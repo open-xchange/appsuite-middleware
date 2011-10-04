@@ -249,6 +249,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 }
                 list.clear();
             }
+        } catch (final InterruptedException e) {
+            LOG.error("Interrupted text filler run.", e);
         } catch (final Exception e) {
             LOG.error("Failed text filler run.", e);
         }
@@ -259,8 +261,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param groupedFillers The equally-grouped fillers
      * @param threadDesc The thread description
+     * @throws InterruptedException If thread is interrupted
      */
-    protected void handleFillers(final List<TextFiller> groupedFillers) {
+    protected void handleFillers(final List<TextFiller> groupedFillers) throws InterruptedException {
         final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
         final int size = groupedFillers.size();
         final int configuredBlockSize = MAX_FILLER_CHUNK;
@@ -279,7 +282,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         }
     }
 
-    private void scheduleFillers(final List<TextFiller> groupedFillersSublist, final ThreadPoolService poolService) {
+    private void scheduleFillers(final List<TextFiller> groupedFillersSublist, final ThreadPoolService poolService) throws InterruptedException {
         if (null == poolService) {
             /*
              * Caller runs because thread pool is absent
@@ -315,8 +318,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param fillersChunk The chunk of equally-grouped fillers
      * @param threadDesc The thread description
+     * @throws InterruptedException If thread is interrupted
      */
-    protected void handleFillersSublist(final List<TextFiller> fillersChunk, final String threadDesc) {
+    protected void handleFillersSublist(final List<TextFiller> fillersChunk, final String threadDesc) throws InterruptedException {
         if (fillersChunk.isEmpty()) {
             return;
         }
@@ -329,8 +333,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             if (size <= configuredBlockSize) {
                 pushMailTextBodies(fillersChunk, threadDesc);
             } else {
+                final Thread thread = Thread.currentThread();
                 int fromIndex = 0;
                 while (fromIndex < size) {
+                    if (thread.isInterrupted()) {
+                        throw new InterruptedException("Text filler thread interrupted");
+                    }
                     int toIndex = fromIndex + configuredBlockSize;
                     if (toIndex > size) {
                         toIndex = size;
@@ -348,7 +356,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         }
     }
 
-    private void pushMailTextBodies(final List<TextFiller> fillers, final String threadDesc) throws OXException {
+    private void pushMailTextBodies(final List<TextFiller> fillers, final String threadDesc) throws OXException, InterruptedException {
         if (fillers.isEmpty()) {
             return;
         }
@@ -368,6 +376,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             /*
              * Query existing documents
              */
+            final Thread thread = Thread.currentThread();
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             final Map<String, SolrDocument> documents;
             {
@@ -383,6 +392,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     q.delete(0, 4);
                     solrQuery = new SolrQuery(q.toString());
                 }
+                if (thread.isInterrupted()) {
+                    throw new InterruptedException("Text filler thread interrupted");
+                }
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int rsize = results.size();
@@ -395,6 +407,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         map.remove(uuid); // Processed, so remove from map
                     }
                 }
+                if (thread.isInterrupted()) {
+                    throw new InterruptedException("Text filler thread interrupted");
+                }
                 for (final TextFiller filler : map.values()) {
                     if (filler.queuedCounter > 0) {
                         // Discard
@@ -402,6 +417,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         filler.queuedCounter = filler.queuedCounter + 1;
                         queue.offer(filler);
                     }
+                }
+                if (thread.isInterrupted()) {
+                    throw new InterruptedException("Text filler thread interrupted");
                 }
             }
             /*
@@ -419,6 +437,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 final int docSize = inputDocuments.size();
                 int off = 0;
                 while (off < docSize) {
+                    if (thread.isInterrupted()) {
+                        throw new InterruptedException("Text filler thread interrupted");
+                    }
                     int toIndex = off + 10;
                     if (toIndex > docSize) {
                         toIndex = docSize;
@@ -453,14 +474,18 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         }
     }
 
-    private void grabTextFor(final List<TextFiller> fillers, final int contextId, final int userId, final int accountId, final Map<String, SolrDocument> documents, final List<SolrInputDocument> inputDocuments) throws OXException {
+    private void grabTextFor(final List<TextFiller> fillers, final int contextId, final int userId, final int accountId, final Map<String, SolrDocument> documents, final List<SolrInputDocument> inputDocuments) throws OXException, InterruptedException {
         MailAccess<?, ?> access = null;
         try {
             access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             access.connect(false);
+            final Thread thread = Thread.currentThread();
             final IMailMessageStorage messageStorage = access.getMessageStorage();
             final TextFinder textFinder = new TextFinder();
             for (final TextFiller filler : fillers) {
+                if (thread.isInterrupted()) {
+                    throw new InterruptedException("Text filler thread interrupted");
+                }
                 final String uuid = filler.getUuid();
                 final SolrDocument solrDocument = documents.get(uuid);
                 if (null != solrDocument) {
