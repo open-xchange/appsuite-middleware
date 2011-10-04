@@ -63,7 +63,9 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.smal.adapter.IndexAdapter;
+import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
+import com.openexchange.mail.smal.jobqueue.jobs.RemoveFolderJob;
 import com.openexchange.session.Session;
 
 /**
@@ -120,17 +122,24 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String moveFolder(final String fullName, final String newFullName) throws OXException {
-        return folderStorage.moveFolder(fullName, newFullName);
+        final String nfn = folderStorage.moveFolder(fullName, newFullName);
+        final JobQueue jobQueue = JobQueue.getInstance();
+        final RemoveFolderJob job = new RemoveFolderJob(fullName, accountId, userId, contextId);
+        jobQueue.addJob(job.setRanking(10));
+        final FolderJob folderJob = new FolderJob(newFullName, accountId, userId, contextId);
+        jobQueue.addJob(folderJob.setIgnoreDeleted(true).setSpan(-1L).setRanking(10));
+        return nfn;
     }
 
     @Override
     public String deleteFolder(final String fullName, final boolean hardDelete) throws OXException {
         final String retval = folderStorage.deleteFolder(fullName, hardDelete);
-        final IndexAdapter indexAdapter = getIndexAdapter();
-        if (null != indexAdapter) {
-            indexAdapter.deleteFolder(fullName, accountId, session);
-            // Sync trash folder
-            
+        final JobQueue jobQueue = JobQueue.getInstance();
+        final RemoveFolderJob job = new RemoveFolderJob(fullName, accountId, userId, contextId);
+        jobQueue.addJob(job.setRanking(10));
+        if (!hardDelete) {
+            final FolderJob folderJob = new FolderJob(getTrashFolder(), accountId, userId, contextId);
+            jobQueue.addJob(folderJob.setIgnoreDeleted(true).setSpan(-1L).setRanking(0));
         }
         return retval;
     }
@@ -138,6 +147,13 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
     @Override
     public void clearFolder(final String fullName, final boolean hardDelete) throws OXException {
         folderStorage.clearFolder(fullName, hardDelete);
+        final JobQueue jobQueue = JobQueue.getInstance();
+        final RemoveFolderJob job = new RemoveFolderJob(fullName, accountId, userId, contextId);
+        jobQueue.addJob(job.setRanking(10));
+        if (!hardDelete) {
+            final FolderJob folderJob = new FolderJob(getTrashFolder(), accountId, userId, contextId);
+            jobQueue.addJob(folderJob.setIgnoreDeleted(true).setSpan(-1L).setRanking(0));
+        }
     }
 
     @Override
@@ -187,17 +203,23 @@ public final class SMALFolderStorage extends AbstractSMALStorage implements IMai
 
     @Override
     public String renameFolder(final String fullName, final String newName) throws OXException {
-        return folderStorage.renameFolder(fullName, newName);
+        final String nfn = folderStorage.renameFolder(fullName, newName);
+        final JobQueue jobQueue = JobQueue.getInstance();
+        final RemoveFolderJob job = new RemoveFolderJob(fullName, accountId, userId, contextId);
+        jobQueue.addJob(job.setRanking(10));
+        final FolderJob folderJob = new FolderJob(nfn, accountId, userId, contextId);
+        jobQueue.addJob(folderJob.setIgnoreDeleted(true).setSpan(-1L).setRanking(10));
+        return nfn;
     }
 
     @Override
     public String deleteFolder(final String fullName) throws OXException {
-        return folderStorage.deleteFolder(fullName);
+        return deleteFolder(fullName, false);
     }
 
     @Override
     public void clearFolder(final String fullName) throws OXException {
-        folderStorage.clearFolder(fullName);
+        clearFolder(fullName, false);
     }
 
     @Override

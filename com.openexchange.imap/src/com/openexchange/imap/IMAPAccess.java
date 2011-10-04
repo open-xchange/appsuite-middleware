@@ -334,26 +334,33 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return new IMAPConfig(accountId);
     }
 
+    @Override
+    public MailConfig getMailConfig() throws OXException {
+        IMAPConfig tmp = imapConfig;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = imapConfig;
+                if (null == tmp) {
+                    imapConfig = tmp = (IMAPConfig) super.getMailConfig();
+                }
+            }
+        }
+        return tmp;
+    }
+
     /**
      * Gets the IMAP configuration.
      * 
      * @return The IMAP configuration
      */
     public IMAPConfig getIMAPConfig() {
-        IMAPConfig tmp = imapConfig;
+        final IMAPConfig tmp = imapConfig;
         if (null == tmp) {
-            synchronized (this) {
-                tmp = imapConfig;
-                if (null == tmp) {
-                    try {
-                        imapConfig = tmp = (IMAPConfig) getMailConfig();
-                    } catch (final OXException e) {
-                        /*
-                         * Cannot occur since already initialized
-                         */
-                        return null;
-                    }
-                }
+            try {
+                return (IMAPConfig) getMailConfig();
+            } catch (final OXException e) {
+                // Cannot occur
+                return null;
             }
         }
         return tmp;
@@ -514,7 +521,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         imapAccess.connected = storedImapAccess.connected;
         imapAccess.imapSession = storedImapAccess.imapSession;
         imapAccess.imapStore = imapStore;
-        imapAccess.imapConfig = storedImapAccess.getIMAPConfig();
+        try {
+            imapAccess.imapConfig = (IMAPConfig) storedImapAccess.getMailConfig();
+            imapAccess.imapConfig.initializeCapabilities(imapAccess.imapStore, storedImapAccess.getSession());
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
         // Reset IMAP access, too
         imapStore.setImapAccess(imapAccess);
     }
