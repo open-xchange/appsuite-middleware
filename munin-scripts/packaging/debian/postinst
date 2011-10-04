@@ -26,8 +26,8 @@ prevver="$2"
 
 init_plugins() {
         TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`
-        echo -n "Initializing plugins.."
-        munin-node-configure --shell > $TMPFILE || rm -f $TMPFILE
+        echo "Initializing plugins.."
+        munin-node-configure --shell > $TMPFILE || true 
         if [ -f $TMPFILE ] ; then
                   sh < $TMPFILE
         else
