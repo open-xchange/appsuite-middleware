@@ -82,13 +82,15 @@ public final class SolrUtils {
     public static void commitNoTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException {
         final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
         final int timeout = managerParams.getSoTimeout();
-        managerParams.setSoTimeout(0);
-        try {
-            solrServer.commit();
-        } finally {
-            if (timeout > 0) {
+        if (timeout > 0) {
+            managerParams.setSoTimeout(0);
+            try {
+                solrServer.commit();
+            } finally {
                 managerParams.setSoTimeout(timeout);
             }
+        } else {
+            solrServer.commit();
         }
     }
 
@@ -101,18 +103,29 @@ public final class SolrUtils {
         if (null != solrServer) {
             final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
             final int timeout = managerParams.getSoTimeout();
-            try {
-                managerParams.setSoTimeout(0);
-                solrServer.rollback();
-            } catch (final SolrServerException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            } catch (final IOException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            } catch (final RuntimeException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            }
             if (timeout > 0) {
-                managerParams.setSoTimeout(timeout);
+                managerParams.setSoTimeout(0);
+                try {
+                    solrServer.rollback();
+                } catch (final SolrServerException e) {
+                    LOG.warn("Rollback of Solr server failed.", e);
+                } catch (final IOException e) {
+                    LOG.warn("Rollback of Solr server failed.", e);
+                } catch (final RuntimeException e) {
+                    LOG.warn("Rollback of Solr server failed.", e);
+                } finally {
+                    managerParams.setSoTimeout(timeout);
+                }
+            } else {
+                try {
+                    solrServer.rollback();
+                } catch (final SolrServerException e) {
+                    LOG.warn("Rollback of Solr server failed.", e);
+                } catch (final IOException e) {
+                    LOG.warn("Rollback of Solr server failed.", e);
+                } catch (final RuntimeException e) {
+                    LOG.warn("Rollback of Solr server failed.", e);
+                }
             }
         }
     }
