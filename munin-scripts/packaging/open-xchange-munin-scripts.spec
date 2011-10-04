@@ -45,6 +45,7 @@ if [ -f $TMPFILE ] ; then
   sh < $TMPFILE
 fi
 rm -f $TMPFILE
+/etc/init.d/munin-node restart
 exit 0
 
 

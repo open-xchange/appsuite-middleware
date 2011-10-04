@@ -35,6 +35,7 @@ init_plugins() {
         fi
         echo "done."
         rm -f $TMPFILE
+	/etc/init.d/munin-node restart
 }
 
 
