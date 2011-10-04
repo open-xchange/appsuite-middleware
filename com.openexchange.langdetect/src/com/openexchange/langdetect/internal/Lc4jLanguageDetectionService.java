@@ -59,7 +59,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -213,7 +213,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
     public List<Locale> findLanguages(final String input) throws OXException {
         try {
             final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes("utf-8")));
-            final Set<Locale> locales = new HashSet<Locale>(languages.size());
+            final Set<Locale> locales = new LinkedHashSet<Locale>(languages.size());
             for (final String language : languages) {
                 int pos = language.indexOf('.');
                 String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(defaultLocale);
