@@ -50,12 +50,9 @@ package com.openexchange.halo.mail;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.ServiceLoader;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -80,30 +77,38 @@ import com.openexchange.tools.session.ServerSession;
 
 public class MailHaloDataSource implements HaloContactDataSource {
 
-	private ServiceLookup lookup;
+	private final ServiceLookup lookup;
 
-	public MailHaloDataSource(ServiceLookup lookup){
+	public MailHaloDataSource(final ServiceLookup lookup){
 		this.lookup = lookup;
 	}
 	
 	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
-		MailService mailService = lookup.getService(MailService.class);
+	public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
+		final MailService mailService = lookup.getService(MailService.class);
 		
-		int[] accountIds = getAccountIds();
-		MailField[] fields = getFields(req);
-		List<MailMessage> messages = new LinkedList<MailMessage>();
-		MailSortField sortField = MailSortField.RECEIVED_DATE;
+		final int[] accountIds = getAccountIds();
+		final MailField[] fields = getFields(req);
+		final List<MailMessage> messages = new LinkedList<MailMessage>();
+		final MailSortField sortField = MailSortField.RECEIVED_DATE;
 		
-		for(int accountId : accountIds){
-			MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailService.getMailAccess(session, accountId);
-			IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-			
-			Contact contact = query.getContact();
-			SearchTerm<?> searchTerm = generateSearchTerm(contact);
-
-			MailMessage[] additionalMessages = messageStorage.searchMessages("INBOX", getIndexRange(), sortField, OrderDirection.ASC, searchTerm, fields);
-			mergeMessages(messages,additionalMessages, sortField, session.getUser().getLocale());
+		for(final int accountId : accountIds){
+			MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+			try {
+    			mailAccess = mailService.getMailAccess(session, accountId);
+    			mailAccess.connect();
+    			final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+    			
+    			final Contact contact = query.getContact();
+    			final SearchTerm<?> searchTerm = generateSearchTerm(contact);
+    
+    			final MailMessage[] additionalMessages = messageStorage.searchMessages("INBOX", getIndexRange(), sortField, OrderDirection.ASC, searchTerm, fields);
+    			mergeMessages(messages,additionalMessages, sortField, session.getUser().getLocale());
+			} finally {
+			    if (null != mailAccess) {
+                    mailAccess.close(true);
+                }
+			}
 		}
 		return new AJAXRequestResult(messages, "mail");
 	}
@@ -113,14 +118,14 @@ public class MailHaloDataSource implements HaloContactDataSource {
 		return new IndexRange(0, 9); 
 	}
 
-	private void mergeMessages(List<MailMessage> messages,	MailMessage[] additionalMessages, MailSortField sortField, Locale locale) {
+	private void mergeMessages(final List<MailMessage> messages, final MailMessage[] additionalMessages, final MailSortField sortField, final Locale locale) {
 		//TODO: since the lists are already pre-sorted, a single-pass merge might be done here
 		messages.addAll(Arrays.asList(additionalMessages));
 		Collections.sort(messages, new MailMessageComparator(sortField, true, locale));
 	}
 
 	//TODO: Extract from request
-	private MailField[] getFields(AJAXRequestData req) {
+	private MailField[] getFields(final AJAXRequestData req) {
 		return MailField.FIELDS_LOW_COST;
 	}
 
@@ -129,14 +134,20 @@ public class MailHaloDataSource implements HaloContactDataSource {
 		return new int[]{MailAccount.DEFAULT_ID};
 	}
 
-	private SearchTerm<?> generateSearchTerm(Contact contact) {
-		List<String> addrs = new LinkedList<String>();
-		if(contact.containsEmail1()) addrs.add(contact.getEmail1());
-		if(contact.containsEmail2()) addrs.add(contact.getEmail2());
-		if(contact.containsEmail3()) addrs.add(contact.getEmail3());
+	private SearchTerm<?> generateSearchTerm(final Contact contact) {
+		final List<String> addrs = new LinkedList<String>();
+		if(contact.containsEmail1()) {
+            addrs.add(contact.getEmail1());
+        }
+		if(contact.containsEmail2()) {
+            addrs.add(contact.getEmail2());
+        }
+		if(contact.containsEmail3()) {
+            addrs.add(contact.getEmail3());
+        }
 		
-		boolean orSearch = true;
-		int[] searchFields = new int[]{MailField.FROM.ordinal(), MailField.TO.ordinal(), MailField.CC.ordinal(), MailField.BCC.ordinal()};
+		final boolean orSearch = true;
+		final int[] searchFields = new int[]{MailField.FROM.getListField().getField(), MailField.TO.getListField().getField(), MailField.CC.getListField().getField(), MailField.BCC.getListField().getField()};
 		return SearchUtility.parseFields(searchFields , addrs.toArray(new String[]{}), orSearch );
 	}
 
@@ -146,7 +157,7 @@ public class MailHaloDataSource implements HaloContactDataSource {
 	}
 
 	@Override
-	public boolean isAvailable(ServerSession session) throws OXException {
+	public boolean isAvailable(final ServerSession session) throws OXException {
 		// TODO Auto-generated method stub
 		return false;
 	}
