@@ -610,7 +610,7 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
             int off = 0;
             while (off < size) {
                 if (thread.isInterrupted()) {
-                    throw new InterruptedException("Thread interrupted while changing Solr documents.");
+                    throw new InterruptedException("Thread interrupted while deleting Solr documents.");
                 }
                 int endIndex = off + DELETE_ROWS;
                 if (endIndex >= size) {
@@ -628,7 +628,6 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
                 solrServer.deleteByQuery(query);
                 off = endIndex;
             }
-            solrServer.deleteByQuery(query);
             ran = true;
             /*
              * Commit without timeout
