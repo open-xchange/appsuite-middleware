@@ -49,22 +49,16 @@
 package com.openexchange.halo.linkedin;
 
 import java.util.List;
-import java.util.ServiceLoader;
 
 import org.json.JSONObject;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.halo.linkedin.osgi.LinkedinHaloActivator;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
