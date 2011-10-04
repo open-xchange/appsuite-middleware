@@ -35,7 +35,9 @@ from <http://munin.projects.linpro.no/> to a live installation.
 
 %install
 %__mkdir_p %{buildroot}/usr/share/munin/plugins/
+%__mkdir_p %{buildroot}/etc/munin/plugin-conf.d/
 %__cp ox_munin_scripts/* $RPM_BUILD_ROOT/usr/share/munin/plugins/
+%__cp plugin-conf.d/* $RPM_BUILD_ROOT/etc/munin/plugin-conf.d/
 chmod a+x $RPM_BUILD_ROOT/usr/share/munin/plugins/*
 
 %post
@@ -57,7 +59,7 @@ exit 0
 %defattr(-,root,root)
 %dir /usr/share/munin
 /usr/share/munin/plugins/
-
+%config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
 * Tue Sep 20 2011 - holger.achtziger@open-xchange.com

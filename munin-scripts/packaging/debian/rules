@@ -54,8 +54,10 @@ install: build
 
 	# Create dir
 	mkdir -p $(buildroot)/usr/share/munin/plugins/
+	mkdir -p $(buildroot)/etc/munin/plugin-conf.d/
 	# copy files
 	cp ox_munin_scripts/* $(buildroot)/usr/share/munin/plugins/
+	cp plugin-conf.d/* $(buildroot)/etc/munin/plugin-conf.d/
 	chmod a+x $(buildroot)/usr/share/munin/plugins/*
 
 
