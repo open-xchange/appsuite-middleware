@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -128,7 +129,41 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
      */
     protected static <V> MailResult<V> takeNextFrom(final CompletionService<MailResult<V>> completionService) throws OXException {
         try {
-            return completionService.take().get();
+            final Future<MailResult<V>> future = completionService.take();
+            return getFrom(future);
+        } catch (final InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Polls the next completed task from specified completion service.
+     * 
+     * @param completionService The completion service to take from
+     * @return The next completed task or <code>null</code>
+     * @throws OXException If taking next completed task failsF
+     */
+    protected static <V> MailResult<V> pollNextFrom(final CompletionService<MailResult<V>> completionService) throws OXException {
+        final Future<MailResult<V>> future = completionService.poll();
+        if (null == future) {
+            return null;
+        }
+        return getFrom(future);
+    }
+
+    private static <V> void cancelRemaining(final CancelableCompletionService<MailResult<V>> completionService) {
+        try {
+            completionService.cancel(true);
+        } catch (final RuntimeException e) {
+            LOG.warn("Failed canceling remaining tasks.", e);
+        }
+    }
+
+    private static <V> MailResult<V> getFrom(final Future<MailResult<V>> future) throws OXException {
+        try {
+            return future.get();
         } catch (final InterruptedException e) {
             // Keep interrupted state
             Thread.currentThread().interrupt();
@@ -139,14 +174,6 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             } catch (final RuntimeException rte) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create(rte, rte.getMessage());
             }
-        }
-    }
-
-    private static <V> void cancelRemaining(final CancelableCompletionService<MailResult<V>> completionService) {
-        try {
-            completionService.cancel(true);
-        } catch (final RuntimeException e) {
-            LOG.warn("Failed canceling remaining tasks.", e);
         }
     }
 
@@ -314,9 +341,14 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 // Storage result came first: Cancel remaining index task and schedule sync job
                 
                 System.out.println(">>>STORAGE<<< request completed first for " + folder + ". Canceling remaining index request & schedule sync job.");
-                
-                cancelRemaining(completionService);
-                scheduleFolderJob(folder, result.result, (null != searchTerm));
+                final MailResult<List<MailMessage>> delayedResult = pollNextFrom(completionService);
+                if (delayedResult == null) {
+                    cancelRemaining(completionService);
+                    scheduleFolderJob(folder, result.result, null, (null != searchTerm));
+                } else {
+                    // Delayed result immediately available
+                    scheduleFolderJob(folder, result.result, delayedResult.result, (null != searchTerm));
+                }
                 break;
             }
             final List<MailMessage> mails = result.result;
@@ -339,7 +371,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             public void run() {
                 try {
                     final List<MailMessage> mails = takeNextFrom(completionService).result;
-                    scheduleFolderJob(folder, mails, ignoreDeleted);
+                    scheduleFolderJob(folder, mails, null, ignoreDeleted);
                 } catch (final OXException oxe) {
                     LOG.warn("Retrieving mails from mail storage failed.", oxe);
                 } catch (final RuntimeException rte) {
@@ -354,13 +386,17 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
      * Schedules a new folder job.
      * 
      * @param fullName The folder full name
-     * @param optMails The optional storage mails
+     * @param optStorageMails The optional storage mails
+     * @param optIndexMails The optional index mails
      * @param ignoreDeleted Whether to ignore deleted mails during sync operation
      */
-    protected void scheduleFolderJob(final String fullName, final List<MailMessage> optMails, final boolean ignoreDeleted) {
+    protected void scheduleFolderJob(final String fullName, final List<MailMessage> optStorageMails, final List<MailMessage> optIndexMails, final boolean ignoreDeleted) {
         final FolderJob folderJob = new FolderJob(fullName, accountId, userId, contextId);
-        if (null != optMails) {
-            folderJob.setStorageMails(optMails); // Assign storage's mail
+        if (null != optStorageMails) {
+            folderJob.setStorageMails(optStorageMails); // Assign storage's mail
+        }
+        if (null != optIndexMails) {
+            folderJob.setIndexMails(optIndexMails);
         }
         folderJob.setSpan(-1); // Immediate run
         folderJob.setRanking(10); // Replace this job with similar jobs possibly contained in queue

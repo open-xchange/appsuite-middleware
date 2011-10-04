@@ -124,6 +124,8 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private volatile List<MailMessage> storageMails;
 
+    private volatile List<MailMessage> indexMails;
+
     /**
      * Initializes a new {@link FolderJob} with default span.
      * <p>
@@ -189,6 +191,17 @@ public final class FolderJob extends AbstractMailSyncJob {
         return this;
     }
 
+    /**
+     * Sets the index mails
+     *
+     * @param indexMail The index mails to set
+     * @return This folder job with specified index mails applied
+     */
+    public FolderJob setIndexMails(final List<MailMessage> indexMail) {
+        this.indexMails = indexMail;
+        return this;
+    }
+
     @Override
     public void replaceWith(final Job anotherJob) {
         if (!identifier.equals(anotherJob.getIdentifier())) {
@@ -206,6 +219,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         this.ranking = anotherFolderJob.ranking;
         this.span = anotherFolderJob.span;
         this.storageMails = anotherFolderJob.storageMails;
+        this.indexMails = anotherFolderJob.indexMails;
         gate.set(0);
     }
 
@@ -308,7 +322,10 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * Get the mails from index
                  */
-                final List<MailMessage> indexedMails = indexAdapter.search(fullName, null, null, null, FIELDS, accountId, session);
+                List<MailMessage> indexedMails = this.indexMails;
+                if (null == indexedMails) {
+                    indexedMails = indexAdapter.search(fullName, null, null, null, FIELDS, accountId, session);
+                }
                 final Map<String, MailMessage> indexMap;
                 if (indexedMails.isEmpty()) {
                     indexMap = Collections.emptyMap();
