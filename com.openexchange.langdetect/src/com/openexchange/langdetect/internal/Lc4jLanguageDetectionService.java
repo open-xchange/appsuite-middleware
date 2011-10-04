@@ -209,24 +209,30 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         return findLanguages(tmp.toString());
     }
 
+    private static final String UNKNOWN = "UNKNOWN";
+
     @Override
     public List<Locale> findLanguages(final String input) throws OXException {
         try {
             final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes("utf-8")));
             final Set<Locale> locales = new LinkedHashSet<Locale>(languages.size());
             for (final String language : languages) {
-                int pos = language.indexOf('.');
-                String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(defaultLocale);
-                pos = lang.indexOf('-');
-                lang = (pos > 0 ? lang.substring(0, pos) : lang);
-                pos = lang.indexOf('_');
-                lang = (pos > 0 ? lang.substring(0, pos) : lang);
-                Locale locale = languageCodes.get(lang);
-                if (null == locale) {
-                    LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
-                    locale = defaultLocale;
+                if (UNKNOWN.equals(language)) {
+                    locales.add(defaultLocale);
+                } else {
+                    int pos = language.indexOf('.');
+                    String lang = (pos > 0 ? language.substring(0, pos) : language).toLowerCase(defaultLocale);
+                    pos = lang.indexOf('-');
+                    lang = (pos > 0 ? lang.substring(0, pos) : lang);
+                    pos = lang.indexOf('_');
+                    lang = (pos > 0 ? lang.substring(0, pos) : lang);
+                    Locale locale = languageCodes.get(lang);
+                    if (null == locale) {
+                        LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                        locale = defaultLocale;
+                    }
+                    locales.add(locale);
                 }
-                locales.add(locale);
             }
             return new ArrayList<Locale>(locales);
         } catch (final UnsupportedEncodingException e) {
