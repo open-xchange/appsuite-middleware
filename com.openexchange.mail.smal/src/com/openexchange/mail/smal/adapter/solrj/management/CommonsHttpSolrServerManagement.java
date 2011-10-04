@@ -57,7 +57,9 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
@@ -149,7 +151,7 @@ public final class CommonsHttpSolrServerManagement {
         for (final IndexUrl key : removeKeys) {
             final Wrapper wrapper = map.remove(key);
             if (null != wrapper) {
-                closeSolrServer(wrapper.getValue());
+                closeSolrServer(wrapper.getValueUnsafe());
             }
         }
     }
@@ -200,14 +202,14 @@ public final class CommonsHttpSolrServerManagement {
             map.put(indexUrl, new Wrapper(solrServer));
             return solrServer;
         }
-        if (wrapper.elapsed(maxLifeMillis)) {
+        CommonsHttpSolrServer solrServer = wrapper.getValue(maxLifeMillis);
+        if (null == solrServer) {
             map.remove(indexUrl);
             shrink();
-            final CommonsHttpSolrServer solrServer = newCommonsHttpSolrServer(indexUrl);
+            solrServer = newCommonsHttpSolrServer(indexUrl);
             map.put(indexUrl, new Wrapper(solrServer));
-            return solrServer;
         }
-        return wrapper.getValue();
+        return solrServer;
     }
 
     private static CommonsHttpSolrServer newCommonsHttpSolrServer(final IndexUrl indexUrl) throws OXException {
@@ -292,12 +294,13 @@ public final class CommonsHttpSolrServerManagement {
         if (null == wrapper) {
             return null;
         }
-        if (wrapper.elapsed(maxLifeMillis)) {
+        final CommonsHttpSolrServer solrServer = wrapper.getValue(maxLifeMillis);
+        if (null == solrServer) {
             map.remove(indexUrl);
             shrink();
             return null;
         }
-        return wrapper.getValue();
+        return solrServer;
     }
 
     /**
@@ -308,7 +311,7 @@ public final class CommonsHttpSolrServerManagement {
         for (final Iterator<Wrapper> it = map.values().iterator(); it.hasNext();) {
             final Wrapper wrapper = it.next();
             if (null != wrapper) {
-                closeSolrServer(wrapper.getValue());
+                closeSolrServer(wrapper.getValueUnsafe());
             }
             it.remove();
         }
@@ -319,29 +322,58 @@ public final class CommonsHttpSolrServerManagement {
 
         private final CommonsHttpSolrServer value;
 
+        private final Lock readLock;
+        
+        private final Lock writeLock;
+
         private volatile long lastAccessed;
 
         public Wrapper(final CommonsHttpSolrServer value) {
             super();
             this.value = value;
             this.lastAccessed = System.currentTimeMillis();
+            final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+            readLock = rwLock.readLock();
+            writeLock = rwLock.writeLock();
         }
 
         public long getLastAccessed() {
-            return lastAccessed;
+            final Lock lock = readLock;
+            lock.lock();
+            try {
+                return lastAccessed;
+            } finally {
+                lock.unlock();
+            }
         }
 
         public boolean elapsed(final int maxLifeMillis) {
-            return (System.currentTimeMillis() - lastAccessed) > maxLifeMillis;
+            final Lock lock = readLock;
+            lock.lock();
+            try {
+                return (System.currentTimeMillis() - lastAccessed) > maxLifeMillis;
+            } finally {
+                lock.unlock();
+            }
         }
 
-        public CommonsHttpSolrServer getIfNotElapsed(final int maxLifeMillis) {
-            return elapsed(maxLifeMillis) ? null : value;
-        }
-
-        public CommonsHttpSolrServer getValue() {
-            this.lastAccessed = System.currentTimeMillis();
+        public CommonsHttpSolrServer getValueUnsafe() {
             return value;
+        }
+
+        public CommonsHttpSolrServer getValue(final int maxLifeMillis) {
+            final Lock lock = writeLock;
+            lock.lock();
+            try {
+                final long now = System.currentTimeMillis();
+                if ((now - lastAccessed) > maxLifeMillis) {
+                    return null;
+                }
+                this.lastAccessed = now;
+                return value;
+            } finally {
+                lock.unlock();
+            }
         }
 
         @Override
