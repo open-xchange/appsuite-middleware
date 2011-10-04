@@ -432,7 +432,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     final long dur = System.currentTimeMillis() - st;
                     final StringBuilder sb = new StringBuilder(64);
                     sb.append("Thread \"").append(threadDesc);
-                    sb.append("\" added ").append(inputDocuments.size());
+                    sb.append("\" added ").append(docSize);
                     sb.append(" mail bodies in ").append(dur).append("msec");
                     sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
                     sb.append(" for account ").append(accountId);
