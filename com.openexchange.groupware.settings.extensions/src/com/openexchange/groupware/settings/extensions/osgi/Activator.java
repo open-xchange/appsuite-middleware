@@ -88,7 +88,7 @@ public class Activator extends HousekeepingActivator {
 
     private ServicePublisher services;
 
-    private ServiceTracker<ConfigViewFactory, ConfigViewFactory> serviceTracker;
+    private ServiceTracker serviceTracker;
 
     /**
      * Initializes a new {@link Activator}.
@@ -120,7 +120,7 @@ public class Activator extends HousekeepingActivator {
         try {
             final ConfigView view = viewFactory.getView();
             final Map<String, ComposedConfigProperty<String>> all = view.all();
-            for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+            for(final Map.Entry<String,ComposedConfigProperty<String>> entry : all.entrySet()) {
                 final String propertyName = entry.getKey();
                 final ComposedConfigProperty<String> property = entry.getValue();
                 if (isPreferenceItem(property)) {
@@ -130,76 +130,74 @@ public class Activator extends HousekeepingActivator {
         } catch (final Throwable x) {
             LOG.error(x.getMessage(), x);
         }
-
+        
+        
     }
-
+    
     // Maybe that is an overuse of anonymous inner classes. Better get around to refactoring this at some point.
-
+    
     private void export(final ConfigViewFactory viewFactory, final ComposedConfigProperty<String> property, final String propertyName) throws OXException {
-
+        
         final String[] path = property.get(PREFERENCE_PATH).split("/");
-        final String finalScope = property.get("final");
-        final String isProtected = property.get("protected");
-        final boolean writable =
-            (finalScope == null || finalScope.equals("user")) && (isProtected == null || !property.get("protected", boolean.class).booleanValue());
-
+        
+        
         final PreferencesItemService prefItem = new PreferencesItemService() {
 
             private static final String UNDEFINED_STRING = "undefined";
-
-            @Override
+            
             public String[] getPath() {
                 return path;
             }
 
-            @Override
             public IValueHandler getSharedValue() {
                 return new IValueHandler() {
 
-                    @Override
                     public int getId() {
                         return NO_ID;
                     }
 
-                    @Override
                     public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                         try {
                             Object value = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
                             if (UNDEFINED_STRING.equals(value)) {
-                                setting.setSingleValue(UNDEFINED);
+                                //setting.setSingleValue(UNDEFINED);
                                 return;
                             }
                             try {
                                 // Let's turn this into a nice object, if it conforms to JSON
-                                value = new JSONObject("{value: " + value + "}").get("value");
+                                value = new JSONObject("{value: "+value+"}").get("value");
 
                             } catch (final JSONException x) {
                                 // Ah well, let's pretend it's a string.
                             }
-
+                            
                             setting.setSingleValue(value);
                         } catch (final OXException e) {
                             throw new OXException(e);
                         }
                     }
 
-                    @Override
                     public boolean isAvailable(final UserConfiguration userConfig) {
                         return true;
                     }
 
-                    @Override
                     public boolean isWritable() {
-                        return writable;
+                        try {
+                            final String finalScope = property.get("final");
+                            final String isProtected = property.get("protected");
+                            return (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class));
+                        } catch (final OXException x) {
+                            LOG.error(x.getMessage(), x);
+                            return false;
+                        }
                     }
 
-                    @Override
                     public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                         Object value = setting.getSingleValue();
-                        if (value == null) {
+                        if(value == null) {
                             final Object[] multiValue = setting.getMultiValue();
-                            if (multiValue != null) {
-
+                            if(multiValue != null) {
+                                
                                 final JSONArray arr = new JSONArray();
                                 for (final Object o : multiValue) {
                                     arr.put(o);
@@ -211,142 +209,130 @@ public class Activator extends HousekeepingActivator {
                         }
                         try {
                             final String oldValue = viewFactory.getView(user.getId(), ctx.getContextId()).get(propertyName, String.class);
-                            if (value != null) {
+                        if(value != null) {
                                 // Clients have a habit of dumping the config back at us, so we only save differing values.
-                                if (!value.equals(oldValue)) {
+                                if(!value.equals(oldValue)) {
                                     viewFactory.getView(user.getId(), ctx.getContextId()).set("user", propertyName, value);
                                 }
-
-                            } else {
-                                // Eh...
-                            }
-                        } catch (final OXException e) {
+                            
+                        } else {
+                            
+                        }} catch (final OXException e) {
                             throw new OXException(e);
                         }
-
+                        
                     }
-
+                    
                 };
             }
-
+            
         };
-
+        
         services.publishService(PreferencesItemService.class, prefItem);
-
+        
         // And let's publish the metadata as well
         final List<String> metadataNames = property.getMetadataNames();
         for (final String metadataName : metadataNames) {
-            final String[] metadataPath = new String[path.length + 2];
+            final String[] metadataPath = new String[path.length+2];
             System.arraycopy(path, 0, metadataPath, 1, path.length);
-            metadataPath[metadataPath.length - 1] = metadataName;
+            metadataPath[metadataPath.length-1] = metadataName;
             metadataPath[0] = METADATA_PREFIX;
-
+            
             final PreferencesItemService metadataItem = new PreferencesItemService() {
 
-                @Override
                 public String[] getPath() {
                     return metadataPath;
                 }
 
-                @Override
                 public IValueHandler getSharedValue() {
                     return new IValueHandler() {
 
-                        @Override
                         public int getId() {
                             return NO_ID;
                         }
 
-                        @Override
                         public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                             try {
-                                final ComposedConfigProperty<String> prop =
-                                    viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
+                                final ComposedConfigProperty<String> prop = viewFactory.getView(user.getId(), ctx.getContextId()).property(propertyName, String.class);
                                 Object value = prop.get(metadataName);
                                 try {
                                     // Let's turn this into a nice object, if it conforms to JSON
-                                    value = new JSONObject("{value: " + value + "}").get("value");
+                                    value = new JSONObject("{value: "+value+"}").get("value");
 
                                 } catch (final JSONException x) {
                                     // Ah well, let's pretend it's a string.
                                 }
-
+                                
                                 setting.setSingleValue(value);
                             } catch (final OXException e) {
                                 throw new OXException(e);
                             }
                         }
 
-                        @Override
                         public boolean isAvailable(final UserConfiguration userConfig) {
                             return true;
                         }
 
-                        @Override
                         public boolean isWritable() {
                             return false;
                         }
 
-                        @Override
                         public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                             // IGNORE
                         }
-
+                        
                     };
                 }
-
+                
             };
-
+            
             services.publishService(PreferencesItemService.class, metadataItem);
         }
-
+        
         // Lastly, let's publish configurability.
-        final String[] configurablePath = new String[path.length + 2];
+        final String[] configurablePath = new String[path.length+2];
         System.arraycopy(path, 0, configurablePath, 1, path.length);
-        configurablePath[configurablePath.length - 1] = "configurable";
+        configurablePath[configurablePath.length-1] = "configurable";
         configurablePath[0] = METADATA_PREFIX;
+        
+        
+        final PreferencesItemService configurableItem = new PreferencesItemService(){
 
-        final PreferencesItemService configurableItem = new PreferencesItemService() {
-
-            @Override
             public String[] getPath() {
                 return configurablePath;
             }
 
-            @Override
             public IValueHandler getSharedValue() {
                 return new IValueHandler() {
 
-                    @Override
                     public int getId() {
                         return NO_ID;
                     }
 
-                    @Override
                     public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                        setting.setSingleValue(Boolean.valueOf(writable));
+                        final String finalScope = property.get("final");
+                        final String isProtected = property.get("protected");
+                        final boolean writable = (finalScope == null || finalScope.equals("user")) && (isProtected == null || ! property.get("protected", boolean.class));
+                        setting.setSingleValue(writable);
                     }
 
-                    @Override
                     public boolean isAvailable(final UserConfiguration userConfig) {
                         return true;
                     }
 
-                    @Override
                     public boolean isWritable() {
                         return false;
                     }
 
-                    @Override
                     public void writeValue(final Session session, final Context ctx, final User user, final Setting setting) throws OXException {
                         // IGNORE
                     }
-
+                    
                 };
             }
-
+            
         };
-
+        
         services.publishService(PreferencesItemService.class, configurableItem);
     }
 
@@ -355,10 +341,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     private void registerListenerForConfigurationService() {
-        serviceTracker =
-            new ServiceTracker<ConfigViewFactory, ConfigViewFactory>(context, ConfigViewFactory.class, new ConfigurationTracker(
-                context,
-                this));
+        serviceTracker = new ServiceTracker(context, ConfigViewFactory.class.getName(), new ConfigurationTracker(context, this));
         serviceTracker.open();
     }
 
@@ -366,10 +349,9 @@ public class Activator extends HousekeepingActivator {
         serviceTracker.close();
     }
 
-    private static final class ConfigurationTracker implements ServiceTrackerCustomizer<ConfigViewFactory, ConfigViewFactory> {
 
+    private static final class ConfigurationTracker implements ServiceTrackerCustomizer {
         private final BundleContext context;
-
         private final Activator activator;
 
         public ConfigurationTracker(final BundleContext context, final Activator activator) {
@@ -378,22 +360,20 @@ public class Activator extends HousekeepingActivator {
 
         }
 
-        @Override
-        public ConfigViewFactory addingService(final ServiceReference<ConfigViewFactory> serviceReference) {
-            final ConfigViewFactory addedService = context.getService(serviceReference);
-            activator.handleConfigurationUpdate(addedService);
+        public Object addingService(final ServiceReference serviceReference) {
+            final Object addedService = context.getService(serviceReference);
+            if(ConfigViewFactory.class.isAssignableFrom(addedService.getClass())) {
+                activator.handleConfigurationUpdate((ConfigViewFactory) addedService);
+            }
             return addedService;
         }
 
-        @Override
-        public void modifiedService(final ServiceReference<ConfigViewFactory> serviceReference, final ConfigViewFactory o) {
+        public void modifiedService(final ServiceReference serviceReference, final Object o) {
             // IGNORE
         }
 
-        @Override
-        public void removedService(final ServiceReference<ConfigViewFactory> serviceReference, final ConfigViewFactory o) {
+        public void removedService(final ServiceReference serviceReference, final Object o) {
             context.ungetService(serviceReference);
         }
     }
-
 }
