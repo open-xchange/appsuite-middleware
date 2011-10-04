@@ -260,10 +260,10 @@ public final class MessageUtility {
         try {
             return readStream(mailPart.getInputStream(), charset);
         } catch (final IOException e) {
-            if (!(mailPart instanceof MIMERawSource)) {
-                throw e;
+            if (mailPart instanceof MIMERawSource) {
+                return readStream(((MIMERawSource) mailPart).getRawInputStream(), charset);
             }
-            return readStream(((MIMERawSource) mailPart).getRawInputStream(), charset);
+            throw e;
         }
     }
 
