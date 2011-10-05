@@ -47,39 +47,36 @@
  *
  */
 
-package com.openexchange.document.converter.json.actions;
+package com.openexchange.preview.json.actions;
 
-import java.io.IOException;
 import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.document.converter.ByteArrayDocumentContent;
-import com.openexchange.document.converter.DocumentContent;
-import com.openexchange.document.converter.DocumentConverterService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.java.Streams;
+import com.openexchange.preview.PreviewDocument;
+import com.openexchange.preview.PreviewOutput;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ConvertAction}
+ * {@link GetAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConvertAction extends AbstractDocumentConverterAction {
+public class GetAction extends AbstractPreviewAction {
 
     /**
-     * Initializes a new {@link ConvertAction}.
+     * Initializes a new {@link GetAction}.
      * @param serviceLookup
      */
-    public ConvertAction(ServiceLookup serviceLookup) {
+    public GetAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
@@ -89,18 +86,28 @@ public class ConvertAction extends AbstractDocumentConverterAction {
         String source = request.getParameter("source");
         JSONObject data = (JSONObject) request.getData();
         
-        DocumentContent convertedDocument = null;
+        /*
+         * Fill data for testing purposes
+         */
+        data = new JSONObject();
+        try {
+            data.put("version", 1);
+            data.put("id", 4960);
+        } catch (JSONException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        PreviewDocument previewDocument = null;
         if (source.equals("mail")) {
-            convertedDocument = convertMail(request, session, data, format);
-        } else if (source.equals("infostore")) {
-            convertedDocument = convertInfostore(request, session, data, format);
+            previewDocument = convertMail(request, session, data, format);
+        } else if (source.equals("infostore")) {            
+            previewDocument = convertInfostore(request, session, data, format);
         } else {
             // TODO: throw exception...
         }
         
-        java.io.File optFile = convertedDocument.optFile();
-        FileHolder holder = new FileHolder(convertedDocument.getInputStream(), optFile.length(), convertedDocument.getContentType(), convertedDocument.getName());
-        return new AJAXRequestResult(holder, "file");
+        return null;
     }
 
     /**
@@ -110,7 +117,7 @@ public class ConvertAction extends AbstractDocumentConverterAction {
      * @param format
      * @throws OXException 
      */
-    private DocumentContent convertInfostore(AJAXRequestData request, ServerSession session, JSONObject data, String format) throws OXException {
+    private PreviewDocument convertInfostore(AJAXRequestData request, ServerSession session, JSONObject data, String format) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = getFileAccessFactory();
         IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         
@@ -119,19 +126,16 @@ public class ConvertAction extends AbstractDocumentConverterAction {
             int version = data.getInt("version");
             File fileMetadata = fileAccess.getFileMetadata(id, version);
             InputStream documentIS = fileAccess.getDocument(id, version);
-            byte[] documentBytes = Streams.stream2bytes(documentIS);
             
-            DocumentContent document = new ByteArrayDocumentContent(documentBytes, fileMetadata.getFileName(), fileMetadata.getFileMIMEType());
-            return convertDocument(document, format);
+            PreviewService previewService = getPreviewService();
+            PreviewDocument preview = previewService.getPreviewFor(documentIS, fileMetadata.getFileMIMEType(), fileMetadata.getFileName(), PreviewOutput.HTML, session);
+            
+            return preview;
         } catch (JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            return null;
-        }        
+        }  
     }
 
     /**
@@ -140,16 +144,8 @@ public class ConvertAction extends AbstractDocumentConverterAction {
      * @param data
      * @param format
      */
-    private DocumentContent convertMail(AJAXRequestData request, ServerSession session, JSONObject data, String format) {
+    private PreviewDocument convertMail(AJAXRequestData request, ServerSession session, JSONObject data, String format) {
         // TODO Auto-generated method stub
         return null;
     }
-    
-    private DocumentContent convertDocument(DocumentContent document, String format) throws OXException {
-        DocumentConverterService converterService = getConverterService();
-        DocumentContent converted = converterService.convert(document, format);
-        
-        return converted;
-    }
-
 }

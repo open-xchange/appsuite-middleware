@@ -47,30 +47,30 @@
  *
  */
 
-package com.openexchange.document.converter.json;
+package com.openexchange.preview.json;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.document.converter.json.actions.ConvertAction;
 import com.openexchange.exception.OXException;
+import com.openexchange.preview.json.actions.GetAction;
 import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link DocumentConverterActionFactory}
+ * {@link PreviewActionFactory}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class DocumentConverterActionFactory implements AJAXActionServiceFactory {
+public class PreviewActionFactory implements AJAXActionServiceFactory {
     
     private static final Map<String, AJAXActionService> ACTIONS = new ConcurrentHashMap<String, AJAXActionService>(1);
 
     
-    public DocumentConverterActionFactory(ServiceLookup serviceLookup) {
+    public PreviewActionFactory(ServiceLookup serviceLookup) {
         super();
-        ACTIONS.put("convert", new ConvertAction(serviceLookup));
+        ACTIONS.put("get", new GetAction(serviceLookup));
     }
     
     @Override

@@ -47,43 +47,43 @@
  *
  */
 
-package com.openexchange.document.converter.json.actions;
+package com.openexchange.preview.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.document.converter.DocumentConverterService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link AbstractDocumentConverterAction}
+ * {@link AbstractPreviewAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractDocumentConverterAction implements AJAXActionService {
+public abstract class AbstractPreviewAction implements AJAXActionService {
     
     private ServiceLookup serviceLookup;
     
-    public AbstractDocumentConverterAction(ServiceLookup serviceLookup) {
+    public AbstractPreviewAction(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
-    }
-
-    protected DocumentConverterService getConverterService() throws OXException {        
-        DocumentConverterService service = serviceLookup.getService(DocumentConverterService.class);
-        if (service == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DocumentConverterService.class.getName());
-        }
-        
-        return service;
     }
     
     protected IDBasedFileAccessFactory getFileAccessFactory() throws OXException {
         IDBasedFileAccessFactory service = serviceLookup.getService(IDBasedFileAccessFactory.class);
         if (service == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
+        }
+        
+        return service;
+    }
+    
+    protected PreviewService getPreviewService() throws OXException {
+        PreviewService service = serviceLookup.getService(PreviewService.class);
+        if (service == null) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(PreviewService.class.getName());
         }
         
         return service;
