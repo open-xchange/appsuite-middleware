@@ -6,7 +6,8 @@ Bundle-Version: 7.0.0.qualifier
 Bundle-Activator: com.openexchange.halo.mail.osgi.MailHaloActivator
 Bundle-Vendor: OPENEXCHANGE
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.exception,
  com.openexchange.groupware.container,
  com.openexchange.groupware.ldap,
