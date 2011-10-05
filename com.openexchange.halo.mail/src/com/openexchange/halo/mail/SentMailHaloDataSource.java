@@ -54,9 +54,9 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.server.ServiceLookup;
 
-public class SendMailHaloDataSource extends AbstractMailHaloDataSource {
+public class SentMailHaloDataSource extends AbstractMailHaloDataSource {
 
-	public SendMailHaloDataSource(ServiceLookup lookup) {
+	public SentMailHaloDataSource(ServiceLookup lookup) {
 		super(lookup);
 	}
 
