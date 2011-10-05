@@ -56,6 +56,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import javax.activation.MimetypesFileTypeMap;
 import org.apache.commons.io.FilenameUtils;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.document.DefaultDocumentFormatRegistry;
@@ -63,7 +64,6 @@ import org.artofsolving.jodconverter.document.DocumentFamily;
 import org.artofsolving.jodconverter.document.DocumentFormat;
 import org.artofsolving.jodconverter.document.DocumentFormatRegistry;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
-import org.artofsolving.jodconverter.office.OfficeConnectionProtocol;
 import org.artofsolving.jodconverter.office.OfficeException;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import com.openexchange.document.converter.DocumentContent;
@@ -106,18 +106,18 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
          * Start-up JODConverter
          */
         final DefaultOfficeManagerConfiguration configuration = new DefaultOfficeManagerConfiguration();
-        configuration.setOfficeHome("/usr/lib/openoffice");
-        configuration.setConnectionProtocol(OfficeConnectionProtocol.PIPE);
-        {
-            final int processors = Runtime.getRuntime().availableProcessors();
-            final String[] pipes = new String[processors];
-            final StringBuilder sb = new StringBuilder("office");
-            for (int i = 0; i < pipes.length; i++) {
-                sb.setLength(6);
-                pipes[i] = sb.append(i + 1).toString();
-            }
-            configuration.setPipeNames(pipes);
-        }
+//        configuration.setOfficeHome("/usr/lib/openoffice");
+//        configuration.setConnectionProtocol(OfficeConnectionProtocol.PIPE);
+//        {
+//            final int processors = Runtime.getRuntime().availableProcessors();
+//            final String[] pipes = new String[processors];
+//            final StringBuilder sb = new StringBuilder("office");
+//            for (int i = 0; i < pipes.length; i++) {
+//                sb.setLength(6);
+//                pipes[i] = sb.append(i + 1).toString();
+//            }
+//            configuration.setPipeNames(pipes);
+//        }
         configuration.setTaskExecutionTimeout(240000L); // 4 minutes
         configuration.setTaskQueueTimeout(60000L); // 1 minute
         officeManager = configuration.buildOfficeManager();
@@ -303,7 +303,7 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
                 if (null != fileManagement) {
                     fileManagement.createManagedFile(outputFile);
                 }
-                return new FileDocumentContent(outputFile);
+                return new FileDocumentContent(outputFile, new MimetypesFileTypeMap().getContentType(outputFile));
             } finally {
                 deleteOnExit(outputFile);
             }
