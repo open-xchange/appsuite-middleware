@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 27
+%define		ox_release 28
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -101,6 +101,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties
 %doc docs
 %changelog
+* Wed Oct 05 2011 - choeger@open-xchange.com
+ - Bugfix #20456 - [L3] SOAP interface broken (all ModuleAccess functions)
 * Mon Aug 08 2011 - choeger@open-xchange.com
  - Bugfix #20032 - SOAP api breaks when userAttributesForSOAP are set within user object
 * Fri Mar 25 2011 - choeger@open-xchange.com
