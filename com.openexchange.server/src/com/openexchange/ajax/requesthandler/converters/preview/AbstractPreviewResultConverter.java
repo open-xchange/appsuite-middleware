@@ -109,7 +109,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         {
             final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
             if (autoDetect()) {
-                previewDocument = previewService.getPreviewFor(fileHolder.getStream(), getOutput(), session);
+                previewDocument = previewService.getPreviewFor(fileHolder.getStream(), fileHolder.getContentType(), fileHolder.getName(), getOutput(), session);
             } else {
                 final DataProperties dataProperties = new DataProperties(4);
                 dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
