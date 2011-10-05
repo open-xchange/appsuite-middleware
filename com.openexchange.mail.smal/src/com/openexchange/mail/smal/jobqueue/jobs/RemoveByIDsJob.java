@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link RemoveByIDsJob}
+ * {@link RemoveByIDsJob} - Removes mails from index by specified identifiers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -93,9 +93,7 @@ public final class RemoveByIDsJob extends AbstractMailSyncJob {
     private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link RemoveByIDsJob} with default span.
-     * <p>
-     * This job is performed is span is exceeded and if able to exclusively set sync flag.
+     * Initializes a new {@link RemoveByIDsJob}.
      * 
      * @param fullName The folder full name
      * @param accountId The account ID

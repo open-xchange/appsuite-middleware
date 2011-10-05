@@ -64,7 +64,7 @@ import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.session.Session;
 
 /**
- * {@link ChangerJob}
+ * {@link ChangerJob} - Changes the flags of specified mails in index.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -98,9 +98,7 @@ public final class ChangerJob extends AbstractMailSyncJob {
     private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link ChangerJob} with default span.
-     * <p>
-     * This job is performed is span is exceeded and if able to exclusively set sync flag.
+     * Initializes a new {@link ChangerJob}.
      * 
      * @param fullName The folder full name
      * @param accountId The account ID
