@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,60 +49,26 @@
 
 package com.openexchange.preview;
 
-import java.io.InputStream;
-import com.openexchange.conversion.Data;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link PreviewService} - The preview service.
+ * {@link InternalPreviewService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface PreviewService {
-
+public interface InternalPreviewService extends PreviewService {
+    
     /**
-     * Detects the MIME type of passed input stream's data.
-     *
-     * @param inputStream The input stream providing the data
-     * @return The detected MIME type
-     * @throws OXException If an error occurs
+     * Gets the conversion policies of this PreviewService.
+     * 
+     * @return The properties
      */
-    String detectDocumentType(InputStream inputStream) throws OXException;
-
+    PreviewPolicy[] getPreviewPolicies();
+    
     /**
-     * Gets the preview document for specified argument and output format.
-     *
-     * @param arg The argument either denotes an URL or a file
-     * @param output The output format
-     * @param session The session
-     * @return The preview document with its content set according to given output format
-     * @throws OXException If preview document cannot be generated
+     * Checks if this service is able to detect the content type of an input stream.
+     * 
+     * @return  If this service is able to detect the content type of an input stream.
      */
-    PreviewDocument getPreviewFor(String arg, PreviewOutput output, Session session) throws OXException;
-
-    /**
-     * Gets the preview document for specified input stream's data and output format.
-     *
-     * @param inputStream The input stream providing the data
-     * @param mimeType The mime type of the input file
-     * @param extension The extension of the input file
-     * @param output The output format
-     * @param session The session
-     * @return The preview document with its content set according to given output format
-     * @throws OXException If preview document cannot be generated
-     */
-    PreviewDocument getPreviewFor(InputStream inputStream, String mimeType, String extension, PreviewOutput output, Session session) throws OXException;
-
-    /**
-     * Gets the preview document for specified s data and output format.
-     *
-     * @param documentData The data
-     * @param output The output format
-     * @param session The session
-     * @return The preview document with its content set according to given output format
-     * @throws OXException If preview document cannot be generated
-     */
-    PreviewDocument getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session) throws OXException;
+    boolean canDetectContentType();
 
 }
