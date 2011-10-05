@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/htmlcleaner-2.2.jar,
  lib/kxml.jar,
+ lib/jsoup-1.6.1.jar,
  lib/jTidy.jar
 Import-Package: com.openexchange.config,
  com.openexchange.exception,

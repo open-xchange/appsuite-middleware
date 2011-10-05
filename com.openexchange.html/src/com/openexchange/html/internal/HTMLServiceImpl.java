@@ -65,6 +65,8 @@ import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.Serializer;
 import org.htmlcleaner.TagNode;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
@@ -1037,6 +1039,21 @@ public final class HTMLServiceImpl implements HTMLService {
     }
 
     /**
+     * The white-list of permitted HTML elements for <a href="http://jsoup.org/">jsoup</a> library.
+     */
+    //private static final Whitelist WHITELIST = Whitelist.relaxed();
+
+    /**
+     * Pre-process specified HTML content with <a href="http://jsoup.org/">jsoup</a> library.
+     * 
+     * @param htmlContent The HTML content
+     * @return The safe HTML content according to JSoup processing
+     */
+    private static String preprocessWithJSoup(final String htmlContent) {
+        return Jsoup.clean(htmlContent, Whitelist.relaxed());
+    }
+
+    /**
      * The {@link HtmlCleaner} constant which is safe being used by multiple threads as of <a
      * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
      */
@@ -1071,7 +1088,7 @@ public final class HTMLServiceImpl implements HTMLService {
             /*
              * Clean...
              */
-            final TagNode htmlNode = HTML_CLEANER.clean(htmlContent);
+            final TagNode htmlNode = HTML_CLEANER.clean(preprocessWithJSoup(htmlContent));
             /*
              * Check for presence of HTML namespace
              */

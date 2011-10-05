@@ -283,8 +283,8 @@ public class PreviewActivator extends HousekeepingActivator {
 
                             final String content =
                                 tikaPreviewService.getPreviewFor(
-                                    Streams.newByteArrayInputStream(bytes),
-                                    PreviewOutput.TEXT,
+                                    "/Users/thorben/git/backend/org.apache.tika/test-documents/testODFwithOOo3.odt",
+                                    PreviewOutput.HTML,
                                     session).getContent();
 
                             System.out.println(content);
