@@ -42,12 +42,12 @@ chmod a+x $RPM_BUILD_ROOT/usr/share/munin/plugins/*
 
 %post
 TMPFILE=`mktemp /tmp/munin-node.configure.XXXXXXXXXX`
-munin-node-configure --libdir /usr/share/munin/plugins/ --shell > $TMPFILE || true 
+munin-node-configure --libdir /usr/share/munin/plugins/ --shell > $TMPFILE || :
 if [ -f $TMPFILE ] ; then
   sh < $TMPFILE
+  rm -f $TMPFILE
 fi
-rm -f $TMPFILE
-/etc/init.d/munin-node restart
+/etc/init.d/munin-node restart || :
 exit 0
 
 
