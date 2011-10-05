@@ -118,7 +118,7 @@ public abstract class AbstractMailHaloDataSource implements HaloContactDataSourc
 			Contact contact = query.getContact();
 			SearchTerm<?> searchTerm = generateSearchTerm(contact);
 
-			MailMessage[] additionalMessages = messageStorage.searchMessages(getFolder(mailAccess.getFolderStorage()), getIndexRange(req), sortField, OrderDirection.ASC, searchTerm, fields);
+			MailMessage[] additionalMessages = messageStorage.searchMessages(getFolder(mailAccess.getFolderStorage()), getIndexRange(req), sortField, getOrder(req), searchTerm, fields);
 			mergeMessages(messages,additionalMessages, sortField, session.getUser().getLocale());
 		}
 		return new AJAXRequestResult(messages, "mail");
