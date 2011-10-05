@@ -74,8 +74,8 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
-import com.openexchange.mail.smal.jobqueue.jobs.AdderJob;
-import com.openexchange.mail.smal.jobqueue.jobs.ChangerJob;
+import com.openexchange.mail.smal.jobqueue.jobs.AdderByIDsJob;
+import com.openexchange.mail.smal.jobqueue.jobs.ChangeByIDsJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FlagsObserverJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.RemoveByIDsJob;
@@ -200,7 +200,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AdderJob adderJob = new AdderJob(destFolder, accountId, userId, contextId);
+        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
         return newIds;
     }
@@ -211,7 +211,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AdderJob adderJob = new AdderJob(destFolder, accountId, userId, contextId);
+        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
         return fast ? new String[0] : newIds;
     }
@@ -427,7 +427,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue changer job
          */
-        final ChangerJob job = new ChangerJob(folder, accountId, userId, contextId);
+        final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
     }
 
@@ -471,13 +471,19 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] newIds = messageStorage.moveMessages(sourceFolder, destFolder, mailIds, false);
-
-        final AdderJob adderJob = new AdderJob(destFolder, accountId, userId, contextId);
+        /*
+         * Adder job
+         */
+        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
-
+        /*
+         * Remover job
+         */
         final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(removerJob.setMailIds(asList(mailIds)).setRanking(10));
-
+        /*
+         * Return depending on "fast" parameter
+         */
         return fast ? new String[0] : newIds;
     }
 
@@ -490,7 +496,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         messageStorage.updateMessageColorLabel(folder, mailIds, colorLabel);
 
-        final ChangerJob job = new ChangerJob(folder, accountId, userId, contextId);
+        final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
     }
 

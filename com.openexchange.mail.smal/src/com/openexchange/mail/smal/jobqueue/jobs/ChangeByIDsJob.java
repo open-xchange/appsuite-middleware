@@ -64,18 +64,18 @@ import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.session.Session;
 
 /**
- * {@link ChangerJob} - Changes the flags of specified mails in index.
+ * {@link ChangeByIDsJob} - Changes the flags of specified mails in index.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ChangerJob extends AbstractMailSyncJob {
+public final class ChangeByIDsJob extends AbstractMailSyncJob {
 
     private static final long serialVersionUID = -4311521171077091128L;
 
-    private static final String SIMPLE_NAME = ChangerJob.class.getSimpleName();
+    private static final String SIMPLE_NAME = ChangeByIDsJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ChangerJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ChangeByIDsJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -98,14 +98,14 @@ public final class ChangerJob extends AbstractMailSyncJob {
     private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link ChangerJob}.
+     * Initializes a new {@link ChangeByIDsJob}.
      * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
      * @param contextId The context ID
      */
-    public ChangerJob(final String fullName, final int accountId, final int userId, final int contextId) {
+    public ChangeByIDsJob(final String fullName, final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
         gate = new AtomicInteger(0);
         ranking = 0;
@@ -122,7 +122,7 @@ public final class ChangerJob extends AbstractMailSyncJob {
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
-    public ChangerJob setRanking(final int ranking) {
+    public ChangeByIDsJob setRanking(final int ranking) {
         this.ranking = ranking;
         return this;
     }
@@ -133,7 +133,7 @@ public final class ChangerJob extends AbstractMailSyncJob {
      * @param mailIds The identifiers
      * @return This folder job
      */
-    public ChangerJob setMailIds(final List<String> mailIds) {
+    public ChangeByIDsJob setMailIds(final List<String> mailIds) {
         this.mailIds = mailIds;
         return this;
     }
@@ -151,7 +151,7 @@ public final class ChangerJob extends AbstractMailSyncJob {
                 return;
             }
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
-        final ChangerJob anotherFolderJob = (ChangerJob) anotherJob;
+        final ChangeByIDsJob anotherFolderJob = (ChangeByIDsJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
         this.mailIds = anotherFolderJob.mailIds;
         gate.set(0);
