@@ -12,7 +12,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Munin scripts
 Requires:	open-xchange-common 
-Requires(post): munin-node
+PreReq:         munin-node
 #
 
 %description
