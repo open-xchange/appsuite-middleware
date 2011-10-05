@@ -425,7 +425,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         messageStorage.updateMessageFlags(folder, mailIds, flags, set);
         /*
-         * Enqueue changer job
+         * Enqueue change job
          */
         final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
@@ -495,7 +495,9 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         messageStorage.updateMessageColorLabel(folder, mailIds, colorLabel);
-
+        /*
+         * Enqueue change job.
+         */
         final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
     }
