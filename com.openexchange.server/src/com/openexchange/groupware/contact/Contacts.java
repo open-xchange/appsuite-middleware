@@ -402,8 +402,8 @@ public final class Contacts {
         } finally {
             try {
                 DBPool.closeReaderSilent(context, readcon);
-            } catch (final Exception ex) {
-                LOG.error("Unable to close READ Connection");
+            } catch (final Exception e) {
+                LOG.error("Unable to close READ Connection", e);
             }
         }
 
