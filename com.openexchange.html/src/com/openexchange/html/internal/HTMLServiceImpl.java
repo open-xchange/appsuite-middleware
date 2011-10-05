@@ -1085,7 +1085,9 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static String validateWithHtmlCleaner(final String htmlContent) {
         try {
-            /*
+            /*-
+             * http://stackoverflow.com/questions/238036/java-html-parsing
+             * 
              * Clean...
              */
             final TagNode htmlNode = HTML_CLEANER.clean(preprocessWithJSoup(htmlContent));
