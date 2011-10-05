@@ -77,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ContactActionFactory implements AJAXActionServiceFactory {
 
-    private static final Map<String, ContactAction> ACTIONS = new ConcurrentHashMap<String, ContactAction>();
+    private static final Map<String, ContactAction> ACTIONS = new ConcurrentHashMap<String, ContactAction>(12);
 
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();

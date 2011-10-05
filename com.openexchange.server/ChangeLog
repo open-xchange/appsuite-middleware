@@ -1,3 +1,7 @@
+* 2011-10-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20506: Sanitizing HTML with JSoup library before creating tidy content
+
 * 2011-10-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 20466: Fixed calculation of permission bits and make MYRIGHTS and GETACL equal for user entity

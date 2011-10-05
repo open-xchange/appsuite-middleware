@@ -84,7 +84,7 @@ public class DocumentConverterActivator extends HousekeepingActivator {
         try {
             trackService(ManagedFileManagement.class);
             openTrackers();
-            System.getProperties().put("java.library.path", "/usr/lib/ure/lib"); // TODO: Where ever this is located
+//            System.getProperties().put("java.library.path", "/usr/lib/openoffice/program/"); // TODO: Where ever this is located
             documentConverterService = new JODConverterDocumentConverterService(this).startUp();
             registerService(DocumentConverterService.class, documentConverterService, null);
         } catch (final Exception e) {
