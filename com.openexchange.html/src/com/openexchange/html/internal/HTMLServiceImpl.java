@@ -66,7 +66,6 @@ import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.Serializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
@@ -1050,7 +1049,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * @return The safe HTML content according to JSoup processing
      */
     private static String preprocessWithJSoup(final String htmlContent) {
-        return Jsoup.clean(htmlContent, Whitelist.relaxed());
+        return Jsoup.parse(htmlContent).body().html();
     }
 
     /**
