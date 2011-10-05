@@ -64,6 +64,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.parser.HTMLHandler;
@@ -240,6 +241,29 @@ public final class HTMLFilterHandler implements HTMLHandler {
         final boolean[] tmp = depthInfo;
         depthInfo = new boolean[len];
         System.arraycopy(tmp, 0, depthInfo, 0, tmp.length);
+    }
+
+    /**
+     * Gets a JSoup white-list according to <tt>whitelist.properties</tt> file.
+     * 
+     * @return A JSoup white-list according to <tt>whitelist.properties</tt> file
+     */
+    public static Whitelist getJSoupWhitelist() {
+        if (null == staticHTMLMap) {
+            loadWhitelist();
+        }
+        final Map<String, Map<String, Set<String>>> htmlMap = staticHTMLMap;
+        final Whitelist whitelist = new Whitelist();
+        final Set<Entry<String, Map<String, Set<String>>>> entrySet = htmlMap.entrySet();
+        for (final Entry<String, Map<String, Set<String>>> entry : entrySet) {
+            final String tagName = entry.getKey();
+            whitelist.addTags(tagName);
+            final Map<String, Set<String>> attrsMap = entry.getValue();
+            if (null != attrsMap) {
+                whitelist.addAttributes(tagName, attrsMap.keySet().toArray(new String[0]));
+            }
+        }
+        return whitelist;
     }
 
     /**

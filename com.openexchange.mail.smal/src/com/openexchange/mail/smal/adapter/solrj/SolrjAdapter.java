@@ -880,8 +880,10 @@ public final class SolrjAdapter implements IndexAdapter, SolrConstants {
 
     @Override
     public void addContent(final MailMessage mail, final Session session) throws OXException {
-        final MailUUID uuid = new MailUUID(session.getContextId(), session.getUserId(), mail.getAccountId(), mail.getFolder(), mail.getMailId());
-        textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
+        textFillerQueue.add(TextFiller.fillerFor(
+            new MailUUID(session.getContextId(), session.getUserId(), mail.getAccountId(), mail.getFolder(), mail.getMailId()).getUUID(),
+            mail,
+            session));
     }
 
     @Override

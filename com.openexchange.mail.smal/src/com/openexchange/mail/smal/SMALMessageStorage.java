@@ -74,8 +74,8 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
-import com.openexchange.mail.smal.jobqueue.jobs.AdderJob;
-import com.openexchange.mail.smal.jobqueue.jobs.ChangerJob;
+import com.openexchange.mail.smal.jobqueue.jobs.AdderByIDsJob;
+import com.openexchange.mail.smal.jobqueue.jobs.ChangeByIDsJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FlagsObserverJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.RemoveByIDsJob;
@@ -85,7 +85,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
- * {@link SMALMessageStorage}
+ * {@link SMALMessageStorage} - The message storage for SMAL which either delegates calls to delegating message storage or serves them from
+ * index storage.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -196,7 +197,10 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public String[] appendMessages(final String destFolder, final MailMessage[] msgs) throws OXException {
         final String[] newIds = messageStorage.appendMessages(destFolder, msgs);
-        final AdderJob adderJob = new AdderJob(destFolder, accountId, userId, contextId);
+        /*
+         * Enqueue adder job
+         */
+        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
         return newIds;
     }
@@ -204,7 +208,10 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public String[] copyMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] newIds = messageStorage.copyMessages(sourceFolder, destFolder, mailIds, false);
-        final AdderJob adderJob = new AdderJob(destFolder, accountId, userId, contextId);
+        /*
+         * Enqueue adder job
+         */
+        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
         return fast ? new String[0] : newIds;
     }
@@ -212,6 +219,9 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public void deleteMessages(final String folder, final String[] mailIds, final boolean hardDelete) throws OXException {
         messageStorage.deleteMessages(folder, mailIds, hardDelete);
+        /*
+         * Enqueue remover job
+         */
         final RemoveByIDsJob removerJob = new RemoveByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(removerJob.setMailIds(asList(mailIds)).setRanking(10));
     }
@@ -310,12 +320,19 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 @Override
                 public MailResult<List<MailMessage>> call() throws Exception {
                     try {
-                        return MailResult.newIndexResult(indexAdapter.search(folder, searchTerm, sortField, order, fields, accountId, session));
+                        return MailResult.newIndexResult(indexAdapter.search(
+                            folder,
+                            searchTerm,
+                            sortField,
+                            order,
+                            fields,
+                            accountId,
+                            session));
                     } catch (final InterruptedException e) {
                         LOG.debug("Index search request interrupted: " + e.getMessage());
-                        
+
                         System.out.println("Index search request interrupted: " + e.getMessage());
-                        
+
                         throw e;
                     }
                 }
@@ -332,14 +349,14 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             case INDEX:
                 // Index result came first: Await storage task completion separately & schedule sync job
                 // Ignore deleted if results are filtered by a search term
-                
+
                 System.out.println(">>>INDEX<<< request completed first for " + folder + ". Awaitning storage result separately & schedule sync job");
-                
+
                 awaitStorageSearchResult(folder, completionService, (null != searchTerm));
                 break;
             case STORAGE:
                 // Storage result came first: Cancel remaining index task and schedule sync job
-                
+
                 System.out.println(">>>STORAGE<<< request completed first for " + folder + ". Canceling remaining index request & schedule sync job.");
                 final MailResult<List<MailMessage>> delayedResult = pollNextFrom(completionService);
                 if (delayedResult == null) {
@@ -396,19 +413,21 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             folderJob.setStorageMails(optStorageMails); // Assign storage's mail
         }
         if (null != optIndexMails) {
-            folderJob.setIndexMails(optIndexMails);
+            folderJob.setIndexMails(optIndexMails); // Assign index' mail
         }
         folderJob.setSpan(-1); // Immediate run
         folderJob.setRanking(10); // Replace this job with similar jobs possibly contained in queue
-        folderJob.setIgnoreDeleted(ignoreDeleted); // Whether to delete (must only be done if all mails requested)
+        folderJob.setIgnoreDeleted(ignoreDeleted); // Whether to delete (may only be done if all mails requested)
         JobQueue.getInstance().addJob(folderJob);
     }
 
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         messageStorage.updateMessageFlags(folder, mailIds, flags, set);
-
-        final ChangerJob job = new ChangerJob(folder, accountId, userId, contextId);
+        /*
+         * Enqueue change job
+         */
+        final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
     }
 
@@ -452,13 +471,19 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public String[] moveMessages(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast) throws OXException {
         final String[] newIds = messageStorage.moveMessages(sourceFolder, destFolder, mailIds, false);
-
-        final AdderJob adderJob = new AdderJob(destFolder, accountId, userId, contextId);
+        /*
+         * Adder job
+         */
+        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
-
+        /*
+         * Remover job
+         */
         final RemoveByIDsJob removerJob = new RemoveByIDsJob(sourceFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(removerJob.setMailIds(asList(mailIds)).setRanking(10));
-
+        /*
+         * Return depending on "fast" parameter
+         */
         return fast ? new String[0] : newIds;
     }
 
@@ -470,8 +495,10 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
     @Override
     public void updateMessageColorLabel(final String folder, final String[] mailIds, final int colorLabel) throws OXException {
         messageStorage.updateMessageColorLabel(folder, mailIds, colorLabel);
-
-        final ChangerJob job = new ChangerJob(folder, accountId, userId, contextId);
+        /*
+         * Enqueue change job.
+         */
+        final ChangeByIDsJob job = new ChangeByIDsJob(folder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(job.setRanking(10).setMailIds(asList(mailIds)));
     }
 

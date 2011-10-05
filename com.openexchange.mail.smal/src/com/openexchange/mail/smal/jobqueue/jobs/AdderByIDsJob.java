@@ -53,7 +53,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -64,18 +66,18 @@ import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.session.Session;
 
 /**
- * {@link ChangerJob}
+ * {@link AdderByIDsJob} - Adds mails to index by specified identifiers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ChangerJob extends AbstractMailSyncJob {
+public final class AdderByIDsJob extends AbstractMailSyncJob {
 
-    private static final long serialVersionUID = -4311521171077091128L;
+    private static final long serialVersionUID = -5611521171077091128L;
 
-    private static final String SIMPLE_NAME = ChangerJob.class.getSimpleName();
+    private static final String SIMPLE_NAME = AdderByIDsJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ChangerJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AdderByIDsJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -98,16 +100,14 @@ public final class ChangerJob extends AbstractMailSyncJob {
     private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link ChangerJob} with default span.
-     * <p>
-     * This job is performed is span is exceeded and if able to exclusively set sync flag.
+     * Initializes a new {@link AdderByIDsJob}.
      * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
      * @param contextId The context ID
      */
-    public ChangerJob(final String fullName, final int accountId, final int userId, final int contextId) {
+    public AdderByIDsJob(final String fullName, final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
         gate = new AtomicInteger(0);
         ranking = 0;
@@ -124,18 +124,18 @@ public final class ChangerJob extends AbstractMailSyncJob {
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
-    public ChangerJob setRanking(final int ranking) {
+    public AdderByIDsJob setRanking(final int ranking) {
         this.ranking = ranking;
         return this;
     }
 
     /**
-     * Sets the mail identifiers
+     * Sets the mails identifiers
      * 
-     * @param mailIds The identifiers
+     * @param mailIds The identifiers to set
      * @return This folder job
      */
-    public ChangerJob setMailIds(final List<String> mailIds) {
+    public AdderByIDsJob setMailIds(final List<String> mailIds) {
         this.mailIds = mailIds;
         return this;
     }
@@ -153,7 +153,7 @@ public final class ChangerJob extends AbstractMailSyncJob {
                 return;
             }
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
-        final ChangerJob anotherFolderJob = (ChangerJob) anotherJob;
+        final AdderByIDsJob anotherFolderJob = (AdderByIDsJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
         this.mailIds = anotherFolderJob.mailIds;
         gate.set(0);
@@ -169,12 +169,10 @@ public final class ChangerJob extends AbstractMailSyncJob {
         return ranking;
     }
 
-    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
-
     @Override
     public void perform() {
         final List<String> mailIds = this.mailIds;
-        if (null == mailIds || mailIds.isEmpty()) {
+        if (null == mailIds) {
             return;
         }
         if (error) {
@@ -210,34 +208,46 @@ public final class ChangerJob extends AbstractMailSyncJob {
                         /*
                          * Fetch mails
                          */
+                        final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
+                        fields.removeMailField(MailField.BODY);
+                        fields.removeMailField(MailField.FULL);
                         mails =
                             Arrays.asList(mailAccess.getMessageStorage().getMessages(
                                 fullName,
                                 mailIds.toArray(new String[mailIds.size()]),
-                                FIELDS));
+                                fields.toArray()));
                     } finally {
                         SMALMailAccess.closeUnwrappedInstance(mailAccess);
                         mailAccess = null;
                     }
                 }
-                for (final MailMessage mail : mails) {
-                    mail.setAccountId(accountId);
-                    mail.setFolder(fullName);
-                }
                 /*
-                 * Change flags
+                 * Add them to index
                  */
-                indexAdapter.change(mails, session);
+                try {
+                    indexAdapter.add(mails, session);
+                } catch (final OXException e) {
+                    // Batch add failed; retry one-by-one
+                    for (final MailMessage mail : mails) {
+                        try {
+                            indexAdapter.add(mail, session);
+                        } catch (final Exception inner) {
+                            LOG.warn(
+                                "Mail " + mail.getMailId() + " from folder " + mail.getFolder() + " of account " + accountId + " could not be added to index.",
+                                inner);
+                        }
+                    }
+                }
             } finally {
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("ChangerJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                    LOG.debug("AdderJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
                 }
             }
         } catch (final Exception e) {
             error = true;
             cancel();
-            LOG.error("ChangerJob \"" + identifier + "\" failed.", e);
+            LOG.error("AdderJob \"" + identifier + "\" failed.", e);
         }
     }
 
