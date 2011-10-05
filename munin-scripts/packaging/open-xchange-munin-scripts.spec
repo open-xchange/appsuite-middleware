@@ -12,7 +12,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Open-Xchange Munin scripts
 Requires:	open-xchange-common 
-Requires:       munin-node
+Requires(post): munin-node
 #
 
 %description
@@ -59,6 +59,8 @@ exit 0
 %defattr(-,root,root)
 %dir /usr/share/munin
 /usr/share/munin/plugins/
+%dir /etc/munin/
+%dir /etc/munin/plugin-conf.d/
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
