@@ -76,8 +76,7 @@ public final class SolrUtils {
     /**
      * Performs a commit on specified Solr server.
      * <p>
-     * TODO: Temporarily disable possible default socket timeout (if any <tt>SO_TIMEOUT</tt>
-     * set) and restores it afterwards.
+     * Temporarily disables possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set) and restores it afterwards.
      * 
      * @param solrServer The Solr server
      * @throws SolrServerException If an index error occurs
@@ -88,7 +87,8 @@ public final class SolrUtils {
         if (null != solrServer) {
             final int soTimeout = solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout();
             final IndexUrl indexUrl = (IndexUrl) solrServer.getHttpClient().getParams().getParameter("solr.index-url");
-            final CommonsHttpSolrServerManagement management = (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
+            final CommonsHttpSolrServerManagement management =
+                (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
             if (soTimeout <= 0 || null == indexUrl || null == management) {
                 solrServer.commit();
             } else {
@@ -105,7 +105,7 @@ public final class SolrUtils {
     /**
      * Performs a roll-back for specified Solr server.
      * <p>
-     * TODO: Temporarily disable default socket timeout (<tt>SO_TIMEOUT</tt>).
+     * Temporarily disables default socket timeout (<tt>SO_TIMEOUT</tt>).
      * 
      * @param solrServer The Solr server
      */
@@ -114,7 +114,8 @@ public final class SolrUtils {
             try {
                 final int soTimeout = solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout();
                 final IndexUrl indexUrl = (IndexUrl) solrServer.getHttpClient().getParams().getParameter("solr.index-url");
-                final CommonsHttpSolrServerManagement management = (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
+                final CommonsHttpSolrServerManagement management =
+                    (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
                 if (soTimeout <= 0 || null == indexUrl || null == management) {
                     solrServer.rollback();
                 } else {
