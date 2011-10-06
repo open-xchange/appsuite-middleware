@@ -249,6 +249,63 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
     }
 
     @Override
+    public List<MailMessage> search(final String query, final MailField[] fields, final Session session) throws OXException, InterruptedException {
+        try {
+            final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
+            final MailFields mailFields = new MailFields(fields);
+            /*
+             * Page-wise retrieval
+             */
+            final Integer rows = Integer.valueOf(QUERY_ROWS);
+            int off;
+            final long numFound;
+            final List<MailMessage> mails;
+            {
+                final SolrQuery solrQuery = new SolrQuery().setQuery(query);
+                solrQuery.setStart(Integer.valueOf(0));
+                solrQuery.setRows(rows);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                numFound = results.getNumFound();
+                if (numFound <= 0) {
+                    return Collections.emptyList();
+                }
+                mails = new ArrayList<MailMessage>((int) numFound);
+                final int size = results.size();
+                for (int i = 0; i < size; i++) {
+                    mails.add(readDocument(results.get(i), mailFields));
+                }
+                off = size;
+            }
+            final Thread thread = Thread.currentThread();
+            while (off < numFound) {
+                if (thread.isInterrupted()) {
+                    // Clears the thread's interrupted flag
+                    throw new InterruptedException("Thread interrupted while paging through Solr results.");
+                }
+                final SolrQuery solrQuery = new SolrQuery().setQuery(query);
+                solrQuery.setStart(Integer.valueOf(off));
+                solrQuery.setRows(rows);
+                final QueryResponse queryResponse = solrServer.query(solrQuery);
+                final SolrDocumentList results = queryResponse.getResults();
+                final int size = results.size();
+                if (size <= 0) {
+                    break;
+                }
+                for (int i = 0; i < size; i++) {
+                    mails.add(readDocument(results.get(i), mailFields));
+                }
+                off += size;
+            }
+            return mails;
+        } catch (final SolrServerException e) {
+            throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException, InterruptedException {
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);

@@ -122,6 +122,18 @@ public interface IndexAdapter {
     public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, MailField[] fields, int optAccountId, Session session) throws OXException, InterruptedException;
 
     /**
+     * Performs specified search by provided query.
+     * 
+     * @param query The query
+     * @param fields The fields to set
+     * @param session The session
+     * @return The resulting mails
+     * @throws OXException If search fails
+     * @throws InterruptedException If processing is interrupted
+     */
+    public List<MailMessage> search(String query, MailField[] fields, Session session) throws OXException, InterruptedException;
+
+    /**
      * Gets specified mails located in given folder.
      *
      * @param optMailIds The mail identifiers; pass <code>null</code> to get all messages in folder
