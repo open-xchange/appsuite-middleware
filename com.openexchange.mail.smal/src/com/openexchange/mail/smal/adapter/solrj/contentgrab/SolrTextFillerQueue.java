@@ -449,7 +449,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     rollback = true;
                     off = toIndex;
                 }
-                SolrUtils.commitNoTimeout(solrServer);
+                SolrUtils.commitWithTimeout(solrServer);
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
                     final StringBuilder sb = new StringBuilder(64);

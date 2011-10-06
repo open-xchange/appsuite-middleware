@@ -52,7 +52,7 @@ package com.openexchange.mail.smal.adapter.solrj;
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.isEmpty;
-import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitNoTimeout;
+import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitWithTimeout;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import static java.util.Collections.singletonList;
 import java.io.IOException;
@@ -658,7 +658,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             /*
              * Commit without timeout
              */
-            commitNoTimeout(solrServer);
+            commitWithTimeout(solrServer);
         } catch (final SolrServerException e) {
             if (!ran) {
                 LOG.debug("SolrServer.deleteByQuery() failed for query:\n" + query);
@@ -704,7 +704,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             /*
              * Commit without timeout
              */
-            commitNoTimeout(solrServer);
+            commitWithTimeout(solrServer);
         } catch (final SolrServerException e) {
             rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -794,7 +794,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             /*
              * Commit without timeout
              */
-            commitNoTimeout(solrServer);
+            commitWithTimeout(solrServer);
         } catch (final OXException e) {
             rollback(rollback ? solrServer : null);
             throw e;
@@ -897,7 +897,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             /*
              * Commit without timeout
              */
-            commitNoTimeout(solrServer);
+            commitWithTimeout(solrServer);
             textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
         } catch (final SolrServerException e) {
             rollback(solrServer);
@@ -937,7 +937,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             /*
              * Commit without timeout
              */
-            commitNoTimeout(solrServer);
+            commitWithTimeout(solrServer);
             textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
             rollback(solrServer);
