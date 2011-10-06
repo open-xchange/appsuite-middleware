@@ -557,6 +557,11 @@ public final class MailMessageParser {
                          * Set part's headers
                          */
                         part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                        {
+                            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                            cd.setFilenameParameter(getFileName(null, getSequenceId(prefix, partCount + 1), "text/calendar"));
+                            part.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, cd.toString());
+                        }
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);
