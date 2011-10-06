@@ -67,7 +67,7 @@ public interface InternalPreviewService extends PreviewService {
     /**
      * Checks if this service is able to detect the content type of an input stream.
      * 
-     * @return  If this service is able to detect the content type of an input stream.
+     * @return <code>true</code> this service is able to detect the content type of an input stream; otherwise <code>false</code>
      */
     boolean canDetectContentType();
 
