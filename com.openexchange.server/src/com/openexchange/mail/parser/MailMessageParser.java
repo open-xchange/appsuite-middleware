@@ -559,7 +559,7 @@ public final class MailMessageParser {
                         part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
                         {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
-                            cd.setFilenameParameter(getFileName(null, getSequenceId(prefix, partCount + 1), "text/calendar"));
+                            cd.setFilenameParameter(getFileName(null, getSequenceId(prefix, partCount), "text/calendar"));
                             part.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, cd.toString());
                         }
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
