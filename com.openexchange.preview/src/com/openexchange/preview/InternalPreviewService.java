@@ -58,9 +58,9 @@ package com.openexchange.preview;
 public interface InternalPreviewService extends PreviewService {
     
     /**
-     * Gets the preview policy of this <tt>PreviewService</tt>.
+     * Gets the preview policies of this <tt>PreviewService</tt>.
      * 
-     * @return The preview policy
+     * @return The preview policies
      */
     PreviewPolicy[] getPreviewPolicies();
     
