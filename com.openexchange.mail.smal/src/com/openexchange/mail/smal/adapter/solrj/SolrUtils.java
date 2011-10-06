@@ -75,29 +75,47 @@ public final class SolrUtils {
 
     /**
      * Performs a commit on specified Solr server.
-     * <p>
-     * Temporarily disables possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set) and restores it afterwards.
      * 
      * @param solrServer The Solr server
      * @throws SolrServerException If an index error occurs
      * @throws IOException If an I/O error occurs
      * @throws OXException If an OX error occurs
      */
-    public static void commitNoTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException, OXException {
+    public static void commitWithTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException, OXException {
+        commit(solrServer, false);
+    }
+
+    /**
+     * Performs a commit on specified Solr server.
+     * <p>
+     * Set <tt>noTimeout</tt> to temporarily disable possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set) and to restore it
+     * afterwards.
+     * 
+     * @param solrServer The Solr server
+     * @param noTimeout <code>true</code> for no timeout; otherwise <code>false</code>
+     * @throws SolrServerException If an index error occurs
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
+     */
+    public static void commit(final CommonsHttpSolrServer solrServer, final boolean noTimeout) throws SolrServerException, IOException, OXException {
         if (null != solrServer) {
-            final int soTimeout = solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout();
-            final IndexUrl indexUrl = (IndexUrl) solrServer.getHttpClient().getParams().getParameter("solr.index-url");
-            final CommonsHttpSolrServerManagement management =
-                (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
-            if (soTimeout <= 0 || null == indexUrl || null == management) {
-                solrServer.commit();
-            } else {
-                final CommonsHttpSolrServer newInfiniteServer = management.newNoTimeoutSolrServer(indexUrl);
-                try {
-                    newInfiniteServer.commit();
-                } finally {
-                    CommonsHttpSolrServerManagement.closeSolrServer(newInfiniteServer);
+            if (noTimeout) {
+                final int soTimeout = solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout();
+                final IndexUrl indexUrl = (IndexUrl) solrServer.getHttpClient().getParams().getParameter("solr.index-url");
+                final CommonsHttpSolrServerManagement management =
+                    (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
+                if (soTimeout <= 0 || null == indexUrl || null == management) {
+                    solrServer.commit();
+                } else {
+                    final CommonsHttpSolrServer newInfiniteServer = management.newNoTimeoutSolrServer(indexUrl);
+                    try {
+                        newInfiniteServer.commit();
+                    } finally {
+                        CommonsHttpSolrServerManagement.closeSolrServer(newInfiniteServer);
+                    }
                 }
+            } else {
+                solrServer.commit();
             }
         }
     }
