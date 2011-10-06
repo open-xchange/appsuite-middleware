@@ -395,6 +395,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 if (thread.isInterrupted()) {
                     throw new InterruptedException("Text filler thread interrupted");
                 }
+                solrQuery.setRows(Integer.valueOf(size));
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int rsize = results.size();
