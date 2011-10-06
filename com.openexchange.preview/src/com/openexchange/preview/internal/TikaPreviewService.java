@@ -124,7 +124,7 @@ public final class TikaPreviewService implements PreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(final InputStream inputStream, final PreviewOutput output, final Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final InputStream inputStream, final String mimeType, final String name, final PreviewOutput output, final Session session) throws OXException {
         /*
          * Get content according to output format
          */

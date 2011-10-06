@@ -469,7 +469,13 @@ public final class MailMessageParser {
                  * Handle special conversion
                  */
                 final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-                final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
+                final String messageClassName;
+                if (messageClass == null) {
+                    final MAPIProp prop = message.getMAPIProps().getProp(MAPIProp.PR_MESSAGE_CLASS);
+                    messageClassName = null == prop ? "" : prop.getValue().toString();
+                } else {
+                    messageClassName = ((String) messageClass.getValue());
+                }
                 if (TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
                     /*
                      * Convert contact to standard vCard. Resulting Multipart object consists of only ONE BodyPart object which encapsulates
@@ -551,6 +557,11 @@ public final class MailMessageParser {
                          * Set part's headers
                          */
                         part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                        {
+                            final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
+                            cd.setFilenameParameter(getFileName(null, getSequenceId(prefix, partCount), "text/calendar"));
+                            part.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, cd.toString());
+                        }
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
                             final net.fortuna.ical4j.model.Component vEvent = calendar.getComponents().getComponent(net.fortuna.ical4j.model.Component.VEVENT);

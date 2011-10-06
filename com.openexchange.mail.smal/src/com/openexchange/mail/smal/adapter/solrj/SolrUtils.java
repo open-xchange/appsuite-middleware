@@ -50,13 +50,15 @@
 package com.openexchange.mail.smal.adapter.solrj;
 
 import java.io.IOException;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
+import com.openexchange.exception.OXException;
+import com.openexchange.index.IndexUrl;
 import com.openexchange.log.Log;
+import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 
 /**
- * {@link SolrUtils}
+ * {@link SolrUtils} - Utility methods for Solr.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,60 +74,66 @@ public final class SolrUtils {
     }
 
     /**
-     * Performs a commit on specified Solr server, but temporarily disables possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set)
-     * and restores it afterwards.
+     * Performs a commit on specified Solr server.
+     * <p>
+     * Temporarily disables possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set) and restores it afterwards.
      * 
      * @param solrServer The Solr server
      * @throws SolrServerException If an index error occurs
      * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
      */
-    public static void commitNoTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException {
-        final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
-        final int timeout = managerParams.getSoTimeout();
-        if (timeout > 0) {
-            managerParams.setSoTimeout(0);
-            try {
+    public static void commitNoTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException, OXException {
+        if (null != solrServer) {
+            final int soTimeout = solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout();
+            final IndexUrl indexUrl = (IndexUrl) solrServer.getHttpClient().getParams().getParameter("solr.index-url");
+            final CommonsHttpSolrServerManagement management =
+                (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
+            if (soTimeout <= 0 || null == indexUrl || null == management) {
                 solrServer.commit();
-            } finally {
-                managerParams.setSoTimeout(timeout);
+            } else {
+                final CommonsHttpSolrServer newInfiniteServer = management.newNoTimeoutSolrServer(indexUrl);
+                try {
+                    newInfiniteServer.commit();
+                } finally {
+                    CommonsHttpSolrServerManagement.closeSolrServer(newInfiniteServer);
+                }
             }
-        } else {
-            solrServer.commit();
         }
     }
 
     /**
-     * Performs a roll-back for specified Solr server (with temporarily disabling default socket timeout (<tt>SO_TIMEOUT</tt>)).
+     * Performs a roll-back for specified Solr server.
+     * <p>
+     * Temporarily disables default socket timeout (<tt>SO_TIMEOUT</tt>).
      * 
      * @param solrServer The Solr server
      */
     public static void rollback(final CommonsHttpSolrServer solrServer) {
         if (null != solrServer) {
-            final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
-            final int timeout = managerParams.getSoTimeout();
-            if (timeout > 0) {
-                managerParams.setSoTimeout(0);
-                try {
+            try {
+                final int soTimeout = solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout();
+                final IndexUrl indexUrl = (IndexUrl) solrServer.getHttpClient().getParams().getParameter("solr.index-url");
+                final CommonsHttpSolrServerManagement management =
+                    (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
+                if (soTimeout <= 0 || null == indexUrl || null == management) {
                     solrServer.rollback();
-                } catch (final SolrServerException e) {
-                    LOG.warn("Rollback of Solr server failed.", e);
-                } catch (final IOException e) {
-                    LOG.warn("Rollback of Solr server failed.", e);
-                } catch (final RuntimeException e) {
-                    LOG.warn("Rollback of Solr server failed.", e);
-                } finally {
-                    managerParams.setSoTimeout(timeout);
+                } else {
+                    final CommonsHttpSolrServer newInfiniteServer = management.newNoTimeoutSolrServer(indexUrl);
+                    try {
+                        newInfiniteServer.rollback();
+                    } finally {
+                        CommonsHttpSolrServerManagement.closeSolrServer(newInfiniteServer);
+                    }
                 }
-            } else {
-                try {
-                    solrServer.rollback();
-                } catch (final SolrServerException e) {
-                    LOG.warn("Rollback of Solr server failed.", e);
-                } catch (final IOException e) {
-                    LOG.warn("Rollback of Solr server failed.", e);
-                } catch (final RuntimeException e) {
-                    LOG.warn("Rollback of Solr server failed.", e);
-                }
+            } catch (final OXException e) {
+                LOG.warn("Rollback of Solr server failed.", e);
+            } catch (final SolrServerException e) {
+                LOG.warn("Rollback of Solr server failed.", e);
+            } catch (final IOException e) {
+                LOG.warn("Rollback of Solr server failed.", e);
+            } catch (final RuntimeException e) {
+                LOG.warn("Rollback of Solr server failed.", e);
             }
         }
     }

@@ -70,10 +70,7 @@
     <target name="buildProject" description="Copies the build.xml to the bundle if there is not already one and executes it.">
         <echo message="Build bundle ${projectName}"/>
         <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
-            <classpath>
-                <fileset dir="${bundlesDir}" includes="*.jar"/>
-                <dirset dir="${bundlesDir}" includes="*"/>
-            </classpath>
+            <classpath refid="classpath"/>
         </setBundleProperties>
         <if>
             <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
@@ -107,15 +104,23 @@
 
     <target name="buildProjects" depends="antExtensions,prepare" description="Fetches projects from repository, computes build order and builds then each project.">
         <foreach list="${projectsList}" target="updateProject" param="projectName"/>
-        <mkdir dir="${bundlesDir}"/> <!-- TODO remove this -->
+        <if>
+            <available file="${bundlesDir}" type="dir"/>
+            <then>
+                <path id="classpath">
+                    <fileset dir="${bundlesDir}" includes="*.jar"/>
+                    <dirset dir="${bundlesDir}" includes="*"/>
+                </path>
+            </then>
+            <else>
+                <path id="classpath"/>
+            </else>
+        </if>
         <!-- Computes the dependencies and sorts the projects accordingly -->
         <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}">
-            <classpath>
-                <fileset dir="${bundlesDir}" includes="*.jar"/>
-                <dirset dir="${bundlesDir}" includes="*"/>
-            </classpath>
+            <classpath refid="classpath"/>
         </computeBuildOrder>
-        <foreach list="${projectsOrdered}" target="buildProject" param="projectName" inheritAll="true"/>
+        <foreach list="${projectsOrdered}" target="buildProject" param="projectName" inheritAll="true" inheritRefs="true"/>
     </target>
 
     <target name="setBuild" description="Sets the build type to build and install all bundles.">
