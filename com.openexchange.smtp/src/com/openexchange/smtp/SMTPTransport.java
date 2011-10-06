@@ -722,7 +722,11 @@ public final class SMTPTransport extends MailTransport {
                 }
                 final int pos = messageId.indexOf('@');
                 if (pos > 0 ) {
-                    smtpMessage.setHeader("Message-ID", messageId.substring(0, pos + 1) + hostName);
+                    final StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
+                    if (messageId.charAt(0) == '<') {
+                        mid.append('>');
+                    }
+                    smtpMessage.setHeader("Message-ID", mid.toString());
                 } else {
                     smtpMessage.setHeader("Message-ID", messageId + hostName);
                 }
