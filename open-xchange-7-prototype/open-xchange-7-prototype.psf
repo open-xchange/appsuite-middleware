@@ -26,7 +26,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.dataretention"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.datatypes.genericonf.storage"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.document.converter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.favfolder"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.composition"/>
@@ -58,11 +57,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging.facebook"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging.generic"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging.rss"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging.twitter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.model"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.storage"/>
@@ -103,13 +97,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sso"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.crawler"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.facebook"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.linkedin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.msn"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.yahoo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.textxtraction"/>
