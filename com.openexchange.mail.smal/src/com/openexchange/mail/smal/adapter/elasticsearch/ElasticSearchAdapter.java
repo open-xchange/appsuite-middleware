@@ -483,16 +483,8 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         }
     }
 
-    /**
-     * @deprecated Use {@link #search(String,MailField[], Session)} instead
-     */
     @Override
-    public List<MailMessage> search(final String query) throws OXException, InterruptedException {
-        return search(query, fields, session);
-    }
-
-    @Override
-    public List<MailMessage> search(final String query, MailField[] fields, Session session) throws OXException, InterruptedException {
+    public List<MailMessage> search(final String query, final MailField[] fields, final Session session) throws OXException, InterruptedException {
         // TODO Auto-generated method stub
         return null;
     }
