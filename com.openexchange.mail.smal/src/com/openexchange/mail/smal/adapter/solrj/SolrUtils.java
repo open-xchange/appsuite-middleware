@@ -58,7 +58,7 @@ import com.openexchange.log.Log;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 
 /**
- * {@link SolrUtils}
+ * {@link SolrUtils} - Utility methods for Solr.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
