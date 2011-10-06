@@ -64,6 +64,7 @@ import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HostConfiguration;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
@@ -156,7 +157,12 @@ public final class CommonsHttpSolrServerManagement {
         }
     }
 
-    private static void closeSolrServer(final CommonsHttpSolrServer server) {
+    /**
+     * Closes specified Solr server.
+     * 
+     * @param server The Solr server to close
+     */
+    public static void closeSolrServer(final CommonsHttpSolrServer server) {
         try {
             if (null != server) {
                 final HttpClient httpClient = server.getHttpClient();
@@ -185,7 +191,18 @@ public final class CommonsHttpSolrServerManagement {
      * @throws OXException If creation of a new Solr server fails
      */
     public CommonsHttpSolrServer newSolrServer(final IndexUrl indexUrl) throws OXException {
-        return newCommonsHttpSolrServer(indexUrl);
+        return newCommonsHttpSolrServer(indexUrl, -1);
+    }
+
+    /**
+     * Gets a new Solr server with a SO_TIMEOUT set which is associated with specified index URL either from cache or newly established.
+     * 
+     * @param indexUrl The index URL
+     * @return The new Solr server without a SO_TIMEOUT applied
+     * @throws OXException If creation of a new Solr server fails
+     */
+    public CommonsHttpSolrServer newNoTimeoutSolrServer(final IndexUrl indexUrl) throws OXException {
+        return newCommonsHttpSolrServer(indexUrl, 0);
     }
 
     /**
@@ -198,7 +215,7 @@ public final class CommonsHttpSolrServerManagement {
     public CommonsHttpSolrServer getSolrServer(final IndexUrl indexUrl) throws OXException {
         final Wrapper wrapper = map.get(indexUrl);
         if (null == wrapper) {
-            final CommonsHttpSolrServer solrServer = newCommonsHttpSolrServer(indexUrl);
+            final CommonsHttpSolrServer solrServer = newCommonsHttpSolrServer(indexUrl, -1);
             map.put(indexUrl, new Wrapper(solrServer));
             return solrServer;
         }
@@ -206,16 +223,16 @@ public final class CommonsHttpSolrServerManagement {
         if (null == solrServer) {
             map.remove(indexUrl);
             shrink();
-            solrServer = newCommonsHttpSolrServer(indexUrl);
+            solrServer = newCommonsHttpSolrServer(indexUrl, -1);
             map.put(indexUrl, new Wrapper(solrServer));
         }
         return solrServer;
     }
 
-    private static CommonsHttpSolrServer newCommonsHttpSolrServer(final IndexUrl indexUrl) throws OXException {
+    private CommonsHttpSolrServer newCommonsHttpSolrServer(final IndexUrl indexUrl, final int timeout) throws OXException {
         try {
             final CommonsHttpSolrServer server = new CommonsHttpSolrServer(indexUrl.getUrl());
-            server.setSoTimeout(indexUrl.getSoTimeout());  // socket read timeout
+            server.setSoTimeout(timeout < 0 ? indexUrl.getSoTimeout() : timeout);  // socket read timeout
             server.setConnectionTimeout(indexUrl.getConnectionTimeout());
             server.setDefaultMaxConnectionsPerHost(indexUrl.getMaxConnectionsPerHost());
             server.setMaxTotalConnections(indexUrl.getMaxConnectionsPerHost());
@@ -226,7 +243,7 @@ public final class CommonsHttpSolrServerManagement {
             server.setMaxRetries(1); // defaults to 0.  > 1 not recommended.
             server.setParser(new XMLResponseParser()); // Otherwise binary parser is used by default
             // Configure HttpClient
-            configureHttpClient(server.getHttpClient(), indexUrl);
+            configureHttpClient(server.getHttpClient(), indexUrl, timeout);
             return server;
         } catch (final MalformedURLException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -243,12 +260,15 @@ public final class CommonsHttpSolrServerManagement {
      */
     private static final String HTTPS = "https";
 
-    private static void configureHttpClient(final HttpClient client, final IndexUrl indexUrl) throws OXException {
+    private void configureHttpClient(final HttpClient client, final IndexUrl indexUrl, final int timeout) throws OXException {
         try {
-            final int httpTimeout = indexUrl.getSoTimeout();
-            client.getParams().setSoTimeout(httpTimeout);
-            client.getParams().setIntParameter("http.connection.timeout", httpTimeout);
-            client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
+            final int httpTimeout = timeout < 0 ? indexUrl.getSoTimeout() : timeout;
+            final HttpClientParams clientParams = client.getParams();
+            clientParams.setParameter("solr.index-url", indexUrl);
+            clientParams.setParameter("solr.server-management", this);
+            clientParams.setSoTimeout(httpTimeout);
+            clientParams.setIntParameter("http.connection.timeout", httpTimeout);
+            clientParams.setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
             /*
              * Create host configuration or URI
              */

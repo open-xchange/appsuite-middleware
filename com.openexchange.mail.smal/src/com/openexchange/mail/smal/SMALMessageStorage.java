@@ -365,7 +365,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 // Index result came first: Await storage task completion separately & schedule sync job
                 // Ignore deleted if results are filtered by a search term
 
-                System.out.println(">>>INDEX<<< request completed first for " + folder + ". Awaitning storage result separately & schedule sync job");
+                System.out.println(">>>INDEX<<< request completed first for " + folder + ". Awaiting storage result separately & schedule sync job");
 
                 awaitStorageSearchResult(folder, completionService, (null != searchTerm));
                 break;
