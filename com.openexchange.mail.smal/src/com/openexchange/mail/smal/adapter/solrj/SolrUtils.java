@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.adapter.solrj;
 
 import java.io.IOException;
+import org.apache.commons.httpclient.HttpConnectionManager;
 import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -80,14 +81,17 @@ public final class SolrUtils {
      * @throws IOException If an I/O error occurs
      */
     public static void commitNoTimeout(final CommonsHttpSolrServer solrServer) throws SolrServerException, IOException {
-        final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
+        final HttpConnectionManager connectionManager = solrServer.getHttpClient().getHttpConnectionManager();
+        final HttpConnectionManagerParams managerParams = connectionManager.getParams();
         final int timeout = managerParams.getSoTimeout();
         if (timeout > 0) {
             managerParams.setSoTimeout(0);
+            connectionManager.setParams(managerParams);
             try {
                 solrServer.commit();
             } finally {
                 managerParams.setSoTimeout(timeout);
+                connectionManager.setParams(managerParams);
             }
         } else {
             solrServer.commit();
@@ -101,10 +105,12 @@ public final class SolrUtils {
      */
     public static void rollback(final CommonsHttpSolrServer solrServer) {
         if (null != solrServer) {
-            final HttpConnectionManagerParams managerParams = solrServer.getHttpClient().getHttpConnectionManager().getParams();
+            final HttpConnectionManager connectionManager = solrServer.getHttpClient().getHttpConnectionManager();
+            final HttpConnectionManagerParams managerParams = connectionManager.getParams();
             final int timeout = managerParams.getSoTimeout();
             if (timeout > 0) {
                 managerParams.setSoTimeout(0);
+                connectionManager.setParams(managerParams);
                 try {
                     solrServer.rollback();
                 } catch (final SolrServerException e) {
@@ -115,6 +121,7 @@ public final class SolrUtils {
                     LOG.warn("Rollback of Solr server failed.", e);
                 } finally {
                     managerParams.setSoTimeout(timeout);
+                    connectionManager.setParams(managerParams);
                 }
             } else {
                 try {
