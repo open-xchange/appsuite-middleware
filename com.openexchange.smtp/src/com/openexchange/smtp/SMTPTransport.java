@@ -56,6 +56,7 @@ import static java.util.regex.Matcher.quoteReplacement;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.util.Date;
@@ -239,8 +240,9 @@ public final class SMTPTransport extends MailTransport {
                      * Set properties
                      */
                     final ISMTPProperties smtpProperties = smtpConfig.getSMTPProperties();
-                    if (smtpProperties.getSmtpLocalhost() != null) {
-                        smtpProps.put("mail.smtp.localhost", smtpProperties.getSmtpLocalhost());
+                    final String smtpLocalhost = smtpProperties.getSmtpLocalhost();
+                    if (smtpLocalhost != null) {
+                        smtpProps.put("mail.smtp.localhost", smtpLocalhost);
                     }
                     if (smtpProperties.getSmtpTimeout() > 0) {
                         smtpProps.put("mail.smtp.timeout", String.valueOf(smtpProperties.getSmtpTimeout()));
@@ -281,7 +283,27 @@ public final class SMTPTransport extends MailTransport {
                          * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
                          * connection before issuing any login commands.
                          */
-                        smtpProps.put("mail.smtp.starttls.enable", "true");
+                        String hostName = smtpLocalhost;
+                        if (null == hostName) {
+                            final HostnameService hostnameService = SMTPServiceRegistry.getServiceRegistry().getService(HostnameService.class);
+                            if (null == hostnameService) {
+                                hostName = getHostName();
+                            } else {
+                                hostName = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                            }
+                            if (null == hostName) {
+                                hostName = getHostName();
+                            }
+                        }
+                        try {
+                            final InetSocketAddress address = new InetSocketAddress(smtpConfig.getServer(), smtpConfig.getPort());
+                            final Map<String, String> capabilities = SMTPCapabilityCache.getCapabilities(address, smtpConfig.isSecure(), smtpProperties, hostName);
+                            if (capabilities.containsKey("STARTTLS")) {
+                                smtpProps.put("mail.smtp.starttls.enable", "true");
+                            }
+                        } catch (final IOException e) {
+                            smtpProps.put("mail.smtp.starttls.enable", "true");
+                        }
                         /*
                          * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create SMTP SSL sockets if TLS
                          * handshake says so.
@@ -593,13 +615,12 @@ public final class SMTPTransport extends MailTransport {
     @Override
     protected void shutdown() throws OXException {
         SMTPSessionProperties.resetDefaultSessionProperties();
+        SMTPCapabilityCache.tearDown();
     }
 
     @Override
     protected void startup() throws OXException {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("SMTPTransport.startup()");
-        }
+        SMTPCapabilityCache.init();
     }
 
     private static final class MailCleanerTask implements Runnable {
