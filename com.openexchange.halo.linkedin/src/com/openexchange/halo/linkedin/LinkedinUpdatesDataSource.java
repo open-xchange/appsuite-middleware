@@ -61,11 +61,11 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
+public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource
+		implements HaloContactDataSource {
 
-public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
-
-	public LinkedinProfileDataSource(ServiceLookup serviceLookup) {
-		this.serviceLookup = serviceLookup;
+	public LinkedinUpdatesDataSource(ServiceLookup lookup) {
+		setServiceLookup(lookup);
 	}
 
 	@Override
@@ -74,16 +74,15 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		int uid = session.getUserId();
 		int cid = session.getContextId();
 		
-		String email = query.getContact().getEmail1();
-
 		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
 		if(accounts.size() == 0)
 			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
 		
 		OAuthAccount linkedinAccount = accounts.get(0);
-		JSONObject json = getLinkedinService().getFullProfileByEMail(email, password, uid, cid, linkedinAccount.getId());
+		JSONObject json = getLinkedinService().getNetworkUpdates(password, uid, cid, linkedinAccount.getId());
 		AJAXRequestResult result = new AJAXRequestResult();
 		result.setResultObject(json, "json");
 		return result;
 	}
+
 }
