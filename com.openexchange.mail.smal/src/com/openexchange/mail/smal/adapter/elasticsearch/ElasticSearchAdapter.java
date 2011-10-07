@@ -1493,4 +1493,10 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         
     }
 
+	@Override
+	public void addContents() throws OXException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
