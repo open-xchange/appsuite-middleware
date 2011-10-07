@@ -495,7 +495,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     sb.append(" for account ").append(accountId);
                     sb.append(" of user ").append(userId);
                     sb.append(" in context ").append(contextId);
-                    sb.append("\nCurrent queue size: ").append(queue.size());
                     LOG.debug(sb.toString());
                 }
             }
@@ -513,9 +512,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private void grabTextFor(final List<TextFiller> fillers, final int contextId, final int userId, final int accountId, final Map<String, SolrDocument> documents, final List<SolrInputDocument> inputDocuments) throws OXException, InterruptedException {
         MailAccess<?, ?> access = null;
+        long st = 0;
         try {
             access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             access.connect(false);
+            st = System.currentTimeMillis();
+			LOG.debug("Acquired mail connection at " + st);
             final Thread thread = Thread.currentThread();
             final IMailMessageStorage messageStorage = access.getMessageStorage();
             final TextFinder textFinder = new TextFinder();
@@ -555,6 +557,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             }
         } finally {
             SMALMailAccess.closeUnwrappedInstance(access);
+            long dur = System.currentTimeMillis() - st;
+            LOG.debug("Held mail connection for " + dur + "msec");
             access = null;
         }
     }
