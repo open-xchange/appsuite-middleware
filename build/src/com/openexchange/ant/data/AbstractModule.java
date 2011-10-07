@@ -90,16 +90,16 @@ public abstract class AbstractModule {
 
     public void computeDependencies(final Map<String, AbstractModule> modulesByName, final Map<String, Set<AbstractModule>> modulesByPackage) {
         if (osgiManifest != null) {
-            for (final String importedPackage : osgiManifest.getImports()) {
-                final Set<AbstractModule> exportingModules = modulesByPackage.get(importedPackage);
+            for (final BundleImport imported : osgiManifest.getImports()) {
+                final Set<AbstractModule> exportingModules = modulesByPackage.get(imported.getPackageName());
                 if (exportingModules != null) {
                     for (final AbstractModule module : exportingModules) {
                         if (module != this) {
                             dependencies.add(module);
                         }
                     }
-                } else if (!JDK.exports(importedPackage)) {
-                    throw new BuildException("Can not find bundle that exports \"" + importedPackage + "\" to resolve import of bundle \"" + name + "\".");
+                } else if (!JDK.exports(imported.getPackageName()) && !imported.isOptional()) {
+                    throw new BuildException("Can not find bundle that exports \"" + imported + "\" to resolve import of bundle \"" + name + "\".");
                 }
             }
             for (final String requiredBundle : osgiManifest.getListEntry(OSGIManifest.REQUIRE_BUNDLE)) {

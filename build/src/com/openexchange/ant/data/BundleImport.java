@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,56 @@
  *
  */
 
-package com.openexchange.oauth.linkedin;
-
-import java.util.List;
-
-import org.json.JSONObject;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+package com.openexchange.ant.data;
 
 /**
- * {@link LinkedInService}
+ * {@link BundleImport}
  *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface LinkedInService {
+public final class BundleImport {
 
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId);
+    private final String packageName;
+    private final boolean optional;
 
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId);
-   
-    /**
-     * @return all data on a contact identified by e-mail (special feature, only available with extended API keys) 
-     */
-	public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException;
+    public BundleImport(final String packageName, final boolean optional) {
+        super();
+        this.packageName = packageName;
+        this.optional = optional;
+    }
 
-    /**
-     * @return all data on a contact identified by id 
-     */
-	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException;
+    public String getPackageName() {
+        return packageName;
+    }
 
-	/**
-	 * @return all data of all connections a user has
-	 */
-	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException;
+    public boolean isOptional() {
+        return optional;
+    }
 
-	/**
-	 * @return the IDs of all connections a user has (so you can query them separately)
-	 */
-	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException;
+    @Override
+    public int hashCode() {
+        return packageName.hashCode();
+    }
 
-	/**
-	 * @return A list of contacts that list the targeted user to the current user
-	 */
-	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException;
-	
-	/**
-	 * @return A chronologically sorted list of all events that happened in a users network
-	 */
-	public JSONObject getNetworkUpdates(String password, int user, int contextId, int accountId) throws OXException;
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof BundleImport)) {
+            return false;
+        }
+        final BundleImport other = (BundleImport) obj;
+        if (null == packageName) {
+            return null == other.packageName;
+        }
+        return packageName.equals(other.packageName);  
+    }
 
-	/**
-	 * @return The messages in the user's inbox
-	 */
-	public JSONObject getMessageInbox(String string, int i, int j, int k) throws OXException;
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(packageName);
+        if (optional) {
+            sb.append("; resolution=optional");
+        }
+        return sb.toString();
+    }
 }
