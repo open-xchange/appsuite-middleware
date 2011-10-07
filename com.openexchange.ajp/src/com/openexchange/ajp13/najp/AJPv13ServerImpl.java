@@ -174,14 +174,16 @@ public final class AJPv13ServerImpl extends AJPv13Server implements Runnable {
              * Interrupt & destroy threads
              */
             final StringBuilder sb = new StringBuilder(128);
-            for (int i = 0; i < threadArr.length; i++) {
-                try {
-                    threadArr[i].interrupt();
-                } catch (final Exception e) {
-                    LOG.error(sb.append(threadArr[i].getName()).append(" could NOT be interrupted").toString(), e);
-                    sb.setLength(0);
-                } finally {
-                    threadArr[i] = null;
+            if (null != threadArr) {
+                for (int i = 0; i < threadArr.length; i++) {
+                    try {
+                        threadArr[i].interrupt();
+                    } catch (final Exception e) {
+                        LOG.error(sb.append(threadArr[i].getName()).append(" could NOT be interrupted").toString(), e);
+                        sb.setLength(0);
+                    } finally {
+                        threadArr[i] = null;
+                    }
                 }
             }
             if (serverSocket != null) {

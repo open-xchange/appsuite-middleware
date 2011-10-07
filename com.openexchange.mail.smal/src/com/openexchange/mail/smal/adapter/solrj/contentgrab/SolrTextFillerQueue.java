@@ -272,12 +272,14 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         } else {
             int fromIndex = 0;
             while (fromIndex < size) {
-                int toIndex = fromIndex + configuredBlockSize;
+                final int toIndex = fromIndex + configuredBlockSize;
                 if (toIndex > size) {
-                    toIndex = size;
+                    scheduleFillers(groupedFillers.subList(fromIndex, size), poolService);
+                    fromIndex = size;
+                } else {
+                    scheduleFillers(groupedFillers.subList(fromIndex, toIndex), poolService);
+                    fromIndex = toIndex;
                 }
-                scheduleFillers(groupedFillers.subList(fromIndex, toIndex), poolService);
-                fromIndex = toIndex;
             }
         }
     }
@@ -395,6 +397,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 if (thread.isInterrupted()) {
                     throw new InterruptedException("Text filler thread interrupted");
                 }
+                solrQuery.setRows(Integer.valueOf(size));
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int rsize = results.size();
@@ -448,7 +451,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     rollback = true;
                     off = toIndex;
                 }
-                SolrUtils.commitNoTimeout(solrServer);
+                SolrUtils.commitWithTimeout(solrServer);
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
                     final StringBuilder sb = new StringBuilder(64);

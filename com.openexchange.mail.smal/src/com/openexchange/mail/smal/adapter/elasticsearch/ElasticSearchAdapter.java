@@ -484,6 +484,12 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     }
 
     @Override
+    public List<MailMessage> search(final String query, final MailField[] fields, final Session session) throws OXException, InterruptedException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
         try {
             ensureStarted();

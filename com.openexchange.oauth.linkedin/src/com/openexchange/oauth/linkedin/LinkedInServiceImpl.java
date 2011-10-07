@@ -246,4 +246,21 @@ public class LinkedInServiceImpl implements LinkedInService{
 		
 	}
 
+	@Override
+	public JSONObject getNetworkUpdates(String password, int user, int contextId, int accountId) throws OXException {
+		String uri = "http://api.linkedin.com/v1/people/~/network/updates";
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	JSONObject data = extractJson(response);
+    	return data;
+	}
+
+	@Override
+	public JSONObject getMessageInbox(String string, int i, int j, int k) throws OXException {
+		try {
+			return new JSONObject("{\"values\":[{\"header\":\"Hello world\",body:\"Have a nice day.\"},{\"header\":\"Hello world\",body:\"Have a nice day.\"}]}");
+		} catch (JSONException e) {
+			throw new OXException(e);
+		}
+	}
+
 }
