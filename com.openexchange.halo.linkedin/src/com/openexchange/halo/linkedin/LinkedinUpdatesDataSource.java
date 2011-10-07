@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,41 +46,43 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.halo.linkedin;
 
-package com.openexchange.mail.smal.jobqueue;
+import java.util.List;
 
-/**
- * {@link Constants} - Constants for job queue.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class Constants {
+import org.json.JSONObject;
 
-    /**
-     * Initializes a new {@link Constants}.
-     */
-    private Constants() {
-        super();
-    }
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
-    /**
-     * Hour milliseconds.
-     */
-    public static final int HOUR_MILLIS = 60 * 60 * 1000;
+public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource
+		implements HaloContactDataSource {
 
-    /**
-     * Default (5 minutes) milliseconds.
-     */
-    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
+	public LinkedinUpdatesDataSource(ServiceLookup lookup) {
+		setServiceLookup(lookup);
+	}
 
-    /**
-     * The size of a chunk for indexed messages for a bulk add.
-     */
-    public static final int CHUNK_SIZE = 1000;
-
-    /**
-     * The number of chunks allowed being added to index in a single job's run.
-     */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
+	@Override
+	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+		String password = session.getPassword();
+		int uid = session.getUserId();
+		int cid = session.getContextId();
+		
+		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		if(accounts.size() == 0)
+			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		
+		OAuthAccount linkedinAccount = accounts.get(0);
+		JSONObject json = getLinkedinService().getNetworkUpdates(password, uid, cid, linkedinAccount.getId());
+		AJAXRequestResult result = new AJAXRequestResult();
+		result.setResultObject(json, "json");
+		return result;
+	}
 
 }

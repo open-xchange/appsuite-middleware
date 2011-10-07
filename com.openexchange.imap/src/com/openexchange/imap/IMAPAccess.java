@@ -65,7 +65,6 @@ import javax.mail.event.FolderEvent;
 import javax.mail.event.FolderListener;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPStorePool.AccountPool;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -230,7 +229,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isCacheable() {
-        return false;
+        return true;
     }
 
     private void reset() {
@@ -276,25 +275,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void closeInternal() {
-        final AccountPool accountPool = IMAPStorePool.getInstance().optAccountPool(this);
-        if (null == accountPool) {
-            closeSafely(this);
-        } else {
-            accountPool.returnIMAPStore(imapStore);
-        }
-    }
-
-    /**
-     * Closes specified IMAP access.
-     * 
-     * @param imapAccess The IMAP access
-     */
-    public static void closeSafely(final IMAPAccess imapAccess) {
-        if (null == imapAccess || !imapAccess.connected) {
-            return;
-        }
         try {
-            final IMAPFolderStorage folderStorage = imapAccess.folderStorage;
             if (folderStorage != null) {
                 try {
                     folderStorage.releaseResources();
@@ -302,7 +283,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("Error while closing IMAP folder storage,", e);
                 }
             }
-            final IMAPMessageStorage messageStorage = imapAccess.messageStorage;
             if (null != messageStorage) {
                 try {
                     messageStorage.releaseResources();
@@ -310,22 +290,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("Error while closing IMAP message storage.", e);
                 }
             }
-            if (imapAccess.imapStore != null) {
+            if (imapStore != null) {
                 try {
-                    imapAccess.imapStore.close();
+                    imapStore.close();
                 } catch (final MessagingException e) {
                     LOG.error("Error while closing IMAP store.", e);
                 } catch (final RuntimeException e) {
                     LOG.error("Error while closing IMAP store.", e);
                 }
-                final IMAPConfig ic = imapAccess.getIMAPConfig();
+                final IMAPConfig ic = getIMAPConfig();
                 if (null != ic) {
                     ic.dropImapStore();
                 }
-                imapAccess.imapStore = null;
+                imapStore = null;
             }
         } finally {
-            imapAccess.reset();
+            reset();
         }
     }
 
@@ -499,7 +479,148 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void connectInternal() throws OXException {
-        IMAPStorePool.getInstance().getAccountPool(this).connectedIMAPStoreFor(this);
+        if (connected) {
+            return;
+        }
+        final IMAPConfig config = getIMAPConfig();
+        try {
+            final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
+            final boolean tmpDownEnabled = (imapConfProps.getImapTemporaryDown() > 0);
+            if (tmpDownEnabled) {
+                /*
+                 * Check if IMAP server is marked as being (temporary) down since connecting to it failed before
+                 */
+                checkTemporaryDown(imapConfProps);
+            }
+            String tmpPass = config.getPassword();
+            if (tmpPass != null) {
+                try {
+                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
+                } catch (final UnsupportedEncodingException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+            final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+            /*
+             * Check for already failed authentication
+             */
+            final String login = config.getLogin();
+            String user = login;
+            String proxyUser = null;
+            boolean isProxyAuth = false;
+            if (proxyDelimiter != null && login.contains(proxyDelimiter)) {
+                isProxyAuth = true;
+                proxyUser = login.substring(0, login.indexOf(proxyDelimiter));
+                user = login.substring(login.indexOf(proxyDelimiter) + proxyDelimiter.length(), login.length());
+            }
+            checkFailedAuths(user, tmpPass);
+            /*
+             * Get properties
+             */
+            final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
+            if ((null != getMailProperties()) && !getMailProperties().isEmpty()) {
+                imapProps.putAll(getMailProperties());
+            }
+            if (isProxyAuth) {
+                imapProps.put("mail.imap.sasl.enable", "true");
+                imapProps.put("mail.imap.sasl.authorizationid", user);
+                imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
+            }
+
+            /*
+             * Get parameterized IMAP session
+             */
+            imapSession =
+                setConnectProperties(
+                    config.getPort(),
+                    config.isSecure(),
+                    imapConfProps.getImapTimeout(),
+                    imapConfProps.getImapConnectionTimeout(),
+                    imapProps);
+            /*
+             * Check if debug should be enabled
+             */
+            final boolean certainUser = false; //("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
+            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
+                imapSession.setDebug(true);
+                imapSession.setDebugOut(System.out);
+            }
+            /*
+             * Check if client IP address should be propagated
+             */
+            String clientIp = null;
+            if (imapConfProps.isPropagateClientIPAddress() && isPropagateAccount(imapConfProps)) {
+                final String ip = session.getLocalIp();
+                if (!isEmpty(ip)) {
+                    clientIp = ip;
+                } else if (DEBUG) {
+                    LOG.debug(new StringBuilder(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
+                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
+                }
+            } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
+                LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
+                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
+            }
+            /*
+             * Get connected store
+             */
+            try {
+                imapStore =
+                    new AccessedIMAPStore(this, connectIMAPStore(
+                        imapSession,
+                        config.getServer(),
+                        config.getPort(),
+                        isProxyAuth ? proxyUser : user,
+                        tmpPass,
+                        clientIp), imapSession);
+            } catch (final AuthenticationFailedException e) {
+                /*
+                 * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
+                 */
+                failedAuths.put(new LoginAndPass(user, tmpPass), new StampAndError(e, System.currentTimeMillis()));
+                throw e;
+            } catch (final MessagingException e) {
+                /*
+                 * Check for a SocketTimeoutException
+                 */
+                if (tmpDownEnabled) {
+                    final Exception nextException = e.getNextException();
+                    if (SocketTimeoutException.class.isInstance(nextException)) {
+                        /*
+                         * Remember a timed-out IMAP server on connect attempt
+                         */
+                        timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                    }
+                }
+                throw e;
+            }
+            connected = true;
+            /*
+             * Register notifier task if enabled
+             */
+            if (MailAccount.DEFAULT_ID == accountId && config.getIMAPProperties().notifyRecent()) {
+                /*
+                 * This call is re-invoked during IMAPNotifierTask's run
+                 */
+                if (IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session) && INFO) {
+                    final StringBuilder tmp = new StringBuilder("\n\tStarted IMAP notifier for server \"").append(config.getServer());
+                    tmp.append("\" with login \"").append(user);
+                    tmp.append("\" (user=").append(session.getUserId());
+                    tmp.append(", context=").append(session.getContextId()).append(").");
+                    LOG.info(tmp.toString());
+                }
+            }
+            /*
+             * Add folder listener
+             */
+            // imapStore.addFolderListener(new ListLsubCacheFolderListener(accountId, session));
+            /*
+             * Add server's capabilities
+             */
+            config.initializeCapabilities(imapStore, session);
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, config, session);
+        }
     }
 
     private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws OXException {
@@ -514,21 +635,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         final int[] ids =
             storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
         return Arrays.binarySearch(ids, accountId) >= 0;
-    }
-
-    public static void applyStoreTo(final AccessedIMAPStore imapStore, final IMAPAccess imapAccess) {
-        final IMAPAccess storedImapAccess = imapStore.getImapAccess();
-        imapAccess.connected = storedImapAccess.connected;
-        imapAccess.imapSession = storedImapAccess.imapSession;
-        imapAccess.imapStore = imapStore;
-        try {
-            imapAccess.imapConfig = (IMAPConfig) storedImapAccess.getMailConfig();
-            imapAccess.imapConfig.initializeCapabilities(imapAccess.imapStore, storedImapAccess.getSession());
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        }
-        // Reset IMAP access, too
-        imapStore.setImapAccess(imapAccess);
     }
 
     /**
@@ -874,7 +980,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         MBoxEnabledCache.tearDown();
         IMAPSessionProperties.resetDefaultSessionProperties();
         IMAPNotifierMessageRecentListener.dropFullNameChecker();
-        IMAPStorePool.releaseInstance();
         dropMaps();
     }
 

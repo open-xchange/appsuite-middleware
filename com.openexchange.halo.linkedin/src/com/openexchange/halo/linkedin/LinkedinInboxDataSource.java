@@ -1,9 +1,3 @@
-import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
-import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
-import com.openexchange.oauth.linkedin.MockOAuthService;
-
-import junit.framework.TestCase;
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -52,24 +46,43 @@ import junit.framework.TestCase;
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.halo.linkedin;
 
-public class LinkedInDataSourceTest extends TestCase {
-	
-	private LinkedinProfileDataSource source;
+import java.util.List;
+
+import org.json.JSONObject;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
+public class LinkedinInboxDataSource extends AbstractLinkedinDataSource
+		implements HaloContactDataSource {
+
+	public LinkedinInboxDataSource(ServiceLookup lookup) {
+		setServiceLookup(lookup);
+	}
 
 	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-
-		LinkedInServiceImpl lis = new LinkedInServiceImpl(null);
+	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+		String password = session.getPassword();
+		int uid = session.getUserId();
+		int cid = session.getContextId();
 		
-		source = new LinkedinProfileDataSource(null);
-		source.setLinkedinService(lis);
-		source.setOauthService(new MockOAuthService());
-
+		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		if(accounts.size() == 0)
+			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		
+		OAuthAccount linkedinAccount = accounts.get(0);
+		JSONObject json = getLinkedinService().getMessageInbox(password, uid, cid, linkedinAccount.getId());
+		AJAXRequestResult result = new AJAXRequestResult();
+		result.setResultObject(json, "json");
+		return result;
 	}
 
-	public void testBasics(){
-
-	}
 }

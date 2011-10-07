@@ -1049,7 +1049,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * @return The safe HTML content according to JSoup processing
      */
     private static String preprocessWithJSoup(final String htmlContent) {
-        return Jsoup.parse(htmlContent).body().html();
+        return Jsoup.parse(htmlContent).toString();
     }
 
     /**

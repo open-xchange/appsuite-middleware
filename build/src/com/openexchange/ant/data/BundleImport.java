@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,56 @@
  *
  */
 
-package com.openexchange.mail.smal.jobqueue;
+package com.openexchange.ant.data;
 
 /**
- * {@link Constants} - Constants for job queue.
+ * {@link BundleImport}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Constants {
+public final class BundleImport {
 
-    /**
-     * Initializes a new {@link Constants}.
-     */
-    private Constants() {
+    private final String packageName;
+    private final boolean optional;
+
+    public BundleImport(final String packageName, final boolean optional) {
         super();
+        this.packageName = packageName;
+        this.optional = optional;
     }
 
-    /**
-     * Hour milliseconds.
-     */
-    public static final int HOUR_MILLIS = 60 * 60 * 1000;
+    public String getPackageName() {
+        return packageName;
+    }
 
-    /**
-     * Default (5 minutes) milliseconds.
-     */
-    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
+    public boolean isOptional() {
+        return optional;
+    }
 
-    /**
-     * The size of a chunk for indexed messages for a bulk add.
-     */
-    public static final int CHUNK_SIZE = 1000;
+    @Override
+    public int hashCode() {
+        return packageName.hashCode();
+    }
 
-    /**
-     * The number of chunks allowed being added to index in a single job's run.
-     */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof BundleImport)) {
+            return false;
+        }
+        final BundleImport other = (BundleImport) obj;
+        if (null == packageName) {
+            return null == other.packageName;
+        }
+        return packageName.equals(other.packageName);  
+    }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(packageName);
+        if (optional) {
+            sb.append("; resolution=optional");
+        }
+        return sb.toString();
+    }
 }

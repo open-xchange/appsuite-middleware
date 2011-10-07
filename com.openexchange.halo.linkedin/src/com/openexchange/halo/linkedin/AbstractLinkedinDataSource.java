@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,41 +46,72 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.halo.linkedin;
 
-package com.openexchange.mail.smal.jobqueue;
+import java.util.List;
 
-/**
- * {@link Constants} - Constants for job queue.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class Constants {
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.linkedin.LinkedInService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
-    /**
-     * Initializes a new {@link Constants}.
-     */
-    private Constants() {
-        super();
-    }
+public abstract class AbstractLinkedinDataSource  implements HaloContactDataSource {
 
-    /**
-     * Hour milliseconds.
-     */
-    public static final int HOUR_MILLIS = 60 * 60 * 1000;
+	private LinkedInService linkedinService;
+	private OAuthService oauthService;
+	protected ServiceLookup serviceLookup;
 
-    /**
-     * Default (5 minutes) milliseconds.
-     */
-    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
+	public ServiceLookup getServiceLookup() {
+		return serviceLookup;
+	}
 
-    /**
-     * The size of a chunk for indexed messages for a bulk add.
-     */
-    public static final int CHUNK_SIZE = 1000;
+	public void setServiceLookup(ServiceLookup serviceLookup) {
+		this.serviceLookup = serviceLookup;
+	}
 
-    /**
-     * The number of chunks allowed being added to index in a single job's run.
-     */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
+	public LinkedInService getLinkedinService() {
+		if(linkedinService != null)
+			return linkedinService;
+		return serviceLookup.getService(LinkedInService.class);
+	}
+
+	public void setLinkedinService(LinkedInService linkedinService) {
+		this.linkedinService = linkedinService;
+	}
+
+	public OAuthService getOauthService() {
+		if(oauthService != null)
+			return oauthService;
+		return serviceLookup.getService(OAuthService.class);
+	}
+
+	public void setOauthService(OAuthService oauthService) {
+		this.oauthService = oauthService;
+	}
+
+	
+	@Override
+	public String getId() {
+		return "com.openexchange.halo.linkedIn:fullProfile";
+	}
+
+	@Override
+	public boolean isAvailable(ServerSession session) throws OXException {
+		String password = session.getPassword();
+		int uid = session.getUserId();
+		int cid = session.getContextId();
+		
+		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		return !accounts.isEmpty();
+	}
+
+	@Override
+	public abstract AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException;
 
 }

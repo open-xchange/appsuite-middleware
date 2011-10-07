@@ -202,7 +202,13 @@ public final class TextFinder {
              * Handle special conversion
              */
             final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-            final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue());
+            final String messageClassName;
+            if (messageClass == null) {
+                final MAPIProp prop = message.getMAPIProps().getProp(MAPIProp.PR_MESSAGE_CLASS);
+                messageClassName = null == prop ? "" : prop.getValue().toString();
+            } else {
+                messageClassName = ((String) messageClass.getValue());
+            }
             if (TNEF_IPM_CONTACT.equalsIgnoreCase(messageClassName)) {
                 return null;
             }

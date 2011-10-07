@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,99 @@
  *
  */
 
-package com.openexchange.mail.smal.jobqueue;
+package com.openexchange.obs.api;
+
+import java.lang.reflect.Field;
 
 /**
- * {@link Constants} - Constants for job queue.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author choeger
  */
-public final class Constants {
+public class PackageStatus {
 
-    /**
-     * Initializes a new {@link Constants}.
-     */
-    private Constants() {
-        super();
+    private String name;
+
+    private Code code;
+
+    private String details;
+
+    public PackageStatus(final String name, final String code) throws BuildServiceException {
+        if (name == null) {
+            throw new BuildServiceException("Package name is null");
+        }
+        if (code == null) {
+            throw new BuildServiceException("Package name is null");
+        }
+        this.name = name;
+        this.code = Code.parseCode(code);
+        this.details = null;
     }
 
     /**
-     * Hour milliseconds.
+     * @return the name
      */
-    public static final int HOUR_MILLIS = 60 * 60 * 1000;
+    public final String getName() {
+        return name;
+    }
 
     /**
-     * Default (5 minutes) milliseconds.
+     * @param name the name to set
      */
-    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
+    public final void setName(String name) {
+        this.name = name;
+    }
 
     /**
-     * The size of a chunk for indexed messages for a bulk add.
+     * @return the code
      */
-    public static final int CHUNK_SIZE = 1000;
+    public final Code getCode() {
+        return code;
+    }
 
     /**
-     * The number of chunks allowed being added to index in a single job's run.
+     * @param code the code to set
      */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
+    public final void setCode(Code code) {
+        this.code = code;
+    }
+
+    /**
+     * @return the details
+     */
+    public final String getDetails() {
+        return details;
+    }
+
+    /**
+     * @param details the details to set
+     */
+    public final void setDetails(String details) {
+        this.details = details;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder ret = new StringBuilder();
+        ret.append("[ \n");
+
+        for (final Field f : this.getClass().getDeclaredFields()) {
+            try {
+                final Object ob = f.get(this);
+                final String tname = f.getName();
+                if (ob != null) {
+                    ret.append("  ");
+                    ret.append(tname);
+                    ret.append(": ");
+                    ret.append(ob);
+                    ret.append("\n");
+                }
+            } catch (final IllegalArgumentException e) {
+                ret.append("IllegalArgument\n");
+            } catch (final IllegalAccessException e) {
+                ret.append("IllegalAccessException\n");
+            }
+        }
+        ret.append("]\n");
+        return ret.toString();
+    }
 
 }

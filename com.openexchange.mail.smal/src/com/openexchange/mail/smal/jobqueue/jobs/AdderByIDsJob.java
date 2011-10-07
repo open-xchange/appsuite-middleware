@@ -237,6 +237,8 @@ public final class AdderByIDsJob extends AbstractMailSyncJob {
                                 inner);
                         }
                     }
+                } finally {
+                    indexAdapter.addContents();
                 }
             } finally {
                 if (DEBUG) {

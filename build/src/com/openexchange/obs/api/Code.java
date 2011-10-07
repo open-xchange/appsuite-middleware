@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,66 @@
  *
  */
 
-package com.openexchange.mail.smal.jobqueue;
+package com.openexchange.obs.api;
 
 /**
- * {@link Constants} - Constants for job queue.
+ * {@link Code}s for the package status.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class Constants {
+public enum Code {
 
-    /**
-     * Initializes a new {@link Constants}.
-     */
-    private Constants() {
-        super();
+    SUCCEEDED("succeeded"),
+    EXPANSION_ERROR("expansion error"),
+    BROKEN("broken"),
+    FAILED("failed"),
+    DISABLED("disabled"),
+    BLOCKED("blocked"),
+    BUILDING("building"),
+    SCHEDULED("scheduled"),
+    FINISHED("finished"),
+    DISPATCHING("dispatching"),
+    UNKNOWN("unknown"),
+    EXCLUDED("excluded"),
+    UNRESOLVABLE("unresolvable");
+
+    private final String str;
+
+    private Code(final String str) {
+        this.str = str;
     }
 
-    /**
-     * Hour milliseconds.
-     */
-    public static final int HOUR_MILLIS = 60 * 60 * 1000;
+    @Override
+    public String toString() {
+        return str;
+    }
 
-    /**
-     * Default (5 minutes) milliseconds.
-     */
-    public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
-
-    /**
-     * The size of a chunk for indexed messages for a bulk add.
-     */
-    public static final int CHUNK_SIZE = 1000;
-
-    /**
-     * The number of chunks allowed being added to index in a single job's run.
-     */
-    public static final int MAX_CHUNKS_PER_RUN = 10;
-
+    public final static Code parseCode(final String code) throws BuildServiceException {
+        if (SUCCEEDED.str.equalsIgnoreCase(code)) {
+            return SUCCEEDED;
+        } else if (EXPANSION_ERROR.str.equalsIgnoreCase(code)) {
+            return EXPANSION_ERROR;
+        } else if (BROKEN.str.equalsIgnoreCase(code)) {
+            return BROKEN;
+        } else if (FAILED.str.equalsIgnoreCase(code)) {
+            return FAILED;
+        } else if (DISABLED.str.equalsIgnoreCase(code)) {
+            return DISABLED;
+        } else if (BLOCKED.str.equalsIgnoreCase(code)) {
+            return BLOCKED;
+        } else if (BUILDING.str.equalsIgnoreCase(code)) {
+            return BUILDING;
+        } else if (SCHEDULED.str.equalsIgnoreCase(code)) {
+            return SCHEDULED;
+        } else if (FINISHED.str.equalsIgnoreCase(code)) {
+            return FINISHED;
+        } else if (EXCLUDED.str.equalsIgnoreCase(code)) {
+            return EXCLUDED;
+        } else if (DISPATCHING.str.equalsIgnoreCase(code)) {
+            return DISPATCHING;
+        } else if (UNRESOLVABLE.str.equalsIgnoreCase(code)) {
+            return UNRESOLVABLE;
+        }
+        throw new BuildServiceException("Unknown package status code: \"" + code + "\".");
+    }
 }

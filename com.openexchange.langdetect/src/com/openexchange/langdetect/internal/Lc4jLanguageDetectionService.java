@@ -109,11 +109,14 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     private final Locale defaultLocale;
 
+	private boolean warnAboutUnknownModel;
+
     /**
      * Initializes a new {@link Lc4jLanguageDetectionService}.
      */
     private Lc4jLanguageDetectionService() {
         super();
+        warnAboutUnknownModel = false;
         defaultLocale = DEFAULT_LOCALE;
         languageCodes = new ConcurrentHashMap<String, Locale>(64);
         languageModelsDir = new AtomicReference<String>();
@@ -184,8 +187,11 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             pos = lang.indexOf('-');
             Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
             if (null == locale) {
-                LOG.warn("No language code for model: " + language + ". Using default " + defaultLocale);
-                locale = defaultLocale;
+                if (warnAboutUnknownModel) {
+					LOG.warn("No language code for model: " + language
+							+ ". Using default " + defaultLocale);
+				}
+				locale = defaultLocale;
             }
             locales.add(locale);
         }
