@@ -230,7 +230,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isCacheable() {
-        return false;
+        return true;
     }
 
     private void reset() {
@@ -276,12 +276,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void closeInternal() {
-        final AccountPool accountPool = IMAPStorePool.getInstance().optAccountPool(this);
-        if (null == accountPool) {
-            closeSafely(this);
-        } else {
-            accountPool.returnIMAPStore(imapStore);
-        }
+//        final AccountPool accountPool = IMAPStorePool.getInstance().optAccountPool(this);
+//        if (null == accountPool) {
+//            closeSafely(this);
+//        } else {
+//            accountPool.returnIMAPStore(imapStore);
+//        }
+        closeSafely(this);
     }
 
     /**
@@ -499,7 +500,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void connectInternal() throws OXException {
-        IMAPStorePool.getInstance().getAccountPool(this).connectedIMAPStoreFor(this);
+    	connect(this);
+        //IMAPStorePool.getInstance().getAccountPool(this).connectedIMAPStoreFor(this);
     }
 
     private boolean isPropagateAccount(final IIMAPProperties imapConfProps) throws OXException {
