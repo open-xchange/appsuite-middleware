@@ -215,4 +215,11 @@ public interface IndexAdapter {
      */
     public void addContent(MailMessage mail, Session session) throws OXException;
 
+    /**
+     * Adds contents of previously added mails to index.
+     * 
+     * @throws OXException If flushing contents fails
+     */
+    public void addContents() throws OXException;
+
 }

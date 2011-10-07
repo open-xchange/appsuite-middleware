@@ -82,6 +82,8 @@ import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
+import com.openexchange.imap.command.BodyFetchIMAPCommand;
+import com.openexchange.imap.command.BodystructureFetchIMAPCommand;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
@@ -95,6 +97,9 @@ import com.openexchange.imap.threadsort.ThreadSortMailMessage;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -116,11 +121,16 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.text.TextFinder;
+import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.user.UserService;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
@@ -130,6 +140,7 @@ import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
@@ -237,6 +248,165 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return EMPTY_RETVAL;
         }
         return getMessagesInternal(fullName, uids2longs(mailIds), mailFields, headerNames);
+    }
+
+    private static final FetchProfile FETCH_PROFILE_CONTENT_TYPE = new FetchProfile() {
+
+        {
+            add(FetchProfile.Item.CONTENT_INFO);
+        }
+    };
+
+    private static String extractPlainText(final String content) throws OXException {
+        final TextXtractService textXtractService = IMAPServiceRegistry.getService(TextXtractService.class);
+        return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), null);
+    }
+
+    @Override
+    public String[] getPrimaryContentsLong(final String fullName, final long[] mailIds) throws OXException {
+        if (!imapConfig.getImapCapabilities().hasIMAP4rev1()) {
+            return super.getPrimaryContentsLong(fullName, mailIds);
+        }
+        try {
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            final BODYSTRUCTURE[] bodystructures = new BodystructureFetchIMAPCommand(imapFolder, mailIds).doCommand();
+            final String[] retval = new String[mailIds.length];
+
+            for (int i = 0; i < bodystructures.length; i++) {
+                final BODYSTRUCTURE bodystructure = bodystructures[i];
+                if (null != bodystructure) {
+                    retval[i] = handleBODYSTRUCTURE(mailIds[i], bodystructure, null, 1, new boolean[1]);
+                }
+            }
+            return retval;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    private String handleBODYSTRUCTURE(final long mailId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws OXException {
+        try {
+            final String type = bodystructure.type;
+            final String subtype = bodystructure.subtype;
+            if ("text".equals(type)) {
+                final String sequenceId = getSequenceId(prefix, partCount);
+                final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
+                String content = readContent(bytes);
+                boolean textIsHtml;
+                if ("plain".equals(subtype)) {
+                    if (UUEncodedMultiPart.isUUEncoded(content)) {
+                        final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+                        if (uuencodedMP.isUUEncoded()) {
+                            content = uuencodedMP.getCleanText();
+                        }
+                    }
+                    textIsHtml = false;
+                } else {
+                    textIsHtml = subtype.startsWith("htm");
+                    //content = htmlService.getConformHTML(content, "UTF-8");
+                    content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
+                }
+                return textIsHtml ? extractPlainText(content) : content;
+            }
+            if ("multipart".equals(type) && "alternative".equals(subtype)) {
+                /*
+                 * Prefer HTML text over plain text
+                 */
+                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                final String mpPrefix;
+                if (mpDetected[0]) {
+                    mpPrefix = mpId;
+                } else {
+                    mpPrefix = prefix;
+                    mpDetected[0] = true;
+                }
+                final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+                final int count = bodies.length;
+                String text = null;
+                for (int i = 0; i < count; i++) {
+                    final BODYSTRUCTURE bp = bodies[i];
+                    if ("text".equals(bp.type) && "plain".equals(bp.subtype)) {
+                        if (text == null) {
+                            text = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                        }
+                        continue;
+                    } else if ("text".equals(bp.type) && bp.subtype.startsWith("htm")) {
+                        final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                        if (s != null) {
+                            return s;
+                        }
+                    } else {
+                        return handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                    }
+                }
+                return text;
+            } else if ("multipart".equals(type)) {
+                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
+                final String mpPrefix;
+                if (mpDetected[0]) {
+                    mpPrefix = mpId;
+                } else {
+                    mpPrefix = prefix;
+                    mpDetected[0] = true;
+                }
+                final BODYSTRUCTURE[] bodies = bodystructure.bodies;
+                final int count = bodies.length;
+                for (int i = 0; i < count; i++) {
+                    final String s = handleBODYSTRUCTURE(mailId, bodies[i], mpPrefix, i + 1, mpDetected);
+                    if (s != null) {
+                        return s;
+                    }
+                }
+            }
+            if ("application".equals(type) && (subtype.startsWith("application/ms-tnef") || subtype.startsWith("application/vnd.ms-tnef"))) {
+                final String sequenceId = getSequenceId(prefix, partCount);
+                final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
+                return new TextFinder().handleTNEFStream(Streams.newByteArrayInputStream(bytes));
+            }
+            return null;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static String readContent(final byte[] bytes) throws IOException {
+        String cs;
+        try {
+            cs = CharsetDetector.detectCharsetFailOnError(Streams.newByteArrayInputStream(bytes));
+        } catch (final IOException e) {
+            cs = CharsetDetector.getFallback();
+        }
+        try {
+            return MessageUtility.readStream(Streams.newByteArrayInputStream(bytes), cs);
+        } catch (final java.io.CharConversionException e) {
+            // Obviously charset was wrong or bogus implementation of character conversion
+            final String fallback = "ISO-8859-1";
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(
+                    new StringBuilder("Character conversion exception while reading content with charset \"").append(cs).append(
+                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
+                    e);
+            }
+            return MessageUtility.readStream(Streams.newByteArrayInputStream(bytes), fallback);
+        }
+    }
+
+    /**
+     * Composes part's sequence ID from given prefix and part's count
+     *
+     * @param prefix The prefix (may be <code>null</code>)
+     * @param partCount The part count
+     * @return The sequence ID
+     */
+    private static String getSequenceId(final String prefix, final int partCount) {
+        if (prefix == null) {
+            return String.valueOf(partCount);
+        }
+        return new StringBuilder(prefix).append('.').append(partCount).toString();
     }
 
     @Override
