@@ -536,8 +536,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                             field.setValue(entry.getValue(), 1.0f);
                             inputDocument.put(name, field);
                         }
-                        /*
+                        /*-
                          * Get text
+                         * 
+                         * --> mime4j
                          */
                         final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
                         if (null != text) {

@@ -123,7 +123,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrAdapter.class));
 
-    private static final int QUERY_ROWS = 125;
+    private static final int QUERY_ROWS = 1000;
 
     private static final int DELETE_ROWS = 25;
 
@@ -345,7 +345,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(0));
                 solrQuery.setRows(rows);
-                // solrQuery.setFields();
+                // TODO: solrQuery.setFields();
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
