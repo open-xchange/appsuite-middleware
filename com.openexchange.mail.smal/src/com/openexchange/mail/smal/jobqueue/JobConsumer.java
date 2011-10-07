@@ -303,7 +303,7 @@ final class JobConsumer extends AbstractTask<Object> {
         @Override
         public void afterExecute(final Throwable t) {
             
-            System.out.println(job.getIdentifier() + " done" + (null == t ? "." : " with error: " + t.getMessage()));
+            System.out.println(job.getIdentifier() + " terminated" + (null == t ? "." : " with error: " + t.getMessage()));
             
             if (releasePermit) {
                 semaphore.release();

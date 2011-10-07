@@ -305,9 +305,11 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             while (fromIndex < size) {
                 final int toIndex = fromIndex + configuredBlockSize;
                 if (toIndex > size) {
+                	LOG.debug("Scheduling " + (size - fromIndex) + " text fillers...");
                     scheduleFillers(groupedFillers.subList(fromIndex, size), poolService);
                     fromIndex = size;
                 } else {
+                	LOG.debug("Scheduling " + (size - toIndex) + " text fillers...");
                     scheduleFillers(groupedFillers.subList(fromIndex, toIndex), poolService);
                     fromIndex = toIndex;
                 }
