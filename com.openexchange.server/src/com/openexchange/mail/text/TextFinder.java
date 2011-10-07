@@ -50,6 +50,7 @@
 package com.openexchange.mail.text;
 
 import java.io.IOException;
+import java.io.InputStream;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import net.freeutils.tnef.Attr;
@@ -187,13 +188,24 @@ public final class TextFinder {
         }
     }
 
+    private String handleTNEFPart(final MailPart part) throws OXException {
+        return handleTNEFStream(part.getInputStream());
+    }
+
     private static final String TNEF_IPM_CONTACT = "IPM.Contact";
 
     private static final String TNEF_IPM_MS_READ_RECEIPT = "IPM.Microsoft Mail.Read Receipt";
 
-    private String handleTNEFPart(final MailPart part) throws OXException {
+    /**
+     * Handles specified TNEF stream.
+     * 
+     * @param inputStream The TNEF stream
+     * @return The extracted plain text
+     * @throws OXException If an OX error occurs
+     */
+    public String handleTNEFStream(final InputStream inputStream) throws OXException {
         try {
-            final TNEFInputStream tnefInputStream = new TNEFInputStream(part.getInputStream());
+            final TNEFInputStream tnefInputStream = new TNEFInputStream(inputStream);
             /*
              * Wrapping TNEF message
              */
@@ -275,7 +287,7 @@ public final class TextFinder {
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
-            final String fallback = "US-ASCII";
+            final String fallback = "ISO-8859-1";
             if (LOG.isWarnEnabled()) {
                 LOG.warn(
                     new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
