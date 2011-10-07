@@ -66,6 +66,8 @@ package com.openexchange.oauth.linkedin;
 
 import java.util.List;
 import junit.framework.TestCase;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -80,8 +82,8 @@ public class LinkedInConnectionTest extends TestCase {
 
     private LinkedInServiceImpl linkedIn;
 
-    private String apiKey = "INSERT KEY HERE";
-    private String apiSecret = "INSERT SECRET HERE";
+    private String apiKey = "HANYG4YSMun5b1lhv-aIEUtnIvNaHK2Bemjv7VvYI_frJpllhVY9HH8ZVOrII7UV";
+    private String apiSecret = "t2-AWfC0YqMwUjt3v5lxw9VJlDE3BZ-88k7-834Rq-QH-tq_xjqdLUHQz_glLaEb";
     private String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
     private String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
     
@@ -196,5 +198,20 @@ public class LinkedInConnectionTest extends TestCase {
 	public void testGetRelationToViewer() throws Exception {
 		JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, "password",1,1,1);
 		assertEquals("Should know Martin", 1, relations.getJSONObject("relationToViewer").getInt("distance"));
+	}
+	
+	public void testNetworkUpdates() throws Exception {
+		JSONObject updateObj = linkedIn.getNetworkUpdates("password",1,1,1);
+		JSONArray updates = updateObj.getJSONArray("values");
+		assertTrue("Something should have happened lately", updates.length() > 0);
+	}
+	
+	public void testMessageInbox() throws Exception {
+		JSONObject inbox = linkedIn.getMessageInbox("password",1,1,1);
+		JSONArray messages = inbox.getJSONArray("values");
+		assertTrue("Something should have happened lately", messages.length() == 2);
+		JSONObject msg1 = messages.getJSONObject(0);
+		assertEquals("Hello world", msg1.getString("header"));
+		assertEquals("Have a nice day", msg1.getString("body"));
 	}
 }

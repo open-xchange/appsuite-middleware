@@ -91,4 +91,14 @@ public interface LinkedInService {
 	 * @return A list of contacts that list the targeted user to the current user
 	 */
 	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException;
+	
+	/**
+	 * @return A chronologically sorted list of all events that happened in a users network
+	 */
+	public JSONObject getNetworkUpdates(String password, int user, int contextId, int accountId) throws OXException;
+
+	/**
+	 * @return The messages in the user's inbox
+	 */
+	public JSONObject getMessageInbox(String string, int i, int j, int k) throws OXException;
 }
