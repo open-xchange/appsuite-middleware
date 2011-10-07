@@ -410,7 +410,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 	                        if (end > size) {
 	                        	end = size;
 	                        }
-	                        // Add them...
+	                        // Add chunk to index
 	                        add2Index(ids.subList(start, end), fullName, indexAdapter);
 	                        start = end;
 	                        if (DEBUG) {
