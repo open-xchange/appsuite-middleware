@@ -462,6 +462,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     sb.append(" for account ").append(accountId);
                     sb.append(" of user ").append(userId);
                     sb.append(" in context ").append(contextId);
+                    sb.append("\nCurrent queue size: ").append(queue.size());
                     LOG.debug(sb.toString());
                 }
             }
