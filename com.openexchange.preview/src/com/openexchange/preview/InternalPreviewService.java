@@ -58,16 +58,16 @@ package com.openexchange.preview;
 public interface InternalPreviewService extends PreviewService {
     
     /**
-     * Gets the conversion policies of this PreviewService.
+     * Gets the preview policies of this <tt>PreviewService</tt>.
      * 
-     * @return The properties
+     * @return The preview policies
      */
     PreviewPolicy[] getPreviewPolicies();
     
     /**
      * Checks if this service is able to detect the content type of an input stream.
      * 
-     * @return  If this service is able to detect the content type of an input stream.
+     * @return <code>true</code> this service is able to detect the content type of an input stream; otherwise <code>false</code>
      */
     boolean canDetectContentType();
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,59 +46,43 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
-package com.openexchange.oauth.linkedin;
+package com.openexchange.halo.linkedin;
 
 import java.util.List;
 
 import org.json.JSONObject;
 
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.halo.HaloContactDataSource;
+import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
-/**
- * {@link LinkedInService}
- *
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
- */
-public interface LinkedInService {
+public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource
+		implements HaloContactDataSource {
 
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId);
+	public LinkedinUpdatesDataSource(ServiceLookup lookup) {
+		setServiceLookup(lookup);
+	}
 
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId);
-   
-    /**
-     * @return all data on a contact identified by e-mail (special feature, only available with extended API keys) 
-     */
-	public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException;
+	@Override
+	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
+		String password = session.getPassword();
+		int uid = session.getUserId();
+		int cid = session.getContextId();
+		
+		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		if(accounts.size() == 0)
+			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		
+		OAuthAccount linkedinAccount = accounts.get(0);
+		JSONObject json = getLinkedinService().getNetworkUpdates(password, uid, cid, linkedinAccount.getId());
+		AJAXRequestResult result = new AJAXRequestResult();
+		result.setResultObject(json, "json");
+		return result;
+	}
 
-    /**
-     * @return all data on a contact identified by id 
-     */
-	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException;
-
-	/**
-	 * @return all data of all connections a user has
-	 */
-	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException;
-
-	/**
-	 * @return the IDs of all connections a user has (so you can query them separately)
-	 */
-	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException;
-
-	/**
-	 * @return A list of contacts that list the targeted user to the current user
-	 */
-	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException;
-	
-	/**
-	 * @return A chronologically sorted list of all events that happened in a users network
-	 */
-	public JSONObject getNetworkUpdates(String password, int user, int contextId, int accountId) throws OXException;
-
-	/**
-	 * @return The messages in the user's inbox
-	 */
-	public JSONObject getMessageInbox(String string, int i, int j, int k) throws OXException;
 }
