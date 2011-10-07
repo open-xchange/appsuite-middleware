@@ -71,7 +71,6 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -245,10 +244,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             	
             	lock.lock();
             	try {
-            		
-            		LOG.debug("Wating on condition...");
-            		
-					condition.await();
+            		if (DEBUG) {
+                        LOG.debug("Wating on condition...");
+                    }
+                    condition.await();
 				} finally {
 					lock.unlock();
 				}
@@ -268,9 +267,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 queue.drainTo(list);
                 final boolean quit = list.remove(POISON);
                 if (!list.isEmpty()) {
-                	
-                	LOG.debug("Processing " + list.size() + " text fillers from queue");
-                	
+                    if (DEBUG) {
+                        LOG.debug("Processing " + list.size() + " text fillers from queue");
+                    }
                     for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
                         handleFillers(fillers);
                     }
@@ -305,11 +304,15 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             while (fromIndex < size) {
                 final int toIndex = fromIndex + configuredBlockSize;
                 if (toIndex > size) {
-                	LOG.debug("Scheduling " + (size - fromIndex) + " text fillers...");
+                    if (DEBUG) {
+                        LOG.debug("Scheduling " + (size - fromIndex) + " text fillers...");
+                    }
                     scheduleFillers(groupedFillers.subList(fromIndex, size), poolService);
                     fromIndex = size;
                 } else {
-                	LOG.debug("Scheduling " + (size - toIndex) + " text fillers...");
+                    if (DEBUG) {
+                        LOG.debug("Scheduling " + (size - toIndex) + " text fillers...");
+                    }
                     scheduleFillers(groupedFillers.subList(fromIndex, toIndex), poolService);
                     fromIndex = toIndex;
                 }
@@ -517,7 +520,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             access.connect(false);
             st = System.currentTimeMillis();
-			LOG.debug("Acquired mail connection at " + st);
+            if (DEBUG) {
+                LOG.debug("Acquired mail connection at " + st);
+            }
             final Thread thread = Thread.currentThread();
             final IMailMessageStorage messageStorage = access.getMessageStorage();
             final TextFinder textFinder = new TextFinder();
@@ -559,8 +564,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             }
         } finally {
             SMALMailAccess.closeUnwrappedInstance(access);
-            long dur = System.currentTimeMillis() - st;
-            LOG.debug("Held mail connection for " + dur + "msec");
+            final long dur = System.currentTimeMillis() - st;
+            if (DEBUG) {
+                LOG.debug("Held mail connection for " + dur + "msec");
+            }
             access = null;
         }
     }

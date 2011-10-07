@@ -418,13 +418,19 @@ public final class FolderJob extends AbstractMailSyncJob {
 	                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
 	                        }
 	                        if (queue.hasHigherRankedJobInQueue(getRanking())) {
-	                        	LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
+	                            if (DEBUG) {
+                                    LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
+                                }
 	                            break;
 	                        }
 	                    }
-	                    LOG.debug("Folder job \"" + identifier + "\" added " + size + " messages.");
+	                    if (DEBUG) {
+                            LOG.debug("Folder job \"" + identifier + "\" added " + size + " messages.");
+                        }
                     } finally {
-                    	LOG.debug("Folder job \"" + identifier + "\" triggers to add messages' content.");
+                        if (DEBUG) {
+                            LOG.debug("Folder job \"" + identifier + "\" triggers to add messages' content.");
+                        }
                     	indexAdapter.addContents();
                     }
                     reEnqueued = (start < size);
@@ -440,7 +446,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                 }
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                    if (DEBUG) {
+                        LOG.debug("Folder job \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                    }
                 }
             }
             if (reEnqueued) {
@@ -478,7 +486,7 @@ public final class FolderJob extends AbstractMailSyncJob {
             final MailFields fields = new MailFields(indexAdapter.getIndexableFields());
             fields.removeMailField(MailField.BODY);
             fields.removeMailField(MailField.FULL);
-            MailMessage[] mails = mailAccess.getMessageStorage().getMessages(
+            final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(
                 fullName,
                 ids.toArray(new String[ids.size()]),
                 fields.toArray());
