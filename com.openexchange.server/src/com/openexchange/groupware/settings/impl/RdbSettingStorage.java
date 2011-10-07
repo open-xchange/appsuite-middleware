@@ -95,11 +95,8 @@ public class RdbSettingStorage extends SettingStorage {
     private static final String UPDATE_SETTING = "UPDATE user_setting "
         + "SET value=? WHERE cid=? AND user_id=? AND path_id=?";
 
-    /**
-     * SQL statement for checking if a setting for a user exists.
-     */
-    private static final String SETTING_EXISTS = "SELECT COUNT(value) "
-        + "FROM user_setting WHERE cid=? AND user_id=? AND path_id=?";
+    /** SQL statement for checking if a setting for a user exists. */
+    private static final String SETTING_EXISTS = "SELECT COUNT(value) FROM user_setting WHERE cid=? AND user_id=? AND path_id=? FOR UPDATE";
 
     /**
      * Reference to the context.
