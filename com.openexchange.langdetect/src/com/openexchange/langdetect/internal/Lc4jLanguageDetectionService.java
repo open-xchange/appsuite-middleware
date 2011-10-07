@@ -109,7 +109,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     private final Locale defaultLocale;
 
-	private boolean warnAboutUnknownModel;
+	private final boolean warnAboutUnknownModel;
 
     /**
      * Initializes a new {@link Lc4jLanguageDetectionService}.
@@ -234,7 +234,9 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
                     lang = (pos > 0 ? lang.substring(0, pos) : lang);
                     Locale locale = languageCodes.get(lang);
                     if (null == locale) {
-                        LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                        if (warnAboutUnknownModel) {
+                            LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                        }
                         locale = defaultLocale;
                     }
                     locales.add(locale);

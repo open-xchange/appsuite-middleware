@@ -172,18 +172,24 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
         }
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
         index++;
-        final Item item = fetchResponse.getItem(0);
-        final ByteArrayInputStream bais;
-        if (item instanceof BODY) {
-            /*
-             * IMAP4rev1
-             */
-            bais = ((BODY) item).getByteArrayInputStream();
-        } else {
-            /*
-             * IMAP4
-             */
-            bais = ((RFC822DATA) item).getByteArrayInputStream();
+        final int count = fetchResponse.getItemCount();
+        ByteArrayInputStream bais = null;
+        for (int i = 0; i < count && null == bais; i++) {
+            final Item item = fetchResponse.getItem(i);
+            if (item instanceof BODY) {
+                /*
+                 * IMAP4rev1
+                 */
+                bais = ((BODY) item).getByteArrayInputStream();
+            } else if (item instanceof RFC822DATA) {
+                /*
+                 * IMAP4
+                 */
+                bais = ((RFC822DATA) item).getByteArrayInputStream();
+            }
+        }
+        if (null == bais) {
+            throw new MessagingException("No BODY item in fetch response.");
         }
         final ByteArrayOutputStream outputStream = Streams.newByteArrayOutputStream(8192);
         final byte[] bb = new byte[2048];

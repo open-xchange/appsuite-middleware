@@ -288,8 +288,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private String handleBODYSTRUCTURE(final long mailId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws OXException {
         try {
-            final String type = bodystructure.type;
-            final String subtype = bodystructure.subtype;
+            final String type = bodystructure.type.toLowerCase(Locale.ENGLISH);
+            final String subtype = bodystructure.subtype.toLowerCase(Locale.ENGLISH);
             if ("text".equals(type)) {
                 final String sequenceId = getSequenceId(prefix, partCount);
                 final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
@@ -304,9 +304,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     textIsHtml = false;
                 } else {
-                    textIsHtml = subtype.startsWith("htm");
-                    //content = htmlService.getConformHTML(content, "UTF-8");
-                    content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
+                    if (subtype.startsWith("htm")) {
+                        //content = htmlService.getConformHTML(content, "UTF-8");
+                        content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
+                    }
+                    textIsHtml = true;
                 }
                 return textIsHtml ? extractPlainText(content) : content;
             }
@@ -327,12 +329,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 String text = null;
                 for (int i = 0; i < count; i++) {
                     final BODYSTRUCTURE bp = bodies[i];
-                    if ("text".equals(bp.type) && "plain".equals(bp.subtype)) {
+                    final String bpType = bp.type.toLowerCase(Locale.ENGLISH);
+                    final String bpSubtype = bp.subtype.toLowerCase(Locale.ENGLISH);
+                    if ("text".equals(bpType) && "plain".equals(bpSubtype)) {
                         if (text == null) {
                             text = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
                         }
                         continue;
-                    } else if ("text".equals(bp.type) && bp.subtype.startsWith("htm")) {
+                    } else if ("text".equals(bpType) && bpSubtype.startsWith("htm")) {
                         final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
                         if (s != null) {
                             return s;

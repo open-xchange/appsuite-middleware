@@ -91,7 +91,6 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.solrj.SolrConstants;
 import com.openexchange.mail.smal.adapter.solrj.SolrUtils;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
-import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -525,7 +524,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             }
             final Thread thread = Thread.currentThread();
             final IMailMessageStorage messageStorage = access.getMessageStorage();
-            final TextFinder textFinder = new TextFinder();
+            final String[] container = new String[1];
+            // final TextFinder textFinder = new TextFinder();
             for (final TextFiller filler : fillers) {
                 if (thread.isInterrupted()) {
                     throw new InterruptedException("Text filler thread interrupted");
@@ -546,7 +546,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                          * 
                          * --> mime4j
                          */
-                        final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
+                        container[0] = filler.getMailId();
+                        final String text = messageStorage.getPrimaryContents(filler.getFullName(), container)[0];
+                        //final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
                         if (null != text) {
                             final Locale locale = detectLocale(text);
                             inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);

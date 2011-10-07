@@ -162,6 +162,18 @@ public interface IMailMessageStorage {
     public MailPart getImageAttachment(String folder, String mailId, String contentId) throws OXException;
 
     /**
+     * Gets the plain-text versions of the parts considered as primary mails' content.
+     * <p>
+     * If plain text for a single mail cannot be determined, <code>null</code> is inserted at corresponding position in returned array.
+     * 
+     * @param folder The folder identifier
+     * @param mailIds The mail identifiers
+     * @return The plain-text versions of primary content
+     * @throws OXException If plain texts cannot be returned
+     */
+    public String[] getPrimaryContents(String folder, String[] mailIds) throws OXException;
+
+    /**
      * Gets the mail located in given folder whose mail ID matches specified ID.
      * <p>
      * This is a convenience method that invokes {@link #getMessages(String, String[], MailField[])} with specified mail ID and
