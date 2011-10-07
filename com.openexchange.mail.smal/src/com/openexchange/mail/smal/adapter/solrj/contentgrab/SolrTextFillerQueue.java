@@ -68,6 +68,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -135,6 +139,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
 
+    private final Lock lock;
+
+    private final Condition condition;
+
     private final BlockingQueue<TextFiller> queue;
 
     private final AtomicBoolean keepgoing;
@@ -157,6 +165,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      */
     public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverManagement) {
         super();
+        lock = new ReentrantLock();
+        condition = lock.newCondition();
         this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
         concurrentFutures = new AtomicReferenceArray<Future<Object>>(maxNumConcurrentFillerTasks);
@@ -165,6 +175,14 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         simpleName = getClass().getSimpleName();
     }
 
+    public Lock getLock() {
+		return lock;
+	}
+
+    public Condition getCondition() {
+		return condition;
+	}
+    
     /**
      * Starts consuming from queue.
      */
@@ -204,8 +222,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      */
     public void add(final TextFiller filler) {
         if (queue.offer(filler) && DEBUG) {
-            LOG.debug("SolrTextFillerQueue.add() Added text filler:\n" + filler);
-        }
+			LOG.debug("SolrTextFillerQueue.add() Added text filler (queue-size=" + queue.size() + "): " + filler);
+		}
     }
 
     /**
@@ -224,6 +242,16 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         try {
             final List<TextFiller> list = new ArrayList<TextFiller>(16);
             while (keepgoing.get()) {
+            	
+            	lock.lock();
+            	try {
+            		
+            		LOG.debug("Wating on condition...");
+            		
+					condition.await();
+				} finally {
+					lock.unlock();
+				}
                 if (queue.isEmpty()) {
                     final TextFiller next;
                     try {
@@ -240,6 +268,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 queue.drainTo(list);
                 final boolean quit = list.remove(POISON);
                 if (!list.isEmpty()) {
+                	
+                	LOG.debug("Processing " + list.size() + " text fillers from queue");
+                	
                     for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
                         handleFillers(fillers);
                     }

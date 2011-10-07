@@ -215,4 +215,6 @@ public interface IndexAdapter {
      */
     public void addContent(MailMessage mail, Session session) throws OXException;
 
+    public void addContents() throws OXException;
+
 }

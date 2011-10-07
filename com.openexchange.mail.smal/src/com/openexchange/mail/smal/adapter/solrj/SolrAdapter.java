@@ -70,6 +70,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -945,6 +947,17 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             new MailUUID(session.getContextId(), session.getUserId(), mail.getAccountId(), mail.getFolder(), mail.getMailId()).getUUID(),
             mail,
             session));
+    }
+
+    @Override
+    public void addContents() throws OXException {
+    	Lock lock = textFillerQueue.getLock();
+    	lock.lock();
+    	try {
+			textFillerQueue.getCondition().signalAll();
+		} finally {
+			lock.unlock();
+		}
     }
 
     @Override
