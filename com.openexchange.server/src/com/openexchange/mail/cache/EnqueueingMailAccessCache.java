@@ -247,7 +247,7 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
                 return false;
             }
             /*
-             * Insert subsequent MailAccess instances with halfed time-to-live seconds
+             * Insert subsequent MailAccess instances with halved time-to-live seconds
              */
             idleSeconds = accessQueue.isEmpty() ? idleSeconds : (idleSeconds >> 1);
             if (accessQueue.offer(PooledMailAccess.valueFor(mailAccess, idleSeconds * 1000L))) {
