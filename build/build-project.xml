@@ -12,6 +12,7 @@
     <!-- Constants -->
 	<property name="mainSrcDir" value="src"/>
     <property name="mainBinDir" value="build"/>
+	<property name="mainJsDir" value="js"/>
     <property name="simSrcDir" value="sim"/>
     <property name="simBinDir" value="sim-build"/>
     <property name="testSrcDir" value="test"/>
@@ -236,6 +237,32 @@
         <antcall target="install" inheritrefs="true">
             <param name="binDir" value="${mainBinDir}"/>
         </antcall>
+    </target>
+
+    <target name="testForJsBuild" description="Tests if the js files need to be bundled.">
+        <if>
+            <and>
+                <equals arg1="${buildType}" arg2="bundle"/>
+                <available file="${mainJsDir}" type="dir"/>
+            </and>
+            <then>
+                <property name="buildJs" value="true"/>
+                <path id="mainBinClasses">
+                    <pathelement location="${mainBinDir}"/>
+                </path>
+            </then>
+            <else>
+                <path id="mainBinClasses">
+                    <pathelement location="${bundlesDir}/${projectName}.jar"/>
+                </path>
+            </else>
+        </if>
+    </target>
+
+    <target name="buildJs" depends="testForJsBuild" if="buildJs" description="Copies the js files.">
+        <copy todir="${mainBinDir}">
+             <fileset dir="${mainJsDir}" />
+         </copy>
     </target>
 
     <target name="testForSimBuild" description="Tests if the sources in the sim source directory need to be compiled.">
