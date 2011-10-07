@@ -405,17 +405,21 @@ public final class FolderJob extends AbstractMailSyncJob {
                     newIds = null;
                     int start = 0;
                     final JobQueue queue = JobQueue.getInstance();
-                    while (start < size) {
-                        final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
-                        start += num;
-                        if (DEBUG) {
-                            final long dur = System.currentTimeMillis() - st;
-                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
-                        }
-                        if (queue.hasHigherRankedJobInQueue(getRanking())) {
-                        	LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
-                            break;
-                        }
+                    try {
+	                    while (start < size) {
+	                        final int num = add2Index(ids, start, blockSize, fullName, indexAdapter, list);
+	                        start += num;
+	                        if (DEBUG) {
+	                            final long dur = System.currentTimeMillis() - st;
+	                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+	                        }
+	                        if (queue.hasHigherRankedJobInQueue(getRanking())) {
+	                        	LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
+	                            break;
+	                        }
+	                    }
+                    } finally {
+                    	indexAdapter.addContents();
                     }
                     reEnqueued = (start < size);
                 } else if (DEBUG) {
