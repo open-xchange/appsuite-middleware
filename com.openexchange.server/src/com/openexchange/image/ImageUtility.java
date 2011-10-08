@@ -144,10 +144,11 @@ public final class ImageUtility {
      * @param imageLocation The image location
      * @param session The session
      * @param imageDataSource The data source
+     * @param preferRelativeUrl Whether to prefer a relative image URL
      * @param sb The string builder to write to
      */
-    public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final StringBuilder sb) {
-        final String prefix;
+    public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final StringBuilder sb) {
+        String prefix;
         final String route;
         {
             final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
@@ -171,6 +172,9 @@ public final class ImageUtility {
                 sb.setLength(0);
                 route = hostData.getRoute();
             }
+        }
+        if (preferRelativeUrl) {
+            prefix = "";
         }
         /*
          * Compose signature
