@@ -49,11 +49,14 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.groupware.i18n.Notifications;
 import com.openexchange.i18n.tools.TemplateToken;
+import com.openexchange.tools.TimeZoneUtils;
 
 /**
  * {@link EndDateReplacement} - End date replacement
@@ -100,7 +103,18 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
      * shortly before midnight the next day, in our example on the 4th of August.
      */
     private static Date correctDayOfMonth(final Date endDate, final boolean fulltime) {
-        return fulltime && null != endDate ? new Date(endDate.getTime()-1) : endDate;
+        /*-
+         * Previous implementation:
+         * 
+         * return fulltime && null != endDate ? new Date(endDate.getTime()-1) : endDate;
+         */
+        if (!fulltime || null == endDate) {
+            return endDate;
+        }
+        final Calendar calendar = GregorianCalendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
+        calendar.setTime(endDate);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        return calendar.getTime();
     }
 
     @Override
