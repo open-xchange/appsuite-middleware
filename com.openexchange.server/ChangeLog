@@ -1,7 +1,8 @@
 * 2011-10-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 20528: Changed error message
- - Fix for bug 20536: Properly honor groupware's SSL setting when composing absolute image URLs, but preferring relative URLs by now 
+ - Fix for bug 20536: Properly honor groupware's SSL setting when composing absolute image URLs, but preferring relative URLs by now
+ - Fix for bug 20509: More meaningful error message
 
 * 2011-10-07 - marcus.klein@open-xchange.com
 
