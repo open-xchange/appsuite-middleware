@@ -65,6 +65,7 @@ import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.text.TextFinder;
 
 /**
  * {@link MailMessageStorage} - Abstract implementation of {@link IMailMessageStorage}.
@@ -140,6 +141,26 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     }
 
     /**
+     * Gets the plain-text versions of the parts considered as primary mails' content.
+     * <p>
+     * If plain text for a single mail cannot be determined, <code>null</code> is inserted at corresponding position in returned array.
+     * 
+     * @param folder The folder identifier
+     * @param mailIds The mail identifiers
+     * @return The plain-text versions of primary content
+     * @throws OXException If plain texts cannot be returned
+     */
+    public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
+        final TextFinder textFinder = new TextFinder();
+        final int length = mailIds.length;
+        final String[] retval = new String[length];
+        for (int i = 0; i < length; i++) {
+            retval[i] = textFinder.getText(getMessage(folder, mailIds[i], false));
+        }
+        return retval;
+    }
+
+    /**
      * Gets the mail located in given folder whose mail ID matches specified ID.
      * <p>
      * This is a convenience method that invokes {@link #getMessages(String, String[], MailField[])} with specified mail ID and
@@ -149,7 +170,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * <p>
      * This method may be overridden in implementing subclass if a faster way can be achieved.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is

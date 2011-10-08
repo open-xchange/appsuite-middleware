@@ -56,6 +56,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -229,7 +230,13 @@ public final class EnqueueingMailAccessCache implements IMailAccessCache {
         final Key key = keyFor(accountId, session);
         MailAccessQueue accessQueue = map.get(key);
         if (null == accessQueue || accessQueue.isDeprecated()) {
-            final MailAccessQueue tmp = 1 == queueCapacity ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(queueCapacity);
+            int capacity;
+            try {
+                capacity = MailProviderRegistry.getMailProviderBySession(session, accountId).getProtocol().getMaxCount(mailAccess.getMailConfig().getServer(), MailAccount.DEFAULT_ID == accountId);
+            } catch (final OXException e) {
+                capacity = queueCapacity;
+            }
+            final MailAccessQueue tmp = capacity > 0 ? (1 == capacity ? new SingletonMailAccessQueue() : new MailAccessQueueImpl(capacity)) : new MailAccessQueueImpl(-1);
             accessQueue = map.putIfAbsent(key, tmp);
             if (null == accessQueue) {
                 accessQueue = tmp;

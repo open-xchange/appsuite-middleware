@@ -104,17 +104,18 @@ public class OSGIManifest {
         return value;
     }
 
-    private static final String IMPORT_REGEX = "([a-z0-9A-Z\\.]+)(?:; ?(?:(?:resolution:=\"?optional\"?)|(?:version=((?:[0-9.]+)|(?:\"[0-9\\.\\[ \\),]+\")))))*(?:,)?";
+    private static final String IMPORT_REGEX = "([a-z0-9A-Z\\._]+)(?:; ?(?:(?:resolution:=\"?(optional)\"?)|(?:version=((?:[0-9.]+)|(?:\"[0-9\\.\\[ \\),]+\")))))*(?:,)?";
     private static final Pattern IMPORT_PATTERN = Pattern.compile(IMPORT_REGEX);
 
-    public Set<String> getImports() {
+    public Set<BundleImport> getImports() {
         final String value = fEntries.getValue(IMPORT_PACKAGE);
-        final Set<String> imports = new HashSet<String>();
+        final Set<BundleImport> imports = new HashSet<BundleImport>();
         if (value != null) {
             final Matcher matcher = IMPORT_PATTERN.matcher(value);
             while (matcher.find()) {
                 final String packageName = matcher.group(1);
-                imports.add(packageName);
+                final boolean optional = "optional".equals(matcher.group(2));
+                imports.add(new BundleImport(packageName, optional));
             }
         }
         return imports;

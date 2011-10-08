@@ -167,17 +167,22 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void lockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
         final int poolId = Database.resolvePool(contextId, true);
-        final CacheKey key = cache.newCacheKey(poolId, schema.getSchema());
-        try {
-            cache.remove(key);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+        CacheKey key = null;
+        if (null != cache) {
+            key = cache.newCacheKey(poolId, schema.getSchema());
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
         lockSchemaDB(schema, contextId, background);
-        try {
-            cache.remove(key);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+        if (null != cache && null != key) {
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -274,17 +279,22 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
         final int poolId = Database.resolvePool(contextId, true);
-        final CacheKey key = cache.newCacheKey(poolId, schema.getSchema());
-        try {
-            cache.remove(key);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+        CacheKey key = null;
+        if (null != cache) {
+            key = cache.newCacheKey(poolId, schema.getSchema());
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
         unlockSchemaDB(schema, contextId, background);
-        try {
-            cache.remove(key);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+        if (null != cache && null != key) {
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -470,11 +480,13 @@ public class SchemaStoreImpl extends SchemaStore {
     @Override
     public void addExecutedTask(final Connection con, final String taskName, final boolean success, final int poolId, final String schema) throws OXException {
         addExecutedTask(con, taskName, success);
-        final CacheKey key = cache.newCacheKey(poolId, schema);
-        try {
-            cache.remove(key);
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
+        if (null != cache) {
+            final CacheKey key = cache.newCacheKey(poolId, schema);
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            }
         }
     }
 

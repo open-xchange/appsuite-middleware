@@ -347,8 +347,8 @@ public final class Contacts {
         }
         try {
             validateEmailAddress(contact);
-            contactSql = new ContactMySql(session);
             context = ContextStorage.getStorageContext(session.getContextId());
+            contactSql = new ContactMySql(session, context);
 
             readcon = DBPool.pickup(context);
 

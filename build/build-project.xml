@@ -12,6 +12,7 @@
     <!-- Constants -->
 	<property name="mainSrcDir" value="src"/>
     <property name="mainBinDir" value="build"/>
+	<property name="mainJsDir" value="js"/>
     <property name="simSrcDir" value="sim"/>
     <property name="simBinDir" value="sim-build"/>
     <property name="testSrcDir" value="test"/>
@@ -205,6 +206,24 @@
         </antcall>
     </target>
 
+    <target name="testForJsBuild" description="Tests if the js files need to be bundled.">
+        <if>
+            <and>
+                <equals arg1="${buildType}" arg2="bundle"/>
+                <available file="${mainJsDir}" type="dir"/>
+            </and>
+            <then>
+                <property name="buildJs" value="true"/>
+            </then>
+        </if>
+    </target>
+
+    <target name="buildJs" depends="testForJsBuild" if="buildJs" description="Copies the js files.">
+        <copy todir="${mainBinDir}">
+             <fileset dir="${mainJsDir}" />
+         </copy>
+    </target>
+
     <target name="testForBundleMain" depends="testFor3rdPartyLib" description="Tests if the main classes need to be put into a bundle.">
         <condition property="bundleMain">
             <and>
@@ -327,7 +346,7 @@
         </junit>
     </target>
 
-    <target name="build" depends="prepareClasspath,prepareBuild,buildMain,bundleMain,installMain,buildSim,buildTest,testJar,runTests" description="Main build target combining all different possible build types."/>
+    <target name="build" depends="prepareClasspath,prepareBuild,buildMain,buildJs,bundleMain,installMain,buildSim,buildTest,testJar,runTests" description="Main build target combining all different possible build types."/>
 
 	<target name="dist" description="Target to copy bundle for a build on the build service.">
 		<property name="destinationDir" value="${packageDir}/${projectName}"/>

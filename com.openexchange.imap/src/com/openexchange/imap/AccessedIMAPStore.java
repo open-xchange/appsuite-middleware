@@ -50,8 +50,6 @@
 package com.openexchange.imap;
 
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
@@ -71,13 +69,9 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class AccessedIMAPStore extends IMAPStore {
 
-    private final Lock lock;
-
     private final IMAPStore imapStore;
 
-    private volatile IMAPAccess imapAccess;
-
-    private final IMAPStoreMarker marker;
+    private final IMAPAccess imapAccess;
 
     /**
      * Initializes a new {@link AccessedAccessedIMAPStore}.
@@ -89,9 +83,7 @@ public final class AccessedIMAPStore extends IMAPStore {
     public AccessedIMAPStore(final IMAPAccess imapAccess, final IMAPStore imapStore, final Session imapSession) {
         super(imapSession, imapStore.getURLName());
         this.imapAccess = imapAccess;
-        lock = new ReentrantLock();
         this.imapStore = imapStore;
-        marker = new IMAPStoreMarker();
     }
 
     /**
@@ -105,39 +97,12 @@ public final class AccessedIMAPStore extends IMAPStore {
     }
 
     /**
-     * Gets the associated lock.
-     * 
-     * @return The lock
-     */
-    public Lock getLock() {
-        return lock;
-    }
-
-    /**
-     * Sets the IMAP access.
-     * 
-     * @param imapAccess The IMAP access
-     */
-    public void setImapAccess(final IMAPAccess imapAccess) {
-        this.imapAccess = imapAccess;
-    }
-
-    /**
      * Gets the IMAP access
      * 
      * @return The IMAP access
      */
     public IMAPAccess getImapAccess() {
         return imapAccess;
-    }
-
-    /**
-     * Gets the marker.
-     * 
-     * @return The marker
-     */
-    public IMAPStoreMarker getMarker() {
-        return marker;
     }
 
     @Override

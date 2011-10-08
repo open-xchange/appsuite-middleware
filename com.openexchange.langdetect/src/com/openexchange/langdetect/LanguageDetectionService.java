@@ -63,7 +63,7 @@ import com.openexchange.exception.OXException;
 public interface LanguageDetectionService {
 
     /**
-     * The default locale.
+     * The default locale: "en".
      */
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
