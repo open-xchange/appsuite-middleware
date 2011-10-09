@@ -1,6 +1,7 @@
 * 2011-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 20365: Introduced lock management for cached folder storage to ensure consistency
+ - Possible fix for 20547: New property to enable/disable TLS
 
 * 2011-10-08 - thorben.betten@open-xchange.com
 
