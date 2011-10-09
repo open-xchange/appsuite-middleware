@@ -127,7 +127,7 @@ public final class StorageParametersImpl implements StorageParameters {
         contextId = context.getContextId();
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
         warnings = new ConcurrentHashMap<OXException, Object>(2);
-    };
+    }
 
     private ConcurrentMap<String, Object> getFolderTypeMap(final FolderType folderType, final boolean createIfAbsent) {
         ConcurrentMap<String, Object> m = parameters.get(folderType);

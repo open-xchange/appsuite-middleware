@@ -67,12 +67,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.folderstorage.cache.lock.LockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -100,7 +102,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class };
+        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class, SessiondService.class };
     }
 
     @Override
@@ -270,7 +272,10 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
 
                 private void handleDroppedSession(final Session session) {
-                    FolderMapManagement.getInstance().dropFor(session);
+                    if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                        FolderMapManagement.getInstance().dropFor(session);
+                        LockManagement.getInstance().dropFor(session);
+                    }
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
