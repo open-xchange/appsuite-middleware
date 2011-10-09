@@ -1170,19 +1170,21 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
              */
-            try {
-                final InetSocketAddress socketAddress = new InetSocketAddress(config.getServer(), config.getPort());
-                final Map<String, String> capabilities =
-                    IMAPCapabilityAndGreetingCache.getCapabilities(socketAddress, false, config.getIMAPProperties());
-                if (null != capabilities) {
-                    if (capabilities.containsKey("STARTTLS")) {
+            if (config.getIMAPProperties().isEnableTls()) {
+                try {
+                    final InetSocketAddress socketAddress = new InetSocketAddress(config.getServer(), config.getPort());
+                    final Map<String, String> capabilities =
+                        IMAPCapabilityAndGreetingCache.getCapabilities(socketAddress, false, config.getIMAPProperties());
+                    if (null != capabilities) {
+                        if (capabilities.containsKey("STARTTLS")) {
+                            imapProps.put("mail.imap.starttls.enable", "true");
+                        }
+                    } else {
                         imapProps.put("mail.imap.starttls.enable", "true");
                     }
-                } else {
+                } catch (final IOException e) {
                     imapProps.put("mail.imap.starttls.enable", "true");
                 }
-            } catch (final IOException e) {
-                imapProps.put("mail.imap.starttls.enable", "true");
             }
             /*
              * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says
