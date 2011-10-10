@@ -206,6 +206,15 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 f.cancel(true);
             }
         }
+        lock.lock();
+        try {
+            if (DEBUG) {
+                LOG.debug("Wating on condition...");
+            }
+            condition.signalAll();
+        } finally {
+            lock.unlock();
+        }
         keepgoing.set(false);
         queue.offer(POISON);
         try {
@@ -259,6 +268,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         LOG.debug("Waiting on condition...");
                     }
                     condition.await(1, TimeUnit.HOURS);
+                    if (!keepgoing.get()) {
+                        return;
+                    }
 				} finally {
 					lock.unlock();
 				}
