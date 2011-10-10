@@ -209,7 +209,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
     @Override
     public void run() {
         try {
-            final List<TextFiller> list = new ArrayList<TextFiller>(16);
+            final int maxElements = MAX_FILLER_CHUNK << 1;
+            final List<TextFiller> list = new ArrayList<TextFiller>(maxElements);
             while (keepgoing.get()) {
                 if (queue.isEmpty()) {
                     final TextFiller next;
@@ -224,7 +225,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     }
                     list.add(next);
                 }
-                queue.drainTo(list);
+                queue.drainTo(list, maxElements);
                 final boolean quit = list.remove(POISON);
                 if (!list.isEmpty()) {
                     if (DEBUG) {
@@ -258,6 +259,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         final int size = groupedFillers.size();
         final int configuredBlockSize = MAX_FILLER_CHUNK;
         if (size <= configuredBlockSize) {
+            if (DEBUG) {
+                LOG.debug("Scheduled " + size + " of " + size + " text fillers...");
+            }
             scheduleFillers(groupedFillers, poolService);
         } else {
             int fromIndex = 0;
