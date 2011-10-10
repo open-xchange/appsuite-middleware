@@ -511,6 +511,17 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     sb.append(" in context ").append(contextId);
                     LOG.debug(sb.toString());
                 }
+            } else if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                final StringBuilder sb = new StringBuilder(64);
+                sb.append("Thread \"").append(threadDesc);
+                sb.append("\" added ").append(0);
+                sb.append(" mail bodies in ").append(dur).append("msec");
+                sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
+                sb.append(" for account ").append(accountId);
+                sb.append(" of user ").append(userId);
+                sb.append(" in context ").append(contextId);
+                LOG.debug(sb.toString());
             }
         } catch (final SolrServerException e) {
             rollback(rollback ? solrServer : null);
