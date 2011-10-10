@@ -11,6 +11,7 @@
 
     <!-- Constants -->
     <property name="osgiDir" value="osgi"/>
+    <property name="importCSVDir" value="importCSV"/>
 
     <import file="build-project.xml"/>
 
@@ -75,8 +76,13 @@
         </replace>
     </target>    
 
-    <target name="postInstall" description="">
+    <target name="postInstall" description="Install several additional files that are necessary for the backend.">
         <!-- TODO create logging directory -->
+        <antcall target="patchAndInstallConfigIniTemplate"/>
+        <antcall target="installImportCSV"/>
+    </target>
+
+    <target name="patchAndInstallConfigIniTemplate" description="Patches and installs config.ini.template file.">
         <mkdir dir="${tmpDir}/${osgiDir}"/>
         <copy todir="${tmpDir}/${osgiDir}" overwrite="true">
             <fileset dir="${osgiDir}"/>
@@ -88,6 +94,13 @@
         </replace>
         <copy todir="${destDir}/${prefix}/${osgiDir}">
             <fileset dir="${tmpDir}/${osgiDir}"/>
+        </copy>
+    </target>
+
+    <target name="installImportCSV" description="Installs configuration files for importing CSV files.">
+        <mkdir dir="${destDir}/${prefix}/${importCSVDir}"/>
+        <copy todir="${destDir}/${prefix}/${importCSVDir}" overwrite="true">
+            <fileset dir="${importCSVDir}"/>
         </copy>
     </target>
 
