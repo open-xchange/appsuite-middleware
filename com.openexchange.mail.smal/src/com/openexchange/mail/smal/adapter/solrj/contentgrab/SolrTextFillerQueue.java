@@ -473,6 +473,22 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 }
             }
             /*
+             * Empty?
+             */
+            if (documents.isEmpty()) {
+                final long dur = System.currentTimeMillis() - st;
+                final StringBuilder sb = new StringBuilder(64);
+                sb.append("Thread \"").append(threadDesc);
+                sb.append("\" added ").append(0);
+                sb.append(" mail bodies in ").append(dur).append("msec");
+                sb.append(" from folder \"").append(fillers.get(0).getFullName()).append('"');
+                sb.append(" for account ").append(accountId);
+                sb.append(" of user ").append(userId);
+                sb.append(" in context ").append(contextId);
+                LOG.debug(sb.toString());
+                return;
+            }
+            /*
              * Initialize batch addition
              */
             final List<SolrInputDocument> inputDocuments = new ArrayList<SolrInputDocument>(documents.size());
