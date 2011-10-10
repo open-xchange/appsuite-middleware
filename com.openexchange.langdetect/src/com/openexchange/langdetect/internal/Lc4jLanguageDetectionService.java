@@ -128,6 +128,15 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
     }
 
     /**
+     * Sets whether to output a warning if an unknown model is detected.
+     *
+     * @param warnAboutUnknownModel <code>true</code> to warn if an unknown model is detected; otherwise <code>false</code>
+     */
+    public void setWarnAboutUnknownModel(final boolean warnAboutUnknownModel) {
+        this.warnAboutUnknownModel = warnAboutUnknownModel;
+    }
+
+    /**
      * Loads specified language code file.
      * 
      * @param languageCodesFile The file name
@@ -234,7 +243,9 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
                     lang = (pos > 0 ? lang.substring(0, pos) : lang);
                     Locale locale = languageCodes.get(lang);
                     if (null == locale) {
-                        LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                        if (warnAboutUnknownModel) {
+                            LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                        }
                         locale = defaultLocale;
                     }
                     locales.add(locale);

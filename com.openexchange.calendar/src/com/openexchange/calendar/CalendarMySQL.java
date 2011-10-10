@@ -1540,6 +1540,9 @@ public class CalendarMySQL implements CalendarSqlImp {
             insertUserParticipants(cdao, writecon, so.getUserId());
             pst.executeUpdate();
             ParticipantStorage.getInstance().insertParticipants(cdao.getContext(), writecon, cdao.getObjectID(), ParticipantStorage.extractExternal(cdao.getParticipants()));
+        } catch (final OXException e) {
+            DBUtils.rollback(writecon);
+            throw e;
         } finally {
             collection.closePreparedStatement(pst);
         }
@@ -1554,7 +1557,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     confirmOfUser = user.getConfirm();
                 }
             }
-            int confirm = getConfirmAction(confirmOfUser);
+            final int confirm = getConfirmAction(confirmOfUser);
             collection.triggerEvent(so, confirm == CalendarObject.NONE ? CalendarOperation.INSERT : confirm, cdao);
         }
         return null;
@@ -3262,7 +3265,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                                 pu.setNull(4, java.sql.Types.INTEGER);
                             } else {
                                 pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
-                                RecurringResultsInterface recurringResults = collection.calculateRecurring(
+                                final RecurringResultsInterface recurringResults = collection.calculateRecurring(
                                     cdao,
                                     calc_date.getTime(),
                                     end_date.getTime(),
@@ -3701,7 +3704,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
-    public final long attachmentAction(int folderId, final int oid, final int uid, Session session, final Context c, final int numberOfAttachments) throws OXException {
+    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
         Connection writecon = null;
         int changes[];
         PreparedStatement pst = null;

@@ -66,7 +66,7 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Provisioning of some account may take some time although the login is already possible. If creating the account has not finished on
     // OX side the login mechanism can use this message to prevent the login.
     // %s is replaced with some login name.
-    public static final String ACCOUNT_NOT_READY_YET_MSG = "Account \"%s\" is not ready yet.";
+    public static final String ACCOUNT_NOT_READY_YET_MSG = "Account \"%1$s\" is currently being created. This can take a while. Please try again later.";
 
     // If the problem could not be specified in some more detailed way this message can be used.
     // %s is replaced by some own message that will not be translated.

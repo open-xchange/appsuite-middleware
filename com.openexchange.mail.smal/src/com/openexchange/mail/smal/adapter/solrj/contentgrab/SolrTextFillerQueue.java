@@ -91,7 +91,6 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.solrj.SolrConstants;
 import com.openexchange.mail.smal.adapter.solrj.SolrUtils;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
-import com.openexchange.mail.text.TextFinder;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -174,13 +173,20 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         simpleName = getClass().getSimpleName();
     }
 
-    public Lock getLock() {
-		return lock;
-	}
-
-    public Condition getCondition() {
-		return condition;
-	}
+    /**
+     * Signal to start consume possible available elements from queue.
+     */
+    public void signalConsume() {
+        lock.lock();
+        try {
+            if (DEBUG) {
+                LOG.debug("Wating on condition...");
+            }
+            condition.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
     
     /**
      * Starts consuming from queue.
@@ -219,9 +225,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param filler The text filler
      */
-    public void add(final TextFiller filler) {
+    public void add(final TextFiller filler, final boolean signalConsume) {
         if (queue.offer(filler) && DEBUG) {
 			LOG.debug("SolrTextFillerQueue.add() Added text filler (queue-size=" + queue.size() + "): " + filler);
+			if (signalConsume) {
+	            signalConsume();
+	        }
 		}
     }
 
@@ -230,9 +239,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param fillers The text fillers
      */
-    public void add(final Collection<TextFiller> fillers) {
+    public void add(final Collection<TextFiller> fillers, final boolean signalConsume) {
         for (final TextFiller filler : fillers) {
-            add(filler);
+            add(filler, false);
+        }
+        if (signalConsume) {
+            signalConsume();
         }
     }
 
@@ -241,13 +253,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         try {
             final List<TextFiller> list = new ArrayList<TextFiller>(16);
             while (keepgoing.get()) {
-            	
             	lock.lock();
             	try {
             		if (DEBUG) {
-                        LOG.debug("Wating on condition...");
+                        LOG.debug("Waiting on condition...");
                     }
-                    condition.await();
+                    condition.await(1, TimeUnit.HOURS);
 				} finally {
 					lock.unlock();
 				}
@@ -525,7 +536,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             }
             final Thread thread = Thread.currentThread();
             final IMailMessageStorage messageStorage = access.getMessageStorage();
-            final TextFinder textFinder = new TextFinder();
+            final String[] container = new String[1];
+            // final TextFinder textFinder = new TextFinder();
             for (final TextFiller filler : fillers) {
                 if (thread.isInterrupted()) {
                     throw new InterruptedException("Text filler thread interrupted");
@@ -546,7 +558,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                          * 
                          * --> mime4j
                          */
-                        final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
+                        container[0] = filler.getMailId();
+                        final String text = messageStorage.getPrimaryContents(filler.getFullName(), container)[0];
+                        //final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
                         if (null != text) {
                             final Locale locale = detectLocale(text);
                             inputDocument.setField(FIELD_CONTENT_PREFIX + locale.getLanguage(), text);

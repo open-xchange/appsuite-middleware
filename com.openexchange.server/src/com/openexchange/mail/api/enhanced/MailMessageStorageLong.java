@@ -67,6 +67,7 @@ import com.openexchange.mail.parser.handlers.ImageMessageHandler;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.text.TextFinder;
 import com.openexchange.spamhandler.SpamHandler;
 
 /**
@@ -229,6 +230,31 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, Long.valueOf(mailId), folder);
         }
         return imagePart;
+    }
+
+    @Override
+    public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
+        return getPrimaryContentsLong(folder, uids2longs(mailIds));
+    }
+
+    /**
+     * Gets the plain-text versions of the parts considered as primary mails' content.
+     * <p>
+     * If plain text for a single mail cannot be determined, <code>null</code> is inserted at corresponding position in returned array.
+     * 
+     * @param folder The folder identifier
+     * @param mailIds The mail identifiers
+     * @return The plain-text versions of primary content
+     * @throws OXException If plain texts cannot be returned
+     */
+    public String[] getPrimaryContentsLong(final String folder, final long[] mailIds) throws OXException {
+        final TextFinder textFinder = new TextFinder();
+        final int length = mailIds.length;
+        final String[] retval = new String[length];
+        for (int i = 0; i < length; i++) {
+            retval[i] = textFinder.getText(getMessageLong(folder, mailIds[i], false));
+        }
+        return retval;
     }
 
     @Override

@@ -70,6 +70,13 @@ public interface IIMAPProperties extends IMailProperties {
     public boolean isPropagateClientIPAddress();
 
     /**
+     * Whether to use the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection
+     *
+     * @return <code>true</code> to issue STARTTLS command; otherwise <code>false</code>
+     */
+    public boolean isEnableTls();
+
+    /**
      * Gets the host names to propagate to.
      *
      * @return The host names to propagate to
