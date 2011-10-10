@@ -174,9 +174,7 @@
             <available file="${confDir}" type="dir"/>
             <then>
                 <copy todir="${destDir}/${confInstallDir}">
-                    <fileset dir="${confDir}">
-                        <include name="**"/>
-                    </fileset>
+                    <fileset dir="${confDir}"/>
                 </copy>
             </then>
         </if>
