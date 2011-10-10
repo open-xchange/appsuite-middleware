@@ -240,13 +240,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         try {
             final List<TextFiller> list = new ArrayList<TextFiller>(16);
             while (keepgoing.get()) {
-            	
             	lock.lock();
             	try {
             		if (DEBUG) {
                         LOG.debug("Wating on condition...");
                     }
-                    condition.await();
+                    condition.await(1, TimeUnit.HOURS);
 				} finally {
 					lock.unlock();
 				}
