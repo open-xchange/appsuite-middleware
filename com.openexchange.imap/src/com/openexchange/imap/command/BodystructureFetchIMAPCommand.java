@@ -101,7 +101,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
      */
     public BodystructureFetchIMAPCommand(final IMAPFolder imapFolder, final int[] seqNums) throws MessagingException {
         super(imapFolder);
-        posMap = new TLongIntHashMap(seqNums.length);
+        posMap = new TLongIntHashMap(seqNums.length, 0.5f, -1L, -1);
         for (int i = 0; i < seqNums.length; i++) {
             posMap.put(seqNums[i], i);
         }
@@ -130,7 +130,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
      */
     public BodystructureFetchIMAPCommand(final IMAPFolder imapFolder, final long[] uids) throws MessagingException {
         super(imapFolder);
-        posMap = new TLongIntHashMap(uids.length);
+        posMap = new TLongIntHashMap(uids.length, 0.5f, -1L, -1);
         for (int i = 0; i < uids.length; i++) {
             posMap.put(uids[i], i);
         }
@@ -219,7 +219,9 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
         } else {
             pos = posMap.get(fetchResponse.getNumber());
         }
-        retval[pos] = getItemOf(BODYSTRUCTURE.class, fetchResponse);
+        if (pos >= 0) {
+            retval[pos] = getItemOf(BODYSTRUCTURE.class, fetchResponse);
+        }
         return true;
     }
 
