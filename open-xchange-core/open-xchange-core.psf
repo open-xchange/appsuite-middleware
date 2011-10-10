@@ -29,5 +29,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.tx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.apache.tika"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessiond"/>
 </provider>
 </psf>
