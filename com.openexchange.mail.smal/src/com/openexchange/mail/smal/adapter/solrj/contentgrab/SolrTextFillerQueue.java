@@ -271,6 +271,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     if (!keepgoing.get()) {
                         return;
                     }
+                    if (DEBUG) {
+                        LOG.debug("Start consuming from queue...");
+                    }
 				} finally {
 					lock.unlock();
 				}
