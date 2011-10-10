@@ -47,56 +47,46 @@
  *
  */
 
-package com.openexchange.preview.json.actions;
+package com.openexchange.preview.thirdwing.osgi;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.preview.PreviewService;
-import com.openexchange.server.ServiceExceptionCodes;
-import com.openexchange.server.ServiceLookup;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.preview.PreviewDocument;
 
 
 /**
- * {@link AbstractPreviewAction}
+ * {@link ThirdwingPreviewDocument}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractPreviewAction implements AJAXActionService {
+public class ThirdwingPreviewDocument implements PreviewDocument {
     
-    private ServiceLookup serviceLookup;
+    private final Map<String, String> metaData;
     
-    public AbstractPreviewAction(ServiceLookup serviceLookup) {
+    private final String content;
+    
+
+    public ThirdwingPreviewDocument(Map<String, String> metaData, String content) {
         super();
-        this.serviceLookup = serviceLookup;
+        this.metaData = new HashMap<String, String>();        
+        this.metaData.clear();
+        this.metaData.putAll(metaData);
+        this.content = content;
+    }
+
+    @Override
+    public Map<String, String> getMetaData() {
+        return metaData;
+    }
+
+    @Override
+    public String getContent() {
+        return content;
     }
     
-    protected IDBasedFileAccessFactory getFileAccessFactory() throws OXException {
-        IDBasedFileAccessFactory service = serviceLookup.getService(IDBasedFileAccessFactory.class);
-        if (service == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
-        }
-        
-        return service;
-    }
-    
-    protected PreviewService getPreviewService() throws OXException {
-        PreviewService service = serviceLookup.getService(PreviewService.class);
-        if (service == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(PreviewService.class.getName());
-        }
-        
-        return service;
-    }
-    
-    protected ManagedFileManagement getFileManagementService() throws OXException {
-        ManagedFileManagement service = serviceLookup.getService(ManagedFileManagement.class);
-        if (service == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
-        }
-        
-        return service;
+    @Override
+    public String toString() {
+        return content == null ? super.toString() : content;
     }
 
 }

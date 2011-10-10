@@ -72,7 +72,7 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Tester implements Observer, IStreamProvider{
+public class Tester implements Observer, IStreamProvider {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Tester.class));
     
