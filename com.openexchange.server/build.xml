@@ -32,22 +32,9 @@
     </target>
 
     <target name="patchConfigFiles">
-        <!-- TODO antcall target="patchOSGiIni"/ -->
         <antcall target="patchFileLoggingProperties"/>
         <antcall target="patchScriptConf"/>
         <antcall target="patchPathInProperties"/>
-    </target>
-
-    <target name="patchOSGiIni">
-        <fail message="Define bundlesdir." unless="bundlesDir"/>
-        <fail message="Define logInstallDir." unless="logInstallDir"/>
-        <move tofile="${patchConfDir}/osgi/config.ini.template" file="${patch.conf.dir}/osgi/config.ini.template.in" overwrite="true"/>
-        <replace file="${patch.conf.dir}/osgi/config.ini.template">
-            <replacefilter token="@bundlesdir@" value="${bundlesdir}"/>
-        </replace>
-        <replace file="${patch.conf.dir}/osgi/config.ini.template">
-            <replacefilter token="@logfile@" value="${log.install.dir}/open-xchange-osgi.log"/>
-        </replace>
     </target>
 
     <target name="patchFileLoggingProperties">
