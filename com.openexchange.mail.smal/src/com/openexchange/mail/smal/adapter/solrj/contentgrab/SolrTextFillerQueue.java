@@ -283,7 +283,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     fromIndex = size;
                 } else {
                     if (DEBUG) {
-                        LOG.debug("Scheduling " + (size - toIndex) + " text fillers...");
+                        LOG.debug("Scheduling " + (toIndex - fromIndex) + " text fillers...");
                     }
                     scheduleFillers(groupedFillers.subList(fromIndex, toIndex), poolService);
                     fromIndex = toIndex;
@@ -397,7 +397,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     for (final TextFiller filler : fillers) {
                         final String uuid = filler.getUuid();
                         map.put(uuid, filler);
-                        q.append(" OR ").append(FIELD_UUID).append(':').append(uuid);
+                        q.append(" OR ").append(FIELD_UUID).append(":\"").append(uuid).append('"');
                     }
                     q.delete(0, 4);
                     solrQuery = new SolrQuery(q.toString());
