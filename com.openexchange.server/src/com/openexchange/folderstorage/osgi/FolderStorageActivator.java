@@ -61,7 +61,6 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -141,18 +140,20 @@ public final class FolderStorageActivator implements BundleActivator {
 
 		private final ConcurrentMap<Key, String> cache;
 
-		public DisplayNameFolderField() {
+		protected DisplayNameFolderField() {
 			super();
 			final Lock lock = new ReentrantLock();
 			cache = new LockBasedConcurrentMap<Key, String>(lock, lock,
 					new MaxCapacityLinkedHashMap<Key, String>(1000));
 		}
 
-		public Object renderJSON(final Object value) {
-			return value;
+		@Override
+        public Object renderJSON(final Object value) {
+		    return value == null ? JSONObject.NULL : value;
 		}
 
-		public Object getValue(final FolderObject folder,
+		@Override
+        public Object getValue(final FolderObject folder,
 				final ServerSession session) {
 			final int createdBy = folder.getCreatedBy();
 			if (createdBy <= 0) {
@@ -165,16 +166,19 @@ public final class FolderStorageActivator implements BundleActivator {
 					context).getDisplayName() : displayName;
 		}
 
-		public String getColumnName() {
+		@Override
+        public String getColumnName() {
 			return "com.openexchange.folderstorage.displayName";
 		}
 
-		public int getColumnID() {
+		@Override
+        public int getColumnID() {
 			return 3030;
 		}
 
-		public List<Object> getValues(List<FolderObject> folder,
-				ServerSession session) {
+		@Override
+        public List<Object> getValues(final List<FolderObject> folder,
+				final ServerSession session) {
 			return AdditionalFieldsUtils.bulk(this, folder, session);
 		}
 
@@ -198,7 +202,8 @@ public final class FolderStorageActivator implements BundleActivator {
 		super();
 	}
 
-	public void start(final BundleContext context) throws Exception {
+	@Override
+    public void start(final BundleContext context) throws Exception {
 		try {
 			// Register error component
 			// Register services
@@ -282,7 +287,8 @@ public final class FolderStorageActivator implements BundleActivator {
 		LOG.error(sb.toString(), new Throwable());
 	}
 
-	public void stop(final BundleContext context) throws Exception {
+	@Override
+    public void stop(final BundleContext context) throws Exception {
 		try {
 			// Drop activators
 			if (null != activators) {
