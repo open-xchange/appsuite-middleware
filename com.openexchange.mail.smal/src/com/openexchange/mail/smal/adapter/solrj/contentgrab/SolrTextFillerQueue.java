@@ -535,9 +535,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             access.connect(false);
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            if (DEBUG) {
-                LOG.debug("Acquired mail connection at " + st);
-            }
             final IMailMessageStorage messageStorage = access.getMessageStorage();
             final int fs = fillers.size();
             final String[] contents;
