@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.server overrides" basedir=".">
+
+    <description>
+        This build file overrides the installConf target to patch a lot of configuration files before installing them.
+    </description>
+
+    <!-- Customizable values -->
+    <!-- This values must be changed for defining other installation places -->
+    <property name="logInstallDir" value="/var/log/open-xchange"/>
+
+    <import file="build-project.xml"/>
+
+    <target name="installConf" depends="patchConfig">
+        <copy todir="${destDir}/${confInstallDir}">
+            <fileset dir="${tmpDir}/${confDir}"/>
+        </copy>
+        <!-- TODO install importCSV -->
+    </target>
+
+    <target name="patchConfig">
+        <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
+        <mkdir dir="${patchConfDir}"/>
+        <copy todir="${patchConfDir}" overwrite="true">
+            <fileset dir="${confDir}"/>
+        </copy>
+        <antcall target="patchConfigFiles"/>
+    </target>
+
+    <target name="patchConfigFiles">
+        <!-- TODO antcall target="patchOSGiIni"/ -->
+        <antcall target="patchFileLoggingProperties"/>
+        <antcall target="patchScriptConf"/>
+        <antcall target="patchPathInProperties"/>
+    </target>
+
+    <target name="patchOSGiIni">
+        <fail message="Define bundlesdir." unless="bundlesDir"/>
+        <fail message="Define logInstallDir." unless="logInstallDir"/>
+        <move tofile="${patchConfDir}/osgi/config.ini.template" file="${patch.conf.dir}/osgi/config.ini.template.in" overwrite="true"/>
+        <replace file="${patch.conf.dir}/osgi/config.ini.template">
+            <replacefilter token="@bundlesdir@" value="${bundlesdir}"/>
+        </replace>
+        <replace file="${patch.conf.dir}/osgi/config.ini.template">
+            <replacefilter token="@logfile@" value="${log.install.dir}/open-xchange-osgi.log"/>
+        </replace>
+    </target>
+
+    <target name="patchFileLoggingProperties">
+        <move tofile="${patchConfDir}/file-logging.properties" file="${patchConfDir}/file-logging.properties.in" overwrite="true"/>
+        <replace file="${patchConfDir}/file-logging.properties">
+            <replacefilter token="@serverlogfile@" value="${logInstallDir}/open-xchange.log"/>
+        </replace>
+    </target>
+
+    <target name="patchScriptConf">
+        <move tofile="${patchConfDir}/ox-scriptconf.sh" file="${patchConfDir}/ox-scriptconf.sh.in" overwrite="true"/>
+        <replace file="${patchConfDir}/ox-scriptconf.sh">
+            <replacefilter token="@propertiesdir@" value="${confInstallDir}"/>
+            <replacefilter token="@loggingproperties@" value="${confInstallDir}/file-logging.properties"/>
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${prefix}"/>
+        </replace>
+    </target>
+
+    <target name="patchPathInProperties">
+        <move tofile="${patchConfDir}/import.properties" file="${patchConfDir}/import.properties.in" overwrite="true"/>
+        <move tofile="${patchConfDir}/system.properties" file="${patchConfDir}/system.properties.in" overwrite="true"/>
+
+        <replace dir="${patchConfDir}" includes="import.properties,system.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${confInstallDir}"/>
+            <replacefilter token="@rootinstalldir@" value="${prefix}"/>
+        </replace>
+    </target>    
+
+</project>
