@@ -104,14 +104,19 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final StampedFuture PLACEHOLDER = new StampedFuture(null);
-
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
 
     /**
      * The max. running time of 1 minute.
      */
-    private static final int MAX_RUNNING_TIME = 60000;
+    private static final long MAX_RUNNING_TIME = 60000;
+
+    /**
+     * The wait time in milliseconds.
+     */
+    private static final long WAIT_TIME = 3000;
+
+    private final StampedFuture placeHolder;
 
     private final BlockingQueue<TextFiller> queue;
 
@@ -135,6 +140,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      */
     public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverManagement) {
         super();
+        placeHolder = new StampedFuture(null);
         this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
         concurrentFutures = new AtomicReferenceArray<StampedFuture>(maxNumConcurrentFillerTasks);
@@ -157,7 +163,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         final int length = concurrentFutures.length();
         for (int i = 0; i < length; i++) {
             final StampedFuture sf = concurrentFutures.get(i);
-            if (null != sf && PLACEHOLDER != sf) {
+            if (null != sf && placeHolder != sf) {
                 final Future<Object> f = sf.getFuture();
                 if (null != f) {
                     f.cancel(true);
@@ -289,7 +295,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 for (int i = 0; (index < 0) && (i < maxNumConcurrentFillerTasks); i++) {
                     final StampedFuture sf = concurrentFutures.get(i);
                     if (null == sf) {
-                        if (concurrentFutures.compareAndSet(i, null, PLACEHOLDER)) {
+                        if (concurrentFutures.compareAndSet(i, null, placeHolder)) {
                             index = i; // Found a free slot
                         }
                     } else if ((System.currentTimeMillis() - sf.getStamp()) > MAX_RUNNING_TIME) { // Elapsed
@@ -297,10 +303,16 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         if (DEBUG) {
                             LOG.debug("Cancelled elapsed task...");
                         }
-                        if (concurrentFutures.compareAndSet(i, sf, PLACEHOLDER)) {
+                        if (concurrentFutures.compareAndSet(i, sf, placeHolder)) {
                             index = i; // Found a slot with an elapsed task
                         }
                     }
+                }
+                if (DEBUG) {
+                    LOG.debug(index < 0 ? "Awaiting a free/elapsed slot..." : "Found a free/elapsed slot...");
+                }
+                synchronized (placeHolder) {
+                    placeHolder.wait(WAIT_TIME);
                 }
             }
             /*
@@ -364,6 +376,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             LOG.error("Failed pushing text content to indexed mails.", e);
         } catch (final RuntimeException e) {
             LOG.error("Failed pushing text content to indexed mails.", e);
+        } finally {
+            synchronized (placeHolder) {
+                placeHolder.notifyAll();
+            }
         }
     }
 
