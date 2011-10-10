@@ -1,9 +1,9 @@
 define("com.openexchange.halo.json/main", ["osgi", "httpAPI"], function (osgi, httpAPI) {
    var Contact = Packages.com.openexchange.groupware.container.Contact;
    var ContactParser = Packages.com.openexchange.ajax.parser.ContactParser;
-
+   console.log("loaded...");
    osgi.services(["com.openexchange.halo.ContactHalo"], function (contactHalo) {
-      
+      console.log("Services discovered");
       httpAPI.defineModule("halo/contact", {
           services : function (req, session) {
               var retval = [];
