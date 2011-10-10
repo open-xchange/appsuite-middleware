@@ -225,9 +225,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param filler The text filler
      */
-    public void add(final TextFiller filler) {
+    public void add(final TextFiller filler, final boolean signalConsume) {
         if (queue.offer(filler) && DEBUG) {
 			LOG.debug("SolrTextFillerQueue.add() Added text filler (queue-size=" + queue.size() + "): " + filler);
+			if (signalConsume) {
+	            signalConsume();
+	        }
 		}
     }
 
@@ -236,9 +239,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param fillers The text fillers
      */
-    public void add(final Collection<TextFiller> fillers) {
+    public void add(final Collection<TextFiller> fillers, final boolean signalConsume) {
         for (final TextFiller filler : fillers) {
-            add(filler);
+            add(filler, false);
+        }
+        if (signalConsume) {
+            signalConsume();
         }
     }
 

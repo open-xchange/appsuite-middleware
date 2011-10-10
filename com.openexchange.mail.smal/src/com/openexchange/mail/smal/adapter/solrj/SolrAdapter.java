@@ -415,7 +415,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
     private MailMessage readDocument(final SolrDocument document, final MailFields mailFields) throws OXException {
         if (SolrTextFillerQueue.checkSolrDocument(document)) {
-            textFillerQueue.add(TextFiller.fillerFor(document));
+            textFillerQueue.add(TextFiller.fillerFor(document), true);
         }
         final MailFields fields = null == mailFields ? new MailFields(true) : mailFields;
         final MailMessage mail = new IDMailMessage(document.getFieldValue(FIELD_ID).toString(), document.getFieldValue(FIELD_FULL_NAME).toString());
@@ -944,7 +944,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         textFillerQueue.add(TextFiller.fillerFor(
             new MailUUID(session.getContextId(), session.getUserId(), mail.getAccountId(), mail.getFolder(), mail.getMailId()).getUUID(),
             mail,
-            session));
+            session), true);
     }
 
     @Override
@@ -964,7 +964,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              * Commit without timeout
              */
             commitWithTimeout(solrServer);
-            textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
+            textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session), false);
         } catch (final SolrServerException e) {
             rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -1004,7 +1004,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              * Commit without timeout
              */
             commitWithTimeout(solrServer);
-            textFillerQueue.add(fillers);
+            textFillerQueue.add(fillers, false);
         } catch (final SolrServerException e) {
             rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -1270,7 +1270,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             final SolrDocument document = iterator.next();
             if (SolrTextFillerQueue.checkSolrDocument(document)) {
                 try {
-                    textFillerQueue.add(TextFiller.fillerFor(document));
+                    textFillerQueue.add(TextFiller.fillerFor(document), true);
                 } catch (final OXException e) {
                     // Ignore
                 }
