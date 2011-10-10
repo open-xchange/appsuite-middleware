@@ -2,28 +2,28 @@ package com.openexchange.preview.thirdwing.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.preview.InternalPreviewService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
-public class ThirdwingPreviewActivator implements BundleActivator {
+public class ThirdwingPreviewActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ThirdwingPreviewActivator.class));
 
-    /*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-	 */
-	public void start(BundleContext context) throws Exception {
-	    LOG.info("Starting bundle com.openexchange.preview.thirdwing.");
-	    Tester tester = new Tester();
-	    tester.perform();
-	}
-	
-	/*
-	 * (non-Javadoc)
-	 * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-	 */
-	public void stop(BundleContext context) throws Exception {
-		LOG.info("Stopping bundle com.openexchange.preview.thirdwing.");
-	}
+    private static final Class<?>[] NEEDED = new Class<?>[] { ManagedFileManagement.class,
+                                                              ThreadPoolService.class };
+    
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        LOG.info("Starting bundle com.openexchange.preview.thirdwing.");      
+        registerService(InternalPreviewService.class, new ThirdwingPreviewService(this));
+    }
+
 }

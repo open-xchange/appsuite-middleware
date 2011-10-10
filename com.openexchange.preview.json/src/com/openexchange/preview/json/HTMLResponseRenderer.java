@@ -47,56 +47,50 @@
  *
  */
 
-package com.openexchange.preview.json.actions;
+package com.openexchange.preview.json;
 
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.preview.PreviewService;
-import com.openexchange.server.ServiceExceptionCodes;
-import com.openexchange.server.ServiceLookup;
+import java.io.IOException;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
+import com.openexchange.preview.PreviewDocument;
 
 
 /**
- * {@link AbstractPreviewAction}
+ * {@link HTMLResponseRenderer}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractPreviewAction implements AJAXActionService {
-    
-    private ServiceLookup serviceLookup;
-    
-    public AbstractPreviewAction(ServiceLookup serviceLookup) {
-        super();
-        this.serviceLookup = serviceLookup;
-    }
-    
-    protected IDBasedFileAccessFactory getFileAccessFactory() throws OXException {
-        IDBasedFileAccessFactory service = serviceLookup.getService(IDBasedFileAccessFactory.class);
-        if (service == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
+public class HTMLResponseRenderer implements ResponseRenderer {
+
+    @Override
+    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
+        if (result.getResultObject() instanceof PreviewDocument) {
+            return true;
         }
         
-        return service;
+        return false;
     }
-    
-    protected PreviewService getPreviewService() throws OXException {
-        PreviewService service = serviceLookup.getService(PreviewService.class);
-        if (service == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(PreviewService.class.getName());
-        }
-        
-        return service;
+
+    @Override
+    public int getRanking() {
+        return 0;
     }
-    
-    protected ManagedFileManagement getFileManagementService() throws OXException {
-        ManagedFileManagement service = serviceLookup.getService(ManagedFileManagement.class);
-        if (service == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
+
+    @Override
+    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) {
+        PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();        
+        httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
+        try {
+            httpResp.getWriter().write(previewDocument.getContent());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
-        
-        return service;
     }
 
 }
