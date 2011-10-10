@@ -124,7 +124,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
             final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
             return previewService.getPreviewFor(arg, output, session);
         } catch (final IOException e) {
-            throw PreviewExceptionCodes.IO_ERROR.create();
+            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(is);
         }       

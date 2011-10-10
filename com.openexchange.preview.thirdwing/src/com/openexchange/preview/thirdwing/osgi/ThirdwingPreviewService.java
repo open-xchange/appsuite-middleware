@@ -49,12 +49,15 @@
 
 package com.openexchange.preview.thirdwing.osgi;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -63,10 +66,10 @@ import net.thirdwing.common.ConversionJobfactory;
 import net.thirdwing.common.IConversionJob;
 import net.thirdwing.exception.XHTMLConversionException;
 import net.thirdwing.io.IOUnit;
-import net.thirdwing.io.iface.DocumentData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
@@ -85,7 +88,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class ThirdwingPreviewService implements InternalPreviewService {
     
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
     
     private static final PreviewPolicy[] POLICIES = new PreviewPolicy[10];
     
@@ -93,33 +96,52 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         int i = 0;
         POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.document", PreviewOutput.HTML, Quality.GOOD);
     }  
-    
-    
-    public ThirdwingPreviewService(ServiceLookup serviceLookup) {
+
+    public ThirdwingPreviewService(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public String detectDocumentType(InputStream inputStream) throws OXException {
+    public String detectDocumentType(final InputStream inputStream) throws OXException {
         return null;
     }
 
     @Override
-    public PreviewDocument getPreviewFor(String arg, PreviewOutput output, Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
         File file = new File(arg);
-        return generatePreview(file, session);
+        if (file.isFile()) {
+            return generatePreview(file, session);
+        }
+        file = null;
+        try {
+            final URL url = new URL(arg);
+            final URLConnection connection = url.openConnection();
+            final String path = url.getPath();
+            final int slash = path.lastIndexOf('/');
+            String name = ".tmp";
+            if (slash + 1 < path.length()) { // works even with -1!
+                name = path.substring(slash + 1);
+            }
+            file = streamToFile(new BufferedInputStream(connection.getInputStream()), name);
+            return generatePreview(file, session);
+        } catch (final IOException e) {
+            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            if (file != null) {
+                file.delete();
+            }
+        }
     }
 
     @Override
-    public PreviewDocument getPreviewFor(InputStream inputStream, String mimeType, String extension, PreviewOutput output, Session session) throws OXException {    
+    public PreviewDocument getPreviewFor(final InputStream inputStream, final String mimeType, final String extension, final PreviewOutput output, final Session session) throws OXException {    
         File file = null;
         try {
             file = streamToFile(inputStream, extension);
             return generatePreview(file, session);
-        } catch (IOException e) {
-         // TODO: throw proper exception
-            throw PreviewExceptionCodes.ERROR.create();
+        } catch (final IOException e) {
+            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (file != null) {
                 file.delete();
@@ -128,21 +150,18 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     }
 
     @Override
-    public PreviewDocument getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
         File file = null;
         try {
             file = streamToFile(documentData.getData(), documentData.getDataProperties().get(DataProperties.PROPERTY_NAME));
             return generatePreview(file, session);
-        } catch (IOException e) {
-         // TODO: throw proper exception
-            throw PreviewExceptionCodes.ERROR.create();
+        } catch (final IOException e) {
+            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             if (file != null) {
                 file.delete();
             }
         }
-        
-        
     }
 
     @Override
@@ -155,58 +174,64 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         return false;
     }
     
-    private PreviewDocument generatePreview(File file, Session session) throws OXException {
-        IConversionJob transformer = ConversionJobfactory.getTransformer(file);
-        StreamProvider streamProvider = new StreamProvider(serviceLookup);        
-        TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
+    private PreviewDocument generatePreview(final File file, final Session session) throws OXException {
+        final IConversionJob transformer = ConversionJobfactory.getTransformer(file);
+        final StreamProvider streamProvider = new StreamProvider(serviceLookup);        
+        final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
         
-        ThreadPoolService poolService = serviceLookup.getService(ThreadPoolService.class);
-        Future<String> future = poolService.submit(observationTask);
+        final ThreadPoolService poolService = serviceLookup.getService(ThreadPoolService.class);
+        final Future<String> future = poolService.submit(observationTask);
         IOUnit unit;
+        FileInputStream fis = null;
         try {
-            unit = new IOUnit(new FileInputStream(file));
+            unit = new IOUnit((fis = new FileInputStream(file)));
             unit.setStreamProvider(streamProvider);
             transformer.addObserver(observationTask);
             transformer.transformDocument(unit);
             
-            String content = future.get();
+            final String content = future.get();
             if (content == null) {
                 throw observationTask.getException();
             }
             
-            Map<String, String> metaData = new HashMap<String, String>();
+            final Map<String, String> metaData = new HashMap<String, String>();
             metaData.put("content-type", "text/html");
             metaData.put("resourcename", file.getName());
-            ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content);
+            final ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content);
             return previewDocument;
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
          // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
-        } catch (XHTMLConversionException e) {
+        } catch (final XHTMLConversionException e) {
          // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
          // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
-        } catch (ExecutionException e) {
+        } catch (final ExecutionException e) {
          // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
+        } finally {
+            Streams.close(fis);
         }
     }
     
-    private File streamToFile(InputStream is, String name) throws IOException {
-        File file = File.createTempFile("open-xchange", name);
-        FileOutputStream fos = new FileOutputStream(file);
-        
-        byte[] buf = new byte[2048];
-        int len;
-        while((len=is.read(buf))>0) {
-            fos.write(buf, 0, len);
+    private static File streamToFile(final InputStream is, final String name) throws IOException {
+        FileOutputStream fos = null;
+        try {
+            // TODO: Ensure to select configured directory for temp. files
+            final File file = File.createTempFile("open-xchange", name);
+            fos = new FileOutputStream(file);
+            final byte[] buf = new byte[2048];
+            for (int len; (len=is.read(buf, 0, 2048)) > 0;) {
+                fos.write(buf, 0, len);
+            }
+            fos.flush();
+            return file;
+        } finally {
+            Streams.close(is);
+            Streams.close(fos);
         }
-        fos.flush();
-        fos.close();
-        
-        return file;
     }
 
 }
