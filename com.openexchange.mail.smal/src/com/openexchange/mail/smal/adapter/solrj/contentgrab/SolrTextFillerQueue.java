@@ -180,7 +180,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         lock.lock();
         try {
             if (DEBUG) {
-                LOG.debug("Wating on condition...");
+                LOG.debug("Signal on condition...");
             }
             condition.signalAll();
         } finally {
@@ -208,9 +208,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         }
         lock.lock();
         try {
-            if (DEBUG) {
-                LOG.debug("Wating on condition...");
-            }
             condition.signalAll();
         } finally {
             lock.unlock();
