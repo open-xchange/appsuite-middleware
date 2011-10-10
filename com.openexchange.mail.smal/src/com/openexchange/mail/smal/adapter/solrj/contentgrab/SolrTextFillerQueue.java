@@ -68,9 +68,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReferenceArray;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -137,10 +134,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
 
-    private final Lock lock;
-
-    private final Condition condition;
-
     private final BlockingQueue<TextFiller> queue;
 
     private final AtomicBoolean keepgoing;
@@ -163,29 +156,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      */
     public SolrTextFillerQueue(final CommonsHttpSolrServerManagement serverManagement) {
         super();
-        lock = new ReentrantLock();
-        condition = lock.newCondition();
         this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
         concurrentFutures = new AtomicReferenceArray<Future<Object>>(maxNumConcurrentFillerTasks);
         keepgoing = new AtomicBoolean(true);
         queue = new LinkedBlockingQueue<TextFiller>();
         simpleName = getClass().getSimpleName();
-    }
-
-    /**
-     * Signal to start consume possible available elements from queue.
-     */
-    public void signalConsume() {
-        lock.lock();
-        try {
-            if (DEBUG) {
-                LOG.debug("Signal on condition...");
-            }
-            condition.signalAll();
-        } finally {
-            lock.unlock();
-        }
     }
     
     /**
@@ -206,12 +182,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 f.cancel(true);
             }
         }
-        lock.lock();
-        try {
-            condition.signalAll();
-        } finally {
-            lock.unlock();
-        }
         keepgoing.set(false);
         queue.offer(POISON);
         try {
@@ -231,12 +201,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param filler The text filler
      */
-    public void add(final TextFiller filler, final boolean signalConsume) {
+    public void add(final TextFiller filler) {
         if (queue.offer(filler) && DEBUG) {
 			LOG.debug("SolrTextFillerQueue.add() Added text filler (queue-size=" + queue.size() + "): " + filler);
-			if (signalConsume) {
-	            signalConsume();
-	        }
 		}
     }
 
@@ -245,12 +212,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * 
      * @param fillers The text fillers
      */
-    public void add(final Collection<TextFiller> fillers, final boolean signalConsume) {
+    public void add(final Collection<TextFiller> fillers) {
         for (final TextFiller filler : fillers) {
-            add(filler, false);
-        }
-        if (signalConsume) {
-            signalConsume();
+            add(filler);
         }
     }
 
@@ -259,21 +223,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         try {
             final List<TextFiller> list = new ArrayList<TextFiller>(16);
             while (keepgoing.get()) {
-            	lock.lock();
-            	try {
-            		if (DEBUG) {
-                        LOG.debug("Waiting on condition...");
-                    }
-                    condition.await(1, TimeUnit.HOURS);
-                    if (!keepgoing.get()) {
-                        return;
-                    }
-                    if (DEBUG) {
-                        LOG.debug("Start consuming from queue...");
-                    }
-				} finally {
-					lock.unlock();
-				}
                 if (queue.isEmpty()) {
                     final TextFiller next;
                     try {
