@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: LinkedIn JSON proxy
+Bundle-SymbolicName: com.openexchange.oauth.linkedin.json
+Bundle-Version: 7.0.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.oauth,
+ com.openexchange.oauth.linkedin,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework
