@@ -52,9 +52,11 @@ package com.openexchange.mail.smal.adapter.solrj.contentgrab;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link TextFillerGrouper}
@@ -97,17 +99,21 @@ public final class TextFillerGrouper {
      * @return The grouped text fillers
      */
     public static List<List<TextFiller>> groupTextFillersByFullName(final Collection<TextFiller> textFillers) {
-        final Map<Key, List<TextFiller>> map = new HashMap<TextFillerGrouper.Key, List<TextFiller>>(textFillers.size());
+        final Map<Key, Set<TextFiller>> map = new HashMap<TextFillerGrouper.Key, Set<TextFiller>>(textFillers.size());
         for (final TextFiller textFiller : textFillers) {
             final Key key = folderKeyFor(textFiller);
-            List<TextFiller> list = map.get(key);
-            if (null == list) {
-                list = new LinkedList<TextFiller>();
-                map.put(key, list);
+            Set<TextFiller> set = map.get(key);
+            if (null == set) {
+                set = new HashSet<TextFiller>();
+                map.put(key, set);
             }
-            list.add(textFiller);
+            set.add(textFiller);
         }
-        return new ArrayList<List<TextFiller>>(map.values());
+        final List<List<TextFiller>> ret = new ArrayList<List<TextFiller>>(map.size());
+        for (final Set<TextFiller> set : map.values()) {
+            ret.add(new ArrayList<TextFiller>(set));
+        }
+        return ret;
     }
 
     private static Key accountKeyFor(final TextFiller textFiller) {

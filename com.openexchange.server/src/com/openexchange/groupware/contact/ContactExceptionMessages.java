@@ -104,7 +104,7 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String DISPLAY_NAME_MANDATORY = "Your display name is mandatory. Please enter it.";
 
-    public static final String DISPLAY_NAME_IN_USE_MSG = "The name you entered is not available. Choose another display name. Context %1$d Object %2$d";
+    public static final String DISPLAY_NAME_IN_USE_MSG = "The name you entered is already assigned to another user. Please choose another display name. Context %1$d Object %2$d";
 
     public static final String BAD_CHARACTER_MSG = "Bad character in field %2$s. Error: %1$s";
 

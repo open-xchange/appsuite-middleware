@@ -69,6 +69,11 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 	}
 
 	@Override
+	public String getId() {
+		return "com.openexchange.halo.linkedIn.fullProfile";
+	}
+
+	@Override
 	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
 		String password = session.getPassword();
 		int uid = session.getUserId();

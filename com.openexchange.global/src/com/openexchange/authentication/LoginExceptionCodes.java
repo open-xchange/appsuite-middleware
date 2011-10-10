@@ -49,7 +49,21 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.*;
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.CLASS_NOT_FOUND_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.INSTANTIATION_FAILED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.MISSING_CAPABILITIES_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_HTTP_AUTHORIZATION_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_FOUND_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -65,7 +79,7 @@ public enum LoginExceptionCodes implements OXExceptionCode {
 
     /** Account "%s" is locked. */
     ACCOUNT_LOCKED(ACCOUNT_LOCKED_MSG, Category.CATEGORY_PERMISSION_DENIED, 1),
-    /** Account "%s" is not ready yet. */
+    /** Account "%1$s" is currently being created. This can take a while. Please try again later. */
     ACCOUNT_NOT_READY_YET(ACCOUNT_NOT_READY_YET_MSG, Category.CATEGORY_TRY_AGAIN, 2),
     /** Unknown problem: "%s". */
     UNKNOWN(UNKNOWN_MSG, Category.CATEGORY_ERROR, 3),

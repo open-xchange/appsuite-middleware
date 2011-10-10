@@ -81,7 +81,9 @@ public class IPRange {
 
     public boolean contains(String ipAddress) {
         int[] other = parse(ipAddress);
-
+        if (other == null) { // FIXME ipv6
+        	return false;
+        }
         boolean endCarryOver = false;
         boolean startCarryOver = false;
 
@@ -98,11 +100,12 @@ public class IPRange {
         }
         return true;
     }
-
+    
+    // FIXME ipv6
     private static int[] parse(String ipAddress) {
         String[] split = ipAddress.split("\\.");
         if(split.length != 4) {
-            throw new IllegalArgumentException("Doesn't look like an IP address: "+ipAddress);
+        	return null;
         }
         int[] parsed = new int[4];
         for(int i = 0; i < 4; i++) {

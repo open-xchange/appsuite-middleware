@@ -1,3 +1,24 @@
+* 2011-10-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20495: Add "X-Originating-IP" header if enabled
+
+* 2011-10-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20365: Introduced lock management for cached folder storage to ensure consistency
+ - Possible fix for 20547: New property to enable/disable TLS
+
+* 2011-10-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20528: Changed error message
+ - Fix for bug 20536: Properly honor groupware's SSL setting when composing absolute image URLs, but preferring relative URLs by now
+ - Fix for bug 20509: More meaningful error message
+ - Fix for bug 20459: Proper connection roll-back on error during appointment creation
+ - Fix for bug 20488: Printing proper end date to notification message for multiple-day full-time appointments
+
+* 2011-10-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20533: Corrected order of initialization of used objects.
+
 * 2011-10-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 20442: Introduced SMTP capabilities cache to look-up possible TLS support (through "STARTTLS" capability)

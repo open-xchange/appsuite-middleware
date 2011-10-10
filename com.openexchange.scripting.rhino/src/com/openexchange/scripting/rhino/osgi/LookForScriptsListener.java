@@ -27,7 +27,7 @@ public class LookForScriptsListener implements BundleListener {
 		}
 	}
 
-	private void runStartScripts(final Bundle bundle) {
+	public void runStartScripts(final Bundle bundle) {
 		URL entry = bundle.getEntry("/main.js");
 		if (entry == null) {
 			return;

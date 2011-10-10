@@ -325,7 +325,9 @@ public final class MIMEStructureHandler implements StructureHandler {
              */
             final JSONObject jsonObject = currentMailObject;
             for (final String name : new HashSet<String>(jsonObject.keySet())) {
-                jsonObject.remove(name);
+                if (!KEY_HEADERS.equals(name)) {
+                    jsonObject.remove(name);
+                }
             }
             jsonObject.put("smime_body_text", bodyObject);
             return true;
