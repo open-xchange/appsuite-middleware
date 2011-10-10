@@ -145,8 +145,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     
     @Override
     public void added(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
-        final PreviewPolicy[] previewPolicies = service.getPreviewPolicies();
-        for (final PreviewPolicy policy : previewPolicies) {
+        for (final PreviewPolicy policy : service.getPreviewPolicies()) {
             final String mimeType = policy.getMimeType();
             final PreviewOutput output = policy.getOutput();
             ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
