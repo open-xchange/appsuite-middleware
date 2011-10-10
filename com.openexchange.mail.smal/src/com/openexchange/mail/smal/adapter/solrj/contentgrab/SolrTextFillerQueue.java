@@ -104,35 +104,14 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
-    private static final Future<Object> PLACEHOLDER = new Future<Object>() {
-
-        @Override
-        public boolean isDone() {
-            return true;
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public Object get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
-            return null;
-        }
-
-        @Override
-        public Object get() throws InterruptedException, ExecutionException {
-            return null;
-        }
-
-        @Override
-        public boolean cancel(final boolean mayInterruptIfRunning) {
-            return false;
-        }
-    };
+    private static final StampedFuture PLACEHOLDER = new StampedFuture(null);
 
     private static final TextFiller POISON = new TextFiller(null, null, null, 0, 0, 0);
+
+    /**
+     * The max. running time of 1 minute.
+     */
+    private static final int MAX_RUNNING_TIME = 60000;
 
     private final BlockingQueue<TextFiller> queue;
 
@@ -143,7 +122,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
     /**
      * The container for currently running concurrent filler tasks.
      */
-    protected final AtomicReferenceArray<Future<Object>> concurrentFutures;
+    protected final AtomicReferenceArray<StampedFuture> concurrentFutures;
 
     private final String simpleName;
 
@@ -158,7 +137,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         super();
         this.serverManagement = serverManagement;
         maxNumConcurrentFillerTasks = MAX_NUM_CONCURRENT_FILLER_TASKS;
-        concurrentFutures = new AtomicReferenceArray<Future<Object>>(maxNumConcurrentFillerTasks);
+        concurrentFutures = new AtomicReferenceArray<StampedFuture>(maxNumConcurrentFillerTasks);
         keepgoing = new AtomicBoolean(true);
         queue = new LinkedBlockingQueue<TextFiller>();
         simpleName = getClass().getSimpleName();
@@ -177,9 +156,12 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
     public void stop() {
         final int length = concurrentFutures.length();
         for (int i = 0; i < length; i++) {
-            final Future<Object> f = concurrentFutures.get(i);
-            if (null != f && PLACEHOLDER != f) {
-                f.cancel(true);
+            final StampedFuture sf = concurrentFutures.get(i);
+            if (null != sf && PLACEHOLDER != sf) {
+                final Future<Object> f = sf.getFuture();
+                if (null != f) {
+                    f.cancel(true);
+                }
             }
         }
         keepgoing.set(false);
@@ -299,13 +281,31 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
              */
             handleFillersSublist(groupedFillersSublist, simpleName);
         } else {
+            /*
+             * Find a free or elapsed slot
+             */
             int index = -1;
-            for (int i = 0; i < maxNumConcurrentFillerTasks; i++) {
-                if (concurrentFutures.compareAndSet(i, null, PLACEHOLDER)) {
-                    index = i; // Found a free slot
-                    break;
+            while (index < 0) {
+                for (int i = 0; (index < 0) && (i < maxNumConcurrentFillerTasks); i++) {
+                    final StampedFuture sf = concurrentFutures.get(i);
+                    if (null == sf) {
+                        if (concurrentFutures.compareAndSet(i, null, PLACEHOLDER)) {
+                            index = i; // Found a free slot
+                        }
+                    } else if ((System.currentTimeMillis() - sf.getStamp()) > MAX_RUNNING_TIME) { // Running for longer than 1 minute
+                        sf.getFuture().cancel(true);
+                        if (DEBUG) {
+                            LOG.debug("Cancelled elapsed task...");
+                        }
+                        if (concurrentFutures.compareAndSet(i, sf, PLACEHOLDER)) {
+                            index = i; // Found a slot with an elapsed task
+                        }
+                    }
                 }
             }
+            /*
+             * Handle fillers...
+             */
             if (index < 0) {
                 /*
                  * Caller runs because other worker threads are busy
@@ -315,10 +315,11 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 /*
                  * Submit to a free worker thread
                  */
-                final MaxAwareTask task = new MaxAwareTask(groupedFillersSublist, index);
+                final FillerHandlerTask task = new FillerHandlerTask(groupedFillersSublist, index);
                 final Future<Object> f = poolService.submit(ThreadPools.task(task));
-                concurrentFutures.set(index, f);
-                task.start();
+                final StampedFuture sf = new StampedFuture(f);
+                concurrentFutures.set(index, sf);
+                task.start(sf);
             }
         }
     }
@@ -596,13 +597,14 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         return null == contentFlag || !contentFlag.booleanValue();
     }
 
-    private final class MaxAwareTask implements Task<Object> {
+    private final class FillerHandlerTask implements Task<Object> {
 
         private final List<TextFiller> fillers;
         private final int indexPos;
         private final CountDownLatch startSignal;
+        private volatile StampedFuture sf;
 
-        protected MaxAwareTask(final List<TextFiller> fillers, final int indexPos) {
+        protected FillerHandlerTask(final List<TextFiller> fillers, final int indexPos) {
             super();
             this.startSignal = new CountDownLatch(1);
             this.fillers = fillers;
@@ -611,8 +613,11 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
         /**
          * Opens this task for processing.
+         * 
+         * @param sf The future-and-task object associated with this task
          */
-        protected void start() {
+        protected void start(final StampedFuture sf) {
+            this.sf = sf;
             startSignal.countDown();
         }
 
@@ -635,6 +640,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         public Object call() throws Exception {
             try {
                 startSignal.await();
+                final StampedFuture sf = this.sf;
+                if (null != sf) {
+                    sf.setStamp(System.currentTimeMillis());
+                }
                 handleFillersSublist(fillers, String.valueOf(indexPos + 1));
                 return null;
             } finally {
