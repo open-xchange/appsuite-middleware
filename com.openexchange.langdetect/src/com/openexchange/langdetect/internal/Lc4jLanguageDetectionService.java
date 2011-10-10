@@ -127,7 +127,6 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         defaultLanguageCategorization.setUnknownThreshold(1.01f);
     }
 
-    
     /**
      * Sets whether to output a warning if an unknown model is detected.
      *
