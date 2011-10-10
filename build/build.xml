@@ -73,10 +73,10 @@
         </setBundleProperties>
         <if>
             <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
-        	<then>
-        		<copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build-project.xml" overwrite="true"/>
+            <then>
+                <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build-project.xml" overwrite="true"/>
                 <property name="deleteBuildXML" value="build-project.xml"/>
-        	</then>
+            </then>
             <else>
                 <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
                 <property name="deleteBuildXML" value="build.xml"/>
@@ -132,34 +132,47 @@
         <property name="buildType" value="dist"/>
     </target>
 
-    <target name="dist" depends="distBuild" description="Creates the tar.gz for uploading to the build service.">
+    <target name="dist" depends="distBuild,antExtensions" description="Creates the tar.gz for uploading to the build service.">
+        <!-- Version -->
+        <loadfile property="firstChangeLogLine" srcFile="${checkoutDir}/${packageName}/debian/changelog">
+            <filterchain>
+                <headfilter lines="1"/>
+            </filterchain>
+        </loadfile>
+        <propertyregex property="version" input="${firstChangeLogLine}" regexp="^[\w-]+ \(([\d\.]+)-\d+\).*$" select="\1"/>
         <!-- Packaging files -->
-        <property name="packageDir" value="${basedir}/${tmpDir}/${packageName}"/>
+        <property name="packageDir" value="${basedir}/${tmpDir}/${packageName}-${version}"/>
         <mkdir dir="${packageDir}"/>
         <copy todir="${packageDir}">
-            <fileset dir="${checkoutDir}/${packageName}">
-                <exclude name="**${tmpDir}/**"/>
-                <exclude name="Todo"/>
+            <fileset dir="${checkoutDir}">
+            	<include name="${packageName}/**"/>
             </fileset>
         </copy>
+    	<move todir="${packageDir}">
+    		<fileset dir="${packageDir}/${packageName}">
+    			<include name="**"/>
+    			<exclude name=".*"/>
+    			<exclude name="*.psf"/>
+    		</fileset>
+    	</move>
         <!-- Buildsystem -->
         <property name="buildDir" value="${packageDir}/build"/>
         <mkdir dir="${buildDir}"/>
         <copy todir="${buildDir}">
             <fileset dir="${checkoutDir}/build">
-                <exclude name="**${tmpDir}/**"/>
+            	<include name="**"/>
+                <exclude name="${tmpDir}/**"/>
                 <exclude name="build/**"/>
-                <exclude name="Todo"/>
             </fileset>
         </copy>
         <antcall target="buildProjects">
             <param name="packageDir" value="${packageDir}"/>
          </antcall>
         <!-- dpkg-source does not like anything else -->
-        <tar destfile="${tmpDir}/${packageName}.tar.gz" compression="gzip">
+        <tar destfile="${tmpDir}/${packageName}-${version}.tar.gz" compression="gzip">
             <fileset dir="${tmpDir}">
-                <include name="${packageName}/**"/>
-                <exclude name="${packageName}.tar.gz"/>
+                <include name="${packageName}-${version}/**"/>
+                <exclude name="${packageName}-${version}.tar.gz"/>
             </fileset>
         </tar>
     </target>

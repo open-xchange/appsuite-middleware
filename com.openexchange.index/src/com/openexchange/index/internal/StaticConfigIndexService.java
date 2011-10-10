@@ -74,9 +74,9 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     public StaticConfigIndexService() {
         super();
         final IndexServerImpl server = new IndexServerImpl(1, "http://10.20.31.1:8580");
-        server.setConnectionTimeout(100);
+        server.setConnectionTimeout(1000);
         server.setMaxConnectionsPerHost(100);
-        server.setSoTimeout(1000);
+        server.setSoTimeout(3000);
         this.server = server;
         this.indexUrl = new IndexUrlImpl(server, "solr/main");
     }
@@ -92,12 +92,12 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public int registerIndexServer(IndexServer server) throws OXException {
+    public int registerIndexServer(final IndexServer server) throws OXException {
         return 0;        
     }
 
     @Override
-    public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
+    public void unregisterIndexServer(final int serverId, final boolean deleteMappings) throws OXException {
         // TODO Auto-generated method stub
         
     }
@@ -108,25 +108,25 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public void modifyIndexServer(IndexServer server) throws OXException {
+    public void modifyIndexServer(final IndexServer server) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
+    public void addIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void removeIndexMapping(int cid, int uid, int module) throws OXException {
+    public void removeIndexMapping(final int cid, final int uid, final int module) throws OXException {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
+    public void modifiyIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
         // TODO Auto-generated method stub
         
     }

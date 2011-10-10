@@ -109,11 +109,14 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     private final Locale defaultLocale;
 
+	private boolean warnAboutUnknownModel;
+
     /**
      * Initializes a new {@link Lc4jLanguageDetectionService}.
      */
     private Lc4jLanguageDetectionService() {
         super();
+        warnAboutUnknownModel = false;
         defaultLocale = DEFAULT_LOCALE;
         languageCodes = new ConcurrentHashMap<String, Locale>(64);
         languageModelsDir = new AtomicReference<String>();
@@ -122,6 +125,15 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         defaultLanguageCategorization.setNumCharsToExamine(1000);
         defaultLanguageCategorization.setUseTopmostNgrams(400);
         defaultLanguageCategorization.setUnknownThreshold(1.01f);
+    }
+
+    /**
+     * Sets whether to output a warning if an unknown model is detected.
+     *
+     * @param warnAboutUnknownModel <code>true</code> to warn if an unknown model is detected; otherwise <code>false</code>
+     */
+    public void setWarnAboutUnknownModel(final boolean warnAboutUnknownModel) {
+        this.warnAboutUnknownModel = warnAboutUnknownModel;
     }
 
     /**
@@ -184,8 +196,11 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
             pos = lang.indexOf('-');
             Locale locale = languageCodes.get(pos < 0 ? lang : lang.substring(0, pos));
             if (null == locale) {
-                LOG.warn("No language code for model: " + language + ". Using default " + defaultLocale);
-                locale = defaultLocale;
+                if (warnAboutUnknownModel) {
+					LOG.warn("No language code for model: " + language
+							+ ". Using default " + defaultLocale);
+				}
+				locale = defaultLocale;
             }
             locales.add(locale);
         }
@@ -228,7 +243,9 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
                     lang = (pos > 0 ? lang.substring(0, pos) : lang);
                     Locale locale = languageCodes.get(lang);
                     if (null == locale) {
-                        LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                        if (warnAboutUnknownModel) {
+                            LOG.warn("No language code for model: " + language + ". Using default \"" + defaultLocale + '"');
+                        }
                         locale = defaultLocale;
                     }
                     locales.add(locale);

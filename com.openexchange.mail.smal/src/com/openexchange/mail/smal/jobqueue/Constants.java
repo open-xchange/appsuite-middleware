@@ -76,7 +76,7 @@ public final class Constants {
     /**
      * The size of a chunk for indexed messages for a bulk add.
      */
-    public static final int CHUNK_SIZE = 250;
+    public static final int CHUNK_SIZE = 1000;
 
     /**
      * The number of chunks allowed being added to index in a single job's run.

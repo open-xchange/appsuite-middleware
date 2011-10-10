@@ -58,41 +58,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 
-public class LinkedinProfileDataSource implements HaloContactDataSource {
-
-	private LinkedInService linkedinService;
-	
-	private OAuthService oauthService;
-
-	private ServiceLookup serviceLookup;
-	
-	
-	public LinkedInService getLinkedinService() {
-		if(linkedinService != null)
-			return linkedinService;
-		return serviceLookup.getService(LinkedInService.class);
-	}
-
-	public void setLinkedinService(LinkedInService linkedinService) {
-		this.linkedinService = linkedinService;
-	}
-
-	public OAuthService getOauthService() {
-		if(oauthService != null)
-			return oauthService;
-		return serviceLookup.getService(OAuthService.class);
-	}
-
-	public void setOauthService(OAuthService oauthService) {
-		this.oauthService = oauthService;
-	}
-
+public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
 	public LinkedinProfileDataSource(ServiceLookup serviceLookup) {
 		this.serviceLookup = serviceLookup;
@@ -100,7 +70,7 @@ public class LinkedinProfileDataSource implements HaloContactDataSource {
 
 	@Override
 	public String getId() {
-		return "com.openexchange.halo.linkedIn:fullProfile";
+		return "com.openexchange.halo.linkedIn.fullProfile";
 	}
 
 	@Override
@@ -120,15 +90,5 @@ public class LinkedinProfileDataSource implements HaloContactDataSource {
 		AJAXRequestResult result = new AJAXRequestResult();
 		result.setResultObject(json, "json");
 		return result;
-	}
-
-	@Override
-	public boolean isAvailable(ServerSession session) throws OXException {
-		String password = session.getPassword();
-		int uid = session.getUserId();
-		int cid = session.getContextId();
-		
-		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
-		return !accounts.isEmpty();
 	}
 }

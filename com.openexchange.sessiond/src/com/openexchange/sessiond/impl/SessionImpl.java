@@ -172,11 +172,23 @@ public final class SessionImpl implements Session {
     private String obfuscate(final String string) {
         try {
             final String key = getObfuscationKey();
-            return SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
+            return isEmpty(key) ? string : SessiondServiceRegistry.getServiceRegistry().getService(CryptoService.class).encrypt(string, key);
         } catch (final OXException e) {
             LOG.error("Could not obfuscate a string before migration", e);
             return string;
         }
+    }
+
+    private static boolean isEmpty(final String str) {
+        if (null == str) {
+            return true;
+        }
+        final int length = str.length();
+        boolean empty = true;
+        for (int i = 0; empty && i < length; i++) {
+            empty = Character.isWhitespace(str.charAt(i));
+        }
+        return empty;
     }
 
     private String getObfuscationKey() {

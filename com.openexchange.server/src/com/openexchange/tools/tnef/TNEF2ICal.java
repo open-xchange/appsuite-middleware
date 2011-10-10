@@ -501,7 +501,7 @@ public final class TNEF2ICal {
             return false;
         }
         final String mcn = messageClassName.toUpperCase(Locale.ENGLISH);
-        return (mcn.startsWith("IPM.MICROSOFT SCHEDULE.") || "IPM.APPOINTMENT".equals(mcn));
+        return (mcn.startsWith("IPM.MICROSOFT SCHEDULE.") || mcn.startsWith("IPM.SCHEDULE.") || "IPM.APPOINTMENT".equals(mcn));
     }
 
     // http://api.kde.org/4.x-api/kdepimlibs-apidocs/ktnef/html/formatter_8cpp_source.html
@@ -524,7 +524,13 @@ public final class TNEF2ICal {
     public static net.fortuna.ical4j.model.Calendar tnef2VPart(final net.freeutils.tnef.Message message) {
         try {
             final Attr messageClass = message.getAttribute(Attr.attMessageClass);
-            final String messageClassName = messageClass == null ? "" : ((String) messageClass.getValue()).toUpperCase(Locale.ENGLISH);
+            final String messageClassName;
+            if (messageClass == null) {
+                final MAPIProp prop = message.getMAPIProps().getProp(MAPIProp.PR_MESSAGE_CLASS);
+                messageClassName = null == prop ? "" : prop.getValue().toString().toUpperCase(Locale.ENGLISH);
+            } else {
+                messageClassName = ((String) messageClass.getValue()).toUpperCase(Locale.ENGLISH);
+            }
             final MAPIProps mapiProps = message.getMAPIProps();
             if (mapiProps == null) {
                 return null;
@@ -551,7 +557,7 @@ public final class TNEF2ICal {
             /*
              * Check if TNEF c can be converted to a VCal part
              */
-            if (!messageClassName.startsWith("IPM.MICROSOFT SCHEDULE.") && !"IPM.APPOINTMENT".equals(messageClassName)) {
+            if (!isVPart(messageClassName)) {
                 return null;
             }
             /*

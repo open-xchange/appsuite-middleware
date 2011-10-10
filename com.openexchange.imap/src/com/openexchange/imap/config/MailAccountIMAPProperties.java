@@ -256,6 +256,16 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
     }
 
     @Override
+    public boolean isEnableTls() {
+        final String tmp = properties.get("com.openexchange.imap.enableTls");
+        if (null == tmp) {
+            return IMAPProperties.getInstance().isEnableTls();
+        }
+
+        return Boolean.parseBoolean(tmp.trim());
+    }
+
+    @Override
     public Set<String> getPropagateHostNames() {
         final String tmp = properties.get("com.openexchange.imap.propagateHostNames");
         if (null == tmp) {

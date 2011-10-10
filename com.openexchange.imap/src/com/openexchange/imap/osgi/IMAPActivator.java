@@ -61,7 +61,6 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.imap.IMAPProvider;
-import com.openexchange.imap.IMAPStorePool;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
@@ -76,6 +75,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -103,7 +103,7 @@ public final class IMAPActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class, ThreadPoolService.class,
-            TimerService.class, SessiondService.class, DatabaseService.class };
+            TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class };
     }
 
     @Override
@@ -193,7 +193,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                             final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
                             if (null != service && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 ListLsubCache.dropFor(session);
-                                IMAPStorePool.getInstance().dropLast(session);
                             }
                         } catch (final Exception e) {
                             // Failed handling session

@@ -130,6 +130,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean propagateClientIPAddress;
 
+    private boolean enableTls;
+
     private Set<String> propagateHostNames;
 
     /**
@@ -137,6 +139,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
      */
     private IMAPProperties() {
         super();
+        enableTls = true;
         maxNumConnection = -1;
         newACLExtMap = new ConcurrentHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
@@ -194,6 +197,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String tmp = configuration.getProperty("com.openexchange.imap.propagateClientIPAddress", STR_FALSE).trim();
             propagateClientIPAddress = Boolean.parseBoolean(tmp);
             logBuilder.append("\tPropagate Client IP Address: ").append(propagateClientIPAddress).append('\n');
+        }
+
+        {
+            final String tmp = configuration.getProperty("com.openexchange.imap.enableTls", STR_TRUE).trim();
+            enableTls = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tEnable TLS: ").append(enableTls).append('\n');
         }
 
         {
@@ -381,6 +390,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         imapSearch = false;
         fastFetch = true;
         propagateClientIPAddress = false;
+        enableTls = true;
         propagateHostNames = Collections.emptySet();
         supportsACLs = null;
         imapTimeout = 0;
@@ -420,6 +430,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isPropagateClientIPAddress() {
         return propagateClientIPAddress;
+    }
+
+    @Override
+    public boolean isEnableTls() {
+        return enableTls;
     }
 
     @Override

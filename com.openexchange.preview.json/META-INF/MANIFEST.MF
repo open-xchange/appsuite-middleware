@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Document Converter JSON Bundle
+Bundle-SymbolicName: com.openexchange.preview.json
+Bundle-Version: 6.21.0.0
+Bundle-Activator: com.openexchange.preview.json.osgi.PreviewJSONActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.conversion,
+ com.openexchange.file.storage,
+ com.openexchange.file.storage.composition,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.preview,
+ com.openexchange.tx,
+ javax.servlet.http;version="2.5.0",
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework
+Require-Bundle: com.openexchange.global,
+ com.openexchange.server

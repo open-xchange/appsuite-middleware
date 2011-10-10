@@ -56,6 +56,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -146,19 +147,33 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
      * @return The next completed task or <code>null</code>
      * @throws OXException If taking next completed task failsF
      */
-    protected static <V> MailResult<V> pollNextFrom(final CompletionService<MailResult<V>> completionService) throws OXException {
-        final Future<MailResult<V>> future = completionService.poll();
+    protected static <V> MailResult<V> pollNextFrom(final CompletionService<MailResult<V>> completionService, final long millis) throws OXException {
+        final Future<MailResult<V>> future;
+        try {
+            future = millis > 0 ? completionService.poll(millis, TimeUnit.MILLISECONDS) : completionService.poll();
+        } catch (final InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
         if (null == future) {
             return null;
         }
         return getFrom(future);
     }
 
-    private static <V> void cancelRemaining(final CancelableCompletionService<MailResult<V>> completionService) {
-        try {
-            completionService.cancel(true);
-        } catch (final RuntimeException e) {
-            LOG.warn("Failed canceling remaining tasks.", e);
+    /**
+     * Cancels all tasks of passed completion service.
+     * 
+     * @param completionService The completion service to cancel
+     */
+    protected static <V> void cancelRemaining(final CancelableCompletionService<MailResult<V>> completionService) {
+        if (null != completionService) {
+            try {
+                completionService.cancel(true);
+            } catch (final RuntimeException e) {
+                LOG.warn("Failed canceling remaining tasks.", e);
+            }
         }
     }
 
@@ -350,22 +365,16 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 // Index result came first: Await storage task completion separately & schedule sync job
                 // Ignore deleted if results are filtered by a search term
 
-                System.out.println(">>>INDEX<<< request completed first for " + folder + ". Awaitning storage result separately & schedule sync job");
+                System.out.println(">>>INDEX<<< request completed first for " + folder + ". Awaiting storage result separately & schedule sync job");
 
                 awaitStorageSearchResult(folder, completionService, (null != searchTerm));
                 break;
             case STORAGE:
                 // Storage result came first: Cancel remaining index task and schedule sync job
 
-                System.out.println(">>>STORAGE<<< request completed first for " + folder + ". Canceling remaining index request & schedule sync job.");
-                final MailResult<List<MailMessage>> delayedResult = pollNextFrom(completionService);
-                if (delayedResult == null) {
-                    cancelRemaining(completionService);
-                    scheduleFolderJob(folder, result.result, null, (null != searchTerm));
-                } else {
-                    // Delayed result immediately available
-                    scheduleFolderJob(folder, result.result, delayedResult.result, (null != searchTerm));
-                }
+                System.out.println(">>>STORAGE<<< request completed first for " + folder + "...");
+
+                awaitIndexSearchResult(folder, completionService, result, (null != searchTerm));
                 break;
             }
             final List<MailMessage> mails = result.result;
@@ -376,6 +385,35 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             final long dur = System.currentTimeMillis() - st;
             System.out.println("\tSMALMessageStorage.searchMessages() took " + dur + "msec.");
         }
+    }
+
+    /**
+     * Await the completion of the task which returns storage's content. Trigger an appropriate {@link FolderJob}.
+     */
+    private void awaitIndexSearchResult(final String folder, final CancelableCompletionService<MailResult<List<MailMessage>>> completionService, final MailResult<List<MailMessage>> result, final boolean ignoreDeleted) {
+        final Runnable task = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    final MailResult<List<MailMessage>> delayedResult = pollNextFrom(completionService, 1000);
+                    if (delayedResult == null) {
+                        System.out.println("... Canceling remaining index request & schedule sync job.");
+                        cancelRemaining(completionService);
+                        scheduleFolderJob(folder, result.result, null, ignoreDeleted);
+                    } else {
+                        System.out.println("... Delayed result available & schedule sync job.");
+                        // Delayed result available
+                        scheduleFolderJob(folder, result.result, delayedResult.result, ignoreDeleted);
+                    }
+                } catch (final OXException oxe) {
+                    LOG.warn("Retrieving mails from mail storage failed.", oxe);
+                } catch (final RuntimeException rte) {
+                    LOG.warn("Retrieving mails from mail storage failed.", rte);
+                }
+            }
+        };
+        getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(task));
     }
 
     /**
@@ -588,6 +626,11 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
             final String[] ids = getAllIdentifiersOf(fullName);
             messageStorage.updateMessageFlags(fullName, ids, flags, set);
         }
+    }
+
+    @Override
+    public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
+        return messageStorage.getPrimaryContents(folder, mailIds);
     }
 
 }
