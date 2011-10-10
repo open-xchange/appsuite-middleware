@@ -85,6 +85,7 @@ com.openexchange.file.storage.generic/jars
 com.openexchange.file.storage.json/jars
 com.openexchange.http.deferrer/jars
 com.openexchange.i18n/jars
+com.openexchange.i18n/tmp
 com.openexchange.messaging.facebook/jars
 com.openexchange.messaging.twitter/jars
 com.openexchange.oauth.facebook/jars
