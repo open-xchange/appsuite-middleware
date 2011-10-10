@@ -180,7 +180,9 @@
         </if>
     </target>
 
-    <target name="install" depends="installBundle,installIni,installConf" description="Combines installBundle and installConfig targets."/>
+    <target name="postInstall" description="Empty target that can be overwritten by some bundles."/>
+
+    <target name="install" depends="installBundle,installIni,installConf,postInstall" description="Combines installBundle and installConfig targets."/>
 
 	<target name="prepareBuild" description="Executes a currently empty and overwritable prepare step before building the sources.">
 		<antcall target="prepare" inheritrefs="true">

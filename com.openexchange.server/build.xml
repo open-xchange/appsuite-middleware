@@ -9,6 +9,9 @@
     <!-- This values must be changed for defining other installation places -->
     <property name="logInstallDir" value="/var/log/open-xchange"/>
 
+    <!-- Constants -->
+    <property name="osgiDir" value="osgi"/>
+
     <import file="build-project.xml"/>
 
     <target name="installConf" depends="patchConfig">
@@ -71,5 +74,21 @@
             <replacefilter token="@rootinstalldir@" value="${prefix}"/>
         </replace>
     </target>    
+
+    <target name="postInstall" description="">
+        <!-- TODO create logging directory -->
+        <mkdir dir="${tmpDir}/${osgiDir}"/>
+        <copy todir="${tmpDir}/${osgiDir}" overwrite="true">
+            <fileset dir="${osgiDir}"/>
+        </copy>
+        <move tofile="${tmpDir}/${osgiDir}/config.ini.template" file="${tmpDir}/${osgiDir}/config.ini.template.in" overwrite="true"/>
+        <replace file="${tmpDir}/${osgiDir}/config.ini.template">
+            <replacefilter token="@bundlesdir@" value="${bundlesDir}"/>
+            <replacefilter token="@logfile@" value="${logInstallDir}/open-xchange-osgi.log"/>
+        </replace>
+        <copy todir="${destDir}/${prefix}/${osgiDir}">
+            <fileset dir="${tmpDir}/${osgiDir}"/>
+        </copy>
+    </target>
 
 </project>
