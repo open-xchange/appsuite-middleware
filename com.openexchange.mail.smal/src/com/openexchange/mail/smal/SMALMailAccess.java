@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal;
 
-import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailAccessWatcher;
 import com.openexchange.mail.MailExceptionCode;
@@ -119,9 +118,9 @@ public final class SMALMailAccess extends MailAccess<SMALFolderStorage, SMALMess
     public static final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> getUnwrappedInstance(final int userId, final int contextId, final int accountId) throws OXException {
         final SessiondService sessiondService = SMALServiceLookup.getServiceStatic(SessiondService.class);
         if (null != sessiondService) {
-            final Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
-            if (!sessions.isEmpty()) {
-                return getUnwrappedInstance(sessions.iterator().next(), accountId);
+            final Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
+            if (null != session) {
+                return getUnwrappedInstance(session, accountId);
             }
         }
         /*
