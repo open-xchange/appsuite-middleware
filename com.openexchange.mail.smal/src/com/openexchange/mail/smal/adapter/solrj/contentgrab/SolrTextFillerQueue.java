@@ -173,13 +173,20 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         simpleName = getClass().getSimpleName();
     }
 
-    public Lock getLock() {
-		return lock;
-	}
-
-    public Condition getCondition() {
-		return condition;
-	}
+    /**
+     * Signal to start consume possible available elements from queue.
+     */
+    public void signalConsume() {
+        lock.lock();
+        try {
+            if (DEBUG) {
+                LOG.debug("Wating on condition...");
+            }
+            condition.signalAll();
+        } finally {
+            lock.unlock();
+        }
+    }
     
     /**
      * Starts consuming from queue.
@@ -243,7 +250,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             	lock.lock();
             	try {
             		if (DEBUG) {
-                        LOG.debug("Wating on condition...");
+                        LOG.debug("Waiting on condition...");
                     }
                     condition.await(1, TimeUnit.HOURS);
 				} finally {
