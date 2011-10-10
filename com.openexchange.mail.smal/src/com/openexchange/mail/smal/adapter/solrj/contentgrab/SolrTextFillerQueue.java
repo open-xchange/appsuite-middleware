@@ -514,22 +514,36 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private void grabTextFor(final List<TextFiller> fillers, final int contextId, final int userId, final int accountId, final Map<String, SolrDocument> documents, final List<SolrInputDocument> inputDocuments) throws OXException, InterruptedException {
         MailAccess<?, ?> access = null;
-        long st = 0;
         try {
             access = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
             access.connect(false);
-            st = System.currentTimeMillis();
+            final long st = DEBUG ? System.currentTimeMillis() : 0L;
             if (DEBUG) {
                 LOG.debug("Acquired mail connection at " + st);
             }
-            final Thread thread = Thread.currentThread();
             final IMailMessageStorage messageStorage = access.getMessageStorage();
-            final String[] container = new String[1];
+            final int fs = fillers.size();
+            final String[] contents;
+            {
+                final String[] mailIds = new String[fs];
+                for (int i = 0; i < fs; i++) {
+                    mailIds[i] = fillers.get(i).getMailId();
+                }
+                contents = messageStorage.getPrimaryContents(fillers.get(0).getFullName(), mailIds);
+            }
+            SMALMailAccess.closeUnwrappedInstance(access);
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("Held mail connection for " + dur + "msec");
+            }
+            access = null;
             // final TextFinder textFinder = new TextFinder();
-            for (final TextFiller filler : fillers) {
+            final Thread thread = Thread.currentThread();
+            for (int i = 0; i < fs; i++) {
                 if (thread.isInterrupted()) {
                     throw new InterruptedException("Text filler thread interrupted");
                 }
+                final TextFiller filler = fillers.get(i);
                 final String uuid = filler.getUuid();
                 final SolrDocument solrDocument = documents.get(uuid);
                 if (null != solrDocument) {
@@ -546,8 +560,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                          * 
                          * --> mime4j
                          */
-                        container[0] = filler.getMailId();
-                        final String text = messageStorage.getPrimaryContents(filler.getFullName(), container)[0];
+                        final String text = contents[i];
                         //final String text = textFinder.getText(messageStorage.getMessage(filler.getFullName(), filler.getMailId(), false));
                         if (null != text) {
                             final Locale locale = detectLocale(text);
@@ -566,11 +579,6 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
             }
         } finally {
             SMALMailAccess.closeUnwrappedInstance(access);
-            final long dur = System.currentTimeMillis() - st;
-            if (DEBUG) {
-                LOG.debug("Held mail connection for " + dur + "msec");
-            }
-            access = null;
         }
     }
 
