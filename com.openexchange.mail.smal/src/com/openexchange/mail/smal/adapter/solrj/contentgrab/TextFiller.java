@@ -141,6 +141,8 @@ public final class TextFiller {
 
     private final int contextId;
 
+    private final int hash;
+
     /**
      * The counter reflects the number of re-enqueue operations.
      */
@@ -165,6 +167,15 @@ public final class TextFiller {
         this.accountId = accountId;
         this.userId = userId;
         this.contextId = contextId;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + accountId;
+        result = prime * result + contextId;
+        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+        result = prime * result + ((mailId == null) ? 0 : mailId.hashCode());
+        result = prime * result + userId;
+        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        hash = result;
     }
 
     /**
@@ -237,6 +248,53 @@ public final class TextFiller {
         builder.append("accountId=").append(accountId).append(", userId=").append(userId).append(", contextId=").append(contextId).append(
             ')');
         return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof TextFiller)) {
+            return false;
+        }
+        final TextFiller other = (TextFiller) obj;
+        if (accountId != other.accountId) {
+            return false;
+        }
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (fullName == null) {
+            if (other.fullName != null) {
+                return false;
+            }
+        } else if (!fullName.equals(other.fullName)) {
+            return false;
+        }
+        if (mailId == null) {
+            if (other.mailId != null) {
+                return false;
+            }
+        } else if (!mailId.equals(other.mailId)) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (uuid == null) {
+            if (other.uuid != null) {
+                return false;
+            }
+        } else if (!uuid.equals(other.uuid)) {
+            return false;
+        }
+        return true;
     }
 
 }

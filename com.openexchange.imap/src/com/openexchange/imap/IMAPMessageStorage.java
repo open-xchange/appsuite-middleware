@@ -341,8 +341,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         if (s != null) {
                             return s;
                         }
-                    } else {
-                        return handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                    } else if ("multipart".equals(bpType)) {
+                        final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                        if (s != null) {
+                            return s;
+                        }
                     }
                 }
                 return text;

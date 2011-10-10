@@ -54,6 +54,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +65,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.regex.Pattern;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -131,6 +136,19 @@ public final class IMAPCapabilityAndGreetingCache {
         return getCapabilityAndGreeting(address, isSecure, imapProperties).getGreeting();
     }
 
+    /**
+     * Gets the cached capabilities from IMAP server denoted by specified parameters.
+     *
+     * @param address The IMAP server's address
+     * @param isSecure Whether to establish a secure connection
+     * @param imapProperties The IMAP properties
+     * @return The capabilities from IMAP server denoted by specified parameters
+     * @throws IOException If an I/O error occurs
+     */
+    public static Map<String, String> getCapabilities(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
+        return getCapabilityAndGreeting(address, isSecure, imapProperties).getCapability();
+    }
+
     private static CapabilityAndGreeting getCapabilityAndGreeting(final InetSocketAddress address, final boolean isSecure, final IIMAPProperties imapProperties) throws IOException {
         final ConcurrentMap<InetSocketAddress, Future<CapabilityAndGreeting>> map = MAP;
         Future<CapabilityAndGreeting> f = map.get(address);
@@ -167,6 +185,8 @@ public final class IMAPCapabilityAndGreetingCache {
     }
 
     private static final class CapabilityAndGreetingCallable implements Callable<CapabilityAndGreeting> {
+
+        private static final Pattern SPLIT = Pattern.compile("\r?\n");
 
         private final InetSocketAddress key;
 
@@ -282,6 +302,13 @@ public final class IMAPCapabilityAndGreetingCache {
                             sb.append('\n');
                         }
                     } while (nextLine);
+                    final String[] lines = SPLIT.split(sb.toString());
+                    sb.setLength(0);
+                    for (final String line : lines) {
+                        if (!line.startsWith("A10 ")) {
+                            sb.append(' ').append(line);
+                        }
+                    }
                     capabilities = sb.toString();
                 }
                 /*
@@ -314,18 +341,30 @@ public final class IMAPCapabilityAndGreetingCache {
 
     private static final class CapabilityAndGreeting {
 
-        private final String capability;
+        private static final Pattern SPLIT = Pattern.compile(" +");
+
+        private final Map<String, String> capabilities;
 
         private final String greeting;
 
         public CapabilityAndGreeting(final String capability, final String greeting) {
             super();
-            this.capability = capability;
+            if (null == capability) {
+                capabilities = Collections.emptyMap();
+            } else {
+                final String[] caps = SPLIT.split(capability);
+                final Map<String, String> capabilities = new HashMap<String, String>(caps.length);
+                final Locale locale = Locale.ENGLISH;
+                for (final String cap : caps) {
+                    capabilities.put(cap.toUpperCase(locale), cap);
+                }
+                this.capabilities = Collections.unmodifiableMap(capabilities);
+            }
             this.greeting = greeting;
         }
 
-        public String getCapability() {
-            return capability;
+        public Map<String, String> getCapability() {
+            return capabilities;
         }
 
         public String getGreeting() {
@@ -336,7 +375,7 @@ public final class IMAPCapabilityAndGreetingCache {
         public int hashCode() {
             final int prime = 31;
             int result = 1;
-            result = prime * result + ((capability == null) ? 0 : capability.hashCode());
+            result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
             result = prime * result + ((greeting == null) ? 0 : greeting.hashCode());
             return result;
         }
@@ -353,11 +392,11 @@ public final class IMAPCapabilityAndGreetingCache {
                 return false;
             }
             final CapabilityAndGreeting other = (CapabilityAndGreeting) obj;
-            if (capability == null) {
-                if (other.capability != null) {
+            if (capabilities == null) {
+                if (other.capabilities != null) {
                     return false;
                 }
-            } else if (!capability.equals(other.capability)) {
+            } else if (!capabilities.equals(other.capabilities)) {
                 return false;
             }
             if (greeting == null) {
@@ -370,9 +409,6 @@ public final class IMAPCapabilityAndGreetingCache {
             return true;
         }
 
-        public String[] toArray() {
-            return new String[] { capability, greeting };
-        }
     }
 
 }

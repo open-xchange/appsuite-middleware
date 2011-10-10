@@ -150,6 +150,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return The plain-text versions of primary content
      * @throws OXException If plain texts cannot be returned
      */
+    @Override
     public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
         final TextFinder textFinder = new TextFinder();
         final int length = mailIds.length;

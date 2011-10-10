@@ -123,7 +123,7 @@ public final class InlineImageDataSource implements ImageDataSource {
         /*
          * Nothing special...
          */
-        ImageUtility.startImageUrl(imageLocation, session, this, sb);
+        ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
         return sb.toString();
     }
 

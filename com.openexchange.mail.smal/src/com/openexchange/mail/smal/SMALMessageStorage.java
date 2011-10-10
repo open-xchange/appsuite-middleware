@@ -628,4 +628,9 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         }
     }
 
+    @Override
+    public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
+        return messageStorage.getPrimaryContents(folder, mailIds);
+    }
+
 }

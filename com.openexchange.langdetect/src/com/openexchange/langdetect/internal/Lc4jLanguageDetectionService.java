@@ -109,7 +109,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     private final Locale defaultLocale;
 
-	private final boolean warnAboutUnknownModel;
+	private boolean warnAboutUnknownModel;
 
     /**
      * Initializes a new {@link Lc4jLanguageDetectionService}.
@@ -125,6 +125,15 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         defaultLanguageCategorization.setNumCharsToExamine(1000);
         defaultLanguageCategorization.setUseTopmostNgrams(400);
         defaultLanguageCategorization.setUnknownThreshold(1.01f);
+    }
+
+    /**
+     * Sets whether to output a warning if an unknown model is detected.
+     *
+     * @param warnAboutUnknownModel <code>true</code> to warn if an unknown model is detected; otherwise <code>false</code>
+     */
+    public void setWarnAboutUnknownModel(final boolean warnAboutUnknownModel) {
+        this.warnAboutUnknownModel = warnAboutUnknownModel;
     }
 
     /**

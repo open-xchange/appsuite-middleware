@@ -88,7 +88,7 @@ public final class ContactImageDataSource implements ImageDataSource {
     @Override
     public String generateUrl(final ImageLocation imageLocation, final Session session) throws OXException {
         final StringBuilder sb = new StringBuilder(64);
-        ImageUtility.startImageUrl(imageLocation, session, this, sb);
+        ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
         final Contact contact = getContact(imageLocation, session);
         sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
         return sb.toString();

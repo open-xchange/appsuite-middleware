@@ -49,7 +49,9 @@
 
 package com.openexchange.imap;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -428,12 +430,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Get parameterized IMAP session
              */
             final javax.mail.Session imapSession =
-                setConnectProperties(
-                    config.getPort(),
-                    config.isSecure(),
-                    imapConfProps.getImapTimeout(),
-                    imapConfProps.getImapConnectionTimeout(),
-                    imapProps);
+                setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -530,17 +527,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get parameterized IMAP session
              */
-            imapSession =
-                setConnectProperties(
-                    config.getPort(),
-                    config.isSecure(),
-                    imapConfProps.getImapTimeout(),
-                    imapConfProps.getImapConnectionTimeout(),
-                    imapProps);
+            imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false; //("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
+            final boolean certainUser = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
@@ -632,8 +623,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         if (null == storageService) {
             return false;
         }
-        final int[] ids =
-            storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
+        final int[] ids = storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
         return Arrays.binarySearch(ids, accountId) >= 0;
     }
 
@@ -699,12 +689,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             final javax.mail.Session imapSession =
                 imapAccess.imapSession =
-                    setConnectProperties(
-                        config.getPort(),
-                        config.isSecure(),
-                        imapConfProps.getImapTimeout(),
-                        imapConfProps.getImapConnectionTimeout(),
-                        imapProps);
+                    setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
             /*
              * Check if debug should be enabled
              */
@@ -1151,7 +1136,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return new MailAccountIMAPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
-    private static javax.mail.Session setConnectProperties(final int port, final boolean isSecure, final int timeout, final int connectionTimeout, final Properties imapProps) {
+    private static javax.mail.Session setConnectProperties(final IMAPConfig config, final int timeout, final int connectionTimeout, final Properties imapProps) {
         /*
          * Set timeouts
          */
@@ -1164,9 +1149,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Check if a secure IMAP connection should be established
          */
-        final String sPort = String.valueOf(port);
+        final String sPort = String.valueOf(config.getPort());
         final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
-        if (isSecure) {
+        if (config.isSecure()) {
             /*
              * Enables the use of the STARTTLS command.
              */
@@ -1185,7 +1170,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
              */
-            imapProps.put("mail.imap.starttls.enable", "true");
+            if (config.getIMAPProperties().isEnableTls()) {
+                try {
+                    final InetSocketAddress socketAddress = new InetSocketAddress(config.getServer(), config.getPort());
+                    final Map<String, String> capabilities =
+                        IMAPCapabilityAndGreetingCache.getCapabilities(socketAddress, false, config.getIMAPProperties());
+                    if (null != capabilities) {
+                        if (capabilities.containsKey("STARTTLS")) {
+                            imapProps.put("mail.imap.starttls.enable", "true");
+                        }
+                    } else {
+                        imapProps.put("mail.imap.starttls.enable", "true");
+                    }
+                } catch (final IOException e) {
+                    imapProps.put("mail.imap.starttls.enable", "true");
+                }
+            }
             /*
              * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says
              * so.
