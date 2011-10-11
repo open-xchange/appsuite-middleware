@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.preview.thirdwing.osgi;
+package com.openexchange.preview.thirdwing;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -65,6 +65,7 @@ import net.thirdwing.io.IStreamProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
@@ -92,9 +93,17 @@ public class StreamProvider implements IStreamProvider {
 
     @Override
     public OutputStream createFile(final String fileName) throws XHTMLConversionException {
-        final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
         try {
-            File tempFile = fileManagement.newTempFile();
+            final String extension;
+            final int lastIndex = fileName.lastIndexOf('.');
+            if (lastIndex > 0) {
+                extension = fileName.substring(lastIndex, fileName.length());
+            } else {
+                extension = fileName;
+            }
+            
+            final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
+            final File tempFile = fileManagement.newTempFile("open-xchange", extension);
             FileOutputStream fos = new FileOutputStream(tempFile);
             String mimeType = MIMEType2ExtMap.getContentType(fileName);
             ManagedFile managedFile = fileManagement.createManagedFile(tempFile);
@@ -114,6 +123,7 @@ public class StreamProvider implements IStreamProvider {
         if (managedFile == null) { 
             return null;
         }
+        
         return managedFile.constructURL(session);
     }
     
@@ -123,8 +133,10 @@ public class StreamProvider implements IStreamProvider {
             // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
         }
+        
+        BufferedReader reader = null;
         try {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(managedFile.getFile()), "UTF-8"));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(managedFile.getFile()), "UTF-8"));
             final StringBuilder sb = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
@@ -139,8 +151,10 @@ public class StreamProvider implements IStreamProvider {
             // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
         } catch (final IOException e) {
-         // TODO: throw proper exception
+            // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
+        } finally {
+            Streams.close(reader);
         }
     }
 

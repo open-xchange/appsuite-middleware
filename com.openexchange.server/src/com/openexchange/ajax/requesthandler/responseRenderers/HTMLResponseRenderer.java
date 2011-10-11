@@ -47,11 +47,13 @@
  *
  */
 
-package com.openexchange.preview.json;
+package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -65,6 +67,9 @@ import com.openexchange.preview.PreviewDocument;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class HTMLResponseRenderer implements ResponseRenderer {
+    
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HTMLResponseRenderer.class));
+
 
     @Override
     public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
@@ -85,10 +90,14 @@ public class HTMLResponseRenderer implements ResponseRenderer {
         PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();        
         httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
-            httpResp.getWriter().write(previewDocument.getContent());
+            String content = previewDocument.getContent();
+            if (content == null) {
+                LOG.warn("Content of PreviewDocument was null.");
+            } else {
+                httpResp.getWriter().write(content);
+            }            
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
     }
 

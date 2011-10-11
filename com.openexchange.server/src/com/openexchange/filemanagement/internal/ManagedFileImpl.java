@@ -146,6 +146,14 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
         sb.append('&').append("action=get");
         return sb.toString();
     }
+    
+    @Override
+    public String constructHTMLURL(Session session) throws OXException {
+        final String getUrl = constructURL(session);
+        final String htmlUrl = getUrl.replaceAll("action=get", "action=html");
+
+        return htmlUrl;
+    }
 
     @Override
     public void delete() {

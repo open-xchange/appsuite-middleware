@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,90 +52,89 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
-import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.conversion.DataProperties;
-import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
-import com.openexchange.preview.PreviewService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AbstractPreviewResultConverter}
+ * {@link DownloadPreviewResultConverter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public abstract class AbstractPreviewResultConverter implements ResultConverter {
-
+public class DownloadPreviewResultConverter extends AbstractPreviewResultConverter {
+    
+    
     /**
-     * Initializes a new {@link AbstractPreviewResultConverter}.
+     * Initializes a new {@link DownloadPreviewResultConverter}.
      */
-    protected AbstractPreviewResultConverter() {
+    public DownloadPreviewResultConverter() {
         super();
     }
 
     @Override
-    public String getInputFormat() {
-        return "file";
+    public String getOutputFormat() {
+        return "preview_download";
     }
 
     @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final FileHolder fileHolder;
-        {
-            final Object resultObject = result.getResultObject();
-            if (!(resultObject instanceof FileHolder)) {
-                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(FileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
-            }
-            fileHolder = (FileHolder) resultObject;
-        }
-        /*
-         * Obtain preview service
-         */
-        final PreviewDocument previewDocument;
-        {
-            final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-//            if (autoDetect()) {
-//                previewDocument = previewService.getPreviewFor(fileHolder.getStream(), getOutput(), session);
-//            } else {
-                final DataProperties dataProperties = new DataProperties(4);
-                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
-                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-                dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileHolder.getLength()));
-                previewDocument =
-                    previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
-//            }
-        }
-
-        result.setResultObject(previewDocument, getOutputFormat());
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
-    /**
-     * Indicates whether to auto-detect passed content.
-     *
-     * @return <code>true</code> to auto-detect; otherwise <code>false</code>
-     */
-    protected abstract boolean autoDetect();
+    @Override
+    protected boolean autoDetect() {
+        return true;
+    }
 
-    /**
-     * Gets the desired output format.
-     *
-     * @return The output format
-     */
-    protected abstract PreviewOutput getOutput();
+    @Override
+    protected PreviewOutput getOutput() {
+        return PreviewOutput.HTML;
+    }
+    
+    @Override
+    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        super.convert(request, result, session, converter);
+        
+        /*
+         * Provide URL to document
+         */
+        final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
+        final ManagedFile managedFile;
+        try {
+            final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            final File tempFile = fileManagement.newTempFile();
+            final FileOutputStream fos = new FileOutputStream(tempFile);
+            try {
+                fos.write(previewDocument.getContent().getBytes("UTF-8"));
+                fos.flush();
+            } finally {
+                Streams.close(fos);
+            }
+            managedFile = fileManagement.createManagedFile(tempFile);
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * Set meta data
+         */
+        final Map<String, String> metaData = previewDocument.getMetaData();
+        managedFile.setContentType(metaData.get("content-type"));
+        managedFile.setFileName(metaData.get("resourcename"));
+        /*
+         * Set result object
+         */
+        result.setResultObject(managedFile.constructURL(session), getOutputFormat());
+    }
 
 }

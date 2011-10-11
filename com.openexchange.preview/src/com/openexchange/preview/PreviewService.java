@@ -81,18 +81,16 @@ public interface PreviewService {
      */
     PreviewDocument getPreviewFor(String arg, PreviewOutput output, Session session) throws OXException;
 
-    /**
-     * Gets the preview document for specified input stream's data and output format.
-     *
-     * @param inputStream The input stream providing the data
-     * @param mimeType The mime type of the input file
-     * @param extension The extension of the input file
-     * @param output The output format
-     * @param session The session
-     * @return The preview document with its content set according to given output format
-     * @throws OXException If preview document cannot be generated
-     */
-    PreviewDocument getPreviewFor(InputStream inputStream, String mimeType, String extension, PreviewOutput output, Session session) throws OXException;
+//    /**
+//     * Gets the preview document for specified input stream's data and output format.
+//     *
+//     * @param inputStream The input stream providing the data
+//     * @param output The output format
+//     * @param session The session
+//     * @return The preview document with its content set according to given output format
+//     * @throws OXException If preview document cannot be generated
+//     */
+//    PreviewDocument getPreviewFor(InputStream inputStream, PreviewOutput output, Session session) throws OXException;
 
     /**
      * Gets the preview document for specified s data and output format.

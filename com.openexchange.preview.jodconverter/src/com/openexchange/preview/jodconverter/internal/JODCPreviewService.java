@@ -124,15 +124,15 @@ public class JODCPreviewService implements InternalPreviewService {
         }
     }
 
-    @Override
-    public PreviewDocument getPreviewFor(InputStream is, String mimeType, String extension, PreviewOutput output, Session session) throws OXException {
-        if (!isConvertableToOutput(output)) {
-            return null;
-        }
-        
-        DocumentContent document = createDocumentContent(is, "inputDoc." + extension, mimeType);       
-        return convertDocument(document, output);
-    }
+//    @Override
+//    public PreviewDocument getPreviewFor(InputStream is, String mimeType, String extension, PreviewOutput output, Session session) throws OXException {
+//        if (!isConvertableToOutput(output)) {
+//            return null;
+//        }
+//        
+//        DocumentContent document = createDocumentContent(is, "inputDoc." + extension, mimeType);       
+//        return convertDocument(document, output);
+//    }
 
     @Override
     public PreviewDocument getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session) throws OXException {

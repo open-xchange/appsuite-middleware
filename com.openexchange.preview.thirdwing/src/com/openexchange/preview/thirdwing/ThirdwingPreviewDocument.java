@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.preview.thirdwing.osgi;
+package com.openexchange.preview.thirdwing;
 
 import java.util.HashMap;
 import java.util.Map;

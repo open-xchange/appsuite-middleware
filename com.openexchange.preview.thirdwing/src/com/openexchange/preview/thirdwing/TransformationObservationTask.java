@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.preview.thirdwing.osgi;
+package com.openexchange.preview.thirdwing;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -102,14 +102,6 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     public OXException getException() {
         return exception;
     }
-    
-//    public String getContent() throws OXException {
-//        if (content == null) {
-//            throw exception;
-//        }
-//        
-//        return content;
-//    }
 
     @Override
     public void update(Observable o, Object obj) {
@@ -145,11 +137,14 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
                 final Matcher m = FILENAME_PATTERN.matcher(imgTag);
                 mr.resetTo(m, imgTag);
                 if (m.find()) {
-                    final String filename = m.group(1);
+                    final String fileName = m.group(1);
                     /*
                      * Compose corresponding image data
                      */
-                    String imageURL = streamProvider.getLinkForFile(filename, session);
+                    String imageURL = streamProvider.getLinkForFile(fileName, session);
+                    if (imageURL == null) {
+                        imageURL = fileName;
+                    }
 
                     linkBuilder.setLength(0);
                     linkBuilder.append("src=").append('"').append(imageURL).append('"');

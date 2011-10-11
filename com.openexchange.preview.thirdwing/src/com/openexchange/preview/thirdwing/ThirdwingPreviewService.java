@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.preview.thirdwing.osgi;
+package com.openexchange.preview.thirdwing;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -69,6 +69,7 @@ import net.thirdwing.io.IOUnit;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.PreviewDocument;
@@ -134,20 +135,21 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         }
     }
 
-    @Override
-    public PreviewDocument getPreviewFor(final InputStream inputStream, final String mimeType, final String extension, final PreviewOutput output, final Session session) throws OXException {    
-        File file = null;
-        try {
-            file = streamToFile(inputStream, extension);
-            return generatePreview(file, session);
-        } catch (final IOException e) {
-            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            if (file != null) {
-                file.delete();
-            }
-        }
-    }
+//    @Override
+//    public PreviewDocument getPreviewFor(final InputStream inputStream, final PreviewOutput output, final Session session) throws OXException {    
+//        File file = null;
+//        try {
+//            MIMEType2ExtMap.
+//            file = streamToFile(inputStream, extension);
+//            return generatePreview(file, session);
+//        } catch (final IOException e) {
+//            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
+//        } finally {
+//            if (file != null) {
+//                file.delete();
+//            }
+//        }
+//    }
 
     @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
@@ -196,8 +198,9 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             
             final Map<String, String> metaData = new HashMap<String, String>();
             metaData.put("content-type", "text/html");
-            metaData.put("resourcename", file.getName());
+            metaData.put("resourcename", "document.html");
             final ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content);
+            
             return previewDocument;
         } catch (final FileNotFoundException e) {
          // TODO: throw proper exception
@@ -216,11 +219,19 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         }
     }
     
-    private static File streamToFile(final InputStream is, final String name) throws IOException {
+    private File streamToFile(final InputStream is, final String name) throws OXException, IOException {
         FileOutputStream fos = null;
         try {
-            // TODO: Ensure to select configured directory for temp. files
-            final File file = File.createTempFile("open-xchange", name);
+            final String extension;
+            final int lastIndex = name.lastIndexOf('.');
+            if (lastIndex > 0) {
+                extension = name.substring(lastIndex, name.length());
+            } else {
+                extension = name;
+            }
+            
+            final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
+            final File file = fileManagement.newTempFile("open-xchange", extension);
             fos = new FileOutputStream(file);
             final byte[] buf = new byte[2048];
             for (int len; (len=is.read(buf, 0, 2048)) > 0;) {

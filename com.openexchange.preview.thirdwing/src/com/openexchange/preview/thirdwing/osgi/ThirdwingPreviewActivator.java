@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.preview.InternalPreviewService;
+import com.openexchange.preview.thirdwing.ThirdwingPreviewService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 
