@@ -34,7 +34,6 @@ public class XHTMLContentHandlerTest extends TestCase {
 
     private XHTMLContentHandler xhtml;
 
-    @Override
     protected void setUp() {
         output = new BodyContentHandler();
         xhtml = new XHTMLContentHandler(output, new Metadata());
@@ -77,7 +76,7 @@ public class XHTMLContentHandlerTest extends TestCase {
         assertEquals("a", words[4]);
         assertEquals("b", words[5]);
     }
-
+    
     /**
      * Test that content in option elements are properly separated in text
      * output.
@@ -99,7 +98,7 @@ public class XHTMLContentHandlerTest extends TestCase {
         assertEquals("opt1", words[0]);
         assertEquals("opt2", words[1]);
     }
-
+    
     public void testWhitespaceWithMenus() throws Exception {
         xhtml.startDocument();
         xhtml.startElement("menu");
@@ -107,7 +106,7 @@ public class XHTMLContentHandlerTest extends TestCase {
         xhtml.element("li", "two");
         xhtml.endElement("menu");
         xhtml.endDocument();
-
+        
         String[] words = getRealWords(output.toString());
         assertEquals(2, words.length);
         assertEquals("one", words[0]);
@@ -117,7 +116,7 @@ public class XHTMLContentHandlerTest extends TestCase {
     /**
      * Return array of non-zerolength words. Splitting on whitespace will get us
      * empty words for emptylines.
-     *
+     * 
      * @param string some mix of newlines and real words
      * @return array of real words.
      */
@@ -129,7 +128,7 @@ public class XHTMLContentHandlerTest extends TestCase {
                 words.add(word);
             }
         }
-
+        
         return words.toArray(new String[words.size()]);
     }
 

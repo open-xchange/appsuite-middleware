@@ -17,6 +17,7 @@
 package org.apache.tika.parser.microsoft;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,43 +40,48 @@ public abstract class AbstractPOIContainerExtractionTest extends TestCase {
     public static final MediaType TYPE_PPTX = MediaType.application("vnd.openxmlformats-officedocument.presentationml.presentation");
     public static final MediaType TYPE_XLSX = MediaType.application("vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     public static final MediaType TYPE_MSG = MediaType.application("vnd.ms-outlook");
-
+    
     public static final MediaType TYPE_TXT = MediaType.text("plain");
     public static final MediaType TYPE_PDF = MediaType.application("pdf");
-
+    
     public static final MediaType TYPE_JPG = MediaType.image("jpeg");
     public static final MediaType TYPE_GIF = MediaType.image("gif");
     public static final MediaType TYPE_PNG = MediaType.image("png");
     public static final MediaType TYPE_EMF = MediaType.application("x-msmetafile");
 
     protected TrackingHandler process(String filename, ContainerExtractor extractor, boolean recurse) throws Exception {
-        InputStream input = AbstractPOIContainerExtractionTest.class.getResourceAsStream(
-             "/test-documents/" + filename);
+        TikaInputStream stream = getTestFile(filename);
+        try {
+            assertEquals(true, extractor.isSupported(stream));
+
+            // Process it
+            TrackingHandler handler = new TrackingHandler();
+            if(recurse) {
+                extractor.extract(stream, extractor, handler);
+            } else {
+                extractor.extract(stream, null, handler);
+            }
+
+            // So they can check what happened
+            return handler;
+        } finally {
+            stream.close();
+        }
+    }
+    
+    protected TikaInputStream getTestFile(String filename) throws Exception {
+        URL input = AbstractPOIContainerExtractionTest.class.getResource(
+               "/test-documents/" + filename);
         assertNotNull(filename + " not found", input);
 
-        TikaInputStream stream = TikaInputStream.get(input);
-        assertNotNull(stream);
-
-        assertEquals(true, extractor.isSupported(stream));
-
-        // Process it
-        TrackingHandler handler = new TrackingHandler();
-        if(recurse) {
-           extractor.extract(stream, extractor, handler);
-        } else {
-           extractor.extract(stream, null, handler);
-        }
-
-        // So they can check what happened
-        return handler;
+        return TikaInputStream.get(input);
     }
-
-    protected static class TrackingHandler implements EmbeddedResourceHandler {
+    
+    public static class TrackingHandler implements EmbeddedResourceHandler {
        public List<String> filenames = new ArrayList<String>();
        public List<MediaType> mediaTypes = new ArrayList<MediaType>();
-
-       @Override
-    public void handle(String filename, MediaType mediaType,
+       
+       public void handle(String filename, MediaType mediaType,
             InputStream stream) {
           filenames.add(filename);
           mediaTypes.add(mediaType);

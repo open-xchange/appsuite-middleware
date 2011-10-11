@@ -30,9 +30,9 @@ import org.xml.sax.ContentHandler;
 import junit.framework.TestCase;
 
 /**
- *
+ * 
  * Test suite for the {@link HDFParser}.
- *
+ * 
  */
 public class HDFParserTest extends TestCase {
 
@@ -46,8 +46,8 @@ public class HDFParserTest extends TestCase {
 
         /*
          * this is a publicly available HDF5 file from the MLS mission:
-         *
-         *
+         * 
+         * 
          * ftp://acdisc.gsfc.nasa.gov/data/s4pa///Aura_MLS_Level2/ML2O3.002//2009
          * /MLS-Aura_L2GP-O3_v02-23-c01_2009d122.he5
          */
