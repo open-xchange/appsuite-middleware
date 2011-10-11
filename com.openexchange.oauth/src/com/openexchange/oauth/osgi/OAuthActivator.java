@@ -60,9 +60,11 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
+import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
@@ -136,6 +138,7 @@ public final class OAuthActivator extends DeferredActivator {
                 }
             }
             DeleteListenerRegistry.initInstance();
+            InvalidationListenerRegistry.initInstance();
             /*
              * Collect OAuth services
              */
@@ -146,6 +149,7 @@ public final class OAuthActivator extends DeferredActivator {
              */
             trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new ServiceTracker<OAuthAccountDeleteListener,OAuthAccountDeleteListener>(context, OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context)));
+            trackers.add(new ServiceTracker<OAuthAccountInvalidationListener,OAuthAccountInvalidationListener>(context, OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context)));
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
             }
