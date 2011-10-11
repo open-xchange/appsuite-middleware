@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
@@ -75,6 +76,15 @@ public abstract class AbstractPreviewAction implements AJAXActionService {
     public AbstractPreviewAction(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
+    }
+
+    /**
+     * Gets the {@link MailService} instance.
+     * 
+     * @return The {@link MailService} instance or <code>null</code>
+     */
+    protected MailService getMailService() {
+        return serviceLookup.getService(MailService.class);
     }
     
     protected IDBasedFileAccessFactory getFileAccessFactory() throws OXException {

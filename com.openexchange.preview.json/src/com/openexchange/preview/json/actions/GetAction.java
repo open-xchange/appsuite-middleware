@@ -66,9 +66,14 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -194,7 +199,21 @@ public class GetAction extends AbstractPreviewAction {
      * @param data
      * @param format
      */
-    private PreviewDocument convertMail(final AJAXRequestData request, final ServerSession session, final JSONObject data) {
+    private PreviewDocument convertMail(final AJAXRequestData request, final ServerSession session, final JSONObject data) throws OXException {
+        final MailService mailService = getMailService();
+        if (null == mailService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailService.class.getName());
+        }
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = mailService.getMailAccess(session, 0);
+            
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
+        }
+        
         // TODO Auto-generated method stub
         return null;
     }

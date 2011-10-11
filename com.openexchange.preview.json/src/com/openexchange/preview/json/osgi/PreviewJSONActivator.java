@@ -54,6 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.json.PreviewActionFactory;
 
@@ -67,7 +68,7 @@ public class PreviewJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { IDBasedFileAccessFactory.class, PreviewService.class, ManagedFileManagement.class };
+        return new Class[] { IDBasedFileAccessFactory.class, PreviewService.class, ManagedFileManagement.class, MailService.class };
     }
 
     @Override

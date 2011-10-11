@@ -97,7 +97,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             fileHolder = (FileHolder) resultObject;
         }
         /*
-         * Obtain preview service
+         * Obtain preview document
          */
         final PreviewDocument previewDocument;
         {
@@ -112,9 +112,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
 
         }
-
         if (request.getIntParameter("save") == 1) {
-            /*
+            /*-
              * Preview document should be saved.
              * We set the request format to file and return a FileHolder 
              * containing the preview document.

@@ -49,12 +49,15 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HTMLService;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -64,14 +67,16 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultConverter {
-    
+
+    private static final String FORMAT = "preview_filtered";
+
     public FilteredHTMLPreviewResultConverter() {
         super();
     }
 
     @Override
     public String getOutputFormat() {
-        return "preview_filtered";
+        return FORMAT;
     }
 
     @Override
@@ -87,11 +92,69 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         super.convert(request, result, session, converter);
-        
-        final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
-        
-        // TODO: Do whitelisting and related stuff here        
-        result.setResultObject(previewDocument, getOutputFormat());
+        final Object resultObject = result.getResultObject();
+        if (!(resultObject instanceof PreviewDocument)) {
+            return;
+        }
+        /*
+         * Sanitize document's HTML content
+         */
+        final PreviewDocument previewDocument = (PreviewDocument) resultObject;
+        if (resultObject instanceof SanitizedPreviewDocument) {
+            // Already sanitized
+            return;
+        }
+        final Map<String, String> metaData = previewDocument.getMetaData();
+        final String sanitizedHtml;
+        {
+            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
+            String content = previewDocument.getContent();
+            content = htmlService.dropScriptTagsInHeader(content);
+            final String charset = metaData.get("charset");
+            content = htmlService.getConformHTML(content, charset == null ? "ISO-8859-1" : charset, false);
+            content = htmlService.checkBaseTag(content, false);
+            /*
+             * Filter according to white-list
+             */
+            content = htmlService.filterWhitelist(content);
+            final boolean[] modified = new boolean[1];
+            content = htmlService.filterExternalImages(content, modified);
+            sanitizedHtml = content;
+        }
+        result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml), FORMAT);
     }
+
+    /**
+     * {@link SanitizedPreviewDocument}
+     *
+     * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+     */
+    private static final class SanitizedPreviewDocument implements PreviewDocument {
+
+        private final Map<String, String> metaData;
+
+        private final String sanitizedHtml;
+
+        /**
+         * Initializes a new {@link SanitizedPreviewDocument}.
+         * 
+         * @param metaData
+         * @param sanitizedHtml
+         */
+        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml) {
+            this.metaData = metaData;
+            this.sanitizedHtml = sanitizedHtml;
+        }
+
+        @Override
+        public Map<String, String> getMetaData() {
+            return metaData;
+        }
+
+        @Override
+        public String getContent() {
+            return sanitizedHtml;
+        }
+    } // End of class SanitizedPreviewDocument
 
 }
