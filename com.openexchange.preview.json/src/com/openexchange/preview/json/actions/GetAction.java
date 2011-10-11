@@ -57,6 +57,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataProperties;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -83,13 +86,13 @@ public class GetAction extends AbstractPreviewAction {
      * Initializes a new {@link GetAction}.
      * @param serviceLookup
      */
-    public GetAction(ServiceLookup serviceLookup) {
+    public GetAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        String source = request.getParameter("source");
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final String source = request.getParameter("source");
         JSONObject data = (JSONObject) request.getData();
         
         /*
@@ -99,7 +102,7 @@ public class GetAction extends AbstractPreviewAction {
         try {
             data.put("version", 1);
             data.put("id", 4973);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -145,21 +148,26 @@ public class GetAction extends AbstractPreviewAction {
      * @param format
      * @throws OXException 
      */
-    private PreviewDocument convertInfostore(AJAXRequestData request, ServerSession session, JSONObject data) throws OXException {
-        IDBasedFileAccessFactory fileAccessFactory = getFileAccessFactory();
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+    private PreviewDocument convertInfostore(final AJAXRequestData request, final ServerSession session, final JSONObject data) throws OXException {
+        final IDBasedFileAccessFactory fileAccessFactory = getFileAccessFactory();
+        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         
         try {
-            String id = data.getString("id");
-            int version = data.getInt("version");
-            File fileMetadata = fileAccess.getFileMetadata(id, version);
-            InputStream documentIS = fileAccess.getDocument(id, version);
+            final String id = data.getString("id");
+            final int version = data.getInt("version");
+            final File fileMetadata = fileAccess.getFileMetadata(id, version);
             
-            PreviewService previewService = getPreviewService();
-            PreviewDocument preview = previewService.getPreviewFor(documentIS, fileMetadata.getFileMIMEType(), fileMetadata.getFileName(), PreviewOutput.HTML, session);
+            final DataProperties dataProperties = new DataProperties(4);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileMetadata.getFileMIMEType());
+            dataProperties.put(DataProperties.PROPERTY_NAME, fileMetadata.getFileName());
+            dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileMetadata.getFileSize()));
+            final Data<InputStream> documentData = new SimpleData<InputStream>(fileAccess.getDocument(id, version), dataProperties);
+            
+            final PreviewService previewService = getPreviewService();
+            final PreviewDocument preview = previewService.getPreviewFor(documentData, PreviewOutput.HTML, session);
             
             return preview;
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
@@ -172,7 +180,7 @@ public class GetAction extends AbstractPreviewAction {
      * @param data
      * @param format
      */
-    private PreviewDocument convertMail(AJAXRequestData request, ServerSession session, JSONObject data) {
+    private PreviewDocument convertMail(final AJAXRequestData request, final ServerSession session, final JSONObject data) {
         // TODO Auto-generated method stub
         return null;
     }
