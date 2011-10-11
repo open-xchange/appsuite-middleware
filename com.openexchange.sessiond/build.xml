@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.sessiond overrides" basedir=".">
+
+    <description>
+        This build file overrides the installConf target to patch a configuration file before installing it.
+    </description>
+
+    <import file="build-project.xml"/>
+
+    <target name="installConf" depends="patchConfig">
+        <copy todir="${destDir}/${confInstallDir}">
+            <fileset dir="${tmpDir}/${confDir}"/>
+        </copy>
+    </target>
+
+    <target name="patchConfig">
+        <property name="patchConfDir" value="${tmpDir}/${confDir}"/>
+        <mkdir dir="${patchConfDir}"/>
+        <copy todir="${patchConfDir}" overwrite="true">
+            <fileset dir="${confDir}"/>
+        </copy>
+        <antcall target="patchConfigFiles"/>
+    </target>
+
+    <target name="patchConfigFiles">
+        <antcall target="patchPathInProperties"/>
+    </target>
+
+    <target name="patchPathInProperties">
+        <move tofile="${patchConfDir}/sessiond.properties" file="${patchConfDir}/sessiond.properties.in" overwrite="true"/>
+
+        <replace dir="${patchConfDir}" includes="sessiond.properties">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${confInstallDir}"/>
+        </replace>
+    </target>    
+
+</project>

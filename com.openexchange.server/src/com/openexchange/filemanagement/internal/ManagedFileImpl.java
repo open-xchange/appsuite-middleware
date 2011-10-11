@@ -142,6 +142,8 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
             sb.append(";jsessionid=").append(route);
         }
         sb.append('?').append("id=").append(id);
+        sb.append('&').append("session=").append(session.getSessionID());
+        sb.append('&').append("action=get");
         return sb.toString();
     }
 

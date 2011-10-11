@@ -136,7 +136,7 @@ public class MimeDetectionTest extends TestCase {
             assertEquals(urlOrFileName + " is not properly detected after adding resource name.", expected, mime);
         } finally {
             in.close();
-        }
+        }        
     }
 
     /**

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.customizer.folder;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,75 +69,85 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BulkAdditionalFolderFieldsList extends AdditionalFolderFieldList {
 
-    private AdditionalFolderFieldList delegate;
+    private final AdditionalFolderFieldList delegate;
     
-    private Map<Integer, BulkFolderField> fieldMap = new HashMap<Integer, BulkFolderField>();
-    private Map<String, BulkFolderField> fieldMap2 = new HashMap<String, BulkFolderField>();
-    private Set<BulkFolderField> fields = new HashSet<BulkFolderField>();
+    private final TIntObjectMap<BulkFolderField> fieldMap = new TIntObjectHashMap<BulkFolderField>();
+    private final Map<String, BulkFolderField> fieldMap2 = new HashMap<String, BulkFolderField>();
+    private final Set<BulkFolderField> fields = new HashSet<BulkFolderField>();
 
-    public BulkAdditionalFolderFieldsList(AdditionalFolderFieldList fields) {
+    public BulkAdditionalFolderFieldsList(final AdditionalFolderFieldList fields) {
         this.delegate = fields;
     }
 
-    public void addField(AdditionalFolderField field) {
+    @Override
+    public void addField(final AdditionalFolderField field) {
         delegate.addField(field);
     }
 
-    public boolean equals(Object obj) {
+    @Override
+    public boolean equals(final Object obj) {
         return delegate.equals(obj);
     }
 
-    public AdditionalFolderField get(int col) {
-        BulkFolderField bulkFolderField = fieldMap.get(col);
+    @Override
+    public AdditionalFolderField get(final int col) {
+        final BulkFolderField bulkFolderField = fieldMap.get(col);
         if (bulkFolderField != null) {
             return bulkFolderField;
         }
         return cache(delegate.get(col));
     }
 
-    public AdditionalFolderField get(String col) {
-        BulkFolderField bulkFolderField = fieldMap2.get(col);
+    @Override
+    public AdditionalFolderField get(final String col) {
+        final BulkFolderField bulkFolderField = fieldMap2.get(col);
         if (bulkFolderField != null) {
             return bulkFolderField;
         }
         return cache(delegate.get(col));
     }
 
-    private AdditionalFolderField cache(AdditionalFolderField additionalFolderField) {
-        BulkFolderField bff = new BulkFolderField(additionalFolderField);
+    private AdditionalFolderField cache(final AdditionalFolderField additionalFolderField) {
+        final BulkFolderField bff = new BulkFolderField(additionalFolderField);
         fieldMap.put(bff.getColumnID(), bff);
         fieldMap2.put(bff.getColumnName(), bff);
         fields.add(bff);
         return bff;
     }
     
-    public void warmUp(Collection<FolderObject> folders, ServerSession session) {
-        List<FolderObject> folderObjects = new ArrayList<FolderObject>(folders);
-        for(BulkFolderField field : fields) {
+    public void warmUp(final Collection<FolderObject> folders, final ServerSession session) {
+        final List<FolderObject> folderObjects = new ArrayList<FolderObject>(folders);
+        for(final BulkFolderField field : fields) {
             field.warmUp(folderObjects, session);
         }
     }
 
+    @Override
     public int[] getKnownFields() {
         return delegate.getKnownFields();
     }
 
+    @Override
     public int hashCode() {
         return delegate.hashCode();
     }
 
-    public boolean knows(int col) {
+    @Override
+    public boolean knows(final int col) {
         return delegate.knows(col);
     }
 
-    public boolean knows(String col) {
+    @Override
+    public boolean knows(final String col) {
         return delegate.knows(col);
     }
 
-    public void remove(int colId) {
+    @Override
+    public void remove(final int colId) {
         delegate.remove(colId);
     }
 
+    @Override
     public String toString() {
         return delegate.toString();
     }

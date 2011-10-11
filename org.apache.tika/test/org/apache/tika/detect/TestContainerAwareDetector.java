@@ -16,12 +16,14 @@
  */
 package org.apache.tika.detect;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 
 import junit.framework.TestCase;
 
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
@@ -32,7 +34,7 @@ import org.apache.tika.mime.MimeTypes;
  */
 public class TestContainerAwareDetector extends TestCase {
 
-    private final ContainerAwareDetector detector =
+    private final Detector detector =
         new ContainerAwareDetector(MimeTypes.getDefaultMimeTypes());
 
     private void assertDetect(String file, String type) throws Exception {
@@ -70,7 +72,7 @@ public class TestContainerAwareDetector extends TestCase {
             assertEquals(
                     MediaType.parse("application/vnd.ms-powerpoint"),
                     detector.detect(stream, new Metadata()));
-            assertTrue(stream.getOpenContainer() instanceof POIFSFileSystem);
+            assertTrue(stream.getOpenContainer() instanceof NPOIFSFileSystem);
         } finally {
             stream.close();
         }
@@ -90,6 +92,43 @@ public class TestContainerAwareDetector extends TestCase {
         assertDetect("testPPT.pptm", "application/vnd.ms-powerpoint.presentation.macroenabled.12");
         assertDetect("testPPT.ppsx", "application/vnd.openxmlformats-officedocument.presentationml.slideshow");
         assertDetect("testPPT.ppsm", "application/vnd.ms-powerpoint.slideshow.macroEnabled.12");
+        
+        // .xlsb is an OOXML file containing the binary parts, and not
+        //  an OLE2 file as you might initially expect!
+        assertDetect("testEXCEL.xlsb", "application/vnd.ms-excel.sheet.binary.macroEnabled.12");
+    }
+
+    /**
+     * Check that temporary files created by Tika are removed after
+     * closing TikaInputStream.
+     */
+    public void testRemovalTempfiles() throws Exception {
+        assertRemovalTempfiles("testWORD.docx");
+        assertRemovalTempfiles("test-documents.zip");
+    }
+
+    private int countTemporaryFiles() {
+        return new File(System.getProperty("java.io.tmpdir")).listFiles(
+                new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return name.startsWith("apache-tika-");
+                    }
+                }).length;
+    }
+
+    private void assertRemovalTempfiles(String fileName) throws Exception {
+        int numberOfTempFiles = countTemporaryFiles();
+
+        TikaInputStream stream = TikaInputStream.get(
+                TestContainerAwareDetector.class.getResource(
+                        "/test-documents/" + fileName));
+        try {
+            detector.detect(stream, new Metadata());
+        } finally {
+            stream.close();
+        }
+
+        assertEquals(numberOfTempFiles, countTemporaryFiles());
     }
 
     public void testDetectIWork() throws Exception {
@@ -131,13 +170,13 @@ public class TestContainerAwareDetector extends TestCase {
         TikaInputStream xlsx = getTruncatedFile("testEXCEL.xlsx", 300);
         try {
             assertEquals(
-                    MediaType.APPLICATION_ZIP,
+                    MediaType.application("x-tika-ooxml"),
                     detector.detect(xlsx, new Metadata()));
         } finally {
             xlsx.close();
         }
 
-        // Now a truncated OLE2 file
+        // Now a truncated OLE2 file 
         TikaInputStream xls = getTruncatedFile("testEXCEL.xls", 400);
         try {
             assertEquals(

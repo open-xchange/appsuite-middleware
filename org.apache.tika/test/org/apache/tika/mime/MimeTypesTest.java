@@ -36,7 +36,6 @@ public class MimeTypesTest extends TestCase {
 
     private MimeType html;
 
-    @Override
     protected void setUp() throws MimeTypeException {
         types = new MimeTypes();
         registry = types.getMediaTypeRegistry();

@@ -209,8 +209,8 @@ public class FileResponseRenderer implements ResponseRenderer {
          */
         String contentType = file.getContentType();
         if (!contentType.startsWith("image/")) {
-            contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(file.getName());
-            if (!contentType.startsWith("image/")) {
+            final String fileName = file.getName();
+            if (fileName == null || !(contentType = MimetypesFileTypeMap.getDefaultFileTypeMap().getContentType(fileName)).startsWith("image/")) {
                 return file;
             }
         }

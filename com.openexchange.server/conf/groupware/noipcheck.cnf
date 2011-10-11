@@ -1,4 +1,0 @@
-# This file configures the IP address ranges that will be excluded on the client IP check. Only add here IP address ranges that have clients
-# that you trust unconditionally. This configuration file currently only supports IPv4 addresses.
-
-127.0.0.1-127.255.255.255

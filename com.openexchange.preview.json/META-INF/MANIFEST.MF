@@ -6,14 +6,15 @@ Bundle-Version: 6.21.0.0
 Bundle-Activator: com.openexchange.preview.json.osgi.PreviewJSONActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.document.converter,
- com.openexchange.log,
+Import-Package: com.openexchange.conversion,
  com.openexchange.file.storage,
  com.openexchange.file.storage.composition,
- com.openexchange.tx,
  com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.preview,
- com.openexchange.conversion,
+ com.openexchange.tx,
+ javax.servlet,
+ javax.servlet.http,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework

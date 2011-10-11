@@ -5,44 +5,30 @@
     </description>
 
     <!-- Directories -->
-    <property name="tmp.dir" value="tmp"/>
-    <property name="commonTmpDir" value="commonTmp"/>
+    <property name="tmpDir" value="tmp"/>
     <property name="adminTmpDir" value="adminTmp"/>
-    <property name="conf.dir" value="conf"/>
-    <property name="commonConfDir" location="commonConf"/>
+    <property name="confDir" value="conf"/>
     <property name="adminConfDir" value="adminConf"/>
 
     <!-- Replacements -->
-    <property name="conf.install.dir" value="${basedir}/${tmp.dir}"/>
+    <property name="confInstallDir" value="${basedir}/${tmpDir}"/>
 
     <!-- Data Retention property file -->
-    <property name="dataretention.properties" value="${basedir}/${tmp.dir}/dataretention.properties"/>
+    <property name="dataretention.properties" value="${basedir}/${tmpDir}/dataretention.properties"/>
 
     <target name="prepare">
-        <mkdir dir="${tmp.dir}"/>
-        <mkdir dir="${commonTmpDir}"/>
+        <mkdir dir="${tmpDir}"/>
         <mkdir dir="${adminTmpDir}"/>
     </target>
 
     <target name="patchConfig" depends="prepare">
-        <property name="patch.conf.dir" value="${tmp.dir}"/>
-        <copy todir="${patch.conf.dir}" overwrite="true">
-            <fileset dir="${conf.dir}"/>
+        <property name="patchConfDir" value="${tmpDir}"/>
+        <copy todir="${patchConfDir}" overwrite="true">
+            <fileset dir="${confDir}"/>
         </copy>
         <antcall target="patchConfigFiles">
-            <param name="conf.subst.patch" value="${conf.install.dir}"/>
-            <param name="patch.conf.dir" value="${patch.conf.dir}"/>
-        </antcall>
-    </target>
-
-    <target name="patchCommonConfig" depends="prepare">
-        <property name="patchConfDir" value="${commonTmpDir}"/>
-        <copy todir="${patchConfDir}" overwrite="true">
-            <fileset dir="${commonConfDir}"/>
-        </copy>
-        <antcall target="patchPath">
-            <param name="conf.subst.patch" value="${conf.install.dir}"/>
-            <param name="patch.conf.dir" value="${patchConfDir}"/>
+            <param name="confSubstPatch" value="${confInstallDir}"/>
+            <param name="patchConfDir" value="${patchConfDir}"/>
         </antcall>
     </target>
 
@@ -53,26 +39,24 @@
         </copy>
         <antcall target="patchAdminConfigFiles">
             <param name="confAdminSubstPatch" value="${basedir}/${adminTmpDir}"/>
-            <param name="confGroupSubstPatch" value="${basedir}/${tmp.dir}"/>
+            <param name="confGroupSubstPatch" value="${basedir}/${tmpDir}"/>
         </antcall>
     </target>
 
     <target name="install">
         <antcall target="patchConfig"/>
-        <antcall target="patchCommonConfig"/>
         <antcall target="patchAdminConfig"/>
     </target>
 
     <target name="default" depends="install"/>
 
     <target name="clean">
-        <delete dir="${tmp.dir}"/>
-    	<delete dir="${commonTmpDir}"/>
+        <delete dir="${tmpDir}"/>
         <delete dir="${adminTmpDir}"/>
     </target>
 
     <target name="patchConfigFiles">
-        <fail message="Define conf.subst.patch." unless="conf.subst.patch"/>
+        <fail message="Define confSubstPatch." unless="confSubstPatch"/>
     	<antcall target="patchCrawlerProperties"/>
         <antcall target="patchPath"/>
         <antcall target="patchDataRetentionProperties"/>
@@ -85,21 +69,21 @@
     </target>
 	
 	<target name="patchCrawlerProperties">
-        <move tofile="${patch.conf.dir}/crawler.properties" file="${patch.conf.dir}/crawler.properties.in" overwrite="true"/>
-        <replace file="${patch.conf.dir}/crawler.properties">
+        <move tofile="${patchConfDir}/crawler.properties" file="${patchConfDir}/crawler.properties.in" overwrite="true"/>
+        <replace file="${patchConfDir}/crawler.properties">
             <replacefilter token="@oxgroupwaresysconfdir@" value="${basedir}"/>
         </replace>
 	</target>
 
     <target name="patchPath">
-        <move todir="${patch.conf.dir}" includeemptydirs="false">
-            <fileset dir="${patch.conf.dir}">
+        <move todir="${patchConfDir}" includeemptydirs="false">
+            <fileset dir="${patchConfDir}">
                 <include name="*.in"/>
             </fileset>
             <mapper type="glob" from="*.in" to="*"/>
         </move>
-        <replace dir="${patch.conf.dir}">
-            <replacefilter token="@oxgroupwaresysconfdir@" value="${conf.subst.patch}"/>
+        <replace dir="${patchConfDir}">
+            <replacefilter token="@oxgroupwaresysconfdir@" value="${confSubstPatch}"/>
         </replace>
     </target>
 
@@ -120,7 +104,7 @@
     </target>
 
     <target name="patchDataRetentionProperties">
-        <replace file="${dataretention.properties}" token="com.openexchange.dataretention.dir=/var/log/open-xchange" value="com.openexchange.dataretention.dir=${conf.install.dir}">
+        <replace file="${dataretention.properties}" token="com.openexchange.dataretention.dir=/var/log/open-xchange" value="com.openexchange.dataretention.dir=${confInstallDir}">
         </replace>
     </target>
 

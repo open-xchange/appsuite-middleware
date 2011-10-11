@@ -19,6 +19,7 @@ package org.apache.tika.parser.image;
 import java.io.InputStream;
 
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -33,17 +34,17 @@ public class ImageParserTest extends TestCase {
         metadata.set(Metadata.CONTENT_TYPE, "image/bmp");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testBMP.bmp");
-        parser.parse(stream, new DefaultHandler(), metadata);
+        parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
 
         assertEquals("75", metadata.get("height"));
         assertEquals("100", metadata.get("width"));
-        assertEquals("8 8 8 ", metadata.get("Data BitsPerSample"));
+        assertEquals("8 8 8", metadata.get("Data BitsPerSample"));
         assertEquals("1.0", metadata.get("Dimension PixelAspectRatio"));
         assertEquals("0", metadata.get("Dimension VerticalPhysicalPixelSpacing"));
         assertEquals("0", metadata.get("Dimension HorizontalPhysicalPixelSpacing"));
         assertEquals("BI_RGB", metadata.get("Compression CompressionTypeName"));
         assertEquals("image/bmp", metadata.get("Content-Type"));
-
+        
         assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
         assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
         assertEquals("8 8 8", metadata.get(Metadata.BITS_PER_SAMPLE));
@@ -54,11 +55,11 @@ public class ImageParserTest extends TestCase {
         metadata.set(Metadata.CONTENT_TYPE, "image/gif");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testGIF.gif");
-        parser.parse(stream, new DefaultHandler(), metadata);
+        parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
 
         assertEquals("75", metadata.get("height"));
         assertEquals("100", metadata.get("width"));
-        assertEquals("TRUE", metadata.get("Compression Lossless"));
+        assertEquals("true", metadata.get("Compression Lossless"));
         assertEquals("Normal", metadata.get("Dimension ImageOrientation"));
         assertEquals("lzw", metadata.get("Compression CompressionTypeName"));
         assertEquals("0", metadata.get("Dimension HorizontalPixelOffset"));
@@ -69,11 +70,11 @@ public class ImageParserTest extends TestCase {
         assertEquals("RGB", metadata.get("Chroma ColorSpaceType"));
         assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get("CommentExtensions CommentExtension"));
         assertEquals("value=Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership., encoding=ISO-8859-1, compression=none", metadata.get("Text TextEntry"));
-        assertEquals("TRUE", metadata.get("Chroma BlackIsZero"));
+        assertEquals("true", metadata.get("Chroma BlackIsZero"));
         assertEquals("disposalMethod=none, userInputFlag=false, transparentColorFlag=false, delayTime=0, transparentColorIndex=0", metadata.get("GraphicControlExtension"));
         assertEquals("0", metadata.get("Dimension VerticalPixelOffset"));
         assertEquals("image/gif", metadata.get("Content-Type"));
-
+        
         assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
         assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
         assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(Metadata.COMMENTS));
@@ -84,7 +85,7 @@ public class ImageParserTest extends TestCase {
         metadata.set(Metadata.CONTENT_TYPE, "image/jpeg");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testJPEG.jpg");
-        parser.parse(stream, new DefaultHandler(), metadata);
+        parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
 
         assertEquals("75", metadata.get("height"));
         assertEquals("100", metadata.get("width"));
@@ -108,7 +109,7 @@ public class ImageParserTest extends TestCase {
         assertEquals("keyword=comment, value=Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get("Text TextEntry"));
         assertEquals("image/jpeg", metadata.get("Content-Type"));
         assertEquals("process=0, samplePrecision=8, numLines=75, samplesPerLine=100, numFrameComponents=3", metadata.get("markerSequence sof"));
-
+        
         assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
         assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
         assertEquals("Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements.  See the NOTICE file distributed with this work for additional information regarding copyright ownership.", metadata.get(Metadata.COMMENTS));
@@ -119,7 +120,7 @@ public class ImageParserTest extends TestCase {
         metadata.set(Metadata.CONTENT_TYPE, "image/png");
         InputStream stream =
             getClass().getResourceAsStream("/test-documents/testPNG.png");
-        parser.parse(stream, new DefaultHandler(), metadata);
+        parser.parse(stream, new DefaultHandler(), metadata, new ParseContext());
 
         assertEquals("75", metadata.get("height"));
         assertEquals("100", metadata.get("width"));
@@ -145,7 +146,7 @@ public class ImageParserTest extends TestCase {
         assertEquals("true", metadata.get("Chroma BlackIsZero"));
         assertEquals("year=2008, month=5, day=6, hour=6, minute=18, second=47", metadata.get("Document ImageModificationTime"));
         assertEquals("image/png", metadata.get("Content-Type"));
-
+        
         assertEquals("100", metadata.get(Metadata.IMAGE_WIDTH));
         assertEquals("75", metadata.get(Metadata.IMAGE_LENGTH));
         assertEquals("8 8 8", metadata.get(Metadata.BITS_PER_SAMPLE));

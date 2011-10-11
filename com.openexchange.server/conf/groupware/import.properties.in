@@ -1,4 +1,0 @@
-# Import configuration - settings for import of CSV, iCal or vCard files 
-
-# Configures path to mappings of ox fields to other csv formats (like Outlook)
-com.openexchange.import.mapper.path=@rootinstalldir@/importCSV/

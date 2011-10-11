@@ -6,7 +6,18 @@ Bundle-Version: 6.21.0.0
 Bundle-Activator: com.openexchange.preview.thirdwing.osgi.ThirdwingPreviewActivator
 Bundle-Vendor: Open-Xchange AG
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.log,
+Import-Package: com.openexchange.conversion,
+ com.openexchange.exception,
+ com.openexchange.filemanagement,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.mail.mime,
+ com.openexchange.preview,
+ com.openexchange.server,
+ com.openexchange.server.osgiservice,
+ com.openexchange.session,
+ com.openexchange.threadpool,
+ com.openexchange.tools.regex,
  org.apache.commons.logging,
  org.osgi.framework
 DynamicImport-Package: *

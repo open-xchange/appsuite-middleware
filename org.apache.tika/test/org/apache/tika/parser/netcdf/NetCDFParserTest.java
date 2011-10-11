@@ -30,7 +30,7 @@ import junit.framework.TestCase;
 
 /**
  * Test cases to exercise the {@link NetCDFParser}.
- *
+ * 
  */
 public class NetCDFParserTest extends TestCase {
 

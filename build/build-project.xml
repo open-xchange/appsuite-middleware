@@ -18,6 +18,7 @@
     <property name="testSrcDir" value="test"/>
     <property name="testBinDir" value="test-build"/>
     <property name="libDir" value="lib"/>
+    <property name="confDir" value="conf"/>
     <property name="jarsDir" value="jars"/>
     <property file="META-INF/MANIFEST.MF"/>
     <property file="build.properties"/>
@@ -153,7 +154,7 @@
         <echo file="${destDir}/${bundle.dDir}/${bundleName}.ini" message="${bundlesDir}/${fileOrDir}@start${line.separator}"/>
     </target>
 
-    <target name="installConfig" description="Installs the .ini file and the bundles configuration files.">
+    <target name="installIni" description="Installs the .ini file and the bundles configuration files.">
         <mkdir dir="${destDir}/${bundle.dDir}"/>
         <foreach target="makeIni" param="bundleFileOrDir" inheritAll="true">
             <path>
@@ -167,10 +168,22 @@
                 </dirset>
             </path>
         </foreach>
-        <!-- TODO configuration files to confInstallDir -->
     </target>
 
-    <target name="install" depends="installBundle,installConfig" description="Combines installBundle and installConfig targets."/>
+    <target name="installConf" description="Install all configuration files for a bundle.">
+        <if>
+            <available file="${confDir}" type="dir"/>
+            <then>
+                <copy todir="${destDir}/${confInstallDir}">
+                    <fileset dir="${confDir}"/>
+                </copy>
+            </then>
+        </if>
+    </target>
+
+    <target name="postInstall" description="Empty target that can be overwritten by some bundles."/>
+
+    <target name="install" depends="installBundle,installIni,installConf,postInstall" description="Combines installBundle and installConfig targets."/>
 
 	<target name="prepareBuild" description="Executes a currently empty and overwritable prepare step before building the sources.">
 		<antcall target="prepare" inheritrefs="true">

@@ -53,12 +53,25 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * {@link SimpleRegistryListener}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SimpleRegistryListener<T> {
 
+    /**
+     * The service is being added to this {@code SimpleRegistryListener}.
+     * 
+     * @param ref The reference to the service being added
+     * @param service The (tracked) service object
+     */
     public void added(ServiceReference<T> ref, T service);
 
+    /**
+     * The service is being removed from this {@code SimpleRegistryListener}.
+     * 
+     * @param ref The reference to the service being removed
+     * @param service The (tracked) service object
+     */
     public void removed(ServiceReference<T> ref, T service);
+
 }

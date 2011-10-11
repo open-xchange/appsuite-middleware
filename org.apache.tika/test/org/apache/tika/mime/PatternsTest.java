@@ -16,20 +16,17 @@
  */
 package org.apache.tika.mime;
 
+import java.util.List;
+
 import junit.framework.TestCase;
 
-/**
- * Test case for {@link Patterns}.
- *
- * @version $Id$
- */
 public class PatternsTest extends TestCase {
+    private MimeTypes fullTypes = MimeTypes.getDefaultMimeTypes();
 
     private Patterns patterns;
     private MimeTypes types;
     private MimeType text;
 
-    @Override
     protected void setUp() throws MimeTypeException {
         patterns = new Patterns(new MediaTypeRegistry());
         types = new MimeTypes();
@@ -74,4 +71,16 @@ public class PatternsTest extends TestCase {
 
         assertEquals(".doc", doc.getExtension());
     }
+
+    public void testExtensions() throws Exception{
+        MimeType jpeg = fullTypes.forName("image/jpeg");
+
+        assertEquals(".jpg", jpeg.getExtension());
+
+        List<String> extensions = jpeg.getExtensions();
+        assertTrue(extensions.size() > 1);
+        assertTrue(extensions.contains(".jpg"));
+        assertTrue(extensions.contains(".jpeg"));
+    }
+
 }
