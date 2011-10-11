@@ -488,6 +488,7 @@ chemical/x-pdb pdb xyz
 chemical/x-xyz xyz
 image/bmp bmp
 image/cgm cgm
+image/x-emf emf
 image/g3fax g3
 image/gif gif
 image/ief ief

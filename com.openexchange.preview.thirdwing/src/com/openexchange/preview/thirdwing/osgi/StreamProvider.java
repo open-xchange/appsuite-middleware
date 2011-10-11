@@ -65,6 +65,7 @@ import net.thirdwing.io.IStreamProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -93,9 +94,11 @@ public class StreamProvider implements IStreamProvider {
     public OutputStream createFile(final String fileName) throws XHTMLConversionException {
         final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
         try {
-            final File tempFile = fileManagement.newTempFile();
-            final FileOutputStream fos = new FileOutputStream(tempFile);
-            final ManagedFile managedFile = fileManagement.createManagedFile(tempFile);
+            File tempFile = fileManagement.newTempFile();
+            FileOutputStream fos = new FileOutputStream(tempFile);
+            String mimeType = MIMEType2ExtMap.getContentType(fileName);
+            ManagedFile managedFile = fileManagement.createManagedFile(tempFile);
+            managedFile.setContentType(mimeType);
             createdFiles.put(fileName, managedFile);
             
             return fos;
@@ -105,11 +108,7 @@ public class StreamProvider implements IStreamProvider {
             throw new XHTMLConversionException("Could not create OutputStream for file " + fileName, e);
         }
     }
-    
-//    public Iterator<String> getFileNameIterator() {
-//        return createdFiles.keySet().iterator();
-//    }
-    
+        
     public String getLinkForFile(final String fileName, final Session session) throws OXException {
         final ManagedFile managedFile = createdFiles.get(fileName);
         if (managedFile == null) { 
