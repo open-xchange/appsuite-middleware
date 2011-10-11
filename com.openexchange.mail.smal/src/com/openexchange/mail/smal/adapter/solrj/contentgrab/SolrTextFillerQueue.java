@@ -67,6 +67,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -116,6 +117,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      */
     private static final long WAIT_TIME = 3000;
 
+    private static enum GateState {
+        OPEN,CLOSED;
+    }
+
     private final StampedFuture placeHolder;
 
     private final BlockingQueue<TextFiller> queue;
@@ -135,6 +140,8 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     private final CommonsHttpSolrServerManagement serverManagement;
 
+    private final AtomicReference<GateState> gate;
+
     /**
      * Initializes a new {@link SolrTextFillerQueue}.
      */
@@ -147,6 +154,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         keepgoing = new AtomicBoolean(true);
         queue = new LinkedBlockingQueue<TextFiller>();
         simpleName = getClass().getSimpleName();
+        gate = new AtomicReference<GateState>(GateState.OPEN);
     }
     
     /**
@@ -206,12 +214,59 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         }
     }
 
+    /**
+     * Pauses taking from queue.
+     * 
+     * @return <code>true</code> if caller paused the consuming thread; otherwise <code>false</code> if already paused
+     */
+    public boolean pause() {
+        GateState gateState;
+        do {
+            gateState = gate.get();
+            if (GateState.CLOSED == gateState) {
+                // Already closed
+                return false;
+            }
+        } while (!gate.compareAndSet(gateState, GateState.CLOSED));
+        return true;
+    }
+
+    /**
+     * Proceed taking from queue.
+     */
+    public void proceed() {
+        GateState gateState;
+        do {
+            gateState = gate.get();
+            if (GateState.OPEN == gateState) {
+                // Already open
+                return;
+            }
+        } while (!gate.compareAndSet(gateState, GateState.OPEN));
+        // Notify OPEN state
+        synchronized (gate) {
+            gate.notifyAll();
+        }
+    }
+
     @Override
     public void run() {
         try {
-            final int maxElements = MAX_FILLER_CHUNK << 1;
-            final List<TextFiller> list = new ArrayList<TextFiller>(maxElements);
+            // final int maxElements = MAX_FILLER_CHUNK << 1;
+            final List<TextFiller> list = new ArrayList<TextFiller>(8192);
             while (keepgoing.get()) {
+                /*
+                 * Check if paused
+                 */
+                while (GateState.OPEN != gate.get()) {
+                    // Await OPEN state
+                    synchronized (gate) {
+                        gate.wait();
+                    }
+                }
+                /*
+                 * Proceed taking from queue
+                 */
                 if (queue.isEmpty()) {
                     final TextFiller next;
                     try {
@@ -225,13 +280,16 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     }
                     list.add(next);
                 }
-                queue.drainTo(list, maxElements);
+                queue.drainTo(list);
                 final boolean quit = list.remove(POISON);
                 if (!list.isEmpty()) {
                     if (DEBUG) {
                         LOG.debug("Processing " + list.size() + " text fillers from queue");
                     }
                     for (final List<TextFiller> fillers : TextFillerGrouper.groupTextFillersByFullName(list)) {
+                        if (DEBUG) {
+                            LOG.debug("Scheduling " + fillers.size() + " text fillers. Remaining in queue: " + queue.size());
+                        }
                         handleFillers(fillers);
                     }
                 }
@@ -258,29 +316,25 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
         final int size = groupedFillers.size();
         final int configuredBlockSize = MAX_FILLER_CHUNK;
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         if (size <= configuredBlockSize) {
-            if (DEBUG) {
-                LOG.debug("Scheduled " + size + " of " + size + " text fillers...");
-            }
             scheduleFillers(groupedFillers, poolService);
         } else {
             int fromIndex = 0;
             while (fromIndex < size) {
                 final int toIndex = fromIndex + configuredBlockSize;
                 if (toIndex > size) {
-                    if (DEBUG) {
-                        LOG.debug("Scheduled " + size + " of " + size + " text fillers...");
-                    }
                     scheduleFillers(groupedFillers.subList(fromIndex, size), poolService);
                     fromIndex = size;
                 } else {
-                    if (DEBUG) {
-                        LOG.debug("Scheduled " + toIndex + " of " + size + " text fillers...");
-                    }
                     scheduleFillers(groupedFillers.subList(fromIndex, toIndex), poolService);
                     fromIndex = toIndex;
                 }
             }
+        }
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            LOG.debug("Scheduled " + groupedFillers.size() + " fillers within " + dur + "msec");
         }
     }
 
@@ -296,13 +350,14 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
              */
             int index = -1;
             while (index < 0) {
+                final long currentMillis = System.currentTimeMillis();
                 for (int i = 0; (index < 0) && (i < maxNumConcurrentFillerTasks); i++) {
                     final StampedFuture sf = concurrentFutures.get(i);
                     if (null == sf) {
                         if (concurrentFutures.compareAndSet(i, null, placeHolder)) {
                             index = i; // Found a free slot
                         }
-                    } else if ((System.currentTimeMillis() - sf.getStamp()) > MAX_RUNNING_TIME) { // Elapsed
+                    } else if ((currentMillis - sf.getStamp()) > MAX_RUNNING_TIME) { // Elapsed
                         sf.getFuture().cancel(true);
                         if (DEBUG) {
                             LOG.debug("Cancelled elapsed task...");
@@ -315,8 +370,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 if (DEBUG) {
                     LOG.debug(index < 0 ? "Awaiting a free/elapsed slot..." : "Found a free/elapsed slot...");
                 }
-                synchronized (placeHolder) {
-                    placeHolder.wait(WAIT_TIME);
+                if (index < 0) {
+                    synchronized (placeHolder) {
+                        placeHolder.wait(WAIT_TIME);
+                    }
                 }
             }
             /*

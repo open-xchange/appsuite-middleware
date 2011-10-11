@@ -203,8 +203,9 @@ public interface IndexAdapter {
      * @param mails The mails to add
      * @param session The session
      * @throws OXException If adding mails to index fails
+     * @throws InterruptedException If processing is interrupted
      */
-    public void add(List<MailMessage> mails, Session session) throws OXException;
+    public void add(List<MailMessage> mails, Session session) throws OXException, InterruptedException;
 
     /**
      * Adds specified mail's content to the index.

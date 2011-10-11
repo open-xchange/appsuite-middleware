@@ -394,6 +394,13 @@ public final class FolderJob extends AbstractMailSyncJob {
                  * Add
                  */
                 if (!newIds.isEmpty()) {
+                    
+                    
+                    
+                    
+                    
+                    
+                    
                     final int blockSize;
                     final int size = newIds.size();
                     {
@@ -455,6 +462,12 @@ public final class FolderJob extends AbstractMailSyncJob {
                 reset();
                 JobQueue.getInstance().addJob(this);
             }
+        } catch (final InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            error = true;
+            cancel();
+            LOG.error("Folder job \"" + identifier + "\" failed.", e);
         } catch (final Exception e) {
             error = true;
             cancel();
@@ -503,6 +516,10 @@ public final class FolderJob extends AbstractMailSyncJob {
                             inner);
                     }
                 }
+            } catch (final InterruptedException e) {
+                // Keep interrupted state
+                Thread.currentThread().interrupt();
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
             }
         } finally {
             SMALMailAccess.closeUnwrappedInstance(mailAccess);

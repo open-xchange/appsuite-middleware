@@ -1,0 +1,107 @@
+http://java.sun.com/performance/reference/whitepapers/tuning.html#section4.2.1
+
+Tuning Examples
+
+Here are some specific tuning examples for your experimentation. Please understand that these are only examples and that the optimal heap sizes and tuning parameters for your application on your hardware may differ.
+
+4.2.1   Tuning Example 1: Tuning for Throughput
+
+Here is an example of specific command line tuning for a server application running on system with 4 GB of memory and capable of running 32 threads simultaneously (CPU's and cores or contexts).
+
+java -Xmx3800m -Xms3800m -Xmn2g -Xss128k -XX:+UseParallelGC -XX:ParallelGCThreads=20
+
+Comments:
+
+    -Xmx3800m -Xms3800m
+    Configures a large Java heap to take advantage of the large memory system.
+    -Xmn2g
+    Configures a large heap for the young generation (which can be collected in parallel), again taking advantage of the large memory system. It helps prevent short lived objects from being prematurely promoted to the old generation, where garbage collection is more expensive.
+    -Xss128k
+    Reduces the default maximum thread stack size, which allows more of the process' virtual memory address space to be used by the Java heap.
+    -XX:+UseParallelGC
+    Selects the parallel garbage collector for the new generation of the Java heap (note: this is generally the default on server-class machines)
+    -XX:ParallelGCThreads=20
+    Reduces the number of garbage collection threads. The default would be equal to the processor count, which would probably be unnecessarily high on a 32 thread capable system. 
+
+4.2.2   Tuning Example 2: Try the parallel old generation collector
+
+Similar to example 1 we here want to test the impact of the parallel old generation collector.
+
+java -Xmx3550m -Xms3550m -Xmn2g -Xss128k -XX:+UseParallelGC -XX:ParallelGCThreads=20 -XX:+UseParallelOldGC
+
+Comments:
+
+    -Xmx3550m -Xms3550m
+    Sizes have been reduced. The ParallelOldGC collector has additional native, non-Java heap memory requirements and so the Java heap sizes may need to be reduced when running a 32-bit JVM.
+    -XX:+UseParallelOldGC
+    Use the parallel old generation collector. Certain phases of an old generation collection can be performed in parallel, speeding up a old generation collection. 
+
+4.2.3   Tuning Example 3: Try 256 MB pages
+
+This tuning example is specific to those Solaris-based systems that would support the huge page size of 256 MB.
+
+java -Xmx2506m -Xms2506m -Xmn1536m -Xss128k -XX:+UseParallelGC -XX:ParallelGCThreads=20 -XX:+UseParallelOldGC -XX:LargePageSizeInBytes=256m
+
+Comments:
+
+    -Xmx2506m -Xms2506m
+    Sizes have been reduced because using the large page setting causes the permanent generation and code caches sizes to be 256 MB and this reduces memory available for the Java heap.
+    -Xmn1536m
+    The young generation heap is often sized as a fraction of the overall Java heap size. Typically we suggest you start tuning with a young generation size of 1/4th the overall heap size. The young generation was reduced in this case to maintain a similar ratio between young generation and old generation sizing used in the previous example option used.
+    -XX:LargePageSizeInBytes=256m
+    Causes the Java heap, including the permanent generation, and the compiled code cache to use as a minimum size one 256 MB page (for those platforms which support it). 
+
+4.2.4   Tuning Example 4: Try -XX:+AggressiveOpts
+
+This tuning example is similar to Example 2, but adds the AggressiveOpts option.
+
+java -Xmx3550m -Xms3550m -Xmn2g -Xss128k -XX:+UseParallelGC -XX:ParallelGCThreads=20 -XX:+UseParallelOldGC -XX:+AggressiveOpts
+
+Comments:
+
+    -Xmx3550m -Xms3550m
+    Sizes have been increased back to the level of Example 2 since we no longer using huge pages.
+    -Xmn2g
+    Sizes have been increased back to the level of Example 2 since we no longer using huge pages.
+    -XX:+AggressiveOpts
+    Turns on point performance optimizations that are expected to be on by default in upcoming releases. The changes grouped by this flag are minor changes to JVM runtime compiled code and not distinct performance features (such as BiasedLocking and ParallelOldGC). This is a good flag to try the JVM engineering team's latest performance tweaks for upcoming releases. Note: this option is experimental! The specific optimizations enabled by this option can change from release to release and even build to build. You should reevaluate the effects of this option with prior to deploying a new release of Java. 
+
+4.2.5   Tuning Example 5: Try Biased Locking
+
+This tuning example is builds on Example 4, and adds the Biased Locking option.
+
+java -Xmx3550m -Xms3550m -Xmn2g -Xss128k -XX:+UseParallelGC -XX:ParallelGCThreads=20 -XX:+UseParallelOldGC -XX:+AggressiveOpts -XX:+UseBiasedLocking
+
+Comments:
+
+    -XX:+UseBiasedLocking
+    Enables a technique for improving the performance of uncontended synchronization. An object is "biased" toward the thread which first acquires its monitor via a monitorenter bytecode or synchronized method invocation; subsequent monitor-related operations performed by that thread are relatively much faster on multiprocessor machines. Some applications with significant amounts of uncontended synchronization may attain significant speedups with this flag enabled; some applications with certain patterns of locking may see slowdowns, though attempts have been made to minimize the negative impact. 
+
+4.2.6   Tuning Example 6: Tuning for low pause times and high throughput
+
+This tuning example similar to Example 2, but uses the concurrent garbage collector (instead of the parallel throughput collector).
+
+java -Xmx3550m -Xms3550m -Xmn2g -Xss128k -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31
+
+Comments:
+
+    -XX:+UseConcMarkSweepGC -XX:+UseParNewGC
+    Selects the Concurrent Mark Sweep collector. This collector may deliver better response time properties for the application (i.e., low application pause time). It is a parallel and mostly-concurrent collector and and can be a good match for the threading ability of an large multi-processor systems.
+    -XX:SurvivorRatio=8
+    Sets survivor space ratio to 1:8, resulting in larger survivor spaces (the smaller the ratio, the larger the space). Larger survivor spaces allow short lived objects a longer time period to die in the young generation.
+    -XX:TargetSurvivorRatio=90
+    Allows 90% of the survivor spaces to be occupied instead of the default 50%, allowing better utilization of the survivor space memory.
+    -XX:MaxTenuringThreshold=31
+    Allows short lived objects a longer time period to die in the young generation (and hence, avoid promotion). A consequence of this setting is that minor GC times can increase due to additional objects to copy. This value and survivor space sizes may need to be adjusted so as to balance overheads of copying between survivor spaces versus tenuring objects that are going to live for a long time. The default settings for CMS are SurvivorRatio=1024 and MaxTenuringThreshold=0 which cause all survivors of a scavenge to be promoted. This can place a lot of pressure on the single concurrent thread collecting the tenured generation. Note: when used with -XX:+UseBiasedLocking, this setting should be 15. 
+
+4.2.7   Tuning Example 7: Try AggressiveOpts for low pause times and high throughput
+
+This tuning example is builds on Example 6, and adds the AggressiveOpts option.
+
+java -Xmx3550m -Xms3550m -Xmn2g -Xss128k -XX:ParallelGCThreads=20 -XX:+UseConcMarkSweepGC -XX:+UseParNewGC -XX:SurvivorRatio=8 -XX:TargetSurvivorRatio=90 -XX:MaxTenuringThreshold=31 -XX:+AggressiveOpts
+
+Comments:
+
+    -XX:+AggressiveOpts
+    Turns on point performance optimizations that are expected to be on by default in upcoming releases. The changes grouped by this flag are minor changes to JVM runtime compiled code and not distinct performance features (such as BiasedLocking and ParallelOldGC). This is a good flag to try the JVM engineering team's latest performance tweaks for upcoming releases. Note: this option is experimental! The specific optimizations enabled by this option can change from release to release and even build to build. You should reevaluate the effects of this option with prior to deploying a new release of Java. 
+
