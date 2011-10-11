@@ -525,7 +525,25 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private void setAttribute(final int contextId, final Connection con, final int userId, final String name, final String value) throws SQLException {
+        setAttribute(contextId, con, userId, name, value, 0);
+    }
+
+    private static final int MAX_RETRY = 3;
+
+    private void setAttribute(final int contextId, final Connection con, final int userId, final String name, final String value, final int retryCount) throws SQLException {
         PreparedStatement stmt = null;
+        boolean retry = false;
+        try {
+            stmt = con.prepareStatement("SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=? FOR UPDATE");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            stmt.setString(pos, name);
+            stmt.executeQuery();
+        } finally {
+            closeSQLStuff(stmt);
+            stmt = null;
+        }
         try {
             stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
             int pos = 1;
@@ -545,10 +563,24 @@ public class RdbUserStorage extends UserStorage {
                 stmt.setInt(pos++, userId);
                 stmt.setString(pos++, name);
                 stmt.setString(pos, value);
-                stmt.executeUpdate();
+                try {
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    if (retryCount > MAX_RETRY) {
+                        throw e;
+                    }
+                    // Another thread inserted in the meantime: Retry
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Detected concurrent insertion of a user's attribute.", e);
+                    }
+                    retry = true;
+                }
             } finally {
                 closeSQLStuff(stmt);
             }
+        }
+        if (retry) {
+            setAttribute(contextId, con, userId, name, value, retryCount + 1);
         }
     }
 
