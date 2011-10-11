@@ -27,6 +27,8 @@ public class ExceptionUtils {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExceptionUtils.class));
 
+    private static final String MARKER = " ---=== /!\\ ===--- ";
+
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
      * 
@@ -34,12 +36,12 @@ public class ExceptionUtils {
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
-            LOG.fatal("Fatal error: Thread death", t);
+            LOG.fatal(MARKER + "Thread death" + MARKER, t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
             LOG.fatal(
-                "Fatal error: The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating.",
+                MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
                 t);
             throw (VirtualMachineError) t;
         }
