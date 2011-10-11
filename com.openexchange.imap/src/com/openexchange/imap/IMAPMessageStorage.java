@@ -305,10 +305,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 return textIsHtml ? extractPlainText(content) : content;
             }
-            if ("multipart".equals(type) && "alternative".equals(subtype)) {
-                /*
-                 * Prefer HTML text over plain text
-                 */
+            if ("multipart".equals(type)) {
                 final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
                 final String mpPrefix;
                 if (mpDetected[0]) {
@@ -319,40 +316,37 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 final BODYSTRUCTURE[] bodies = bodystructure.bodies;
                 final int count = bodies.length;
-                String text = null;
-                for (int i = 0; i < count; i++) {
-                    final BODYSTRUCTURE bp = bodies[i];
-                    final String bpType = bp.type.toLowerCase(Locale.ENGLISH);
-                    final String bpSubtype = bp.subtype.toLowerCase(Locale.ENGLISH);
-                    if ("text".equals(bpType) && "plain".equals(bpSubtype)) {
-                        if (text == null) {
-                            text = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
-                        }
-                        continue;
-                    } else if ("text".equals(bpType) && bpSubtype.startsWith("htm")) {
-                        final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
-                        if (s != null) {
-                            return s;
-                        }
-                    } else if ("multipart".equals(bpType)) {
-                        final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
-                        if (s != null) {
-                            return s;
+                if ("alternative".equals(subtype)) {
+                    /*
+                     * Prefer HTML text over plain text
+                     */
+                    String text = null;
+                    for (int i = 0; i < count; i++) {
+                        final BODYSTRUCTURE bp = bodies[i];
+                        final String bpType = bp.type.toLowerCase(Locale.ENGLISH);
+                        final String bpSubtype = bp.subtype.toLowerCase(Locale.ENGLISH);
+                        if ("text".equals(bpType) && "plain".equals(bpSubtype)) {
+                            if (text == null) {
+                                text = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                            }
+                            continue;
+                        } else if ("text".equals(bpType) && bpSubtype.startsWith("htm")) {
+                            final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                            if (s != null) {
+                                return s;
+                            }
+                        } else if ("multipart".equals(bpType)) {
+                            final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                            if (s != null) {
+                                return s;
+                            }
                         }
                     }
+                    return text;
                 }
-                return text;
-            } else if ("multipart".equals(type)) {
-                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
-                final String mpPrefix;
-                if (mpDetected[0]) {
-                    mpPrefix = mpId;
-                } else {
-                    mpPrefix = prefix;
-                    mpDetected[0] = true;
-                }
-                final BODYSTRUCTURE[] bodies = bodystructure.bodies;
-                final int count = bodies.length;
+                /*
+                 * A regular multipart
+                 */
                 for (int i = 0; i < count; i++) {
                     final String s = handleBODYSTRUCTURE(mailId, bodies[i], mpPrefix, i + 1, mpDetected);
                     if (s != null) {
