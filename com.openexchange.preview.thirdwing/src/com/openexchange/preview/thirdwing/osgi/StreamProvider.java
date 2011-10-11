@@ -82,17 +82,17 @@ public class StreamProvider implements IStreamProvider {
     
     private final Map<String, ManagedFile> createdFiles = new HashMap<String, ManagedFile>();
     
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
     
     
-    public StreamProvider(ServiceLookup serviceLookup) {
+    public StreamProvider(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public OutputStream createFile(String fileName) throws XHTMLConversionException {
-        ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
+    public OutputStream createFile(final String fileName) throws XHTMLConversionException {
+        final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
         try {
             File tempFile = fileManagement.newTempFile();
             FileOutputStream fos = new FileOutputStream(tempFile);
@@ -102,46 +102,44 @@ public class StreamProvider implements IStreamProvider {
             createdFiles.put(fileName, managedFile);
             
             return fos;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new XHTMLConversionException("Could not create OutputStream for file " + fileName, e);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new XHTMLConversionException("Could not create OutputStream for file " + fileName, e);
         }
     }
-    
-    public String getLinkForFile(String fileName, Session session) throws OXException {
-        ManagedFile managedFile = createdFiles.get(fileName); 
-        if (managedFile != null) {
-            return managedFile.constructURL(session);
-        } else { 
+        
+    public String getLinkForFile(final String fileName, final Session session) throws OXException {
+        final ManagedFile managedFile = createdFiles.get(fileName);
+        if (managedFile == null) { 
             return null;
         }
+        return managedFile.constructURL(session);
     }
     
     public String getDocumentContent() throws OXException {
-        ManagedFile managedFile = createdFiles.get(DOCUMENT);
-        if (managedFile != null) {
-            try {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(managedFile.getFile()), "UTF-8"));
-                StringBuilder sb = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-                
-                return sb.toString();
-            } catch (FileNotFoundException e) {
-                // TODO: throw proper exception
-                throw PreviewExceptionCodes.ERROR.create();
-            } catch (UnsupportedEncodingException e) {
-                // TODO: throw proper exception
-                throw PreviewExceptionCodes.ERROR.create();
-            } catch (IOException e) {
-             // TODO: throw proper exception
-                throw PreviewExceptionCodes.ERROR.create();
-            }            
-        } else { 
+        final ManagedFile managedFile = createdFiles.get(DOCUMENT);
+        if (managedFile == null) { 
             // TODO: throw proper exception
+            throw PreviewExceptionCodes.ERROR.create();
+        }
+        try {
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(managedFile.getFile()), "UTF-8"));
+            final StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+            }
+            
+            return sb.toString();
+        } catch (final FileNotFoundException e) {
+            // TODO: throw proper exception
+            throw PreviewExceptionCodes.ERROR.create();
+        } catch (final UnsupportedEncodingException e) {
+            // TODO: throw proper exception
+            throw PreviewExceptionCodes.ERROR.create();
+        } catch (final IOException e) {
+         // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
         }
     }

@@ -138,6 +138,9 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
@@ -3805,13 +3808,48 @@ public class Mail extends PermissionServlet implements UploadListener {
             m.writeTo(tmp);
             final MailMessage sentMail = transport.sendRawMessage(tmp.toByteArray());
             JSONObject responseData = null;
-            if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
-                /*
-                 * Copy in sent folder allowed
-                 */
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+            /*
+             * Set \Answered flag (if appropriate) & append to sent folder
+             */
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                mailAccess = MailAccess.getInstance(session, accountId);
                 mailAccess.connect();
-                try {
+                /*
+                 * Manually detect&set \Answered flag
+                 */
+                if (mailAccess.getMessageStorage() instanceof IMailMessageStorageExt) {
+                    final List<String> lst = new ArrayList<String>(2);
+                    {
+                        final String inReplyTo = sentMail.getFirstHeader("In-Reply-To");
+                        String references = sentMail.getFirstHeader("References");
+                        if (equals(inReplyTo, references)) {
+                            references = null;
+                        }
+                        if (null != inReplyTo) {
+                            lst.add(inReplyTo);
+                        }
+                        if (null != references) {
+                            lst.add(references);
+                        }
+                    }
+                    if (!lst.isEmpty()) {
+                        final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) mailAccess.getMessageStorage();
+                        final MailMessage[] mails = messageStorageExt.getMessagesByMessageID(lst.toArray(new String[lst.size()]));
+                        for (final MailMessage mail : mails) {
+                            if (null != mail) {
+                                setFlagReply(new MailPath(accountId, mail.getFolder(), mail.getMailId()), mailAccess);
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Append to sent folder
+                 */
+                if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
+                    /*
+                     * Copy in sent folder allowed
+                     */
                     final String sentFullname =
                         MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
                     final String[] uidArr;
@@ -3853,7 +3891,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                     responseData = new JSONObject();
                     responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, sentFullname));
                     responseData.put(DataFields.ID, uidArr[0]);
-                } finally {
+                }
+            } finally {
+                if (null != mailAccess) {
                     mailAccess.close(true);
                 }
             }
@@ -3864,6 +3904,55 @@ public class Mail extends PermissionServlet implements UploadListener {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             transport.close();
+        }
+    }
+
+    private static boolean equals(final String s1, final String s2) {
+        if (null == s2) {
+            if (null != s1) {
+                return false;
+            }
+        } else if (!s1.equals(s2)) {
+            return false;
+        }
+        return true;
+    }
+
+    private static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
+
+    private void setFlagReply(final MailPath path, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        if (null == path) {
+            LOG.warn("Missing msgref on reply. Corresponding mail cannot be marked as answered.", new Throwable());
+            return;
+        }
+        /*
+         * Mark referenced mail as answered
+         */
+        final String fullname = path.getFolder();
+        final String[] uids = new String[] { path.getMailID() };
+        mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
+        try {
+            /*
+             * Update JSON cache
+             */
+            final Session session = mailAccess.getSession();
+            final int userId = session.getUserId();
+            final int contextId = session.getContextId();
+            if (MailMessageCache.getInstance().containsFolderMessages(mailAccess.getAccountId(), fullname, userId, contextId)) {
+                /*
+                 * Update cache entries
+                 */
+                MailMessageCache.getInstance().updateCachedMessages(
+                    uids,
+                    mailAccess.getAccountId(),
+                    fullname,
+                    userId,
+                    contextId,
+                    FIELDS_FLAGS,
+                    new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
+            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 

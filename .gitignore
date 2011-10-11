@@ -33,6 +33,7 @@ com.openexchange.push/jars
 com.openexchange.secret/jars
 com.openexchange.server/jars
 com.openexchange.server/build
+com.openexchange.server/tmp
 org.apache.tika/jars
 com.openexchange.calendar/jars
 com.openexchange.preview/jars
@@ -54,6 +55,7 @@ com.openexchange.oauth.linkedin/jars
 com.openexchange.oauth/jars
 com.openexchange.secret.recovery/jars
 com.openexchange.sessiond/jars
+com.openexchange.sessiond/tmp
 com.openexchange.textxtraction/jars
 com.openexchange.carddav/jars
 com.openexchange.config.cascade.user/jars
@@ -83,6 +85,7 @@ com.openexchange.file.storage.generic/jars
 com.openexchange.file.storage.json/jars
 com.openexchange.http.deferrer/jars
 com.openexchange.i18n/jars
+com.openexchange.i18n/tmp
 com.openexchange.messaging.facebook/jars
 com.openexchange.messaging.twitter/jars
 com.openexchange.oauth.facebook/jars

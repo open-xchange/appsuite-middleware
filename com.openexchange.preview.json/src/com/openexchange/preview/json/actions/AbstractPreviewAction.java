@@ -65,15 +65,20 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractPreviewAction implements AJAXActionService {
     
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
     
-    public AbstractPreviewAction(ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link AbstractPreviewAction}.
+     * 
+     * @param serviceLookup The service look-up
+     */
+    public AbstractPreviewAction(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
     
     protected IDBasedFileAccessFactory getFileAccessFactory() throws OXException {
-        IDBasedFileAccessFactory service = serviceLookup.getService(IDBasedFileAccessFactory.class);
+        final IDBasedFileAccessFactory service = serviceLookup.getService(IDBasedFileAccessFactory.class);
         if (service == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
@@ -82,7 +87,7 @@ public abstract class AbstractPreviewAction implements AJAXActionService {
     }
     
     protected PreviewService getPreviewService() throws OXException {
-        PreviewService service = serviceLookup.getService(PreviewService.class);
+        final PreviewService service = serviceLookup.getService(PreviewService.class);
         if (service == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(PreviewService.class.getName());
         }
@@ -91,7 +96,7 @@ public abstract class AbstractPreviewAction implements AJAXActionService {
     }
     
     protected ManagedFileManagement getFileManagementService() throws OXException {
-        ManagedFileManagement service = serviceLookup.getService(ManagedFileManagement.class);
+        final ManagedFileManagement service = serviceLookup.getService(ManagedFileManagement.class);
         if (service == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
         }

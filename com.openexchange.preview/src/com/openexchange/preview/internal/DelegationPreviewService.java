@@ -49,21 +49,24 @@
 
 package com.openexchange.preview.internal;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.PriorityBlockingQueue;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
@@ -78,165 +81,150 @@ import com.openexchange.session.Session;
  * {@link DelegationPreviewService}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DelegationPreviewService implements PreviewService, SimpleRegistryListener<InternalPreviewService> {
     
-    private PreviewService delegate;
+    private final PreviewService delegate;
     
-    private Map<String, Map<PreviewOutput, List<InternalPreviewService>>> serviceMap = new HashMap<String, Map<PreviewOutput, List<InternalPreviewService>>>();
-        
+    private final ConcurrentMap<String, ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>>> serviceMap;
 
-    public DelegationPreviewService(PreviewService delegate) {
+    /**
+     * Initializes a new {@link DelegationPreviewService}.
+     * 
+     * @param delegate The delegate preview service
+     */
+    public DelegationPreviewService(final PreviewService delegate) {
         super();
         this.delegate = delegate;
+        serviceMap = new ConcurrentHashMap<String, ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>>>();
     }
 
     @Override
-    public String detectDocumentType(InputStream inputStream) throws OXException {                
+    public String detectDocumentType(final InputStream inputStream) throws OXException {                
         return delegate.detectDocumentType(inputStream);
     }
 
     @Override
-    public PreviewDocument getPreviewFor(String arg, PreviewOutput output, Session session) throws OXException {
-        FileInputStream fis;
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
+        InputStream is = null;
         try {
-            fis = new FileInputStream(new File(arg));
-            String mimeType = detectDocumentType(fis);
-            fis.close();
-            
-            PreviewService previewService = getBestFitOrDelegate(mimeType, output);
-            PreviewDocument preview = previewService.getPreviewFor(arg, output, session);
-                
-            return preview;
-        } catch (FileNotFoundException e) {
-         // TODO: throw proper exception
-            throw PreviewExceptionCodes.ERROR.create();
-        } catch (IOException e) {
-         // TODO: throw proper exception
-            throw PreviewExceptionCodes.ERROR.create();
-        }        
+            final File file = new File(arg);
+            if (file.isFile()) {
+                is = new BufferedInputStream(new FileInputStream(new File(arg)));
+            } else {
+                final URL url = new URL(arg);
+                final URLConnection connection = url.openConnection();
+                is = new BufferedInputStream(connection.getInputStream());
+            }
+            final String mimeType = detectDocumentType(is);
+            /*
+             * Serve with best-fit or delegate preview service
+             */
+            final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
+            return previewService.getPreviewFor(arg, output, session);
+        } catch (final IOException e) {
+            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(is);
+        }       
     }
 
     @Override
-    public PreviewDocument getPreviewFor(InputStream inputStream, String mimeType, String name, PreviewOutput output, Session session) throws OXException {        
-        PreviewService previewService = getBestFitOrDelegate(mimeType, output);
-        PreviewDocument preview = previewService.getPreviewFor(inputStream, mimeType, name, output, session);
-
-        return preview;
+    public PreviewDocument getPreviewFor(final InputStream inputStream, final String mimeType, final String name, final PreviewOutput output, final Session session) throws OXException {        
+        final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
+        return previewService.getPreviewFor(inputStream, mimeType, name, output, session);
     }
 
     @Override
-    public PreviewDocument getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session) throws OXException {
-        String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
-        PreviewService previewService = getBestFitOrDelegate(mimeType, output);
-        PreviewDocument preview = previewService.getPreviewFor(documentData, output, session);
-        
-        return preview;
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
+        final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
+        final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
+        return previewService.getPreviewFor(documentData, output, session);
     }
     
     @Override
-    public void added(ServiceReference<InternalPreviewService> ref, InternalPreviewService service) {
-        PreviewPolicy[] previewPolicies = service.getPreviewPolicies();
-        for (PreviewPolicy policy : previewPolicies) {
-            String mimeType = policy.getMimeType();
-            PreviewOutput output = policy.getOutput();
-            Map<PreviewOutput, List<InternalPreviewService>> map = serviceMap.get(mimeType);
+    public void added(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
+        for (final PreviewPolicy policy : service.getPreviewPolicies()) {
+            final String mimeType = policy.getMimeType();
+            final PreviewOutput output = policy.getOutput();
+            ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
             if (map == null) {
-                map = new HashMap<PreviewOutput, List<InternalPreviewService>>();
-                List<InternalPreviewService> list = new ArrayList<InternalPreviewService>();
-                list.add(service);
-                map.put(output, list);
-                serviceMap.put(mimeType, map);
-                continue;
+                final ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>> newMap = new ConcurrentHashMap<PreviewOutput, BlockingQueue<InternalPreviewService>>();
+                map = serviceMap.putIfAbsent(mimeType, newMap);
+                if (null == map) {
+                    map = newMap;
+                }
             }
-            
-            List<InternalPreviewService> list = map.get(output);
-            if (list == null) {
-                list = new ArrayList<InternalPreviewService>();
-                list.add(service);
-                map.put(output, list);
-                continue;
+            BlockingQueue<InternalPreviewService> queue = map.get(output);
+            if (queue == null) {
+                final BlockingQueue<InternalPreviewService> newQueue = new PriorityBlockingQueue<InternalPreviewService>(4, new InternalPreviewServiceComparator(mimeType, output));
+                queue = map.putIfAbsent(output, newQueue);
+                if (queue == null) {
+                    queue = newQueue;
+                }
             }
-            
-            list.add(service);
+            queue.add(service);
         }
-        
-        calc();
     }
 
     @Override
-    public void removed(ServiceReference<InternalPreviewService> ref, InternalPreviewService service) {
-        PreviewPolicy[] previewPolicies = service.getPreviewPolicies();
-        for (PreviewPolicy policy : previewPolicies) {
-            String mimeType = policy.getMimeType();
-            PreviewOutput output = policy.getOutput();
-            Map<PreviewOutput, List<InternalPreviewService>> map = serviceMap.get(mimeType);
+    public void removed(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
+        final PreviewPolicy[] previewPolicies = service.getPreviewPolicies();
+        for (final PreviewPolicy policy : previewPolicies) {
+            final String mimeType = policy.getMimeType();
+            final PreviewOutput output = policy.getOutput();
+            final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
             if (map != null) {
-                List<InternalPreviewService> list = map.get(output);
-                if (list != null)  {
-                    list.remove(service);
+                final BlockingQueue<InternalPreviewService> queue = map.get(output);
+                if (queue != null)  {
+                    queue.remove(service);
                 }                
             }
             
         }
-
-        calc();
     }
     
-    private void calc() {
-        for (String mimeType : serviceMap.keySet()) {
-            Map<PreviewOutput, List<InternalPreviewService>> map = serviceMap.get(mimeType);
-            for (PreviewOutput output : map.keySet()) {
-                List<InternalPreviewService> list = map.get(output);
-                Collections.sort(list, new InternalPreviewServiceComparator(mimeType, output));
-            }
-        }
-    }
-    
-    private PreviewService getBestFitOrDelegate(String mimeType, PreviewOutput output) {
-        Map<PreviewOutput, List<InternalPreviewService>> map = serviceMap.get(mimeType);
+    private PreviewService getBestFitOrDelegate(final String mimeType, final PreviewOutput output) {
+        final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
         if (map == null) {
             return delegate;
         }
-        
-        List<InternalPreviewService> list = map.get(output);
-        if (list == null || list.isEmpty()) {
+        final BlockingQueue<InternalPreviewService> queue = map.get(output);
+        if (queue == null) {
             return delegate;
         }
-        
-        return list.get(0);
+        return queue.peek();
     }
     
     private static final class InternalPreviewServiceComparator implements Comparator<InternalPreviewService> {
         
-        private PreviewOutput output;
+        private final PreviewOutput output;
         
-        private String mimeType;
+        private final String mimeType;
 
-        public InternalPreviewServiceComparator(String mimeType, PreviewOutput output) {
+        protected InternalPreviewServiceComparator(final String mimeType, final PreviewOutput output) {
             super();
             this.mimeType = mimeType;
             this.output = output;
         }
 
         @Override
-        public int compare(InternalPreviewService o1, InternalPreviewService o2) {
+        public int compare(final InternalPreviewService o1, final InternalPreviewService o2) {
             int o1Quality = 0;
             int o2Quality = 0;
-            PreviewPolicy[] o1Policies = o1.getPreviewPolicies();
-            for (PreviewPolicy policy : o1Policies) {
+            final PreviewPolicy[] o1Policies = o1.getPreviewPolicies();
+            for (final PreviewPolicy policy : o1Policies) {
                 if (policy.getMimeType().equals(mimeType) && policy.getOutput().equals(output)) {
                     o1Quality = policy.getQuality().getValue();
                 }
             }
-            
-            PreviewPolicy[] o2Policies = o2.getPreviewPolicies();
-            for (PreviewPolicy policy : o2Policies) {
+            final PreviewPolicy[] o2Policies = o2.getPreviewPolicies();
+            for (final PreviewPolicy policy : o2Policies) {
                 if (policy.getMimeType().equals(mimeType) && policy.getOutput().equals(output)) {
                     o2Quality = policy.getQuality().getValue();
                 }
             }
-
             return o1Quality - o2Quality;
         }
         
