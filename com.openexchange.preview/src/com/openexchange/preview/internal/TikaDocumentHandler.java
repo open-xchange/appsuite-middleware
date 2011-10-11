@@ -102,9 +102,6 @@ import com.openexchange.session.Session;
  */
 public final class TikaDocumentHandler {
 
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TikaDocumentHandler.class));
-
     protected final Map<String, ManagedFile> extractedFiles;
 
     protected final ServiceLookup serviceLookup;
