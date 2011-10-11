@@ -21,7 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Utilities for handling Throwables and Exceptions.
+ * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
  */
 public class ExceptionUtils {
 

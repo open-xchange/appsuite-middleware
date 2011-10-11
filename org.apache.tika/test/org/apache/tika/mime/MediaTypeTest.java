@@ -106,7 +106,7 @@ public class MediaTypeTest extends TestCase {
                 + "; c=\"\\(\\)\\<\\>\\@\\,\\;\\:\\\\\\\"\\/\\[\\]\\?\\=\"",
                 new MediaType("text", "plain", parameters).toString());
     }
-
+    
     /**
      * @since TIKA-121
      */
@@ -156,5 +156,5 @@ public class MediaTypeTest extends TestCase {
         assertEquals(0, type.getParameters().keySet().size());
     }
 
-
+    
 }

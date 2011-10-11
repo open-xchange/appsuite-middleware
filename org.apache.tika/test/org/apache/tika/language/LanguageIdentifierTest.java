@@ -41,11 +41,10 @@ public class LanguageIdentifierTest extends TestCase {
         /* "lt", */ "nl", "pt", "sv"
     };
 
-    @Override
     public void setUp() {
         LanguageIdentifier.initProfiles();
     }
-
+    
     public void testLanguageDetection() throws IOException {
         for (String language : languages) {
             ProfilingWriter writer = new ProfilingWriter();
@@ -120,7 +119,7 @@ public class LanguageIdentifierTest extends TestCase {
             new LanguageIdentifier(writer.getProfile());
         assertEquals(estonian, identifier.getLanguage());
     }
-
+    
     private void writeTo(String language, Writer writer) throws IOException {
         InputStream stream =
             LanguageIdentifierTest.class.getResourceAsStream(language + ".test");

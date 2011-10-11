@@ -81,11 +81,11 @@ public class Bzip2ParserTest extends AbstractPkgTest {
        } finally {
            stream.close();
        }
-
+       
        // Should find a single entry, for the (compressed) tar file
        assertEquals(1, tracker.filenames.size());
        assertEquals(1, tracker.mediatypes.size());
-
+       
        assertEquals(null, tracker.filenames.get(0));
        assertEquals(null, tracker.mediatypes.get(0));
 
