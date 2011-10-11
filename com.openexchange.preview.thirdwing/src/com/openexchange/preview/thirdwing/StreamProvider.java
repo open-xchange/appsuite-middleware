@@ -104,9 +104,9 @@ public class StreamProvider implements IStreamProvider {
             
             final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
             final File tempFile = fileManagement.newTempFile("open-xchange", extension);
-            FileOutputStream fos = new FileOutputStream(tempFile);
-            String mimeType = MIMEType2ExtMap.getContentType(fileName);
-            ManagedFile managedFile = fileManagement.createManagedFile(tempFile);
+            final FileOutputStream fos = new FileOutputStream(tempFile);
+            final String mimeType = MIMEType2ExtMap.getContentType(fileName);
+            final ManagedFile managedFile = fileManagement.createManagedFile(tempFile);
             managedFile.setContentType(mimeType);
             createdFiles.put(fileName, managedFile);
             

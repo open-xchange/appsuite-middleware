@@ -95,64 +95,27 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     
     static {
         int i = 0;        
+        POLICIES[i++] = new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD);
         POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.document", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.template", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-word.document.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-word.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.template", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.sheet.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.sheet.binary.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
         POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint", PreviewOutput.HTML, Quality.GOOD);
-        /*
-         *  Ext
-            MIME Type
-            .doc
-            application/msword
-            .dot
-            application/msword
-            .docx
-            application/vnd.openxmlformats-officedocument.wordprocessingml.document
-            .dotx
-            application/vnd.openxmlformats-officedocument.wordprocessingml.template
-            .docm
-            application/vnd.ms-word.document.macroEnabled.12
-            .dotm
-            application/vnd.ms-word.template.macroEnabled.12
-            .xls
-            application/vnd.ms-excel
-            .xlt
-            application/vnd.ms-excel
-            .xla
-            application/vnd.ms-excel
-            .xlsx
-            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-            .xltx
-            application/vnd.openxmlformats-officedocument.spreadsheetml.template
-            .xlsm
-            application/vnd.ms-excel.sheet.macroEnabled.12
-            .xltm
-            application/vnd.ms-excel.template.macroEnabled.12
-            .xlam
-            application/vnd.ms-excel.addin.macroEnabled.12
-            .xlsb
-            application/vnd.ms-excel.sheet.binary.macroEnabled.12
-            .ppt
-            application/vnd.ms-powerpoint
-            .pot
-            application/vnd.ms-powerpoint
-            .pps
-            application/vnd.ms-powerpoint
-            .ppa
-            application/vnd.ms-powerpoint
-            .pptx
-            application/vnd.openxmlformats-officedocument.presentationml.presentation
-            .potx
-            application/vnd.openxmlformats-officedocument.presentationml.template
-            .ppsx
-            application/vnd.openxmlformats-officedocument.presentationml.slideshow
-            .ppam
-            application/vnd.ms-powerpoint.addin.macroEnabled.12
-            .pptm
-            application/vnd.ms-powerpoint.presentation.macroEnabled.12
-            .potm
-            application/vnd.ms-powerpoint.template.macroEnabled.12
-            .ppsm
-            application/vnd.ms-powerpoint.slideshow.macroEnabled.12
-         */
+        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.presentation", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.template", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.slideshow", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.presentation.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.slideshow.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
     }  
 
     public ThirdwingPreviewService(final ServiceLookup serviceLookup) {
@@ -191,22 +154,6 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             }
         }
     }
-
-//    @Override
-//    public PreviewDocument getPreviewFor(final InputStream inputStream, final PreviewOutput output, final Session session) throws OXException {    
-//        File file = null;
-//        try {
-//            MIMEType2ExtMap.
-//            file = streamToFile(inputStream, extension);
-//            return generatePreview(file, session);
-//        } catch (final IOException e) {
-//            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
-//        } finally {
-//            if (file != null) {
-//                file.delete();
-//            }
-//        }
-//    }
 
     @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {

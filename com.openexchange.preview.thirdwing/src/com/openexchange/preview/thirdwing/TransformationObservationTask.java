@@ -83,18 +83,18 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
         "src=['\"]?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)['\"]?",
         Pattern.CASE_INSENSITIVE);
 
-    private StreamProvider streamProvider;
+    private final StreamProvider streamProvider;
 
-    private Session session;
+    private final Session session;
     
-    private AtomicBoolean done;
+    private final AtomicBoolean done;
     
     private String content;
     
     private OXException exception;
     
 
-    public TransformationObservationTask(StreamProvider streamProvider, Session session) {
+    public TransformationObservationTask(final StreamProvider streamProvider, final Session session) {
         super();
         this.streamProvider = streamProvider;
         this.session = session;
@@ -103,7 +103,9 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     
     @Override
     public String call() {
-        while (!done.get());
+        while (!done.get()) {
+            ;
+        }
         
         return content;
     }
@@ -113,35 +115,35 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     }
 
     @Override
-    public void update(Observable o, Object obj) {
-        UpdateMessages message = (UpdateMessages) obj;
+    public void update(final Observable o, final Object obj) {
+        final UpdateMessages message = (UpdateMessages) obj;
         if (message.getKey().equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED)) {
             try {
-                String content = streamProvider.getDocumentContent();
+                final String content = streamProvider.getDocumentContent();
                 this.content = replaceLinks(content);                
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 exception = e;
             } finally {
                 done.compareAndSet(false, true);
             }
         } else if (message.getKey().equals(UpdateMessages.HTML_TRANSFORMATION_FAILED)) {
-            Exception e = (Exception) message.getData();
+            final Exception e = (Exception) message.getData();
             exception = PreviewExceptionCodes.ERROR.create(e);
             done.compareAndSet(false, true);
         }        
     }
 
-    private String replaceLinks(String content) throws OXException {
+    private String replaceLinks(final String content) throws OXException {
         String retval = content;
-        Matcher imgMatcher = IMG_PATTERN.matcher(retval);
-        MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
-        StringBuilder sb = new StringBuilder(retval.length());
+        final Matcher imgMatcher = IMG_PATTERN.matcher(retval);
+        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
+        final StringBuilder sb = new StringBuilder(retval.length());
         if (imgMatcher.find()) {
             final StringBuilder strBuffer = new StringBuilder(256);
             final MatcherReplacer mr = new MatcherReplacer();
             final StringBuilder linkBuilder = new StringBuilder(256);
             do {
-                String imgTag = imgMatcher.group();
+                final String imgTag = imgMatcher.group();
                 strBuffer.setLength(0);
                 final Matcher m = FILENAME_PATTERN.matcher(imgTag);
                 mr.resetTo(m, imgTag);

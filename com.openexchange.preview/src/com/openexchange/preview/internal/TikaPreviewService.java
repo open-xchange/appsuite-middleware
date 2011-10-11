@@ -123,14 +123,6 @@ public final class TikaPreviewService implements PreviewService {
         }
     }
 
-//    @Override
-//    public PreviewDocument getPreviewFor(final InputStream inputStream, final PreviewOutput output, final Session session) throws OXException {
-//        /*
-//         * Get content according to output format
-//         */
-//        return getPreviewFor(newDefaultHandler(session), inputStream, output);
-//    }
-
     @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
         final DataProperties dataProperties = documentData.getDataProperties();

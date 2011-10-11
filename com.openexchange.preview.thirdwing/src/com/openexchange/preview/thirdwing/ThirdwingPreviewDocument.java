@@ -66,7 +66,7 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
     private final String content;
     
 
-    public ThirdwingPreviewDocument(Map<String, String> metaData, String content) {
+    public ThirdwingPreviewDocument(final Map<String, String> metaData, final String content) {
         super();
         this.metaData = new HashMap<String, String>();        
         this.metaData.clear();

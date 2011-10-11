@@ -116,7 +116,7 @@ public enum DocumentConverterExceptionCodes implements OXExceptionCode {
 
     private DocumentConverterExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        this.number = detailNumber;
+        number = detailNumber;
         this.category = category;
 
     }

@@ -130,13 +130,6 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
         }       
     }
 
-//    @Override
-//    public PreviewDocument getPreviewFor(final InputStream inputStream, final PreviewOutput output, final Session session) throws OXException {        
-//        final String mimeType = detectDocumentType(inputStream);
-//        final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
-//        return previewService.getPreviewFor(inputStream, output, session);
-//    }
-
     @Override
     public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);

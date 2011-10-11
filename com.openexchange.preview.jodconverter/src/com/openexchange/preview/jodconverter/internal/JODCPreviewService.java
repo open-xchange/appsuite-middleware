@@ -92,30 +92,30 @@ public class JODCPreviewService implements InternalPreviewService {
     }
     
     
-    public JODCPreviewService(ServiceLookup serviceLookup) {
+    public JODCPreviewService(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public String detectDocumentType(InputStream inputStream) throws OXException {
+    public String detectDocumentType(final InputStream inputStream) throws OXException {
         return null;
     }
 
     @Override
-    public PreviewDocument getPreviewFor(String arg, PreviewOutput output, Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final String arg, final PreviewOutput output, final Session session) throws OXException {
         if (!isConvertableToOutput(output)) {
             return null;
         }
         
-        File file = new File(arg);
+        final File file = new File(arg);
         InputStream is = null;
         try {
             is = new FileInputStream(file);
-            DocumentContent document = createDocumentContent(is, file.getName(), new MimetypesFileTypeMap().getContentType(file));            
+            final DocumentContent document = createDocumentContent(is, file.getName(), new MimetypesFileTypeMap().getContentType(file));            
             
             return convertDocument(document, output);
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
@@ -124,47 +124,37 @@ public class JODCPreviewService implements InternalPreviewService {
         }
     }
 
-//    @Override
-//    public PreviewDocument getPreviewFor(InputStream is, String mimeType, String extension, PreviewOutput output, Session session) throws OXException {
-//        if (!isConvertableToOutput(output)) {
-//            return null;
-//        }
-//        
-//        DocumentContent document = createDocumentContent(is, "inputDoc." + extension, mimeType);       
-//        return convertDocument(document, output);
-//    }
-
     @Override
-    public PreviewDocument getPreviewFor(Data<InputStream> documentData, PreviewOutput output, Session session) throws OXException {
+    public PreviewDocument getPreviewFor(final Data<InputStream> documentData, final PreviewOutput output, final Session session) throws OXException {
         if (!isConvertableToOutput(output)) {
             return null;
         }
         
-        InputStream is = documentData.getData();
-        String name = documentData.getDataProperties().get(DataProperties.PROPERTY_NAME);
-        String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
-        DocumentContent document = createDocumentContent(is, name, mimeType);       
+        final InputStream is = documentData.getData();
+        final String name = documentData.getDataProperties().get(DataProperties.PROPERTY_NAME);
+        final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
+        final DocumentContent document = createDocumentContent(is, name, mimeType);       
         return convertDocument(document, output);
     }
     
-    private DocumentContent createDocumentContent(InputStream is, String fileName, String mimeType) {
+    private DocumentContent createDocumentContent(final InputStream is, final String fileName, final String mimeType) {
         try {
-            byte[] documentBytes = Streams.stream2bytes(is);
-            DocumentContent document = new ByteArrayDocumentContent(documentBytes, fileName, mimeType);
+            final byte[] documentBytes = Streams.stream2bytes(is);
+            final DocumentContent document = new ByteArrayDocumentContent(documentBytes, fileName, mimeType);
             
             return document;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
         }         
     }
     
-    private boolean isConvertableToOutput(PreviewOutput output) {
+    private boolean isConvertableToOutput(final PreviewOutput output) {
         return getOutputExtension(output) != null;
     }
     
-    private String getOutputExtension(PreviewOutput output) {
+    private String getOutputExtension(final PreviewOutput output) {
         final String retval;
         switch (output) {
         
@@ -190,28 +180,28 @@ public class JODCPreviewService implements InternalPreviewService {
     }
 
     
-    private PreviewDocument convertDocument(DocumentContent document, PreviewOutput output) throws OXException {
-        DocumentConverterService converterService = serviceLookup.getService(DocumentConverterService.class);
+    private PreviewDocument convertDocument(final DocumentContent document, final PreviewOutput output) throws OXException {
+        final DocumentConverterService converterService = serviceLookup.getService(DocumentConverterService.class);
         if (converterService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DocumentConverterService.class.getName());
         }
         
-        DocumentContent documentContent = converterService.convert(document, getOutputExtension(output));
-        JODCPreviewDocument previewDocument = new JODCPreviewDocument();
-        Map<String, String> metaData = new HashMap<String, String>();
+        final DocumentContent documentContent = converterService.convert(document, getOutputExtension(output));
+        final JODCPreviewDocument previewDocument = new JODCPreviewDocument();
+        final Map<String, String> metaData = new HashMap<String, String>();
         metaData.put("content-type", documentContent.getContentType());
         metaData.put("resourcename", documentContent.getName());
         previewDocument.setMetaData(metaData);
         
-        InputStream is = documentContent.getInputStream();
+        final InputStream is = documentContent.getInputStream();
         byte[] documentBytes;
         try {
             documentBytes = Streams.stream2bytes(is);
-            String str = new String(documentBytes, "UTF-8");            
+            final String str = new String(documentBytes, "UTF-8");            
             previewDocument.setContent(str);
             
             return previewDocument;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return null;

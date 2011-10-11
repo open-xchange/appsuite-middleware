@@ -92,7 +92,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
     public FileEmbeddedDocumentExtractor(final TikaDocumentHandler documentHandler) {
         super();
         this.documentHandler = documentHandler;
-        this.fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
+        fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
         count = 1;
         config = TikaConfig.getDefaultConfig();
         /*
@@ -121,7 +121,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
             if (name == null) {
                 name = Integer.toString(count++);
             }
-            // ²contentHandler.s
+            // ï¿½contentHandler.s
             /*
              * MIME type
              */

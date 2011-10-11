@@ -103,7 +103,7 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
     }
     
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         super.convert(request, result, session, converter);
         
         /*

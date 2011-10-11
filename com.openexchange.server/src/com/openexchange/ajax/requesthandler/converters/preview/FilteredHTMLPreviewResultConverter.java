@@ -85,7 +85,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
     }
     
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         super.convert(request, result, session, converter);
         
         final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
