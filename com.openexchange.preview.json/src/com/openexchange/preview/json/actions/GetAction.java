@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
-import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -161,7 +160,22 @@ public class GetAction extends AbstractPreviewAction {
             dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileMetadata.getFileMIMEType());
             dataProperties.put(DataProperties.PROPERTY_NAME, fileMetadata.getFileName());
             dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileMetadata.getFileSize()));
-            final Data<InputStream> documentData = new SimpleData<InputStream>(fileAccess.getDocument(id, version), dataProperties);
+            final Data<InputStream> documentData = new Data<InputStream>() {
+                
+                @Override
+                public DataProperties getDataProperties() {
+                    return dataProperties;
+                }
+                
+                @Override
+                public InputStream getData() {
+                    try {
+                        return fileAccess.getDocument(id, version);
+                    } catch (final OXException e) {
+                        return Streams.newByteArrayInputStream(new byte[0]);
+                    }
+                }
+            };
             
             final PreviewService previewService = getPreviewService();
             final PreviewDocument preview = previewService.getPreviewFor(documentData, PreviewOutput.HTML, session);
