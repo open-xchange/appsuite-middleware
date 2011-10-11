@@ -134,7 +134,11 @@ public final class GetAction implements ETagAwareAJAXActionService {
                 contentType.setPrimaryType(ct.substring(0, pos));
                 contentType.setSubType(ct.substring(pos + 1));
             }
-            contentType.setParameter("name", fileName);
+            
+            if (fileName != null) {
+                contentType.setParameter("name", fileName);
+            }
+            
             /*
              * Write from content's input stream to response output stream
              */
@@ -153,7 +157,9 @@ public final class GetAction implements ETagAwareAJAXActionService {
              * Create file holder
              */
             final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(out.toByteArray());
-            fileHolder.setName(fileName);
+            if (fileName != null) {
+                fileHolder.setName(fileName);
+            }
             fileHolder.setContentType(contentType.toString());
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*

@@ -63,7 +63,6 @@ import net.thirdwing.common.ConversionJobfactory;
 import net.thirdwing.common.IConversionJob;
 import net.thirdwing.exception.XHTMLConversionException;
 import net.thirdwing.io.IOUnit;
-import net.thirdwing.io.iface.DocumentData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
