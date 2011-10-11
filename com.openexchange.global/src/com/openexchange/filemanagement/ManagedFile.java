@@ -69,15 +69,6 @@ public interface ManagedFile {
      * @throws OXException If URL cannot be constructed
      */
     public String constructURL(Session session) throws OXException;
-    
-    /**
-     * Constructs an URL to HTML document held by this managed file.
-     *
-     * @param session The session
-     * @return The URL to managed resource
-     * @throws OXException If URL cannot be constructed
-     */
-    public String constructHTMLURL(Session session) throws OXException;
 
     /**
      * Gets the (optional) file name.

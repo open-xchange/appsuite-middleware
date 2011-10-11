@@ -49,11 +49,8 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Map;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -62,9 +59,6 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
@@ -108,28 +102,34 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         final PreviewDocument previewDocument;
         {
             final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-//            if (autoDetect()) {
-//                previewDocument = previewService.getPreviewFor(fileHolder.getStream(), getOutput(), session);
-//            } else {
-                final DataProperties dataProperties = new DataProperties(4);
-                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
-                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
-                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
-                dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileHolder.getLength()));
-                previewDocument =
-                    previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
-//            }
+
+            final DataProperties dataProperties = new DataProperties(4);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
+            dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+            dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+            dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileHolder.getLength()));
+            previewDocument =
+                previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
+
         }
 
-        result.setResultObject(previewDocument, getOutputFormat());
+        if (request.getIntParameter("save") == 1) {
+            /*
+             * Preview document should be saved.
+             * We set the request format to file and return a FileHolder 
+             * containing the preview document.
+             */
+            request.setFormat("file");
+            byte[] documentBytes = previewDocument.getContent().getBytes();
+            InputStream is = new ByteArrayInputStream(documentBytes);
+            String contentType = previewDocument.getMetaData().get("content-type");
+            String fileName = previewDocument.getMetaData().get("resourcename");
+            FileHolder responseFileHolder = new FileHolder(is, documentBytes.length, contentType, fileName);
+            result.setResultObject(responseFileHolder, "file");
+        } else {
+            result.setResultObject(previewDocument, getOutputFormat());
+        }        
     }
-
-    /**
-     * Indicates whether to auto-detect passed content.
-     *
-     * @return <code>true</code> to auto-detect; otherwise <code>false</code>
-     */
-    protected abstract boolean autoDetect();
 
     /**
      * Gets the desired output format.

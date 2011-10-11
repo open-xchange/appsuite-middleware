@@ -76,7 +76,6 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
         actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction(services));
         actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction(services));
         actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction(services));
-        actions.put("html", new com.openexchange.filemanagement.json.actions.HTMLAction(services));
     }
 
     @Override

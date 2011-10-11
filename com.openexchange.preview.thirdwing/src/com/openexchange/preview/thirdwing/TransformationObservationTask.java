@@ -67,8 +67,17 @@ import com.openexchange.tools.regex.MatcherReplacer;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TransformationObservationTask extends AbstractTask<String> implements Observer {
+    
+    /*
+     * TODO:
+     * We have to recognize the following patterns:
+     * url(filename.ext)
+     * href="/filename.html"
+     * rel="filename.html"
+     */
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
 
     private static final Pattern FILENAME_PATTERN = Pattern.compile(
         "src=['\"]?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)['\"]?",

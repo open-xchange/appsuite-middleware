@@ -81,6 +81,11 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
     public DownloadPreviewResultConverter() {
         super();
     }
+    
+    @Override
+    public String getInputFormat() {
+        return "preview";
+    }
 
     @Override
     public String getOutputFormat() {
@@ -90,11 +95,6 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
     @Override
     public Quality getQuality() {
         return Quality.GOOD;
-    }
-
-    @Override
-    protected boolean autoDetect() {
-        return true;
     }
 
     @Override

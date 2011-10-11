@@ -76,11 +76,6 @@ public final class HTMLPreviewResultConverter extends AbstractPreviewResultConve
     }
 
     @Override
-    protected boolean autoDetect() {
-        return true;
-    }
-
-    @Override
     protected PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
