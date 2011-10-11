@@ -250,13 +250,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return getMessagesInternal(fullName, uids2longs(mailIds), mailFields, headerNames);
     }
 
-    private static final FetchProfile FETCH_PROFILE_CONTENT_TYPE = new FetchProfile() {
-
-        {
-            add(FetchProfile.Item.CONTENT_INFO);
-        }
-    };
-
     private static String extractPlainText(final String content) throws OXException {
         final TextXtractService textXtractService = IMAPServiceRegistry.getService(TextXtractService.class);
         return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), null);
