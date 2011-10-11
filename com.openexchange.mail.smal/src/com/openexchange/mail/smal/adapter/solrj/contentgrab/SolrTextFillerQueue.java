@@ -350,14 +350,14 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
              */
             int index = -1;
             while (index < 0) {
-                final long currentMillis = System.currentTimeMillis();
+                final long earliestStamp = System.currentTimeMillis() - MAX_RUNNING_TIME;
                 for (int i = 0; (index < 0) && (i < maxNumConcurrentFillerTasks); i++) {
                     final StampedFuture sf = concurrentFutures.get(i);
                     if (null == sf) {
                         if (concurrentFutures.compareAndSet(i, null, placeHolder)) {
                             index = i; // Found a free slot
                         }
-                    } else if ((currentMillis - sf.getStamp()) > MAX_RUNNING_TIME) { // Elapsed
+                    } else if (sf.getStamp() < earliestStamp) { // Elapsed
                         sf.getFuture().cancel(true);
                         if (DEBUG) {
                             LOG.debug("Cancelled elapsed task...");
