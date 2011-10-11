@@ -602,7 +602,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int i = 0; i < uids.length; i++) {
                 final long uid = uids[i];
                 if (uid != -1) {
-                    retval[i] = new IDMailMessage("INBOX", String.valueOf(uid));
+                    retval[i] = new IDMailMessage(String.valueOf(uid), "INBOX");
                     count++;
                 }
             }

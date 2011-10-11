@@ -2886,7 +2886,7 @@ public final class IMAPCommandsCollection {
                 final Response response = r[r.length - 1];
                 final Long retval = Long.valueOf(-1L);
                 if (response.isOK()) {
-                    final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(messageIds.length);
+                    final TObjectIntHashMap<String> map = new TObjectIntHashMap<String>(messageIds.length, 0.5f, -1);
                     for (int i = 0; i < messageIds.length; i++) {
                         map.put(messageIds[i], i + 1);
                     }
@@ -2897,10 +2897,10 @@ public final class IMAPCommandsCollection {
                             continue;
                         }
                         final FetchResponse fetchResponse = (FetchResponse) r[i];
-                        final int num = map.get(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId);
-                        if (num > 0) {
+                        final int index = map.get(getItemOf(ENVELOPE.class, fetchResponse, "ENVELOPE").messageId);
+                        if (index >= 0) {
                             final UID uidItem = getItemOf(UID.class, fetchResponse, STR_UID);
-                            uids[num - 1] = uidItem.uid;
+                            uids[index] = uidItem.uid;
                         }
                         r[i] = null;
                     }
