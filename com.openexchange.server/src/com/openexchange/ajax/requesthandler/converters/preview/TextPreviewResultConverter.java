@@ -76,11 +76,6 @@ public final class TextPreviewResultConverter extends AbstractPreviewResultConve
     }
 
     @Override
-    protected boolean autoDetect() {
-        return true;
-    }
-
-    @Override
     protected PreviewOutput getOutput() {
         return PreviewOutput.TEXT;
     }

@@ -63,7 +63,7 @@ public class JODCPreviewDocument implements PreviewDocument {
     
     private String content;
     
-    private Map<String, String> metaData;
+    private final Map<String, String> metaData;
     
     
     public JODCPreviewDocument() {
@@ -81,11 +81,11 @@ public class JODCPreviewDocument implements PreviewDocument {
         return content;
     }
     
-    public void setContent(String content) {
+    public void setContent(final String content) {
         this.content = content;
     }
     
-    public void setMetaData(Map<String, String> metaData) {
+    public void setMetaData(final Map<String, String> metaData) {
         this.metaData.clear();
         this.metaData.putAll(metaData);
     }

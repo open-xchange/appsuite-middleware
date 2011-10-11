@@ -51,12 +51,10 @@ package com.openexchange.preview.json.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.preview.PreviewService;
-import com.openexchange.preview.json.HTMLResponseRenderer;
 import com.openexchange.preview.json.PreviewActionFactory;
 
 /**
@@ -77,7 +75,6 @@ public class PreviewJSONActivator extends AJAXModuleActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreviewJSONActivator.class));
         log.info("Starting bundle com.openexchange.preview.json.");
         registerModule(new PreviewActionFactory(this), "preview");
-        registerService(ResponseRenderer.class, new HTMLResponseRenderer());
     }
 
 }
