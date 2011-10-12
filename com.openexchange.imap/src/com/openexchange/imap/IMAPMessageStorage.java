@@ -2234,6 +2234,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private static int applyThreadLevel(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {
+        if (null == threadList) {
+            return index;
+        }
         int idx = index;
         final int threadListSize = threadList.size();
         final Iterator<ThreadSortNode> iter = threadList.iterator();
