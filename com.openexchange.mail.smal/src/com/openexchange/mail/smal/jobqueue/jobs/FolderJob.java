@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -79,7 +80,9 @@ import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.smal.jobqueue.Job;
+import com.openexchange.mail.smal.jobqueue.JobCompletionService;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
+import com.openexchange.mail.smal.jobqueue.Jobs;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.sql.DBUtils;
@@ -95,10 +98,10 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private static final String SIMPLE_NAME = FolderJob.class.getSimpleName();
 
-    private static final org.apache.commons.logging.Log LOG =
+    protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJob.class));
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final int GATE_PERFORM = -1;
 
@@ -106,9 +109,9 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private static final int GATE_REPLACE = 1;
 
-    private final String fullName;
+    protected final String fullName;
 
-    private final String identifier;
+    protected final String identifier;
 
     private final AtomicInteger gate;
 
@@ -394,13 +397,6 @@ public final class FolderJob extends AbstractMailSyncJob {
                  * Add
                  */
                 if (!newIds.isEmpty()) {
-                    
-                    
-                    
-                    
-                    
-                    
-                    
                     final int blockSize;
                     final int size = newIds.size();
                     {
@@ -410,27 +406,59 @@ public final class FolderJob extends AbstractMailSyncJob {
                     final List<String> ids = new ArrayList<String>(newIds);
                     newIds = null;
                     int start = 0;
-                    final JobQueue queue = JobQueue.getInstance();
                     try {
+                        final JobQueue queue = JobQueue.getInstance();
+                        final long now = System.currentTimeMillis();
+                        int cnt = 0;
+                        final JobCompletionService completionService = new JobCompletionService(0);
 	                    while (start < size) {
-	                    	int end = start + blockSize;
-	                        if (end > size) {
-	                        	end = size;
-	                        }
-	                        // Add chunk to index
-	                        add2Index(ids.subList(start, end), fullName, indexAdapter);
-	                        start = end;
-	                        if (DEBUG) {
-	                            final long dur = System.currentTimeMillis() - st;
-	                            LOG.debug("Folder job \"" + identifier + "\" inserted " + start + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
-	                        }
-	                        if (queue.hasHigherRankedJobInQueue(getRanking())) {
-	                            if (DEBUG) {
+	                    	final int end;
+	                    	{
+	                    	    int tmp = start + blockSize;
+	                            if (tmp > size) {
+	                                tmp = size;
+	                            }
+	                            end = tmp;
+	                    	}
+	                        /*
+	                         * A new job
+	                         */
+	                    	final int strt = start;
+	                        final Callable<Object> callable = new Callable<Object>() {
+
+                                @Override
+                                public Object call() throws Exception {
+                                    // Add chunk to index
+                                    add2Index(ids.subList(strt, end), fullName, indexAdapter);
+                                    if (DEBUG) {
+                                        final long dur = System.currentTimeMillis() - st;
+                                        LOG.debug("Folder job \"" + identifier + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                                    }
+                                    return null;
+                                }
+                            };
+                            final Job adderJob = Jobs.jobFor(callable, identifier + '@' + String.valueOf(now+(cnt+1)), ranking);
+                            if(completionService.addJob(adderJob)) {
+                                cnt++;
+                            } else {
+                                // Add chunk to index
+                                add2Index(ids.subList(strt, end), fullName, indexAdapter);
+                                if (DEBUG) {
+                                    final long dur = System.currentTimeMillis() - st;
+                                    LOG.debug("Folder job \"" + identifier + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                                }
+                            }
+                            if (queue.hasHigherRankedJobInQueue(getRanking())) {
+                                if (DEBUG) {
                                     LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
                                 }
-	                            break;
-	                        }
+                                break;
+                            }
+                            start = end;
 	                    }
+	                    for (int i = 0; i < cnt; i++) {
+                            completionService.take();
+                        }
 	                    if (DEBUG) {
                             LOG.debug("Folder job \"" + identifier + "\" added " + size + " messages.");
                         }
@@ -487,7 +515,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         }
     }
 
-    private void add2Index(final List<String> ids, final String fullName, final IndexAdapter indexAdapter) throws OXException {
+    protected void add2Index(final List<String> ids, final String fullName, final IndexAdapter indexAdapter) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);

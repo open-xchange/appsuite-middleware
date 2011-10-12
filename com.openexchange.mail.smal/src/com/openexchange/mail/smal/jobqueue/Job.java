@@ -70,6 +70,11 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
     private static final long serialVersionUID = 5618306933455163193L;
 
     /**
+     * The default ranking for a job.
+     */
+    public static final int DEFAULT_RANKING = 0;
+
+    /**
      * The associated future object.
      */
     protected volatile Future<Object> future;
@@ -217,7 +222,10 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
 
     @Override
     public void afterExecute(final Throwable t) {
-        // Nothing to do; override if needed
+        if (null != t) {
+            executionFailure = t;
+        }
+        done = true;
     }
 
     @Override

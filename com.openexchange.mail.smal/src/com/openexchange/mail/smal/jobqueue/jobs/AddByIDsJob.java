@@ -66,18 +66,18 @@ import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.session.Session;
 
 /**
- * {@link AdderByIDsJob} - Adds mails to index by specified identifiers.
+ * {@link AddByIDsJob} - Adds mails to index by specified identifiers.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AdderByIDsJob extends AbstractMailSyncJob {
+public final class AddByIDsJob extends AbstractMailSyncJob {
 
     private static final long serialVersionUID = -5611521171077091128L;
 
-    private static final String SIMPLE_NAME = AdderByIDsJob.class.getSimpleName();
+    private static final String SIMPLE_NAME = AddByIDsJob.class.getSimpleName();
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AdderByIDsJob.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(AddByIDsJob.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -100,14 +100,14 @@ public final class AdderByIDsJob extends AbstractMailSyncJob {
     private volatile List<String> mailIds;
 
     /**
-     * Initializes a new {@link AdderByIDsJob}.
+     * Initializes a new {@link AddByIDsJob}.
      * 
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
      * @param contextId The context ID
      */
-    public AdderByIDsJob(final String fullName, final int accountId, final int userId, final int contextId) {
+    public AddByIDsJob(final String fullName, final int accountId, final int userId, final int contextId) {
         super(accountId, userId, contextId);
         gate = new AtomicInteger(0);
         ranking = 0;
@@ -124,7 +124,7 @@ public final class AdderByIDsJob extends AbstractMailSyncJob {
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
-    public AdderByIDsJob setRanking(final int ranking) {
+    public AddByIDsJob setRanking(final int ranking) {
         this.ranking = ranking;
         return this;
     }
@@ -135,7 +135,7 @@ public final class AdderByIDsJob extends AbstractMailSyncJob {
      * @param mailIds The identifiers to set
      * @return This folder job
      */
-    public AdderByIDsJob setMailIds(final List<String> mailIds) {
+    public AddByIDsJob setMailIds(final List<String> mailIds) {
         this.mailIds = mailIds;
         return this;
     }
@@ -153,7 +153,7 @@ public final class AdderByIDsJob extends AbstractMailSyncJob {
                 return;
             }
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_REPLACE));
-        final AdderByIDsJob anotherFolderJob = (AdderByIDsJob) anotherJob;
+        final AddByIDsJob anotherFolderJob = (AddByIDsJob) anotherJob;
         this.ranking = anotherFolderJob.ranking;
         this.mailIds = anotherFolderJob.mailIds;
         gate.set(0);
@@ -243,13 +243,13 @@ public final class AdderByIDsJob extends AbstractMailSyncJob {
             } finally {
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
-                    LOG.debug("AdderJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
+                    LOG.debug("AddByIDsJob \"" + identifier + "\" took " + dur + "msec for folder " + fullName + " in account " + accountId);
                 }
             }
         } catch (final Exception e) {
             error = true;
             cancel();
-            LOG.error("AdderJob \"" + identifier + "\" failed.", e);
+            LOG.error("AddByIDsJob \"" + identifier + "\" failed.", e);
         }
     }
 

@@ -332,8 +332,6 @@ final class JobConsumer extends AbstractTask<Object> {
             if (releasePermit) {
                 semaphore.release();
             }
-            job.done = true;
-            job.executionFailure = t;
             // TODO: Useful? currentJobs.remove(job);
             job.afterExecute(t);
         }
