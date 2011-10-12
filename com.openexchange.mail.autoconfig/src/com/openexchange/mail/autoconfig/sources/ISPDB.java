@@ -91,7 +91,9 @@ public class ISPDB extends AbstractConfigSource {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
         String url = view.get(locationProperty, String.class);
-
+        if (url == null) {
+            return null;
+        }
         if (!url.endsWith("/")) {
             url += "/";
         }

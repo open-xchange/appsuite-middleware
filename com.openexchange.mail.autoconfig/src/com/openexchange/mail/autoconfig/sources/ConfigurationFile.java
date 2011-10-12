@@ -85,6 +85,9 @@ public class ConfigurationFile extends AbstractConfigSource {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
         String fileLocation = view.get(locationProperty, String.class);
+        if (fileLocation == null) {
+            return null;
+        }
         File configFolder = new File(fileLocation);
 
         File[] files = configFolder.listFiles(new FilenameFilter() {

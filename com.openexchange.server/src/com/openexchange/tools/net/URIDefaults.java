@@ -120,4 +120,27 @@ public interface URIDefaults {
             return 465;
         }
     };
+
+    static URIDefaults POP3 = new URIDefaults() {
+
+        @Override
+        public String getProtocol() {
+            return "pop3";
+        }
+
+        @Override
+        public String getSSLProtocol() {
+            return "pop3s";
+        }
+
+        @Override
+        public int getPort() {
+            return 110;
+        }
+
+        @Override
+        public int getSSLPort() {
+            return 995;
+        }
+    };
 }
