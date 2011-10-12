@@ -82,7 +82,7 @@ public final class MDNSActivator implements BundleActivator {
     @Override
     public void start(final BundleContext context) throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
-        log.error("Starting bundle: com.openexchange.mdns");
+        log.info("Starting bundle: com.openexchange.mdns");
         try {
             /*
              * Create mDNS service
@@ -100,7 +100,7 @@ public final class MDNSActivator implements BundleActivator {
     @Override
     public void stop(final BundleContext context) throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
-        log.error("Stopping bundle: com.openexchange.mdns");
+        log.info("Stopping bundle: com.openexchange.mdns");
         try {
             if (registrations != null) {
                 while (!registrations.isEmpty()) {
