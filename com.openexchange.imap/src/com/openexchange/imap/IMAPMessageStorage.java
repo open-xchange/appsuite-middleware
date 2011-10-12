@@ -82,12 +82,14 @@ import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
+import com.openexchange.imap.command.AbstractIMAPCommand;
 import com.openexchange.imap.command.BodyFetchIMAPCommand;
 import com.openexchange.imap.command.BodystructureFetchIMAPCommand;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
 import com.openexchange.imap.command.FlagsIMAPCommand;
+import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.command.NewFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
@@ -1161,16 +1163,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Copy messages to folder "TRASH"
              */
+            final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
             try {
+                AbstractIMAPCommand<long[]> command;
+                if (supportsMove) {
+                    command = new MoveIMAPCommand(imapFolder, uids, trashFullname, false, true);
+                } else {
+                    command = new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true);
+                }
                 if (DEBUG) {
                     final long start = System.currentTimeMillis();
-                    new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
+                    command.doCommand();
                     final long time = System.currentTimeMillis() - start;
                     sb.setLength(0);
-                    LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(" messages copied to default trash folder \"").append(
-                        trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                    if (supportsMove) {
+                        LOG.debug(sb.append("\"Move\": ").append(uids.length).append(" messages moved to default trash folder \"").append(
+                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                    } else {
+                        LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(" messages copied to default trash folder \"").append(
+                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                    }
                 } else {
-                    new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
+                    command.doCommand();
                 }
             } catch (final MessagingException e) {
                 if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
@@ -1187,6 +1201,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
                 }
                 throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
+            }
+            if (supportsMove) {
+                return;
             }
         }
         /*
