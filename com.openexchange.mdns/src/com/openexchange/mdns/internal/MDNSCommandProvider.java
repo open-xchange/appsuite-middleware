@@ -94,11 +94,13 @@ public final class MDNSCommandProvider implements CommandProvider {
         sb.setLength(0);
         intp.print(sb.append("---Tracked services of \"").append(serviceId).append(
             "\" ---\n").toString());
+        final String delim = "\n\t";
         for (final MDNSServiceEntry mdnsServiceEntry : services) {
             sb.setLength(0);
-            sb.append("\n\tUUID: ").append(mdnsServiceEntry.getId()).append("\n\t");
-            sb.append("Address: ").append(mdnsServiceEntry.getAddress()).append("\n\t");
-            sb.append("Port: ").append(mdnsServiceEntry.getPort()).append('\n');
+            sb.append(delim).append("UUID: ").append(mdnsServiceEntry.getId());
+            sb.append(delim).append("Address: ").append(mdnsServiceEntry.getAddress());
+            sb.append(delim).append("Port: ").append(mdnsServiceEntry.getPort());
+            sb.append('\n');
             intp.print(sb.toString());
         }
         /*
