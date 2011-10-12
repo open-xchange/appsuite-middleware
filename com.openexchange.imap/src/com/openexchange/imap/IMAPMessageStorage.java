@@ -1428,21 +1428,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullName, final long[] tmp, final StringBuilder sb) throws MessagingException, OXException, IMAPException {
+        final boolean supportsMove = move && imapConfig.asMap().containsKey("MOVE");
+        final AbstractIMAPCommand<long[]> command;
+        if (supportsMove) {
+            command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
+        } else {
+            command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
+        }
         long[] uids;
         if (DEBUG) {
             final long start = System.currentTimeMillis();
-            uids = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast).doCommand();
+            uids = command.doCommand();
             final long time = System.currentTimeMillis() - start;
             sb.setLength(0);
-            LOG.debug(sb.append(tmp.length).append(" messages copied in ").append(time).append(STR_MSEC).toString());
+            if (supportsMove) {
+                LOG.debug(sb.append(tmp.length).append(" messages moved in ").append(time).append(STR_MSEC).toString());
+            } else {
+                LOG.debug(sb.append(tmp.length).append(" messages copied in ").append(time).append(STR_MSEC).toString());
+            }
         } else {
-            uids = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast).doCommand();
+            uids = command.doCommand();
         }
         if (!fast && ((uids == null) || noUIDsAssigned(uids, tmp.length))) {
             /*
              * Invalid UIDs
              */
             uids = getDestinationUIDs(tmp, destFullName);
+        }
+        if (supportsMove) {
+            return uids;
         }
         if (move) {
             if (DEBUG) {
