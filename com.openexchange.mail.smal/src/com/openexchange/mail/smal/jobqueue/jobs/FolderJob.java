@@ -364,6 +364,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                     final MailMessage storageMail = storageMap.get(mailId);
                     final MailMessage indexMail = indexMap.get(mailId);
                     boolean different = false;
+                    // TODO:
                     if (storageMail.getFlags() != indexMail.getFlags()) {
                         storageMail.setAccountId(accountId);
                         storageMail.setFolder(fullName);

@@ -153,7 +153,7 @@ public final class JobCompletionService {
     }
 
     /**
-     * Adds specified job to this completion service
+     * Adds specified job to this completion service if immediately able to do so.
      * 
      * @param job The job to add
      * @return <code>true</code> if job could be added; otherwise <code>false</code>
