@@ -17,21 +17,32 @@
 
 package com.openexchange.ajp13.coyote;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
- * Utilities for handling Throwables and Exceptions.
+ * Utilities for handling <tt>Throwable</tt>s and <tt>Exception</tt>s.
  */
 public class ExceptionUtils {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExceptionUtils.class));
+
+    private static final String MARKER = " ---=== /!\\ ===--- ";
+
     /**
-     * Checks whether the supplied Throwable is one that needs to be rethrown and swallows all others.
-     *
-     * @param t the Throwable to check
+     * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
+     * 
+     * @param t The <tt>Throwable</tt> to check
      */
     public static void handleThrowable(final Throwable t) {
         if (t instanceof ThreadDeath) {
+            LOG.fatal(MARKER + "Thread death" + MARKER, t);
             throw (ThreadDeath) t;
         }
         if (t instanceof VirtualMachineError) {
+            LOG.fatal(
+                MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
+                t);
             throw (VirtualMachineError) t;
         }
         // All other instances of Throwable will be silently swallowed

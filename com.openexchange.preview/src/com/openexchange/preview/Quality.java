@@ -56,7 +56,18 @@ package com.openexchange.preview;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum Quality {
-    GOOD,
-    BAD;
+    GOOD(1),
+    BAD(2);
+    
+    
+    private int value;
+    
+    private Quality(final int value) {
+        this.value = value;
+    }
+    
+    public int getValue() {
+        return value;
+    }
 
 }

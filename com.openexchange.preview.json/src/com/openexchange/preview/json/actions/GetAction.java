@@ -49,19 +49,33 @@
 
 package com.openexchange.preview.json.actions;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -76,14 +90,13 @@ public class GetAction extends AbstractPreviewAction {
      * Initializes a new {@link GetAction}.
      * @param serviceLookup
      */
-    public GetAction(ServiceLookup serviceLookup) {
+    public GetAction(final ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        String format = request.getParameter("format");
-        String source = request.getParameter("source");
+    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+        final String source = request.getParameter("source");
         JSONObject data = (JSONObject) request.getData();
         
         /*
@@ -92,22 +105,44 @@ public class GetAction extends AbstractPreviewAction {
         data = new JSONObject();
         try {
             data.put("version", 1);
-            data.put("id", 4960);
-        } catch (JSONException e) {
+            data.put("id", 4973);
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
         PreviewDocument previewDocument = null;
         if (source.equals("mail")) {
-            previewDocument = convertMail(request, session, data, format);
+            previewDocument = convertMail(request, session, data);
         } else if (source.equals("infostore")) {            
-            previewDocument = convertInfostore(request, session, data, format);
+            previewDocument = convertInfostore(request, session, data);
         } else {
             // TODO: throw exception...
         }
         
-        return null;
+        final ManagedFile managedFile;
+        try {
+            final ManagedFileManagement fileManagement = getFileManagementService();
+            final java.io.File tempFile = fileManagement.newTempFile();
+            final FileOutputStream fos = new FileOutputStream(tempFile);
+            try {
+                fos.write(previewDocument.getContent().getBytes("UTF-8"));
+                fos.flush();
+            } finally {
+                Streams.close(fos);
+            }
+            managedFile = fileManagement.createManagedFile(tempFile);
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * Set meta data
+         */
+        final Map<String, String> metaData = previewDocument.getMetaData();
+        managedFile.setContentType(metaData.get("content-type"));
+        managedFile.setFileName(metaData.get("resourcename"));
+        
+        return new AJAXRequestResult(previewDocument, "preview");
     }
 
     /**
@@ -117,21 +152,41 @@ public class GetAction extends AbstractPreviewAction {
      * @param format
      * @throws OXException 
      */
-    private PreviewDocument convertInfostore(AJAXRequestData request, ServerSession session, JSONObject data, String format) throws OXException {
-        IDBasedFileAccessFactory fileAccessFactory = getFileAccessFactory();
-        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+    private PreviewDocument convertInfostore(final AJAXRequestData request, final ServerSession session, final JSONObject data) throws OXException {
+        final IDBasedFileAccessFactory fileAccessFactory = getFileAccessFactory();
+        final IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         
         try {
-            String id = data.getString("id");
-            int version = data.getInt("version");
-            File fileMetadata = fileAccess.getFileMetadata(id, version);
-            InputStream documentIS = fileAccess.getDocument(id, version);
+            final String id = data.getString("id");
+            final int version = data.getInt("version");
+            final File fileMetadata = fileAccess.getFileMetadata(id, version);
             
-            PreviewService previewService = getPreviewService();
-            PreviewDocument preview = previewService.getPreviewFor(documentIS, fileMetadata.getFileMIMEType(), fileMetadata.getFileName(), PreviewOutput.HTML, session);
+            final DataProperties dataProperties = new DataProperties(4);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileMetadata.getFileMIMEType());
+            dataProperties.put(DataProperties.PROPERTY_NAME, fileMetadata.getFileName());
+            dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileMetadata.getFileSize()));
+            final Data<InputStream> documentData = new Data<InputStream>() {
+                
+                @Override
+                public DataProperties getDataProperties() {
+                    return dataProperties;
+                }
+                
+                @Override
+                public InputStream getData() {
+                    try {
+                        return fileAccess.getDocument(id, version);
+                    } catch (final OXException e) {
+                        return Streams.newByteArrayInputStream(new byte[0]);
+                    }
+                }
+            };
+            
+            final PreviewService previewService = getPreviewService();
+            final PreviewDocument preview = previewService.getPreviewFor(documentData, PreviewOutput.HTML, session);
             
             return preview;
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
@@ -144,7 +199,21 @@ public class GetAction extends AbstractPreviewAction {
      * @param data
      * @param format
      */
-    private PreviewDocument convertMail(AJAXRequestData request, ServerSession session, JSONObject data, String format) {
+    private PreviewDocument convertMail(final AJAXRequestData request, final ServerSession session, final JSONObject data) throws OXException {
+        final MailService mailService = getMailService();
+        if (null == mailService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailService.class.getName());
+        }
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = mailService.getMailAccess(session, 0);
+            
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
+        }
+        
         // TODO Auto-generated method stub
         return null;
     }

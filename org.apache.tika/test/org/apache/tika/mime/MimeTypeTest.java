@@ -23,7 +23,6 @@ public class MimeTypeTest extends TestCase {
     private MimeTypes types;
     private MimeType text;
 
-    @Override
     protected void setUp() throws MimeTypeException {
         types = new MimeTypes();
         text = types.forName("text/plain");

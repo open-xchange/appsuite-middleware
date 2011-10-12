@@ -93,7 +93,7 @@ public enum PreviewExceptionCodes implements OXExceptionCode {
 
     private PreviewExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        this.number = detailNumber;
+        number = detailNumber;
         this.category = category;
     }
 

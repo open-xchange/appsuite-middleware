@@ -66,10 +66,13 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.DownloadPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.HTMLResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
@@ -109,6 +112,8 @@ public class DispatcherActivator extends HousekeepingActivator {
          */
         defaultConverter.addConverter(new HTMLPreviewResultConverter());
         defaultConverter.addConverter(new TextPreviewResultConverter());
+        defaultConverter.addConverter(new FilteredHTMLPreviewResultConverter());
+        defaultConverter.addConverter(new DownloadPreviewResultConverter());
 
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
@@ -133,6 +138,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
+        DispatcherServlet.registerRenderer(new HTMLResponseRenderer());
 
         track(ResponseRenderer.class, new SimpleRegistryListener<ResponseRenderer>() {
 

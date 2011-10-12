@@ -42,6 +42,13 @@ public class ExcelParserTest extends TestCase {
                     metadata.get(Metadata.CONTENT_TYPE));
             assertEquals("Simple Excel document", metadata.get(Metadata.TITLE));
             assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
+            
+            // Mon Oct 01 17:13:56 BST 2007
+            assertEquals("2007-10-01T16:13:56Z", metadata.get(Metadata.CREATION_DATE));
+            
+            // Mon Oct 01 17:31:43 BST 2007
+            assertEquals("2007-10-01T16:31:43Z", metadata.get(Metadata.LAST_SAVED));
+            
             String content = handler.toString();
             assertTrue(content.contains("Sample Excel Worksheet"));
             assertTrue(content.contains("Numbers and their Squares"));
@@ -80,8 +87,9 @@ public class ExcelParserTest extends TestCase {
             assertTrue(content.contains("($1,599.99)"));
 
             // Scientific 0.00E+00
-            assertTrue(content.contains("1.98E08"));
-            assertTrue(content.contains("-1.98E08"));
+            // poi <=3.8beta1 returns 1.98E08, newer versions return 1.98+E08
+            assertTrue(content.contains("1.98E08") || content.contains("1.98E+08"));
+            assertTrue(content.contains("-1.98E08") || content.contains("-1.98E+08"));
 
             // Percentage.
             assertTrue(content.contains("2.50%"));
@@ -137,17 +145,17 @@ public class ExcelParserTest extends TestCase {
             context.set(Locale.class, Locale.US);
             ContentHandler handler = new BodyContentHandler();
             new OfficeParser().parse(input, handler, metadata, context);
-
+        
             assertEquals(
                     "application/vnd.ms-excel",
                     metadata.get(Metadata.CONTENT_TYPE));
-
+        
             String content = handler.toString();
-
+            
             // The first sheet has a pie chart
             assertTrue(content.contains("charttabyodawg"));
             assertTrue(content.contains("WhamPuff"));
-
+            
             // The second sheet has a bar chart and some text
             assertTrue(content.contains("Sheet1"));
             assertTrue(content.contains("Test Excel Spreasheet"));
@@ -156,7 +164,7 @@ public class ExcelParserTest extends TestCase {
             assertTrue(content.contains("fizzlepuff"));
             assertTrue(content.contains("whyaxis"));
             assertTrue(content.contains("eksaxis"));
-
+            
             // The third sheet has some text
             assertTrue(content.contains("Sheet2"));
             assertTrue(content.contains("dingdong"));
@@ -164,4 +172,25 @@ public class ExcelParserTest extends TestCase {
             input.close();
         }
     }
+
+    public void testJXL() throws Exception {
+        InputStream input = ExcelParserTest.class.getResourceAsStream(
+                "/test-documents/jxl.xls");
+        try {
+            Metadata metadata = new Metadata();
+            ContentHandler handler = new BodyContentHandler(-1);
+            ParseContext context = new ParseContext();
+            context.set(Locale.class, Locale.US);
+            new OfficeParser().parse(input, handler, metadata, context);
+
+            assertEquals(
+                    "application/vnd.ms-excel",
+                    metadata.get(Metadata.CONTENT_TYPE));
+            String content = handler.toString();
+            assertTrue(content.contains("Number Formats"));
+        } finally {
+            input.close();
+        }
+    }
+
 }

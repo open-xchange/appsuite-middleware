@@ -64,6 +64,7 @@ import com.openexchange.messaging.twitter.TwitterMessagingService;
 import com.openexchange.messaging.twitter.TwitterOAuthAccountDeleteListener;
 import com.openexchange.messaging.twitter.session.TwitterEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -155,6 +156,7 @@ public final class TwitterMessagingActivator extends DeferredActivator {
             registrations.add(context.registerService(EventHandler.class, new TwitterEventHandler(), serviceProperties));
 
             registrations.add(context.registerService(OAuthAccountDeleteListener.class, new TwitterOAuthAccountDeleteListener(), null));
+            registrations.add(context.registerService(OAuthAccountInvalidationListener.class, new TwitterOAuthAccountDeleteListener(), null));
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(e.getMessage(), e);
             throw e;

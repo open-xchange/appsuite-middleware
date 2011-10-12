@@ -28,7 +28,7 @@ import org.apache.tika.parser.image.xmp.JempboxExtractor;
 import junit.framework.TestCase;
 
 public class JempboxExtractorTest extends TestCase {
-
+   
     public void testParseJpeg() throws IOException, TikaException {
         Metadata metadata = new Metadata();
         InputStream stream = getClass().getResourceAsStream("/test-documents/testJPEG_commented.jpg");
@@ -38,15 +38,15 @@ public class JempboxExtractorTest extends TestCase {
         metadata.set(Metadata.CREATOR, "previous author");
         // ... or kept in case the field is multi-value
         metadata.add(Metadata.SUBJECT, "oldkeyword");
-
+        
         JempboxExtractor extractor = new JempboxExtractor(metadata);
         extractor.parse(stream);
-
+        
         // DublinCore fields
         assertEquals("Tosteberga \u00C4ngar", metadata.get(Metadata.TITLE));
         assertEquals("Bird site in north eastern Sk\u00E5ne, Sweden.\n(new line)", metadata.get(Metadata.DESCRIPTION));
         assertEquals("Some Tourist", metadata.get(Metadata.CREATOR));
-        Collection<String> keywords = Arrays.asList(metadata.getValues(Metadata.SUBJECT));
+        Collection<String> keywords = Arrays.asList(metadata.getValues(Metadata.SUBJECT));  
         assertTrue(keywords.contains("oldkeyword"));
         assertTrue(keywords.contains("grazelands"));
         assertTrue(keywords.contains("nature reserve"));
@@ -57,33 +57,33 @@ public class JempboxExtractorTest extends TestCase {
     public void testParseJpegPhotoshop() throws IOException, TikaException {
         Metadata metadata = new Metadata();
         InputStream stream = getClass().getResourceAsStream("/test-documents/testJPEG_commented_pspcs2mac.jpg");
-
+       
         JempboxExtractor extractor = new JempboxExtractor(metadata);
         extractor.parse(stream);
-
+        
         // DublinCore fields
         assertEquals("Tosteberga \u00C4ngar", metadata.get(Metadata.TITLE));
         assertEquals("Bird site in north eastern Sk\u00E5ne, Sweden.\n(new line)", metadata.get(Metadata.DESCRIPTION));
         assertEquals("Some Tourist", metadata.get(Metadata.CREATOR));
-        Collection<String> keywords = Arrays.asList(metadata.getValues(Metadata.SUBJECT));
+        Collection<String> keywords = Arrays.asList(metadata.getValues(Metadata.SUBJECT));  
         assertTrue(keywords.contains("bird watching"));
         assertTrue(keywords.contains("coast"));
     }
-
+    
     public void testParseJpegXnviewmp() throws IOException, TikaException {
         Metadata metadata = new Metadata();
         InputStream stream = getClass().getResourceAsStream("/test-documents/testJPEG_commented_xnviewmp026.jpg");
-
+       
         JempboxExtractor extractor = new JempboxExtractor(metadata);
         extractor.parse(stream);
-
+        
         // XnViewMp fields not understood by Jempbox
         assertEquals("Bird site in north eastern Sk\u00E5ne, Sweden.\n(new line)", metadata.get(Metadata.DESCRIPTION));
         Collection<String> keywords = Arrays.asList(metadata.getValues(Metadata.SUBJECT));
         assertTrue(keywords.contains("coast"));
         assertTrue(keywords.contains("nature reserve"));
     }
-
+    
     public void testJoinCreators() {
         assertEquals("Mr B", new JempboxExtractor(null).joinCreators(
                 Arrays.asList("Mr B")));

@@ -20,7 +20,6 @@
 
     <!-- Install Constants -->
     <property name="bundlesDir" value="${prefix}/bundles"/>
-    <property name="bundle.dDir" value="${prefix}/etc/osgi/bundle.d"/>
 
     <target name="antExtensions" description="Compiles our additional Ant tasks and defines them for this build.">
         <path id="ant3rdPartyLib">

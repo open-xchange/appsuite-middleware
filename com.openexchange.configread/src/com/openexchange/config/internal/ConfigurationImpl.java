@@ -98,7 +98,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     private static final String[] getDirectories() {
         final List<String> tmp = new ArrayList<String>();
-        for (final String property : new String[] { "openexchange.propdir", "openexchange.propdir2" }) {
+        for (final String property : new String[] { "openexchange.propdir" }) {
             final String sysProp = System.getProperty(property);
             if (null != sysProp) {
                 tmp.add(sysProp);

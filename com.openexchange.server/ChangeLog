@@ -1,3 +1,13 @@
+* 2011-10-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20143: Solved along with fix for bug #20365
+ - Fix for bug 20491: Properly synchronizing concurrent insert attempts on user_attribute table
+
+* 2011-10-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20495: Add "X-Originating-IP" header if enabled
+ - Fix for bug 20547: Avoiding possible StackOverflowError when batch-handling folder fields
+
 * 2011-10-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 20365: Introduced lock management for cached folder storage to ensure consistency

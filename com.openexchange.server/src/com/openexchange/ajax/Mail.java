@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.tools.Collections.newHashMap;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -128,6 +129,7 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.html.HTMLService;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -136,6 +138,9 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
@@ -3320,7 +3325,7 @@ public class Mail extends PermissionServlet implements UploadListener {
 
         InternetAddress getFromAddress();
 
-        MailMessage getMail();
+        MimeMessage getMail();
     }
 
     private final Response actionPutNewMail(final ServerSession session, final HttpServletRequest req, final ParamContainer paramContainer) {
@@ -3350,21 +3355,18 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), req.getInputStream());
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
-                final MailMessage mail;
                 if (isEmpty(fromAddr)) {
                     // Add from address
                     fromAddress = defaultSendAddr;
                     message.setFrom(fromAddress);
-                    mail = MIMEMessageConverter.convertMessage(message);
                 } else {
                     fromAddress = new QuotedInternetAddress(fromAddr, true);
-                    mail = MIMEMessageConverter.convertMessage(message);
                 }
                 data = new PutNewMailData() {
 
                     @Override
-                    public MailMessage getMail() {
-                        return mail;
+                    public MimeMessage getMail() {
+                        return message;
                     }
 
                     @Override
@@ -3380,7 +3382,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final String[] ids;
                 final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                 try {
-                    ids = mailInterface.appendMessages(folder, new MailMessage[] { data.getMail() }, force);
+                    ids = mailInterface.appendMessages(folder, new MailMessage[] { MIMEMessageConverter.convertMessage(data.getMail()) }, force);
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
                     }
@@ -3766,7 +3768,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return response;
     }
 
-    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, OXException, JSONException {
+    private JSONObject appendDraft(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MimeMessage m) throws OXException, OXException, JSONException {
         /*
          * Determine the account to transport with
          */
@@ -3794,15 +3796,60 @@ public class Mail extends PermissionServlet implements UploadListener {
             /*
              * Send raw message source
              */
-            final MailMessage sentMail = transport.sendRawMessage(m.getSourceBytes());
+            if (MailProperties.getInstance().isAddClientIPAddress()) {
+                final Map<String, Object> logProperties = LogProperties.optLogProperties();
+                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+                m.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+            }
+            /*
+             * Get message bytes
+             */
+            final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream();
+            m.writeTo(tmp);
+            final MailMessage sentMail = transport.sendRawMessage(tmp.toByteArray());
             JSONObject responseData = null;
-            if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
-                /*
-                 * Copy in sent folder allowed
-                 */
-                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
+            /*
+             * Set \Answered flag (if appropriate) & append to sent folder
+             */
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                mailAccess = MailAccess.getInstance(session, accountId);
                 mailAccess.connect();
-                try {
+                /*
+                 * Manually detect&set \Answered flag
+                 */
+                if (mailAccess.getMessageStorage() instanceof IMailMessageStorageExt) {
+                    final List<String> lst = new ArrayList<String>(2);
+                    {
+                        final String inReplyTo = sentMail.getFirstHeader("In-Reply-To");
+                        String references = sentMail.getFirstHeader("References");
+                        if (equals(inReplyTo, references)) {
+                            references = null;
+                        }
+                        if (null != inReplyTo) {
+                            lst.add(inReplyTo);
+                        }
+                        if (null != references) {
+                            lst.add(references);
+                        }
+                    }
+                    if (!lst.isEmpty()) {
+                        final IMailMessageStorageExt messageStorageExt = (IMailMessageStorageExt) mailAccess.getMessageStorage();
+                        final MailMessage[] mails = messageStorageExt.getMessagesByMessageID(lst.toArray(new String[lst.size()]));
+                        for (final MailMessage mail : mails) {
+                            if (null != mail) {
+                                setFlagReply(new MailPath(accountId, mail.getFolder(), mail.getMailId()), mailAccess);
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Append to sent folder
+                 */
+                if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
+                    /*
+                     * Copy in sent folder allowed
+                     */
                     final String sentFullname =
                         MailFolderUtility.prepareMailFolderParam(mailAccess.getFolderStorage().getSentFolder()).getFullname();
                     final String[] uidArr;
@@ -3844,13 +3891,68 @@ public class Mail extends PermissionServlet implements UploadListener {
                     responseData = new JSONObject();
                     responseData.put(FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, sentFullname));
                     responseData.put(DataFields.ID, uidArr[0]);
-                } finally {
+                }
+            } finally {
+                if (null != mailAccess) {
                     mailAccess.close(true);
                 }
             }
             return responseData;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
             transport.close();
+        }
+    }
+
+    private static boolean equals(final String s1, final String s2) {
+        if (null == s2) {
+            if (null != s1) {
+                return false;
+            }
+        } else if (!s1.equals(s2)) {
+            return false;
+        }
+        return true;
+    }
+
+    private static final MailListField[] FIELDS_FLAGS = new MailListField[] { MailListField.FLAGS };
+
+    private void setFlagReply(final MailPath path, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        if (null == path) {
+            LOG.warn("Missing msgref on reply. Corresponding mail cannot be marked as answered.", new Throwable());
+            return;
+        }
+        /*
+         * Mark referenced mail as answered
+         */
+        final String fullname = path.getFolder();
+        final String[] uids = new String[] { path.getMailID() };
+        mailAccess.getMessageStorage().updateMessageFlags(fullname, uids, MailMessage.FLAG_ANSWERED, true);
+        try {
+            /*
+             * Update JSON cache
+             */
+            final Session session = mailAccess.getSession();
+            final int userId = session.getUserId();
+            final int contextId = session.getContextId();
+            if (MailMessageCache.getInstance().containsFolderMessages(mailAccess.getAccountId(), fullname, userId, contextId)) {
+                /*
+                 * Update cache entries
+                 */
+                MailMessageCache.getInstance().updateCachedMessages(
+                    uids,
+                    mailAccess.getAccountId(),
+                    fullname,
+                    userId,
+                    contextId,
+                    FIELDS_FLAGS,
+                    new Object[] { Integer.valueOf(MailMessage.FLAG_ANSWERED) });
+            }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 

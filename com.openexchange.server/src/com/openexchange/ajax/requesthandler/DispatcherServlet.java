@@ -249,7 +249,11 @@ public final class DispatcherServlet extends SessionServlet {
         /*
          * Set the module
          */
-        final String pathInfo = req.getRequestURI();
+        String pathInfo = req.getRequestURI();
+        final int lastIndex = pathInfo.lastIndexOf(';');
+        if (lastIndex > 0) {
+            pathInfo = pathInfo.substring(0, lastIndex);
+        }
         retval.setModule(pathInfo.substring(PREFIX.get().length()));
         /*
          * Set request URI

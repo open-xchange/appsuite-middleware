@@ -59,7 +59,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.facebook.session.FacebookOAuthAccessRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -68,7 +70,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDeleteListener, OAuthAccountInvalidationListener {
 
     /**
      * Initializes a new {@link FacebookOAuthAccountDeleteListener}.
@@ -90,6 +92,10 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
                 dropAccountByData(data, con);
             }
         }
+    }
+    
+    public void onAfterOAuthAccountInvalidation(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        FacebookOAuthAccessRegistry.getInstance().purgeUserAccess(cid, user, id);
     }
 
     private static List<int[]> listFacebookMessagingAccounts(final int userId, final int contextId, final Connection writeCon) throws OXException {

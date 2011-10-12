@@ -53,18 +53,11 @@ import java.awt.Graphics2D;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
 import org.artofsolving.jodconverter.office.DefaultOfficeManagerConfiguration;
 import org.artofsolving.jodconverter.office.OfficeManager;
 import org.jopendocument.model.OpenDocument;
 import org.jopendocument.renderer.ODTRenderer;
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.PageSize;
@@ -75,15 +68,11 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HTMLService;
-import com.openexchange.java.Streams;
 import com.openexchange.preview.InternalPreviewService;
-import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.internal.DelegationPreviewService;
 import com.openexchange.preview.internal.TikaPreviewService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
  * {@link PreviewActivator}

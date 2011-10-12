@@ -104,6 +104,7 @@ import com.openexchange.mail.smal.adapter.IndexAdapters;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.TextFiller;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
+import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -717,7 +718,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             ran = true;
             /*
-             * Commit without timeout
+             * Commit with timeout
              */
             commitWithTimeout(solrServer);
         } catch (final SolrServerException e) {
@@ -853,7 +854,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 off = endIndex;
             }
             /*
-             * Commit without timeout
+             * Commit with timeout
              */
             commitWithTimeout(solrServer);
         } catch (final OXException e) {
@@ -949,7 +950,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
     @Override
     public void addContents() throws OXException {
-    	// Nope
+    	textFillerQueue.proceed();
     }
 
     @Override
@@ -978,22 +979,49 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
     }
 
     @Override
-    public void add(final List<MailMessage> mails, final Session session) throws OXException {
+    public void add(final List<MailMessage> mails, final Session session) throws OXException, InterruptedException {
+        if (mails == null || mails.isEmpty()) {
+            return;
+        }
         CommonsHttpSolrServer solrServer = null;
+        boolean rollback = false;
         try {
             solrServer = solrServerFor(session, true);
             final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
             final long now = System.currentTimeMillis();
+            final int chunkSize = Constants.CHUNK_SIZE;
+            final int size = mails.size();
+            final Thread thread = Thread.currentThread();
             try {
-                solrServer.add(new MailDocumentIterator(mails.iterator(), session, now, fillers));
+                textFillerQueue.pause();
+                int off = 0;
+                while (off < size) {
+                    if (thread.isInterrupted()) {
+                        throw new InterruptedException("Thread interrupted while adding Solr input documents.");
+                    }
+                    int endIndex = off + chunkSize;
+                    if (endIndex >= size) {
+                        endIndex = size;
+                    }
+                    solrServer.add(new MailDocumentIterator(mails.subList(off, endIndex).iterator(), session, now, fillers));
+                    rollback = true;
+                    off = endIndex;
+                }
             } catch (final SolrException e) {
-                // Batch failed
-                rollback(solrServer);
+                if (rollback) {
+                    // Batch failed
+                    rollback(solrServer);
+                    rollback = false;
+                }
                 fillers.clear();
                 for (final Iterator<SolrInputDocument> it = new MailDocumentIterator(mails.iterator(), session, now, null); it.hasNext();) {
+                    if (thread.isInterrupted()) {
+                        throw new InterruptedException("Thread interrupted while adding Solr input documents.");
+                    }
                     final SolrInputDocument inputDocument = it.next();
                     try {
                         solrServer.add(inputDocument);
+                        rollback = true;
                         fillers.add(TextFiller.fillerFor(inputDocument));
                     } catch (final Exception addFailed) {
                         LOG.warn("Mail input document could not be added: id=" + inputDocument.getFieldValue("id") + " fullName=" + inputDocument.getFieldValue("full_name"), addFailed);
@@ -1001,18 +1029,24 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 }
             }
             /*
-             * Commit without timeout
+             * Commit with timeout
              */
             commitWithTimeout(solrServer);
             textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
-            rollback(solrServer);
+            if (rollback) {
+                rollback(solrServer);
+            }
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
-            rollback(solrServer);
+            if (rollback) {
+                rollback(solrServer);
+            }
             throw SMALExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(solrServer);
+            if (rollback) {
+                rollback(solrServer);
+            }
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

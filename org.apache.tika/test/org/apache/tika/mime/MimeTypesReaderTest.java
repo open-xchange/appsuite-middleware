@@ -31,12 +31,12 @@ import org.apache.tika.config.TikaConfig;
  * To do this, it tests that various aspects of the
  *  mime-types.xml file have ended up correctly as
  *  globs, matches, magics etc.
- *
+ *  
  * If you make updates to mime-types.xml, then the
  *  checks in this test may no longer hold true.
  * As such, if tests here start failing after your
  *  changes, please review the test details, and
- *  update it to match the new state of the file!
+ *  update it to match the new state of the file! 
  */
 public class MimeTypesReaderTest extends TestCase {
 
@@ -108,7 +108,7 @@ public class MimeTypesReaderTest extends TestCase {
              excelMagics.size() >= minMatches
        );
     }
-
+    
     /**
      * @since TIKA-515
      */

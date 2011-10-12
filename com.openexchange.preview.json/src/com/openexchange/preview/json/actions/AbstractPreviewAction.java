@@ -52,6 +52,8 @@ package com.openexchange.preview.json.actions;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
@@ -64,15 +66,29 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractPreviewAction implements AJAXActionService {
     
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
     
-    public AbstractPreviewAction(ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link AbstractPreviewAction}.
+     * 
+     * @param serviceLookup The service look-up
+     */
+    public AbstractPreviewAction(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
     }
+
+    /**
+     * Gets the {@link MailService} instance.
+     * 
+     * @return The {@link MailService} instance or <code>null</code>
+     */
+    protected MailService getMailService() {
+        return serviceLookup.getService(MailService.class);
+    }
     
     protected IDBasedFileAccessFactory getFileAccessFactory() throws OXException {
-        IDBasedFileAccessFactory service = serviceLookup.getService(IDBasedFileAccessFactory.class);
+        final IDBasedFileAccessFactory service = serviceLookup.getService(IDBasedFileAccessFactory.class);
         if (service == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
@@ -81,9 +97,18 @@ public abstract class AbstractPreviewAction implements AJAXActionService {
     }
     
     protected PreviewService getPreviewService() throws OXException {
-        PreviewService service = serviceLookup.getService(PreviewService.class);
+        final PreviewService service = serviceLookup.getService(PreviewService.class);
         if (service == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(PreviewService.class.getName());
+        }
+        
+        return service;
+    }
+    
+    protected ManagedFileManagement getFileManagementService() throws OXException {
+        final ManagedFileManagement service = serviceLookup.getService(ManagedFileManagement.class);
+        if (service == null) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
         }
         
         return service;

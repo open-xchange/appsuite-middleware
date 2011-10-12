@@ -18,6 +18,7 @@ package org.apache.tika.parser.pkg;
 
 import java.io.InputStream;
 
+import org.apache.tika.Tika;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
@@ -80,11 +81,11 @@ public class ZipParserTest extends AbstractPkgTest {
        } finally {
            stream.close();
        }
-
+       
        // Should have found all 9 documents
        assertEquals(9, tracker.filenames.size());
        assertEquals(9, tracker.mediatypes.size());
-
+       
        // Should have names but not content types, as zip doesn't
        //  store the content types
        assertEquals("testEXCEL.xls", tracker.filenames.get(0));
@@ -96,9 +97,24 @@ public class ZipParserTest extends AbstractPkgTest {
        assertEquals("testTXT.txt", tracker.filenames.get(6));
        assertEquals("testWORD.doc", tracker.filenames.get(7));
        assertEquals("testXML.xml", tracker.filenames.get(8));
-
+       
        for(String type : tracker.mediatypes) {
           assertNull(type);
        }
     }
+
+    /**
+     * Test case for the ability of the ZIP parser to extract the name of
+     * a ZIP entry even if the content of the entry is unreadable due to an
+     * unsupported compression method.
+     *
+     * @see <a href="https://issues.apache.org/jira/browse/TIKA-346">TIKA-346</a>
+     */
+    public void testUnsupportedZipCompressionMethod() throws Exception {
+        String content = new Tika().parseToString(
+                ZipParserTest.class.getResourceAsStream(
+                        "/test-documents/moby.zip"));
+        assertTrue(content.contains("README"));
+    }
+
 }

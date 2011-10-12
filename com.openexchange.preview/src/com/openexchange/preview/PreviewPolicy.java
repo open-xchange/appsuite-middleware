@@ -58,11 +58,11 @@ package com.openexchange.preview;
  */
 public class PreviewPolicy {
     
-    private String mimeType;
+    private final String mimeType;
     
-    private PreviewOutput output;
+    private final PreviewOutput output;
     
-    private Quality quality;
+    private final Quality quality;
     
     
     /**
@@ -71,7 +71,7 @@ public class PreviewPolicy {
      * @param output
      * @param quality
      */
-    public PreviewPolicy(String mimeType, PreviewOutput output, Quality quality) {
+    public PreviewPolicy(final String mimeType, final PreviewOutput output, final Quality quality) {
         super();
         this.mimeType = mimeType;
         this.output = output;

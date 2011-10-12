@@ -276,10 +276,14 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
     @Override
     public boolean handleSpecialPart(final MailPart part, final String baseContentType, final String fileName, final String id) throws OXException {
-        final String disposition =
-            part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE : Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
-        if (!Part.INLINE.equalsIgnoreCase(disposition)) {
+        if (baseContentType.startsWith("text/")) {
             nonInlineParts.add(part);
+        } else {
+            final String disposition =
+                part.getContentDisposition() == null ? (part.getFileName() == null ? Part.INLINE : Part.ATTACHMENT) : part.getContentDisposition().getDisposition();
+            if (!Part.INLINE.equalsIgnoreCase(disposition)) {
+                nonInlineParts.add(part);
+            }
         }
         return true;
     }
