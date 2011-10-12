@@ -70,7 +70,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link JobConsumer} - The job consumer which takes jobs from passed blocking queue.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class JobConsumer extends AbstractTask<Object> {
@@ -118,13 +118,15 @@ final class JobConsumer extends AbstractTask<Object> {
         }
     };
 
-    private static final int NUM_OF_MAX_CONCURRENT_WORKERS = Runtime.getRuntime().availableProcessors();
+    private static final int NUM_OF_MAX_CONCURRENT_WORKERS = Runtime.getRuntime().availableProcessors() << 1;
 
     private final BlockingQueue<Job> queue;
 
     private final ConcurrentMap<String, Job> identifiers;
 
     private final AtomicBoolean keepgoing;
+
+    private final boolean consumerMayPerformTasks;
 
     protected final Semaphore semaphore;
 
@@ -133,13 +135,14 @@ final class JobConsumer extends AbstractTask<Object> {
     /**
      * Initializes a new {@link JobConsumer}.
      */
-    protected JobConsumer(final BlockingQueue<Job> queue, final ConcurrentMap<String, Job> identifiers) {
+    protected JobConsumer(final BlockingQueue<Job> queue, final ConcurrentMap<String, Job> identifiers, final boolean consumerMayPerformTasks) {
         super();
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
         this.identifiers = identifiers;
         currentJobs = new ConcurrentLinkedQueue<Job>();
         semaphore = new Semaphore(NUM_OF_MAX_CONCURRENT_WORKERS);
+        this.consumerMayPerformTasks = consumerMayPerformTasks;
     }
 
     /**
@@ -162,7 +165,7 @@ final class JobConsumer extends AbstractTask<Object> {
 
     /**
      * Gets the jobs currently being executed.
-     *
+     * 
      * @return The jobs currently being executed or an empty list if none is executed at the moment
      */
     protected List<Job> currentJobs() {
@@ -172,11 +175,19 @@ final class JobConsumer extends AbstractTask<Object> {
 
     /**
      * Checks if there is a job in queue with a higher ranking than specified ranking.
-     *
+     * 
      * @param ranking The ranking to check against
      * @return <code>true</code> if there is a higher-ranked job; otherwise <code>false</code>
      */
     protected boolean hasHigherRankedJobInQueue(final int ranking) {
+        /*
+         * Method's intention is to pause a long-running to allow further consuming intermediate tasks from queue. This is not
+         * appropriate if main thread does not perform tasks. Meaning consuming from queue is possible unless further permits are
+         * available from semaphore instance.
+         */
+        if (!consumerMayPerformTasks && semaphore.availablePermits() > 0) {
+            return false;
+        }
         final Job peekedJob = queue.peek();
         return null != peekedJob && peekedJob.getRanking() > ranking;
     }
@@ -219,13 +230,19 @@ final class JobConsumer extends AbstractTask<Object> {
                     // Consumer run failed...
                 }
             }
+            LOG.info("Job consumer terminated.");
+        } catch (final InterruptedException e) {
+            // Consumer interrupted... Keep interrupted flag
+            Thread.currentThread().interrupt();
+            LOG.info("Job consumer interrupted.", e);
         } catch (final Exception e) {
             // Consumer failed...
+            LOG.info("Job consumer terminated with error.", e);
         }
         return null;
     }
 
-    protected void performJob(final Job job, final ThreadPoolService threadPool) {
+    protected void performJob(final Job job, final ThreadPoolService threadPool) throws InterruptedException {
         /*
          * Check if canceled in the meantime
          */
@@ -242,28 +259,35 @@ final class JobConsumer extends AbstractTask<Object> {
             return;
         }
         try {
-            if (semaphore.tryAcquire()) {
-                // Further concurrent worker allowed
+            if (consumerMayPerformTasks) {
+                if (semaphore.tryAcquire()) {
+                    // Further concurrent worker allowed
+                    final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
+                    job.future = future;
+                } else {
+                    // Execute with "Job-Consumer" thread
+                    final JobWrapper jobWrapper = wrapperFor(job, false);
+                    boolean ran = false;
+                    jobWrapper.beforeExecute(Thread.currentThread());
+                    try {
+                        jobWrapper.call();
+                        ran = true;
+                        jobWrapper.afterExecute(null);
+                    } catch (final Throwable t) {
+                        if (!ran) {
+                            afterExecute(t);
+                        }
+                        // Else the exception occurred within afterExecute itself in which case we don't want to call it again.
+                        LOG.warn("Exception occurred within afterExecute().", t);
+                    } finally {
+                        Thread.interrupted();
+                    }
+                }
+            } else {
+                semaphore.acquire();
+                // Free worker
                 final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
                 job.future = future;
-            } else {
-                // Execute with "Job-Consumer" thread
-                final JobWrapper jobWrapper = wrapperFor(job, false);
-                boolean ran = false;
-                jobWrapper.beforeExecute(Thread.currentThread());
-                try {
-                    jobWrapper.call();
-                    ran = true;
-                    jobWrapper.afterExecute(null);
-                } catch (final Throwable t) {
-                    if (!ran) {
-                        afterExecute(t);
-                    }
-                    // Else the exception occurred within afterExecute itself in which case we don't want to call it again.
-                    LOG.warn("Exception occurred within afterExecute().", t);
-                } finally {
-                    Thread.interrupted();
-                }
             }
         } finally {
             /*
@@ -302,9 +326,9 @@ final class JobConsumer extends AbstractTask<Object> {
 
         @Override
         public void afterExecute(final Throwable t) {
-            
+
             System.out.println(job.getIdentifier() + " terminated" + (null == t ? "." : " with error: " + t.getMessage()));
-            
+
             if (releasePermit) {
                 semaphore.release();
             }
