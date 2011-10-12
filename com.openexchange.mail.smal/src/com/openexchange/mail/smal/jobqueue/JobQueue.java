@@ -121,7 +121,7 @@ public final class JobQueue {
         super();
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
         identifiers = new ConcurrentHashMap<String, Job>(CAPACITY);
-        consumer = new JobConsumer(queue, identifiers);
+        consumer = new JobConsumer(queue, identifiers, false);
         consumerFuture = threadPool.submit(consumer, AbortBehavior.getInstance());
     }
 
