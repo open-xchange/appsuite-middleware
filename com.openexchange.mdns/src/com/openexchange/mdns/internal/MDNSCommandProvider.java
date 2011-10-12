@@ -79,17 +79,20 @@ public final class MDNSCommandProvider implements CommandProvider {
         /*
          * Check service identifier
          */
-        final String serviceId = intp.nextArgument();
+        String serviceId = intp.nextArgument();
+        if (null == serviceId) {
+            serviceId = "openexchange.service.messaging";
+        }
         final StringBuilder sb = new StringBuilder(256);
         final List<MDNSServiceEntry> services;
         try {
-            services = mdnsService.listByService(null == serviceId ? "openexchange.service.messaging" : serviceId);
+            services = mdnsService.listByService(serviceId);
         } catch (final OXException e) {
             intp.print(sb.append("Error: ").append(e.getMessage()).toString());
             return null;
         }
         sb.setLength(0);
-        intp.print(sb.append("---Tracked services of \"").append(null == serviceId ? "openexchange.service.messaging" : serviceId).append(
+        intp.print(sb.append("---Tracked services of \"").append(serviceId).append(
             "\" ---\n").toString());
         for (final MDNSServiceEntry mdnsServiceEntry : services) {
             sb.setLength(0);
