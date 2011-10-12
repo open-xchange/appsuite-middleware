@@ -377,23 +377,13 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 }
             }
             /*
-             * Handle fillers...
+             * Submit to a free worker thread
              */
-            if (index < 0) {
-                /*
-                 * Caller runs because other worker threads are busy
-                 */
-                handleFillersSublist(groupedFillersSublist, simpleName);
-            } else {
-                /*
-                 * Submit to a free worker thread
-                 */
-                final FillerHandlerTask task = new FillerHandlerTask(groupedFillersSublist, index);
-                final Future<Object> f = poolService.submit(ThreadPools.task(task));
-                final StampedFuture sf = new StampedFuture(f);
-                concurrentFutures.set(index, sf);
-                task.start(sf);
-            }
+            final FillerHandlerTask task = new FillerHandlerTask(groupedFillersSublist, index);
+            final Future<Object> f = poolService.submit(ThreadPools.task(task));
+            final StampedFuture sf = new StampedFuture(f);
+            concurrentFutures.set(index, sf);
+            task.start(sf);
         }
     }
 
@@ -688,7 +678,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         /**
          * Opens this task for processing.
          * 
-         * @param sf The future-and-task object associated with this task
+         * @param sf The stamped future object associated with this task
          */
         protected void start(final StampedFuture sf) {
             this.sf = sf;
