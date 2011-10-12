@@ -336,7 +336,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     } else if (sf.getStamp() < earliestStamp) { // Elapsed
                         sf.getFuture().cancel(true);
                         if (DEBUG) {
-                            LOG.debug("Cancelled elapsed task...");
+                            LOG.debug("Cancelled elapsed task running for " + (System.currentTimeMillis() - sf.getStamp()) + "msec.");
                         }
                         if (concurrentFutures.compareAndSet(i, sf, placeHolder)) {
                             index = i; // Found a slot with an elapsed task
@@ -404,6 +404,9 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         } catch (final RuntimeException e) {
             LOG.error("Failed pushing text content to indexed mails.", e);
         } finally {
+            if (DEBUG) {
+                LOG.debug("Handled " + fillersChunk.size() + " fillers.");
+            }
             synchronized (placeHolder) {
                 placeHolder.notifyAll();
             }

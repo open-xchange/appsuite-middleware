@@ -69,7 +69,7 @@ public final class StampedFuture {
     public StampedFuture(final Future<Object> future) {
         super();
         this.future = future;
-        stamp = new AtomicLong(Long.MIN_VALUE);
+        stamp = new AtomicLong(Long.MAX_VALUE);
     }
 
     /**
