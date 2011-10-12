@@ -51,6 +51,8 @@ package com.openexchange.mdns.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -66,8 +68,6 @@ import com.openexchange.mdns.internal.MDNSServiceImpl;
  */
 public final class MDNSActivator implements BundleActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSActivator.class));
-
     private List<ServiceRegistration<?>> registrations;
 
     private MDNSServiceImpl service;
@@ -81,6 +81,8 @@ public final class MDNSActivator implements BundleActivator {
 
     @Override
     public void start(final BundleContext context) throws Exception {
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
+        log.error("Starting bundle: com.openexchange.mdns");
         try {
             /*
              * Create mDNS service
@@ -90,13 +92,15 @@ public final class MDNSActivator implements BundleActivator {
             registrations.add(context.registerService(MDNSService.class.getName(), service, null));
             registrations.add(context.registerService(CommandProvider.class.getName(), new MDNSCommandProvider(service), null));
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error("Starting bundle failed: com.openexchange.mdns", e);
             throw e;
         }
     }
 
     @Override
     public void stop(final BundleContext context) throws Exception {
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
+        log.error("Stopping bundle: com.openexchange.mdns");
         try {
             if (registrations != null) {
                 while (!registrations.isEmpty()) {
@@ -109,7 +113,7 @@ public final class MDNSActivator implements BundleActivator {
                 service = null;
             }
         } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+            log.error("Stopping bundle failed: com.openexchange.mdns", e);
             throw e;
         }
     }
