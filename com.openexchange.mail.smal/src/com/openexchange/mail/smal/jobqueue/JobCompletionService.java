@@ -144,8 +144,36 @@ public final class JobCompletionService {
         /*
          * Add to job queue
          */
-        final boolean added = JobQueue.getInstance().addJob(queueingJob);
-        if (added) {
+        if (JobQueue.getInstance().addJob(queueingJob)) {
+            queueingJob.start();
+            return true;
+        }
+        runningCount.decrementAndGet();
+        return false;
+    }
+
+    /**
+     * Adds specified job to this completion service
+     * 
+     * @param job The job to add
+     * @return <code>true</code> if job could be added; otherwise <code>false</code>
+     */
+    public boolean tryAddJob(final Job job) {
+        final QueueingJob queueingJob = new QueueingJob(job);
+        if (capacity <= 0) {
+            return JobQueue.getInstance().addJob(queueingJob);
+        }
+        int count;
+        do {
+            count = runningCount.get();
+            if (count >= capacity) {
+                return false;
+            }
+        } while (!runningCount.compareAndSet(count, count + 1));
+        /*
+         * Add to job queue
+         */
+        if (JobQueue.getInstance().addJob(queueingJob)) {
             queueingJob.start();
             return true;
         }
