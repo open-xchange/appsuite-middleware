@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.mdns
 Bundle-Version: 6.20.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-ClassPath: .,
- lib/jmdns-3.1.6.jar
+ lib/jmdns-3.4.1.jar
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
