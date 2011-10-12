@@ -439,6 +439,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrivateFolderID(inFolder);
                 cdao.setGlobalFolderID(0);
             }
+            if (cdao.getFolderType() == FolderObject.SHARED) {
+                int folderOwner = ofa.getFolderOwner(inFolder);
+                cdao.setCreatedBy(folderOwner);
+                cdao.setModifiedBy(folderOwner);
+            }
             // Strange bugs can be produced if the recurrence identifier is set to some value on insert.
             cdao.removeRecurrenceID();
         } else {

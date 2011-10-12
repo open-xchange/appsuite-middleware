@@ -144,6 +144,10 @@
  - Fix for bug 18866: Deny for non context admin
  - Fix for reopen issue for bug 20155: Using generic ContactInterface instead of casting to RDB implementation
  - Fix for bug 20310: Max. connection setting for IMAP
+ 
+* 2011-09-09 - martin.herfurth@open-xchange.com
+ 
+  - Bugfix #19932: Create exception for a series, which started in the past and ends in the future.
 
 * 2011-09-09 - marcus.klein@open-xchange.com
 
