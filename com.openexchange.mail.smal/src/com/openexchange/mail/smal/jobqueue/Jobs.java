@@ -223,7 +223,12 @@ public final class Jobs {
 
         @Override
         public void perform() {
-            task.run();
+            try {
+                task.run();
+            } catch (final RuntimeException e) {
+                final Throwable cause = e.getCause();
+                executionFailure = null == cause ? e : cause;
+            }
         }
 
     }

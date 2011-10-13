@@ -66,7 +66,12 @@ public final class UnboundedJobCompletionService extends AbstractJobCompletionSe
 
     @Override
     public boolean addJob(final Job job) {
-        return JobQueue.getInstance().addJob(new QueueingJob(job));
+        final QueueingJob queueingJob = new QueueingJob(job);
+        if (!JobQueue.getInstance().addJob(queueingJob)) {
+            return false;
+        }
+        queueingJob.start();
+        return true;
     }
 
     @Override
