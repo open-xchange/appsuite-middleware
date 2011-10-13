@@ -185,7 +185,7 @@ public final class Gate {
     }
 
     /**
-     * Tries to pass this gate immediately and does not wait until that condition is met.
+     * Tries to pass this gate and does not wait if not immediately able to do so.
      * <p>
      * It is recommended practice to <em>always</em> immediately follow a call to {@code tryPass} with a {@code try} block, most typically
      * in a before/after construction such as:
