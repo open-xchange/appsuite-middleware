@@ -281,7 +281,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * This method may be overridden in implementing subclass if a faster way can be achieved.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is

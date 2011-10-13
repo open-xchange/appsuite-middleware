@@ -132,7 +132,11 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
-        new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
+        final MailMessage mail = getMessage(folder, mailId, false);
+        if (null == mail) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
+        }
+        new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart ret = handler.getImagePart();
         if (ret == null) {
             throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, mailId, folder);
