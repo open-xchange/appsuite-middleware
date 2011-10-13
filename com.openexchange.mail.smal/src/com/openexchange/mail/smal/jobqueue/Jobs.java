@@ -73,7 +73,7 @@ public final class Jobs {
      * @return A new {@link Job job} for specified task
      */
     public static Job jobFor(final Runnable task) {
-        return jobFor(task, new StringBuilder(48).append("Job@").append(UUID.randomUUID().toString()).toString());
+        return jobFor(task, new StringBuilder(48).append("RunnableJob@").append(UUID.randomUUID().toString()).toString());
     }
 
     /**
@@ -106,7 +106,7 @@ public final class Jobs {
      * @return A new {@link Job job} for specified task
      */
     public static <V> Job jobFor(final Callable<V> task) {
-        return jobFor(task, new StringBuilder(48).append("Job@").append(UUID.randomUUID().toString()).toString());
+        return jobFor(task, new StringBuilder(48).append("CallableJob@").append(UUID.randomUUID().toString()).toString());
     }
 
     /**
