@@ -196,7 +196,38 @@ public final class CommonsHttpSolrServerManagement {
     }
 
     /**
-     * Gets a new Solr server with a SO_TIMEOUT set which is associated with specified index URL either from cache or newly established.
+     * Gets the Solr server without a SO_TIMEOUT set which is based on specified server's settings.
+     * 
+     * @param solrServer The base server
+     * @return The Solr server without a SO_TIMEOUT applied
+     * @throws OXException If creation of a new Solr server fails
+     */
+    public CommonsHttpSolrServer getNoTimeoutSolrServerFor(final CommonsHttpSolrServer solrServer) throws OXException {
+        final HttpClient client = solrServer.getHttpClient();
+        final int soTimeout = client.getHttpConnectionManager().getParams().getSoTimeout();
+        if (soTimeout <= 0) {
+            return solrServer;
+        }
+        final HttpClientParams clientParams = client.getParams();
+        CommonsHttpSolrServer infiniteServer = (CommonsHttpSolrServer) clientParams.getParameter("solr.infinite-server");
+        if (null == infiniteServer) {
+            synchronized (clientParams) {
+                infiniteServer = (CommonsHttpSolrServer) clientParams.getParameter("solr.infinite-server");
+                if (null == infiniteServer) {
+                    final IndexUrl indexUrl = (IndexUrl) clientParams.getParameter("solr.index-url");
+                    if (null == indexUrl) {
+                        return solrServer;
+                    }
+                    infiniteServer = newNoTimeoutSolrServer(indexUrl);
+                    clientParams.setParameter("solr.infinite-server", infiniteServer);
+                }
+            }
+        }
+        return infiniteServer;
+    }
+
+    /**
+     * Gets a new Solr server without a SO_TIMEOUT set which is associated with specified index URL either from cache or newly established.
      * 
      * @param indexUrl The index URL
      * @return The new Solr server without a SO_TIMEOUT applied

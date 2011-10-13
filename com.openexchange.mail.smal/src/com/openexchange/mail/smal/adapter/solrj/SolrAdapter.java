@@ -940,13 +940,14 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                     throw e;
                 }
                 fillers.clear();
+                final CommonsHttpSolrServer noTimeoutSolrServer = solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
                 final SolrDocumentIterator it = new SolrDocumentIterator(documents, map, fillers);
                 final int itSize = documents.size();
                 for (int i = 0; i < itSize; i++) {
                     if (thread.isInterrupted()) {
                         throw new InterruptedException("Thread interrupted while changing Solr documents.");
                     }
-                    solrServer.add(it.next());
+                    noTimeoutSolrServer.add(it.next());
                 }
             }
             textFillerQueue.add(fillers);
@@ -1025,21 +1026,23 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                     final List<MailMessage> subList = mails.subList(off, endIndex);
                     try {
                         solrServer.add(new MailDocumentIterator(subList.iterator(), session, now, fillers));
+                        rollback = true;
                     } catch (final SolrServerException e) {
                         if (!(e.getCause() instanceof SocketTimeoutException)) {
                             throw e;
                         }
                         fillers.clear();
+                        final CommonsHttpSolrServer noTimeoutSolrServer = solrServerManagement.getNoTimeoutSolrServerFor(solrServer);
                         final MailDocumentIterator it = new MailDocumentIterator(subList.iterator(), session, now, fillers);
                         final int itSize = subList.size();
                         for (int i = 0; i < itSize; i++) {
                             if (thread.isInterrupted()) {
                                 throw new InterruptedException("Thread interrupted while adding Solr input documents.");
                             }
-                            solrServer.add(it.next());
+                            noTimeoutSolrServer.add(it.next());
+                            rollback = true;
                         }
                     }
-                    rollback = true;
                     off = endIndex;
                 }
             } catch (final SolrException e) {

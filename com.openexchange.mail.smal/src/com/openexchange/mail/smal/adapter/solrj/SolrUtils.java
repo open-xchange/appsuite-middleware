@@ -51,12 +51,10 @@ package com.openexchange.mail.smal.adapter.solrj;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.params.HttpClientParams;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import com.openexchange.exception.OXException;
-import com.openexchange.index.IndexUrl;
 import com.openexchange.log.Log;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 
@@ -121,72 +119,58 @@ public final class SolrUtils {
      */
     public static void commit(final CommonsHttpSolrServer solrServer, final boolean noTimeout) throws SolrServerException, IOException, OXException {
         if (null != solrServer) {
-            if (!noTimeout) {
+            if (!noTimeout || solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout() <= 0) {
                 solrServer.commit();
                 return;
             }
-            final HttpClient client = solrServer.getHttpClient();
-            final int soTimeout = client.getHttpConnectionManager().getParams().getSoTimeout();
-            if (soTimeout <= 0) {
-                solrServer.commit();
-                return;
-            }
-            final HttpClientParams clientParams = client.getParams();
-            CommonsHttpSolrServer infiniteServer = (CommonsHttpSolrServer) clientParams.getParameter("solr.infinite-server");
-            if (null == infiniteServer) {
-                synchronized (clientParams) {
-                    infiniteServer = (CommonsHttpSolrServer) clientParams.getParameter("solr.infinite-server");
-                    if (null == infiniteServer) {
-                        final IndexUrl indexUrl = (IndexUrl) clientParams.getParameter("solr.index-url");
-                        final CommonsHttpSolrServerManagement management =
-                            (CommonsHttpSolrServerManagement) clientParams.getParameter("solr.server-management");
-                        if (null == indexUrl || null == management) {
-                            solrServer.commit();
-                            return;
-                        }
-                        infiniteServer = management.newNoTimeoutSolrServer(indexUrl);
-                        clientParams.setParameter("solr.infinite-server", infiniteServer);
-                    }
-                }
-            }
-            infiniteServer.commit();
+            noTimeoutServer(solrServer).commit();
         }
     }
 
     /**
-     * Performs a roll-back for specified Solr server.
-     * <p>
-     * Temporarily disables default socket timeout (<tt>SO_TIMEOUT</tt>).
+     * Performs a safe roll-back for specified Solr server.
      * 
      * @param solrServer The Solr server
      */
     public static void rollback(final CommonsHttpSolrServer solrServer) {
         if (null != solrServer) {
             try {
-                final int soTimeout = solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout();
-                final IndexUrl indexUrl = (IndexUrl) solrServer.getHttpClient().getParams().getParameter("solr.index-url");
-                final CommonsHttpSolrServerManagement management =
-                    (CommonsHttpSolrServerManagement) solrServer.getHttpClient().getParams().getParameter("solr.server-management");
-                if (soTimeout <= 0 || null == indexUrl || null == management) {
+                if (solrServer.getHttpClient().getHttpConnectionManager().getParams().getSoTimeout() <= 0) {
                     solrServer.rollback();
-                } else {
-                    final CommonsHttpSolrServer newInfiniteServer = management.newNoTimeoutSolrServer(indexUrl);
-                    try {
-                        newInfiniteServer.rollback();
-                    } finally {
-                        CommonsHttpSolrServerManagement.closeSolrServer(newInfiniteServer);
-                    }
+                    return;
                 }
-            } catch (final OXException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            } catch (final SolrServerException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            } catch (final IOException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
-            } catch (final RuntimeException e) {
-                LOG.warn("Rollback of Solr server failed.", e);
+                noTimeoutServer(solrServer).rollback();
+            } catch (final Throwable t) {
+                handleThrowable(t);
+                LOG.warn("Rollback of Solr server failed.", t);
             }
         }
+    }
+
+    private static CommonsHttpSolrServer noTimeoutServer(final CommonsHttpSolrServer solrServer) throws OXException {
+        final HttpClientParams params = solrServer.getHttpClient().getParams();
+        return ((CommonsHttpSolrServerManagement) params.getParameter("solr.server-management")).getNoTimeoutSolrServerFor(solrServer);
+    }
+
+    private static final String MARKER = " ---=== /!\\ ===--- ";
+
+    /**
+     * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
+     * 
+     * @param t The <tt>Throwable</tt> to check
+     */
+    public static void handleThrowable(final Throwable t) {
+        if (t instanceof ThreadDeath) {
+            LOG.fatal(MARKER + "Thread death" + MARKER, t);
+            throw (ThreadDeath) t;
+        }
+        if (t instanceof VirtualMachineError) {
+            LOG.fatal(
+                MARKER + "The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating." + MARKER,
+                t);
+            throw (VirtualMachineError) t;
+        }
+        // All other instances of Throwable will be silently swallowed
     }
 
 }

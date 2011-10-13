@@ -524,15 +524,17 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     final List<SolrInputDocument> docs = inputDocuments.subList(off, toIndex);
                     try {
                         solrServer.add(docs);
+                        rollback = true;
                     } catch (final SolrServerException e) {
                         if (!(e.getCause() instanceof SocketTimeoutException)) {
                             throw e;
                         }
+                        final CommonsHttpSolrServer noTimeoutSolrServer = serverManagement.getNoTimeoutSolrServerFor(solrServer);
                         for (final SolrInputDocument doc : docs) {
-                            solrServer.add(doc);
+                            noTimeoutSolrServer.add(doc);
+                            rollback = true;
                         }
                     }
-                    rollback = true;
                     off = toIndex;
                 }
                 /*
