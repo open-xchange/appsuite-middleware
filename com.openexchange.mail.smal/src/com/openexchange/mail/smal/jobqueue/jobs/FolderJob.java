@@ -139,6 +139,8 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     private final AtomicInteger gate;
 
+    private volatile boolean mayScheduleJobs;
+
     private volatile boolean ignoreDeleted;
 
     private volatile int ranking;
@@ -226,6 +228,16 @@ public final class FolderJob extends AbstractMailSyncJob {
      */
     public FolderJob setIndexMails(final List<MailMessage> indexMail) {
         this.indexMails = indexMail;
+        return this;
+    }
+
+    /**
+     * Sets the mayScheduleJobs
+     *
+     * @param mayScheduleJobs The mayScheduleJobs to set
+     */
+    public FolderJob setMayScheduleJobs(final boolean mayScheduleJobs) {
+        this.mayScheduleJobs = mayScheduleJobs;
         return this;
     }
 
@@ -437,7 +449,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                         idBuilder.append('@').append(UUIDs.getUnformattedString(UUID.randomUUID())).append('@');
                         final int resetlen = idBuilder.length();
                         int cnt = 0;
-                        final JobCompletionService completionService = new UnboundedJobCompletionService();
+                        final JobCompletionService completionService = mayScheduleJobs ? new UnboundedJobCompletionService() : null;
                         while (start < size) {
                             final int end;
                             {
@@ -450,7 +462,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                             /*
                              * A new job?
                              */
-                            if (end == size) {
+                            if (!mayScheduleJobs || end == size) {
                                 /*
                                  * Add last chunk
                                  */
@@ -493,7 +505,10 @@ public final class FolderJob extends AbstractMailSyncJob {
                             }
                             start = end;
                         }
-                        if (cnt > 0) {
+                        /*
+                         * Await scheduled jobs in completion service
+                         */
+                        if (cnt > 0 && null != completionService) {
                             if (DEBUG) {
                                 LOG.debug("Awaiting completed jobs...");
                             }

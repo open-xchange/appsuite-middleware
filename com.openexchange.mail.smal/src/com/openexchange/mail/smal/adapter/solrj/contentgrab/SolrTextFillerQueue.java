@@ -52,6 +52,7 @@ package com.openexchange.mail.smal.adapter.solrj.contentgrab;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -518,7 +519,17 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     if (toIndex > docSize) {
                         toIndex = docSize;
                     }
-                    solrServer.add(inputDocuments.subList(off, toIndex));
+                    final List<SolrInputDocument> docs = inputDocuments.subList(off, toIndex);
+                    try {
+                        solrServer.add(docs);
+                    } catch (final SolrServerException e) {
+                        if (!(e.getCause() instanceof SocketTimeoutException)) {
+                            throw e;
+                        }
+                        for (final SolrInputDocument doc : docs) {
+                            solrServer.add(doc);
+                        }
+                    }
                     rollback = true;
                     off = toIndex;
                 }

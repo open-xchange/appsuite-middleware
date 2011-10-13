@@ -56,6 +56,7 @@ import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitWithTimeo
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import static java.util.Collections.singletonList;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -930,7 +931,24 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 }
                 off += rsize;
             }
-            solrServer.add(new SolrDocumentIterator(documents, map, textFillerQueue));
+            final List<TextFiller> fillers = new ArrayList<TextFiller>(documents.size());
+            try {
+                solrServer.add(new SolrDocumentIterator(documents, map, fillers));
+            } catch (final SolrServerException e) {
+                if (!(e.getCause() instanceof SocketTimeoutException)) {
+                    throw e;
+                }
+                fillers.clear();
+                final SolrDocumentIterator it = new SolrDocumentIterator(documents, map, fillers);
+                final int itSize = documents.size();
+                for (int i = 0; i < itSize; i++) {
+                    if (thread.isInterrupted()) {
+                        throw new InterruptedException("Thread interrupted while changing Solr documents.");
+                    }
+                    solrServer.add(it.next());
+                }
+            }
+            textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final IOException e) {
@@ -1003,7 +1021,23 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                     if (endIndex >= size) {
                         endIndex = size;
                     }
-                    solrServer.add(new MailDocumentIterator(mails.subList(off, endIndex).iterator(), session, now, fillers));
+                    final List<MailMessage> subList = mails.subList(off, endIndex);
+                    try {
+                        solrServer.add(new MailDocumentIterator(subList.iterator(), session, now, fillers));
+                    } catch (final SolrServerException e) {
+                        if (!(e.getCause() instanceof SocketTimeoutException)) {
+                            throw e;
+                        }
+                        fillers.clear();
+                        final MailDocumentIterator it = new MailDocumentIterator(subList.iterator(), session, now, fillers);
+                        final int itSize = subList.size();
+                        for (int i = 0; i < itSize; i++) {
+                            if (thread.isInterrupted()) {
+                                throw new InterruptedException("Thread interrupted while adding Solr input documents.");
+                            }
+                            solrServer.add(it.next());
+                        }
+                    }
                     rollback = true;
                     off = endIndex;
                 }
@@ -1285,11 +1319,11 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
         private final Map<String, MailMessage> mailMap;
 
-        private final SolrTextFillerQueue textFillerQueue;
+        private final List<TextFiller> fillers;
 
-        protected SolrDocumentIterator(final Collection<SolrDocument> documents, final Map<String, MailMessage> mailMap, final SolrTextFillerQueue textFillerQueue) {
+        protected SolrDocumentIterator(final Collection<SolrDocument> documents, final Map<String, MailMessage> mailMap, final List<TextFiller> fillers) {
             super();
-            this.textFillerQueue = textFillerQueue;
+            this.fillers = fillers;
             iterator = documents.iterator();
             this.mailMap = mailMap;
         }
@@ -1302,9 +1336,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         @Override
         public SolrInputDocument next() {
             final SolrDocument document = iterator.next();
-            if (SolrTextFillerQueue.checkSolrDocument(document)) {
+            if (null != fillers && SolrTextFillerQueue.checkSolrDocument(document)) {
                 try {
-                    textFillerQueue.add(TextFiller.fillerFor(document));
+                    fillers.add(TextFiller.fillerFor(document));
                 } catch (final OXException e) {
                     // Ignore
                 }
