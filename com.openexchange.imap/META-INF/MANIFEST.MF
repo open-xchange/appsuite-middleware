@@ -80,3 +80,5 @@ Export-Package: com.openexchange.imap,
  com.openexchange.imap.notify
 Bundle-Activator: com.openexchange.imap.osgi.IMAPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .,
+ lib/jsoup-1.6.1.jar

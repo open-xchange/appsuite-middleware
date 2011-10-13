@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.Flags;
@@ -76,6 +77,8 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.AllFetch.LowCostItem;
 import com.openexchange.imap.cache.ListLsubCache;
@@ -253,8 +256,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private static String extractPlainText(final String content) throws OXException {
+        return extractPlainText(content, null);
+    }
+
+    private static String extractPlainText(final String content, final String optMimeType) throws OXException {
         final TextXtractService textXtractService = IMAPServiceRegistry.getService(TextXtractService.class);
-        return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), null);
+        return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), optMimeType);
     }
 
     @Override
@@ -270,7 +277,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int i = 0; i < bodystructures.length; i++) {
                 final BODYSTRUCTURE bodystructure = bodystructures[i];
                 if (null != bodystructure) {
-                    retval[i] = handleBODYSTRUCTURE(mailIds[i], bodystructure, null, 1, new boolean[1]);
+                    retval[i] = handleBODYSTRUCTURE(fullName, mailIds[i], bodystructure, null, 1, new boolean[1]);
                 }
             }
             return retval;
@@ -281,7 +288,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private String handleBODYSTRUCTURE(final long mailId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws OXException {
+    private static final Whitelist WHITELIST = Whitelist.relaxed();
+
+    private static final Pattern PATTERN_CRLF = Pattern.compile("(\r?\n)+");
+
+    private String handleBODYSTRUCTURE(final String fullName, final long mailId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws OXException {
         try {
             final String type = bodystructure.type.toLowerCase(Locale.ENGLISH);
             final String subtype = bodystructure.subtype.toLowerCase(Locale.ENGLISH);
@@ -289,7 +300,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final String sequenceId = getSequenceId(prefix, partCount);
                 final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
                 String content = readContent(bytes);
-                boolean textIsHtml;
+                boolean extractPlainText;
                 if ("plain".equals(subtype)) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
                         final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -297,15 +308,36 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             content = uuencodedMP.getCleanText();
                         }
                     }
-                    textIsHtml = false;
+                    extractPlainText = false;
                 } else {
                     if (subtype.startsWith("htm")) {
                         //content = htmlService.getConformHTML(content, "UTF-8");
-                        content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
+                        content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
                     }
-                    textIsHtml = true;
+                    extractPlainText = true;
                 }
-                return textIsHtml ? extractPlainText(content) : content;
+                if (!extractPlainText) {
+                    return content;
+                }
+                try {
+                    return extractPlainText(content);
+                } catch (final OXException e) {
+                    if (!subtype.startsWith("htm")) {
+                        final StringBuilder sb = new StringBuilder("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
+                        sb.append(" context=").append(session.getContextId());
+                        sb.append(", user=").append(session.getUserId());
+                        sb.append(", account=").append(accountId);
+                        sb.append(", full-name=").append(fullName);
+                        sb.append(", uid=").append(mailId);
+                        sb.append(", sequence-id=").append(sequenceId);
+                        LOG.warn(sb.toString());
+                        throw e;
+                    }
+                    /*
+                     * Retry with sanitized HTML content
+                     */
+                    return extractPlainText(Jsoup.clean(content, WHITELIST));
+                }
             }
             if ("multipart".equals(type)) {
                 final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
@@ -329,16 +361,16 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         final String bpSubtype = bp.subtype.toLowerCase(Locale.ENGLISH);
                         if ("text".equals(bpType) && "plain".equals(bpSubtype)) {
                             if (text == null) {
-                                text = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                                text = handleBODYSTRUCTURE(fullName, mailId, bp, mpPrefix, i + 1, mpDetected);
                             }
                             continue;
                         } else if ("text".equals(bpType) && bpSubtype.startsWith("htm")) {
-                            final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                            final String s = handleBODYSTRUCTURE(fullName, mailId, bp, mpPrefix, i + 1, mpDetected);
                             if (s != null) {
                                 return s;
                             }
                         } else if ("multipart".equals(bpType)) {
-                            final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                            final String s = handleBODYSTRUCTURE(fullName, mailId, bp, mpPrefix, i + 1, mpDetected);
                             if (s != null) {
                                 return s;
                             }
@@ -350,7 +382,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * A regular multipart
                  */
                 for (int i = 0; i < count; i++) {
-                    final String s = handleBODYSTRUCTURE(mailId, bodies[i], mpPrefix, i + 1, mpDetected);
+                    final String s = handleBODYSTRUCTURE(fullName, mailId, bodies[i], mpPrefix, i + 1, mpDetected);
                     if (s != null) {
                         return s;
                     }

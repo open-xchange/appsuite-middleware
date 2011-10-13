@@ -50,6 +50,7 @@
 package com.openexchange.mail.smal.adapter.solrj.contentgrab;
 
 import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
+import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitSane;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
@@ -69,6 +70,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReferenceArray;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -87,7 +90,6 @@ import com.openexchange.mail.smal.SMALExceptionCodes;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.adapter.solrj.SolrConstants;
-import com.openexchange.mail.smal.adapter.solrj.SolrUtils;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -101,7 +103,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
-    private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(SolrTextFillerQueue.class);
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrTextFillerQueue.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -533,7 +535,10 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                     rollback = true;
                     off = toIndex;
                 }
-                SolrUtils.commitWithTimeout(solrServer);
+                /*
+                 * Commit sane
+                 */
+                commitSane(solrServer);
                 if (DEBUG) {
                     final long dur = System.currentTimeMillis() - st;
                     final StringBuilder sb = new StringBuilder(64);

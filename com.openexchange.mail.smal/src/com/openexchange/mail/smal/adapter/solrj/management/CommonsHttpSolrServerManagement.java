@@ -163,13 +163,14 @@ public final class CommonsHttpSolrServerManagement {
      * @param server The Solr server to close
      */
     public static void closeSolrServer(final CommonsHttpSolrServer server) {
-        try {
-            if (null != server) {
-                final HttpClient httpClient = server.getHttpClient();
-                ((MultiThreadedHttpConnectionManager) httpClient.getHttpConnectionManager()).shutdown();
+        if (null != server) {
+            try {
+                final HttpClient client = server.getHttpClient();
+                closeSolrServer((CommonsHttpSolrServer) client.getParams().getParameter("solr.infinite-server"));
+                ((MultiThreadedHttpConnectionManager) client.getHttpConnectionManager()).shutdown();
+            } catch (final Exception e) {
+                // Ignore
             }
-        } catch (final Exception e) {
-            // Ignore
         }
     }
 

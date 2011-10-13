@@ -96,6 +96,13 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class FolderJob extends AbstractMailSyncJob {
 
+    private static final long serialVersionUID = -4811521171077091128L;
+
+    protected static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJob.class));
+
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
+
     private final class Add2IndexRunnable implements Runnable {
 
         private final IndexAdapter indexAdapter;
@@ -118,20 +125,15 @@ public final class FolderJob extends AbstractMailSyncJob {
         }
     }
 
-    private static final long serialVersionUID = -4811521171077091128L;
-
     private static final String SIMPLE_NAME = FolderJob.class.getSimpleName();
-
-    protected static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderJob.class));
-
-    protected static final boolean DEBUG = LOG.isDebugEnabled();
 
     private static final int GATE_PERFORM = -1;
 
     private static final int GATE_OPEN = 0;
 
     private static final int GATE_REPLACE = 1;
+
+    private volatile Session session;
 
     protected final String fullName;
 
@@ -272,6 +274,14 @@ public final class FolderJob extends AbstractMailSyncJob {
         return ranking;
     }
 
+    private Session getSession() {
+        Session tmp = session;
+        if (null == tmp) {
+            session = tmp = SMALServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
+        }
+        return tmp;
+    }
+
     private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
 
     @Override
@@ -309,12 +319,10 @@ public final class FolderJob extends AbstractMailSyncJob {
             try {
                 final IndexAdapter indexAdapter = getAdapter();
                 final List<MailMessage> mails;
-                final Session session;
                 if (null == storageMails) {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     try {
-                        mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-                        session = mailAccess.getSession();
+                        mailAccess = SMALMailAccess.getUnwrappedInstance(getSession(), accountId);
                         /*
                          * Get the mails from mail storage
                          */
@@ -347,7 +355,6 @@ public final class FolderJob extends AbstractMailSyncJob {
                     }
                 } else {
                     mails = storageMails;
-                    session = SMALServiceLookup.getServiceStatic(SessiondService.class).getAnyActiveSessionForUser(userId, contextId);
                 }
                 final Map<String, MailMessage> storageMap;
                 if (mails.isEmpty()) {
@@ -363,7 +370,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                  */
                 List<MailMessage> indexedMails = this.indexMails;
                 if (null == indexedMails) {
-                    indexedMails = indexAdapter.search(fullName, null, null, null, FIELDS, accountId, session);
+                    indexedMails = indexAdapter.search(fullName, null, null, null, FIELDS, accountId, getSession());
                 }
                 final Map<String, MailMessage> indexMap;
                 if (indexedMails.isEmpty()) {
@@ -423,12 +430,12 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * Delete
                  */
-                indexAdapter.deleteMessages(deletedIds, fullName, accountId, session);
+                indexAdapter.deleteMessages(deletedIds, fullName, accountId, getSession());
                 deletedIds = null;
                 /*
                  * Change flags
                  */
-                indexAdapter.change(changedMails, session);
+                indexAdapter.change(changedMails, getSession());
                 changedMails = null;
                 /*
                  * Add
@@ -586,8 +593,8 @@ public final class FolderJob extends AbstractMailSyncJob {
     protected void add2Index(final List<String> ids, final String fullName, final IndexAdapter indexAdapter) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            mailAccess = SMALMailAccess.getUnwrappedInstance(userId, contextId, accountId);
-            final Session session = mailAccess.getSession();
+            final Session session = getSession();
+            mailAccess = SMALMailAccess.getUnwrappedInstance(session, accountId);
             mailAccess.connect(true);
             /*
              * Specify fields

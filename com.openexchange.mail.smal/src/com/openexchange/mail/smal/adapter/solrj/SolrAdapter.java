@@ -52,7 +52,7 @@ package com.openexchange.mail.smal.adapter.solrj;
 import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
 import static com.openexchange.mail.smal.adapter.IndexAdapters.isEmpty;
-import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitWithTimeout;
+import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitSane;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import static java.util.Collections.singletonList;
 import java.io.IOException;
@@ -73,6 +73,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
@@ -120,8 +122,7 @@ import com.openexchange.user.UserService;
  */
 public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SolrAdapter.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SolrAdapter.class));
 
     private static final int QUERY_ROWS = 1000;
 
@@ -719,9 +720,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             ran = true;
             /*
-             * Commit with timeout
+             * Commit sane
              */
-            commitWithTimeout(solrServer);
+            commitSane(solrServer);
         } catch (final SolrServerException e) {
             if (!ran) {
                 LOG.debug("SolrServer.deleteByQuery() failed for query:\n" + query);
@@ -765,9 +766,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             }
             solrServer.deleteByQuery(queryBuilder.toString());
             /*
-             * Commit without timeout
+             * Commit sane
              */
-            commitWithTimeout(solrServer);
+            commitSane(solrServer);
         } catch (final SolrServerException e) {
             rollback(solrServer);
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
@@ -855,9 +856,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 off = endIndex;
             }
             /*
-             * Commit with timeout
+             * Commit sane
              */
-            commitWithTimeout(solrServer);
+            commitSane(solrServer);
         } catch (final OXException e) {
             rollback(rollback ? solrServer : null);
             throw e;
@@ -980,9 +981,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             final MailUUID uuid = new MailUUID(session.getContextId(), session.getUserId(), accountId, mail.getFolder(), mail.getMailId());
             solrServer.add(createDocument(uuid.getUUID(), mail, accountId, session, System.currentTimeMillis()));
             /*
-             * Commit without timeout
+             * Commit sane
              */
-            commitWithTimeout(solrServer);
+            commitSane(solrServer);
             textFillerQueue.add(TextFiller.fillerFor(uuid.getUUID(), mail, session));
         } catch (final SolrServerException e) {
             rollback(solrServer);
@@ -1063,9 +1064,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 }
             }
             /*
-             * Commit with timeout
+             * Commit sane
              */
-            commitWithTimeout(solrServer);
+            commitSane(solrServer);
             textFillerQueue.add(fillers);
         } catch (final SolrServerException e) {
             if (rollback) {
