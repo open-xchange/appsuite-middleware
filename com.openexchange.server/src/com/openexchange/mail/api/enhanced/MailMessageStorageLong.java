@@ -191,7 +191,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         final MailPartHandler handler = new MailPartHandler(sequenceId);
         final MailMessage mail = getMessageLong(folder, mailId, false);
         if (null == mail) {
-            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(mailId), folder);
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), folder);
         }
         new MailMessageParser().parseMailMessage(mail, handler);
         if (handler.getMailPart() == null) {
