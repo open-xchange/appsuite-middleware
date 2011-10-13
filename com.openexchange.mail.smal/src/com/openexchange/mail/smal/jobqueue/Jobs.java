@@ -51,6 +51,7 @@ package com.openexchange.mail.smal.jobqueue;
 
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link Jobs} - Utility class for {@link Job}s.
@@ -73,7 +74,7 @@ public final class Jobs {
      * @return A new {@link Job job} for specified task
      */
     public static Job jobFor(final Runnable task) {
-        return jobFor(task, new StringBuilder(48).append("RunnableJob@").append(UUID.randomUUID().toString()).toString());
+        return jobFor(task, new StringBuilder(48).append("RunnableJob@").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString());
     }
 
     /**
@@ -85,6 +86,18 @@ public final class Jobs {
      */
     public static Job jobFor(final Runnable task, final String identifier) {
         return jobFor(task, identifier, Job.DEFAULT_RANKING);
+    }
+
+    /**
+     * Generates a new {@link Job job} for specified task with a unique identifier and given ranking.
+     * 
+     * @param task The task to perform as a job
+     * @param ranking The ranking
+     * @return A new {@link Job job} for specified task
+     */
+    public static Job jobFor(final Runnable task, final int ranking) {
+        final StringBuilder tmp = new StringBuilder(48).append("RunnableJob@").append(UUIDs.getUnformattedString(UUID.randomUUID()));
+        return jobFor(task, tmp.toString(), ranking);
     }
 
     /**
@@ -106,7 +119,7 @@ public final class Jobs {
      * @return A new {@link Job job} for specified task
      */
     public static <V> Job jobFor(final Callable<V> task) {
-        return jobFor(task, new StringBuilder(48).append("CallableJob@").append(UUID.randomUUID().toString()).toString());
+        return jobFor(task, new StringBuilder(48).append("CallableJob@").append(UUIDs.getUnformattedString(UUID.randomUUID())).toString());
     }
 
     /**
@@ -118,6 +131,18 @@ public final class Jobs {
      */
     public static <V> Job jobFor(final Callable<V> task, final String identifier) {
         return jobFor(task, identifier, Job.DEFAULT_RANKING);
+    }
+
+    /**
+     * Generates a new {@link Job job} for specified task with a unique identifier and given ranking.
+     * 
+     * @param task The task to perform as a job
+     * @param ranking The ranking
+     * @return A new {@link Job job} for specified task
+     */
+    public static <V> Job jobFor(final Callable<V> task, final int ranking) {
+        final StringBuilder tmp = new StringBuilder(48).append("CallableJob@").append(UUIDs.getUnformattedString(UUID.randomUUID()));
+        return jobFor(task, tmp.toString(), ranking);
     }
 
     /**
