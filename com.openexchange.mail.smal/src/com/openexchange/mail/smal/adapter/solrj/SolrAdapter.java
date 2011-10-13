@@ -64,6 +64,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -203,6 +204,16 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         mailFields = new MailFields(field2Name.keySet());
     }
 
+    private static void addUnmappedFields(final Set<String> set) {
+        set.add(FIELD_UUID);
+        set.add(FIELD_ID);
+        set.add(FIELD_FULL_NAME);
+        set.add(FIELD_ACCOUNT);
+        set.add(FIELD_USER);
+        set.add(FIELD_CONTEXT);
+        set.add(FIELD_CONTENT_FLAG);
+    }
+
     private IndexUrl indexUrlFor(final Session session, final boolean readWrite) throws OXException {
         final ConfigIndexService configIndexService = SMALServiceLookup.getServiceStatic(ConfigIndexService.class);
         if (readWrite) {
@@ -260,6 +271,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              * Page-wise retrieval
              */
             final Integer rows = Integer.valueOf(QUERY_ROWS);
+            final String[] fieldArray;
             int off;
             final long numFound;
             final List<MailMessage> mails;
@@ -267,6 +279,18 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(0));
                 solrQuery.setRows(rows);
+                final Set<String> set = new HashSet<String>(fields.length);
+                for (final MailField field : fields) {
+                    final List<String> list = field2Name.get(field);
+                    if (null != list) {
+                        for (final String str : list) {
+                            set.add(str);
+                        }
+                    }
+                }
+                addUnmappedFields(set);
+                fieldArray  = set.toArray(new String[set.size()]);
+                solrQuery.setFields(fieldArray);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
@@ -289,6 +313,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(rows);
+                solrQuery.setFields(fieldArray);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int size = results.size();
@@ -340,13 +365,26 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              */
             final Integer rows = Integer.valueOf(QUERY_ROWS);
             int off;
+            final String[] fieldArray;
             final long numFound;
             final List<MailMessage> mails;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(0));
                 solrQuery.setRows(rows);
-                // TODO: solrQuery.setFields();
+                final MailField[] fields2 = mailFields.toArray();
+                final Set<String> set = new HashSet<String>(fields2.length);
+                for (final MailField field : fields2) {
+                    final List<String> list = field2Name.get(field);
+                    if (null != list) {
+                        for (final String str : list) {
+                            set.add(str);
+                        }
+                    }
+                }
+                addUnmappedFields(set);
+                fieldArray = set.toArray(new String[set.size()]);
+                solrQuery.setFields(fieldArray);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
@@ -373,6 +411,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(rows);
+                solrQuery.setFields(fieldArray);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int size = results.size();
@@ -617,6 +656,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              * Page-wise retrieval
              */
             final Integer rows = Integer.valueOf(QUERY_ROWS);
+            final String[] fieldArray;
             int off;
             final long numFound;
             final List<MailMessage> mails;
@@ -624,6 +664,19 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(0));
                 solrQuery.setRows(rows);
+                final MailField[] fields = mailFields.toArray();
+                final Set<String> set = new HashSet<String>(fields.length);
+                for (final MailField field : fields) {
+                    final List<String> list = field2Name.get(field);
+                    if (null != list) {
+                        for (final String str : list) {
+                            set.add(str);
+                        }
+                    }
+                }
+                addUnmappedFields(set);
+                fieldArray = set.toArray(new String[set.size()]);
+                solrQuery.setFields(fieldArray);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 numFound = results.getNumFound();
@@ -645,6 +698,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
                 solrQuery.setStart(Integer.valueOf(off));
                 solrQuery.setRows(rows);
+                solrQuery.setFields(fieldArray);
                 final QueryResponse queryResponse = solrServer.query(solrQuery);
                 final SolrDocumentList results = queryResponse.getResults();
                 final int size = results.size();

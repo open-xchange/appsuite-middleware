@@ -497,6 +497,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
+            
+            tmpPass = 0 == accountId ? "maniacNo1" : tmpPass;
+            
             final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
             /*
              * Check for already failed authentication

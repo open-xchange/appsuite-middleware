@@ -54,6 +54,7 @@ import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SMALExceptionCodes;
+import com.openexchange.mail.smal.adapter.solrj.SolrConstants;
 import com.openexchange.session.Session;
 
 /**
@@ -61,7 +62,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TextFiller {
+public final class TextFiller implements SolrConstants {
 
     /**
      * Gets the filler for specified arguments.
@@ -84,12 +85,12 @@ public final class TextFiller {
      */
     public static TextFiller fillerFor(final SolrDocument document) throws OXException {
         return new TextFiller(
-            document.getFieldValue("uuid").toString(),
-            document.getFieldValue("id").toString(),
-            document.getFieldValue("full_name").toString(),
-            TextFiller.<Integer> get("account", document).intValue(),
-            TextFiller.<Long> get("user", document).intValue(),
-            TextFiller.<Long> get("context", document).intValue());
+            document.getFieldValue(FIELD_UUID).toString(),
+            document.getFieldValue(FIELD_ID).toString(),
+            document.getFieldValue(FIELD_FULL_NAME).toString(),
+            TextFiller.<Integer> get(FIELD_ACCOUNT, document).intValue(),
+            TextFiller.<Long> get(FIELD_USER, document).intValue(),
+            TextFiller.<Long> get(FIELD_CONTEXT, document).intValue());
     }
 
     @SuppressWarnings("unchecked")
