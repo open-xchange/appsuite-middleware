@@ -53,7 +53,6 @@ import static com.openexchange.mail.smal.adapter.IndexAdapters.detectLocale;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitSane;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -526,7 +525,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         solrServer.add(docs);
                         rollback = true;
                     } catch (final SolrServerException e) {
-                        if (!(e.getCause() instanceof SocketTimeoutException)) {
+                        if (!(e.getRootCause() instanceof java.net.SocketTimeoutException)) {
                             throw e;
                         }
                         final CommonsHttpSolrServer noTimeoutSolrServer = serverManagement.getNoTimeoutSolrServerFor(solrServer);

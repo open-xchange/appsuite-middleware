@@ -56,7 +56,6 @@ import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.commitSane;
 import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import static java.util.Collections.singletonList;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -990,7 +989,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             try {
                 solrServer.add(new SolrDocumentIterator(documents, map, fillers));
             } catch (final SolrServerException e) {
-                if (!(e.getCause() instanceof SocketTimeoutException)) {
+                if (!(e.getRootCause() instanceof java.net.SocketTimeoutException)) {
                     throw e;
                 }
                 fillers.clear();
@@ -1082,7 +1081,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                         solrServer.add(new MailDocumentIterator(subList.iterator(), session, now, fillers));
                         rollback = true;
                     } catch (final SolrServerException e) {
-                        if (!(e.getCause() instanceof SocketTimeoutException)) {
+                        if (!(e.getRootCause() instanceof java.net.SocketTimeoutException)) {
                             throw e;
                         }
                         fillers.clear();
