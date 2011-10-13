@@ -83,6 +83,7 @@ import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobCompletionService;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.Jobs;
+import com.openexchange.mail.smal.jobqueue.UnboundedJobCompletionService;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.sql.DBUtils;
@@ -411,7 +412,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                         final JobQueue queue = JobQueue.getInstance();
                         final long now = System.currentTimeMillis();
                         int cnt = 0;
-                        final JobCompletionService completionService = new JobCompletionService(0);
+                        final JobCompletionService completionService = new UnboundedJobCompletionService();
 	                    while (start < size) {
 	                    	final int end;
 	                    	{

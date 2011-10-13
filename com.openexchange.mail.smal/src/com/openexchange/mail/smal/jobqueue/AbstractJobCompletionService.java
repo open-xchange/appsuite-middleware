@@ -49,55 +49,88 @@
 
 package com.openexchange.mail.smal.jobqueue;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link JobCompletionService} - A completion service for {@link Job jobs}.
- *
+ * {@link AbstractJobCompletionService}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JobCompletionService {
+abstract class AbstractJobCompletionService implements JobCompletionService {
+
+    protected class QueueingJob extends Job {
+
+        private static final long serialVersionUID = 9034768716474242553L;
+
+        protected final Job job;
+
+        protected final CountDownLatch latch;
+
+        protected QueueingJob(final Job job) {
+            super();
+            this.job = job;
+            latch = new CountDownLatch(1);
+        }
+
+        protected void start() {
+            latch.countDown();
+        }
+
+        @Override
+        public int getRanking() {
+            return job.getRanking();
+        }
+
+        @Override
+        public String getIdentifier() {
+            return job.getIdentifier();
+        }
+
+        @Override
+        public void perform() {
+            try {
+                latch.await();
+                job.perform();
+            } catch (final InterruptedException e) {
+                // Keep interrupted state
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            super.afterExecute(t);
+            queue.add(job);
+        }
+
+    }
+
+    protected final BlockingQueue<Job> queue;
 
     /**
-     * Adds specified job to this completion service, waiting if necessary for other jobs to complete if capacity restriction is reached.
-     * 
-     * @param job The job to add
-     * @return <code>true</code> if job could be added; otherwise <code>false</code>
-     * @throws InterruptedException If thread is interrupted while waiting for a job to completed in case capacity is exceeded
+     * Initializes a new {@link AbstractJobCompletionService}.
      */
-    public boolean addJob(final Job job) throws InterruptedException;
+    protected AbstractJobCompletionService() {
+        super();
+        queue = new LinkedBlockingQueue<Job>();
+    }
 
-    /**
-     * Adds specified job to this completion service if immediately able to do so.
-     * 
-     * @param job The job to add
-     * @return <code>true</code> if job could be added; otherwise <code>false</code>
-     */
-    public boolean tryAddJob(final Job job);
+    @Override
+    public Job take() throws InterruptedException {
+        return queue.take();
+    }
 
-    /**
-     * Retrieves and removes the next completed job, waiting if none are yet present.
-     * 
-     * @return The next completed job
-     * @throws InterruptedException If interrupted while waiting
-     */
-    public Job take() throws InterruptedException;
+    @Override
+    public Job poll() {
+        return queue.poll();
+    }
 
-    /**
-     * Retrieves and removes the next completed job or <tt>null</tt> if none are present.
-     * 
-     * @return The the next completed job, or <tt>null</tt> if none are present
-     */
-    public Job poll();
-
-    /**
-     * Retrieves and removes the next completed job, waiting if necessary up to the specified wait time if none are yet present.
-     * 
-     * @param timeout How long to wait before giving up, in units of <tt>unit</tt>
-     * @param unit A <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
-     * @return The the next completed job or <tt>null</tt> if the specified waiting time elapses before one is present
-     * @throws InterruptedException If interrupted while waiting
-     */
-    public Job poll(final long timeout, final TimeUnit unit) throws InterruptedException;
+    @Override
+    public Job poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+        return queue.poll(timeout, unit);
+    }
 
 }
