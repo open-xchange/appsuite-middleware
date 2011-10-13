@@ -220,7 +220,8 @@ public final class Gate {
     }
 
     /**
-     * Closes this gate.
+     * Closes this gate. Threads which already passed the gate are allowed to terminate. Newly arriving threads are prevented from passing
+     * this gate.
      * 
      * @return <code>true</code> if caller closed the gate; otherwise <code>false</code> if already closed
      */
@@ -237,7 +238,7 @@ public final class Gate {
     }
 
     /**
-     * Opens this gate.
+     * Opens this gate. Possibly waiting threads are notified to pass this gate.
      * 
      * @return <code>true</code> if caller opened the gate; otherwise <code>false</code> if already open
      */
