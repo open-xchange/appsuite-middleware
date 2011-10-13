@@ -189,7 +189,11 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     public MailPart getAttachmentLong(final String folder, final long mailId, final String sequenceId) throws OXException {
         final MailPartHandler handler = new MailPartHandler(sequenceId);
-        new MailMessageParser().parseMailMessage(getMessageLong(folder, mailId, false), handler);
+        final MailMessage mail = getMessageLong(folder, mailId, false);
+        if (null == mail) {
+            throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(mailId), folder);
+        }
+        new MailMessageParser().parseMailMessage(mail, handler);
         if (handler.getMailPart() == null) {
             throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(mailId), folder);
         }
