@@ -282,7 +282,7 @@ public final class FolderJob extends AbstractMailSyncJob {
         return tmp;
     }
 
-    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
+    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS, MailField.COLOR_LABEL };
 
     @Override
     public void perform() {
@@ -415,11 +415,35 @@ public final class FolderJob extends AbstractMailSyncJob {
                         final String mailId = iterator.next();
                         final MailMessage storageMail = storageMap.get(mailId);
                         final MailMessage indexMail = indexMap.get(mailId);
+                        boolean different = false;
                         if (storageMail.getFlags() != indexMail.getFlags()) { // Different flags
                             storageMail.setAccountId(accountId);
                             storageMail.setFolder(fullName);
                             storageMail.setMailId(mailId);
                             changedMails.add(storageMail);
+                            different = true;
+                        }
+                        if (storageMail.getColorLabel() != indexMail.getColorLabel()) { // Different color label
+                            storageMail.setAccountId(accountId);
+                            storageMail.setFolder(fullName);
+                            storageMail.setMailId(mailId);
+                            changedMails.add(storageMail);
+                            different = true;
+                        }
+                        final String[] stoUserFlags = storageMail.getUserFlags();
+                        final Set<String> storageUserFlags =
+                            null == stoUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(stoUserFlags));
+                        final String[] idxUserFlags = indexMail.getUserFlags();
+                        final Set<String> indexUserFlags =
+                            null == idxUserFlags ? Collections.<String> emptySet() : new HashSet<String>(Arrays.asList(idxUserFlags));
+                        if (!storageUserFlags.equals(indexUserFlags)) { // Different user flags
+                            storageMail.setAccountId(accountId);
+                            storageMail.setFolder(fullName);
+                            storageMail.setMailId(mailId);
+                            changedMails.add(storageMail);
+                            different = true;
+                        }
+                        if (different) {
                             iterator.remove();
                         }
                     }

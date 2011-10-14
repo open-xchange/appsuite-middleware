@@ -130,6 +130,8 @@ public interface SolrConstants {
 
     public static final String FIELD_FLAG_READ_ACK = "flag_read_ack";
 
+    public static final String FIELD_USER_FLAGS = "user_flags";
+
     public static final String FIELD_SUBJECT_PREFIX = "subject_";
 
     public static final String FIELD_SUBJECT_PLAIN = "subject_plain";

@@ -207,6 +207,7 @@ public final class SearchTerm2Query implements SolrConstants {
             }
             queryBuilder.delete(off, off + andConcat.length()); // Delete first >>" AND "<< prefix
             queryBuilder.append(')');
+
             return queryBuilder;
         }
         /*
