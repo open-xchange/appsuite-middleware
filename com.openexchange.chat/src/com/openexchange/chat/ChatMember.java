@@ -49,23 +49,36 @@
 
 package com.openexchange.chat;
 
-
 /**
  * {@link ChatMember}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatMember {
 
     public static enum Status {
-        AWAY, ONLINE, OFFLINE,
-        ;
+        AWAY, ONLINE, OFFLINE, ;
     }
 
-    String getGreeting();
+    /**
+     * Gets the status message.
+     * 
+     * @return The status message
+     */
+    String getStatusMessage();
 
+    /**
+     * Gets the status.
+     * 
+     * @return The status
+     */
     Status getStatus();
 
+    /**
+     * Gets the identifier.
+     * 
+     * @return The identifier.
+     */
     String getId();
-    
+
 }

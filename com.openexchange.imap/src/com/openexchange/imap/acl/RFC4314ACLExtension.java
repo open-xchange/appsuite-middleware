@@ -66,7 +66,7 @@ import com.sun.mail.imap.Rights.Right;
  * <p>
  * If a client includes the "c" right in a rights list, then it MUST be treated as if the client had included every member of the "create"
  * right.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 class RFC4314ACLExtension extends AbstractACLExtension {
@@ -94,6 +94,12 @@ class RFC4314ACLExtension extends AbstractACLExtension {
     private static final transient Rights RIGHTS_FOLDER_CREATE_SUBFOLDERS = new Rights("cilkx");
 
     /**
+     * The "create" right is the union of the "k" and "x" rights.<br>
+     * "kx": {@link RFC4314Rights#CREATE_MAILBOXES} + {@link RFC4314Rights#DELETE_MAILBOX}.
+     */
+    private static final transient Rights RIGHTS_CREATE_UNION = new Rights("kx");
+
+    /**
      * "rs": {@link Right#READ} + {@link Right#KEEP_SEEN}
      */
     private static final transient Rights RIGHTS_READ_ALL_KEEP_SEEN = new Rights("rs");
@@ -112,6 +118,12 @@ class RFC4314ACLExtension extends AbstractACLExtension {
      * "det": {@link Right#DELETE} + {@link RFC4314Rights#EXPUNGE} + {@link RFC4314Rights#DELETE_MESSAGES} +
      */
     private static final transient Rights RIGHTS_DELETE_ALL = new Rights("det");
+
+    /**
+     * The "delete" right is the union of the "e" and "t" rights.<br>
+     * "et": {@link RFC4314Rights#EXPUNGE} + {@link RFC4314Rights#DELETE_MESSAGES}
+     */
+    private static final transient Rights RIGHTS_DELETE_UNION = new Rights("et");
 
     /**
      * "p": {@link Right#POST}
@@ -225,12 +237,12 @@ class RFC4314ACLExtension extends AbstractACLExtension {
 
     @Override
     public boolean containsCreateSubfolders(final Rights rights) {
-        return rights.contains(RIGHTS_FOLDER_CREATE_SUBFOLDERS);
+        return rights.contains(RIGHTS_FOLDER_CREATE_OBJECTS) && (rights.contains(Rights.Right.CREATE) || rights.contains(RIGHTS_CREATE_UNION));
     }
 
     @Override
     public boolean containsDeleteAll(final Rights rights) {
-        return rights.contains(RIGHTS_DELETE_ALL);
+        return rights.contains(Rights.Right.DELETE) || rights.contains(RIGHTS_DELETE_UNION);
     }
 
     @Override

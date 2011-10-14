@@ -54,7 +54,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.activation.MimetypesFileTypeMap;
 import com.openexchange.conversion.Data;
@@ -212,8 +214,8 @@ public class JODCPreviewService implements InternalPreviewService {
     }
 
     @Override
-    public PreviewPolicy[] getPreviewPolicies() {
-        return POLICIES;
+    public List<PreviewPolicy> getPreviewPolicies() {
+        return Arrays.asList(POLICIES);
     }
 
     @Override

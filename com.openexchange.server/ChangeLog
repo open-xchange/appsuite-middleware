@@ -1,3 +1,7 @@
+* 2011-10-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 2066: The "delete" right is the union of the "e" and "t" rights
+
 * 2011-10-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 20593: Fixed associated regular expression to also accept "&amp;id=...." (former "&id=...")
