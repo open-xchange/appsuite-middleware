@@ -50,33 +50,80 @@
 package com.openexchange.chat;
 
 import java.util.List;
-import com.openexchange.exception.OXException;
+import java.util.Locale;
 
 /**
- * {@link Chat} - Represents a chat (room) or a user's private chat.
+ * {@link ChatMessage}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat extends ChatDesc {
+/**
+ * {@link Message}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface Message extends Packet {
+
+    public static enum Type {
+        /**
+         * (Default) a normal text message used in email like interface.
+         */
+        NORMAL,
+        /**
+         * Typically short text message used in line-by-line chat interfaces.
+         */
+        CHAT,
+        /**
+         * Chat message sent to a groupchat server for group chats.
+         */
+        GROUPCHAT,
+        /**
+         * Text message to be displayed in scrolling marquee displays.
+         */
+        HEADLINE,
+        /**
+         * indicates a messaging error.
+         */
+        ERROR;
+
+        public static Type fromString(final String name) {
+            if (null == name) {
+                return NORMAL;
+            }
+            try {
+                return Type.valueOf(name.toUpperCase(Locale.ENGLISH).trim());
+            } catch (final Exception e) {
+                return NORMAL;
+            }
+        }
+    }
 
     /**
-     * Gets the chat members.
+     * Gets this message's type.
      * 
-     * @return The chat members
-     * @throws OXException If chat members cannot be returned
+     * @return The type
      */
-    List<ChatMember> getMembers() throws OXException;
+    Type getType();
 
     /**
-     * Joins specified chat member to this chat.
+     * Gets this message's subject.
      * 
-     * @param member The member to join
-     * @throws OXException If joining the chat member fails
+     * @return The subject or <code>null</code>
      */
-    void join(ChatMember member) throws OXException;
+    String getSubject();
 
-    void part(ChatMember member) throws OXException;
+    /**
+     * Gets the message's text.
+     * 
+     * @return The text
+     */
+    String getText();
 
-    void post(Packet packet) throws OXException;
+    /**
+     * Gets the attachments.
+     * 
+     * @return The optional attachments
+     */
+    List<ChatAttachment> getAttachments();
 
 }

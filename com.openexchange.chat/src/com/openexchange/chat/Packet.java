@@ -49,34 +49,32 @@
 
 package com.openexchange.chat;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-
 /**
- * {@link Chat} - Represents a chat (room) or a user's private chat.
+ * {@link Packet} - Represents any kind of package that can be delivered within a chat.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat extends ChatDesc {
+public interface Packet {
 
     /**
-     * Gets the chat members.
+     * Gets the packet identifier.
      * 
-     * @return The chat members
-     * @throws OXException If chat members cannot be returned
+     * @return The identifier or <code>null</code>
      */
-    List<ChatMember> getMembers() throws OXException;
+    String getPacketID();
 
     /**
-     * Joins specified chat member to this chat.
+     * Gets the recipient (if appropriate)
      * 
-     * @param member The member to join
-     * @throws OXException If joining the chat member fails
+     * @return The recipient or <code>null</code>
      */
-    void join(ChatMember member) throws OXException;
+    ChatMember getTo();
 
-    void part(ChatMember member) throws OXException;
-
-    void post(Packet packet) throws OXException;
+    /**
+     * Gets the sender.
+     * 
+     * @return The sender or <code>null</code>
+     */
+    ChatMember getFrom();
 
 }

@@ -49,34 +49,36 @@
 
 package com.openexchange.chat;
 
-import java.util.List;
+import java.io.InputStream;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link Chat} - Represents a chat (room) or a user's private chat.
+ * {@link ChatAttachment} - Represents an attachment delivered by a chat message.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat extends ChatDesc {
+public interface ChatAttachment {
 
     /**
-     * Gets the chat members.
+     * Gets the MIME type. If <code>null</code> <i>application/octet-stream</i> is assumed.
      * 
-     * @return The chat members
-     * @throws OXException If chat members cannot be returned
+     * @return The MIME type
      */
-    List<ChatMember> getMembers() throws OXException;
+    String getMimeType();
 
     /**
-     * Joins specified chat member to this chat.
+     * Gets the file name.
      * 
-     * @param member The member to join
-     * @throws OXException If joining the chat member fails
+     * @return The file name or <code>null</code>
      */
-    void join(ChatMember member) throws OXException;
+    String getFileName();
 
-    void part(ChatMember member) throws OXException;
-
-    void post(Packet packet) throws OXException;
+    /**
+     * Gets the input stream providing attachment's content.
+     * 
+     * @return The input stream to read from
+     * @throws OXException If input stream cannot be returned
+     */
+    InputStream getInputStream() throws OXException;
 
 }

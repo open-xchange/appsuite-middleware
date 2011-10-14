@@ -49,12 +49,96 @@
 
 package com.openexchange.chat;
 
-
 /**
- * {@link ChatMessage}
- *
+ * {@link Presence}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatMessage {
+public interface Presence extends Packet {
+
+    /**
+     * A enum to represent the presecence type. Not that presence type is often confused with presence mode. Generally, if a user is signed
+     * into a server, they have a presence type of {@link #available available}, even if the mode is {@link Mode#away away},
+     * {@link Mode#dnd dnd}, etc. The presence type is only {@link #unavailable unavailable} when the user is signing out of the server.
+     */
+    public static enum Type {
+
+        /**
+         * The user is available to receive messages (default).
+         */
+        AVAILABLE,
+        /**
+         * The user is unavailable to receive messages.
+         */
+        UNAVAILABLE,
+        /**
+         * Request subscription to recipient's presence.
+         */
+        SUBSCRIBE,
+        /**
+         * Grant subscription to sender's presence.
+         */
+        SUBSCRIBED,
+        /**
+         * Request removal of subscription to sender's presence.
+         */
+        UNSUBSCRIBE,
+        /**
+         * Grant removal of subscription to sender's presence.
+         */
+        UNSUBSCRIBED,
+        /**
+         * The presence packet contains an error message.
+         */
+        ERROR
+    }
+
+    /**
+     * An enum to represent the presence mode.
+     */
+    public static enum Mode {
+
+        /**
+         * Free to chat.
+         */
+        CHAT,
+        /**
+         * Available (the default).
+         */
+        AVAILABLE,
+        /**
+         * Away.
+         */
+        AWAY,
+        /**
+         * Away for an extended period of time.
+         */
+        XA,
+        /**
+         * Do not disturb.
+         */
+        DND
+    }
+
+    /**
+     * Gets the status message.
+     * 
+     * @return The status message
+     */
+    String getStatus();
+
+    /**
+     * Gets the type of this presence packet.
+     * 
+     * @return The type
+     */
+    Type getType();
+
+    /**
+     * Gets the mode of this presence packet.
+     * 
+     * @return The mode
+     */
+    Mode getMode();
 
 }
