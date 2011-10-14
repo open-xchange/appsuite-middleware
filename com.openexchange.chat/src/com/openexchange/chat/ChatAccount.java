@@ -49,33 +49,41 @@
 
 package com.openexchange.chat;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.Map;
 
 /**
- * {@link ChatService} - The chat service.
+ * {@link ChatAccount} - Represents a user account of a certain chat service.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
-
-    public static final String DEFAULT_ACCESS = "default";
+public interface ChatAccount {
 
     /**
-     * Gets the access to specified chat account.
+     * Gets this account's configuration.
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * 
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
+     * @return The configuration as a {@link Map}
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
+    Map<String, Object> getConfiguration();
 
     /**
-     * Gets the account manager for this chat service.
-     *
-     * @return The account manager
+     * Gets the identifier.
+     * 
+     * @return The identifier
      */
-    ChatAccountManager getAccountManager();
+    String getId();
+
+    /**
+     * Gets the display name.
+     * 
+     * @return The display name
+     */
+    String getDisplayName();
+
+    /**
+     * Gets the associated messaging service.
+     * 
+     * @return The associated messaging service
+     */
+    ChatService getMessagingService();
 
 }

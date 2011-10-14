@@ -49,33 +49,18 @@
 
 package com.openexchange.chat;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 /**
- * {@link ChatService} - The chat service.
+ * {@link ChatCaps} - The capabilities of a chat..
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
-
-    public static final String DEFAULT_ACCESS = "default";
+public interface ChatCaps {
 
     /**
-     * Gets the access to specified chat account.
+     * Checks if associated chat supports notifications about new messages.
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * 
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
+     * @return <code>true</code> if notifications about new messages are supported; else <code>false</code>
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
-
-    /**
-     * Gets the account manager for this chat service.
-     *
-     * @return The account manager
-     */
-    ChatAccountManager getAccountManager();
+    boolean supportsNotifcation();
 
 }

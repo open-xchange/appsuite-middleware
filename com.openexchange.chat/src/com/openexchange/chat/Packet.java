@@ -49,6 +49,8 @@
 
 package com.openexchange.chat;
 
+import java.util.Date;
+
 /**
  * {@link Packet} - Represents any kind of package that can be delivered within a chat.
  * 
@@ -76,5 +78,12 @@ public interface Packet {
      * @return The sender or <code>null</code>
      */
     ChatMember getFrom();
+
+    /**
+     * Gets the time stamp for this packet.
+     * 
+     * @return The time stamp
+     */
+    Date getTimeStamp();
 
 }

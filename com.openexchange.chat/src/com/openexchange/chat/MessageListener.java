@@ -49,33 +49,19 @@
 
 package com.openexchange.chat;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 /**
- * {@link ChatService} - The chat service.
+ * {@link MessageListener} - Listens for new messages to arrive.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
-
-    public static final String DEFAULT_ACCESS = "default";
+public interface MessageListener {
 
     /**
-     * Gets the access to specified chat account.
+     * Handles arrived message.
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * 
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
+     * @param chat The associated chat in which the message arrived
+     * @param message The arrived message
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
-
-    /**
-     * Gets the account manager for this chat service.
-     *
-     * @return The account manager
-     */
-    ChatAccountManager getAccountManager();
+    void handleMessage(Chat chat, Message message);
 
 }

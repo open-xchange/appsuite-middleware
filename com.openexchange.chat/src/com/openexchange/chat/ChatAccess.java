@@ -49,33 +49,70 @@
 
 package com.openexchange.chat;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link ChatService} - The chat service.
+ * {@link ChatAccess} - Provides the methods to access a chat for a certain user.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
-
-    public static final String DEFAULT_ACCESS = "default";
+public interface ChatAccess {
 
     /**
-     * Gets the access to specified chat account.
+     * Gets the capabilities of this access.
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * 
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
+     * @return The capabilities
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
+    ChatCaps getCapabilities();
 
     /**
-     * Gets the account manager for this chat service.
-     *
-     * @return The account manager
+     * Closes the connection by setting presence to unavailable then closing the connection.
      */
-    ChatAccountManager getAccountManager();
+    void disconnect();
+
+    /**
+     * Logs in to the server, then sets presence to available.
+     * 
+     * @throws OXException If an error occurs.
+     */
+    void login() throws OXException;
+
+    /**
+     * Gets the associated user.
+     * 
+     * @return The user
+     */
+    ChatMember getUser();
+
+    /**
+     * Gets all descriptions for opened chats for this access.
+     * 
+     * @return All descriptions for opened chats
+     * @throws OXException If an error occurs
+     */
+    List<ChatDesc> getChats() throws OXException;
+
+    /**
+     * Opens described chat with specified member.
+     * 
+     * @param chatDescription The chat description
+     * @param member The member with which to open the chat
+     * @return The opened chat
+     * @throws OXException If chat cannot be opened
+     * @see ChatDesc#DEFAULT_CHAT
+     */
+    Chat openChat(ChatDesc chatDescription, MessageListener listener, ChatMember member) throws OXException;
+
+    /**
+     * Opens described chat with specified members.
+     * 
+     * @param chatDescription The chat description
+     * @param members The members with which to open the chat
+     * @return The opened chat
+     * @throws OXException If chat cannot be opened
+     * @see ChatDesc#DEFAULT_CHAT
+     */
+    Chat openChat(ChatDesc chatDescription, MessageListener listener, ChatMember... members) throws OXException;
 
 }

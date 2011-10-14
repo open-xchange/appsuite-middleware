@@ -49,85 +49,82 @@
 
 package com.openexchange.chat;
 
-import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link Chat} - Represents a chat (room) or a user's private chat.
+ * {@link ChatAccountManager} - Manages chat accounts.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat extends ChatDesc {
+public interface ChatAccountManager {
 
     /**
-     * Gets the chat members.
+     * Adds a new account.
      * 
-     * @return The chat members
-     * @throws OXException If chat members cannot be returned
+     * @param account The account to add
+     * @param session The session providing needed user data
+     * @return The identifier of the newly created account
+     * @throws OXException If insertion fails
      */
-    List<ChatMember> getMembers() throws OXException;
+    int addAccount(ChatAccount account, Session session) throws OXException;
 
     /**
-     * Joins specified chat member to this chat.
+     * Updates an existing account.
      * 
-     * @param member The member to join
-     * @throws OXException If joining the chat member fails
+     * @param account The account providing the identifier and the data to update
+     * @param session The session providing needed user data
+     * @throws OXException If update fails
      */
-    void join(ChatMember member) throws OXException;
+    void updateAccount(ChatAccount account, Session session) throws OXException;;
 
     /**
-     * Parts specified chat member from this chat.
+     * Deletes an existing account.
      * 
-     * @param member The member to part
-     * @throws OXException If member cannot be removed
+     * @param account The account to delete
+     * @param session The session providing needed user data
+     * @throws OXException If deletion fails
      */
-    void part(ChatMember member) throws OXException;
+    void deleteAccount(ChatAccount account, Session session) throws OXException;
 
     /**
-     * Posts specified packet to this chat.
+     * Gets all accounts associated with session user.
      * 
-     * @param packet The packet to post
-     * @throws OXException If posting the packet fails
+     * @param session The session providing needed user data
+     * @return All accounts associated with session user.
+     * @throws OXException If listing fails
      */
-    void post(Packet packet) throws OXException;
+    List<ChatAccount> getAccounts(Session session) throws OXException;;
 
     /**
-     * Polls all arrived message since specified time stamp.
+     * Gets an existing messaging account.
      * 
-     * @param since The time stamp; pass <code>null</code> to retrieve all available messages for this chat
-     * @return All arrived message since specified time stamp
-     * @throws OXException If poll fails
+     * @param id The identifier
+     * @param session The session providing needed user data
+     * @return The messaging account.
+     * @throws OXException If retrieval fails
      */
-    List<Message> pollMessages(Date since) throws OXException;
+    ChatAccount getAccount(int id, Session session) throws OXException;
 
     /**
-     * Adds given message listener that will be notified of any new messages in the chat.
-     * <p>
-     * If <code>false</code> is returned, the client is supposed to poll messages with {@link #pollMessages(Date)} while remembering last
-     * packet's time stamp.
-     * <p>
-     * See also {@link ChatCaps#supportsNotifcation()}.
+     * Checks whether the given secret can be used to decrypt secret strings in this account.
      * 
-     * @param listener A message listener.
-     * @return <code>true</code> if listener could be registered; otherwise <code>false</code> if this chat does not support notifications
-     * @see ChatCaps#supportsNotifcation()
+     * @param session The session providing needed user data
+     * @param secret The secret to use for decrypting
+     * @return true when all accounts could be decrypted, false otherwise
+     * @throws OXException If check fails
      */
-    boolean addMessageListener(MessageListener listener);
+    String checkSecretCanDecryptStrings(Session session, String secret) throws OXException;
 
     /**
-     * Removes specified message listener
+     * Migrates all encrypted strings from an old secret to a new one.
      * 
-     * @param listener The message listener to remove
+     * @param oldSecret The old secret for decrypting stored secret strings
+     * @param newSecret The new secret used for encrypting the secret strings
+     * @param session The session providing needed user data
+     * @throws OXException If migration fails
      */
-    void removeMessageListener(MessageListener listener);
-
-    /**
-     * Returns an unmodifiable collection of all of the listeners registered with this chat.
-     * 
-     * @return An unmodifiable collection of all of the listeners registered with this chat.
-     */
-    Collection<MessageListener> getListeners();
+    void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
 
 }
