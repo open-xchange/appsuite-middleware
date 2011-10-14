@@ -224,9 +224,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     
     @Override
     public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
-    	//Implemented as dummy, because LinkedIn has not upgraded our keys yet to do this");
-    	String id = "hTHkfgJLSi";
-		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer,"+PERSONAL_FIELDS+")";
+		String uri = "http://api.linkedin.com/v1/people/email="+email+":(relation-to-viewer,"+PERSONAL_FIELDS+")";
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
     	JSONObject data = extractJson(response);
     	addFullInformationToRelation(data, password, user, contextId, accountId);
@@ -263,7 +261,11 @@ public class LinkedInServiceImpl implements LinkedInService{
 	}
 
 	@Override
-	public JSONObject getMessageInbox(String string, int i, int j, int k) throws OXException {
+	public JSONObject getMessageInbox(String password, int user, int contextId, int accountId) throws OXException {
+//		String uri = "http://api.linkedin.com/v1/people/~/mailbox";
+//	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri);
+//    	JSONObject data = extractJson(response);
+//    	return data;
 		try {
 			return new JSONObject("{\"values\":[{\"header\":\"Hello world\",body:\"Have a nice day.\"},{\"header\":\"Hello world\",body:\"Have a nice day.\"}]}");
 		} catch (JSONException e) {
