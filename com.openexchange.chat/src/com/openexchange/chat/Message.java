@@ -64,6 +64,9 @@ import java.util.Locale;
  */
 public interface Message extends Packet {
 
+    /**
+     * The type of a chat message.
+     */
     public static enum Type {
         /**
          * (Default) a normal text message used in email like interface.
@@ -74,7 +77,7 @@ public interface Message extends Packet {
          */
         CHAT,
         /**
-         * Chat message sent to a groupchat server for group chats.
+         * Chat message sent to a group chat server for group chats.
          */
         GROUPCHAT,
         /**

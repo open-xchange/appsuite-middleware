@@ -75,8 +75,20 @@ public interface Chat extends ChatDesc {
      */
     void join(ChatMember member) throws OXException;
 
+    /**
+     * Parts specified chat member from this chat.
+     * 
+     * @param member The member to part
+     * @throws OXException If member cannot be removed
+     */
     void part(ChatMember member) throws OXException;
 
+    /**
+     * Posts specified packet to this chat.
+     * 
+     * @param packet The packet to post
+     * @throws OXException If posting the packet fails
+     */
     void post(Packet packet) throws OXException;
 
 }

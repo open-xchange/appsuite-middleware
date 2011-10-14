@@ -57,9 +57,12 @@ package com.openexchange.chat;
 public interface Presence extends Packet {
 
     /**
-     * A enum to represent the presecence type. Not that presence type is often confused with presence mode. Generally, if a user is signed
-     * into a server, they have a presence type of {@link #available available}, even if the mode is {@link Mode#away away},
-     * {@link Mode#dnd dnd}, etc. The presence type is only {@link #unavailable unavailable} when the user is signing out of the server.
+     * A enum to represent the presecence type.
+     * <p>
+     * <b>Note</b> that presence type is often confused with presence mode.<br>
+     * Generally, if a user is signed into a server, they have a presence type of {@link #available available}, even if the mode is
+     * {@link Mode#away away}, {@link Mode#dnd dnd}, etc. The presence type is only {@link #unavailable unavailable} when the user is
+     * signing out of the server.
      */
     public static enum Type {
 
