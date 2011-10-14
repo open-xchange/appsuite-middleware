@@ -51,9 +51,10 @@ package com.openexchange.preview;
 
 
 /**
- * {@link InternalPreviewService}
+ * {@link InternalPreviewService} - Extends the {@link PreviewService} to specify what MIME types can be handled in what quality.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface InternalPreviewService extends PreviewService {
     
