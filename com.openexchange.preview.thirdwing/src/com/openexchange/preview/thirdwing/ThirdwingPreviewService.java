@@ -58,7 +58,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -91,31 +93,30 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     
     private final ServiceLookup serviceLookup;
     
-    private static final PreviewPolicy[] POLICIES = new PreviewPolicy[10];
+    private static final List<PreviewPolicy> POLICIES = new ArrayList<PreviewPolicy>();
     
     static {
-        int i = 0;        
-        POLICIES[i++] = new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.document", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.template", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-word.document.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-word.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.template", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.sheet.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-excel.sheet.binary.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.presentation", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.template", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.slideshow", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.presentation.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.ms-powerpoint.slideshow.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD);
+        POLICIES.add(new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.document", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.template", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-word.document.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-word.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.template", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.sheet.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.sheet.binary.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.presentation", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.template", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.slideshow", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.presentation.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.slideshow.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
     }  
 
     public ThirdwingPreviewService(final ServiceLookup serviceLookup) {
@@ -171,7 +172,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     }
 
     @Override
-    public PreviewPolicy[] getPreviewPolicies() {
+    public List<PreviewPolicy> getPreviewPolicies() {
         return POLICIES;
     }
 

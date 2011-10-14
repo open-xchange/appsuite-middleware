@@ -57,6 +57,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -164,7 +165,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
 
     @Override
     public void removed(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
-        final PreviewPolicy[] previewPolicies = service.getPreviewPolicies();
+        final List<PreviewPolicy> previewPolicies = service.getPreviewPolicies();
         for (final PreviewPolicy policy : previewPolicies) {
             final String mimeType = policy.getMimeType();
             final PreviewOutput output = policy.getOutput();
@@ -207,13 +208,13 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
         public int compare(final InternalPreviewService o1, final InternalPreviewService o2) {
             int o1Quality = 0;
             int o2Quality = 0;
-            final PreviewPolicy[] o1Policies = o1.getPreviewPolicies();
+            final List<PreviewPolicy> o1Policies = o1.getPreviewPolicies();
             for (final PreviewPolicy policy : o1Policies) {
                 if (policy.getMimeType().equals(mimeType) && policy.getOutput().equals(output)) {
                     o1Quality = policy.getQuality().getValue();
                 }
             }
-            final PreviewPolicy[] o2Policies = o2.getPreviewPolicies();
+            final List<PreviewPolicy> o2Policies = o2.getPreviewPolicies();
             for (final PreviewPolicy policy : o2Policies) {
                 if (policy.getMimeType().equals(mimeType) && policy.getOutput().equals(output)) {
                     o2Quality = policy.getQuality().getValue();
