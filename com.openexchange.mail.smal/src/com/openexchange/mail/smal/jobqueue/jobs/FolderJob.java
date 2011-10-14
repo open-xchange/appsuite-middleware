@@ -235,7 +235,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the mayScheduleJobs
-     *
+     * 
      * @param mayScheduleJobs The mayScheduleJobs to set
      */
     public FolderJob setMayScheduleJobs(final boolean mayScheduleJobs) {
@@ -317,68 +317,75 @@ public final class FolderJob extends AbstractMailSyncJob {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             boolean unset = true;
             try {
-                final IndexAdapter indexAdapter = getAdapter();
-                final List<MailMessage> mails;
-                if (null == storageMails) {
-                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                    try {
-                        mailAccess = SMALMailAccess.getUnwrappedInstance(getSession(), accountId);
-                        /*
-                         * Get the mails from mail storage
-                         */
-                        mailAccess.connect(true);
-                        /*
-                         * At first check existence of denoted folder
-                         */
-                        if (!mailAccess.getFolderStorage().exists(fullName)) {
-                            /*
-                             * Drop entry from database and return
-                             */
-                            deleteDBEntry();
-                            unset = false;
-                            return;
-                        }
-                        /*
-                         * Fetch mails
-                         */
-                        mails =
-                            Arrays.asList(mailAccess.getMessageStorage().searchMessages(
-                                fullName,
-                                IndexRange.NULL,
-                                MailSortField.RECEIVED_DATE,
-                                OrderDirection.ASC,
-                                null,
-                                FIELDS));
-                    } finally {
-                        SMALMailAccess.closeUnwrappedInstance(mailAccess);
-                        mailAccess = null;
-                    }
-                } else {
-                    mails = storageMails;
-                }
+                /*
+                 * Get the mails from storage
+                 */
                 final Map<String, MailMessage> storageMap;
-                if (mails.isEmpty()) {
-                    storageMap = Collections.emptyMap();
-                } else {
-                    storageMap = new HashMap<String, MailMessage>(mails.size());
-                    for (final MailMessage mailMessage : mails) {
-                        storageMap.put(mailMessage.getMailId(), mailMessage);
+                {
+                    final List<MailMessage> mails;
+                    if (null == storageMails) {
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        try {
+                            mailAccess = SMALMailAccess.getUnwrappedInstance(getSession(), accountId);
+                            /*
+                             * Get the mails from mail storage
+                             */
+                            mailAccess.connect(true);
+                            /*
+                             * At first check existence of denoted folder
+                             */
+                            if (!mailAccess.getFolderStorage().exists(fullName)) {
+                                /*
+                                 * Drop entry from database and return
+                                 */
+                                deleteDBEntry();
+                                unset = false;
+                                return;
+                            }
+                            /*
+                             * Fetch mails
+                             */
+                            mails =
+                                Arrays.asList(mailAccess.getMessageStorage().searchMessages(
+                                    fullName,
+                                    IndexRange.NULL,
+                                    MailSortField.RECEIVED_DATE,
+                                    OrderDirection.ASC,
+                                    null,
+                                    FIELDS));
+                        } finally {
+                            SMALMailAccess.closeUnwrappedInstance(mailAccess);
+                            mailAccess = null;
+                        }
+                    } else {
+                        mails = storageMails;
+                    }
+                    if (mails.isEmpty()) {
+                        storageMap = Collections.emptyMap();
+                    } else {
+                        storageMap = new HashMap<String, MailMessage>(mails.size());
+                        for (final MailMessage mailMessage : mails) {
+                            storageMap.put(mailMessage.getMailId(), mailMessage);
+                        }
                     }
                 }
                 /*
                  * Get the mails from index
                  */
-                List<MailMessage> indexedMails = this.indexMails;
-                if (null == indexedMails) {
-                    indexedMails = indexAdapter.search(fullName, null, null, null, FIELDS, accountId, getSession());
-                }
+                final IndexAdapter indexAdapter = getAdapter();
                 final Map<String, MailMessage> indexMap;
-                if (indexedMails.isEmpty()) {
-                    indexMap = Collections.emptyMap();
-                } else {
-                    indexMap = new HashMap<String, MailMessage>(indexedMails.size());
-                    for (final MailMessage mailMessage : indexedMails) {
-                        indexMap.put(mailMessage.getMailId(), mailMessage);
+                {
+                    List<MailMessage> indexedMails = this.indexMails;
+                    if (null == indexedMails) {
+                        indexedMails = indexAdapter.all(fullName, accountId, getSession());
+                    }
+                    if (indexedMails.isEmpty()) {
+                        indexMap = Collections.emptyMap();
+                    } else {
+                        indexMap = new HashMap<String, MailMessage>(indexedMails.size());
+                        for (final MailMessage mailMessage : indexedMails) {
+                            indexMap.put(mailMessage.getMailId(), mailMessage);
+                        }
                     }
                 }
                 /*
@@ -399,146 +406,54 @@ public final class FolderJob extends AbstractMailSyncJob {
                 /*
                  * Changed ones
                  */
-                Set<String> changedIds = new HashSet<String>(indexMap.keySet());
-                List<MailMessage> changedMails = new ArrayList<MailMessage>(changedIds.size());
-                changedIds.removeAll(deletedIds);
-                for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
-                    final String mailId = iterator.next();
-                    final MailMessage storageMail = storageMap.get(mailId);
-                    final MailMessage indexMail = indexMap.get(mailId);
-                    boolean different = false;
-                    // TODO:
-                    if (storageMail.getFlags() != indexMail.getFlags()) {
-                        storageMail.setAccountId(accountId);
-                        storageMail.setFolder(fullName);
-                        storageMail.setMailId(mailId);
-                        changedMails.add(storageMail);
-                        different = true;
-                    }
-                    if (storageMail.getFlags() != indexMail.getFlags()) {
-                        storageMail.setAccountId(accountId);
-                        storageMail.setFolder(fullName);
-                        storageMail.setMailId(mailId);
-                        changedMails.add(storageMail);
-                        different = true;
-                    }
-                    if (different) {
-                        iterator.remove();
+                List<MailMessage> changedMails;
+                {
+                    final Set<String> changedIds = new HashSet<String>(indexMap.keySet());
+                    changedMails = new ArrayList<MailMessage>(changedIds.size());
+                    changedIds.removeAll(deletedIds);
+                    for (final Iterator<String> iterator = changedIds.iterator(); iterator.hasNext();) {
+                        final String mailId = iterator.next();
+                        final MailMessage storageMail = storageMap.get(mailId);
+                        final MailMessage indexMail = indexMap.get(mailId);
+                        if (storageMail.getFlags() != indexMail.getFlags()) { // Different flags
+                            storageMail.setAccountId(accountId);
+                            storageMail.setFolder(fullName);
+                            storageMail.setMailId(mailId);
+                            changedMails.add(storageMail);
+                            iterator.remove();
+                        }
                     }
                 }
-                changedIds = null;
                 /*
                  * Delete
                  */
-                indexAdapter.deleteMessages(deletedIds, fullName, accountId, getSession());
+                if (!deletedIds.isEmpty()) {
+                    indexAdapter.deleteMessages(deletedIds, fullName, accountId, getSession());
+                }
                 deletedIds = null;
                 /*
                  * Change flags
                  */
-                indexAdapter.change(changedMails, getSession());
+                if (!changedMails.isEmpty()) {
+                    indexAdapter.change(changedMails, getSession());
+                }
                 changedMails = null;
                 /*
                  * Add
                  */
                 if (!newIds.isEmpty()) {
-                    final int blockSize;
-                    final int size = newIds.size();
-                    {
-                        final int configuredBlockSize = Constants.CHUNK_SIZE;
-                        blockSize = configuredBlockSize > size ? size : configuredBlockSize;
-                    }
                     final List<String> ids = new ArrayList<String>(newIds);
                     newIds = null;
-                    int start = 0;
+                    final int numAdded;
                     try {
-                        final JobQueue queue = JobQueue.getInstance();
-                        final StringBuilder idBuilder = new StringBuilder(identifier);
-                        idBuilder.append('@').append(UUIDs.getUnformattedString(UUID.randomUUID())).append('@');
-                        final int resetlen = idBuilder.length();
-                        int cnt = 0;
-                        final JobCompletionService completionService = mayScheduleJobs ? new UnboundedJobCompletionService() : null;
-                        while (start < size) {
-                            final int end;
-                            {
-                                int i = start + blockSize;
-                                if (i > size) {
-                                    i = size;
-                                }
-                                end = i;
-                            }
-                            /*
-                             * A new job?
-                             */
-                            if (!mayScheduleJobs || end == size) {
-                                /*
-                                 * Add last chunk
-                                 */
-                                add2Index(ids.subList(start, end), fullName, indexAdapter);
-                                if (DEBUG) {
-                                    final long dur = System.currentTimeMillis() - st;
-                                    LOG.debug("Folder job \"" + identifier + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
-                                }
-                            } else {
-                                idBuilder.setLength(resetlen);
-                                final String subId = idBuilder.append(cnt + 1).toString();
-                                if (scheduleJob(ids.subList(start, end), indexAdapter, completionService, subId)) {
-                                    /*
-                                     * Successfully delegated to completion service
-                                     */
-                                    cnt++;
-                                    if (DEBUG) {
-                                        final long dur = System.currentTimeMillis() - st;
-                                        LOG.debug("Folder job \"" + identifier + "\" scheduled " + end + " of " + size + " messages with sub-job \"" + subId + "\" in " + dur + "msec in folder " + fullName + " in account " + accountId);
-                                    }
-                                } else {
-                                    /*
-                                     * Add this chunk with caller-runs behavior
-                                     */
-                                    add2Index(ids.subList(start, end), fullName, indexAdapter);
-                                    if (DEBUG) {
-                                        final long dur = System.currentTimeMillis() - st;
-                                        LOG.debug("Folder job \"" + identifier + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
-                                    }
-                                }
-                            }
-                            /*
-                             * Check for higher-ranked job in queue
-                             */
-                            if (queue.hasHigherRankedJobInQueue(getRanking())) {
-                                if (DEBUG) {
-                                    LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
-                                }
-                                break;
-                            }
-                            start = end;
-                        }
-                        /*
-                         * Await scheduled jobs in completion service
-                         */
-                        if (cnt > 0 && null != completionService) {
-                            if (DEBUG) {
-                                LOG.debug("Awaiting completed jobs...");
-                            }
-                            for (int i = 0; i < cnt; i++) {
-                                completionService.take();
-                                if (DEBUG) {
-                                    LOG.debug("Detected completed job");
-                                }
-                            }
-                            if (DEBUG) {
-                                LOG.debug("All jobs competed.");
-                            }
-                        }
-                        if (DEBUG) {
-                            LOG.debug("Folder job \"" + identifier + "\" added " + size + " messages.");
-                        }
+                        numAdded = mayScheduleJobs ? chunkedAddWithJobs(ids, indexAdapter) : chunkedAddWithoutJobs(ids, indexAdapter);
                     } finally {
                         if (DEBUG) {
                             LOG.debug("Folder job \"" + identifier + "\" triggers to add messages' content.");
                         }
                         indexAdapter.addContents();
                     }
-                    reEnqueued = (start < size);
+                    reEnqueued = (numAdded < ids.size());
                 } else if (DEBUG) {
                     LOG.debug("Folder job \"" + identifier + "\" detected no new messages in folder " + fullName + " in account " + accountId);
                 }
@@ -565,12 +480,122 @@ public final class FolderJob extends AbstractMailSyncJob {
             Thread.currentThread().interrupt();
             error = true;
             cancel();
-            LOG.error("Folder job \"" + identifier + "\" failed.", e);
+            LOG.info("Folder job \"" + identifier + "\" interrupted.", e);
         } catch (final Exception e) {
             error = true;
             cancel();
             LOG.error("Folder job \"" + identifier + "\" failed.", e);
         }
+    }
+
+    private int chunkedAddWithoutJobs(final List<String> ids, final IndexAdapter indexAdapter) throws OXException {
+        final long st = DEBUG ? System.currentTimeMillis() : 0l;
+        final JobQueue queue = JobQueue.getInstance();
+        final int configuredBlockSize = Constants.CHUNK_SIZE;
+        final int size = ids.size();
+        int start = 0;
+        while (start < size) {
+            int end = start + configuredBlockSize;
+            if (end > size) {
+                end = size;
+            }
+            /*
+             * Add chunk
+             */
+            add2Index(ids.subList(start, end), fullName, indexAdapter);
+            if (DEBUG) {
+                final long dur = System.currentTimeMillis() - st;
+                LOG.debug("Folder job \"" + identifier + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+            }
+            start = end;
+            /*
+             * Check for higher-ranked job in queue
+             */
+            if (queue.hasHigherRankedJobInQueue(getRanking())) {
+                if (DEBUG) {
+                    LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
+                }
+                break;
+            }
+        }
+        if (DEBUG) {
+            LOG.debug("Folder job \"" + identifier + "\" added " + size + " messages.");
+        }
+        return start;
+    }
+
+    private int chunkedAddWithJobs(final List<String> ids, final IndexAdapter indexAdapter) throws OXException, InterruptedException {
+        final long st = DEBUG ? System.currentTimeMillis() : 0l;
+        final JobQueue queue = JobQueue.getInstance();
+        final int configuredBlockSize = Constants.CHUNK_SIZE;
+        final int size = ids.size();
+        final StringBuilder idBuilder = new StringBuilder(identifier);
+        idBuilder.append('@').append(UUIDs.getUnformattedString(UUID.randomUUID())).append('@');
+        final int resetlen = idBuilder.length();
+        int numScheduled = 0;
+        final JobCompletionService completionService = mayScheduleJobs ? new UnboundedJobCompletionService() : null;
+        int start = 0;
+        while (start < size) {
+            int end = start + configuredBlockSize;
+            if (end > size) {
+                end = size;
+            }
+            /*
+             * Delegate to completion service if not last chunk and completion service accepted job
+             */
+            idBuilder.setLength(resetlen);
+            final String subId = idBuilder.append(numScheduled + 1).toString();
+            if ((end < size) && scheduleJob(ids.subList(start, end), indexAdapter, completionService, subId)) {
+                /*
+                 * Successfully delegated to completion service
+                 */
+                numScheduled++;
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("Folder job \"" + identifier + "\" scheduled " + end + " of " + size + " messages with sub-job \"" + subId + "\" in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                }
+            } else {
+                /*
+                 * Add this chunk with caller-runs behavior
+                 */
+                add2Index(ids.subList(start, end), fullName, indexAdapter);
+                if (DEBUG) {
+                    final long dur = System.currentTimeMillis() - st;
+                    LOG.debug("Folder job \"" + identifier + "\" inserted " + end + " of " + size + " messages in " + dur + "msec in folder " + fullName + " in account " + accountId);
+                }
+            }
+            start = end;
+            /*
+             * Check for higher-ranked job in queue
+             */
+            if (queue.hasHigherRankedJobInQueue(getRanking())) {
+                if (DEBUG) {
+                    LOG.debug("Folder job \"" + identifier + "\" aborted temporarily because a higher-ranked job is available in job queue.");
+                }
+                break;
+            }
+        }
+        /*
+         * Await scheduled jobs in completion service
+         */
+        if (numScheduled > 0 && null != completionService) {
+            if (DEBUG) {
+                LOG.debug("Awaiting completed jobs...");
+            }
+            for (int i = 0; i < numScheduled; i++) {
+                completionService.take();
+                if (DEBUG) {
+                    LOG.debug("Detected completed job");
+                }
+            }
+            if (DEBUG) {
+                LOG.debug("All jobs competed.");
+            }
+        }
+        if (DEBUG) {
+            LOG.debug("Folder job \"" + identifier + "\" added " + size + " messages.");
+        }
+        return start;
     }
 
     private boolean scheduleJob(final List<String> ids, final IndexAdapter indexAdapter, final JobCompletionService completionService, final String subId) throws InterruptedException {

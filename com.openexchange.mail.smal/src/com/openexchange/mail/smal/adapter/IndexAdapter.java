@@ -106,6 +106,18 @@ public interface IndexAdapter {
     public void onSessionGone(Session session) throws OXException;
 
     /**
+     * Gets all mails in a fast manner. Returned mails only contain identifier and flags.
+     * 
+     * @param optFullName The optional full name to restrict search results to specified folder
+     * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
+     * @param session The session
+     * @return All mails
+     * @throws OXException If all request fails
+     * @throws InterruptedException If processing is interrupted
+     */
+    public List<MailMessage> all(String optFullName, int optAccountId, Session session) throws OXException, InterruptedException;
+
+    /**
      * Performs the query derived from given search term.
      *
      * @param optFullName The optional full name to restrict search results to specified folder

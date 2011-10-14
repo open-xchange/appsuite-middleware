@@ -135,6 +135,21 @@ public final class MailFields {
     }
 
     /**
+     * Gets the size.
+     * 
+     * @return The size
+     */
+    public int size() {
+        int size = 0;
+        for (final boolean field : arr) {
+            if (field) {
+                size++;
+            }
+        }
+        return size;
+    }
+
+    /**
      * Adds specified {@link MailField} constant.
      *
      * @param mailField The mail field to add
