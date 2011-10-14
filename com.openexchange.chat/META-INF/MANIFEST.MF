@@ -8,7 +8,13 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.log,
+ gnu.inet.encoding,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/dom4j-1.6.1.jar,
+ lib/smack-3.2.1.jar,
+ lib/smackx-3.2.1.jar,
+ lib/tinder-1.2.2.jar,
+ .
