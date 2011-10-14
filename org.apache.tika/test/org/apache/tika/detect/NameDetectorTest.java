@@ -33,7 +33,6 @@ public class NameDetectorTest extends TestCase {
 
     private Detector detector;
 
-    @Override
     protected void setUp() {
         Map<Pattern, MediaType> patterns = new HashMap<Pattern, MediaType>();
         patterns.put(

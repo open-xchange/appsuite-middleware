@@ -151,7 +151,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getFolderId() throws OXException {
-        return data.getParameter(Param.FOLDER_ID.getName());
+    	String parameter = data.getParameter(Param.FOLDER_ID.getName());
+        if (parameter == null || parameter.equals("null") || parameter.equals("undefined")) {
+            return FileStorageFileAccess.ALL_FOLDERS;
+        }
+        return parameter;
     }
 
     @Override

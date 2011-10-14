@@ -50,8 +50,6 @@
 package com.openexchange.imap.command;
 
 import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import java.util.Arrays;
 import java.util.Locale;
 import javax.mail.MessagingException;
@@ -230,7 +228,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
          * * 45 EXISTS..* 2 RECENT..A4 OK [COPYUID 1185853191 7,32 44:45] Completed
          */
         int pos = resp.indexOf(COPYUID);
-        if (pos == -1) {
+        if (pos < 0) {
             if (LOG.isWarnEnabled()) {
                 LOG.warn(new StringBuilder(128).append("Missing COPYUID response code: ").append(resp).toString());
             }
@@ -273,81 +271,6 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
         }
         proceed = false;
         return true;
-    }
-
-    private static final class COPYUIDResponse {
-
-        private final org.apache.commons.logging.Log logger;
-
-        protected String src;
-
-        protected String dest;
-
-        public COPYUIDResponse(final org.apache.commons.logging.Log logger) {
-            super();
-            this.logger = logger;
-        }
-
-        /**
-         * Fills given <code>retval</code> with UIDs from destination folder while keeping order of source UIDs in <code>uids</code>
-         *
-         * @param uids The source UIDs
-         * @param retval The destination UIDs to fill
-         */
-        public void fillResponse(final long[] uids, final long[] retval) {
-            final long[] srcArr = toLongArray(src);
-            final long[] destArr = toLongArray(dest);
-            for (int in = 0; in < srcArr.length; in++) {
-                int index = 0;
-                /*
-                 * Determine index position in given UIDs...
-                 */
-                while ((index < uids.length) && (uids[index] != srcArr[in])) {
-                    index++;
-                }
-                /*
-                 * ... and apply copied UID to corresponding index position in return value
-                 */
-                try {
-                    retval[index] = destArr[in];
-                } catch (final ArrayIndexOutOfBoundsException e) {
-                    logger.error("A COPYUID's source UID could not be found in given source UIDs", e);
-                }
-            }
-        }
-
-        /**
-         * Turns a sequence of UIDs to a corresponding array of <code>long</code>.
-         *
-         * <pre>
-         * 7,32,44:49
-         * </pre>
-         *
-         * would be
-         *
-         * <pre>
-         * [7,32,44,46,47,48,49]
-         * </pre>
-         *
-         * @param uidSet The sequence of UIDs
-         * @return The corresponding array of <code>long</code>.
-         */
-        private static long[] toLongArray(final String uidSet) {
-            final TLongList arr = new TLongArrayList(32);
-            final String[] sa = uidSet.split(" *, *");
-            Next: for (int i = 0; i < sa.length; i++) {
-                final int pos = sa[i].indexOf(':');
-                if (pos == -1) {
-                    arr.add(Long.parseLong(sa[i]));
-                    continue Next;
-                }
-                final long endUID = Long.parseLong(sa[i].substring(pos + 1));
-                for (long j = Long.parseLong(sa[i].substring(0, pos)); j <= endUID; j++) {
-                    arr.add(j);
-                }
-            }
-            return arr.toArray();
-        }
     }
 
     private static long[] startend2long(final int start, final int end) {

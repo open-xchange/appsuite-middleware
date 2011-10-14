@@ -59,7 +59,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**
@@ -67,7 +69,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDeleteListener, OAuthAccountInvalidationListener {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterOAuthAccountDeleteListener.class));
 
@@ -91,6 +93,10 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
                 dropAccountByData(data, con);
             }
         }
+    }
+    
+    public void onAfterOAuthAccountInvalidation(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user, id);
     }
 
     private static List<int[]> listTwitterMessagingAccounts(final int userId, final int contextId, final Connection writeCon) throws OXException {

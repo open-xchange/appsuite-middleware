@@ -66,6 +66,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
 import javax.mail.Flags;
@@ -76,18 +77,22 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.AllFetch.LowCostItem;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
+import com.openexchange.imap.command.AbstractIMAPCommand;
 import com.openexchange.imap.command.BodyFetchIMAPCommand;
 import com.openexchange.imap.command.BodystructureFetchIMAPCommand;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand;
 import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
 import com.openexchange.imap.command.FlagsIMAPCommand;
+import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.command.NewFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
@@ -250,16 +255,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return getMessagesInternal(fullName, uids2longs(mailIds), mailFields, headerNames);
     }
 
-    private static final FetchProfile FETCH_PROFILE_CONTENT_TYPE = new FetchProfile() {
-
-        {
-            add(FetchProfile.Item.CONTENT_INFO);
-        }
-    };
-
     private static String extractPlainText(final String content) throws OXException {
+        return extractPlainText(content, null);
+    }
+
+    private static String extractPlainText(final String content, final String optMimeType) throws OXException {
         final TextXtractService textXtractService = IMAPServiceRegistry.getService(TextXtractService.class);
-        return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), null);
+        return textXtractService.extractFrom(new UnsynchronizedByteArrayInputStream(content.getBytes(Charsets.UTF_8)), optMimeType);
     }
 
     @Override
@@ -275,7 +277,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int i = 0; i < bodystructures.length; i++) {
                 final BODYSTRUCTURE bodystructure = bodystructures[i];
                 if (null != bodystructure) {
-                    retval[i] = handleBODYSTRUCTURE(mailIds[i], bodystructure, null, 1, new boolean[1]);
+                    retval[i] = handleBODYSTRUCTURE(fullName, mailIds[i], bodystructure, null, 1, new boolean[1]);
                 }
             }
             return retval;
@@ -286,7 +288,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private String handleBODYSTRUCTURE(final long mailId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws OXException {
+    private static final Whitelist WHITELIST = Whitelist.relaxed();
+
+    private static final Pattern PATTERN_CRLF = Pattern.compile("(\r?\n)+");
+
+    private String handleBODYSTRUCTURE(final String fullName, final long mailId, final BODYSTRUCTURE bodystructure, final String prefix, final int partCount, final boolean[] mpDetected) throws OXException {
         try {
             final String type = bodystructure.type.toLowerCase(Locale.ENGLISH);
             final String subtype = bodystructure.subtype.toLowerCase(Locale.ENGLISH);
@@ -294,7 +300,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final String sequenceId = getSequenceId(prefix, partCount);
                 final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
                 String content = readContent(bytes);
-                boolean textIsHtml;
+                boolean extractPlainText;
                 if ("plain".equals(subtype)) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
                         final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -302,20 +308,38 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             content = uuencodedMP.getCleanText();
                         }
                     }
-                    textIsHtml = false;
+                    extractPlainText = false;
                 } else {
                     if (subtype.startsWith("htm")) {
                         //content = htmlService.getConformHTML(content, "UTF-8");
-                        content = content.replaceAll("(\r?\n)+", "");// .replaceAll("(  )+", "");
+                        content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
                     }
-                    textIsHtml = true;
+                    extractPlainText = true;
                 }
-                return textIsHtml ? extractPlainText(content) : content;
+                if (!extractPlainText) {
+                    return content;
+                }
+                try {
+                    return extractPlainText(content);
+                } catch (final OXException e) {
+                    if (!subtype.startsWith("htm")) {
+                        final StringBuilder sb = new StringBuilder("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
+                        sb.append(" context=").append(session.getContextId());
+                        sb.append(", user=").append(session.getUserId());
+                        sb.append(", account=").append(accountId);
+                        sb.append(", full-name=").append(fullName);
+                        sb.append(", uid=").append(mailId);
+                        sb.append(", sequence-id=").append(sequenceId);
+                        LOG.warn(sb.toString());
+                        throw e;
+                    }
+                    /*
+                     * Retry with sanitized HTML content
+                     */
+                    return extractPlainText(Jsoup.clean(content, WHITELIST));
+                }
             }
-            if ("multipart".equals(type) && "alternative".equals(subtype)) {
-                /*
-                 * Prefer HTML text over plain text
-                 */
+            if ("multipart".equals(type)) {
                 final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
                 final String mpPrefix;
                 if (mpDetected[0]) {
@@ -326,39 +350,39 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 final BODYSTRUCTURE[] bodies = bodystructure.bodies;
                 final int count = bodies.length;
-                String text = null;
-                for (int i = 0; i < count; i++) {
-                    final BODYSTRUCTURE bp = bodies[i];
-                    final String bpType = bp.type.toLowerCase(Locale.ENGLISH);
-                    final String bpSubtype = bp.subtype.toLowerCase(Locale.ENGLISH);
-                    if ("text".equals(bpType) && "plain".equals(bpSubtype)) {
-                        if (text == null) {
-                            text = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
+                if ("alternative".equals(subtype)) {
+                    /*
+                     * Prefer HTML text over plain text
+                     */
+                    String text = null;
+                    for (int i = 0; i < count; i++) {
+                        final BODYSTRUCTURE bp = bodies[i];
+                        final String bpType = bp.type.toLowerCase(Locale.ENGLISH);
+                        final String bpSubtype = bp.subtype.toLowerCase(Locale.ENGLISH);
+                        if ("text".equals(bpType) && "plain".equals(bpSubtype)) {
+                            if (text == null) {
+                                text = handleBODYSTRUCTURE(fullName, mailId, bp, mpPrefix, i + 1, mpDetected);
+                            }
+                            continue;
+                        } else if ("text".equals(bpType) && bpSubtype.startsWith("htm")) {
+                            final String s = handleBODYSTRUCTURE(fullName, mailId, bp, mpPrefix, i + 1, mpDetected);
+                            if (s != null) {
+                                return s;
+                            }
+                        } else if ("multipart".equals(bpType)) {
+                            final String s = handleBODYSTRUCTURE(fullName, mailId, bp, mpPrefix, i + 1, mpDetected);
+                            if (s != null) {
+                                return s;
+                            }
                         }
-                        continue;
-                    } else if ("text".equals(bpType) && bpSubtype.startsWith("htm")) {
-                        final String s = handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
-                        if (s != null) {
-                            return s;
-                        }
-                    } else {
-                        return handleBODYSTRUCTURE(mailId, bp, mpPrefix, i + 1, mpDetected);
                     }
+                    return text;
                 }
-                return text;
-            } else if ("multipart".equals(type)) {
-                final String mpId = null == prefix && !mpDetected[0] ? "" : getSequenceId(prefix, partCount);
-                final String mpPrefix;
-                if (mpDetected[0]) {
-                    mpPrefix = mpId;
-                } else {
-                    mpPrefix = prefix;
-                    mpDetected[0] = true;
-                }
-                final BODYSTRUCTURE[] bodies = bodystructure.bodies;
-                final int count = bodies.length;
+                /*
+                 * A regular multipart
+                 */
                 for (int i = 0; i < count; i++) {
-                    final String s = handleBODYSTRUCTURE(mailId, bodies[i], mpPrefix, i + 1, mpDetected);
+                    final String s = handleBODYSTRUCTURE(fullName, mailId, bodies[i], mpPrefix, i + 1, mpDetected);
                     if (s != null) {
                         return s;
                     }
@@ -599,7 +623,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int i = 0; i < uids.length; i++) {
                 final long uid = uids[i];
                 if (uid != -1) {
-                    retval[i] = new IDMailMessage("INBOX", String.valueOf(uid));
+                    retval[i] = new IDMailMessage(String.valueOf(uid), "INBOX");
                     count++;
                 }
             }
@@ -1171,16 +1195,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Copy messages to folder "TRASH"
              */
+            final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
             try {
+                AbstractIMAPCommand<long[]> command;
+                if (supportsMove) {
+                    command = new MoveIMAPCommand(imapFolder, uids, trashFullname, false, true);
+                } else {
+                    command = new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true);
+                }
                 if (DEBUG) {
                     final long start = System.currentTimeMillis();
-                    new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
+                    command.doCommand();
                     final long time = System.currentTimeMillis() - start;
                     sb.setLength(0);
-                    LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(" messages copied to default trash folder \"").append(
-                        trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                    if (supportsMove) {
+                        LOG.debug(sb.append("\"Move\": ").append(uids.length).append(" messages moved to default trash folder \"").append(
+                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                    } else {
+                        LOG.debug(sb.append("\"Soft Delete\": ").append(uids.length).append(" messages copied to default trash folder \"").append(
+                            trashFullname).append("\" in ").append(time).append(STR_MSEC).toString());
+                    }
                 } else {
-                    new CopyIMAPCommand(imapFolder, uids, trashFullname, false, true).doCommand();
+                    command.doCommand();
                 }
             } catch (final MessagingException e) {
                 if (e.getMessage().toLowerCase(Locale.US).indexOf("quota") >= 0) {
@@ -1197,6 +1233,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
                 }
                 throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
+            }
+            if (supportsMove) {
+                return;
             }
         }
         /*
@@ -1421,21 +1460,35 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private long[] copyOrMoveByUID(final boolean move, final boolean fast, final String destFullName, final long[] tmp, final StringBuilder sb) throws MessagingException, OXException, IMAPException {
+        final boolean supportsMove = move && imapConfig.asMap().containsKey("MOVE");
+        final AbstractIMAPCommand<long[]> command;
+        if (supportsMove) {
+            command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
+        } else {
+            command = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast);
+        }
         long[] uids;
         if (DEBUG) {
             final long start = System.currentTimeMillis();
-            uids = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast).doCommand();
+            uids = command.doCommand();
             final long time = System.currentTimeMillis() - start;
             sb.setLength(0);
-            LOG.debug(sb.append(tmp.length).append(" messages copied in ").append(time).append(STR_MSEC).toString());
+            if (supportsMove) {
+                LOG.debug(sb.append(tmp.length).append(" messages moved in ").append(time).append(STR_MSEC).toString());
+            } else {
+                LOG.debug(sb.append(tmp.length).append(" messages copied in ").append(time).append(STR_MSEC).toString());
+            }
         } else {
-            uids = new CopyIMAPCommand(imapFolder, tmp, destFullName, false, fast).doCommand();
+            uids = command.doCommand();
         }
         if (!fast && ((uids == null) || noUIDsAssigned(uids, tmp.length))) {
             /*
              * Invalid UIDs
              */
             uids = getDestinationUIDs(tmp, destFullName);
+        }
+        if (supportsMove) {
+            return uids;
         }
         if (move) {
             if (DEBUG) {
@@ -2244,6 +2297,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     private static int applyThreadLevel(final List<ThreadSortNode> threadList, final int level, final Message[] msgs, final int index) {
+        if (null == threadList) {
+            return index;
+        }
         int idx = index;
         final int threadListSize = threadList.size();
         final Iterator<ThreadSortNode> iter = threadList.iterator();

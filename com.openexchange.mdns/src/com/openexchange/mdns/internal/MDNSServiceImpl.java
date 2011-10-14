@@ -124,7 +124,11 @@ public final class MDNSServiceImpl implements MDNSService, MDNSReregisterer {
             map.clear();
             registeredServicesSet.clear();
             jmdns.unregisterAllServices();
-            jmdns.close();
+            try {
+                jmdns.close();
+            } catch (final IOException e) {
+                LOG.error("Closing JmDNS instance failed.", e);
+            }
         } finally {
             wlock.unlock();
         }

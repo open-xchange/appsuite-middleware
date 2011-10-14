@@ -79,23 +79,28 @@ public final class MDNSCommandProvider implements CommandProvider {
         /*
          * Check service identifier
          */
-        final String serviceId = intp.nextArgument();
+        String serviceId = intp.nextArgument();
+        if (null == serviceId) {
+            serviceId = "openexchange.service.messaging";
+        }
         final StringBuilder sb = new StringBuilder(256);
         final List<MDNSServiceEntry> services;
         try {
-            services = mdnsService.listByService(null == serviceId ? "openexchange.service.messaging" : serviceId);
+            services = mdnsService.listByService(serviceId);
         } catch (final OXException e) {
             intp.print(sb.append("Error: ").append(e.getMessage()).toString());
             return null;
         }
         sb.setLength(0);
-        intp.print(sb.append("---Tracked services of \"").append(null == serviceId ? "openexchange.service.messaging" : serviceId).append(
+        intp.print(sb.append("---Tracked services of \"").append(serviceId).append(
             "\" ---\n").toString());
+        final String delim = "\n\t";
         for (final MDNSServiceEntry mdnsServiceEntry : services) {
             sb.setLength(0);
-            sb.append("\n\tUUID: ").append(mdnsServiceEntry.getId()).append("\n\t");
-            sb.append("Address: ").append(mdnsServiceEntry.getAddress()).append("\n\t");
-            sb.append("Port: ").append(mdnsServiceEntry.getPort()).append('\n');
+            sb.append(delim).append("UUID: ").append(mdnsServiceEntry.getId());
+            sb.append(delim).append("Address: ").append(mdnsServiceEntry.getAddress());
+            sb.append(delim).append("Port: ").append(mdnsServiceEntry.getPort());
+            sb.append('\n');
             intp.print(sb.toString());
         }
         /*

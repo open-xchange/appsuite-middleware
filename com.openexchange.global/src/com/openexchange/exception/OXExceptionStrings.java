@@ -63,7 +63,7 @@ public final class OXExceptionStrings implements LocalizableStrings {
     public static final String DEFAULT_MESSAGE = "[Not available]";
 
     // The default message displayed to user.
-    public static final String MESSAGE = "An error occurred. There is nothing you can do about at the moment.";
+    public static final String MESSAGE = "A severe error occurred.";
 
     // The default message displayed to user.
     public static final String MESSAGE_RETRY = "An error occurred. Please try again later.";

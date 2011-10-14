@@ -489,6 +489,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
         return null;
     }
 
+    private static final MailField[] FIELDS = new MailField[] { MailField.ID, MailField.FLAGS };
+
+    @Override
+    public List<MailMessage> all(final String optFullName, final int optAccountId, final Session session) throws OXException, InterruptedException {
+        return search(optFullName, null, null, null, FIELDS, optAccountId, session);
+    }
+
     @Override
     public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
         try {

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.i18n overrides" basedir=".">
+
+    <description>
+        Installs the language files.
+    </description>
+
+    <import file="build-project.xml"/>
+
+    <target name="installConf" description="Patches i18n.properties before installing it.">
+        <antcall target="patchAndInstallConf"/>
+    </target>
+
+    <target name="patchAndInstallConf">
+        <mkdir dir="${tmpDir}/${confDir}"/>
+        <copy todir="${tmpDir}/${confDir}" overwrite="true">
+            <fileset dir="${confDir}"/>
+        </copy>
+        <move tofile="${tmpDir}/${confDir}/i18n.properties" file="${tmpDir}/${confDir}/i18n.properties.in" overwrite="true"/>
+        <replace file="${tmpDir}/${confDir}/i18n.properties">
+            <replacefilter token="@prefix@" value="${prefix}"/>
+        </replace>
+        <copy todir="${destDir}/${confInstallDir}">
+            <fileset dir="${tmpDir}/${confDir}"/>
+        </copy>
+    </target>
+
+    <target name="postInstall" description="Installs the language files.">
+        <antcall target="installLanguages"/>
+    </target>
+
+    <target name="installLanguages">
+        <mkdir dir="${destDir}/${prefix}/i18n"/>
+        <antcall target="installLanguage">
+            <param name="language" value="de_DE"/>
+        </antcall>
+        <antcall target="installLanguage">
+            <param name="language" value="fr_FR"/>
+        </antcall>
+    </target>
+
+    <target name="installLanguage">
+        <copy todir="${destDir}/${prefix}/i18n">
+            <fileset dir="${language}">
+                <include name="server.${language}.po"/>
+            </fileset>
+        </copy>
+    </target>
+
+</project>

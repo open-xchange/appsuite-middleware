@@ -25,8 +25,7 @@ import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
-import junit.framework.TestCase;
-
+import org.apache.tika.TikaTest;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.detect.ContainerAwareDetector;
 import org.apache.tika.io.TikaInputStream;
@@ -38,9 +37,9 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
-public class OOXMLParserTest extends TestCase {
+public class OOXMLParserTest extends TikaTest {
     private Parser parser;
-
+   
     @Override
     protected void setUp() throws Exception {
        TikaConfig config = TikaConfig.getDefaultConfig();
@@ -55,7 +54,7 @@ public class OOXMLParserTest extends TestCase {
                 .getResourceAsStream("/test-documents/testEXCEL.xlsx");
         assertNotNull(input);
 
-        Metadata metadata = new Metadata();
+        Metadata metadata = new Metadata(); 
         ContentHandler handler = new BodyContentHandler();
         ParseContext context = new ParseContext();
         context.set(Locale.class, Locale.US);
@@ -107,9 +106,10 @@ public class OOXMLParserTest extends TestCase {
             assertTrue(content.contains("$1,599.99"));
             assertTrue(content.contains("$1,599.99)"));
 
-            // Scientific 0.00E+00
-            assertTrue(content.contains("1.98E08"));
-            assertTrue(content.contains("-1.98E08"));
+          // Scientific 0.00E+00
+          // poi <=3.8beta1 returns 1.98E08, newer versions return 1.98+E08
+          assertTrue(content.contains("1.98E08") || content.contains("1.98E+08"));
+          assertTrue(content.contains("-1.98E08") || content.contains("-1.98E+08"));
 
             // Percentage
             assertTrue(content.contains("2.50%"));
@@ -130,7 +130,7 @@ public class OOXMLParserTest extends TestCase {
             // Currency $#,##0.00;[Red]($#,##0.00)
             assertTrue(content.contains("$1,599.99"));
             assertTrue(content.contains("($1,599.99)"));
-
+            
             // Below assertions represent outstanding formatting issues to be addressed
             // they are included to allow the issues to be progressed with the Apache POI
             // team - See TIKA-103.
@@ -163,53 +163,64 @@ public class OOXMLParserTest extends TestCase {
     public void testPowerPoint() throws Exception {
 	String[] extensions = new String[] {
 		"pptx", "pptm", "ppsm", "ppsx",
-		//"thmx", // TIKA-418: Will be supported in POI 3.7 beta 2
+		//"thmx", // TIKA-418: Will be supported in POI 3.7 beta 2 
 		//"xps" // TIKA-418: Not yet supported by POI
 	};
-	for(String extension : extensions) {
-	    String filename = "testPPT." + extension;
+
+        String[] mimeTypes = new String[] {
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "application/vnd.ms-powerpoint.presentation.macroenabled.12",
+                "application/vnd.ms-powerpoint.slideshow.macroenabled.12",
+                "application/vnd.openxmlformats-officedocument.presentationml.slideshow"
+        };
+
+        for (int i=0; i<extensions.length; i++) {
+            String extension = extensions[i];
+            String filename = "testPPT." + extension;
+
             InputStream input = OOXMLParserTest.class
                     .getResourceAsStream("/test-documents/"+filename);
-
+    
             Parser parser = new AutoDetectParser();
             Metadata metadata = new Metadata();
             // TODO: should auto-detect without the resource name
             metadata.set(Metadata.RESOURCE_NAME_KEY, filename);
             ContentHandler handler = new BodyContentHandler();
             ParseContext context = new ParseContext();
-
+    
             try {
                 parser.parse(input, handler, metadata, context);
-
+    
                 assertEquals(
-                        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                        "Mime-type checking for " + filename,
+                        mimeTypes[i],
                         metadata.get(Metadata.CONTENT_TYPE));
                 assertEquals("Attachment Test", metadata.get(Metadata.TITLE));
                 assertEquals("Rajiv", metadata.get(Metadata.AUTHOR));
-
+                
                 String content = handler.toString();
                 // Theme files don't have the text in them
                 if(extension.equals("thmx")) {
                     assertEquals("", content);
                 } else {
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content,
+                    	"Text missing for " + filename + "\n" + content, 
                     	content.contains("Attachment Test")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content,
+                    	"Text missing for " + filename + "\n" + content, 
                     	content.contains("This is a test file data with the same content")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content,
+                    	"Text missing for " + filename + "\n" + content, 
                     	content.contains("content parsing")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content,
+                    	"Text missing for " + filename + "\n" + content, 
                     	content.contains("Different words to test against")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content,
+                    	"Text missing for " + filename + "\n" + content, 
                     	content.contains("Mystery")
                     );
                 }
@@ -218,7 +229,7 @@ public class OOXMLParserTest extends TestCase {
             }
 	}
     }
-
+    
     /**
      * Test the plain text output of the Word converter
      * @throws Exception
@@ -267,11 +278,108 @@ public class OOXMLParserTest extends TestCase {
         }
     }
 
+    private static class XMLResult {
+        public final String xml;
+        public final Metadata metadata;
+
+        public XMLResult(String xml, Metadata metadata) {
+            this.xml = xml;
+            this.metadata = metadata;
+      }
+    }
+
+    private XMLResult getXML(String filePath) throws Exception {
+        InputStream input = null;
+        Metadata metadata = new Metadata();
+        
+        StringWriter sw = new StringWriter();
+        SAXTransformerFactory factory = (SAXTransformerFactory)
+                 SAXTransformerFactory.newInstance();
+        TransformerHandler handler = factory.newTransformerHandler();
+        handler.getTransformer().setOutputProperty(OutputKeys.METHOD, "xml");
+        handler.getTransformer().setOutputProperty(OutputKeys.INDENT, "yes");
+        handler.setResult(new StreamResult(sw));
+
+        // Try with a document containing various tables and formattings
+        input = OOXMLParserTest.class.getResourceAsStream(filePath);
+        try {
+            parser.parse(TikaInputStream.get(input), handler, metadata, new ParseContext());
+            return new XMLResult(sw.toString(), metadata);
+        } finally {
+            input.close();
+        }
+    }
+
     /**
      * Test that the word converter is able to generate the
      *  correct HTML for the document
      */
     public void testWordHTML() throws Exception {
+
+      XMLResult result = getXML("/test-documents/testWORD.docx");
+      String xml = result.xml;
+      Metadata metadata = result.metadata;
+      assertEquals(
+                   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                   metadata.get(Metadata.CONTENT_TYPE));
+      assertEquals("Sample Word Document", metadata.get(Metadata.TITLE));
+      assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
+      assertTrue(xml.contains("Sample Word Document"));
+            
+      // Check that custom headings came through
+      assertTrue(xml.contains("<h1 class=\"title\">"));
+      // Regular headings
+      assertTrue(xml.contains("<h1>Heading Level 1</h1>"));
+      assertTrue(xml.contains("<h2>Heading Level 2</h2>"));
+      // Headings with anchor tags in them
+      assertTrue(xml.replaceAll("\r?\n", "").contains("<h3><a name=\"OnLevel3\"/>Heading Level 3</h3>"));
+      // Bold and italic
+      assertTrue(xml.contains("<b>BOLD</b>"));
+      assertTrue(xml.contains("<i>ITALIC</i>"));
+      // Table
+      assertTrue(xml.contains("<table>"));
+      assertTrue(xml.contains("<td>"));
+      // Links
+      assertTrue(xml.contains("<a href=\"http://tika.apache.org/\">Tika</a>"));
+      // Anchor links
+      assertTrue(xml.contains("<a href=\"#OnMainHeading\">The Main Heading Bookmark</a>"));
+      // Paragraphs with other styles
+      assertTrue(xml.contains("<p class=\"signature\">This one"));
+
+      result = getXML("/test-documents/testWORD_3imgs.docx");
+      xml = result.xml;
+
+      // Images 2-4 (there is no 1!)
+      assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image2.png\" alt=\"A description...\"/>"));
+      assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image3.jpeg\" alt=\"A description...\"/>"));
+      assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image4.png\" alt=\"A description...\"/>"));
+            
+      // Text too
+      assertTrue(xml.contains("<p>The end!</p>"));
+
+      // TIKA-692: test document containing multiple
+      // character runs within a bold tag:
+      xml = getXML("/test-documents/testWORD_bold_character_runs.docx").xml;
+
+      // Make sure bold text arrived as single
+      // contiguous string even though Word parser
+      // handled this as 3 character runs
+      assertTrue("Bold text wasn't contiguous: "+xml, xml.contains("F<b>oob</b>a<b>r</b>"));
+
+      // TIKA-692: test document containing multiple
+      // character runs within a bold tag:
+      xml = getXML("/test-documents/testWORD_bold_character_runs2.docx").xml;
+            
+      // Make sure bold text arrived as single
+      // contiguous string even though Word parser
+      // handled this as 3 character runs
+      assertTrue("Bold text wasn't contiguous: "+xml, xml.contains("F<b>oob</b>a<b>r</b>"));
+    }
+
+    /**
+     * Test that we can extract image from docx header
+     */
+    public void testWordPicturesInHeader() throws Exception {
         InputStream input = null;
         Metadata metadata = new Metadata();
         ParseContext context = new ParseContext();
@@ -285,62 +393,22 @@ public class OOXMLParserTest extends TestCase {
         handler.setResult(new StreamResult(sw));
 
         // Try with a document containing various tables and formattings
-        input = OOXMLParserTest.class.getResourceAsStream("/test-documents/testWORD.docx");
+        input = OOXMLParserTest.class.getResourceAsStream("/test-documents/headerPic.docx");
         try {
             parser.parse(TikaInputStream.get(input), handler, metadata, context);
             String xml = sw.toString();
             assertEquals(
                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                     metadata.get(Metadata.CONTENT_TYPE));
-            assertEquals("Sample Word Document", metadata.get(Metadata.TITLE));
-            assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
-            assertTrue(xml.contains("Sample Word Document"));
-
             // Check that custom headings came through
-            assertTrue(xml.contains("<h1 class=\"title\">"));
-            // Regular headings
-            assertTrue(xml.contains("<h1>Heading Level 1</h1>"));
-            assertTrue(xml.contains("<h2>Heading Level 2</h2>"));
-            // Headings with anchor tags in them
-            assertTrue(xml.replaceAll("\r?\n", "").contains("<h3><a name=\"OnLevel3\"/>Heading Level 3</h3>"));
-            // Bold and italic
-            assertTrue(xml.contains("<b>BOLD</b>"));
-            assertTrue(xml.contains("<i>ITALIC</i>"));
-            // Table
-            assertTrue(xml.contains("<table>"));
-            assertTrue(xml.contains("<td>"));
-            // Links
-            assertTrue(xml.contains("<a href=\"http://tika.apache.org/\">Tika</a>"));
-            // Anchor links
-            assertTrue(xml.contains("<a href=\"#OnMainHeading\">The Main Heading Bookmark</a>"));
-            // Paragraphs with other styles
-            assertTrue(xml.contains("<p class=\"signature\">This one"));
-        } finally {
-            input.close();
-        }
-
-        // Try with a document that contains images
-        sw = new StringWriter();
-        handler.setResult(new StreamResult(sw));
-        input = OOXMLParserTest.class.getResourceAsStream("/test-documents/testWORD_3imgs.docx");
-        try {
-            parser.parse(TikaInputStream.get(input), handler, metadata, context);
-            String xml = sw.toString();
-
-            // Images 2-4 (there is no 1!)
-//            assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image2.png\"/>"));
-//            assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image3.jpeg\"/>"));
-//            assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image4.png\"/>"));
-
-            // Text too
-            assertTrue(xml.contains("<p>The end!</p>"));
+            assertTrue(xml.contains("<img"));
         } finally {
             input.close();
         }
     }
 
     /**
-     * Documents with some sheets are protected, but not all.
+     * Documents with some sheets are protected, but not all. 
      * See TIKA-364.
      */
     public void testProtectedExcelSheets() throws Exception {
@@ -366,7 +434,7 @@ public class OOXMLParserTest extends TestCase {
     }
 
     /**
-     * An excel document which is password protected.
+     * An excel document which is password protected. 
      * See TIKA-437.
      */
     public void testProtectedExcelFile() throws Exception {
@@ -386,7 +454,7 @@ public class OOXMLParserTest extends TestCase {
                     metadata.get(Metadata.CONTENT_TYPE));
 
             assertEquals("true", metadata.get(TikaMetadataKeys.PROTECTED));
-
+            
             String content = handler.toString();
             assertTrue(content.contains("Office"));
         } finally {
@@ -394,4 +462,213 @@ public class OOXMLParserTest extends TestCase {
         }
     }
 
+    /**
+     * Test docx without headers
+     * TIKA-633
+     */
+    public void testNullHeaders() throws Exception {
+        Parser parser = new AutoDetectParser();
+        Metadata metadata = new Metadata();
+        ContentHandler handler = new BodyContentHandler();
+        ParseContext context = new ParseContext();
+
+        InputStream input = OOXMLParserTest.class.getResourceAsStream("/test-documents/NullHeader.docx");
+        try {
+            parser.parse(TikaInputStream.get(input), handler, metadata, context);
+            assertFalse(handler.toString().length()==0);
+        } finally {
+            input.close();
+        }
+    }
+
+    public void testVarious() throws Exception {
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+
+        InputStream stream = OOXMLParserTest.class.getResourceAsStream(
+                "/test-documents/testWORD_various.docx");
+        try {
+            new AutoDetectParser().parse(stream, handler, metadata, new ParseContext());
+        } finally {
+            stream.close();
+        }
+
+        String content = handler.toString();
+        //content = content.replaceAll("\\s+"," ");
+        assertContains("Footnote appears here", content);
+        assertContains("This is a footnote.", content);
+        assertContains("This is the header text.", content);
+        assertContains("This is the footer text.", content);
+        assertContains("Here is a text box", content);
+        assertContains("Bold", content);
+        assertContains("italic", content);
+        assertContains("underline", content);
+        assertContains("superscript", content);
+        assertContains("subscript", content);
+        assertContains("Here is a citation:", content);
+        assertContains("Figure 1 This is a caption for Figure 1", content);
+        assertContains("(Kramer)", content);
+        assertContains("Row 1 Col 1 Row 1 Col 2 Row 1 Col 3 Row 2 Col 1 Row 2 Col 2 Row 2 Col 3", content.replaceAll("\\s+"," "));
+        assertContains("Row 1 column 1 Row 2 column 1 Row 1 column 2 Row 2 column 2", content.replaceAll("\\s+"," "));
+        assertContains("This is a hyperlink", content);
+        assertContains("Here is a list:", content);
+        for(int row=1;row<=3;row++) {
+            //assertContains("·\tBullet " + row, content);
+            //assertContains("\u00b7\tBullet " + row, content);
+            assertContains("Bullet " + row, content);
+        }
+        assertContains("Here is a numbered list:", content);
+        for(int row=1;row<=3;row++) {
+            //assertContains(row + ")\tNumber bullet " + row, content);
+            //assertContains(row + ") Number bullet " + row, content);
+            // TODO: OOXMLExtractor fails to number the bullets:
+            assertContains("Number bullet " + row, content);
+        }
+
+        for(int row=1;row<=2;row++) {
+            for(int col=1;col<=3;col++) {
+                assertContains("Row " + row + " Col " + col, content);
+            }
+        }
+
+        assertContains("Keyword1 Keyword2", content);
+        assertEquals("Keyword1 Keyword2",
+                     metadata.get(Metadata.KEYWORDS));
+
+        assertContains("Subject is here", content);
+        assertEquals("Subject is here",
+                     metadata.get(Metadata.SUBJECT));
+
+        assertContains("Suddenly some Japanese text:", content);
+        // Special version of (GHQ)
+        assertContains("\uff08\uff27\uff28\uff31\uff09", content);
+        // 6 other characters
+        assertContains("\u30be\u30eb\u30b2\u3068\u5c3e\u5d0e\u3001\u6de1\u3005\u3068\u6700\u671f", content);
+
+        assertContains("And then some Gothic text:", content);
+        assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
+    }
+
+    public void testVariousPPTX() throws Exception {
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+
+        InputStream stream = OOXMLParserTest.class.getResourceAsStream(
+                "/test-documents/testPPT_various.pptx");
+        try {
+            new AutoDetectParser().parse(stream, handler, metadata, new ParseContext());
+        } finally {
+            stream.close();
+        }
+
+        String content = handler.toString();
+        //content = content.replaceAll("\\s+"," ");
+        assertContains("Footnote appears here", content);
+        assertContains("This is a footnote.", content);
+        assertContains("This is the header text.", content);
+        assertContains("This is the footer text.", content);
+        assertContains("Here is a text box", content);
+        assertContains("Bold", content);
+        assertContains("italic", content);
+        assertContains("underline", content);
+        assertContains("superscript", content);
+        assertContains("subscript", content);
+        assertContains("Here is a citation:", content);
+        assertContains("Figure 1 This is a caption for Figure 1", content);
+        assertContains("(Kramer)", content);
+        assertContains("Row 1 Col 1 Row 1 Col 2 Row 1 Col 3 Row 2 Col 1 Row 2 Col 2 Row 2 Col 3", content.replaceAll("\\s+"," "));
+        assertContains("Row 1 column 1 Row 2 column 1 Row 1 column 2 Row 2 column 2", content.replaceAll("\\s+"," "));
+        assertContains("This is a hyperlink", content);
+        assertContains("Here is a list:", content);
+        for(int row=1;row<=3;row++) {
+            //assertContains("·\tBullet " + row, content);
+            //assertContains("\u00b7\tBullet " + row, content);
+            assertContains("Bullet " + row, content);
+        }
+        assertContains("Here is a numbered list:", content);
+        for(int row=1;row<=3;row++) {
+            //assertContains(row + ")\tNumber bullet " + row, content);
+            //assertContains(row + ") Number bullet " + row, content);
+            // TODO: OOXMLExtractor fails to number the bullets:
+            assertContains("Number bullet " + row, content);
+        }
+
+        for(int row=1;row<=2;row++) {
+            for(int col=1;col<=3;col++) {
+                assertContains("Row " + row + " Col " + col, content);
+            }
+        }
+
+        assertContains("Keyword1 Keyword2", content);
+        assertEquals("Keyword1 Keyword2",
+                     metadata.get(Metadata.KEYWORDS));
+
+        assertContains("Subject is here", content);
+        assertEquals("Subject is here",
+                     metadata.get(Metadata.SUBJECT));
+
+        assertContains("Suddenly some Japanese text:", content);
+        // Special version of (GHQ)
+        assertContains("\uff08\uff27\uff28\uff31\uff09", content);
+        // 6 other characters
+        assertContains("\u30be\u30eb\u30b2\u3068\u5c3e\u5d0e\u3001\u6de1\u3005\u3068\u6700\u671f", content);
+
+        assertContains("And then some Gothic text:", content);
+        assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
+    }
+
+
+    public void testMasterFooter() throws Exception {
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+
+        InputStream stream = OOXMLParserTest.class.getResourceAsStream(
+                "/test-documents/testPPT_masterFooter.pptx");
+        try {
+            new AutoDetectParser().parse(stream, handler, metadata, new ParseContext());
+        } finally {
+            stream.close();
+        }
+
+        String content = handler.toString();
+        assertContains("Master footer is here", content);
+    }
+
+    // TODO: once we fix TIKA-712, re-enable this
+    /*
+    public void testMasterText() throws Exception {
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+
+        InputStream stream = OOXMLParserTest.class.getResourceAsStream(
+                "/test-documents/testPPT_masterText.pptx");
+        try {
+            new AutoDetectParser().parse(stream, handler, metadata, new ParseContext());
+        } finally {
+            stream.close();
+        }
+
+        String content = handler.toString();
+        assertContains("Text that I added to the master slide", content);
+    }
+    */
+
+    // TODO: once we fix TIKA-712, re-enable this
+    /*
+    public void testMasterText2() throws Exception {
+        ContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+
+        InputStream stream = OOXMLParserTest.class.getResourceAsStream(
+                "/test-documents/testPPT_masterText2.pptx");
+        try {
+            new AutoDetectParser().parse(stream, handler, metadata, new ParseContext());
+        } finally {
+            stream.close();
+        }
+
+        String content = handler.toString();
+        assertContains("Text that I added to the master slide", content);
+    }
+    */
 }

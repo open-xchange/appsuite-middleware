@@ -74,7 +74,7 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     public StaticConfigIndexService() {
         super();
         final IndexServerImpl server = new IndexServerImpl(1, "http://10.20.31.1:8580");
-        server.setConnectionTimeout(100);
+        server.setConnectionTimeout(1000);
         server.setMaxConnectionsPerHost(100);
         server.setSoTimeout(3000);
         this.server = server;

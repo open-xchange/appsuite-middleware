@@ -73,8 +73,15 @@ public final class IDMailMessage extends MailMessage {
     /**
      * Initializes a new {@link IDMailMessage}
      */
-    public IDMailMessage(final String mailId, final String folder) {
+    public IDMailMessage() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link IDMailMessage}
+     */
+    public IDMailMessage(final String mailId, final String folder) {
+        this();
         this.mailId = mailId;
         if (null == mailId) {
             uid = -1L;

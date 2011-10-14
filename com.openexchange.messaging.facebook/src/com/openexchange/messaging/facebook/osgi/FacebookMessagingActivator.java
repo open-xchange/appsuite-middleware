@@ -69,6 +69,7 @@ import com.openexchange.messaging.facebook.FacebookMessagingService;
 import com.openexchange.messaging.facebook.FacebookOAuthAccountDeleteListener;
 import com.openexchange.messaging.facebook.session.FacebookEventHandler;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
+import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -169,6 +170,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrations.add(context.registerService(EventHandler.class.getName(), new FacebookEventHandler(), serviceProperties));
             registrations.add(context.registerService(OAuthAccountDeleteListener.class.getName(), new FacebookOAuthAccountDeleteListener(), null));
+            registrations.add(context.registerService(OAuthAccountInvalidationListener.class.getName(), new FacebookOAuthAccountDeleteListener(), null));
             try {
                 // new StartUpTest().test();
             } catch (final Exception e) {

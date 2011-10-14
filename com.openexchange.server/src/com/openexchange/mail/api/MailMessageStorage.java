@@ -131,8 +131,12 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
 
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
+        final MailMessage mail = getMessage(folder, mailId, false);
+        if (null == mail) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
+        }
         final ImageMessageHandler handler = new ImageMessageHandler(contentId);
-        new MailMessageParser().parseMailMessage(getMessage(folder, mailId, false), handler);
+        new MailMessageParser().parseMailMessage(mail, handler);
         final MailPart ret = handler.getImagePart();
         if (ret == null) {
             throw MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.create(contentId, mailId, folder);
@@ -150,6 +154,7 @@ public abstract class MailMessageStorage implements IMailMessageStorage {
      * @return The plain-text versions of primary content
      * @throws OXException If plain texts cannot be returned
      */
+    @Override
     public String[] getPrimaryContents(final String folder, final String[] mailIds) throws OXException {
         final TextFinder textFinder = new TextFinder();
         final int length = mailIds.length;

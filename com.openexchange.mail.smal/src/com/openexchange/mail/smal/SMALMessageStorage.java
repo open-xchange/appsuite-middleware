@@ -75,7 +75,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.smal.adapter.IndexAdapter;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
-import com.openexchange.mail.smal.jobqueue.jobs.AdderByIDsJob;
+import com.openexchange.mail.smal.jobqueue.jobs.AddByIDsJob;
 import com.openexchange.mail.smal.jobqueue.jobs.ChangeByIDsJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FlagsObserverJob;
 import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
@@ -215,7 +215,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
+        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
         return newIds;
     }
@@ -226,7 +226,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Enqueue adder job
          */
-        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
+        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
         return fast ? new String[0] : newIds;
     }
@@ -512,7 +512,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
         /*
          * Adder job
          */
-        final AdderByIDsJob adderJob = new AdderByIDsJob(destFolder, accountId, userId, contextId);
+        final AddByIDsJob adderJob = new AddByIDsJob(destFolder, accountId, userId, contextId);
         JobQueue.getInstance().addJob(adderJob.setMailIds(asList(newIds)).setRanking(10));
         /*
          * Remover job

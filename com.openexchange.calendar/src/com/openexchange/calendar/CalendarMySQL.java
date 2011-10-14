@@ -3266,7 +3266,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             } else {
                                 pu.setInt(4, modified_userparticipants[a].getAlarmMinutes());
                                 final RecurringResultsInterface recurringResults = collection.calculateRecurring(
-                                    cdao,
+                                    edao,
                                     calc_date.getTime(),
                                     end_date.getTime(),
                                     0);

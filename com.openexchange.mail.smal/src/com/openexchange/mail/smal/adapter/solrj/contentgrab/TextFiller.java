@@ -54,6 +54,7 @@ import org.apache.solr.common.SolrInputDocument;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.smal.SMALExceptionCodes;
+import com.openexchange.mail.smal.adapter.solrj.SolrConstants;
 import com.openexchange.session.Session;
 
 /**
@@ -61,7 +62,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TextFiller {
+public final class TextFiller implements SolrConstants {
 
     /**
      * Gets the filler for specified arguments.
@@ -84,12 +85,12 @@ public final class TextFiller {
      */
     public static TextFiller fillerFor(final SolrDocument document) throws OXException {
         return new TextFiller(
-            document.getFieldValue("uuid").toString(),
-            document.getFieldValue("id").toString(),
-            document.getFieldValue("full_name").toString(),
-            TextFiller.<Integer> get("account", document).intValue(),
-            TextFiller.<Long> get("user", document).intValue(),
-            TextFiller.<Long> get("context", document).intValue());
+            document.getFieldValue(FIELD_UUID).toString(),
+            document.getFieldValue(FIELD_ID).toString(),
+            document.getFieldValue(FIELD_FULL_NAME).toString(),
+            TextFiller.<Integer> get(FIELD_ACCOUNT, document).intValue(),
+            TextFiller.<Long> get(FIELD_USER, document).intValue(),
+            TextFiller.<Long> get(FIELD_CONTEXT, document).intValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -141,6 +142,8 @@ public final class TextFiller {
 
     private final int contextId;
 
+    private final int hash;
+
     /**
      * The counter reflects the number of re-enqueue operations.
      */
@@ -165,6 +168,15 @@ public final class TextFiller {
         this.accountId = accountId;
         this.userId = userId;
         this.contextId = contextId;
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + accountId;
+        result = prime * result + contextId;
+        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+        result = prime * result + ((mailId == null) ? 0 : mailId.hashCode());
+        result = prime * result + userId;
+        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        hash = result;
     }
 
     /**
@@ -237,6 +249,53 @@ public final class TextFiller {
         builder.append("accountId=").append(accountId).append(", userId=").append(userId).append(", contextId=").append(contextId).append(
             ')');
         return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof TextFiller)) {
+            return false;
+        }
+        final TextFiller other = (TextFiller) obj;
+        if (accountId != other.accountId) {
+            return false;
+        }
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (fullName == null) {
+            if (other.fullName != null) {
+                return false;
+            }
+        } else if (!fullName.equals(other.fullName)) {
+            return false;
+        }
+        if (mailId == null) {
+            if (other.mailId != null) {
+                return false;
+            }
+        } else if (!mailId.equals(other.mailId)) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (uuid == null) {
+            if (other.uuid != null) {
+                return false;
+            }
+        } else if (!uuid.equals(other.uuid)) {
+            return false;
+        }
+        return true;
     }
 
 }

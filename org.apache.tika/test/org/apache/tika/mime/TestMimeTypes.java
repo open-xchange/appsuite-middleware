@@ -17,6 +17,7 @@
 package org.apache.tika.mime;
 
 // Junit imports
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,9 +30,9 @@ import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 
 /**
- *
+ * 
  * Test Suite for the {@link MimeTypes} repository.
- *
+ * 
  */
 public class TestMimeTypes extends TestCase {
 
@@ -132,17 +133,52 @@ public class TestMimeTypes extends TestCase {
      *  iffy, as we can't be sure where things will end up.
      * People really ought to use the container aware detection...
      */
+    public void testOLE2Detection() throws Exception {
+        // These have the properties block near the start, so our mime
+        //  magic will spot them
+        assertTypeByData("application/vnd.ms-excel", "testEXCEL.xls");
+        
+        // This one quite legitimately doesn't have its properties block
+        //  as one of the first couple of entries
+        // As such, our mime magic can't figure it out...
+        assertTypeByData("application/x-tika-msoffice", "testWORD.doc");
+        assertTypeByData("application/x-tika-msoffice", "testPPT.ppt");
+        
+        
+        // By name + data:
+        
+        // Those we got right to start with are fine
+        assertTypeByNameAndData("application/vnd.ms-excel","testEXCEL.xls");
+        
+        // And the name lets us specialise the generic OOXML
+        //  ones to their actual type
+        assertTypeByNameAndData("application/vnd.ms-powerpoint", "testPPT.ppt");
+        assertTypeByNameAndData("application/msword", "testWORD.doc");
+    }
+    
+    /**
+     * Note - detecting container formats by mime magic is very very
+     *  iffy, as we can't be sure where things will end up.
+     * People really ought to use the container aware detection...
+     */
     public void testOoxmlDetection() throws Exception {
         // These two do luckily have [Content_Types].xml near the start,
         //  so our mime magic will spot them
         assertTypeByData("application/x-tika-ooxml", "testEXCEL.xlsx");
         assertTypeByData("application/x-tika-ooxml", "testPPT.pptx");
-
+        
         // This one quite legitimately doesn't have its [Content_Types].xml
         //  file as one of the first couple of entries
         // As such, our mime magic can't figure it out...
         assertTypeByData("application/zip", "testWORD.docx");
-
+        
+        // If we give the filename as well as the data, we can
+        //  specialise the ooxml generic one to the correct type
+        assertTypeByNameAndData("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "testEXCEL.xlsx");
+        assertTypeByNameAndData("application/vnd.openxmlformats-officedocument.presentationml.presentation", "testPPT.pptx");
+        assertTypeByNameAndData("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "testWORD.docx");
+        
+        // Test a few of the less usual ones
         assertTypeByNameAndData("application/vnd.ms-excel.sheet.binary.macroenabled.12","testEXCEL.xlsb");
         assertTypeByNameAndData("application/vnd.ms-powerpoint.presentation.macroenabled.12", "testPPT.pptm");
         assertTypeByNameAndData("application/vnd.ms-powerpoint.template.macroenabled.12", "testPPT.potm");
@@ -159,11 +195,11 @@ public class TestMimeTypes extends TestCase {
        assertTypeByName("application/vnd.apple.keynote", "testKeynote.key");
        assertTypeByName("application/vnd.apple.numbers", "testNumbers.numbers");
        assertTypeByName("application/vnd.apple.pages", "testPages.pages");
-
+       
        // We can't do it by data, as we'd need to unpack
-       //  the zip file to check the XML
+       //  the zip file to check the XML 
        assertTypeByData("application/zip", "testKeynote.key");
-
+       
        assertTypeByNameAndData("application/vnd.apple.keynote", "testKeynote.key");
        assertTypeByNameAndData("application/vnd.apple.numbers", "testNumbers.numbers");
        assertTypeByNameAndData("application/vnd.apple.pages", "testPages.pages");
@@ -276,6 +312,11 @@ public class TestMimeTypes extends TestCase {
         assertTypeByData("image/vnd.dwg", "testDWG2010.dwg");
     }
 
+    public void testprtDetection() throws Exception {
+       assertTypeByName("application/x-prt", "x.prt");
+       assertTypeByData("application/x-prt", "testCADKEY.prt");
+   }
+
     public void testWmfDetection() throws Exception {
         // TODO: Need a test wmf file
         assertTypeByName("application/x-msmetafile", "x.wmf");
@@ -299,6 +340,16 @@ public class TestMimeTypes extends TestCase {
         assertTypeByName("application/postscript", "x.epsf");
         assertTypeByName("application/postscript", "x.epsi");
     }
+    
+    public void testMicrosoftMultiMedia() throws Exception {
+       assertTypeByName("video/x-ms-asf", "x.asf");
+       assertTypeByName("video/x-ms-wmv", "x.wmv");
+       assertTypeByName("audio/x-ms-wma", "x.wma");
+       
+       assertTypeByData("video/x-ms-asf", "testASF.asf");
+       assertTypeByData("video/x-ms-wmv", "testWMV.wmv");
+       assertTypeByData("audio/x-ms-wma", "testWMA.wma");
+    }
 
     /**
      * @since TIKA-194
@@ -320,7 +371,7 @@ public class TestMimeTypes extends TestCase {
         assertNotNull(this.repo.getMimeType(testFileName));
         assertNotSame("foo/bar2", this.repo.getMimeType(testFileName).getName());
     }
-
+    
     public void testRawDetection() throws Exception {
         assertTypeByName("image/x-raw-adobe", "x.dng");
         assertTypeByName("image/x-raw-adobe", "x.DNG");
@@ -347,14 +398,46 @@ public class TestMimeTypes extends TestCase {
         assertTypeByName("image/x-raw-leaf", "x.mos");
         assertTypeByName("image/x-raw-panasonic", "x.raw");
         assertTypeByName("image/x-raw-panasonic", "x.rw2");
-        assertTypeByName("image/x-raw-phaseone", "x.cap");
         assertTypeByName("image/x-raw-phaseone", "x.iiq");
-        assertTypeByName("image/x-raw-phaseone", "x.cap");
         assertTypeByName("image/x-raw-red", "x.r3d");
         assertTypeByName("image/x-raw-imacon", "x.fff");
         assertTypeByName("image/x-raw-logitech", "x.pxn");
         assertTypeByName("image/x-raw-casio", "x.bay");
         assertTypeByName("image/x-raw-rawzor", "x.rwz");
+    }
+    
+    /**
+     * Tests that we correctly detect the font types
+     */
+    public void testFontDetection() throws Exception {
+       assertTypeByName("application/x-font-adobe-metric", "x.afm");
+       assertTypeByData("application/x-font-adobe-metric", "testAFM.afm");
+       
+       assertTypeByName("application/x-font-printer-metric", "x.pfm");
+       // TODO Get a sample .pfm file
+       assertTypeByData(
+             "application/x-font-printer-metric", 
+             new byte[] {0x00, 0x01, 256-0xb1, 0x0a, 0x00, 0x00, 0x43, 0x6f,  
+                         0x70, 0x79, 0x72, 0x69, 0x67, 0x68, 0x74, 0x20}
+       );
+       
+       assertTypeByName("application/x-font-type1", "x.pfa");
+       // TODO Get a sample .pfa file
+       assertTypeByData(
+             "application/x-font-type1", 
+             new byte[] {0x25, 0x21, 0x50, 0x53, 0x2d, 0x41, 0x64, 0x6f,
+                         0x62, 0x65, 0x46, 0x6f, 0x6e, 0x74, 0x2d, 0x31,
+                         0x2e, 0x30, 0x20, 0x20, 0x2d, 0x2a, 0x2d, 0x20}
+       );
+       
+       assertTypeByName("application/x-font-type1", "x.pfb");
+       // TODO Get a sample .pfm file
+       assertTypeByData(
+             "application/x-font-type1", 
+             new byte[] {-0x80, 0x01, 0x09, 0x05, 0x00, 0x00, 0x25, 0x21,
+                          0x50, 0x53, 0x2d, 0x41, 0x64, 0x6f, 0x62, 0x65,
+                          0x46, 0x6f, 0x6e, 0x74, 0x2d, 0x31, 0x2e, 0x30 }
+       );
     }
 
     /**
@@ -364,14 +447,7 @@ public class TestMimeTypes extends TestCase {
     public void testMimeDeterminationForTestDocuments() throws Exception {
         assertType("text/html", "testHTML.html");
         assertType("application/zip", "test-documents.zip");
-        // TODO: Currently returns generic MS Office type based on
-        // the magic header. The getMimeType method should understand
-        // MS Office types better.
-        // assertEquals("application/vnd.ms-excel",
-        // getMimeType("testEXCEL.xls"));
-        // assertEquals("application/vnd.ms-powerpoint",
-        // getMimeType("testPPT.ppt"));
-        // assertEquals("application/msword", getMimeType("testWORD.doc"));
+
         assertType("text/html", "testHTML_utf8.html");
         assertType(
                 "application/vnd.oasis.opendocument.text",
@@ -411,6 +487,7 @@ public class TestMimeTypes extends TestCase {
             throws IOException {
         InputStream stream = TestMimeTypes.class.getResourceAsStream(
                 "/test-documents/" + filename);
+        assertNotNull("Test file not found: " + filename, stream);
         try {
             Metadata metadata = new Metadata();
             assertEquals(expected, repo.detect(stream, metadata).toString());
@@ -418,7 +495,18 @@ public class TestMimeTypes extends TestCase {
             stream.close();
         }
     }
-
+    
+    private void assertTypeByData(String expected, byte[] data)
+            throws IOException {
+       InputStream stream = new ByteArrayInputStream(data);
+       try {
+          Metadata metadata = new Metadata();
+          assertEquals(expected, repo.detect(stream, metadata).toString());
+       } finally {
+          stream.close();
+       }
+    }
+    
     private void assertTypeByNameAndData(String expected, String filename)
 	    throws IOException {
 	InputStream stream = TestMimeTypes.class.getResourceAsStream(

@@ -50,7 +50,7 @@
 package com.openexchange.ajax.customizer.folder;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,69 +64,85 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class BulkFolderField implements AdditionalFolderField {
 
-    private AdditionalFolderField delegate;
+    private static final Object NULL = new Object();
 
-    private Map<String, Object> values = new HashMap<String, Object>();
+    private final AdditionalFolderField delegate;
 
-    public BulkFolderField(AdditionalFolderField delegate) {
+    private final Map<String, Object> values;
+
+    /**
+     * Initializes a new {@link BulkFolderField}.
+     * 
+     * @param delegate The delegate field
+     */
+    public BulkFolderField(final AdditionalFolderField delegate) {
+        super();
+        values = new HashMap<String, Object>();
         this.delegate = delegate;
     }
 
+    @Override
     public int getColumnID() {
         return delegate.getColumnID();
     }
 
+    @Override
     public String getColumnName() {
         return delegate.getColumnName();
     }
 
-    public Object getValue(FolderObject f, ServerSession session) {
-        getValues(Arrays.asList(f), session);
-        
+    @Override
+    public Object getValue(final FolderObject f, final ServerSession session) {
         String fn = f.getFullName();
         if (fn == null) {
-            fn = "" + f.getObjectID();
+            fn = String.valueOf(f.getObjectID());
         }
-        return values.get(fn);
+        if (!values.containsKey(fn)) {
+            getValues(Collections.singletonList(f), session);
+        }
+        final Object value = values.get(fn);
+        return NULL == value ? null : value;
     }
 
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        List<Object> v = new ArrayList<Object>(folder.size());
-        List<FolderObject> fo = new ArrayList<FolderObject>(folder.size());
-        for (FolderObject f : folder) {
-            String fn = f.getFullName();
-            if (fn == null) {
-                fn = "" + f.getObjectID();
-            }
-            Object object = values.get(fn);
-            if (object == null) {
-                fo.add(f);
-            } else {
-                v.add(object);
+    @Override
+    public List<Object> getValues(final List<FolderObject> folders, final ServerSession session) {
+        final List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
+        for (final FolderObject f : folders) {
+            final String fn = f.getFullName();
+            if (!values.containsKey(fn == null ? String.valueOf(f.getObjectID()) : fn)) {
+                fl.add(f);
             }
         }
-        if (fo.isEmpty()) {
-            return v;
+        if (!fl.isEmpty()) {
+            warmUp(fl, session);
         }
-        warmUp(fo, session);
-        return getValues(folder, session);
+        final List<Object> vals = new ArrayList<Object>(folders.size());
+        for (final FolderObject f : folders) {
+            final String fn = f.getFullName();
+            final Object value = values.get(fn == null ? String.valueOf(f.getObjectID()) : fn);
+            vals.add(NULL == value ? null : value);
+        }
+        return vals;
     }
 
-    public Object renderJSON(Object value) {
+    @Override
+    public Object renderJSON(final Object value) {
         return delegate.renderJSON(value);
     }
 
-    public void warmUp(List<FolderObject> folderObjects, ServerSession session) {
-        List<Object> v = delegate.getValues(folderObjects, session);
+    /**
+     * Loads the values for specified folders and puts resulting values into cache.
+     * 
+     * @param folders The folders
+     * @param session The session
+     */
+    public void warmUp(final List<FolderObject> folders, final ServerSession session) {
+        final List<Object> vals = delegate.getValues(folders, session);
         int i = 0;
-        for (FolderObject f : folderObjects) {
-            Object object = v.get(i);
-            String fn = f.getFullName();
-            if (fn == null) {
-                fn = "" + f.getObjectID();
-            }
-            values.put(fn, object);
-            i++;
+        for (final FolderObject f : folders) {
+            final String fn = f.getFullName();
+            final Object value = vals.get(i++);
+            values.put(fn == null ? String.valueOf(f.getObjectID()) : fn, null == value ? NULL : value);
         }
     }
 

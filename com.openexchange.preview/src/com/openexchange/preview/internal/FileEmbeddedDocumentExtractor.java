@@ -55,6 +55,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.extractor.EmbeddedDocumentExtractor;
 import org.apache.tika.io.IOUtils;
@@ -74,6 +76,8 @@ import com.openexchange.java.Streams;
  */
 public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtractor {
 
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileEmbeddedDocumentExtractor.class));
+
     private final TikaDocumentHandler documentHandler;
 
     private final ManagedFileManagement fileManagement;
@@ -92,7 +96,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
     public FileEmbeddedDocumentExtractor(final TikaDocumentHandler documentHandler) {
         super();
         this.documentHandler = documentHandler;
-        this.fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
+        fileManagement = documentHandler.serviceLookup.getService(ManagedFileManagement.class);
         count = 1;
         config = TikaConfig.getDefaultConfig();
         /*
@@ -121,7 +125,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
             if (name == null) {
                 name = Integer.toString(count++);
             }
-            // ²contentHandler.s
+            // ï¿½contentHandler.s
             /*
              * MIME type
              */
@@ -130,7 +134,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
                 try {
                     name += config.getMimeRepository().forName(contentType).getExtension();
                 } catch (final MimeTypeException e) {
-                    TikaDocumentHandler.LOG.debug("Invalid MIME type encountered: " + contentType, e);
+                    LOG.debug("Invalid MIME type encountered: " + contentType, e);
                 }
                 if (name.indexOf('.') == -1) {
                     final byte[] bytes = Streams.stream2bytes(in);
@@ -138,7 +142,7 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
                     try {
                         name += config.getMimeRepository().forName(contentType).getExtension();
                     } catch (final MimeTypeException e) {
-                        TikaDocumentHandler.LOG.debug("Invalid MIME type encountered: " + contentType, e);
+                        LOG.debug("Invalid MIME type encountered: " + contentType, e);
                     }
                     in = Streams.newByteArrayInputStream(bytes);
                 }

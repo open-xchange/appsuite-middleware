@@ -164,8 +164,11 @@ public final class TextFinder {
                         if (s != null) {
                             return s;
                         }
-                    } else {
-                        return getTextRecursive(bp);
+                    } else if (bct.startsWith("multipart/")) {
+                        final String s = getTextRecursive(bp);
+                        if (s != null) {
+                            return s;
+                        }
                     }
                 }
                 return text;

@@ -151,7 +151,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * This method may be overridden in implementing subclass if a faster way can be achieved.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -181,7 +181,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * If no mail could be found for given mail ID, returned mail part is <code>null</code>.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param sequenceId The attachment sequence ID
      * @return The attachment wrapped by a {@link MailPart} instance
@@ -189,7 +189,11 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      */
     public MailPart getAttachmentLong(final String folder, final long mailId, final String sequenceId) throws OXException {
         final MailPartHandler handler = new MailPartHandler(sequenceId);
-        new MailMessageParser().parseMailMessage(getMessageLong(folder, mailId, false), handler);
+        final MailMessage mail = getMessageLong(folder, mailId, false);
+        if (null == mail) {
+            throw MailExceptionCode.MAIL_NOT_FOUND.create(Long.valueOf(mailId), folder);
+        }
+        new MailMessageParser().parseMailMessage(mail, handler);
         if (handler.getMailPart() == null) {
             throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(sequenceId, Long.valueOf(mailId), folder);
         }
@@ -212,7 +216,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * If no mail could be found for given mail ID, returned mail part is <code>null</code>.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param contentId The value of header <code>Content-Id</code>
      * @return The image attachment wrapped by an {@link MailPart} instance
@@ -277,7 +281,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * This method may be overridden in implementing subclass if a faster way can be achieved.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailId The mail ID
      * @param markSeen <code>true</code> to explicitly mark corresponding mail as seen (setting system flag <i>\Seen</i>); otherwise
      *            <code>false</code> to leave as-is

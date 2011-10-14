@@ -176,6 +176,10 @@ public final class CoyoteTask implements Task<Object> {
             } catch (final java.io.IOException e) {
                 // IOExceptions are normal
                 LOG.debug(e.getMessage(), e);
+            } catch (final ThreadDeath fatal) {
+                throw fatal;
+            } catch (final VirtualMachineError fatal) {
+                throw fatal;
             } catch (final Throwable e) {
                 /*
                  * Any other exception or error is odd.

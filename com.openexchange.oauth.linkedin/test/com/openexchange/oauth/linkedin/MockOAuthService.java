@@ -68,8 +68,8 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
  */
 public class MockOAuthService implements OAuthService {
 
-    private static final String TOKEN = "6208a7db-a114-46bc-87c1-32107f310ff4";//"23a0c108-2ea5-49e9-a23d-fb7d6d404462";
-	private static final String SECRET = "45a3d835-375b-406e-a9a2-5e98afb8c5f2";//"b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a";
+    private static final String TOKEN = "338ac5f7-48b7-415f-b815-b4656cae5cd9";//"23a0c108-2ea5-49e9-a23d-fb7d6d404462";
+	private static final String SECRET = "19e090e8-1b0f-4695-aa03-2f2a6e1dd303";//"b558fc34-ecb0-45f2-a1ca-0f3c8ea1eb1a";
 
 	/* (non-Javadoc)
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)

@@ -65,13 +65,22 @@ package com.openexchange.oauth.linkedin;
 //import com.openexchange.oauth.DefaultOAuthToken;
 
 import java.util.List;
+import java.util.Scanner;
+
 import junit.framework.TestCase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.LinkedInApi;
+import org.scribe.model.Token;
+import org.scribe.model.Verifier;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.oauth.DefaultOAuthToken;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 /**
  * {@link LinkedInConnectionTest}
@@ -83,7 +92,7 @@ public class LinkedInConnectionTest extends TestCase {
     private LinkedInServiceImpl linkedIn;
 
     private String apiKey = "HANYG4YSMun5b1lhv-aIEUtnIvNaHK2Bemjv7VvYI_frJpllhVY9HH8ZVOrII7UV";
-    private String apiSecret = "t2-AWfC0YqMwUjt3v5lxw9VJlDE3BZ-88k7-834Rq-QH-tq_xjqdLUHQz_glLaEb";
+    private String apiSecret = "t2-AWfC0YqMwUjt3v5lxw9VJlDE3BZ-88k7-834Rq-QH-tq_xjqdLUHQz_glLaEb";  
     private String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
     private String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
     
@@ -100,38 +109,38 @@ public class LinkedInConnectionTest extends TestCase {
 
     }
 
-//    public void testAccountCreation(){
-//        // This is basically scribes example
-//        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
-//
-//        System.out.println("=== LinkedIn's OAuth Workflow ===");
-//        System.out.println();
-//
-//        // Obtain the Request Token
-//        System.out.println("Fetching the Request Token...");
-//        Token requestToken = service.getRequestToken();
-//        System.out.println("Got the Request Token!");
-//        System.out.println();
-//
-//        DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
-//        oAuthToken.setToken(requestToken.getToken());
-//        oAuthToken.setSecret(requestToken.getSecret());
-//
-//        System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
-//        System.out.println("And paste the verifier here");
-//        System.out.print(">>");
-//
-//        Scanner in = new Scanner(System.in);
-//        Verifier verifier = new Verifier(in.nextLine());
-//        System.out.println();
-//
-//        // Trade the Request Token and Verifier for the Access Token
-//        System.out.println("Trading the Request Token for an Access Token...");
-//        Token accessToken = service.getAccessToken(requestToken, verifier);
-//        System.out.println("Got the Access Token!");
-//        System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
-//        System.out.println();
-//    }
+    /*public void testAccountCreation(){
+        // This is basically scribes example
+        org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
+
+        System.out.println("=== LinkedIn's OAuth Workflow ===");
+        System.out.println();
+
+        // Obtain the Request Token
+        System.out.println("Fetching the Request Token...");
+        Token requestToken = service.getRequestToken();
+        System.out.println("Got the Request Token!");
+        System.out.println();
+
+        DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
+        oAuthToken.setToken(requestToken.getToken());
+        oAuthToken.setSecret(requestToken.getSecret());
+
+        System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
+        System.out.println("And paste the verifier here");
+        System.out.print(">>");
+
+        Scanner in = new Scanner(System.in);
+        Verifier verifier = new Verifier(in.nextLine());
+        System.out.println();
+
+        // Trade the Request Token and Verifier for the Access Token
+        System.out.println("Trading the Request Token for an Access Token...");
+        Token accessToken = service.getAccessToken(requestToken, verifier);
+        System.out.println("Got the Access Token!");
+        System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
+        System.out.println();
+    } */
 //
 //    public void testXMLParsing(){
 //

@@ -77,29 +77,6 @@ public class Database extends AbstractConfigSource {
 
     private ServiceLookup services;
 
-    private static URIDefaults POP3 = new URIDefaults() {
-
-        @Override
-        public String getProtocol() {
-            return "pop3";
-        }
-
-        @Override
-        public String getSSLProtocol() {
-            return "pop3s";
-        }
-
-        @Override
-        public int getPort() {
-            return 110;
-        }
-
-        @Override
-        public int getSSLPort() {
-            return 995;
-        }
-    };
-
     public Database(ServiceLookup services) {
         this.services = services;
     }
@@ -222,7 +199,7 @@ public class Database extends AbstractConfigSource {
             if (url.startsWith("imap")) {
                 uriDefaults = URIDefaults.IMAP;
             } else if (url.startsWith("pop") && !foundPop3) {
-                uriDefaults = POP3;
+                uriDefaults = URIDefaults.POP3;
             } else {
                 continue;
             }
@@ -244,7 +221,7 @@ public class Database extends AbstractConfigSource {
                 if (uriDefaults == URIDefaults.IMAP && !MailValidator.checkForImap(host, port)) {
                     continue;
                 }
-                if (uriDefaults == POP3 && !MailValidator.checkForPop3(host, port)) {
+                if (uriDefaults == URIDefaults.POP3 && !MailValidator.checkForPop3(host, port)) {
                     continue;
                 }
 

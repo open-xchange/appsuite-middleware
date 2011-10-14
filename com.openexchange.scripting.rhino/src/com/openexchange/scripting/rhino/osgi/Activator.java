@@ -1,5 +1,6 @@
 package com.openexchange.scripting.rhino.osgi;
 
+import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
 import com.openexchange.scripting.rhino.require.DeferredResolution;
@@ -18,7 +19,15 @@ public class Activator extends HousekeepingActivator {
 
 	@Override
 	protected void startBundle() throws Exception {
-		context.addBundleListener(new LookForScriptsListener());
+		LookForScriptsListener listener = new LookForScriptsListener();
+		Bundle[] bundles = context.getBundles();
+		for (Bundle bundle : bundles) {
+			if (bundle.getState() == Bundle.ACTIVE) {
+				listener.runStartScripts(bundle);
+			}
+		}
+		
+		context.addBundleListener(listener);
 		track(ResolveEnhancement.class, new SimpleRegistryListener<ResolveEnhancement>() {
 
 			@Override

@@ -49,11 +49,14 @@
 
 package com.openexchange.preview;
 
+import java.util.List;
+
 
 /**
- * {@link InternalPreviewService}
+ * {@link InternalPreviewService} - Extends the {@link PreviewService} to specify what MIME types can be handled in what quality.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface InternalPreviewService extends PreviewService {
     
@@ -62,7 +65,7 @@ public interface InternalPreviewService extends PreviewService {
      * 
      * @return The preview policies
      */
-    PreviewPolicy[] getPreviewPolicies();
+    List<PreviewPolicy> getPreviewPolicies();
     
     /**
      * Checks if this service is able to detect the content type of an input stream.

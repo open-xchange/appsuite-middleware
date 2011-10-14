@@ -16,7 +16,10 @@
  */
 package org.apache.tika;
 
-import junit.framework.TestCase;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
@@ -24,20 +27,13 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.utils.ParseUtils;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-
 /**
  * Junit test class for Tika {@link Parser}s.
  */
-public class TestParsers extends TestCase {
+public class TestParsers extends TikaTest {
 
     private TikaConfig tc;
 
-    @Override
     public void setUp() throws Exception {
         tc = TikaConfig.getDefaultConfig();
     }
@@ -57,57 +53,6 @@ public class TestParsers extends TestCase {
         String s1 = ParseUtils.getStringContent(file, tc);
         String s2 = ParseUtils.getStringContent(file, tc, "text/plain");
         assertEquals(s1, s2);
-    }
-
-    public void testRTFExtraction() throws Exception {
-        File file = getResourceAsFile("/test-documents/testRTF.rtf");
-        String s1 = ParseUtils.getStringContent(file, tc);
-        String s2 = ParseUtils.getStringContent(file, tc, "application/rtf");
-        assertEquals(s1, s2);
-    }
-
-    public void testRTFms932Extraction() throws Exception {
-        File file = getResourceAsFile("/test-documents/testRTF-ms932.rtf");
-        String s1 = ParseUtils.getStringContent(file, tc);
-        String s2 = ParseUtils.getStringContent(file, tc, "application/rtf");
-        assertEquals(s1, s2);
-        // Hello in Japanese
-        assertTrue(s1.contains("\u3053\u3093\u306b\u3061\u306f"));
-    }
-
-    public void testRTFUmlautSpacesExtraction() throws Exception {
-        File file = getResourceAsFile("/test-documents/testRTFUmlautSpaces.rtf");
-        String s1 = ParseUtils.getStringContent(file, tc);
-        String s2 = ParseUtils.getStringContent(file, tc, "application/rtf");
-        assertEquals(s1, s2);
-        assertTrue(s1.contains("\u00DCbersicht"));
-    }
-
-    public void testRTFWordPadCzechCharactersExtraction() throws Exception {
-        File file = getResourceAsFile("/test-documents/testRTFWordPadCzechCharacters.rtf");
-        String s1 = ParseUtils.getStringContent(file, tc);
-        String s2 = ParseUtils.getStringContent(file, tc, "application/rtf");
-        assertEquals(s1, s2);
-        assertTrue(s1.contains("\u010Cl\u00E1nek t\u00FDdne"));
-        assertTrue(s1.contains("starov\u011Bk\u00E9 \u017Eidovsk\u00E9 n\u00E1bo\u017Eensk\u00E9 texty"));
-    }
-
-    public void testRTFWord2010CzechCharactersExtraction() throws Exception {
-        File file = getResourceAsFile("/test-documents/testRTFWord2010CzechCharacters.rtf");
-        String s1 = ParseUtils.getStringContent(file, tc);
-        String s2 = ParseUtils.getStringContent(file, tc, "application/rtf");
-        assertEquals(s1, s2);
-        assertTrue(s1.contains("\u010Cl\u00E1nek t\u00FDdne"));
-        assertTrue(s1.contains("starov\u011Bk\u00E9 \u017Eidovsk\u00E9 n\u00E1bo\u017Eensk\u00E9 texty"));
-    }
-
-    public void testRTFTableCellSeparation() throws Exception {
-        File file = getResourceAsFile("/test-documents/testRTFTableCellSeparation.rtf");
-        String s1 = ParseUtils.getStringContent(file, tc);
-        String s2 = ParseUtils.getStringContent(file, tc, "application/rtf");
-        assertEquals(s1, s2);
-        String content = s1.replaceAll("\\s+"," ");
-        assertTrue(content.contains("a b c d \u00E4 \u00EB \u00F6 \u00FC"));
     }
 
     public void testXMLExtraction() throws Exception {
@@ -218,30 +163,25 @@ public class TestParsers extends TestCase {
         assertNotNull(parser);
     }
 
-    /**
-     * This method will give you back the filename incl. the absolute path name
-     * to the resource. If the resource does not exist it will give you back the
-     * resource name incl. the path.
-     *
-     * @param name
-     *            The named resource to search for.
-     * @return an absolute path incl. the name which is in the same directory as
-     *         the the class you've called it from.
-     */
-    public File getResourceAsFile(String name) throws URISyntaxException {
-        URL url = this.getClass().getResource(name);
-        if (url != null) {
-            return new File(url.toURI());
-        } else {
-            // We have a file which does not exists
-            // We got the path
-            url = this.getClass().getResource(".");
-            return new File(new File(url.toURI()), name);
+    private void verifyComment(String extension, String fileName) throws Exception {
+        File file = getResourceAsFile("/test-documents/" + fileName + "." + extension);
+        String content = ParseUtils.getStringContent(file, tc);
+        assertTrue(extension + ": content=" + content + " did not extract text",
+                   content.contains("Here is some text"));
+        assertTrue(extension + ": content=" + content + " did not extract comment",
+                   content.contains("Here is a comment"));
+    }
+
+    public void testComment() throws Exception {
+        // TIKA-717: re-enable ppt once we fix it
+        //final String[] extensions = new String[] {"ppt", "pptx", "doc", "docx", "pdf", "rtf"};
+        final String[] extensions = new String[] {"pptx", "doc", "docx", "pdf", "rtf"};
+        for(String extension : extensions) {
+            verifyComment(extension, "testComment");
+            // TIKA-717: re-enable once we fix this:
+            //if (extension.equals("pdf")) {
+            //verifyComment(extension, "testComment2");
+            //}
         }
     }
-
-    public InputStream getResourceAsStream(String name) {
-        return this.getClass().getResourceAsStream(name);
-    }
-
 }
