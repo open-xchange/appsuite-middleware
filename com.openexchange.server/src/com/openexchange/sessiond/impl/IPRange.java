@@ -49,77 +49,119 @@
 
 package com.openexchange.sessiond.impl;
 
+import org.apache.commons.lang.math.LongRange;
+
 
 /**
- * {@link IPRange}
+ * {@link IPRange} - An IP range of either IPv4 or IPv6 addresses.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IPRange {
 
-    private final int[] start;
-    private final int[] end;
+    private final LongRange ipv4Range;
+    private final LongRange ipv6Range;
 
-    public IPRange(int[] start, int[] end) {
+    public IPRange(final LongRange ipv4Range, final LongRange ipv6Range) {
         super();
-        this.start = start;
-        this.end = end;
+        this.ipv4Range = ipv4Range;
+        this.ipv6Range = ipv6Range;
     }
 
-    public IPRange(int[] start) {
-        this.start = start;
-        this.end = start;
+    public LongRange getIpv4Range() {
+        return ipv4Range;
     }
 
-    public int[] getStart() {
-        return start;
+    public LongRange getIpv6Range() {
+        return ipv6Range;
     }
 
-    public int[] getEnd() {
-        return end;
-    }
-
-    public boolean contains(String ipAddress) {
-        int[] other = parse(ipAddress);
-        if (other == null) { // FIXME ipv6
-        	return false;
+    public boolean contains(final String ipAddress) {
+        byte[] octets = IPAddressUtil.textToNumericFormatV4(ipAddress);
+        if (null != octets) {
+            /*
+             * IPv4
+             */
+            return null != ipv4Range && ipv4Range.containsLong(ipToLong(octets));
         }
-        boolean endCarryOver = false;
-        boolean startCarryOver = false;
-
-        for(int i = 0; i < 4; i++) {
-            int part = other[i];
-            endCarryOver = endCarryOver || part < end[i];
-            startCarryOver = startCarryOver || part > start[i];
-            if(startCarryOver && endCarryOver) {
-                return true;
-            }
-            if((part < start[i] && ! startCarryOver)|| (part > end[i] && ! endCarryOver) ) {
-                return false;
-            }
+        /*
+         * IPv6
+         */
+        octets = IPAddressUtil.textToNumericFormatV6(ipAddress);
+        if (null == octets) {
+            throw new IllegalArgumentException("Not an IP address: " + ipAddress);
         }
-        return true;
-    }
-    
-    // FIXME ipv6
-    private static int[] parse(String ipAddress) {
-        String[] split = ipAddress.split("\\.");
-        if(split.length != 4) {
-        	return null;
-        }
-        int[] parsed = new int[4];
-        for(int i = 0; i < 4; i++) {
-            parsed[i] = Integer.parseInt(split[i]);
-        }
-        return parsed;
+        return null != ipv6Range && ipv6Range.containsLong(ipToLong(octets));
     }
 
-    public static IPRange parseRange(String string) {
+    public static IPRange parseRange(final String string) {
         if(string.contains("-")) {
-            String[] addresses = string.split("\\s*-\\s*");
-            return new IPRange(parse(addresses[0]), parse(addresses[1]));
+            final String[] addresses = string.split("\\s*-\\s*");
+            // Try IPv4 first
+            byte[] octetsStart = IPAddressUtil.textToNumericFormatV4(addresses[0]);
+            if (null == octetsStart) {
+                // IPv6
+                octetsStart = IPAddressUtil.textToNumericFormatV6(addresses[0]);
+                if (null == octetsStart) {
+                    throw new IllegalArgumentException("Not an IP address: " + addresses[0]);
+                }
+                final byte[] octetsEnd = IPAddressUtil.textToNumericFormatV6(addresses[1]);
+                if (null == octetsEnd) {
+                    throw new IllegalArgumentException("Not an IPv6 address: " + addresses[1]);
+                }
+                final LongRange ipv6Range = new LongRange(ipToLong(octetsStart), ipToLong(octetsEnd));
+                return new IPRange(null, ipv6Range);
+            }
+            // IPv4
+            final byte[] octetsEnd = IPAddressUtil.textToNumericFormatV4(addresses[1]);
+            if (null == octetsEnd) {
+                throw new IllegalArgumentException("Not an IPv4 address: " + addresses[1]);
+            }
+            final LongRange ipv4Range = new LongRange(ipToLong(octetsStart), ipToLong(octetsEnd));
+            return new IPRange(ipv4Range, null);
         }
-        return new IPRange(parse(string));
+        // Try IPv4 first
+        byte[] octets = IPAddressUtil.textToNumericFormatV4(string);
+        if (null == octets) {
+            // IPv6
+            octets = IPAddressUtil.textToNumericFormatV6(string);
+            if (null == octets) {
+                throw new IllegalArgumentException("Not an IP address: " + string);
+            }
+            final byte[] octetsEnd = new byte[16];
+            int i;
+            boolean bool = true;
+            for (i = 0; bool && i < octetsEnd.length; i++) {
+                bool = (octets[i] == 0);
+                if (!bool) {
+                    octetsEnd[i] = octets[i];
+                }
+            }
+            while (i < octetsEnd.length) {
+                octetsEnd[i++] = (byte) 255;
+            }
+            return new IPRange(null, new LongRange(ipToLong(octets), ipToLong(octetsEnd)));
+        }
+        // IPv4
+        final byte[] octetsEnd = new byte[4];
+        octetsEnd[0] = octets[0];
+        octetsEnd[1] = (byte) 255;
+        octetsEnd[2] = (byte) 255;
+        octetsEnd[3] = (byte) 255;
+        return new IPRange(new LongRange(ipToLong(octets), ipToLong(octetsEnd)), null);
+    }
+
+    private static long ipToLong(final byte[] octets) {
+        long result = 0;
+        final int length = octets.length;
+        for (int i = 0; i < length; i++) {
+            result |= octets[i] & 0xff;
+            if (i < length - 1) {
+                result <<= 8;
+            }
+        }
+        return result;
     }
 
 }
