@@ -104,7 +104,7 @@ public class IPRange {
                 // IPv6
                 octetsStart = IPAddressUtil.textToNumericFormatV6(addresses[0]);
                 if (null == octetsStart) {
-                    throw new IllegalArgumentException("Not an IP address: " + addresses[0]);
+                    throw new IllegalArgumentException("Not an IP address range: " + string);
                 }
                 final byte[] octetsEnd = IPAddressUtil.textToNumericFormatV6(addresses[1]);
                 if (null == octetsEnd) {
