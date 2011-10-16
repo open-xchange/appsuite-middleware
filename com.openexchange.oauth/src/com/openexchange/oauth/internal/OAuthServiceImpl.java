@@ -59,7 +59,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -457,7 +456,7 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
      // Firstly let's see if the currently active session matches the one we need here and prefer that one.
         final SessionHolder sessionHolder = ServiceRegistry.getInstance().getService(SessionHolder.class);
         if (sessionHolder != null) {
-            Session session = sessionHolder.getSessionObject();
+            final Session session = sessionHolder.getSessionObject();
             if (session != null && session.getUserId() == userId && session.getContextId() == contextId) {
                 return session;
             }
@@ -783,10 +782,10 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
         if (null == string) {
             return true;
         }
-        final char[] chars = string.toCharArray();
+        final int len = string.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

@@ -4835,10 +4835,10 @@ public class Mail extends PermissionServlet implements UploadListener {
         if (null == string) {
             return true;
         }
-        final char[] chars = string.toCharArray();
+        final int len = string.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < chars.length; i++) {
-            isWhitespace = Character.isWhitespace(chars[i]);
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
     }

@@ -518,16 +518,16 @@ public final class ListLsubCache {
         return list.toArray(new String[list.size()]);
     }
 
-    private static boolean isEmpty(final String s) {
-        if (null == s) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
             return true;
         }
-        final char[] chars = s.toCharArray();
-        boolean whitespace = true;
-        for (int i = 0; whitespace && i < chars.length; i++) {
-            whitespace = Character.isWhitespace(chars[i]);
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return whitespace;
+        return isWhitespace;
     }
 
     /**

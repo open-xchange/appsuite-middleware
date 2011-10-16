@@ -407,15 +407,15 @@ public final class CSSMatcher {
         return PATTERN_STYLE_LINE.matcher(css).find();
     }
 
-    private static boolean isEmpty(final String s) {
-        if (s.length() == 0) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
             return true;
         }
-        boolean retval = true;
-        final char[] chars = s.toCharArray();
-        for (int i = 0; i < chars.length && retval; i++) {
-            retval = Character.isWhitespace(chars[i]);
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return retval;
+        return isWhitespace;
     }
 }
