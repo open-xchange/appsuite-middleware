@@ -151,16 +151,16 @@ public final class MessagingConfig {
         }
     }
 
-    private static boolean isEmpty(final String property) {
-        if (null == property) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
             return true;
         }
-        boolean ws = true;
-        final char[] chars = property.toCharArray();
-        for (int i = 0; ws && i < chars.length; i++) {
-            ws = Character.isWhitespace(chars[i]);
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return ws;
+        return isWhitespace;
     }
 
     /**
