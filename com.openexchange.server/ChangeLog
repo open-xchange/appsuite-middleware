@@ -1,3 +1,7 @@
+* 2011-10-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20602: Checking for POP3 account's full names outside of connection scope
+
 * 2011-10-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 20603: IPv6 support for IP ranges
