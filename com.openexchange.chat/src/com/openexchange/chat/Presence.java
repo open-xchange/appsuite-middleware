@@ -57,7 +57,7 @@ package com.openexchange.chat;
 public interface Presence extends Packet {
 
     /**
-     * A enum to represent the presecence type.
+     * A enumeration to represent the presence type.
      * <p>
      * <b>Note</b> that presence type is often confused with presence mode.<br>
      * Generally, if a user is signed into a server, they have a presence type of {@link #available available}, even if the mode is
@@ -97,7 +97,7 @@ public interface Presence extends Packet {
     }
 
     /**
-     * An enum to represent the presence mode.
+     * An enumeration to represent the presence mode.
      */
     public static enum Mode {
 

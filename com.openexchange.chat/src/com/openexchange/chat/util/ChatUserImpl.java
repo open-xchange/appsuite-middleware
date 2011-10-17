@@ -47,32 +47,54 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.util;
+
+import com.openexchange.chat.ChatUser;
 
 /**
- * {@link ChatDesc}
+ * {@link ChatUserImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatDesc {
+public class ChatUserImpl implements ChatUser {
+
+    private String id;
+
+    private String name;
 
     /**
-     * The identifier for a user's default chat.
+     * Initializes a new {@link ChatUserImpl}.
      */
-    public static final String DEFAULT_CHAT = "0";
+    public ChatUserImpl() {
+        super();
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 
     /**
-     * Gets the chat identifier.
+     * Sets the id
      * 
-     * @return The chat identifier.
+     * @param id The id to set
      */
-    String getChatId();
+    public void setId(final String id) {
+        this.id = id;
+    }
 
     /**
-     * Gets the chat's topic
+     * Sets the name
      * 
-     * @return The topic
+     * @param name The name to set
      */
-    String getChatTopic();
+    public void setName(final String name) {
+        this.name = name;
+    }
 
 }

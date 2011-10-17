@@ -47,44 +47,72 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.util;
 
 import java.util.Date;
+import com.openexchange.chat.ChatUser;
+import com.openexchange.chat.Packet;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link PacketImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public abstract class PacketImpl implements Packet {
+
+    protected String packetId;
+
+    protected ChatUser from;
+
+    protected Date timeStamp;
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link MessageImpl}.
      */
-    String getPacketId();
+    protected PacketImpl() {
+        super();
+    }
 
-    /**
-     * Gets the sender.
-     * 
-     * @return The sender or <code>null</code>
-     */
-    ChatUser getFrom();
-
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
     @Override
-    String toString();
+    public String getPacketId() {
+        return packetId;
+    }
+
+    @Override
+    public ChatUser getFrom() {
+        return from;
+    }
+
+    @Override
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    /**
+     * Sets the packet identifier
+     * 
+     * @param packetId The packet identifier to set
+     */
+    public void setPacketId(final String packetId) {
+        this.packetId = packetId;
+    }
+
+    /**
+     * Sets the from
+     * 
+     * @param from The from to set
+     */
+    public void setFrom(final ChatUser from) {
+        this.from = from;
+    }
+
+    /**
+     * Sets the time stamp
+     * 
+     * @param timeStamp The time stamp to set
+     */
+    public void setTimeStamp(final Date timeStamp) {
+        this.timeStamp = timeStamp;
+    }
 
 }

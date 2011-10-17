@@ -49,42 +49,53 @@
 
 package com.openexchange.chat;
 
-import java.util.Date;
+import java.util.Collection;
+
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
- * 
+ * {@link RosterListener}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public interface RosterListener {
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Called when roster entries are added.
+     *
+     * @param users The users that have been added
      */
-    String getPacketId();
+    public void entriesAdded(Collection<ChatUser> users);
 
     /**
-     * Gets the sender.
-     * 
-     * @return The sender or <code>null</code>
+     * Called when roster entries are updated.
+     *
+     * @param users The users that have been updated.
      */
-    ChatUser getFrom();
+    public void entriesUpdated(Collection<ChatUser> users);
 
     /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
+     * Called when roster entries are removed.
+     *
+     * @param users The users that have been removed
      */
-    Date getTimeStamp();
+    public void entriesDeleted(Collection<ChatUser> users);
 
     /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
+     * Called when the presence of a roster entry is changed.
+     * <p>
+     * To get the current "best presence" for a user after the presence update, query the roster:
+     * <pre>
+     *    ChatUser user = presence.getFrom();
+     *    Presence bestPresence = roster.getPresence(user);
+     * </pre>
+     * <p>
+     * Note that this listener is triggered for presence (mode) changes only
+     * (e.g presence of types available and unavailable. Subscription-related
+     * presence packets will not cause this method to be called.
+     *
+     * @param presence The presence that changed.
+     * @see Roster#getPresence(ChatUser)
      */
-    @Override
-    String toString();
+    public void presenceChanged(Presence presence);
 
 }
