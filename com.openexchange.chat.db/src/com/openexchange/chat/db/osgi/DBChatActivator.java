@@ -49,10 +49,27 @@
 
 package com.openexchange.chat.db.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.chat.Presence;
 import com.openexchange.chat.db.DBChatServiceLookup;
+import com.openexchange.chat.db.DBRoster;
+import com.openexchange.chat.util.ChatUserImpl;
+import com.openexchange.chat.util.PresenceImpl;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -65,6 +82,8 @@ import com.openexchange.user.UserService;
  */
 public final class DBChatActivator extends HousekeepingActivator {
 
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChatActivator.class));
+
     /**
      * Initializes a new {@link DBChatActivator}.
      */
@@ -76,12 +95,85 @@ public final class DBChatActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, UserService.class,
-            ContextService.class };
+            ContextService.class, IDGeneratorService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         DBChatServiceLookup.set(this);
+        {
+            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, new EventHandler() {
+
+                @Override
+                public void handleEvent(final Event event) {
+                    final String topic = event.getTopic();
+                    if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                        @SuppressWarnings("unchecked") final Map<String, Session> container =
+                            (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        for (final Session session : container.values()) {
+                            handleRemovedSession(session);
+                        }
+                    } else if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                        final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                        handleRemovedSession(session);
+                    } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
+                        @SuppressWarnings("unchecked") final Map<String, Session> container =
+                            (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        for (final Session session : container.values()) {
+                            handleRemovedSession(session);
+                        }
+                    } else if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
+                        final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
+                        handleAddedSession(session);
+                    } else if (SessiondEventConstants.TOPIC_REACTIVATE_SESSION.equals(topic)) {
+                        @SuppressWarnings("unchecked") final Map<String, Session> container =
+                            (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                        for (final Session session : container.values()) {
+                            handleAddedSession(session);
+                        }
+                    }
+                }
+
+                private void handleAddedSession(final Session session) {
+                    try {
+                        final DBRoster dbRoster = DBRoster.optRosterFor(session.getContextId());
+                        if (null != dbRoster) {
+                            final PresenceImpl presence = new PresenceImpl();
+                            final int userId = session.getUserId();
+                            presence.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, session.getContextId())));
+                            dbRoster.notifyRosterListeners(presence);
+                        }
+                    } catch (final Exception e) {
+                        // Failed handling session
+                        LOG.warn("Failed handling tracked added session for LIST/LSUB cache.", e);
+                    }
+                }
+
+                private void handleRemovedSession(final Session session) {
+                    try {
+                        final DBRoster dbRoster = DBRoster.optRosterFor(session.getContextId());
+                        if (null != dbRoster) {
+                            final PresenceImpl presence = new PresenceImpl(Presence.Type.UNAVAILABLE);
+                            final int userId = session.getUserId();
+                            presence.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, session.getContextId())));
+                            dbRoster.notifyRosterListeners(presence);
+                        }
+                    } catch (final Exception e) {
+                        // Failed handling session
+                        LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);
+                    }
+                }
+
+                private String getUserName(final int userId, final int cid) throws OXException {
+                    final Context ctx = getService(ContextService.class).getContext(cid);
+                    return getService(UserService.class).getUser(userId, ctx).getDisplayName();
+                }
+
+            },
+                serviceProperties);
+        }
     }
 
     @Override

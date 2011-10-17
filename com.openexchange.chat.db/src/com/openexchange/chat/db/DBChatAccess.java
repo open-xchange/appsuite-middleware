@@ -49,6 +49,12 @@
 
 package com.openexchange.chat.db;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
@@ -57,11 +63,13 @@ import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.MessageListener;
 import com.openexchange.chat.Presence;
+import com.openexchange.chat.Presence.Mode;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -80,6 +88,8 @@ public final class DBChatAccess implements ChatAccess {
 
     private final ServiceLookup serviceLookup;
 
+    private final Context context;
+
     /**
      * Initializes a new {@link DBChatAccess}.
      * 
@@ -90,16 +100,15 @@ public final class DBChatAccess implements ChatAccess {
         super();
         this.session = session;
         serviceLookup = DBChatServiceLookup.get();
+        context = serviceLookup.getService(ContextService.class).getContext(session.getContextId());
         final ChatUserImpl user = new ChatUserImpl();
         user.setId(String.valueOf(session.getUserId()));
-        user.setName(getUserName(session.getUserId(), session.getContextId(), serviceLookup));
+        user.setName(getUserName(session.getUserId()));
         this.user = user;
     }
 
-    private static String getUserName(final int userId, final int contextId, final ServiceLookup serviceLookup) throws OXException {
-        return serviceLookup.getService(UserService.class).getUser(
-            userId,
-            serviceLookup.getService(ContextService.class).getContext(contextId)).getDisplayName();
+    private String getUserName(final int userId) throws OXException {
+        return serviceLookup.getService(UserService.class).getUser(userId, context).getDisplayName();
     }
 
     @Override
@@ -110,13 +119,12 @@ public final class DBChatAccess implements ChatAccess {
 
     @Override
     public void disconnect() {
-        // TODO Auto-generated method stub
-
+        // Nothing to do: Login/logout is mapped to availability of any active session for a user
     }
 
     @Override
     public void login() throws OXException {
-        // Nothing to do
+        // Nothing to do: Login/logout is mapped to availability of any active session for a user
     }
 
     @Override
@@ -129,28 +137,68 @@ public final class DBChatAccess implements ChatAccess {
         if (!Presence.Type.AVAILABLE.equals(presence.getType())) {
             throw ChatExceptionCodes.INVALID_PRESENCE_PACKET.create();
         }
-        
-
+        final DatabaseService databaseService = getDatabaseService();
+        PreparedStatement stmt = null;
+        final Connection con = databaseService.getWritable(context);
+        try {
+            stmt = con.prepareStatement("UPDATE chatPresence SET mode = ?, statusMessage = ?, lastModified = ? WHERE cid = ? AND user = ?");
+            int pos = 1;
+            {
+                final Mode  mode = presence.getMode();
+                stmt.setString(pos++, (null == mode ? Mode.AVAILABLE : mode).name());
+            }
+            {
+                final String status = presence.getStatus();
+                if (null == status) {
+                    stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, status);
+                }
+            }
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, session.getUserId());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            databaseService.backWritable(context, con);
+        }
+        /*
+         * Notify roster listeners
+         */
+        DBRoster.getRosterFor(context).notifyRosterListeners(presence);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.chat.ChatAccess#getRoster()
-     */
     @Override
     public Roster getRoster() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return DBRoster.getRosterFor(context);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.chat.ChatAccess#getChats()
-     */
     @Override
     public List<String> getChats() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        final DatabaseService databaseService = getDatabaseService();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        final Connection con = databaseService.getReadOnly(context);
+        try {
+            stmt = con.prepareStatement("SELECT chatId FROM multiChat WHERE cid = ? AND user = ?");
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, session.getUserId());
+            rs = stmt.executeQuery();
+            final List<String> ids = new LinkedList<String>();
+            while (rs.next()) {
+                ids.add(rs.getString(1));
+            }
+            return ids;
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(context, con);
+        }
     }
 
     /*

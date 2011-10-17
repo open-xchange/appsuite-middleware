@@ -57,6 +57,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
@@ -64,36 +67,63 @@ import com.openexchange.chat.Roster;
 import com.openexchange.chat.RosterListener;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link DBRoster}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBRoster implements Roster {
 
-    private final Session session;
-    private final ChatUser user;
+    private static final ConcurrentMap<Integer, DBRoster> ROSTER_MAP = new ConcurrentHashMap<Integer, DBRoster>();
+
+    /**
+     * Gets the roster for specified context.
+     * 
+     * @param context The context
+     * @return The roster or <code>null</code>
+     */
+    public static DBRoster optRosterFor(final int contextId) {
+        return ROSTER_MAP.get(Integer.valueOf(contextId));
+    }
+
+    /**
+     * Gets the roster for specified context.
+     * 
+     * @param context The context
+     * @return The roster
+     */
+    public static DBRoster getRosterFor(final Context context) {
+        final Integer key = Integer.valueOf(context.getContextId());
+        DBRoster dbRoster = ROSTER_MAP.get(key);
+        if (null == dbRoster) {
+            final DBRoster newRoster = new DBRoster(context);
+            dbRoster = ROSTER_MAP.putIfAbsent(key, newRoster);
+            if (null == dbRoster) {
+                dbRoster = newRoster;
+            }
+        }
+        return dbRoster;
+    }
+
     private final Context context;
+
+    private final List<RosterListener> listeners;
 
     /**
      * Initializes a new {@link DBRoster}.
-     * @throws OXException 
      */
-    public DBRoster(final Session session, final ChatUser user) throws OXException {
+    private DBRoster(final Context context) {
         super();
-        this.session = session;
-        this.user = user;
-        context = getService(ContextService.class).getContext(session.getContextId());
+        this.context = context;
+        listeners = new CopyOnWriteArrayList<RosterListener>();
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
@@ -127,11 +157,17 @@ public final class DBRoster implements Roster {
         final Connection con = databaseService.getReadOnly(context);
         try {
             stmt = con.prepareStatement("SELECT mode, statusMessage FROM chatPresence WHERE cid = ? AND user = ?");
-            final int pos = 1;
-            stmt.setInt(pos, context.getContextId());
-            stmt.setInt(pos, Integer.parseInt(user.getId()));
+            final int userId = Integer.parseInt(user.getId());
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
+                final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
+                packetUnavailable.setFrom(user);
+                return packetUnavailable;
+            }
+            if (null == getService(SessiondService.class).getAnyActiveSessionForUser(userId, context.getContextId())) {
                 final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
                 packetUnavailable.setFrom(user);
                 return packetUnavailable;
@@ -149,16 +185,31 @@ public final class DBRoster implements Roster {
         }
     }
 
+    /**
+     * Notify listeners about changed presence.
+     * 
+     * @param presence The changed presence
+     */
+    public void notifyRosterListeners(final Presence presence) {
+        for (final RosterListener listener : listeners) {
+            listener.presenceChanged(presence);
+        }
+    }
+
     @Override
     public void addRosterListener(final RosterListener rosterListener) throws OXException {
-        // TODO Auto-generated method stub
-
+        if (null == rosterListener) {
+            return;
+        }
+        listeners.add(rosterListener);
     }
 
     @Override
     public void removeRosterListener(final RosterListener rosterListener) throws OXException {
-        // TODO Auto-generated method stub
-
+        if (null == rosterListener) {
+            return;
+        }
+        listeners.remove(rosterListener);
     }
 
 }

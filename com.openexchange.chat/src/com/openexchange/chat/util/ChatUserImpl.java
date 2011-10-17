@@ -69,6 +69,18 @@ public class ChatUserImpl implements ChatUser {
         super();
     }
 
+    /**
+     * Initializes a new {@link ChatUserImpl}.
+     * 
+     * @param id The identifier
+     * @param name The name
+     */
+    public ChatUserImpl(final String id, final String name) {
+        super();
+        this.id = id;
+        this.name = name;
+    }
+
     @Override
     public String getId() {
         return id;
