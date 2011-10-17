@@ -88,6 +88,8 @@ public final class XmppMessage implements Message {
 
     @Override
     public ChatMember getFrom() {
+        final String from = xmppMessage.getFrom();
+        
         // TODO Auto-generated method stub
         return null;
     }

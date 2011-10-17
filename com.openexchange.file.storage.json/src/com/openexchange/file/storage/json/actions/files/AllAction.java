@@ -53,6 +53,8 @@ import static com.openexchange.file.storage.json.actions.files.AbstractFileActio
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.TimedResult;
 
@@ -70,7 +72,11 @@ public class AllAction extends AbstractFileAction {
 
         final IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        final TimedResult<File> documents = fileAccess.getDocuments(request.getFolderId(), request.getColumns(), request.getSortingField(), request.getSortingOrder());
+        final String folderId = request.getFolderId();
+        if (folderId == FileStorageFileAccess.ALL_FOLDERS) {
+            throw FileStorageExceptionCodes.MISSING_PARAMETER.create(Param.FOLDER_ID.getName());
+        }
+        final TimedResult<File> documents = fileAccess.getDocuments(folderId, request.getColumns(), request.getSortingField(), request.getSortingOrder());
 
         return result( documents, request );
     }
