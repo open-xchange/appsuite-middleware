@@ -58,6 +58,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.chat.Presence;
+import com.openexchange.chat.db.DBChatAccess;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.chat.db.DBRoster;
 import com.openexchange.chat.util.ChatUserImpl;
@@ -153,6 +154,16 @@ public final class DBChatActivator extends HousekeepingActivator {
 
                 private void handleRemovedSession(final Session session) {
                     try {
+                        if (null != getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                            // Other active session present
+                            return;
+                        }
+                        /*-
+                         * Last session gone: clean up
+                         * 
+                         * 1. Mark as unavailable in roster
+                         * 2. Remove associated chat access
+                         */
                         final DBRoster dbRoster = DBRoster.optRosterFor(session.getContextId());
                         if (null != dbRoster) {
                             final PresenceImpl presence = new PresenceImpl(Presence.Type.UNAVAILABLE);
@@ -160,6 +171,8 @@ public final class DBChatActivator extends HousekeepingActivator {
                             presence.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, session.getContextId())));
                             dbRoster.notifyRosterListeners(presence);
                         }
+                        // Drop chat access for associated user
+                        DBChatAccess.removeDbChatAccess(session);
                     } catch (final Exception e) {
                         // Failed handling session
                         LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);

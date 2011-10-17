@@ -79,7 +79,7 @@ public final class DBChatService implements ChatService {
         if (!DEFAULT_ACCOUNT.equals(accountId)) {
             throw ChatExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
         }
-        return new DBChatAccess(session);
+        return DBChatAccess.getDbChatAccess(session);
     }
 
     @Override

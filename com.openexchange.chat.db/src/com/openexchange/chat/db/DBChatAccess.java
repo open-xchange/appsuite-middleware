@@ -56,6 +56,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatCaps;
@@ -82,7 +84,67 @@ import com.openexchange.user.UserService;
  */
 public final class DBChatAccess implements ChatAccess {
 
-    private final Session session;
+    private static final ConcurrentMap<Key, DBChatAccess> ACCESS_MAP = new ConcurrentHashMap<Key, DBChatAccess>();
+
+    /**
+     * Removes associated chat access.
+     * 
+     * @param session The session
+     */
+    public static void removeDbChatAccess(final Session session) {
+        removeDbChatAccess(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Removes associated chat access.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void removeDbChatAccess(final int userId, final int contextId) {
+        final DBChatAccess access = ACCESS_MAP.remove(new Key(userId, contextId));
+        if (null != access) {
+            access.cleanUp();
+        }
+    }
+
+    /**
+     * Gets the database chat access for specified arguments.
+     * 
+     * @param session The session
+     * @return The access
+     * @throws OXException If initialization fails
+     */
+    public static DBChatAccess getDbChatAccess(final Session session) throws OXException {
+        return getDbChatAccess(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the database chat access for specified arguments.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The access
+     * @throws OXException If initialization fails
+     */
+    public static DBChatAccess getDbChatAccess(final int userId, final int contextId) throws OXException {
+        final Key key = new Key(userId, contextId);
+        DBChatAccess dbChatAccess = ACCESS_MAP.get(key);
+        if (null == dbChatAccess) {
+            final DBChatAccess newAccess = new DBChatAccess(userId, contextId);
+            dbChatAccess = ACCESS_MAP.putIfAbsent(key, newAccess);
+            if (null == dbChatAccess) {
+                dbChatAccess = newAccess;
+            }
+        }
+        return dbChatAccess;
+    }
+
+    /*-
+     * ------------------------------------
+     */
+
+    private final int userId;
 
     private final ChatUser user;
 
@@ -93,22 +155,28 @@ public final class DBChatAccess implements ChatAccess {
     /**
      * Initializes a new {@link DBChatAccess}.
      * 
-     * @param session The session
      * @throws OXException If init fails
      */
-    public DBChatAccess(final Session session) throws OXException {
+    private DBChatAccess(final int userId, final int contextId) throws OXException {
         super();
-        this.session = session;
+        this.userId = userId;
         serviceLookup = DBChatServiceLookup.get();
-        context = serviceLookup.getService(ContextService.class).getContext(session.getContextId());
+        context = serviceLookup.getService(ContextService.class).getContext(contextId);
         final ChatUserImpl user = new ChatUserImpl();
-        user.setId(String.valueOf(session.getUserId()));
-        user.setName(getUserName(session.getUserId()));
+        user.setId(String.valueOf(userId));
+        user.setName(getUserName(userId));
         this.user = user;
     }
 
     private String getUserName(final int userId) throws OXException {
         return serviceLookup.getService(UserService.class).getUser(userId, context).getDisplayName();
+    }
+
+    /**
+     * Clean up any remaining single-chats/occurrences.
+     */
+    private void cleanUp() {
+        // TODO:
     }
 
     @Override
@@ -144,7 +212,7 @@ public final class DBChatAccess implements ChatAccess {
             stmt = con.prepareStatement("UPDATE chatPresence SET mode = ?, statusMessage = ?, lastModified = ? WHERE cid = ? AND user = ?");
             int pos = 1;
             {
-                final Mode  mode = presence.getMode();
+                final Mode mode = presence.getMode();
                 stmt.setString(pos++, (null == mode ? Mode.AVAILABLE : mode).name());
             }
             {
@@ -157,7 +225,7 @@ public final class DBChatAccess implements ChatAccess {
             }
             stmt.setLong(pos++, System.currentTimeMillis());
             stmt.setInt(pos++, context.getContextId());
-            stmt.setInt(pos++, session.getUserId());
+            stmt.setInt(pos++, userId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
@@ -186,7 +254,7 @@ public final class DBChatAccess implements ChatAccess {
             stmt = con.prepareStatement("SELECT chatId FROM multiChat WHERE cid = ? AND user = ?");
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
-            stmt.setInt(pos++, session.getUserId());
+            stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
             final List<String> ids = new LinkedList<String>();
             while (rs.next()) {
@@ -201,11 +269,6 @@ public final class DBChatAccess implements ChatAccess {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.chat.ChatAccess#openChat(java.lang.String, com.openexchange.chat.MessageListener,
-     * com.openexchange.chat.ChatUser)
-     */
     @Override
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser member) throws OXException {
         // TODO Auto-generated method stub
@@ -230,5 +293,61 @@ public final class DBChatAccess implements ChatAccess {
         }
         return databaseService;
     }
+
+    private static final class Key {
+
+        private final int contextId;
+
+        private final int userId;
+
+        private final int hash;
+
+        public Key(final int userId, final int contextId) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + userId;
+            result = prime * result + contextId;
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (userId != other.userId) {
+                return false;
+            }
+            if (contextId != other.contextId) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("Key ( ");
+            sb.append("contextId = ");
+            sb.append(contextId);
+            sb.append(", userId = ");
+            sb.append(userId);
+            sb.append(" )");
+            return sb.toString();
+        }
+
+    } // End of class Key
 
 }
