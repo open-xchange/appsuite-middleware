@@ -78,6 +78,18 @@ public final class DBChatServiceLookup {
     }
 
     /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = ref.get();
+        return null == serviceLookup ? null : serviceLookup.getService(clazz);
+    }
+
+    /**
      * Sets the service look-up
      * 
      * @param serviceLookup The service look-up or <code>null</code>

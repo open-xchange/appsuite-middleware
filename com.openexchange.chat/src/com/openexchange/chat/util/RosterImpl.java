@@ -49,83 +49,84 @@
 
 package com.openexchange.chat.util;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
+import com.openexchange.chat.Roster;
+import com.openexchange.chat.RosterListener;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link PresenceImpl}
+ * {@link RosterImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PresenceImpl extends PacketImpl implements Presence {
+public class RosterImpl implements Roster {
 
-    private Type type;
+    private static final String DEFAULT_RESOURCE = "default";
 
-    private Mode mode;
+    private final ConcurrentMap<String, ChatUser> entries;
 
-    private String status;
+    private final List<RosterListener> rosterListeners;
+
+    private final Map<String, Map<String, Presence>> presenceMap;
 
     /**
-     * Initializes a new {@link PresenceImpl}.
+     * Initializes a new {@link RosterImpl}.
      */
-    public PresenceImpl() {
+    public RosterImpl() {
         super();
-    }
-
-    /**
-     * Initializes a new {@link PresenceImpl}.
-     * 
-     * @param type The presence type
-     */
-    public PresenceImpl(final Type type) {
-        super();
-        this.type = type;
+        entries = new ConcurrentHashMap<String, ChatUser>();
+        rosterListeners = new CopyOnWriteArrayList<RosterListener>();
+        presenceMap = new ConcurrentHashMap<String, Map<String, Presence>>();
     }
 
     @Override
-    public String toString() {
-        return getStatus();
+    public Collection<ChatUser> getEntries() throws OXException {
+        return Collections.unmodifiableCollection(entries.values());
     }
 
     @Override
-    public String getStatus() {
-        return status;
+    public Presence getPresence(final ChatUser user) throws OXException {
+        final Map<String, Presence> resources = presenceMap.get(user.getId());
+        if (null == resources) {
+            final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
+            packetUnavailable.setFrom(user);
+            return packetUnavailable;
+        }
+        final Presence presence = resources.get(DEFAULT_RESOURCE);
+        if (null == presence) {
+            final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
+            packetUnavailable.setFrom(user);
+            return packetUnavailable;
+        }
+        return presence;
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.chat.Roster#addRosterListener(com.openexchange.chat.RosterListener)
+     */
     @Override
-    public Type getType() {
-        return type;
+    public void addRosterListener(final RosterListener rosterListener) throws OXException {
+        // TODO Auto-generated method stub
+
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.openexchange.chat.Roster#removeRosterListener(com.openexchange.chat.RosterListener)
+     */
     @Override
-    public Mode getMode() {
-        return mode;
-    }
+    public void removeRosterListener(final RosterListener rosterListener) throws OXException {
+        // TODO Auto-generated method stub
 
-    /**
-     * Sets the type
-     * 
-     * @param type The type to set
-     */
-    public void setType(final Type type) {
-        this.type = type;
-    }
-
-    /**
-     * Sets the mode
-     * 
-     * @param mode The mode to set
-     */
-    public void setMode(final Mode mode) {
-        this.mode = mode;
-    }
-
-    /**
-     * Sets the status
-     * 
-     * @param status The status to set
-     */
-    public void setStatus(final String status) {
-        this.status = status;
     }
 
 }

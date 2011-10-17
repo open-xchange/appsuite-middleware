@@ -93,7 +93,19 @@ public interface Presence extends Packet {
         /**
          * The presence packet contains an error message.
          */
-        ERROR
+        ERROR;
+
+        /**
+         * Gets the type for specified string or <code>null</code>.
+         */
+        public static Type typeOf(final String type) {
+            for (final Type t : Type.values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    return t;
+                }
+            }
+            return null;
+        }
     }
 
     /**
@@ -120,7 +132,19 @@ public interface Presence extends Packet {
         /**
          * Do not disturb.
          */
-        DND
+        DND;
+
+        /**
+         * Gets the mode for specified string or <code>null</code>.
+         */
+        public static Mode modeOf(final String mode) {
+            for (final Mode m : Mode.values()) {
+                if (m.name().equalsIgnoreCase(mode)) {
+                    return m;
+                }
+            }
+            return null;
+        }
     }
 
     /**

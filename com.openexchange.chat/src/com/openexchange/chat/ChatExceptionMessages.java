@@ -70,6 +70,9 @@ public final class ChatExceptionMessages implements LocalizableStrings {
 
     // No account found with identifier "%1$s".
     public static final String ACCOUNT_NOT_FOUND_MSG = "No account found with identifier \"%1$s\".";
+
+    // Invalid presence packet.
+    public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence packet.";
     
 
     /**

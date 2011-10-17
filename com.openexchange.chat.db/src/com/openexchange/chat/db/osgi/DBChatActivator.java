@@ -50,11 +50,13 @@
 package com.openexchange.chat.db.osgi;
 
 import com.openexchange.chat.db.DBChatServiceLookup;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link DBChatActivator}
@@ -72,7 +74,9 @@ public final class DBChatActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class };
+        return new Class<?>[] {
+            ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, UserService.class,
+            ContextService.class };
     }
 
     @Override

@@ -76,7 +76,11 @@ public enum ChatExceptionCodes implements OXExceptionCode {
     /**
      * No account found with identifier "%1$s".
      */
-    ACCOUNT_NOT_FOUND(ChatExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 4);
+    ACCOUNT_NOT_FOUND(ChatExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 4),
+    /**
+     * Invalid presence packet.
+     */
+    INVALID_PRESENCE_PACKET(ChatExceptionMessages.INVALID_PRESENCE_PACKET_MSG, Category.CATEGORY_ERROR, 5),
 
     ;
 
