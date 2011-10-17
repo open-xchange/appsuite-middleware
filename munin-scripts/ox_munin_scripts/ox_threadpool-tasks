@@ -27,7 +27,7 @@ if ($ARGV[0] and $ARGV[0] eq "config") {
     print "a.type DERIVE\n";
     print "b.label CompletedTaskCount\n";
     print "b.draw LINE1\n";
-    print "a.type DERIVE\n";
+    print "b.type DERIVE\n";
     exit 0
 }
 
