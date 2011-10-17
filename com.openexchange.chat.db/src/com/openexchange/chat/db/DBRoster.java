@@ -50,6 +50,7 @@
 package com.openexchange.chat.db;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -57,8 +58,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
@@ -82,7 +81,7 @@ import com.openexchange.user.UserService;
  */
 public final class DBRoster implements Roster {
 
-    private static final ConcurrentMap<Integer, DBRoster> ROSTER_MAP = new ConcurrentHashMap<Integer, DBRoster>();
+    private static final ConcurrentTIntObjectHashMap<DBRoster> ROSTER_MAP = new ConcurrentTIntObjectHashMap<DBRoster>();
 
     /**
      * Gets the roster for specified context.
@@ -91,7 +90,7 @@ public final class DBRoster implements Roster {
      * @return The roster or <code>null</code>
      */
     public static DBRoster optRosterFor(final int contextId) {
-        return ROSTER_MAP.get(Integer.valueOf(contextId));
+        return ROSTER_MAP.get(contextId);
     }
 
     /**
@@ -101,7 +100,7 @@ public final class DBRoster implements Roster {
      * @return The roster
      */
     public static DBRoster getRosterFor(final Context context) {
-        final Integer key = Integer.valueOf(context.getContextId());
+        final int key = context.getContextId();
         DBRoster dbRoster = ROSTER_MAP.get(key);
         if (null == dbRoster) {
             final DBRoster newRoster = new DBRoster(context);

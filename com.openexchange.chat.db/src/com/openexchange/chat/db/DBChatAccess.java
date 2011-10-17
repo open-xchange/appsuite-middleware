@@ -49,7 +49,12 @@
 
 package com.openexchange.chat.db;
 
+import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -90,8 +95,9 @@ public final class DBChatAccess implements ChatAccess {
      * Removes associated chat access.
      * 
      * @param session The session
+     * @throws OXException If clean-up fails
      */
-    public static void removeDbChatAccess(final Session session) {
+    public static void removeDbChatAccess(final Session session) throws OXException {
         removeDbChatAccess(session.getUserId(), session.getContextId());
     }
 
@@ -100,8 +106,9 @@ public final class DBChatAccess implements ChatAccess {
      * 
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @throws OXException If clean-up fails
      */
-    public static void removeDbChatAccess(final int userId, final int contextId) {
+    public static void removeDbChatAccess(final int userId, final int contextId) throws OXException {
         final DBChatAccess access = ACCESS_MAP.remove(new Key(userId, contextId));
         if (null != access) {
             access.cleanUp();
@@ -174,9 +181,79 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Clean up any remaining single-chats/occurrences.
+     * @throws OXException If an error occurs
      */
-    private void cleanUp() {
-        // TODO:
+    private void cleanUp() throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(context);
+        try {
+            con.setAutoCommit(false);
+            cleanUp(con);
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            databaseService.backWritable(context, con);
+        }
+    }
+
+    /**
+     * Clean up any remaining single-chats/occurrences.
+     * @throws OXException If an error occurs
+     */
+    private void cleanUp(final Connection con) throws OXException {
+        final TIntList chatIds = new TIntLinkedList();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int pos;
+        try {
+            stmt = con.prepareStatement("SELECT chatId FROM chat WHERE cid = ? AND user = ?");
+            pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos, userId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                chatIds.add(rs.getInt(1));
+            }
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+        if (chatIds.isEmpty()) {
+            return;
+        }
+        rs = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM chatConversation WHERE cid = ? AND chatId = ?");
+            pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
+                stmt.setInt(pos, iterator.next());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        try {
+            stmt = con.prepareStatement("DELETE FROM chat WHERE cid = ? AND user = ?");
+            pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos, userId);
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     @Override
