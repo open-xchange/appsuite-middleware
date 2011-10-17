@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.chat.osgi.ChatActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.session,
  gnu.inet.encoding,
