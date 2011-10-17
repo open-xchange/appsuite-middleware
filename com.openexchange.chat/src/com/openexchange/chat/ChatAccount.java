@@ -84,6 +84,6 @@ public interface ChatAccount {
      * 
      * @return The associated messaging service
      */
-    ChatService getMessagingService();
+    ChatService getChatService();
 
 }

@@ -47,44 +47,73 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.db;
 
-import java.util.Date;
+import java.util.Collections;
+import java.util.List;
+import com.openexchange.chat.ChatAccount;
+import com.openexchange.chat.ChatAccountManager;
+import com.openexchange.chat.ChatExceptionCodes;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.util.ChatAccountImpl;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link DBChatAccountManager}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public class DBChatAccountManager implements ChatAccountManager {
+
+    private static final String DEFAULT_ACCOUNT = ChatService.DEFAULT_ACCOUNT;
+
+    private final ChatAccount defaultAccount;
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link DBChatAccountManager}.
      */
-    String getPacketId();
+    public DBChatAccountManager() {
+        super();
+        defaultAccount = new ChatAccountImpl();
+    }
 
-    /**
-     * Gets the sender.
-     * 
-     * @return The sender or <code>null</code>
-     */
-    ChatUser getFrom();
-
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
     @Override
-    String toString();
+    public String addAccount(final ChatAccount account, final Session session) throws OXException {
+        throw ChatExceptionCodes.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
+    public void updateAccount(final ChatAccount account, final Session session) throws OXException {
+        throw ChatExceptionCodes.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
+    public void deleteAccount(final ChatAccount account, final Session session) throws OXException {
+        throw ChatExceptionCodes.UNSUPPORTED_OPERATION.create();
+    }
+
+    @Override
+    public List<ChatAccount> getAccounts(final Session session) throws OXException {
+        return Collections.singletonList(getAccount(DEFAULT_ACCOUNT, session));
+    }
+
+    @Override
+    public ChatAccount getAccount(final String id, final Session session) throws OXException {
+        if (!DEFAULT_ACCOUNT.equals(id)) {
+            throw ChatExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
+        }
+        return defaultAccount;
+    }
+
+    @Override
+    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
+        return null;
+    }
+
+    @Override
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
+        // Nope
+    }
 
 }

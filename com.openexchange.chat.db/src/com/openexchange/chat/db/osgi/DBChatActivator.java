@@ -47,44 +47,47 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.db.osgi;
 
-import java.util.Date;
+import com.openexchange.chat.db.DBChatServiceLookup;
+import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link DBChatActivator}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public final class DBChatActivator extends HousekeepingActivator {
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link DBChatActivator}.
      */
-    String getPacketId();
+    public DBChatActivator() {
+        super();
+    }
 
-    /**
-     * Gets the sender.
-     * 
-     * @return The sender or <code>null</code>
-     */
-    ChatUser getFrom();
-
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
     @Override
-    String toString();
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {
+            ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, UserService.class,
+            ContextService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        DBChatServiceLookup.set(this);
+    }
+
+    @Override
+    protected void cleanUp() {
+        super.cleanUp();
+        DBChatServiceLookup.set(null);
+    }
 
 }
