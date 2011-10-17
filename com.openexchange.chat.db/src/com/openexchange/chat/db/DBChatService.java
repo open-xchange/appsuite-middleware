@@ -47,44 +47,44 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.db;
 
-import java.util.Date;
+import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatAccountManager;
+import com.openexchange.chat.ChatExceptionCodes;
+import com.openexchange.chat.ChatService;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
- * 
+ * {@link DBChatService}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public final class DBChatService implements ChatService {
+
+    private final DBChatAccountManager accountManager;
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link DBChatService}.
      */
-    String getPacketId();
+    public DBChatService() {
+        super();
+        accountManager = new DBChatAccountManager();
+    }
 
-    /**
-     * Gets the sender.
-     * 
-     * @return The sender or <code>null</code>
-     */
-    ChatUser getFrom();
-
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
     @Override
-    String toString();
+    public ChatAccess access(final String accountId, final Session session) throws OXException {
+        if (!DEFAULT_ACCOUNT.equals(accountId)) {
+            throw ChatExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+        }
+        return DBChatAccess.getDbChatAccess(session);
+    }
+
+    @Override
+    public ChatAccountManager getAccountManager() {
+        return accountManager;
+    }
 
 }

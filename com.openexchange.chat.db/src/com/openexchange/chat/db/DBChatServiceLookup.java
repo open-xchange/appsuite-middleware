@@ -47,44 +47,55 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.db;
 
-import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link DBChatServiceLookup}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public final class DBChatServiceLookup {
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link DBChatServiceLookup}.
      */
-    String getPacketId();
+    private DBChatServiceLookup() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
     /**
-     * Gets the sender.
+     * Gets the service look-up
      * 
-     * @return The sender or <code>null</code>
+     * @return The service look-up or <code>null</code>
      */
-    ChatUser getFrom();
+    public static ServiceLookup get() {
+        return ref.get();
+    }
 
     /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> is absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    Date getTimeStamp();
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = ref.get();
+        return null == serviceLookup ? null : serviceLookup.getService(clazz);
+    }
 
     /**
-     * Gets the string representation of this packet.
+     * Sets the service look-up
      * 
-     * @return The string representation
+     * @param serviceLookup The service look-up or <code>null</code>
      */
-    @Override
-    String toString();
+    public static void set(final ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
 
 }

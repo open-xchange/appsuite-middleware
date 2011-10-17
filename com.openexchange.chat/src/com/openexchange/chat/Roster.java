@@ -49,42 +49,45 @@
 
 package com.openexchange.chat;
 
-import java.util.Date;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link Roster} - Represents a user's roster, which is the collection of users a person receives presence updates for.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public interface Roster {
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Returns an unmodifiable collection of all users in the roster.
+     *
+     * @return All entries in the roster.
      */
-    String getPacketId();
+    public Collection<ChatUser> getEntries() throws OXException;
 
     /**
-     * Gets the sender.
+     * Returns the presence info for a particular user. If the user is offline, or if no presence data is available (such as when you are
+     * not subscribed to the user's presence updates), unavailable presence will be returned.
      * 
-     * @return The sender or <code>null</code>
+     * @param user The user to receive the presence from
+     * @return The user's current presence, or unavailable presence if the user is offline or if no presence information is available.
+     * @throws OXException If presence cannot be returned
      */
-    ChatUser getFrom();
+    public Presence getPresence(ChatUser user) throws OXException;
 
     /**
-     * Gets the time stamp for this packet.
+     * Adds a listener to this roster. The listener will be fired anytime one or more changes to the roster are pushed from the server.
      * 
-     * @return The time stamp
+     * @param rosterListener A roster listener.
      */
-    Date getTimeStamp();
+    public void addRosterListener(RosterListener rosterListener) throws OXException;
 
     /**
-     * Gets the string representation of this packet.
+     * Removes a listener from this roster. The listener will be fired anytime one or more changes to the roster are pushed from the server.
      * 
-     * @return The string representation
+     * @param rosterListener A roster listener.
      */
-    @Override
-    String toString();
+    public void removeRosterListener(RosterListener rosterListener) throws OXException;
 
 }

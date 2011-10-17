@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,79 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.obs.ant.tasks;
+
+import java.io.File;
+import java.io.IOException;
+import javax.xml.xpath.XPathExpressionException;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.Path;
+import com.openexchange.obs.api.BuildServiceClient;
+import com.openexchange.obs.api.BuildServiceException;
 
 /**
- * {@link ChatMember}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Uploads source files to openSUSE build service.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface ChatMember {
+public class UploadSource extends Task {
 
-    public static enum Status {
-        AWAY, ONLINE, OFFLINE, ;
+    private String url;
+    private String user;
+    private String pass;
+    private String project;
+    private String packageName;
+    private Path files;
+
+    public UploadSource() {
+        super();
     }
 
-    /**
-     * Gets the status message.
-     * 
-     * @return The status message
-     */
-    String getStatusMessage();
+    public void setUrl(String url) {
+        this.url = url;
+    }
 
-    /**
-     * Gets the status.
-     * 
-     * @return The status
-     */
-    Status getStatus();
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-    /**
-     * Gets the identifier.
-     * 
-     * @return The identifier.
-     */
-    String getId();
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
 
+    public void setProject(final String project) {
+        this.project = project;
+    }
+
+    public void setPackageName(final String packageName) {
+        this.packageName = packageName;
+    }
+
+    public final Path createFiles() {
+        files = new Path(getProject());
+        return files;
+    }
+
+    @Override
+    public void execute() throws BuildException {
+        BuildServiceClient client = new BuildServiceClient(user, pass, url);
+        String[] list = files.list();
+        final File[] fFiles = new File[files.list().length];
+        for (int i = 0; i < list.length; i++) {
+            fFiles[i] = new File(list[i]);
+        }
+        try {
+            client.uploadSourcePackage(project, packageName, fFiles);
+        } catch (HttpException e) {
+            throw new BuildException(e.getMessage(), e);
+        } catch (XPathExpressionException e) {
+            throw new BuildException(e.getMessage(), e);
+        } catch (IOException e) {
+            throw new BuildException(e.getMessage(), e);
+        } catch (BuildServiceException e) {
+            throw new BuildException(e.getMessage(), e);
+        }
+    }
 }

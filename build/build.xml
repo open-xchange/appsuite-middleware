@@ -132,14 +132,16 @@
         <property name="buildType" value="dist"/>
     </target>
 
-    <target name="dist" depends="distBuild,antExtensions" description="Creates the tar.gz for uploading to the build service.">
-        <!-- Version -->
+	<target name="readVersion">
         <loadfile property="firstChangeLogLine" srcFile="${checkoutDir}/${packageName}/debian/changelog">
             <filterchain>
                 <headfilter lines="1"/>
             </filterchain>
         </loadfile>
         <propertyregex property="version" input="${firstChangeLogLine}" regexp="^[\w-]+ \(([\d\.]+)-\d+\).*$" select="\1"/>
+	</target>
+
+    <target name="dist" depends="distBuild,antExtensions,readVersion" description="Creates the tar.gz for uploading to the build service.">
         <!-- Packaging files -->
         <property name="packageDir" value="${basedir}/${tmpDir}/${packageName}-${version}"/>
         <mkdir dir="${packageDir}"/>
@@ -163,19 +165,40 @@
             	<include name="**"/>
                 <exclude name="${tmpDir}/**"/>
                 <exclude name="build/**"/>
+            	<exclude name="launcher/**"/>
             </fileset>
         </copy>
         <antcall target="buildProjects">
             <param name="packageDir" value="${packageDir}"/>
          </antcall>
         <!-- dpkg-source does not like anything else -->
-        <tar destfile="${tmpDir}/${packageName}-${version}.tar.gz" compression="gzip">
+        <tar destfile="${tmpDir}/${packageName}_${version}.orig.tar.bz2" compression="bzip2">
             <fileset dir="${tmpDir}">
                 <include name="${packageName}-${version}/**"/>
                 <exclude name="${packageName}-${version}.tar.gz"/>
             </fileset>
         </tar>
     </target>
+
+	<target name="debianSource" depends="dist,readVersion">
+		<exec executable="dpkg-source" dir="${tmpDir}">
+			<arg value="-b"/>
+			<arg value="-Zbzip2"/>
+			<arg path="${tmpDir}/${packageName}-${version}"/>
+		</exec>
+	</target>
+
+	<target name="upload" depends="debianSource">
+		<!-- TODO project must be defined somewhere -->
+		<uploadSource url="http://buildapi.netline.de" user="oxbuilduser" pass="openxchange" project="open-xchange-7-test" packageName="${packageName}">
+			<files>
+				<fileset dir="${tmpDir}">
+					<exclude name="${packageName}-${version}/**"/>
+					<include name="${packageName}_${version}*"/>
+				</fileset>
+			</files>
+		</uploadSource>
+	</target>
 
     <target name="cpd" description="Find copied and pasted code.">
         <mkdir dir="${logDir}"/>

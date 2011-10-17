@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Code Metrics" basedir=".">
+
+    <description>
+        Build file for code metrics.
+    </description>
+
+    <!-- Constants -->
+    <property name="mainDir" value=".."/>
+    <property name="checkoutDir" value="${mainDir}"/>
+    <property name="logDir" value="${mainDir}/log"/>
+
+    <target name="cpd" description="Find copied and pasted code.">
+        <mkdir dir="${logDir}"/>
+        <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask"/>
+        <cpd minimumTokenCount="100" encoding="US-ASCII" format="xml" outputFile="${logDir}/cpd.xml">
+            <fileset dir="${checkoutDir}">
+                <include name="**/*.java"/>
+            </fileset>
+        </cpd>
+    </target>
+
+</project>

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,42 +49,36 @@
 
 package com.openexchange.chat;
 
-import java.util.Date;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
- * 
+ * {@link ChatExceptionMessages} - Exception messages for {@link OXException} that must be translated.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public final class ChatExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    
+    // Method is not supported.
+    public static final String UNSUPPORTED_OPERATION_MSG = "Method is not supported.";
+
+    // No account found with identifier "%1$s".
+    public static final String ACCOUNT_NOT_FOUND_MSG = "No account found with identifier \"%1$s\".";
+
+    // Invalid presence packet.
+    public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence packet.";
+    
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Prevent instantiation.
      */
-    String getPacketId();
-
-    /**
-     * Gets the sender.
-     * 
-     * @return The sender or <code>null</code>
-     */
-    ChatUser getFrom();
-
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
-    @Override
-    String toString();
-
+    private ChatExceptionMessages() {
+        super();
+    }
 }

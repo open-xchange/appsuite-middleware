@@ -57,7 +57,7 @@ package com.openexchange.chat;
 public interface Presence extends Packet {
 
     /**
-     * A enum to represent the presecence type.
+     * A enumeration to represent the presence type.
      * <p>
      * <b>Note</b> that presence type is often confused with presence mode.<br>
      * Generally, if a user is signed into a server, they have a presence type of {@link #available available}, even if the mode is
@@ -93,11 +93,23 @@ public interface Presence extends Packet {
         /**
          * The presence packet contains an error message.
          */
-        ERROR
+        ERROR;
+
+        /**
+         * Gets the type for specified string or <code>null</code>.
+         */
+        public static Type typeOf(final String type) {
+            for (final Type t : Type.values()) {
+                if (t.name().equalsIgnoreCase(type)) {
+                    return t;
+                }
+            }
+            return null;
+        }
     }
 
     /**
-     * An enum to represent the presence mode.
+     * An enumeration to represent the presence mode.
      */
     public static enum Mode {
 
@@ -120,7 +132,19 @@ public interface Presence extends Packet {
         /**
          * Do not disturb.
          */
-        DND
+        DND;
+
+        /**
+         * Gets the mode for specified string or <code>null</code>.
+         */
+        public static Mode modeOf(final String mode) {
+            for (final Mode m : Mode.values()) {
+                if (m.name().equalsIgnoreCase(mode)) {
+                    return m;
+                }
+            }
+            return null;
+        }
     }
 
     /**
