@@ -76,6 +76,12 @@ public final class ChatExceptionMessages implements LocalizableStrings {
 
     // A chat with identifier "%1$s" already exists.
     public static final String CHAT_ALREADY_EXISTS_MSG = "A chat with identifier \"%1$s\" already exists.";
+
+    // Chat member "%1$s" already exists in chat "%2$s".
+    public static final String CHAT_MEMBER_ALREADY_EXISTS_MSG = "Chat member \"%1$s\" already exists in chat \"%2$s\".";
+
+    // No chat found with identifier "%1$s".
+    public static final String CHAT_NOT_FOUND_MSG = "No chat found with identifier \"%1$s\".";
     
 
     /**
