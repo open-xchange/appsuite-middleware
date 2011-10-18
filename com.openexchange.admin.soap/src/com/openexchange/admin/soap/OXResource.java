@@ -50,17 +50,16 @@ package com.openexchange.admin.soap;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.rmi.OXResourceInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchResourceException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.soap.dataobjects.Context;
+import com.openexchange.admin.soap.dataobjects.Resource;
 
 /**
  * SOAP Service implementing RMI Interface OXResourceInterface
@@ -95,10 +94,10 @@ public class OXResource extends OXSOAPRMIMapper {
     public void change(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         reconnect();
         try {
-            ((OXResourceInterface)rmistub).change(ctx, res, auth);
+            ((OXResourceInterface)rmistub).change(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth);
         } catch( ConnectException e) {
             reconnect(true);
-            ((OXResourceInterface)rmistub).change(ctx, res, auth);
+            ((OXResourceInterface)rmistub).change(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth);
         }
     }
 
@@ -119,10 +118,10 @@ public class OXResource extends OXSOAPRMIMapper {
     public Resource create(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {        
         reconnect();
         try {
-            return ((OXResourceInterface)rmistub).create(ctx, res, auth);
+            return new Resource(((OXResourceInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth));
         } catch( ConnectException e) {
             reconnect(true);
-            return ((OXResourceInterface)rmistub).create(ctx, res, auth);
+            return new Resource(((OXResourceInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth));
         }
     }
 
@@ -143,10 +142,10 @@ public class OXResource extends OXSOAPRMIMapper {
     public void delete(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         reconnect();
         try {
-            ((OXResourceInterface)rmistub).delete(ctx, res, auth);
+            ((OXResourceInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth);
         } catch( ConnectException e) {
             reconnect(true);
-            ((OXResourceInterface)rmistub).delete(ctx, res, auth);
+            ((OXResourceInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth);
         }
     }
 
@@ -168,10 +167,10 @@ public class OXResource extends OXSOAPRMIMapper {
     public Resource getData(final Context ctx, final Resource res, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
         reconnect();
         try {
-            return ((OXResourceInterface)rmistub).getData(ctx, res, auth);
+            return new Resource(((OXResourceInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth));
         } catch( ConnectException e) {
             reconnect(true);
-            return ((OXResourceInterface)rmistub).getData(ctx, res, auth);
+            return new Resource(((OXResourceInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResource2Resource(res), auth));
         }
     }
 
@@ -193,10 +192,10 @@ public class OXResource extends OXSOAPRMIMapper {
     public Resource[] getMultipleData(final Context ctx, final Resource[] resources, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
         reconnect();
         try {
-            return ((OXResourceInterface)rmistub).getData(ctx, resources, auth);
+            return SOAPUtils.resources2SoapResources(((OXResourceInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResources2Resources(resources), auth));
         } catch( ConnectException e) {
             reconnect(true);
-            return ((OXResourceInterface)rmistub).getData(ctx, resources, auth);
+            return SOAPUtils.resources2SoapResources(((OXResourceInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapResources2Resources(resources), auth));
         }
     }
 
@@ -217,10 +216,10 @@ public class OXResource extends OXSOAPRMIMapper {
     public Resource[] list(final Context ctx, final String pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
-            return ((OXResourceInterface)rmistub).list(ctx, pattern, auth);
+            return SOAPUtils.resources2SoapResources(((OXResourceInterface)rmistub).list(SOAPUtils.soapContext2Context(ctx), pattern, auth));
         } catch( ConnectException e) {
             reconnect(true);
-            return ((OXResourceInterface)rmistub).list(ctx, pattern, auth);
+            return SOAPUtils.resources2SoapResources(((OXResourceInterface)rmistub).list(SOAPUtils.soapContext2Context(ctx), pattern, auth));
         }
     }
 

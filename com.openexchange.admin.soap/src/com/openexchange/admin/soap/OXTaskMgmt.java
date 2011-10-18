@@ -51,14 +51,13 @@ package com.openexchange.admin.soap;
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
-
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
+import com.openexchange.admin.soap.dataobjects.Context;
 
 
 /**
@@ -67,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.TaskManagerException;
  * @author choeger
  *
  */
-public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
+public class OXTaskMgmt extends OXSOAPRMIMapper {
 
     public OXTaskMgmt() throws RemoteException {
         super(OXTaskMgmtInterface.class);
@@ -79,10 +78,10 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
     public void deleteJob(Context ctx, Credentials auth, int i) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         reconnect();
         try {
-            ((OXTaskMgmtInterface)rmistub).deleteJob(ctx, auth, i);
+            ((OXTaskMgmtInterface)rmistub).deleteJob(SOAPUtils.soapContext2Context(ctx), auth, i);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXTaskMgmtInterface)rmistub).deleteJob(ctx, auth, i);
+            ((OXTaskMgmtInterface)rmistub).deleteJob(SOAPUtils.soapContext2Context(ctx), auth, i);
         }
     }
 
@@ -92,10 +91,10 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
     public void flush(Context ctx, Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, TaskManagerException {
         reconnect();
         try {
-            ((OXTaskMgmtInterface)rmistub).flush(ctx, auth);
+            ((OXTaskMgmtInterface)rmistub).flush(SOAPUtils.soapContext2Context(ctx), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXTaskMgmtInterface)rmistub).flush(ctx, auth);
+            ((OXTaskMgmtInterface)rmistub).flush(SOAPUtils.soapContext2Context(ctx), auth);
         }
     }
 
@@ -105,10 +104,10 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
     public String getJobList(Context ctx, Credentials cred) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException {
         reconnect();
         try {
-            return ((OXTaskMgmtInterface)rmistub).getJobList(ctx, cred);
+            return ((OXTaskMgmtInterface)rmistub).getJobList(SOAPUtils.soapContext2Context(ctx), cred);
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXTaskMgmtInterface)rmistub).getJobList(ctx, cred);
+            return ((OXTaskMgmtInterface)rmistub).getJobList(SOAPUtils.soapContext2Context(ctx), cred);
         }
     }
 
@@ -118,10 +117,10 @@ public class OXTaskMgmt extends OXSOAPRMIMapper implements OXTaskMgmtInterface {
     public Object getTaskResults(Context ctx, Credentials cred, int id) throws RemoteException, InvalidCredentialsException, StorageException, InterruptedException, ExecutionException, InvalidDataException {
         reconnect();
         try {
-            return ((OXTaskMgmtInterface)rmistub).getTaskResults(ctx, cred, id);
+            return ((OXTaskMgmtInterface)rmistub).getTaskResults(SOAPUtils.soapContext2Context(ctx), cred, id);
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXTaskMgmtInterface)rmistub).getTaskResults(ctx, cred, id);
+            return ((OXTaskMgmtInterface)rmistub).getTaskResults(SOAPUtils.soapContext2Context(ctx), cred, id);
         }
     }
 

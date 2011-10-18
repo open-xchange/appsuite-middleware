@@ -4,14 +4,7 @@ runcmd() {
    cmd="$1"
    arg="$2"
    echo "running \"$cmd $arg\" now" 1>&2
-   ./$cmd $arg || { echo "running $cmd failed" | tee FAIL; cleanup; exit; }
-}
-
-cleanup() {
-   ./deletecontext
-   ./unregisterdatabase
-   ./unregisterfilestore $FNR
-   ./unregisterserver
+   ./$cmd $arg || { echo "running $cmd failed" | tee FAIL; exit; }
 }
 
 cmdpath="$1/perl"

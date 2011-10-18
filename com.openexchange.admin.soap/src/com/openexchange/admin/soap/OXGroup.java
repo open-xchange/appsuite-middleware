@@ -50,12 +50,8 @@ package com.openexchange.admin.soap;
 
 import java.rmi.ConnectException;
 import java.rmi.RemoteException;
-
 import com.openexchange.admin.rmi.OXGroupInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Group;
-import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -63,6 +59,9 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.soap.dataobjects.Context;
+import com.openexchange.admin.soap.dataobjects.Group;
+import com.openexchange.admin.soap.dataobjects.User;
 
 /**
  * SOAP Service implementing RMI Interface OXGroupInterface 
@@ -99,10 +98,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public void addMember(Context ctx, Group grp, User[] members, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, NoSuchGroupException {
         reconnect();
         try {
-            ((OXGroupInterface)rmistub).addMember(ctx, grp, members, auth);
+            ((OXGroupInterface)rmistub).addMember(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), SOAPUtils.soapUsers2Users(members), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXGroupInterface)rmistub).addMember(ctx, grp, members, auth);
+            ((OXGroupInterface)rmistub).addMember(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), SOAPUtils.soapUsers2Users(members), auth);
         }
     }
 
@@ -124,10 +123,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public void change(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
-            ((OXGroupInterface)rmistub).change(ctx, grp, auth);
+            ((OXGroupInterface)rmistub).change(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXGroupInterface)rmistub).change(ctx, grp, auth);
+            ((OXGroupInterface)rmistub).change(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth);
         }
     }
 
@@ -149,10 +148,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public Group create(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, NoSuchUserException, StorageException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).create(ctx, grp, auth);
+            return new Group(((OXGroupInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).create(ctx, grp, auth);
+            return new Group(((OXGroupInterface)rmistub).create(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth));
         }
     }
 
@@ -173,10 +172,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public void delete(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
-            ((OXGroupInterface)rmistub).delete(ctx, grp, auth);
+            ((OXGroupInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXGroupInterface)rmistub).delete(ctx, grp, auth);
+            ((OXGroupInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth);
         }
     }
 
@@ -197,10 +196,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public void deleteMultiple(Context ctx, Group[] grps, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
-            ((OXGroupInterface)rmistub).delete(ctx, grps, auth);
+            ((OXGroupInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroups2Groups(grps), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXGroupInterface)rmistub).delete(ctx, grps, auth);
+            ((OXGroupInterface)rmistub).delete(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroups2Groups(grps), auth);
         }
     }
 
@@ -222,10 +221,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public Group getData(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).getData(ctx, grp, auth);
+            return new Group(((OXGroupInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).getData(ctx, grp, auth);
+            return new Group(((OXGroupInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth));
         }
     }
 
@@ -247,10 +246,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public Group[] getMultipleData(Context ctx, Group[] grps, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchGroupException, DatabaseUpdateException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).getData(ctx, grps, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroups2Groups(grps), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).getData(ctx, grps, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).getData(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroups2Groups(grps), auth));
         }
     }
 
@@ -270,10 +269,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public Group getDefaultGroup(Context ctx, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).getDefaultGroup(ctx, auth);
+            return new Group(((OXGroupInterface)rmistub).getDefaultGroup(SOAPUtils.soapContext2Context(ctx), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).getDefaultGroup(ctx, auth);
+            return new Group(((OXGroupInterface)rmistub).getDefaultGroup(SOAPUtils.soapContext2Context(ctx), auth));
         }
     }
 
@@ -295,10 +294,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public User[] getMembers(Context ctx, Group grp, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).getMembers(ctx, grp, auth);
+            return SOAPUtils.users2SoapUsers(((OXGroupInterface)rmistub).getMembers(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).getMembers(ctx, grp, auth);
+            return SOAPUtils.users2SoapUsers(((OXGroupInterface)rmistub).getMembers(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), auth));
         }
     }
 
@@ -319,10 +318,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public Group[] list(Context ctx, String pattern, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).list(ctx, pattern, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).list(SOAPUtils.soapContext2Context(ctx), pattern, auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).list(ctx, pattern, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).list(SOAPUtils.soapContext2Context(ctx), pattern, auth));
         }
     }
 
@@ -342,10 +341,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public Group[] listAll(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).listAll(ctx, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).listAll(SOAPUtils.soapContext2Context(ctx), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).listAll(ctx, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).listAll(SOAPUtils.soapContext2Context(ctx), auth));
         }
     }
 
@@ -367,10 +366,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public Group[] listGroupsForUser(Context ctx, User usr, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         reconnect();
         try {
-            return ((OXGroupInterface)rmistub).listGroupsForUser(ctx, usr, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).listGroupsForUser(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(usr), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXGroupInterface)rmistub).listGroupsForUser(ctx, usr, auth);
+            return SOAPUtils.groups2SoapGroups(((OXGroupInterface)rmistub).listGroupsForUser(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapUser2User(usr), auth));
         }
     }
 
@@ -393,10 +392,10 @@ public class OXGroup extends OXSOAPRMIMapper {
     public void removeMember(Context ctx, Group grp, User[] members, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
         reconnect();
         try {
-            ((OXGroupInterface)rmistub).removeMember(ctx, grp, members, auth);
+            ((OXGroupInterface)rmistub).removeMember(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), SOAPUtils.soapUsers2Users(members), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXGroupInterface)rmistub).removeMember(ctx, grp, members, auth);
+            ((OXGroupInterface)rmistub).removeMember(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapGroup2Group(grp), SOAPUtils.soapUsers2Users(members), auth);
         }
     }
 }
