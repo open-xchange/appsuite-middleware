@@ -254,7 +254,7 @@ public final class DBChatAccess implements ChatAccess {
          * Drop determined chats
          */
         if (!singleChatIds.isEmpty()) {
-            DBChat.dropChats(singleChatIds, contextId, con);
+            DBChat.removeDBChats(singleChatIds, contextId, con);
         }
     }
 

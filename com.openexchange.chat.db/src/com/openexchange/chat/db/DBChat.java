@@ -50,21 +50,23 @@
 package com.openexchange.chat.db;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntObjectProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.chat.Chat;
@@ -75,6 +77,10 @@ import com.openexchange.chat.Packet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -84,9 +90,97 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class DBChat implements Chat {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChat.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChat.class));
 
-    private static final ConcurrentMap<Key, DBChat> CHAT_MAP = new ConcurrentHashMap<Key, DBChat>();
+    private static final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>> CHAT_MAP = new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>>();
+
+    private static final AtomicReference<ScheduledTimerTask> TIMER_TASK = new AtomicReference<ScheduledTimerTask>();
+
+    public static void startUp() {
+        final TimerService timerService = DBChatServiceLookup.getService(TimerService.class);
+        final Runnable task = new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    final ThreadPoolService pool = DBChatServiceLookup.getService(ThreadPoolService.class);
+                    CHAT_MAP.forEachEntry(new TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
+
+                        @Override
+                        public boolean execute(final int contextId, final ConcurrentTIntObjectHashMap<DBChat> map) {
+                            final Runnable subtask = new Runnable() {
+                                
+                                @Override
+                                public void run() {
+                                    try {
+                                        map.forEachEntry(new TIntObjectProcedure<DBChat>() {
+
+                                            @Override
+                                            public boolean execute(final int chatId, final DBChat dbChat) {
+                                                try {
+                                                    final List<Message> messages = dbChat.getNewMessages();
+                                                    for (final Message message : messages) {
+                                                        for (final MessageListener ml : dbChat.messageListeners) {
+                                                            ml.handleMessage(dbChat, message);
+                                                        }
+                                                    }
+                                                } catch (final Exception e) {
+                                                    LOG.error(e.getMessage(), e);
+                                                }
+                                                return true;
+                                            }
+                                        });
+                                        
+                                    } catch (final Exception e) {
+                                        LOG.error(e.getMessage(), e);
+                                    }
+                                }
+                            };
+                            pool.submit(ThreadPools.task(subtask));
+                            return true;
+                        }
+                    });
+                } catch (final Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
+        };
+        timerService.scheduleWithFixedDelay(task, 5000, 5000);
+    }
+
+    public static void shutDone() {
+        final ScheduledTimerTask timerTask = TIMER_TASK.get();
+        if (null != timerTask) {
+            timerTask.cancel(false);
+            TIMER_TASK.set(null);
+        }
+        final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>> clone = new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>>();
+        CHAT_MAP.forEachEntry(new TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
+
+            @Override
+            public boolean execute(final int contextId, final ConcurrentTIntObjectHashMap<DBChat> map) {
+                clone.put(contextId, map);
+                return true;
+            }
+        });
+        CHAT_MAP.clear();
+        clone.forEachEntry(new TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
+
+            @Override
+            public boolean execute(final int contextId, final ConcurrentTIntObjectHashMap<DBChat> map) {
+                final TIntList chatIds = new TIntArrayList();
+                chatIds.add(map.keys());
+                try {
+                    removeDBChats(chatIds, contextId);
+                } catch (final OXException e) {
+                    // Ignore
+                } catch (final Exception e) {
+                    // Ignore
+                }
+                return true;
+            }
+        });
+    }
 
     /**
      * Gets the chat for specified arguments
@@ -96,7 +190,8 @@ public final class DBChat implements Chat {
      * @return The chat or <code>null</code> if absent
      */
     public static DBChat optDBChat(final int chatId, final int contextId) {
-        return CHAT_MAP.get(new Key(chatId, contextId));
+        final ConcurrentTIntObjectHashMap<DBChat> map = CHAT_MAP.get(contextId);
+        return null == map ? null : map.get(chatId);
     }
 
     /**
@@ -107,11 +202,18 @@ public final class DBChat implements Chat {
      * @return The chat
      */
     public static DBChat getDBChat(final int chatId, final int contextId) {
-        final Key key = new Key(chatId, contextId);
-        DBChat dbChat = CHAT_MAP.get(key);
+        ConcurrentTIntObjectHashMap<DBChat> map = CHAT_MAP.get(contextId);
+        if (null == map) {
+            final ConcurrentTIntObjectHashMap<DBChat> newMap = new ConcurrentTIntObjectHashMap<DBChat>();
+            map = CHAT_MAP.putIfAbsent(contextId, newMap);
+            if (null == map) {
+                map = newMap;
+            }
+        }
+        DBChat dbChat = map.get(chatId);
         if (null == dbChat) {
             final DBChat newChat = new DBChat(chatId, contextId);
-            dbChat = CHAT_MAP.putIfAbsent(key, newChat);
+            dbChat = map.putIfAbsent(chatId, newChat);
             if (null == dbChat) {
                 dbChat = newChat;
             }
@@ -127,14 +229,52 @@ public final class DBChat implements Chat {
      * @throws OXException If removal fails
      */
     public static void removeDBChat(final int chatId, final int contextId) throws OXException {
-        CHAT_MAP.remove(new Key(chatId, contextId));
+        final ConcurrentTIntObjectHashMap<DBChat> map = CHAT_MAP.get(contextId);
+        if (null != map) {
+            map.remove(chatId);
+        }
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getWritable(contextId);
         try {
             con.setAutoCommit(false);
             final TIntList list = new TIntArrayList(1);
             list.add(chatId);
-            dropChats(list, contextId, con);
+            removeDBChats(list, contextId, con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * Removes specified chat.
+     * 
+     * @param chatIds The chat identifiers
+     * @param contextId The context identifier
+     * @throws OXException If removal fails
+     */
+    public static void removeDBChats(final TIntList chatIds, final int contextId) throws OXException {
+        /*
+         * Delete from map
+         */
+        final ConcurrentTIntObjectHashMap<DBChat> map = CHAT_MAP.get(contextId);
+        if (null != map) {
+            for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
+                map.remove(iterator.next());
+            }
+        }
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            removeDBChats(chatIds, contextId, con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -156,7 +296,19 @@ public final class DBChat implements Chat {
      * @param con The connection to use
      * @throws OXException If operation fails
      */
-    public static void dropChats(final TIntList chatIds, final int contextId, final Connection con) throws OXException {
+    public static void removeDBChats(final TIntList chatIds, final int contextId, final Connection con) throws OXException {
+        /*
+         * Delete from map
+         */
+        final ConcurrentTIntObjectHashMap<DBChat> map = CHAT_MAP.get(contextId);
+        if (null != map) {
+            for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
+                map.remove(iterator.next());
+            }
+        }
+        /*
+         * Clean tables
+         */
         PreparedStatement stmt = null;
         int pos;
         /*
@@ -211,13 +363,14 @@ public final class DBChat implements Chat {
             closeSQLStuff(stmt);
         }
     }
-    
 
     private final int chatId;
 
     private final List<MessageListener> messageListeners;
 
     private final int contextId;
+
+    private volatile long lastChecked;
 
     /**
      * Initializes a new {@link DBChat}.
@@ -227,6 +380,13 @@ public final class DBChat implements Chat {
         this.chatId = chatId;
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
+    }
+
+    private List<Message> getNewMessages() {
+        final List<Message> list = new ArrayList<Message>();
+        
+        lastChecked = System.currentTimeMillis();
+        return list;
     }
 
     /**
@@ -496,61 +656,5 @@ public final class DBChat implements Chat {
         }
         return databaseService;
     }
-
-    private static final class Key {
-
-        private final int contextId;
-
-        private final int chatId;
-
-        private final int hash;
-
-        public Key(final int chatId, final int contextId) {
-            super();
-            this.chatId = chatId;
-            this.contextId = contextId;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + chatId;
-            result = prime * result + contextId;
-            this.hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (chatId != other.chatId) {
-                return false;
-            }
-            if (contextId != other.contextId) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("Key ( ");
-            sb.append("contextId = ");
-            sb.append(contextId);
-            sb.append(", chatId = ");
-            sb.append(chatId);
-            sb.append(" )");
-            return sb.toString();
-        }
-
-    } // End of class Key
 
 }
