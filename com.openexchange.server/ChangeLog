@@ -1,3 +1,8 @@
+* 2011-10-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20610: Using proper folder tree identifier with submitted tasks
+ - Fix for bug 20624: Proper handling of InterruptedException
+
 * 2011-10-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 20602: Checking for POP3 account's full names outside of connection scope
