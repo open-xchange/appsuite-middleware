@@ -155,7 +155,7 @@ public final class DBRoster implements Roster {
         ResultSet rs = null;
         final Connection con = databaseService.getReadOnly(context);
         try {
-            stmt = con.prepareStatement("SELECT mode, statusMessage FROM chatPresence WHERE cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT mode, statusMessage, type FROM chatPresence WHERE cid = ? AND user = ?");
             final int userId = Integer.parseInt(user.getId());
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
