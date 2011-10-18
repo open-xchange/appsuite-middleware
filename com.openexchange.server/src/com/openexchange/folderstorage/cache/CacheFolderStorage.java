@@ -142,17 +142,11 @@ public final class CacheFolderStorage implements FolderStorage {
 
     @Override
     public void clearCache(final int userId, final int contextId) {
-        final Lock lock = LockManagement.getInstance().getFor(REAL_TREE_ID, userId, contextId).writeLock();
-        lock.lock();
-        try {
-            final Cache cache = globalCache;
-            if (null != cache) {
-                cache.invalidateGroup(String.valueOf(contextId));
-            }
-            dropUserEntries(userId, contextId);
-        } finally {
-            lock.unlock();
+        final Cache cache = globalCache;
+        if (null != cache) {
+            cache.invalidateGroup(String.valueOf(contextId));
         }
+        dropUserEntries(userId, contextId);
     }
 
     /**
@@ -399,7 +393,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * @throws OXException If removal fails
      */
     public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws OXException {
-        final Lock lock = LockManagement.getInstance().getFor(REAL_TREE_ID, session).writeLock();
+        final Lock lock = LockManagement.getInstance().getFor(treeId, session).writeLock();
         lock.lock();
         try {
             if (singleOnly) {
@@ -488,7 +482,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param contextId The context identifier
      */
     public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final boolean deleted) {
-        final Lock lock = LockManagement.getInstance().getFor(REAL_TREE_ID, userId, contextId).writeLock();
+        final Lock lock = LockManagement.getInstance().getFor(treeId, userId, contextId).writeLock();
         lock.lock();
         try {
             final Cache cache = globalCache;

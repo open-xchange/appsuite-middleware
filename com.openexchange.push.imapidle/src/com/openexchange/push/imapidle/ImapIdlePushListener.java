@@ -379,7 +379,7 @@ public final class ImapIdlePushListener implements PushListener {
                     final int newUnreadCount = inbox.getUnreadMessageCount();
                     if (!(newDeletedCount == deletedCount && newTotalCount == totalCount && newUnreadCount == unreadCount)) {
                         if (DEBUG_ENABLED) {
-                            StringBuilder sb = new StringBuilder("IDLE: Mail event for Context: ");
+                            final StringBuilder sb = new StringBuilder("IDLE: Mail event for Context: ");
                             sb.append(session.getContextId());
                             sb.append(", Login: ");
                             sb.append(session.getLoginName());
@@ -424,7 +424,9 @@ public final class ImapIdlePushListener implements PushListener {
             try {
                 Thread.sleep(errordelay);
             } catch (final InterruptedException e1) {
-                LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
+                if (DEBUG_ENABLED) {
+                    LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
+                }
             }
         } catch (final MessagingException e) {
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
@@ -434,7 +436,9 @@ public final class ImapIdlePushListener implements PushListener {
             try {
                 Thread.sleep(errordelay);
             } catch (final InterruptedException e1) {
-                LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
+                if (DEBUG_ENABLED) {
+                    LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
+                }
             }
         } finally {
             if (null != mailAccess) {

@@ -51,17 +51,14 @@ package com.openexchange.obs.api;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -172,14 +169,14 @@ public class BuildServiceClient {
 
     /**
      * set common parameters for this method like AuthScheme, etc.
-     * 
+     *
      * @param method
      */
     private void setHttpMethodParams(HttpMethod method) {
         method.getHostAuthState().setAuthScheme(new BasicScheme());
         method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
     }
-    
+
     /**
      * return {@link InputStream} to {@link GetMethod} response
      * @param method
@@ -188,8 +185,8 @@ public class BuildServiceClient {
      * @throws IOException
      */
     private InputStream bsGetResult(GetMethod method) throws HttpException, IOException {
-    	setHttpMethodParams(method);
-    	int status = httpclient.executeMethod(method);
+        setHttpMethodParams(method);
+        int status = httpclient.executeMethod(method);
         if (status != HttpStatus.SC_OK) {
             throw new HttpException(method.getStatusLine().toString());
         }
@@ -198,7 +195,7 @@ public class BuildServiceClient {
 
     /**
      * Return {@link InputStream} to binary package content
-     * 
+     *
      * @param project
      * @param repository
      * @param pkgname
@@ -217,44 +214,44 @@ public class BuildServiceClient {
      * check if specified package exists
      * returns true in case it exists, false in case of 404 and
      * throws an Exception in case of any other responses
-     * 
+     *
      * @param method
      * @return
      * @throws HttpException
      * @throws IOException
      */
     private boolean packageExists(GetMethod method) throws HttpException, IOException {
-    	int status = httpclient.executeMethod(method);
-    	if( status == HttpStatus.SC_NOT_FOUND ) {
-    		return false;
-    	} else if (status != HttpStatus.SC_OK) {
+        int status = httpclient.executeMethod(method);
+        if( status == HttpStatus.SC_NOT_FOUND ) {
+            return false;
+        } else if (status != HttpStatus.SC_OK) {
             throw new HttpException(method.getStatusLine().toString());
         }
-    	return true;
+        return true;
     }
-    
+
     /**
      * create empty package on obs
-     * 
+     *
      * @param project
      * @param pkgname
      * @throws HttpException
      * @throws IOException
      */
     private void createPackage(String project, String pkgname) throws HttpException, IOException {
-    	String pkgmeta = getPackageMeta(project, pkgname);
-    	final PutMethod pmethod = new PutMethod(this.bsurl + "/source/" + project + "/" + pkgname + "/_meta");
-    	setHttpMethodParams(pmethod);
-    	pmethod.setRequestEntity(new StringRequestEntity(pkgmeta,"text/plain","utf-8"));
-    	int status = httpclient.executeMethod(pmethod);
+        String pkgmeta = getPackageMeta(project, pkgname);
+        final PutMethod pmethod = new PutMethod(this.bsurl + "/source/" + project + "/" + pkgname + "/_meta");
+        setHttpMethodParams(pmethod);
+        pmethod.setRequestEntity(new StringRequestEntity(pkgmeta,"text/plain","utf-8"));
+        int status = httpclient.executeMethod(pmethod);
         if (status != HttpStatus.SC_OK) {
             throw new HttpException(pmethod.getStatusLine().toString());
         }
     }
-    
+
     /**
      * upload specified file into obs
-     * 
+     *
      * @param project
      * @param pkgname
      * @param file
@@ -262,18 +259,18 @@ public class BuildServiceClient {
      * @throws IOException
      */
     private void uploadSource(String project, String pkgname, File file) throws HttpException, IOException {
-    	final PutMethod pmethod = new PutMethod(this.bsurl + "/source/" + project + "/" + pkgname + "/" + file.getName());
-    	setHttpMethodParams(pmethod);
-    	pmethod.setRequestEntity(new InputStreamRequestEntity(new FileInputStream(file)));
-    	int status = httpclient.executeMethod(pmethod);
+        final PutMethod pmethod = new PutMethod(this.bsurl + "/source/" + project + "/" + pkgname + "/" + file.getName());
+        setHttpMethodParams(pmethod);
+        pmethod.setRequestEntity(new InputStreamRequestEntity(new FileInputStream(file)));
+        int status = httpclient.executeMethod(pmethod);
         if (status != HttpStatus.SC_OK) {
             throw new HttpException(pmethod.getStatusLine().toString());
         }
     }
-    
+
     /**
      * delete specified source file
-     * 
+     *
      * @param project
      * @param pkgname
      * @param file
@@ -281,32 +278,32 @@ public class BuildServiceClient {
      * @throws IOException
      */
     private void deleteSource(String project, String pkgname, String file) throws HttpException, IOException {
-    	final DeleteMethod dmethod = new DeleteMethod(this.bsurl + "/source/" + project + "/" + pkgname + "/" + file);
-    	setHttpMethodParams(dmethod);
-    	int status = httpclient.executeMethod(dmethod);
+        final DeleteMethod dmethod = new DeleteMethod(this.bsurl + "/source/" + project + "/" + pkgname + "/" + file);
+        setHttpMethodParams(dmethod);
+        int status = httpclient.executeMethod(dmethod);
         if (status != HttpStatus.SC_OK) {
             throw new HttpException(dmethod.getStatusLine().toString());
         }
     }
-    
+
     /**
      * generate package meta xml data
-     * 
+     *
      * @param project
      * @param pkgname
      * @return
      */
     private String getPackageMeta(String project, String pkgname) {
-    	return "<package project=\"" + project + "\" name=\"" + pkgname + "\">\n" +
-    			"<title>" + pkgname + "</title>\n" + 
-    			"<description/>\n" + 
-    			"<person role=\"maintainer\" userid=\"" + this.bsuser + "\"/>\n" +
-    			"</package>";
+        return "<package project=\"" + project + "\" name=\"" + pkgname + "\">\n" +
+                "<title>" + pkgname + "</title>\n" +
+                "<description/>\n" +
+                "<person role=\"maintainer\" userid=\"" + this.bsuser + "\"/>\n" +
+                "</package>";
     }
-    
+
     /**
      * upload all source files from within directory path
-     * 
+     *
      * @param project
      * @param pkgname
      * @param path
@@ -316,32 +313,36 @@ public class BuildServiceClient {
      * @throws XPathExpressionException
      */
     public void uploadSourcePackage(String project, String pkgname, String path) throws HttpException, IOException, BuildServiceException, XPathExpressionException {
-    	final GetMethod method = new GetMethod(this.bsurl + "/source/" + project + "/" + pkgname + "/_meta");
-    	setHttpMethodParams(method);
-    	if( ! packageExists(method) ) {
-    		createPackage(project, pkgname);
-    	}
-    	File sdir = new File(path);
-    	if( ! sdir.isDirectory() ) {
-    		throw new BuildServiceException("path is not a directory");
-    	}
-    	// TODO: only upload files that have changed (use md5sum)
-    	ArrayList<String> obsfiles = getPackageSourceNames(project, pkgname);
-    	if( null != obsfiles && obsfiles.size() > 0 ) {
-    		for(String s : obsfiles) {
-    			System.out.println("Removing " + s);
-    			deleteSource(project, pkgname, s);
-    		}
-    	}
-		for(final File f : sdir.listFiles() ) {
-			System.out.println("Uploading " + f.getPath());
-			uploadSource(project, pkgname, f);
-		}
+        final File sdir = new File(path);
+        if (! sdir.isDirectory()) {
+            throw new BuildServiceException("path is not a directory");
+        }
+        uploadSourcePackage(project, pkgname, sdir.listFiles());
     }
-    
+
+    public void uploadSourcePackage(final String project, final String pkgName, final File[] files) throws HttpException, IOException, XPathExpressionException, BuildServiceException {
+        final GetMethod method = new GetMethod(this.bsurl + "/source/" + project + "/" + pkgName + "/_meta");
+        setHttpMethodParams(method);
+        if (!packageExists(method)) {
+            createPackage(project, pkgName);
+        }
+        // TODO: only upload files that have changed (use md5sum)
+        ArrayList<String> obsfiles = getPackageSourceNames(project, pkgName);
+        if (null != obsfiles && obsfiles.size() > 0) {
+            for (final String s : obsfiles) {
+                System.out.println("Removing " + s);
+                deleteSource(project, pkgName, s);
+            }
+        }
+        for (final File f : files) {
+            System.out.println("Uploading " + f.getPath());
+            uploadSource(project, pkgName, f);
+        }
+    }
+
     /**
      * get an ArrayList of packages that belong to project / repository / package
-     * 
+     *
      * @param project
      * @param repository
      * @param pkgname
@@ -402,7 +403,7 @@ public class BuildServiceClient {
             }
             Node node = nmap.getNamedItem("filename");
             if( null == node ) {
-            	node = nmap.getNamedItem("name");
+                node = nmap.getNamedItem("name");
             }
             if (node != null) {
                 ret.add(node.getNodeValue());
@@ -410,10 +411,10 @@ public class BuildServiceClient {
         }
         return ret;
     }
-    
+
     /**
      * Determine status of project Status is cached internally and is overwritten with every call of this method
-     * 
+     *
      * @param project
      * @param repository
      * @return the package statuses
@@ -541,8 +542,8 @@ public class BuildServiceClient {
 
     /**
      * @param args
-     * @throws BuildServiceException 
-     * @throws XPathExpressionException 
+     * @throws BuildServiceException
+     * @throws XPathExpressionException
      */
     public static void main(String[] args) throws XPathExpressionException, BuildServiceException {
         BuildServiceClient bsc = new BuildServiceClient("oxbuilduser", "openxchange", "http://buildapi.netline.de");
@@ -551,9 +552,9 @@ public class BuildServiceClient {
 //        final String repository = "DebianSqueeze";
 
         try {
-        	//bsc.uploadSourcePackage("open-xchange-snapshot", "open-xchange-imap", "/home/choeger/bsctest");
-        	bsc.uploadSourcePackage("open-xchange-7-test", "open-xchange-imap", "/home/choeger/bsctest");
-        	
+            //bsc.uploadSourcePackage("open-xchange-snapshot", "open-xchange-imap", "/home/choeger/bsctest");
+            bsc.uploadSourcePackage("open-xchange-7-test", "open-xchange-imap", "/home/choeger/bsctest");
+
             //bsc.getProjectBinaryPackageNames("open-xchange-snapshot", "DebianLenny", "open-xchange-imap");
             /*
             while (it.hasNext()) {
@@ -572,14 +573,14 @@ public class BuildServiceClient {
                 }
             }
             */
-        	
+
 //            while (true) {
-//        	PackageStatus[] statuses = bsc.checkProjectStatus(project, repository);
-//        	for(final PackageStatus st : statuses ) {
-//        		if( st.getCode() != Code.DISABLED ) {
-//        			System.out.println(st.getName() + ":" + st.getCode());
-//        		}
-//        	}
+//            PackageStatus[] statuses = bsc.checkProjectStatus(project, repository);
+//            for(final PackageStatus st : statuses ) {
+//                if( st.getCode() != Code.DISABLED ) {
+//                    System.out.println(st.getName() + ":" + st.getCode());
+//                }
+//            }
 //                if (!bsc.isProjectBuilding(statuses)) {
 //                    break;
 //                }

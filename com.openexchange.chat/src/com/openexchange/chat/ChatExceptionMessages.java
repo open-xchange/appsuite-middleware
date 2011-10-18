@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,18 +49,45 @@
 
 package com.openexchange.chat;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
+
 /**
- * {@link ChatCaps} - The capabilities of a chat..
- * 
+ * {@link ChatExceptionMessages} - Exception messages for {@link OXException} that must be translated.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatCaps {
+public final class ChatExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String ERROR_MSG = "An error occurred: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+    
+    // Method is not supported.
+    public static final String UNSUPPORTED_OPERATION_MSG = "Method is not supported.";
+
+    // No account found with identifier "%1$s".
+    public static final String ACCOUNT_NOT_FOUND_MSG = "No account found with identifier \"%1$s\".";
+
+    // Invalid presence packet.
+    public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence packet.";
+
+    // A chat with identifier "%1$s" already exists.
+    public static final String CHAT_ALREADY_EXISTS_MSG = "A chat with identifier \"%1$s\" already exists.";
+
+    // Chat member "%1$s" already exists in chat "%2$s".
+    public static final String CHAT_MEMBER_ALREADY_EXISTS_MSG = "Chat member \"%1$s\" already exists in chat \"%2$s\".";
+
+    // No chat found with identifier "%1$s".
+    public static final String CHAT_NOT_FOUND_MSG = "No chat found with identifier \"%1$s\".";
+    
 
     /**
-     * Checks if associated chat supports notifications about new messages.
-     * 
-     * @return <code>true</code> if notifications about new messages are supported; else <code>false</code>
+     * Prevent instantiation.
      */
-    boolean supportsNotifcation();
-
+    private ChatExceptionMessages() {
+        super();
+    }
 }

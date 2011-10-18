@@ -53,18 +53,11 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ChatAccess} - Provides the methods to access a chat for a certain user.
+ * {@link ChatAccess} - Provides access to chat functionality in the name of associated user.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatAccess {
-
-    /**
-     * Gets the capabilities of this access.
-     * 
-     * @return The capabilities
-     */
-    ChatCaps getCapabilities();
 
     /**
      * Closes the connection by setting presence to unavailable then closing the connection.
@@ -83,36 +76,51 @@ public interface ChatAccess {
      * 
      * @return The user
      */
-    ChatMember getUser();
+    ChatUser getUser();
 
     /**
-     * Gets all descriptions for opened chats for this access.
+     * Sends given presence packet for associated {@link #getUser() user}.
      * 
-     * @return All descriptions for opened chats
+     * @param presence The presence packet
+     * @throws OXException If sending presence packet fails
+     */
+    void sendPresence(Presence presence) throws OXException;
+
+    /**
+     * Gets the user's roster.
+     * 
+     * @return The roster
+     * @throws OXException If roster cannot be returned
+     */
+    Roster getRoster() throws OXException;
+
+    /**
+     * Gets all identifiers for opened chats for this access.
+     * 
+     * @return All identifiers for opened chats
      * @throws OXException If an error occurs
      */
-    List<ChatDesc> getChats() throws OXException;
+    List<String> getChats() throws OXException;
 
     /**
      * Opens described chat with specified member.
      * 
-     * @param chatDescription The chat description
+     * @param chatId The chat identifier or <code>null</code> to generate a unique one
      * @param member The member with which to open the chat
      * @return The opened chat
      * @throws OXException If chat cannot be opened
-     * @see ChatDesc#DEFAULT_CHAT
+     * @see Chat#DEFAULT_CHAT
      */
-    Chat openChat(ChatDesc chatDescription, MessageListener listener, ChatMember member) throws OXException;
+    Chat openChat(String chatId, MessageListener listener, ChatUser member) throws OXException;
 
     /**
      * Opens described chat with specified members.
      * 
-     * @param chatDescription The chat description
+     * @param chatId The chat identifier or <code>null</code> to generate a unique one; must not be Chat#DEFAULT_CHAT
      * @param members The members with which to open the chat
      * @return The opened chat
      * @throws OXException If chat cannot be opened
-     * @see ChatDesc#DEFAULT_CHAT
      */
-    Chat openChat(ChatDesc chatDescription, MessageListener listener, ChatMember... members) throws OXException;
+    Chat openChat(String chatId, MessageListener listener, ChatUser... members) throws OXException;
 
 }

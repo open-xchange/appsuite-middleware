@@ -68,7 +68,7 @@ public interface ChatAccountManager {
      * @return The identifier of the newly created account
      * @throws OXException If insertion fails
      */
-    int addAccount(ChatAccount account, Session session) throws OXException;
+    String addAccount(ChatAccount account, Session session) throws OXException;
 
     /**
      * Updates an existing account.
@@ -105,7 +105,7 @@ public interface ChatAccountManager {
      * @return The messaging account.
      * @throws OXException If retrieval fails
      */
-    ChatAccount getAccount(int id, Session session) throws OXException;
+    ChatAccount getAccount(String id, Session session) throws OXException;
 
     /**
      * Checks whether the given secret can be used to decrypt secret strings in this account.

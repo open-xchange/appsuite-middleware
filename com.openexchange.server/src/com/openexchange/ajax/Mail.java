@@ -3908,8 +3908,8 @@ public class Mail extends PermissionServlet implements UploadListener {
     }
 
     private static boolean equals(final String s1, final String s2) {
-        if (null == s2) {
-            if (null != s1) {
+        if (null == s1) {
+            if (null != s2) {
                 return false;
             }
         } else if (!s1.equals(s2)) {

@@ -49,42 +49,25 @@
 
 package com.openexchange.chat;
 
-import java.util.Date;
-
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link ChatUser} - Represents a chat user.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public interface ChatUser {
 
     /**
-     * Gets the packet identifier.
+     * Gets the identifier.
      * 
-     * @return The identifier or <code>null</code>
+     * @return The identifier.
      */
-    String getPacketId();
+    String getId();
 
     /**
-     * Gets the sender.
+     * Gets the name or nickname of the user.
      * 
-     * @return The sender or <code>null</code>
+     * @return The name/nickname
      */
-    ChatUser getFrom();
-
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
-    @Override
-    String toString();
+    String getName();
 
 }

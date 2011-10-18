@@ -59,31 +59,45 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat extends ChatDesc {
+public interface Chat {
+
+    /**
+     * Gets the chat identifier.
+     * 
+     * @return The chat identifier.
+     */
+    String getChatId();
+
+    /**
+     * Gets the chat's subject.
+     * 
+     * @return The subject
+     */
+    String getSubject();
 
     /**
      * Gets the chat members.
      * 
-     * @return The chat members
+     * @return The identifiers of the chat members
      * @throws OXException If chat members cannot be returned
      */
-    List<ChatMember> getMembers() throws OXException;
+    List<String> getMembers() throws OXException;
 
     /**
      * Joins specified chat member to this chat.
      * 
-     * @param member The member to join
+     * @param user The identifier of the member to join
      * @throws OXException If joining the chat member fails
      */
-    void join(ChatMember member) throws OXException;
+    void join(String user) throws OXException;
 
     /**
      * Parts specified chat member from this chat.
      * 
-     * @param member The member to part
+     * @param user The identifier of the member to part
      * @throws OXException If member cannot be removed
      */
-    void part(ChatMember member) throws OXException;
+    void part(String user) throws OXException;
 
     /**
      * Posts specified packet to this chat.
@@ -92,15 +106,6 @@ public interface Chat extends ChatDesc {
      * @throws OXException If posting the packet fails
      */
     void post(Packet packet) throws OXException;
-
-    /**
-     * Polls all arrived message since specified time stamp.
-     * 
-     * @param since The time stamp; pass <code>null</code> to retrieve all available messages for this chat
-     * @return All arrived message since specified time stamp
-     * @throws OXException If poll fails
-     */
-    List<Message> pollMessages(Date since) throws OXException;
 
     /**
      * Adds given message listener that will be notified of any new messages in the chat.

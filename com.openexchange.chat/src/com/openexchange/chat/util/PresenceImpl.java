@@ -47,44 +47,88 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.util;
 
-import java.util.Date;
+import com.openexchange.chat.Presence;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link PresenceImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public class PresenceImpl extends PacketImpl implements Presence {
+
+    private Type type;
+
+    private Mode mode;
+
+    private String status;
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link PresenceImpl}.
      */
-    String getPacketId();
+    public PresenceImpl() {
+        super();
+        type = Type.AVAILABLE;
+        mode = Mode.AVAILABLE;
+    }
 
     /**
-     * Gets the sender.
+     * Initializes a new {@link PresenceImpl}.
      * 
-     * @return The sender or <code>null</code>
+     * @param type The presence type
      */
-    ChatUser getFrom();
+    public PresenceImpl(final Type type) {
+        super();
+        this.type = type;
+        mode = Mode.AVAILABLE;
+    }
 
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
     @Override
-    String toString();
+    public String toString() {
+        return getStatus();
+    }
+
+    @Override
+    public String getStatus() {
+        return status;
+    }
+
+    @Override
+    public Type getType() {
+        return type;
+    }
+
+    @Override
+    public Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Sets the type
+     * 
+     * @param type The type to set
+     */
+    public void setType(final Type type) {
+        this.type = type;
+    }
+
+    /**
+     * Sets the mode
+     * 
+     * @param mode The mode to set
+     */
+    public void setMode(final Mode mode) {
+        this.mode = mode;
+    }
+
+    /**
+     * Sets the status
+     * 
+     * @param status The status to set
+     */
+    public void setStatus(final String status) {
+        this.status = status;
+    }
 
 }

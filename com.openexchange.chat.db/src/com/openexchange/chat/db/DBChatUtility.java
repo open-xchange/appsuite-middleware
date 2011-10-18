@@ -47,44 +47,73 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.db;
 
-import java.util.Date;
+import java.util.UUID;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link DBChatUtility} - Utility class.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public final class DBChatUtility {
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link DBChatUtility}.
      */
-    String getPacketId();
+    private DBChatUtility() {
+        super();
+    }
 
     /**
-     * Gets the sender.
-     * 
-     * @return The sender or <code>null</code>
+     * The unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
      */
-    ChatUser getFrom();
+    private static final String UNHEX_REPLACE_STRING = "UNHEX(REPLACE(?,'-',''))";
 
     /**
-     * Gets the time stamp for this packet.
+     * Appends the unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
      * 
-     * @return The time stamp
+     * @param sb The string builder to append to
+     * @return The string builder with unhex-replace string appended
      */
-    Date getTimeStamp();
+    public static StringBuilder appendUnhexReplaceString(final StringBuilder sb) {
+        return sb.append(UNHEX_REPLACE_STRING);
+    }
 
     /**
-     * Gets the string representation of this packet.
+     * Gets the unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
      * 
-     * @return The string representation
+     * @return The unhex-replace string
      */
-    @Override
-    String toString();
+    public static String getUnhexReplaceString() {
+        return UNHEX_REPLACE_STRING;
+    }
+
+    private static final int UUID_BYTE_LENGTH = 16;
+
+    /**
+     * Generates a new {@link UUID} instance from specified byte array.
+     * 
+     * @param bytes The byte array
+     * @return A new {@link UUID} instance
+     * @throws IllegalArgumentException If passed byte array is <code>null</code> or its length is not 16
+     */
+    public static UUID toUUID(final byte[] bytes) {
+        if (null == bytes) {
+            throw new IllegalArgumentException("Byte array is null.");
+        }
+        if (bytes.length != UUID_BYTE_LENGTH) {
+            throw new IllegalArgumentException("UUID must be contructed using a byte array with length 16.");
+        }
+        long msb = 0;
+        long lsb = 0;
+        for (int i = 0; i < 8; i++) {
+            msb = (msb << 8) | (bytes[i] & 0xff);
+        }
+        for (int i = 8; i < 16; i++) {
+            lsb = (lsb << 8) | (bytes[i] & 0xff);
+        }
+        return new UUID(msb, lsb);
+    }
 
 }

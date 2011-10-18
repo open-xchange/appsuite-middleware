@@ -47,44 +47,66 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.util;
 
-import java.util.Date;
+import com.openexchange.chat.ChatUser;
 
 /**
- * {@link Packet} - Represents any kind of package that can be delivered within a chat.
+ * {@link ChatUserImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Packet {
+public class ChatUserImpl implements ChatUser {
+
+    private String id;
+
+    private String name;
 
     /**
-     * Gets the packet identifier.
-     * 
-     * @return The identifier or <code>null</code>
+     * Initializes a new {@link ChatUserImpl}.
      */
-    String getPacketId();
+    public ChatUserImpl() {
+        super();
+    }
 
     /**
-     * Gets the sender.
+     * Initializes a new {@link ChatUserImpl}.
      * 
-     * @return The sender or <code>null</code>
+     * @param id The identifier
+     * @param name The name
      */
-    ChatUser getFrom();
+    public ChatUserImpl(final String id, final String name) {
+        super();
+        this.id = id;
+        this.name = name;
+    }
 
-    /**
-     * Gets the time stamp for this packet.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
-
-    /**
-     * Gets the string representation of this packet.
-     * 
-     * @return The string representation
-     */
     @Override
-    String toString();
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+    /**
+     * Sets the name
+     * 
+     * @param name The name to set
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
 
 }
