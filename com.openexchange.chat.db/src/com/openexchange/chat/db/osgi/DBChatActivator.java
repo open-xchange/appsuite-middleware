@@ -57,8 +57,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.chat.ChatService;
 import com.openexchange.chat.Presence;
 import com.openexchange.chat.db.DBChatAccess;
+import com.openexchange.chat.db.DBChatService;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.chat.db.DBRoster;
 import com.openexchange.chat.util.ChatUserImpl;
@@ -102,6 +104,13 @@ public final class DBChatActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         DBChatServiceLookup.set(this);
+        /*
+         * Register service
+         */
+        registerService(ChatService.class, new DBChatService());
+        /*
+         * Register event handler
+         */
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());

@@ -50,6 +50,9 @@
 package com.openexchange.chat.db;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +62,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -81,7 +86,134 @@ public final class DBChat implements Chat {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChat.class));
 
-    private int chatId;
+    private static final ConcurrentMap<Key, DBChat> CHAT_MAP = new ConcurrentHashMap<Key, DBChat>();
+
+    /**
+     * Gets the chat for specified arguments
+     * 
+     * @param chatId The chat identifier
+     * @param contextId The context identifier
+     * @return The chat or <code>null</code> if absent
+     */
+    public static DBChat optDBChat(final int chatId, final int contextId) {
+        return CHAT_MAP.get(new Key(chatId, contextId));
+    }
+
+    /**
+     * Gets the chat for specified arguments
+     * 
+     * @param chatId The chat identifier
+     * @param contextId The context identifier
+     * @return The chat
+     */
+    public static DBChat getDBChat(final int chatId, final int contextId) {
+        final Key key = new Key(chatId, contextId);
+        DBChat dbChat = CHAT_MAP.get(key);
+        if (null == dbChat) {
+            final DBChat newChat = new DBChat(chatId, contextId);
+            dbChat = CHAT_MAP.putIfAbsent(key, newChat);
+            if (null == dbChat) {
+                dbChat = newChat;
+            }
+        }
+        return dbChat;
+    }
+    
+    /**
+     * Removes specified chat.
+     * 
+     * @param chatId The chat identifier
+     * @param contextId The context identifier
+     * @throws OXException If removal fails
+     */
+    public static void removeDBChat(final int chatId, final int contextId) throws OXException {
+        CHAT_MAP.remove(new Key(chatId, contextId));
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            final TIntList list = new TIntArrayList(1);
+            list.add(chatId);
+            dropChats(list, contextId, con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    /**
+     * Drops all data associated with specified chats.
+     * 
+     * @param chatIds The chat identifiers
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws OXException If operation fails
+     */
+    public static void dropChats(final TIntList chatIds, final int contextId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        int pos;
+        /*
+         * Drop chat message entries for each chat identifier
+         */
+        try {
+            stmt = con.prepareStatement("DELETE FROM chatMessage WHERE cid = ? AND chatId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
+                stmt.setInt(pos, iterator.next());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        /*
+         * Drop chat member entries for each chat identifier
+         */
+        try {
+            stmt = con.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND chatId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
+                stmt.setInt(pos, iterator.next());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        /*
+         * Drop chat entry for each chat identifier
+         */
+        try {
+            stmt = con.prepareStatement("DELETE FROM chat WHERE cid = ? AND chatId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            for (final TIntIterator iterator = chatIds.iterator(); iterator.hasNext();) {
+                stmt.setInt(pos, iterator.next());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+    
+
+    private final int chatId;
 
     private final List<MessageListener> messageListeners;
 
@@ -90,19 +222,11 @@ public final class DBChat implements Chat {
     /**
      * Initializes a new {@link DBChat}.
      */
-    public DBChat(final int contextId) {
+    public DBChat(final int chatId, final int contextId) {
         super();
+        this.chatId = chatId;
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
-    }
-
-    /**
-     * Sets the chatId
-     * 
-     * @param chatId The chatId to set
-     */
-    public void setChatId(final int chatId) {
-        this.chatId = chatId;
     }
 
     /**
@@ -365,12 +489,68 @@ public final class DBChat implements Chat {
         }
     }
 
-    private DatabaseService getDatabaseService() throws OXException {
+    private static DatabaseService getDatabaseService() throws OXException {
         final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return databaseService;
     }
+
+    private static final class Key {
+
+        private final int contextId;
+
+        private final int chatId;
+
+        private final int hash;
+
+        public Key(final int chatId, final int contextId) {
+            super();
+            this.chatId = chatId;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + chatId;
+            result = prime * result + contextId;
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Key)) {
+                return false;
+            }
+            final Key other = (Key) obj;
+            if (chatId != other.chatId) {
+                return false;
+            }
+            if (contextId != other.contextId) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append("Key ( ");
+            sb.append("contextId = ");
+            sb.append(contextId);
+            sb.append(", chatId = ");
+            sb.append(chatId);
+            sb.append(" )");
+            return sb.toString();
+        }
+
+    } // End of class Key
 
 }

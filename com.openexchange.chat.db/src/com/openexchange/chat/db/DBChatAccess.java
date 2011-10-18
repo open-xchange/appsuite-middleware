@@ -52,7 +52,6 @@ package com.openexchange.chat.db;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
@@ -65,7 +64,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
-import com.openexchange.chat.ChatCaps;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.MessageListener;
@@ -79,8 +77,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
@@ -158,13 +156,9 @@ public final class DBChatAccess implements ChatAccess {
 
     private final ChatUser user;
 
-    private final ServiceLookup serviceLookup;
-
     private final Context context;
 
     private final int contextId;
-
-    private final ConcurrentMap<String, List<MessageListener>> listeners;
 
     /**
      * Initializes a new {@link DBChatAccess}.
@@ -174,18 +168,16 @@ public final class DBChatAccess implements ChatAccess {
     private DBChatAccess(final int userId, final int contextId) throws OXException {
         super();
         this.userId = userId;
-        serviceLookup = DBChatServiceLookup.get();
-        context = serviceLookup.getService(ContextService.class).getContext(contextId);
+        context = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
         final ChatUserImpl user = new ChatUserImpl();
         user.setId(String.valueOf(userId));
         user.setName(getUserName(userId));
         this.user = user;
         this.contextId = contextId;
-        listeners = new ConcurrentHashMap<String, List<MessageListener>>();
     }
 
     private String getUserName(final int userId) throws OXException {
-        return serviceLookup.getService(UserService.class).getUser(userId, context).getDisplayName();
+        return DBChatServiceLookup.getService(UserService.class).getUser(userId, context).getDisplayName();
     }
 
     /**
@@ -262,70 +254,8 @@ public final class DBChatAccess implements ChatAccess {
          * Drop determined chats
          */
         if (!singleChatIds.isEmpty()) {
-            dropChats(singleChatIds, con);
+            DBChat.dropChats(singleChatIds, contextId, con);
         }
-    }
-
-    private void dropChats(final TIntList singleChatIds, final Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        int pos;
-        /*
-         * Drop chat message entries for each chat identifier
-         */
-        try {
-            stmt = con.prepareStatement("DELETE FROM chatMessage WHERE cid = ? AND chatId = ?");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            for (final TIntIterator iterator = singleChatIds.iterator(); iterator.hasNext();) {
-                stmt.setInt(pos, iterator.next());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
-        /*
-         * Drop chat member entries for each chat identifier
-         */
-        try {
-            stmt = con.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND chatId = ?");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            for (final TIntIterator iterator = singleChatIds.iterator(); iterator.hasNext();) {
-                stmt.setInt(pos, iterator.next());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
-        /*
-         * Drop chat entry for each chat identifier
-         */
-        try {
-            stmt = con.prepareStatement("DELETE FROM chat WHERE cid = ? AND chatId = ?");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            for (final TIntIterator iterator = singleChatIds.iterator(); iterator.hasNext();) {
-                stmt.setInt(pos, iterator.next());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    @Override
-    public ChatCaps getCapabilities() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     @Override
@@ -412,46 +342,32 @@ public final class DBChatAccess implements ChatAccess {
 
     @Override
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser member) throws OXException {
+        return openChat(chatId, listener, member);
+    }
+
+    @Override
+    public Chat openChat(final String chatId, final MessageListener listener, final ChatUser... members) throws OXException {
         String chid = chatId;
         if (null == chid) {
             chid = String.valueOf(getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId));
         }
         final DatabaseService databaseService = getDatabaseService();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        final Connection con = databaseService.getWritable(context);
+        final Connection con = databaseService.getWritable(contextId);
         try {
-            stmt = con.prepareStatement("SELECT chatId FROM chat WHERE cid = ? AND chatId = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, Integer.parseInt(chid));
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                throw ChatExceptionCodes.CHAT_ALREADY_EXISTS.create(chid);
-            }
+            con.setAutoCommit(false);
+            final Chat chat = openChat0(chatId, listener, members, con);
+            con.commit();
+            return chat;
         } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
-            databaseService.backWritable(context, con);
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
         }
-        rs = null;
-        
-        
-        
-        
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.chat.ChatAccess#openChat(java.lang.String, com.openexchange.chat.MessageListener,
-     * com.openexchange.chat.ChatUser[])
-     */
-    @Override
-    public Chat openChat(final String chatId, final MessageListener listener, final ChatUser... members) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
     }
 
     private Chat openChat0(final String chatId, final MessageListener listener, final ChatUser[] members, final Connection con) throws OXException {
@@ -492,24 +408,47 @@ public final class DBChatAccess implements ChatAccess {
         } finally {
             closeSQLStuff(rs, stmt);
         }
-        
-        
-        
-        
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO chatMember (cid, user, chatId, opMode) VALUES (?, ?, ?, ?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(3, chid);
+            stmt.setInt(4, 0);
+            /*
+             * This user
+             */
+            stmt.setInt(2, userId);
+            stmt.addBatch();
+            /*
+             * Others
+             */
+            for (final ChatUser chatUser : members) {
+                stmt.setInt(2, Integer.parseInt(chatUser.getId()));
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+        /*
+         * Get associated chat
+         */
+        final DBChat chat = DBChat.getDBChat(chid, contextId);
+        chat.addMessageListener(listener);
+        return chat;
     }
 
-    private DatabaseService getDatabaseService() throws OXException {
-        final DatabaseService databaseService = serviceLookup.getService(DatabaseService.class);
+    private static DatabaseService getDatabaseService() throws OXException {
+        final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return databaseService;
     }
 
-    private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        final S service = serviceLookup.getService(clazz);
+    private static <S> S getService(final Class<? extends S> clazz) throws OXException {
+        final S service = DBChatServiceLookup.getService(clazz);
         if (null == service) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }

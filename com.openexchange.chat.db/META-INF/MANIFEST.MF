@@ -64,3 +64,4 @@ Import-Package: com.openexchange.api2,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.service.event
+Bundle-Activator: com.openexchange.chat.db.osgi.DBChatActivator
