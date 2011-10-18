@@ -73,6 +73,9 @@ public final class ChatExceptionMessages implements LocalizableStrings {
 
     // Invalid presence packet.
     public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence packet.";
+
+    // A chat with identifier "%1$s" already exists.
+    public static final String CHAT_ALREADY_EXISTS_MSG = "A chat with identifier \"%1$s\" already exists.";
     
 
     /**
