@@ -262,15 +262,16 @@ public class LinkedInServiceImpl implements LinkedInService{
 
 	@Override
 	public JSONObject getMessageInbox(String password, int user, int contextId, int accountId) throws OXException {
-//		String uri = "http://api.linkedin.com/v1/people/~/mailbox";
-//	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri);
-//    	JSONObject data = extractJson(response);
-//    	return data;
-		try {
-			return new JSONObject("{\"values\":[{\"header\":\"Hello world\",body:\"Have a nice day.\"},{\"header\":\"Hello world\",body:\"Have a nice day.\"}]}");
-		} catch (JSONException e) {
-			throw new OXException(e);
-		}
+		String uri = "http://api.linkedin.com/v1/people/~/mailbox"+IN_JSON+"&folder=inbox&message-type=message-connections";
+	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri);
+	   	System.out.println(response);
+    	JSONObject data = extractJson(response);
+    	return data;
+//		try {
+//			return new JSONObject("{\"values\":[{\"header\":\"Hello world\",body:\"Have a nice day.\"},{\"header\":\"Hello world\",body:\"Have a nice day.\"}]}");
+//		} catch (JSONException e) {
+//			throw new OXException(e);
+//		}
 	}
 
 }
