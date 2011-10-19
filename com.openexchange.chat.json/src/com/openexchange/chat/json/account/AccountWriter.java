@@ -47,20 +47,47 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.account;
+
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.chat.ChatAccount;
 
 /**
- * {@link ChatCaps} - The capabilities of a chat..
+ * {@link AccountWriter}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatCaps {
+public final class AccountWriter {
 
     /**
-     * Checks if associated chat supports notifications about new messages.
-     * 
-     * @return <code>true</code> if notifications about new messages are supported; else <code>false</code>
+     * Initializes a new {@link AccountWriter}.
      */
-    boolean supportsNotifcation();
+    private AccountWriter() {
+        super();
+    }
+
+    /**
+     * Generates the JSON representation of specified account.
+     * 
+     * @param account The account
+     * @return The JSON representation of specified account
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONObject write(final ChatAccount account) throws JSONException {
+        final JSONObject jo = new JSONObject();
+        jo.put("id", account.getDisplayName());
+        jo.put("serviceId", account.getId());
+        jo.put("displayName", account.getDisplayName());
+
+        final JSONObject config = new JSONObject();
+        for (final Entry<String, Object> entry : account.getConfiguration().entrySet()) {
+            config.put(entry.getKey(), entry.getValue().toString());
+        }
+        jo.put("configuration", config);
+
+        return jo;
+    }
 
 }

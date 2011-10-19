@@ -47,52 +47,40 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.conversation;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.chat.json.conversation.action.AbstractChatConversationAction;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChatService} - The chat service.
- * 
+ * {@link ChatConversationActionFactory}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
+public class ChatConversationActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, AbstractChatConversationAction> actions;
 
     /**
-     * The identifier for default account.
+     * Initializes a new {@link ChatConversationActionFactory}.
+     *
+     * @param services The service look-up
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    public ChatConversationActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, AbstractChatConversationAction>(4);
+        
+        
+    }
 
-    /**
-     * Gets the access to specified chat account.
-     * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
-     * @see #DEFAULT_ACCOUNT
-     */
-    ChatAccess access(String accountId, Session session) throws OXException;
-
-    /**
-     * Gets the account manager for this chat service.
-     * 
-     * @return The account manager
-     */
-    ChatAccountManager getAccountManager();
-
-    /**
-     * Gets the service's identifier. Usually the package name.
-     * 
-     * @return The identifier
-     */
-    String getId();
-
-    /**
-     * Gets the service's display name.
-     * 
-     * @return The display name
-     */
-    String getDisplayName();
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
 
 }

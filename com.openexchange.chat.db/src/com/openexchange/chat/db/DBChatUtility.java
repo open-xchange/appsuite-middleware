@@ -47,52 +47,73 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.db;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.UUID;
 
 /**
- * {@link ChatService} - The chat service.
+ * {@link DBChatUtility} - Utility class.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
+public final class DBChatUtility {
 
     /**
-     * The identifier for default account.
+     * Initializes a new {@link DBChatUtility}.
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    private DBChatUtility() {
+        super();
+    }
 
     /**
-     * Gets the access to specified chat account.
+     * The unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
+     */
+    private static final String UNHEX_REPLACE_STRING = "UNHEX(REPLACE(?,'-',''))";
+
+    /**
+     * Appends the unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
-     * @see #DEFAULT_ACCOUNT
+     * @param sb The string builder to append to
+     * @return The string builder with unhex-replace string appended
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
+    public static StringBuilder appendUnhexReplaceString(final StringBuilder sb) {
+        return sb.append(UNHEX_REPLACE_STRING);
+    }
 
     /**
-     * Gets the account manager for this chat service.
+     * Gets the unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
      * 
-     * @return The account manager
+     * @return The unhex-replace string
      */
-    ChatAccountManager getAccountManager();
+    public static String getUnhexReplaceString() {
+        return UNHEX_REPLACE_STRING;
+    }
+
+    private static final int UUID_BYTE_LENGTH = 16;
 
     /**
-     * Gets the service's identifier. Usually the package name.
+     * Generates a new {@link UUID} instance from specified byte array.
      * 
-     * @return The identifier
+     * @param bytes The byte array
+     * @return A new {@link UUID} instance
+     * @throws IllegalArgumentException If passed byte array is <code>null</code> or its length is not 16
      */
-    String getId();
-
-    /**
-     * Gets the service's display name.
-     * 
-     * @return The display name
-     */
-    String getDisplayName();
+    public static UUID toUUID(final byte[] bytes) {
+        if (null == bytes) {
+            throw new IllegalArgumentException("Byte array is null.");
+        }
+        if (bytes.length != UUID_BYTE_LENGTH) {
+            throw new IllegalArgumentException("UUID must be contructed using a byte array with length 16.");
+        }
+        long msb = 0;
+        long lsb = 0;
+        for (int i = 0; i < 8; i++) {
+            msb = (msb << 8) | (bytes[i] & 0xff);
+        }
+        for (int i = 8; i < 16; i++) {
+            lsb = (lsb << 8) | (bytes[i] & 0xff);
+        }
+        return new UUID(msb, lsb);
+    }
 
 }

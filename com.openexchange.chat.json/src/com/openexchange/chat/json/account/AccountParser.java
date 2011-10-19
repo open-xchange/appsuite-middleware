@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,27 +46,57 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.halo.mail;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.chat.json.account;
 
-public class SentMailHaloDataSource extends AbstractMailHaloDataSource {
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-	public SentMailHaloDataSource(ServiceLookup lookup) {
-		super(lookup);
-	}
+/**
+ * {@link AccountParser}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class AccountParser {
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.mail:sent";
-	}
+    /**
+     * Initializes a new {@link AccountParser}.
+     */
+    private AccountParser() {
+        super();
+    }
 
-	@Override
-	protected String getFolder(IMailFolderStorage folderStorage) throws OXException {
-		return folderStorage.getSentFolder();
-	}
+    /**
+     * Parses the account from specified JSON account.
+     * 
+     * @param jsonAccount The JSON account
+     * @return The parsed account
+     * @throws JSONException If a JSON error occurs
+     */
+    public static ParsedAccount parse(final JSONObject jsonAccount) throws JSONException {
+        final ParsedAccount parsedAccount = new ParsedAccount();
+
+        if (jsonAccount.hasAndNotNull("id")) {
+            parsedAccount.setId(jsonAccount.getString("id"));
+        }
+
+        if (jsonAccount.hasAndNotNull("displayName")) {
+            parsedAccount.setDisplayName(jsonAccount.getString("displayName"));
+        }
+
+        final JSONObject jsonConfig = jsonAccount.optJSONObject("configuration");
+        if (null != jsonConfig) {
+            final Map<String, Object> config = new HashMap<String, Object>(jsonConfig.length());
+            for (final Entry<String, Object> entry : jsonConfig.entrySet()) {
+                config.put(entry.getKey(), entry.getValue());
+            }
+            parsedAccount.setConfiguration(config);
+        }
+
+        return parsedAccount;
+    }
+
 }

@@ -62,11 +62,6 @@ import com.openexchange.exception.OXException;
 public interface Chat {
 
     /**
-     * The identifier for a user's default chat aka private chat.
-     */
-    public static final String DEFAULT_CHAT = "0";
-
-    /**
      * Gets the chat identifier.
      * 
      * @return The chat identifier.

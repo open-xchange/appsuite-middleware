@@ -47,52 +47,66 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.conversation.action;
 
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatAccount;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link ChatService} - The chat service.
- * 
+ * {@link AllAction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
+public final class AllAction extends AbstractChatConversationAction {
 
     /**
-     * The identifier for default account.
+     * Initializes a new {@link AllAction}.
+     *
+     * @param services
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    public AllAction(final ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Gets the access to specified chat account.
-     * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
-     * @see #DEFAULT_ACCOUNT
-     */
-    ChatAccess access(String accountId, Session session) throws OXException;
-
-    /**
-     * Gets the account manager for this chat service.
-     * 
-     * @return The account manager
-     */
-    ChatAccountManager getAccountManager();
-
-    /**
-     * Gets the service's identifier. Usually the package name.
-     * 
-     * @return The identifier
-     */
-    String getId();
-
-    /**
-     * Gets the service's display name.
-     * 
-     * @return The display name
-     */
-    String getDisplayName();
+    @Override
+    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
+        final ServerSession session = req.getSession();
+        /*
+         * Get services
+         */
+        final ChatServiceRegistry service = getService(ChatServiceRegistry.class);
+        final JSONArray jsonArray = new JSONArray();
+        for (final ChatService chatService : service.getAllServices(session.getUserId(), session.getContextId())) {
+            for (final ChatAccount chatAccount : chatService.getAccountManager().getAccounts(session)) {
+                ChatAccess access = null;
+                try {
+                    access = chatService.access(chatAccount.getId(), session);
+                    access.login();
+                    for (final String chatId : access.getChats()) {
+                        jsonArray.put(chatId);
+                    }
+                } finally {
+                    if (null != access) {
+                        access.disconnect();
+                    }
+                }
+            }
+        }
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(jsonArray, "json");
+    }
 
 }

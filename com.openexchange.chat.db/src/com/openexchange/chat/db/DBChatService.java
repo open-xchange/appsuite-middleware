@@ -53,6 +53,7 @@ import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatAccountManager;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatService;
+import com.openexchange.chat.util.ChatAccountImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -64,14 +65,50 @@ import com.openexchange.session.Session;
  */
 public final class DBChatService implements ChatService {
 
+    /**
+     * Gets a new service instance.
+     * 
+     * @return A new service instance
+     */
+    public static DBChatService newDbChatService() {
+        final DBChatService service = new DBChatService();
+        final ChatAccountImpl defaultAccount = service.accountManager.getDefaultAccount();
+        defaultAccount.setChatService(service);
+        return service;       
+    }
+
+    private static final String IDENTIFIER = "com.openexchange.chat.db";
+
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public static String getIdentifier() {
+        return IDENTIFIER;
+    }
+
     private final DBChatAccountManager accountManager;
+
+    private final String displayName;
 
     /**
      * Initializes a new {@link DBChatService}.
      */
-    public DBChatService() {
+    private DBChatService() {
         super();
         accountManager = new DBChatAccountManager();
+        displayName = "Database Chat Service";
+    }
+
+    @Override
+    public String getId() {
+        return IDENTIFIER;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
     }
 
     @Override

@@ -81,6 +81,22 @@ public enum ChatExceptionCodes implements OXExceptionCode {
      * Invalid presence packet.
      */
     INVALID_PRESENCE_PACKET(ChatExceptionMessages.INVALID_PRESENCE_PACKET_MSG, Category.CATEGORY_ERROR, 5),
+    /**
+     * A chat with identifier "%1$s" already exists.
+     */
+    CHAT_ALREADY_EXISTS(ChatExceptionMessages.CHAT_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 6),
+    /**
+     * Chat member "%1$s" already exists in chat "%2$s".
+     */
+    CHAT_MEMBER_ALREADY_EXISTS(ChatExceptionMessages.CHAT_MEMBER_ALREADY_EXISTS_MSG, Category.CATEGORY_ERROR, 7),
+    /**
+     * No chat found with identifier "%1$s".
+     */
+    CHAT_NOT_FOUND(ChatExceptionMessages.CHAT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 8),
+    /**
+     * Unknown chat service: %1$s
+     */
+    UNKNOWN_CHAT_SERVICE(ChatExceptionMessages.UNKNOWN_CHAT_SERVICE_MSG, Category.CATEGORY_ERROR, 9),
 
     ;
 

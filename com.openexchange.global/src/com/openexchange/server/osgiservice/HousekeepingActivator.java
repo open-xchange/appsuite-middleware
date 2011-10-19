@@ -52,6 +52,7 @@ package com.openexchange.server.osgiservice;
 import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.List;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -64,8 +65,90 @@ import com.openexchange.server.ServiceLookup;
  * them up later.
  * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class HousekeepingActivator extends DeferredActivator {
+
+    /**
+     * Puts/removes tracked service from activator's service look-up as the appear/disappear.
+     */
+    private static final class ServiceLookupTrackerCustomizer<S> implements ServiceTrackerCustomizer<S, S> {
+
+        private final Class<S> clazz;
+        private final HousekeepingActivator activator;
+        private final BundleContext context;
+
+        /**
+         * Initializes a new {@link ServiceTrackerCustomizerImplementation}.
+         * 
+         * @param clazz The service's class to look-up
+         * @param activator The activator
+         * @param context The bundle context
+         */
+        protected ServiceLookupTrackerCustomizer(final Class<S> clazz, final HousekeepingActivator activator, final BundleContext context) {
+            super();
+            this.clazz = clazz;
+            this.activator = activator;
+            this.context = context;
+        }
+
+        @Override
+        public S addingService(final ServiceReference<S> reference) {
+            final S service = context.getService(reference);
+            activator.addService(clazz, service);
+            return service;
+        }
+
+        @Override
+        public void modifiedService(final ServiceReference<S> reference, final S service) {
+            // Ignore
+        }
+
+        @Override
+        public void removedService(final ServiceReference<S> reference, final S service) {
+            activator.removeService(clazz);
+            context.ungetService(reference);
+        }
+    }
+
+    /**
+     * Delegates tracker events to specified {@link SimpleRegistryListener} instance.
+     */
+    private static final class SimpleRegistryListenerTrackerCustomizer<S> implements ServiceTrackerCustomizer<S, S> {
+
+        private final SimpleRegistryListener<S> listener;
+        private final BundleContext context;
+
+        /**
+         * Initializes a new {@link SimpleRegistryListenerTrackerCustomizer}.
+         * 
+         * @param listener The {@link SimpleRegistryListener} instance to delegate to
+         * @param context The bundle context
+         */
+        protected SimpleRegistryListenerTrackerCustomizer(final SimpleRegistryListener<S> listener, final BundleContext context) {
+            super();
+            this.listener = listener;
+            this.context = context;
+        }
+
+        @Override
+        public S addingService(final ServiceReference<S> serviceReference) {
+            final S service = context.getService(serviceReference);
+            listener.added(serviceReference, service);
+            return service;
+        }
+
+        @Override
+        public void modifiedService(final ServiceReference<S> serviceReference, final S service) {
+            // Don't care
+        }
+
+        @Override
+        public void removedService(final ServiceReference<S> serviceReference, final S service) {
+            listener.removed(serviceReference, service);
+            context.ungetService(serviceReference);
+        }
+    }
 
     private final List<ServiceTracker<?, ?>> serviceTrackers;
 
@@ -154,26 +237,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @return The newly created {@link ServiceTracker} instance
      */
     protected <S> ServiceTracker<S, S> trackService(final Class<S> clazz) {
-        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, clazz, new ServiceTrackerCustomizer<S, S>() {
-
-            @Override
-            public S addingService(final ServiceReference<S> reference) {
-                final S service = context.getService(reference);
-                addService(clazz, service);
-                return service;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<S> reference, final S service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(final ServiceReference<S> reference, final S service) {
-                removeService(clazz);
-                context.ungetService(reference);
-            }
-        });
+        final ServiceTracker<S, S> tracker = new ServiceTracker<S, S>(context, clazz, new ServiceLookupTrackerCustomizer<S>(clazz, this, context));
         rememberTracker(tracker);
         return tracker;
     }
@@ -242,27 +306,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @return The newly created {@link ServiceTracker} instance
      */
     protected <S> ServiceTracker<S, S> track(final Class<S> clazz, final SimpleRegistryListener<S> listener) {
-        return track(clazz, new ServiceTrackerCustomizer<S, S>() {
-
-            @Override
-            public S addingService(final ServiceReference<S> arg0) {
-                final S service = context.getService(arg0);
-                listener.added(arg0, service);
-                return service;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<S> arg0, final S arg1) {
-                // Don't care
-            }
-
-            @Override
-            public void removedService(final ServiceReference<S> arg0, final S arg1) {
-                listener.removed(arg0, arg1);
-                context.ungetService(arg0);
-            }
-
-        });
+        return track(clazz, new SimpleRegistryListenerTrackerCustomizer<S>(listener, context));
     }
 
     /**
@@ -275,27 +319,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * @return The newly created {@link ServiceTracker} instance
      */
     protected <S> ServiceTracker<S, S> track(final Filter filter, final SimpleRegistryListener<S> listener) {
-        return track(filter, new ServiceTrackerCustomizer<S, S>() {
-
-            @Override
-            public S addingService(final ServiceReference<S> arg0) {
-                final S service = context.getService(arg0);
-                listener.added(arg0, service);
-                return service;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<S> arg0, final S arg1) {
-                // Nothing to do
-            }
-
-            @Override
-            public void removedService(final ServiceReference<S> arg0, final S arg1) {
-                listener.removed(arg0, arg1);
-                context.ungetService(arg0);
-            }
-
-        });
+        return track(filter, new SimpleRegistryListenerTrackerCustomizer<S>(listener, context));
     }
 
     /**

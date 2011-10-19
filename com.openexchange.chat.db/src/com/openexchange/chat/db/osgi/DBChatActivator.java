@@ -54,11 +54,16 @@ import java.util.Hashtable;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.MessageListener;
 import com.openexchange.chat.Presence;
+import com.openexchange.chat.db.DBChat;
 import com.openexchange.chat.db.DBChatAccess;
+import com.openexchange.chat.db.DBChatService;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.chat.db.DBRoster;
 import com.openexchange.chat.util.ChatUserImpl;
@@ -69,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.server.osgiservice.SimpleRegistryListener;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -102,6 +108,30 @@ public final class DBChatActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         DBChatServiceLookup.set(this);
+        DBChat.startUp();
+        /*
+         * Register service
+         */
+        registerService(ChatService.class, DBChatService.newDbChatService());
+        /*
+         * Add tracker
+         */
+        track(MessageListener.class, new SimpleRegistryListener<MessageListener>() {
+
+            @Override
+            public void added(final ServiceReference<MessageListener> ref, final MessageListener messageListener) {
+                DBChat.addMessageListenerStatic(messageListener);
+            }
+
+            @Override
+            public void removed(final ServiceReference<MessageListener> ref, final MessageListener messageListener) {
+                DBChat.removeMessageListenerStatic(messageListener);
+            }
+        });
+        openTrackers();
+        /*
+         * Register event handler
+         */
         {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
@@ -192,6 +222,7 @@ public final class DBChatActivator extends HousekeepingActivator {
     @Override
     protected void cleanUp() {
         super.cleanUp();
+        DBChat.shutDown();
         DBChatServiceLookup.set(null);
     }
 
