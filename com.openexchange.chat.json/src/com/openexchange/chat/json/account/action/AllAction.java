@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,20 +47,69 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.account.action;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.ChatAccount;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.json.account.AccountWriter;
+import com.openexchange.chat.json.account.ChatAccountAJAXRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChatCaps} - The capabilities of a chat..
- * 
+ * {@link AllAction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatCaps {
+public final class AllAction extends AbstractChatAccountAction {
 
     /**
-     * Checks if associated chat supports notifications about new messages.
-     * 
-     * @return <code>true</code> if notifications about new messages are supported; else <code>false</code>
+     * Initializes a new {@link AllAction}.
      */
-    boolean supportsNotifcation();
+    public AllAction(final ServiceLookup services) {
+        super(services);
+    }
+
+    @Override
+    public AJAXRequestResult perform(final ChatAccountAJAXRequest request) throws OXException, JSONException {
+        /*
+         * Parse parameters
+         */
+        final String serviceId = request.getParameter("serviceId");
+        final ServerSession session = request.getSession();
+        /*
+         * Request accounts
+         */
+        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+        final List<ChatAccount> accounts;
+        if (null == serviceId) {
+            final List<ChatService> services = registry.getAllServices(session.getUserId(), session.getContextId());
+            accounts = new ArrayList<ChatAccount>(4);
+            for (final ChatService chatService : services) {
+                accounts.addAll(chatService.getAccountManager().getAccounts(session));
+            }
+        } else {
+            final ChatService chatService = registry.getChatService(serviceId, session.getUserId(), session.getContextId());
+            accounts = chatService.getAccountManager().getAccounts(session);
+        }
+        /*
+         * Write accounts as a JSON array
+         */
+        final JSONArray jsonArray = new JSONArray();
+        for (final ChatAccount account : accounts) {
+            jsonArray.put(AccountWriter.write(account));
+        }
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(jsonArray);
+    }
 
 }

@@ -47,86 +47,88 @@
  *
  */
 
-package com.openexchange.chat.util;
+package com.openexchange.chat.json.account;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import com.openexchange.chat.ChatUser;
-import com.openexchange.chat.Presence;
-import com.openexchange.chat.Roster;
-import com.openexchange.chat.RosterListener;
-import com.openexchange.exception.OXException;
+import com.openexchange.chat.ChatAccount;
+import com.openexchange.chat.ChatService;
 
 /**
- * {@link RosterImpl}
- * 
+ * {@link ParsedAccount}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class RosterImpl implements Roster {
+public class ParsedAccount implements ChatAccount {
 
-    private static final String DEFAULT_RESOURCE = "default";
+    private Map<String, Object> configuration;
 
-    private final ConcurrentMap<String, ChatUser> entries;
+    private String id;
 
-    private final List<RosterListener> rosterListeners;
+    private String displayName;
 
-    private final Map<String, Map<String, Presence>> presenceMap;
+    private ChatService chatService;
 
     /**
-     * Initializes a new {@link RosterImpl}.
+     * Initializes a new {@link ParsedAccount}.
      */
-    public RosterImpl() {
+    public ParsedAccount() {
         super();
-        entries = new ConcurrentHashMap<String, ChatUser>();
-        rosterListeners = new CopyOnWriteArrayList<RosterListener>();
-        presenceMap = new ConcurrentHashMap<String, Map<String, Presence>>();
     }
 
     @Override
-    public Collection<ChatUser> getEntries() throws OXException {
-        return Collections.unmodifiableCollection(entries.values());
+    public Map<String, Object> getConfiguration() {
+        return configuration;
     }
 
     @Override
-    public Presence getPresence(final ChatUser user) throws OXException {
-        final Map<String, Presence> resources = presenceMap.get(user.getId());
-        if (null == resources) {
-            final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
-            packetUnavailable.setFrom(user);
-            return packetUnavailable;
-        }
-        final Presence presence = resources.get(DEFAULT_RESOURCE);
-        if (null == presence) {
-            final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
-            packetUnavailable.setFrom(user);
-            return packetUnavailable;
-        }
-        return presence;
+    public String getId() {
+        return id;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.chat.Roster#addRosterListener(com.openexchange.chat.RosterListener)
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public ChatService getChatService() {
+        return chatService;
+    }
+
+    /**
+     * Sets the configuration
+     * 
+     * @param configuration The configuration to set
      */
-    @Override
-    public void addRosterListener(final RosterListener rosterListener) throws OXException {
-        // TODO Auto-generated method stub
-
+    public void setConfiguration(final Map<String, Object> configuration) {
+        this.configuration = configuration;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.chat.Roster#removeRosterListener(com.openexchange.chat.RosterListener)
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
      */
-    @Override
-    public void removeRosterListener(final RosterListener rosterListener) throws OXException {
-        // TODO Auto-generated method stub
+    public void setId(final String id) {
+        this.id = id;
+    }
 
+    /**
+     * Sets the display name
+     * 
+     * @param displayName The display name to set
+     */
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * Sets the chat service
+     * 
+     * @param chatService The chat service to set
+     */
+    public void setChatService(final ChatService chatService) {
+        this.chatService = chatService;
     }
 
 }

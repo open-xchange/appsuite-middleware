@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,27 +46,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.halo.mail;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.chat.json.account;
 
-public class SentMailHaloDataSource extends AbstractMailHaloDataSource {
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.chat.ChatAccount;
 
-	public SentMailHaloDataSource(ServiceLookup lookup) {
-		super(lookup);
-	}
+/**
+ * {@link AccountWriter}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class AccountWriter {
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.mail:sent";
-	}
+    /**
+     * Initializes a new {@link AccountWriter}.
+     */
+    private AccountWriter() {
+        super();
+    }
 
-	@Override
-	protected String getFolder(IMailFolderStorage folderStorage) throws OXException {
-		return folderStorage.getSentFolder();
-	}
+    /**
+     * Generates the JSON representation of specified account.
+     * 
+     * @param account The account
+     * @return The JSON representation of specified account
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONObject write(final ChatAccount account) throws JSONException {
+        final JSONObject jo = new JSONObject();
+        jo.put("id", account.getDisplayName());
+        jo.put("serviceId", account.getId());
+        jo.put("displayName", account.getDisplayName());
+
+        final JSONObject config = new JSONObject();
+        for (final Entry<String, Object> entry : account.getConfiguration().entrySet()) {
+            config.put(entry.getKey(), entry.getValue().toString());
+        }
+        jo.put("configuration", config);
+
+        return jo;
+    }
+
 }

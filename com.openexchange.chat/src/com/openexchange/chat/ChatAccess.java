@@ -60,13 +60,6 @@ import com.openexchange.exception.OXException;
 public interface ChatAccess {
 
     /**
-     * Gets the capabilities of this access.
-     * 
-     * @return The capabilities
-     */
-    ChatCaps getCapabilities();
-
-    /**
      * Closes the connection by setting presence to unavailable then closing the connection.
      */
     void disconnect();

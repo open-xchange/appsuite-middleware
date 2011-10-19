@@ -46,26 +46,53 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.halo.mail;
 
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
+package com.openexchange.chat.json.account.action;
+
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.json.account.ChatAccountAJAXRequest;
+import com.openexchange.chat.json.account.ParsedAccount;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
-public class InboxMailHaloDataSource extends AbstractMailHaloDataSource {
-	
-	public InboxMailHaloDataSource(ServiceLookup lookup) {
-		super(lookup);
-	}
+/**
+ * {@link DeleteAction}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class DeleteAction extends AbstractChatAccountAction {
 
-	@Override
-	public String getId() {
-		return "com.openexchange.halo.mail:inbox";
-	}
+    /**
+     * Initializes a new {@link DeleteAction}.
+     */
+    public DeleteAction(final ServiceLookup services) {
+        super(services);
+    }
 
-	@Override
-	protected String getFolder(IMailFolderStorage folderStorage) {
-		return "INBOX";
-	}
+    @Override
+    public AJAXRequestResult perform(final ChatAccountAJAXRequest request) throws OXException {
+        /*
+         * Parse parameters
+         */
+        final String serviceId = request.checkParameter("serviceId");
+        final String accountId = request.checkParameter("id");
+        final ServerSession session = request.getSession();
+        /*
+         * Request account
+         */
+        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+        final ChatService chatService = registry.getChatService(serviceId, session.getUserId(), session.getContextId());
+        final ParsedAccount account = new ParsedAccount();
+        account.setId(accountId);
+        account.setChatService(chatService);
+        chatService.getAccountManager().deleteAccount(account, session);
+        /*
+         * Return appropriate result
+         */
+        return new AJAXRequestResult(getJSONNullResult());
+    }
+
 }

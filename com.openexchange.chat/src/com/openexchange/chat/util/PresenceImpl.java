@@ -69,6 +69,8 @@ public class PresenceImpl extends PacketImpl implements Presence {
      */
     public PresenceImpl() {
         super();
+        type = Type.AVAILABLE;
+        mode = Mode.AVAILABLE;
     }
 
     /**
@@ -79,6 +81,7 @@ public class PresenceImpl extends PacketImpl implements Presence {
     public PresenceImpl(final Type type) {
         super();
         this.type = type;
+        mode = Mode.AVAILABLE;
     }
 
     @Override

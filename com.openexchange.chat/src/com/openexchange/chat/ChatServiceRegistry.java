@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,50 +49,38 @@
 
 package com.openexchange.chat;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link ChatService} - The chat service.
- * 
+ * {@link ChatServiceRegistry}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
+public interface ChatServiceRegistry {
 
     /**
-     * The identifier for default account.
+     * Gets the chat service associated with specified identifier.
+     *
+     * @param id The chat service identifier
+     * @return The chat service associated with specified identifier
+     * @throws OXException If no chat service is associated with specified identifier
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    public ChatService getChatService(String id, int user, int context) throws OXException;
 
     /**
-     * Gets the access to specified chat account.
-     * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
-     * @see #DEFAULT_ACCOUNT
+     * Checks if there is a chat service associated with specified identifier.
+     *
+     * @param id The chat service identifier
+     * @return <code>true</code> if there is a chat service associated with specified identifier; otherwise <code>false</code>
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
+    public boolean containsChatService(String id, int user, int context);
 
     /**
-     * Gets the account manager for this chat service.
-     * 
-     * @return The account manager
+     * Gets all chat services kept in this registry.
+     *
+     * @return All chat services kept in this registry
+     * @throws OXException If chat services cannot be returned
      */
-    ChatAccountManager getAccountManager();
-
-    /**
-     * Gets the service's identifier. Usually the package name.
-     * 
-     * @return The identifier
-     */
-    String getId();
-
-    /**
-     * Gets the service's display name.
-     * 
-     * @return The display name
-     */
-    String getDisplayName();
-
+    public List<ChatService> getAllServices(int user, int context) throws OXException;
 }

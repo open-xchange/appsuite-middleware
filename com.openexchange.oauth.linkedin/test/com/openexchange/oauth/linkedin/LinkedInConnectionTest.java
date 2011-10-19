@@ -183,9 +183,10 @@ public class LinkedInConnectionTest extends TestCase {
     	linkedIn.getContacts("password",1,1,1);
     }
     
-    public void testGetProfileForEMail() throws OXException{
+    public void testGetProfileForEMail() throws OXException, JSONException{
     	JSONObject fullProfile = linkedIn.getFullProfileByEMail("tobiasprinz@gmx.net","password",1,1,1);
-    	System.out.println(fullProfile);
+    	assertEquals("Tobias", fullProfile.getString("firstName"));
+    	assertEquals("Prinz", fullProfile.getString("lastName"));
     }
 
 	public void testGetProfileForId() throws OXException, JSONException {
@@ -217,10 +218,6 @@ public class LinkedInConnectionTest extends TestCase {
 	
 	public void testMessageInbox() throws Exception {
 		JSONObject inbox = linkedIn.getMessageInbox("password",1,1,1);
-		JSONArray messages = inbox.getJSONArray("values");
-		assertTrue("Something should have happened lately", messages.length() == 2);
-		JSONObject msg1 = messages.getJSONObject(0);
-		assertEquals("Hello world", msg1.getString("header"));
-		assertEquals("Have a nice day", msg1.getString("body"));
+		assertEquals("Should have zero messages.", 0, inbox.getInt("_total"));
 	}
 }
