@@ -185,7 +185,7 @@ public final class DBRoster implements Roster {
     }
 
     /**
-     * Notify listeners about changed presence.
+     * Notifies listeners about changed presence.
      * 
      * @param presence The changed presence
      */
