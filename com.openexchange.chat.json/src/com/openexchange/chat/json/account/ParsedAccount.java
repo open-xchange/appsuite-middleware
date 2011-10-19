@@ -47,52 +47,88 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.account;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.Map;
+import com.openexchange.chat.ChatAccount;
+import com.openexchange.chat.ChatService;
 
 /**
- * {@link ChatService} - The chat service.
- * 
+ * {@link ParsedAccount}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
+public class ParsedAccount implements ChatAccount {
+
+    private Map<String, Object> configuration;
+
+    private String id;
+
+    private String displayName;
+
+    private ChatService chatService;
 
     /**
-     * The identifier for default account.
+     * Initializes a new {@link ParsedAccount}.
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    public ParsedAccount() {
+        super();
+    }
+
+    @Override
+    public Map<String, Object> getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    @Override
+    public ChatService getChatService() {
+        return chatService;
+    }
 
     /**
-     * Gets the access to specified chat account.
+     * Sets the configuration
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
-     * @see #DEFAULT_ACCOUNT
+     * @param configuration The configuration to set
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
+    public void setConfiguration(final Map<String, Object> configuration) {
+        this.configuration = configuration;
+    }
 
     /**
-     * Gets the account manager for this chat service.
+     * Sets the id
      * 
-     * @return The account manager
+     * @param id The id to set
      */
-    ChatAccountManager getAccountManager();
+    public void setId(final String id) {
+        this.id = id;
+    }
 
     /**
-     * Gets the service's identifier. Usually the package name.
+     * Sets the display name
      * 
-     * @return The identifier
+     * @param displayName The display name to set
      */
-    String getId();
+    public void setDisplayName(final String displayName) {
+        this.displayName = displayName;
+    }
 
     /**
-     * Gets the service's display name.
+     * Sets the chat service
      * 
-     * @return The display name
+     * @param chatService The chat service to set
      */
-    String getDisplayName();
+    public void setChatService(final ChatService chatService) {
+        this.chatService = chatService;
+    }
 
 }

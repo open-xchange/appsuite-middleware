@@ -49,19 +49,60 @@
 
 package com.openexchange.chat.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.chat.ChatServiceRegistry;
 
+/**
+ * {@link ChatActivator} - The activator for chat bundle.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class ChatActivator implements BundleActivator {
+
+    private OSGiChatServiceRegistry registry;
+    
+    private ServiceRegistration<ChatServiceRegistry> registration;
+    
+    /**
+     * Initializes a new {@link ChatActivator}.
+     */
+    public ChatActivator() {
+        super();
+    }
 
 	@Override
     public void start(final BundleContext context) throws Exception {
-
+	    final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatActivator.class));
+	    log.info("Starting bundle: com.openexchange.chat");
+	    try {
+	        registry = new OSGiChatServiceRegistry();
+	        registry.start(context);
+            registration = context.registerService(ChatServiceRegistry.class, registry, null);
+        } catch (final Exception e) {
+            log.error("Starting bundle failed: com.openexchange.chat");
+        }
 	}
 
 	@Override
     public void stop(final BundleContext context) throws Exception {
-
+	    final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatActivator.class));
+        log.info("Stopping bundle: com.openexchange.chat");
+        try {
+            if (null != registration) {
+                registration.unregister();
+                registration = null;
+            }
+            if (null != registry) {
+                registry.stop();
+                registry = null;
+            }
+        } catch (final Exception e) {
+            log.error("Stopping bundle failed: com.openexchange.chat");
+        }
 	}
 
 }
