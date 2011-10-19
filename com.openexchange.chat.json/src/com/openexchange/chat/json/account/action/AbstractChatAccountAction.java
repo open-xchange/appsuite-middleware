@@ -95,6 +95,8 @@ public abstract class AbstractChatAccountAction implements AJAXActionService {
             return perform(new ChatAccountAJAXRequest(request, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

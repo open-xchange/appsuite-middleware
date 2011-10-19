@@ -68,7 +68,7 @@ public class DBChatAccountManager implements ChatAccountManager {
 
     private static final String DEFAULT_ACCOUNT = ChatService.DEFAULT_ACCOUNT;
 
-    private final ChatAccount defaultAccount;
+    private final ChatAccountImpl defaultAccount;
 
     /**
      * Initializes a new {@link DBChatAccountManager}.
@@ -76,6 +76,17 @@ public class DBChatAccountManager implements ChatAccountManager {
     public DBChatAccountManager() {
         super();
         defaultAccount = new ChatAccountImpl();
+        defaultAccount.setDisplayName("OX7 Chat");
+        defaultAccount.setId(ChatService.DEFAULT_ACCOUNT);
+    }
+
+    /**
+     * Gets the default account
+     * 
+     * @return The default account
+     */
+    public ChatAccountImpl getDefaultAccount() {
+        return defaultAccount;
     }
 
     @Override

@@ -112,7 +112,7 @@ public final class DBChatActivator extends HousekeepingActivator {
         /*
          * Register service
          */
-        registerService(ChatService.class, new DBChatService());
+        registerService(ChatService.class, DBChatService.newDbChatService());
         /*
          * Add tracker
          */

@@ -47,52 +47,56 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.account;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
- * {@link ChatService} - The chat service.
+ * {@link AccountParser}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
+public final class AccountParser {
 
     /**
-     * The identifier for default account.
+     * Initializes a new {@link AccountParser}.
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    private AccountParser() {
+        super();
+    }
 
     /**
-     * Gets the access to specified chat account.
+     * Parses the account from specified JSON account.
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
-     * @see #DEFAULT_ACCOUNT
+     * @param jsonAccount The JSON account
+     * @return The parsed account
+     * @throws JSONException If a JSON error occurs
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
+    public static ParsedAccount parse(final JSONObject jsonAccount) throws JSONException {
+        final ParsedAccount parsedAccount = new ParsedAccount();
 
-    /**
-     * Gets the account manager for this chat service.
-     * 
-     * @return The account manager
-     */
-    ChatAccountManager getAccountManager();
+        if (jsonAccount.hasAndNotNull("id")) {
+            parsedAccount.setId(jsonAccount.getString("id"));
+        }
 
-    /**
-     * Gets the service's identifier. Usually the package name.
-     * 
-     * @return The identifier
-     */
-    String getId();
+        if (jsonAccount.hasAndNotNull("displayName")) {
+            parsedAccount.setDisplayName(jsonAccount.getString("displayName"));
+        }
 
-    /**
-     * Gets the service's display name.
-     * 
-     * @return The display name
-     */
-    String getDisplayName();
+        final JSONObject jsonConfig = jsonAccount.optJSONObject("configuration");
+        if (null != jsonConfig) {
+            final Map<String, Object> config = new HashMap<String, Object>(jsonConfig.length());
+            for (final Entry<String, Object> entry : jsonConfig.entrySet()) {
+                config.put(entry.getKey(), entry.getValue());
+            }
+            parsedAccount.setConfiguration(config);
+        }
+
+        return parsedAccount;
+    }
 
 }

@@ -47,52 +47,47 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.account;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.chat.ChatAccount;
 
 /**
- * {@link ChatService} - The chat service.
+ * {@link AccountWriter}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatService {
+public final class AccountWriter {
 
     /**
-     * The identifier for default account.
+     * Initializes a new {@link AccountWriter}.
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    private AccountWriter() {
+        super();
+    }
 
     /**
-     * Gets the access to specified chat account.
+     * Generates the JSON representation of specified account.
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
-     * @return The access to specified chat account
-     * @throws OXException If access cannot be provided; e.g. because no such account exists
-     * @see #DEFAULT_ACCOUNT
+     * @param account The account
+     * @return The JSON representation of specified account
+     * @throws JSONException If a JSON error occurs
      */
-    ChatAccess access(String accountId, Session session) throws OXException;
+    public static JSONObject write(final ChatAccount account) throws JSONException {
+        final JSONObject jo = new JSONObject();
+        jo.put("id", account.getDisplayName());
+        jo.put("serviceId", account.getId());
+        jo.put("displayName", account.getDisplayName());
 
-    /**
-     * Gets the account manager for this chat service.
-     * 
-     * @return The account manager
-     */
-    ChatAccountManager getAccountManager();
+        final JSONObject config = new JSONObject();
+        for (final Entry<String, Object> entry : account.getConfiguration().entrySet()) {
+            config.put(entry.getKey(), entry.getValue().toString());
+        }
+        jo.put("configuration", config);
 
-    /**
-     * Gets the service's identifier. Usually the package name.
-     * 
-     * @return The identifier
-     */
-    String getId();
-
-    /**
-     * Gets the service's display name.
-     * 
-     * @return The display name
-     */
-    String getDisplayName();
+        return jo;
+    }
 
 }
