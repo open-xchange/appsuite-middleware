@@ -57,7 +57,7 @@
     <target name="mapperjar" depends="compile">
     	<mkdir dir="jar"/>
         <jar jarfile="jar/soaprmimapper.jar"
-        	includes="com/openexchange/admin/soap/OXSOAPRMIMapper**"
+        	includes="com/openexchange/admin/soap/OXSOAPRMIMapper**,com/openexchange/admin/soap/dataobjects/**,com/openexchange/admin/soap/SOAPUtils**"
         	basedir="classes"/>
     </target>
 
