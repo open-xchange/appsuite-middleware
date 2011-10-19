@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
@@ -2032,71 +2033,61 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void change(final Context ctx) throws StorageException {
-
-        Connection config_db_write = null;
-
+        final Connection configCon;
         try {
-
-            config_db_write = cache.getConnectionForConfigDB();
-            config_db_write.setAutoCommit(false);
+            configCon = cache.getConnectionForConfigDB();
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        }
+        try {
+            configCon.setAutoCommit(false);
 
             // Change login mappings in configdb
-            changeLoginMappingsForContext(ctx, config_db_write);
+            changeLoginMappingsForContext(ctx, configCon);
 
             // Change context name in configdb
-            changeNameForContext(ctx, config_db_write);
+            changeNameForContext(ctx, configCon);
 
             // Change quota size in config db
-            changeQuotaForContext(ctx, config_db_write);
+            changeQuotaForContext(ctx, configCon);
 
             // Change storage data
-            changeStorageDataImpl(ctx, config_db_write);
+            changeStorageDataImpl(ctx, configCon);
 
             // commit changes to db
-            config_db_write.commit();
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
+            configCon.commit();
         } catch (final SQLException e) {
-            if (config_db_write != null) {
-                try {
-                    config_db_write.rollback();
-                } catch (final SQLException e1) {
-                    LOG.error("Error in rollback of configdb connection", e1);
-                    throw new StorageException(e1);
-                }
-            }
-
+            rollback(configCon);
             LOG.error("SQL Error", e);
             throw new StorageException(e);
+        } catch (final StorageException e) {
+            rollback(configCon);
+            throw e;
         } finally {
-
             try {
-                if (null != config_db_write) {
-                    cache.pushConnectionForConfigDB(config_db_write);
-                }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
+                cache.pushConnectionForConfigDB(configCon);
+            } catch (final PoolException e) {
+                LOG.error("Error pushing configdb connection to pool!", e);
             }
         }
-
-        Connection oxCon = null;
+        final Connection oxCon;
         try {
-            oxCon = cache.getConnectionForContext(ctx.getId());
-            updateDynamicAttributes(oxCon, ctx);
+            oxCon = cache.getConnectionForContext(i(ctx.getId()));
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
+        }
+        try {
+            updateDynamicAttributes(oxCon, ctx);
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            if (oxCon != null) {
-                try {
-                    cache.pushConnectionForContext(ctx.getId(), oxCon);
-                } catch (final PoolException e) {
-                    LOG.error("SQL Error", e);
-                }
+            try {
+                cache.pushConnectionForContext(i(ctx.getId()), oxCon);
+            } catch (final PoolException e) {
+                LOG.error("SQL Error", e);
             }
         }
     }
@@ -2207,37 +2198,33 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         final Set<String> loginMappings = ctx.getLoginMappings();
         loginMappings.remove(ctx.getIdAsString()); // Deny change of mapping cid<->cid
+        // first delete all mappings excluding default mapping from cid <-> cid
+        PreparedStatement stmt = null;
         try {
-            // first delete all mappings excluding default mapping from cid <-> cid
-            PreparedStatement stmt = null;
-            try {
-                stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=? AND login_info!=?");
-                stmt.setInt(1, ctx.getId().intValue());
-                stmt.setInt(2, ctx.getId().intValue());
-                stmt.executeUpdate();
-                stmt.close();
-            } finally {
-                closeSQLStuff(stmt);
-            }
-            // now check if some other context uses one of the login mappings
-            checkForExistingLoginMapping(con, loginMappings);
-            // now insert all mappings from the set
-            PreparedStatement stmt2 = null;
-            try {
-                stmt2 = con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
-                stmt2.setInt(1, ctx.getId().intValue());
-                for (final String loginMapping : loginMappings) {
-                    if (loginMapping.length() == 0) {
-                        continue;
-                    }
-                    stmt2.setString(2, loginMapping);
-                    stmt2.executeUpdate();
+            stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=? AND login_info!=?");
+            stmt.setInt(1, ctx.getId().intValue());
+            stmt.setInt(2, ctx.getId().intValue());
+            stmt.executeUpdate();
+            stmt.close();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        // now check if some other context uses one of the login mappings
+        checkForExistingLoginMapping(con, loginMappings);
+        // now insert all mappings from the set
+        PreparedStatement stmt2 = null;
+        try {
+            stmt2 = con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
+            stmt2.setInt(1, ctx.getId().intValue());
+            for (final String loginMapping : loginMappings) {
+                if (loginMapping.length() == 0) {
+                    continue;
                 }
-            } finally {
-                closeSQLStuff(stmt2);
+                stmt2.setString(2, loginMapping);
+                stmt2.executeUpdate();
             }
-        } catch (final StorageException e) {
-            throw e;
+        } finally {
+            closeSQLStuff(stmt2);
         }
     }
 
