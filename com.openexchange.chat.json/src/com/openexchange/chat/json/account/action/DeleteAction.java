@@ -92,7 +92,7 @@ public final class DeleteAction extends AbstractChatAccountAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(getJSONNullResult());
+        return getJSONNullResult();
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chat.json.service;
+package com.openexchange.chat.json.conversation;
 
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -57,11 +57,11 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChatServiceAJAXRequest}
+ * {@link ChatConversationAJAXRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ChatServiceAJAXRequest {
+public final class ChatConversationAJAXRequest {
 
     /**
      * Constant for not-found number.
@@ -73,12 +73,12 @@ public final class ChatServiceAJAXRequest {
     private final AJAXRequestData request;
 
     /**
-     * Initializes a new {@link ChatServiceAJAXRequest}.
+     * Initializes a new {@link ChatConversationAJAXRequest}.
      *
      * @param session The session
      * @param request The request
      */
-    public ChatServiceAJAXRequest(final AJAXRequestData request, final ServerSession session) {
+    public ChatConversationAJAXRequest(final AJAXRequestData request, final ServerSession session) {
         super();
         this.request = request;
         this.session = session;

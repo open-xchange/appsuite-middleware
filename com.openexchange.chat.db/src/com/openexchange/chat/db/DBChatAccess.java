@@ -88,6 +88,8 @@ import com.openexchange.user.UserService;
  */
 public final class DBChatAccess implements ChatAccess {
 
+    private static final int MIN_CHAT_ID = 1000;
+
     private static final ConcurrentMap<Key, DBChatAccess> ACCESS_MAP = new ConcurrentHashMap<Key, DBChatAccess>();
 
     private static final String PACKAGE_NAME = "com.openexchange.chat.db";
@@ -328,6 +330,7 @@ public final class DBChatAccess implements ChatAccess {
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             final List<String> ids = new LinkedList<String>();
+            // TODO: ids.add("default"); // The default chat where all users are participating
             while (rs.next()) {
                 ids.add(String.valueOf(rs.getInt(1)));
             }
@@ -349,7 +352,7 @@ public final class DBChatAccess implements ChatAccess {
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser... members) throws OXException {
         String chid = chatId;
         if (null == chid) {
-            chid = String.valueOf(getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId));
+            chid = String.valueOf(getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId, MIN_CHAT_ID));
         }
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getWritable(contextId);

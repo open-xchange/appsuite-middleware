@@ -47,34 +47,34 @@
  *
  */
 
-package com.openexchange.chat.json.service.action;
+package com.openexchange.chat.json.conversation.action;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chat.json.service.ChatServiceAJAXRequest;
+import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AbstractChatServiceAction}
+ * {@link AbstractChatConversationAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractChatServiceAction implements AJAXActionService {
+public abstract class AbstractChatConversationAction implements AJAXActionService {
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link AbstractChatServiceAction}.
+     * Initializes a new {@link AbstractChatConversationAction}.
      */
-    protected AbstractChatServiceAction(final ServiceLookup services) {
+    protected AbstractChatConversationAction(final ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -92,9 +92,11 @@ public abstract class AbstractChatServiceAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
         try {
-            return perform(new ChatServiceAJAXRequest(request, session));
+            return perform(new ChatConversationAJAXRequest(request, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -106,7 +108,7 @@ public abstract class AbstractChatServiceAction implements AJAXActionService {
      * @throws OXException If an error occurs
      * @throws JSONException If a JSON error occurs
      */
-    protected abstract AJAXRequestResult perform(ChatServiceAJAXRequest req) throws OXException, JSONException;
+    protected abstract AJAXRequestResult perform(ChatConversationAJAXRequest req) throws OXException, JSONException;
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.

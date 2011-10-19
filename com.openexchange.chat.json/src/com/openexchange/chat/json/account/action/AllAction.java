@@ -109,7 +109,7 @@ public final class AllAction extends AbstractChatAccountAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonArray);
+        return new AJAXRequestResult(jsonArray, "json");
     }
 
 }

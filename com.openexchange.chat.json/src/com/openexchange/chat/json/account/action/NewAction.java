@@ -108,7 +108,7 @@ public final class NewAction extends AbstractChatAccountAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(jsonAccount);
+        return new AJAXRequestResult(jsonAccount, "json");
     }
 
 }

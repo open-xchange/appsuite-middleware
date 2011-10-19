@@ -83,7 +83,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         /*
          * Get appropriate connection
          */
-        final Connection con = getWritableNonAutoCommitConnection(contextId); // BEGIN
+        final Connection con = getWritableConnection(contextId);
         try {
             /*
              * Try to perform an UPDATE
@@ -95,31 +95,21 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
                  */
                 throw IDExceptionCodes.ID_GEN_FAILED.create();
             }
-            con.commit(); // COMMIT;
             /*
              * Return identifier
              */
             return id;
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
             throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final Exception e) {
-            DBUtils.rollback(con);
             throw IDExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
             Database.back(contextId, true, con);
         }
     }
 
-    private static Connection getWritableNonAutoCommitConnection(final int contextId) throws OXException {
-        try {
-            final Connection con = Database.get(contextId, true);
-            con.setAutoCommit(false); // BEGIN
-            return con;
-        } catch (final SQLException e) {
-            throw IDExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        }
+    private static Connection getWritableConnection(final int contextId) throws OXException {
+        return Database.get(contextId, true);
     }
 
     private static int getId(final String type, final int contextId, final int minId, final Connection con) throws SQLException {
@@ -132,20 +122,23 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
             /*
              * Try to perform an UPDATE
              */
-            if (performUpdate(type, contextId, con)) {
-                retval = performSelect(type, contextId, con);
-                while (retval < minId) {
-                    performUpdate(type, contextId, con);
-                    retval = performSelect(type, contextId, con);
+            int cur;
+            int increment;
+            do {
+                cur = performSelect(type, contextId, con);
+                if (cur < 0) {
+                    if (performInsert(type, contextId, minId, con)) {
+                        return minId;
+                    }
+                    cur = performSelect(type, contextId, con);
                 }
-            } else {
-                /*
-                 * Try to perform initial INSERT
-                 */
-                if (performInsert(type, contextId, minId, con)) {
-                    retval = minId;
+                if (cur < minId) {
+                    increment = minId - cur;
+                } else {
+                    increment = 1;
                 }
-            }
+            } while (!compareAndSet(type, contextId, cur, cur + increment, con));
+            retval = cur + increment;
             /*
              * Retry...
              */
@@ -156,12 +149,14 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         return retval;
     }
 
-    private static boolean performUpdate(final String type, final int contextId, final Connection con) throws SQLException {
+    private static boolean compareAndSet(final String type, final int contextId, final int expected, final int newValue, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE sequenceIds SET id = id + 1 WHERE cid = ? AND type = ?");
-            stmt.setInt(1, contextId);
-            stmt.setString(2, type);
+            stmt = con.prepareStatement("UPDATE sequenceIds SET id = ? WHERE cid = ? AND type = ? AND id = ?");
+            stmt.setInt(1, newValue);
+            stmt.setInt(2, contextId);
+            stmt.setString(3, type);
+            stmt.setInt(4, expected);
             final int result = stmt.executeUpdate();
             return (result > 0);
         } finally {
@@ -186,13 +181,13 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
         }
     }
 
-    private static boolean performInsert(final String type, final int contextId, final int minId, final Connection con) throws SQLException {
+    private static boolean performInsert(final String type, final int contextId, final int firstValue, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO sequenceIds (cid, type, id) VALUES (?, ?, ?)");
             stmt.setInt(1, contextId);
             stmt.setString(2, type);
-            stmt.setInt(3, minId);
+            stmt.setInt(3, firstValue);
             try {
                 final int result = stmt.executeUpdate();
                 return (result > 0);

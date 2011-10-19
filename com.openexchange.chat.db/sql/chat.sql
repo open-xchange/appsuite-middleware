@@ -28,10 +28,19 @@ CREATE TABLE chatMessage (
  messageId BINARY(16) NOT NULL,
  message TEXT NOT NULL,
  createdAt BIGINT(64) DEFAULT NULL,
- PRIMARY KEY (cid, messageId),
+ PRIMARY KEY (cid, chatId, messageId),
  INDEX `user` (cid, user),
  INDEX `chat` (cid, chatId),
  INDEX `userMessage` (cid, user, chatId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE chatMessageMap (
+ cid INT4 unsigned NOT NULL,
+ chatId INT4 unsigned NOT NULL,
+ customId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+ messageId BINARY(16) NOT NULL,
+ PRIMARY KEY (cid, chatId, messageId),
+ INDEX `chat` (cid, chatId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE chatPresence (
