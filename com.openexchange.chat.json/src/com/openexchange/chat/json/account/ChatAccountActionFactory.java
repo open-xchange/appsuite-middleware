@@ -47,33 +47,33 @@
  *
  */
 
-package com.openexchange.chat.json;
+package com.openexchange.chat.json.account;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.chat.json.action.AbstractChatAction;
+import com.openexchange.chat.json.account.action.AbstractChatAccountAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ChatActionFactory}
+ * {@link ChatAccountActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ChatActionFactory implements AJAXActionServiceFactory {
+public class ChatAccountActionFactory implements AJAXActionServiceFactory {
 
-    private final Map<String, AbstractChatAction> actions;
+    private final Map<String, AbstractChatAccountAction> actions;
 
     /**
-     * Initializes a new {@link ChatActionFactory}.
+     * Initializes a new {@link ChatAccountActionFactory}.
      *
      * @param services The service look-up
      */
-    public ChatActionFactory(final ServiceLookup services) {
+    public ChatAccountActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractChatAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractChatAccountAction>(4);
         
         
     }
