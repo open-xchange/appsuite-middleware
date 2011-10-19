@@ -107,16 +107,16 @@ public final class WhitelistServiceTracker implements ServiceTrackerCustomizer<C
         // no-op
     }
 
-    private static boolean isEmpty(final String str) {
-        if (null == str) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
             return true;
         }
-        final char[] chars = str.toCharArray();
-        boolean empty = true;
-        for (int i = 0; empty && i < chars.length; i++) {
-            empty = Character.isWhitespace(chars[i]);
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return empty;
+        return isWhitespace;
     }
 
     private static String removeQuotes(final String quoted) {

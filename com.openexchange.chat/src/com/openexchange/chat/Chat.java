@@ -50,36 +50,89 @@
 package com.openexchange.chat;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 import com.openexchange.exception.OXException;
-
 
 /**
  * {@link Chat} - Represents a chat (room) or a user's private chat.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat extends ChatDesc {
+public interface Chat {
+
+    /**
+     * Gets the chat identifier.
+     * 
+     * @return The chat identifier.
+     */
+    String getChatId();
+
+    /**
+     * Gets the chat's subject.
+     * 
+     * @return The subject
+     */
+    String getSubject();
 
     /**
      * Gets the chat members.
      * 
-     * @return The chat members
+     * @return The identifiers of the chat members
      * @throws OXException If chat members cannot be returned
      */
-    Collection<ChatMember> getMembers() throws OXException;
+    List<String> getMembers() throws OXException;
 
     /**
      * Joins specified chat member to this chat.
      * 
-     * @param member The member to join
+     * @param user The identifier of the member to join
      * @throws OXException If joining the chat member fails
      */
-    void join(ChatMember member) throws OXException;
-    
-    void part(ChatMember member) throws OXException;
-    
-    void postMessage(ChatMessage message, String recipientId) throws OXException;
+    void join(String user) throws OXException;
 
-    void directMessage(ChatMessage message, String recipientId) throws OXException;
-    
+    /**
+     * Parts specified chat member from this chat.
+     * 
+     * @param user The identifier of the member to part
+     * @throws OXException If member cannot be removed
+     */
+    void part(String user) throws OXException;
+
+    /**
+     * Posts specified packet to this chat.
+     * 
+     * @param packet The packet to post
+     * @throws OXException If posting the packet fails
+     */
+    void post(Packet packet) throws OXException;
+
+    /**
+     * Adds given message listener that will be notified of any new messages in the chat.
+     * <p>
+     * If <code>false</code> is returned, the client is supposed to poll messages with {@link #pollMessages(Date)} while remembering last
+     * packet's time stamp.
+     * <p>
+     * See also {@link ChatCaps#supportsNotifcation()}.
+     * 
+     * @param listener A message listener.
+     * @return <code>true</code> if listener could be registered; otherwise <code>false</code> if this chat does not support notifications
+     * @see ChatCaps#supportsNotifcation()
+     */
+    boolean addMessageListener(MessageListener listener);
+
+    /**
+     * Removes specified message listener
+     * 
+     * @param listener The message listener to remove
+     */
+    void removeMessageListener(MessageListener listener);
+
+    /**
+     * Returns an unmodifiable collection of all of the listeners registered with this chat.
+     * 
+     * @return An unmodifiable collection of all of the listeners registered with this chat.
+     */
+    Collection<MessageListener> getListeners();
+
 }

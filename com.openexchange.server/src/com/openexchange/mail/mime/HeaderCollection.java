@@ -863,16 +863,16 @@ public class HeaderCollection implements Serializable {
      * @param s The string to check
      * @return <code>true</code> if string is empty; otherwise <code>false</code>
      */
-    private static final boolean isEmpty(final String s) {
-        if (null == s) {
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
             return true;
         }
-        final char[] chars = s.toCharArray();
-        boolean empty = true;
-        for (int i = 0; empty && i < chars.length; i++) {
-            empty = Character.isWhitespace(chars[i]);
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
         }
-        return empty;
+        return isWhitespace;
     }
 
     /**

@@ -64,6 +64,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link StorageParametersImpl} - Implementation of {@link StorageParameters}.
@@ -125,6 +126,35 @@ public final class StorageParametersImpl implements StorageParameters {
         userId = user.getId();
         this.context = context;
         contextId = context.getContextId();
+        parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
+        warnings = new ConcurrentHashMap<OXException, Object>(2);
+    }
+
+    /**
+     * Initializes a new {@link StorageParametersImpl} from specified storage parameters.
+     * 
+     * @param source The source parameters
+     */
+    public StorageParametersImpl(final StorageParameters source) {
+        super();
+        final Session s = source.getSession();
+        if (null == s) {
+            user = source.getUser();
+            session = null;
+            userId = user.getId();
+            context = source.getContext();
+            contextId = context.getContextId();
+        } else {
+            try {
+                session = s instanceof ServerSession ? (ServerSession) s : new ServerSessionAdapter(s);
+                user = this.session.getUser();
+                userId = user.getId();
+                context = this.session.getContext();
+                contextId = context.getContextId();
+            } catch (final OXException e) {
+                throw new IllegalStateException(e);
+            }
+        }
         parameters = new ConcurrentHashMap<FolderType, ConcurrentMap<String, Object>>();
         warnings = new ConcurrentHashMap<OXException, Object>(2);
     }

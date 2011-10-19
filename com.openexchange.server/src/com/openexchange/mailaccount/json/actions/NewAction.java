@@ -120,20 +120,17 @@ public final class NewAction extends AbstractMailAccountAction {
                 throw e;
             }
             final int id;
+            MailAccount newAccount = null;
             try {
                 con.setAutoCommit(false);
                 id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session), con);
                 // Check full names after successful creation
-                MailAccount newAccount = null;
                 final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), cid, con);
                 for (final MailAccount mailAccount : accounts) {
                     if (mailAccount.getId() == id) {
                         newAccount = mailAccount;
                         break;
                     }
-                }
-                if (null != newAccount) {
-                    checkFullNames(newAccount, storageService, session, con);
                 }
                 con.commit();
             } catch (final SQLException e) {
@@ -148,6 +145,10 @@ public final class NewAction extends AbstractMailAccountAction {
             } finally {
                 autocommit(con);
                 Database.back(cid, true, con);
+            }
+
+            if (null != newAccount) {
+                checkFullNames(newAccount, storageService, session, null);
             }
 
             final JSONObject jsonAccount =

@@ -2097,13 +2097,16 @@ public final class MIMEMessageConverter {
         return headers;
     }
 
-    private static boolean isEmpty(final String value) {
-        final char[] chars = value.toCharArray();
-        boolean empty = true;
-        for (int i = 0; i < chars.length && empty; i++) {
-            empty = ((chars[i] == ' ') || (chars[i] == '\t'));
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
         }
-        return empty;
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**

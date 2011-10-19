@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -63,7 +62,7 @@ public class IPRangeTest {
 
     @Test
     public void simpleIP() {
-        IPRange singleIP = new IPRange(new int[]{192,168,32,99});
+        final IPRange singleIP = IPRange.parseRange("192.168.32.99");
 
         assertTrue(singleIP.contains("192.168.32.99"));
         assertFalse(singleIP.contains("192.168.32.98"));
@@ -72,7 +71,7 @@ public class IPRangeTest {
 
     @Test
     public void range() {
-        IPRange range = new IPRange(new int[]{192,168,32,100}, new int[]{192,168,32,200});
+        final IPRange range = IPRange.parseRange("192.168.32.100-192.168.32.200");
         assertTrue(range.contains("192.168.32.150"));
         assertFalse(range.contains("192.168.32.99"));
         assertFalse(range.contains("191.168.32.150"));
@@ -80,7 +79,7 @@ public class IPRangeTest {
 
     @Test
     public void rangeWithCarryOver() {
-        IPRange range = new IPRange(new int[]{192,168,32,99}, new int[]{192,168,33,20});
+        final IPRange range = IPRange.parseRange("192.168.32.99-192.168.33.20");
 
         assertTrue(range.contains("192.168.32.100"));
         assertTrue(range.contains("192.168.33.19"));
@@ -89,43 +88,12 @@ public class IPRangeTest {
     }
 
     @Test
-    public void parseSimple() {
-        IPRange range = IPRange.parseRange("192.168.32.99");
+    public void rangeWithCarryOverIpv6() {
+        final IPRange range = IPRange.parseRange("::1-::128");
 
-        int[] start = range.getStart();
-
-        assertEquals(192, start[0]);
-        assertEquals(168, start[1]);
-        assertEquals(32, start[2]);
-        assertEquals(99, start[3]);
-
-        int[] end = range.getEnd();
-
-        assertEquals(192, end[0]);
-        assertEquals(168, end[1]);
-        assertEquals(32, end[2]);
-        assertEquals(99, end[3]);
-
-
-    }
-
-    @Test
-    public void parseRange() {
-        IPRange range = IPRange.parseRange("192.168.32.100  -  192.168.32.200");
-
-        int[] start = range.getStart();
-
-        assertEquals(192, start[0]);
-        assertEquals(168, start[1]);
-        assertEquals(32, start[2]);
-        assertEquals(100, start[3]);
-
-        int[] end = range.getEnd();
-
-        assertEquals(192, end[0]);
-        assertEquals(168, end[1]);
-        assertEquals(32, end[2]);
-        assertEquals(200, end[3]);
+        assertTrue(range.contains("::12"));
+        assertTrue(range.contains("::24"));
+        assertFalse(range.contains("::168"));
 
     }
 

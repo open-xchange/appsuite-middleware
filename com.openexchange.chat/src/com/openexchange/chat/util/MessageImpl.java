@@ -47,38 +47,124 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.util;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.chat.ChatAttachment;
+import com.openexchange.chat.Message;
 
 /**
- * {@link ChatMember}
+ * {@link MessageImpl}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatMember {
+public class MessageImpl extends PacketImpl implements Message {
 
-    public static enum Status {
-        AWAY, ONLINE, OFFLINE, ;
+    private Type type;
+
+    private String subject;
+
+    private String text;
+
+    private final List<ChatAttachment> attachments;
+
+    /**
+     * Initializes a new {@link MessageImpl}.
+     */
+    public MessageImpl() {
+        super();
+        attachments = new CopyOnWriteArrayList<ChatAttachment>();
+    }
+
+    @Override
+    public String toString() {
+        return getText();
+    }
+
+    @Override
+    public Type getType() {
+        return type;
+    }
+
+    @Override
+    public String getSubject() {
+        return subject;
+    }
+
+    @Override
+    public String getText() {
+        return text;
+    }
+
+    @Override
+    public List<ChatAttachment> getAttachments() {
+        return Collections.unmodifiableList(attachments);
     }
 
     /**
-     * Gets the status message.
+     * Removes specified attachment.
      * 
-     * @return The status message
+     * @param attachment The attachment
      */
-    String getStatusMessage();
+    public void removeAttachments(final ChatAttachment attachment) {
+        if (attachment == null) {
+            return;
+        }
+        attachments.remove(attachment);
+    }
 
     /**
-     * Gets the status.
+     * Adds specified attachment.
      * 
-     * @return The status
+     * @param attachment The attachment
      */
-    Status getStatus();
+    public void addAttachments(final ChatAttachment attachment) {
+        if (attachment == null) {
+            return;
+        }
+        attachments.add(attachment);
+    }
 
     /**
-     * Gets the identifier.
+     * Adds specified attachments.
      * 
-     * @return The identifier.
+     * @param attachments The attachments
      */
-    String getId();
+    public void addAttachments(final Collection<ChatAttachment> attachments) {
+        if (attachments == null) {
+            return;
+        }
+        this.attachments.addAll(attachments);
+    }
+
+    /**
+     * Sets the type
+     * 
+     * @param type The type to set
+     */
+    public void setType(final Type type) {
+        this.type = type;
+    }
+
+    /**
+     * Sets the subject
+     * 
+     * @param subject The subject to set
+     */
+    public void setSubject(final String subject) {
+        this.subject = subject;
+    }
+
+    /**
+     * Sets the text
+     * 
+     * @param text The text to set
+     */
+    public void setText(final String text) {
+        this.text = text;
+    }
 
 }

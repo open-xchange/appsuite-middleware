@@ -50,15 +50,35 @@
 package com.openexchange.chat;
 
 import com.openexchange.exception.OXException;
-
+import com.openexchange.session.Session;
 
 /**
  * {@link ChatService} - The chat service.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatService {
-    
-    Chat openChat(ChatDesc chatDesc) throws OXException;
+
+    /**
+     * The identifier for default account.
+     */
+    public static final String DEFAULT_ACCOUNT = "default";
+
+    /**
+     * Gets the access to specified chat account.
+     * 
+     * @param accountId The account identifier; e.g. "default" for default account
+     * @return The access to specified chat account
+     * @throws OXException If access cannot be provided; e.g. because no such account exists
+     * @see #DEFAULT_ACCOUNT
+     */
+    ChatAccess access(String accountId, Session session) throws OXException;
+
+    /**
+     * Gets the account manager for this chat service.
+     * 
+     * @return The account manager
+     */
+    ChatAccountManager getAccountManager();
 
 }

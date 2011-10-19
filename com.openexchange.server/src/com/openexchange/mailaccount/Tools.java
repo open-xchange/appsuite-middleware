@@ -161,7 +161,7 @@ public final class Tools {
         /*
          * Variables
          */
-        String prefix = null;
+        String prefix = account.generateMailServerURL().startsWith("pop3") ? "" : null;;
         StringBuilder tmp = null;
         MailAccount primaryAccount = null;
         /*
@@ -170,7 +170,9 @@ public final class Tools {
         try {
             String fullName = account.getConfirmedHamFullname();
             if (null == fullName) {
-                prefix = getPrefix(accountId, serverSession);
+                if (null == prefix) {
+                    prefix = getPrefix(accountId, serverSession);
+                }
                 String name = account.getConfirmedHam();
                 if (null == name) {
                     primaryAccount = storageService.getDefaultMailAccount(serverSession.getUserId(), serverSession.getContextId());

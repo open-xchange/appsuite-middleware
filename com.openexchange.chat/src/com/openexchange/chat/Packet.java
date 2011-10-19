@@ -49,30 +49,42 @@
 
 package com.openexchange.chat;
 
+import java.util.Date;
+
 /**
- * {@link ChatDesc}
+ * {@link Packet} - Represents any kind of package that can be delivered within a chat.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatDesc {
+public interface Packet {
 
     /**
-     * The identifier for a user's default chat.
-     */
-    public static final String DEFAULT_CHAT = "0";
-
-    /**
-     * Gets the chat identifier.
+     * Gets the packet identifier.
      * 
-     * @return The chat identifier.
+     * @return The identifier or <code>null</code>
      */
-    String getChatId();
+    String getPacketId();
 
     /**
-     * Gets the chat's topic
+     * Gets the sender.
      * 
-     * @return The topic
+     * @return The sender or <code>null</code>
      */
-    String getChatTopic();
+    ChatUser getFrom();
+
+    /**
+     * Gets the time stamp for this packet.
+     * 
+     * @return The time stamp
+     */
+    Date getTimeStamp();
+
+    /**
+     * Gets the string representation of this packet.
+     * 
+     * @return The string representation
+     */
+    @Override
+    String toString();
 
 }
