@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.SOAPStringMap;
 import com.openexchange.admin.soap.SOAPUtils;
 

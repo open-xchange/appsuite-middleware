@@ -329,7 +329,7 @@ public final class SOAPUtils {
             out.setCompany(in.getCompany());
         }
         if( null != in.getDefault_group() ) {
-            out.setDefault_group(in.getDefault_group());
+            out.setDefault_group(new Group(in.getDefault_group()));
         }
         if( null != in.getDepartment() ) {
             out.setDepartment(in.getDepartment());
@@ -699,7 +699,7 @@ public final class SOAPUtils {
             ret.setCompany(u.getCompany());
         }
         if( null != u.getDefault_group() ) {
-            ret.setDefault_group(u.getDefault_group());
+            ret.setDefault_group(soapGroup2Group(u.getDefault_group()));
         }
         if( null != u.getDepartment() ) {
             ret.setDepartment(u.getDepartment());
