@@ -218,10 +218,6 @@ public class LinkedInConnectionTest extends TestCase {
 	
 	public void testMessageInbox() throws Exception {
 		JSONObject inbox = linkedIn.getMessageInbox("password",1,1,1);
-		JSONArray messages = inbox.getJSONArray("values");
-		assertTrue("Something should have happened lately", messages.length() == 2);
-		JSONObject msg1 = messages.getJSONObject(0);
-		assertEquals("Hello world", msg1.getString("header"));
-		assertEquals("Have a nice day.", msg1.getString("body"));
+		assertEquals("Should have zero messages.", 0, inbox.getInt("_total"));
 	}
 }
