@@ -190,7 +190,7 @@ public final class DBChatActivator extends HousekeepingActivator {
                         }
                     } catch (final Exception e) {
                         // Failed handling session
-                        LOG.warn("Failed handling tracked added session for LIST/LSUB cache.", e);
+                        LOG.warn("Failed handling tracked added session for DB chat.", e);
                     }
                 }
 
@@ -217,7 +217,7 @@ public final class DBChatActivator extends HousekeepingActivator {
                         DBChatAccess.removeDbChatAccess(session);
                     } catch (final Exception e) {
                         // Failed handling session
-                        LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);
+                        LOG.warn("Failed handling tracked removed session for DB chat.", e);
                     }
                 }
 
