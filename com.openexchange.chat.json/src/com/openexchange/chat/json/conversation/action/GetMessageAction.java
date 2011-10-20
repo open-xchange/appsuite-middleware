@@ -110,7 +110,7 @@ public final class GetMessageAction extends AbstractChatConversationAction {
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(json, "json");
+            return new AJAXRequestResult(json, message.getTimeStamp(), "json");
         } finally {
             if (null != access) {
                 access.disconnect();

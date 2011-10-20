@@ -108,6 +108,16 @@ public final class AllMessagesAction extends AbstractChatConversationAction {
              * Get messages
              */
             final List<Message> messages = chat.pollMessages(since);
+            if (messages.isEmpty()) {
+                return new AJAXRequestResult(new JSONArray(), "json");
+            }
+            Date timestamp = messages.get(0).getTimeStamp();
+            for (int i = 1, size = messages.size(); i < size; i++) {
+                final Date stamp = messages.get(i).getTimeStamp();
+                if ((null != stamp) && ((null == timestamp) || timestamp.before(stamp))) {
+                    timestamp = stamp;
+                }
+            }
             /*
              * Create JSON array
              */
@@ -115,7 +125,7 @@ public final class AllMessagesAction extends AbstractChatConversationAction {
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonArray, "json");
+            return new AJAXRequestResult(jsonArray, timestamp, "json");
         } finally {
             if (null != access) {
                 access.disconnect();

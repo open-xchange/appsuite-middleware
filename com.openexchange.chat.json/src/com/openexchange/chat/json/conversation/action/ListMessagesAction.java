@@ -50,6 +50,7 @@
 package com.openexchange.chat.json.conversation.action;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -101,6 +102,16 @@ public final class ListMessagesAction extends AbstractChatConversationAction {
                 messageIds.add(ids.getString(i));
             }
             final List<Message> messages = access.getChat(conversationID.getChatId()).getMessages(messageIds);
+            if (messages.isEmpty()) {
+                return new AJAXRequestResult(new JSONArray(), "json");
+            }
+            Date timestamp = messages.get(0).getTimeStamp();
+            for (int i = 1, size = messages.size(); i < size; i++) {
+                final Date stamp = messages.get(i).getTimeStamp();
+                if ((null != stamp) && ((null == timestamp) || timestamp.before(stamp))) {
+                    timestamp = stamp;
+                }
+            }
             /*
              * Create JSON
              */

@@ -51,7 +51,6 @@ package com.openexchange.chat.json.rest;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -61,61 +60,58 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteMethodHandler extends AbstractMethodHandler {
+public final class PostMethodHandler extends AbstractMethodHandler {
 
     /**
-     * Initializes a new {@link DeleteMethodHandler}.
+     * Initializes a new {@link PostMethodHandler}.
      */
-    public DeleteMethodHandler() {
+    public PostMethodHandler() {
         super();
     }
+    
+    /*-
+     * Handle:
+     * 
+     * "Update conv."
+     *  PUT /conversation/11
+     *   
+     * "Search for stuff"
+     *  PUT /conversation?action=search
+     * 
+     * "Update message"
+     *  PUT /conversation/11/message/1234
+     */
 
     @Override
     protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        final String[] pathElements = SPLIT_PATH.split(pathInfo);
-        final int length = pathElements.length;
-        if (0 == length) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        if (1 == length) {
-            /*-
-             * "Delete/part specific conversation"
-             *  DELETE /conversation/11
-             */
-            final String element = pathElements[0];
-            retval.setAction("delete");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
-        } else if ("message".equals(pathElements[1])) {
-            if (2 == length) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create();
-            }
-            /*-
-             * "Delete specific message"
-             *  DELETE /conversation/11/message/1234
-             */
-            retval.putParameter("id", pathElements[0]);
-            final String element = pathElements[2];
-            retval.setAction("deleteMessages");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
+            retval.setAction("new");
         } else {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+            final String[] pathElements = SPLIT_PATH.split(pathInfo);
+            final int length = pathElements.length;
+            if (0 == length) {
+                retval.setAction("new");
+            } else if (1 == length) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create();
+            } else if ("message".equals(pathElements[1])) {
+                if (2 == length) {
+                    throw AjaxExceptionCodes.BAD_REQUEST.create();
+                }
+                /*-
+                 * "Post new message for Conv. #11"
+                 *  POST /conversation/11/message
+                 */
+                retval.putParameter("id", pathElements[0]);
+                retval.setAction("newMessage");
+            } else {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+            }
         }
     }
 
     @Override
     protected boolean applyBody() {
-        return false;
+        return true;
     }
 
 }

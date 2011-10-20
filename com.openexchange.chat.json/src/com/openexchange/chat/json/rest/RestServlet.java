@@ -55,28 +55,23 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link RestServlet}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RestServlet extends DispatcherServlet {
 
+    private static final long serialVersionUID = 8536451759619846580L;
+
     private static enum Method {
-        GET,
-        PUT,
-        POST,
-        DELETE,
-        
-        ;
+        GET, PUT, POST, DELETE;
 
         private static final Map<String, Method> MAP;
 
@@ -104,7 +99,7 @@ public final class RestServlet extends DispatcherServlet {
      * Handles requests for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
      */
     public static interface MethodHandler {
-        
+
         /**
          * Parses REST-like HTTP Servlet request to an appropriate {@link AJAXRequestData} instance.
          * 
@@ -119,16 +114,14 @@ public final class RestServlet extends DispatcherServlet {
 
     }
 
-    protected static final Pattern SPLIT_CSV = Pattern.compile(Pattern.quote(" *, *"));
-
-    protected static final Pattern SPLIT_PATH = Pattern.compile(Pattern.quote("/"));
-
     private static final Map<Method, MethodHandler> HANDLER_MAP;
 
     static {
         final EnumMap<Method, MethodHandler> m = new EnumMap<RestServlet.Method, RestServlet.MethodHandler>(Method.class);
         m.put(Method.GET, new GetMethodHandler());
-        
+        m.put(Method.PUT, new PutMethodHandler());
+        m.put(Method.DELETE, new DeleteMethodHandler());
+        m.put(Method.POST, new PostMethodHandler());
         HANDLER_MAP = Collections.unmodifiableMap(m);
     }
 
