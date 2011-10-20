@@ -29,4 +29,6 @@ Import-Package: com.openexchange.ajax,
  javax.servlet.resources,
  org.apache.commons.logging,
  org.json,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.service.http
+Bundle-Activator: com.openexchange.chat.json.osgi.ChatJSONActivator
