@@ -100,6 +100,9 @@ public final class RestServlet extends DispatcherServlet {
         }
     }
 
+    /**
+     * Handles requests for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
+     */
     public static interface MethodHandler {
         
         /**
@@ -116,8 +119,6 @@ public final class RestServlet extends DispatcherServlet {
 
     }
 
-    private static final MethodHandler GET_METHOD_HANDLER = new GetMethodHandler();
-
     protected static final Pattern SPLIT_CSV = Pattern.compile(Pattern.quote(" *, *"));
 
     protected static final Pattern SPLIT_PATH = Pattern.compile(Pattern.quote("/"));
@@ -126,7 +127,7 @@ public final class RestServlet extends DispatcherServlet {
 
     static {
         final EnumMap<Method, MethodHandler> m = new EnumMap<RestServlet.Method, RestServlet.MethodHandler>(Method.class);
-        m.put(Method.GET, GET_METHOD_HANDLER);
+        m.put(Method.GET, new GetMethodHandler());
         
         HANDLER_MAP = Collections.unmodifiableMap(m);
     }
