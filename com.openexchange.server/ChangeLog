@@ -1,3 +1,7 @@
+* 2011-10-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 19952: Ensured existence of default infostore folder
+
 * 2011-10-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 20610: Using proper folder tree identifier with submitted tasks
