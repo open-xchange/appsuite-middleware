@@ -55,10 +55,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
@@ -81,7 +83,18 @@ import com.openexchange.user.UserService;
  */
 public final class DBRoster implements Roster {
 
-    private static final ConcurrentTIntObjectHashMap<DBRoster> ROSTER_MAP = new ConcurrentTIntObjectHashMap<DBRoster>();
+    private static final AtomicReference<SessiondService> SERVICE_REF = new AtomicReference<SessiondService>();
+
+    /**
+     * Sets the {@link SessiondService} service instance.
+     * 
+     * @param service The service
+     */
+    public static void set(final SessiondService service) {
+        SERVICE_REF.set(service);
+    }
+
+    private static final ConcurrentTIntObjectHashMap<DBRoster> ROSTER_MAP = new ConcurrentTIntObjectHashMap<DBRoster>(128);
 
     /**
      * Gets the roster for specified context.
@@ -98,8 +111,9 @@ public final class DBRoster implements Roster {
      * 
      * @param context The context
      * @return The roster
+     * @throws OXException If initialization fails
      */
-    public static DBRoster getRosterFor(final Context context) {
+    public static DBRoster getRosterFor(final Context context) throws OXException {
         final int key = context.getContextId();
         DBRoster dbRoster = ROSTER_MAP.get(key);
         if (null == dbRoster) {
@@ -116,13 +130,33 @@ public final class DBRoster implements Roster {
 
     private final List<RosterListener> listeners;
 
+    private final Map<String, ChatUser> entries;
+
     /**
      * Initializes a new {@link DBRoster}.
+     * 
+     * @throws OXException If initialization fails
      */
-    private DBRoster(final Context context) {
+    private DBRoster(final Context context) throws OXException {
         super();
         this.context = context;
         listeners = new CopyOnWriteArrayList<RosterListener>();
+        entries = Collections.unmodifiableMap(generateEntries());
+    }
+
+    private Map<String, ChatUser> generateEntries() throws OXException {
+        final UserService userService = getService(UserService.class);
+        final User[] users = userService.getUser(context);
+        final Map<String, ChatUser> tmp = new HashMap<String, ChatUser>(users.length);
+        for (int i = 0; i < users.length; i++) {
+            final User u = users[i];
+            final ChatUserImpl chatUser = new ChatUserImpl();
+            final String id = String.valueOf(u.getId());
+            chatUser.setId(id);
+            chatUser.setName(u.getDisplayName());
+            tmp.put(id, chatUser);
+        }
+        return tmp;
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
@@ -134,18 +168,8 @@ public final class DBRoster implements Roster {
     }
 
     @Override
-    public Collection<ChatUser> getEntries() throws OXException {
-        final UserService userService = getService(UserService.class);
-        final User[] users = userService.getUser(context);
-        final List<ChatUser> ret = new ArrayList<ChatUser>(users.length);
-        for (int i = 0; i < users.length; i++) {
-            final User u = users[i];
-            final ChatUserImpl chatUser = new ChatUserImpl();
-            chatUser.setId(String.valueOf(u.getId()));
-            chatUser.setName(u.getDisplayName());
-            ret.add(chatUser);
-        }
-        return ret;
+    public Map<String, ChatUser> getEntries() throws OXException {
+        return entries;
     }
 
     @Override
@@ -166,7 +190,7 @@ public final class DBRoster implements Roster {
                 packetUnavailable.setFrom(user);
                 return packetUnavailable;
             }
-            if (null == getService(SessiondService.class).getAnyActiveSessionForUser(userId, context.getContextId())) {
+            if (null == SERVICE_REF.get().getAnyActiveSessionForUser(userId, context.getContextId())) {
                 final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
                 packetUnavailable.setFrom(user);
                 return packetUnavailable;

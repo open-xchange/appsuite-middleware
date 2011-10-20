@@ -344,6 +344,15 @@ public final class DBChatAccess implements ChatAccess {
     }
 
     @Override
+    public Chat getChat(final String chatId) throws OXException {
+        final DBChat dbChat = DBChat.optDBChat(Integer.parseInt(chatId), contextId);
+        if (null == dbChat) {
+            throw ChatExceptionCodes.CHAT_NOT_FOUND.create(chatId);
+        }
+        return dbChat;
+    }
+
+    @Override
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser member) throws OXException {
         return openChat(chatId, listener, member);
     }

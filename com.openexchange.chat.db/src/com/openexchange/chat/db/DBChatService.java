@@ -77,7 +77,7 @@ public final class DBChatService implements ChatService {
         return service;       
     }
 
-    private static final String IDENTIFIER = "com.openexchange.chat.db";
+    private static final String IDENTIFIER = "1001";
 
     /**
      * Gets the identifier

@@ -49,7 +49,7 @@
 
 package com.openexchange.chat;
 
-import java.util.Collection;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,11 +60,11 @@ import com.openexchange.exception.OXException;
 public interface Roster {
 
     /**
-     * Returns an unmodifiable collection of all users in the roster.
+     * Returns an unmodifiable map containing all users in the roster.
      *
      * @return All entries in the roster.
      */
-    public Collection<ChatUser> getEntries() throws OXException;
+    public Map<String, ChatUser> getEntries() throws OXException;
 
     /**
      * Returns the presence info for a particular user. If the user is offline, or if no presence data is available (such as when you are
