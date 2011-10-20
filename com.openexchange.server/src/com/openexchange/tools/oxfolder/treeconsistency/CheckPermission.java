@@ -65,7 +65,6 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * {@link CheckPermission}
@@ -117,25 +116,21 @@ abstract class CheckPermission {
      * @throws OXException If folder cannot be fetched from master database
      */
     protected FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
-        try {
-            /*
-             * Use writable connection to ensure to fetch from master database
-             */
-            Connection wc = writeCon;
-            if (wc == null) {
-                try {
-                    wc = DBPool.pickupWriteable(ctx);
-                    return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-                } finally {
-                    if (wc != null) {
-                        DBPool.closeWriterSilent(ctx, wc);
-                    }
+        /*
+         * Use writable connection to ensure to fetch from master database
+         */
+        Connection wc = writeCon;
+        if (wc == null) {
+            try {
+                wc = DBPool.pickupWriteable(ctx);
+                return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+            } finally {
+                if (wc != null) {
+                    DBPool.closeWriterSilent(ctx, wc);
                 }
             }
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
+        return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
     }
 
     /**
