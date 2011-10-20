@@ -55,8 +55,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.chat.json.RestServlet;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.chat.json.account.ChatAccountActionFactory;
+import com.openexchange.chat.json.conversation.ChatConversationActionFactory;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
 
 
@@ -65,7 +67,7 @@ import com.openexchange.server.osgiservice.SimpleRegistryListener;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ChatJSONActivator extends HousekeepingActivator {
+public final class ChatJSONActivator extends AJAXModuleActivator {
 
     /**
      * Initializes a new {@link ChatJSONActivator}.
@@ -82,6 +84,8 @@ public final class ChatJSONActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatJSONActivator.class));
+        registerModule(new ChatAccountActionFactory(this), "chat/account");
+        registerModule(new ChatConversationActionFactory(this), "conversation");
         track(HttpService.class, new SimpleRegistryListener<HttpService>() {
 
             @Override
