@@ -49,39 +49,39 @@
 
 package com.openexchange.chat.json.conversation.action;
 
-import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
+import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
-import com.openexchange.chat.ChatUser;
-import com.openexchange.chat.Presence;
-import com.openexchange.chat.Roster;
+import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.Writer;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link GetAction}
- * 
+ * {@link AllMessagesAction}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetAction extends AbstractChatConversationAction {
+public final class AllMessagesAction extends AbstractChatConversationAction {
 
     /**
-     * Initializes a new {@link GetAction}.
-     * 
+     * Initializes a new {@link AllMessagesAction}.
+     *
      * @param services
      */
-    public GetAction(final ServiceLookup services) {
+    public AllMessagesAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -89,40 +89,33 @@ public final class GetAction extends AbstractChatConversationAction {
     protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
         final ServerSession session = req.getSession();
         /*
-         * Get services
+         * Get service
          */
         final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
         final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        final TimeZone timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        final Date since = getDateParameter(req.getRequest(), "since", timeZone);
         final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
         ChatAccess access = null;
         try {
             access = chatService.access(conversationID.getAccountId(), session);
             access.login();
             /*
-             * Get roster
-             */
-            final Roster roster = access.getRoster();
-            final Map<String, ChatUser> entries = roster.getEntries();
-            /*
              * Get chat
              */
             final Chat chat = access.getChat(conversationID.getChatId());
-            final List<String> memberIds = chat.getMembers();
-            final List<ChatUser> chatUsers = new ArrayList<ChatUser>(memberIds.size());
-            final List<Presence> presences = new ArrayList<Presence>(memberIds.size());
-            for (final String memberId : memberIds) {
-                final ChatUser chatUser = entries.get(memberId);
-                chatUsers.add(chatUser);
-                presences.add(roster.getPresence(chatUser));
-            }
             /*
-             * Create JSON object for chat
+             * Get messages
              */
-            final JSONObject jsonObject = Writer.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            final List<Message> messages = chat.pollMessages(since);
+            /*
+             * Create JSON array
+             */
+            final JSONArray jsonArray = Writer.writeMessages(messages, timeZone);
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonObject, "json");
+            return new AJAXRequestResult(jsonArray, "json");
         } finally {
             if (null != access) {
                 access.disconnect();

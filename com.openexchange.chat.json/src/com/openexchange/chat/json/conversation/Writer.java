@@ -49,19 +49,23 @@
 
 package com.openexchange.chat.json.conversation;
 
+import static com.openexchange.tools.TimeZoneUtils.addTimeZoneOffset;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatUser;
+import com.openexchange.chat.Message;
 import com.openexchange.chat.Presence;
-
 
 /**
  * {@link Writer} - Provides write methods.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Writer {
@@ -81,17 +85,85 @@ public final class Writer {
      * @return The JSON object
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONObject writeChat(final Chat chat, final List<ChatUser> members, final List<Presence> presences) throws JSONException {
+    public static JSONObject writeChat(final Chat chat, final List<ChatUser> members, final List<Presence> presences, final String timeZone) throws JSONException {
         final JSONObject jsonChat = new JSONObject();
         jsonChat.put("id", chat.getChatId());
         jsonChat.put("subject", chat.getSubject());
         final JSONArray jsonMembers = new JSONArray();
         final int size = members.size();
         for (int i = 0; i < size; i++) {
-            jsonMembers.put(writeChatUser(members.get(i), presences.get(i)));
+            jsonMembers.put(writeChatUser(members.get(i), presences.get(i), timeZone));
         }
         jsonChat.put("members", jsonMembers);
         return jsonChat;
+    }
+
+    /**
+     * Writes specified messages to a JSON array.
+     * 
+     * @param messages The messages
+     * @param timeZone The user's time zone
+     * @return The resulting JOSN array
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONArray writeMessages(final Collection<Message> messages, final String timeZone) throws JSONException {
+        return writeMessages(messages, getTimeZone(timeZone));
+    }
+
+    /**
+     * Writes specified messages to a JSON array.
+     * 
+     * @param messages The messages
+     * @param timeZone The user's time zone
+     * @return The resulting JOSN array
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONArray writeMessages(final Collection<Message> messages, final TimeZone timeZone) throws JSONException {
+        final JSONArray jsonMessages = new JSONArray();
+        for (final Message message : messages) {
+            jsonMessages.put(writeMessage(message, timeZone));
+        }
+        return jsonMessages;
+    }
+
+    /**
+     * Writes specified message to a JSON object.
+     * 
+     * @param message The message
+     * @param timeZone The time zone identifier
+     * @return The JSON object
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONObject writeMessage(final Message message, final String timeZone) throws JSONException {
+        return writeMessage(message, getTimeZone(timeZone));
+    }
+
+    /**
+     * Writes specified message to a JSON object.
+     * 
+     * @param message The message
+     * @param timeZone The time zone
+     * @return The JSON object
+     * @throws JSONException If a JSON error occurs
+     */
+    public static JSONObject writeMessage(final Message message, final TimeZone timeZone) throws JSONException {
+        final JSONObject jsonMessage = new JSONObject();
+        jsonMessage.put("from", writeChatUser(message.getFrom(), null, null));
+        jsonMessage.put("id", message.getPacketId());
+        {
+            final String subject = message.getSubject();
+            if (null != subject) {
+                jsonMessage.put("subject", subject);
+            }
+        }
+        {
+            final String text = message.getText();
+            if (null != text) {
+                jsonMessage.put("text", text);
+            }
+        }
+        jsonMessage.put("timeStamp", addTimeZoneOffset(message.getTimeStamp().getTime(), timeZone));
+        return jsonMessage;
     }
 
     /**
@@ -99,15 +171,16 @@ public final class Writer {
      * 
      * @param chatUser The chat user
      * @param optPresence The optional presence
+     * @param optTimeZone The user's time zone
      * @return The JSON object
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONObject writeChatUser(final ChatUser chatUser, final Presence optPresence) throws JSONException {
+    public static JSONObject writeChatUser(final ChatUser chatUser, final Presence optPresence, final String optTimeZone) throws JSONException {
         final JSONObject jsonChatUser = new JSONObject();
         jsonChatUser.put("id", chatUser.getId());
         jsonChatUser.put("name", chatUser.getName());
         if (null != optPresence) {
-            final JSONObject jsonPresence = writePresence(optPresence);
+            final JSONObject jsonPresence = writePresence(optPresence, optTimeZone);
             jsonChatUser.put("presence", jsonPresence);
         }
         return jsonChatUser;
@@ -120,14 +193,14 @@ public final class Writer {
      * @return The JSON object
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONObject writePresence(final Presence presence) throws JSONException {
+    public static JSONObject writePresence(final Presence presence, final String timeZone) throws JSONException {
         final JSONObject jsonPresence = new JSONObject();
         jsonPresence.put("type", presence.getType().name());
         jsonPresence.put("mode", presence.getMode().name());
         jsonPresence.put("status", presence.getStatus());
         final Date timeStamp = presence.getTimeStamp();
         if (null != timeStamp) {
-            jsonPresence.put("timeStamp", timeStamp.getTime());
+            jsonPresence.put("timeStamp", addTimeZoneOffset(timeStamp.getTime(), getTimeZone(timeZone)));
         }
         return jsonPresence;
     }

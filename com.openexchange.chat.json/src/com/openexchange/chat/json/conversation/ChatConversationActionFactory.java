@@ -75,6 +75,10 @@ public class ChatConversationActionFactory implements AJAXActionServiceFactory {
         super();
         actions = new ConcurrentHashMap<String, AbstractChatConversationAction>(4);
         actions.put("all", new com.openexchange.chat.json.conversation.action.AllAction(services));
+        actions.put("get", new com.openexchange.chat.json.conversation.action.GetAction(services));
+        actions.put("allMessages", new com.openexchange.chat.json.conversation.action.AllMessagesAction(services));
+        actions.put("listMessages", new com.openexchange.chat.json.conversation.action.ListMessagesAction(services));
+        actions.put("getMessage", new com.openexchange.chat.json.conversation.action.GetMessageAction(services));
         
     }
 

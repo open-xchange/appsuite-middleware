@@ -77,6 +77,9 @@ public final class TimeZoneUtils {
      * @return The specified <code>TimeZone</code>, or the GMT zone if the given ID cannot be understood.
      */
     public static TimeZone getTimeZone(final String ID) {
+        if (null == ID) {
+            return ZONE_CACHE.get("GMT");
+        }
         TimeZone tz = ZONE_CACHE.get(ID);
         if (tz == null) {
             final TimeZone tmp =  TimeZone.getTimeZone(ID);

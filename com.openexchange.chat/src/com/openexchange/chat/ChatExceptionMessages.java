@@ -85,6 +85,9 @@ public final class ChatExceptionMessages implements LocalizableStrings {
 
     // Unknown chat service: %1$s
     public static final String UNKNOWN_CHAT_SERVICE_MSG = "Unknown chat service: %1$s";
+
+    // No message found with identifier "%1$s" in chat "%2$s".
+    public static final String MESSAGE_NOT_FOUND_MSG = "No message found with identifier \"%1$s\" in chat \"%2$s\".";
     
 
     /**

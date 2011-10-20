@@ -63,6 +63,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -474,11 +475,14 @@ public final class DBChat implements Chat {
 
     private volatile long lastChecked;
 
+    private final ConcurrentTIntObjectHashMap<String> userNameCache;
+
     /**
      * Initializes a new {@link DBChat}.
      */
     public DBChat(final int chatId, final int contextId) {
         super();
+        userNameCache = new ConcurrentTIntObjectHashMap<String>(128);
         this.chatId = chatId;
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
@@ -516,6 +520,7 @@ public final class DBChat implements Chat {
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
                 message.setText(rs.getString(pos++));
                 final long createdAt = rs.getLong(pos);
+                message.setTimeStamp(new Date(createdAt));
                 if (createdAt > lc) {
                     lc = createdAt;
                 }
@@ -532,8 +537,16 @@ public final class DBChat implements Chat {
         }
     }
 
-    private static String getUserName(final int userId, final Context context) throws OXException {
-        return DBChatServiceLookup.getService(UserService.class).getUser(userId, context).getDisplayName();
+    private String getUserName(final int userId, final Context context) throws OXException {
+        String displayName = userNameCache.get(userId);
+        if (null == displayName) {
+            final String dn = DBChatServiceLookup.getService(UserService.class).getUser(userId, context).getDisplayName();
+            displayName = userNameCache.putIfAbsent(userId, dn);
+            if (null == displayName) {
+                displayName = dn;
+            }
+        }
+        return displayName;
     }
 
     /**
@@ -734,6 +747,114 @@ public final class DBChat implements Chat {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public List<Message> getMessages(final Collection<String> messageIds) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return getMessages(messageIds, DBChatServiceLookup.getService(ContextService.class).getContext(contextId), con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public Message getMessage(final String messageId) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return getMessages(
+                Collections.singletonList(messageId),
+                DBChatServiceLookup.getService(ContextService.class).getContext(contextId),
+                con).get(0);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    private List<Message> getMessages(final Collection<String> messageIds, final Context context, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            int pos;
+            final List<Message> messages = new ArrayList<Message>(messageIds.size());
+            for (final String messageId : messageIds) {
+                pos = 1;
+                {
+                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = ?";
+                    stmt = con.prepareStatement(sql);
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, chatId);
+                    stmt.setString(pos, messageId);
+                }
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    throw ChatExceptionCodes.MESSAGE_NOT_FOUND.create(messageId, Integer.valueOf(chatId));
+                }
+                final MessageImpl message = new MessageImpl();
+                pos = 1;
+                final int userId = rs.getInt(pos++);
+                message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
+                message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
+                message.setText(rs.getString(pos++));
+                message.setTimeStamp(new Date(rs.getLong(pos)));
+                messages.add(message);
+            }
+            return messages;
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
+    public List<Message> pollMessages(final Date since) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            int pos = 1;
+            if (null == since) {
+                final String sql =
+                    "SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? ORDER BY createdAt";
+                stmt = con.prepareStatement(sql);
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos, chatId);
+            } else {
+                final String sql =
+                    "SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND createdAt > ? ORDER BY createdAt";
+                stmt = con.prepareStatement(sql);
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, chatId);
+                stmt.setLong(pos, since.getTime());
+            }
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            final Context context = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
+            final List<Message> list = new ArrayList<Message>();
+            do {
+                final MessageImpl message = new MessageImpl();
+                pos = 1;
+                final int userId = rs.getInt(pos++);
+                message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
+                message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
+                message.setText(rs.getString(pos++));
+                message.setTimeStamp(new Date(rs.getLong(pos)));
+                list.add(message);
+            } while (rs.next());
+            return list;
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
         }
     }
 

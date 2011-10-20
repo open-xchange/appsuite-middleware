@@ -51,17 +51,13 @@ package com.openexchange.chat.json.conversation.action;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
-import com.openexchange.chat.ChatUser;
-import com.openexchange.chat.Presence;
-import com.openexchange.chat.Roster;
+import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.Writer;
@@ -70,18 +66,18 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetAction}
+ * {@link ListMessagesAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetAction extends AbstractChatConversationAction {
+public final class ListMessagesAction extends AbstractChatConversationAction {
 
     /**
-     * Initializes a new {@link GetAction}.
+     * Initializes a new {@link ListMessagesAction}.
      * 
      * @param services
      */
-    public GetAction(final ServiceLookup services) {
+    public ListMessagesAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -93,36 +89,26 @@ public final class GetAction extends AbstractChatConversationAction {
          */
         final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
         final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        final JSONArray ids = req.getData();
         final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
         ChatAccess access = null;
         try {
             access = chatService.access(conversationID.getAccountId(), session);
             access.login();
-            /*
-             * Get roster
-             */
-            final Roster roster = access.getRoster();
-            final Map<String, ChatUser> entries = roster.getEntries();
-            /*
-             * Get chat
-             */
-            final Chat chat = access.getChat(conversationID.getChatId());
-            final List<String> memberIds = chat.getMembers();
-            final List<ChatUser> chatUsers = new ArrayList<ChatUser>(memberIds.size());
-            final List<Presence> presences = new ArrayList<Presence>(memberIds.size());
-            for (final String memberId : memberIds) {
-                final ChatUser chatUser = entries.get(memberId);
-                chatUsers.add(chatUser);
-                presences.add(roster.getPresence(chatUser));
+            final int length = ids.length();
+            final List<String> messageIds = new ArrayList<String>(length);
+            for (int i = 0; i < length; i++) {
+                messageIds.add(ids.getString(i));
             }
+            final List<Message> messages = access.getChat(conversationID.getChatId()).getMessages(messageIds);
             /*
-             * Create JSON object for chat
+             * Create JSON
              */
-            final JSONObject jsonObject = Writer.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            final JSONArray json = Writer.writeMessages(messages, session.getUser().getTimeZone());
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonObject, "json");
+            return new AJAXRequestResult(json, "json");
         } finally {
             if (null != access) {
                 access.disconnect();

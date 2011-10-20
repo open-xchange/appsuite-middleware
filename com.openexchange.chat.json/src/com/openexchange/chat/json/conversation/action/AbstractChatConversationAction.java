@@ -49,6 +49,8 @@
 
 package com.openexchange.chat.json.conversation.action;
 
+import java.util.Date;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -57,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -135,6 +138,63 @@ public abstract class AbstractChatConversationAction implements AJAXActionServic
             isWhitespace = Character.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Gets optional date parameter.
+     * 
+     * @param request The request
+     * @param name The name
+     * @param timeZone The time zone
+     * @return The parsed date or <code>null</code> if absent
+     */
+    protected static Date getDateParameter(final AJAXRequestData request, final String name, final TimeZone timeZone) {
+        final String value = request.getParameter(name);
+        if (value == null) {
+            return null;
+        }
+        final long time = Long.parseLong(value);
+        return new Date(time - timeZone.getOffset(time));
+    }
+
+    /**
+     * Gets date parameter.
+     * 
+     * @param request The request
+     * @param name The name
+     * @param timeZone The time zone
+     * @return The parsed date
+     * @throws OXException If parameter is absent
+     */
+    protected static Date checkDateParameter(final AJAXRequestData request, final String name, final TimeZone timeZone) throws OXException {
+        final String value = request.getParameter(name);
+        if (value == null) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
+        }
+        final long time = Long.parseLong(value);
+        return new Date(time - timeZone.getOffset(time));
+    }
+
+    /**
+     * Adds the time zone offset to specified date.
+     * 
+     * @param date The date
+     * @param timeZone The time zone identifier
+     * @return The date with offset added
+     */
+    protected static long addTimeZoneOffset(final long date, final String timeZone) {
+        return (date + TimeZoneUtils.getTimeZone(timeZone).getOffset(date));
+    }
+
+    /**
+     * Adds the time zone offset to specified date.
+     * 
+     * @param date The date
+     * @param timeZone The time zone
+     * @return The date with offset added
+     */
+    protected static long addTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return (date + timeZone.getOffset(date));
     }
 
 }

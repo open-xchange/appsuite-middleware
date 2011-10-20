@@ -47,64 +47,75 @@
  *
  */
 
-package com.openexchange.chat.json.osgi;
+package com.openexchange.chat.json.conversation.action;
 
-import javax.servlet.ServletException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceReference;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.chat.json.account.ChatAccountActionFactory;
-import com.openexchange.chat.json.conversation.ChatConversationActionFactory;
-import com.openexchange.chat.json.rest.RestServlet;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.Chat;
+import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.Message;
+import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
+import com.openexchange.chat.json.conversation.ConversationID;
+import com.openexchange.chat.json.conversation.Writer;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ChatJSONActivator}
+ * {@link GetMessageAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ChatJSONActivator extends AJAXModuleActivator {
+public final class GetMessageAction extends AbstractChatConversationAction {
 
     /**
-     * Initializes a new {@link ChatJSONActivator}.
+     * Initializes a new {@link GetMessageAction}.
+     *
+     * @param services
      */
-    public ChatJSONActivator() {
-        super();
+    public GetMessageAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatJSONActivator.class));
-        registerModule(new ChatAccountActionFactory(this), "chat/account");
-        registerModule(new ChatConversationActionFactory(this), "conversation");
-        track(HttpService.class, new SimpleRegistryListener<HttpService>() {
-
-            @Override
-            public void added(final ServiceReference<HttpService> ref, final HttpService service) {
-                try {
-                    service.registerServlet("/conversation", new RestServlet(), null, null);
-                } catch (final ServletException e) {
-                    log.error("Servlet registration failed: " + RestServlet.class.getName(), e);
-                } catch (final NamespaceException e) {
-                    log.error("Servlet registration failed: " + RestServlet.class.getName(), e);
-                }
+    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
+        final ServerSession session = req.getSession();
+        /*
+         * Get service
+         */
+        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+        final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        final String messageId = req.getParameter("messageId");
+        final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
+        ChatAccess access = null;
+        try {
+            access = chatService.access(conversationID.getAccountId(), session);
+            access.login();
+            /*
+             * Get chat
+             */
+            final Chat chat = access.getChat(conversationID.getChatId());
+            /*
+             * Get message
+             */
+            final Message message = chat.getMessage(messageId);
+            /*
+             * Create JSON
+             */
+            final JSONObject json = Writer.writeMessage(message, session.getUser().getTimeZone());
+            /*
+             * Return appropriate result
+             */
+            return new AJAXRequestResult(json, "json");
+        } finally {
+            if (null != access) {
+                access.disconnect();
             }
-
-            @Override
-            public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
-                service.unregister("/conversation");
-            }
-        });
-        openTrackers();
+        }
     }
 
 }
