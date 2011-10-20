@@ -88,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DispatcherServlet extends SessionServlet {
+public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
@@ -108,25 +108,57 @@ public final class DispatcherServlet extends SessionServlet {
         }
     }
 
+    /*-
+     * /!\ These must be static for our servlet container to work properly. /!\
+     */
+
     private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
-    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();;
+    /**
+     * Sets the dispatcher instance.
+     * 
+     * @param dispatcher The dispatcher instance or <code>null</code> to remove
+     */
+    public static void setDispatcher(final Dispatcher dispatcher) {
+        DISPATCHER.set(dispatcher);
+    }
+
+    /**
+     * Gets the dispatcher instance.
+     * 
+     * @return The dispatcher instance or <code>null</code> if absent
+     */
+    public static Dispatcher getDispatcher() {
+        return DISPATCHER.get();
+    }
+
+    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();
+
+    /**
+     * Sets the prefix.
+     * 
+     * @param prefix The prefix or <code>null</code> to remove
+     */
+    public static void setPrefix(final String prefix) {
+        PREFIX.set(prefix);
+    }
+
+    /**
+     * Gets the prefix.
+     * 
+     * @return The prefix or <code>null</code> if absent
+     */
+    public static String getPrefix() {
+        return PREFIX.get();
+    }
 
     private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
 
     /**
      * Initializes a new {@link DispatcherServlet}.
-     *
-     * @param dispatcher The dispatcher
-     * @param prefix The prefix
      */
-    public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
-        if (null == dispatcher) {
-            throw new NullPointerException("Dispatcher is null.");
-        }
-        // These must be static for our servlet container to work properly.
-        DispatcherServlet.DISPATCHER.set(dispatcher);
-        DispatcherServlet.PREFIX.set(prefix);
+    public DispatcherServlet() {
+        super();
     }
 
     /**
@@ -145,6 +177,13 @@ public final class DispatcherServlet extends SessionServlet {
      */
     public static void unregisterRenderer(final ResponseRenderer renderer) {
         RESPONSE_RENDERERS.remove(renderer);
+    }
+
+    /**
+     * CLears all registered renderer.
+     */
+    public static void clearRenderer() {
+        RESPONSE_RENDERERS.clear();
     }
 
     @Override

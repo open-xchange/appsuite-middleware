@@ -131,7 +131,9 @@ public class DispatcherActivator extends HousekeepingActivator {
 
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
 
-        final DispatcherServlet servlet = new DispatcherServlet(dispatcher, "/ajax/");
+        final DispatcherServlet servlet = new DispatcherServlet();
+        DispatcherServlet.setDispatcher(dispatcher);
+        DispatcherServlet.setPrefix("/ajax/");
         Multiple.setDispatcher(dispatcher);
 
         DispatcherServlet.registerRenderer(new JSONResponseRenderer());
@@ -172,6 +174,15 @@ public class DispatcherActivator extends HousekeepingActivator {
         });
 
         openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        DispatcherServlet.clearRenderer();
+        DispatcherServlet.setDispatcher(null);
+        DispatcherServlet.setPrefix(null);
+        Multiple.setDispatcher(null);
     }
 
     private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {
