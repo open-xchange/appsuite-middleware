@@ -97,6 +97,10 @@ public enum ChatExceptionCodes implements OXExceptionCode {
      * Unknown chat service: %1$s
      */
     UNKNOWN_CHAT_SERVICE(ChatExceptionMessages.UNKNOWN_CHAT_SERVICE_MSG, Category.CATEGORY_ERROR, 9),
+    /**
+     * No message found with identifier "%1$s" in chat "%2$s".
+     */
+    MESSAGE_NOT_FOUND(ChatExceptionMessages.MESSAGE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
 
     ;
 

@@ -73,8 +73,15 @@ public class ChatConversationActionFactory implements AJAXActionServiceFactory {
      */
     public ChatConversationActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractChatConversationAction>(4);
-        
+        actions = new ConcurrentHashMap<String, AbstractChatConversationAction>(16);
+        actions.put("all", new com.openexchange.chat.json.conversation.action.AllAction(services));
+        actions.put("delete", new com.openexchange.chat.json.conversation.action.DeleteAction(services));
+        actions.put("get", new com.openexchange.chat.json.conversation.action.GetAction(services));
+        actions.put("list", new com.openexchange.chat.json.conversation.action.ListAction(services));
+        actions.put("allMessages", new com.openexchange.chat.json.conversation.action.AllMessagesAction(services));
+        actions.put("listMessages", new com.openexchange.chat.json.conversation.action.ListMessagesAction(services));
+        actions.put("getMessage", new com.openexchange.chat.json.conversation.action.GetMessageAction(services));
+        actions.put("deleteMessages", new com.openexchange.chat.json.conversation.action.DeleteMessagesAction(services));
         
     }
 

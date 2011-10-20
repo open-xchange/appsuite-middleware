@@ -88,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DispatcherServlet extends SessionServlet {
+public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
@@ -108,25 +108,57 @@ public final class DispatcherServlet extends SessionServlet {
         }
     }
 
+    /*-
+     * /!\ These must be static for our servlet container to work properly. /!\
+     */
+
     private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
-    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();;
+    /**
+     * Sets the dispatcher instance.
+     * 
+     * @param dispatcher The dispatcher instance or <code>null</code> to remove
+     */
+    public static void setDispatcher(final Dispatcher dispatcher) {
+        DISPATCHER.set(dispatcher);
+    }
+
+    /**
+     * Gets the dispatcher instance.
+     * 
+     * @return The dispatcher instance or <code>null</code> if absent
+     */
+    public static Dispatcher getDispatcher() {
+        return DISPATCHER.get();
+    }
+
+    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();
+
+    /**
+     * Sets the prefix.
+     * 
+     * @param prefix The prefix or <code>null</code> to remove
+     */
+    public static void setPrefix(final String prefix) {
+        PREFIX.set(prefix);
+    }
+
+    /**
+     * Gets the prefix.
+     * 
+     * @return The prefix or <code>null</code> if absent
+     */
+    public static String getPrefix() {
+        return PREFIX.get();
+    }
 
     private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
 
     /**
      * Initializes a new {@link DispatcherServlet}.
-     *
-     * @param dispatcher The dispatcher
-     * @param prefix The prefix
      */
-    public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
-        if (null == dispatcher) {
-            throw new NullPointerException("Dispatcher is null.");
-        }
-        // These must be static for our servlet container to work properly.
-        DispatcherServlet.DISPATCHER.set(dispatcher);
-        DispatcherServlet.PREFIX.set(prefix);
+    public DispatcherServlet() {
+        super();
     }
 
     /**
@@ -145,6 +177,13 @@ public final class DispatcherServlet extends SessionServlet {
      */
     public static void unregisterRenderer(final ResponseRenderer renderer) {
         RESPONSE_RENDERERS.remove(renderer);
+    }
+
+    /**
+     * CLears all registered renderer.
+     */
+    public static void clearRenderer() {
+        RESPONSE_RENDERERS.clear();
     }
 
     @Override
@@ -218,7 +257,15 @@ public final class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
+    /**
+     * Sends a proper response to requesting client after request has been orderly dispatched.
+     * 
+     * @param request The AJAX request data
+     * @param result The AJAX request result
+     * @param hReq The associated HTTP Servlet request
+     * @param hResp The associated HTTP Servlet response
+     */
+    protected void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
         int highest = Integer.MIN_VALUE;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
@@ -233,28 +280,31 @@ public final class DispatcherServlet extends SessionServlet {
         candidate.write(request, result, hReq, hResp);
     }
 
-    protected static AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
+    /**
+     * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
+     * 
+     * @param req The HTTP Servlet request
+     * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
+     * @param isFileUpload Whether passed request is considered as a file upload
+     * @param session The associated session
+     * @return An appropriate {@link AJAXRequestData} instance
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
+     */
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
-        retval.setSecure(Tools.considerSecure(req));
-        {
-            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            if (null == hostnameService) {
-                retval.setHostname(req.getServerName());
-            } else {
-                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                retval.setHostname(null == hn ? req.getServerName() : hn);
-            }
-        }
-        retval.setRoute(Tools.getRoute(req.getSession(true).getId()));
+        parseHostName(retval, req, session);
         /*
          * Set the module
          */
-        String pathInfo = req.getRequestURI();
-        final int lastIndex = pathInfo.lastIndexOf(';');
-        if (lastIndex > 0) {
-            pathInfo = pathInfo.substring(0, lastIndex);
+        {
+            String pathInfo = req.getRequestURI();
+            final int lastIndex = pathInfo.lastIndexOf(';');
+            if (lastIndex > 0) {
+                pathInfo = pathInfo.substring(0, lastIndex);
+            }
+            retval.setModule(pathInfo.substring(PREFIX.get().length()));
         }
-        retval.setModule(pathInfo.substring(PREFIX.get().length()));
         /*
          * Set request URI
          */
@@ -340,6 +390,27 @@ public final class DispatcherServlet extends SessionServlet {
             }
         }
         return retval;
+    }
+
+    /**
+     * Parses host name, secure and AJP route.
+     * 
+     * @param request The AJAX request data
+     * @param req The HTTP Servlet request
+     * @param session The associated session
+     */
+    public void parseHostName(final AJAXRequestData request, final HttpServletRequest req, final ServerSession session) {
+        request.setSecure(Tools.considerSecure(req));
+        {
+            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+            if (null == hostnameService) {
+                request.setHostname(req.getServerName());
+            } else {
+                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                request.setHostname(null == hn ? req.getServerName() : hn);
+            }
+        }
+        request.setRoute(Tools.getRoute(req.getSession(true).getId()));
     }
 
     private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {

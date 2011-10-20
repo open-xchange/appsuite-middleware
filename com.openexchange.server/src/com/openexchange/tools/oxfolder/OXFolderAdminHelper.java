@@ -290,8 +290,6 @@ public final class OXFolderAdminHelper {
                 }
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            } catch (final OXException e) {
-                throw new OXException(e);
             } finally {
                 DBUtils.closeSQLStuff(rs, stmt);
             }
@@ -306,12 +304,7 @@ public final class OXFolderAdminHelper {
      * @throws OXException If an error occurs
      */
     public void restoreDefaultGlobalAddressBookPermissions(final int cid, final boolean enable) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(cid, true);
         try {
             /*
              * Check if global permission is enabled for global address book folder in current context
@@ -557,8 +550,6 @@ public final class OXFolderAdminHelper {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
@@ -593,8 +584,6 @@ public final class OXFolderAdminHelper {
                 throw OXFolderExceptionCode.NO_ADMIN_USER_FOUND_IN_CONTEXT.create(Integer.valueOf(cid));
             }
             return retval;
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -1410,8 +1399,6 @@ public final class OXFolderAdminHelper {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
         }
         /*
          * Update user's default infostore folder name
@@ -1436,8 +1423,6 @@ public final class OXFolderAdminHelper {
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw e;
         }
     }
 
@@ -1615,8 +1600,59 @@ public final class OXFolderAdminHelper {
                  */
                 LOG.info(new StringBuilder("User ").append(userId).append(" successfully created").append(" in context ").append(cid).toString());
             }
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(cid));
+        } catch (final SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Creates default folders for infostore module for given user ID
+     *
+     * @param userId The user ID
+     * @param displayName The display name which is taken as folder name for user's default infostore folder
+     * @param cid The context ID
+     * @param writeCon A writable connection to (master) database
+     * @return THe folder identifier
+     * @throws OXException If user's default infostore folder could not be created successfully
+     */
+    public int addUserToInfoStore(final int userId, final String displayName, final int cid, final Connection writeCon) throws OXException {
+        try {
+            final Context ctx = new ContextImpl(cid);
+            /*
+             * Check infostore sibling
+             */
+            String folderName = displayName;
+            final int resetLen = folderName.length();
+            int count = 0;
+            while (OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, folderName, FolderObject.INFOSTORE, writeCon, ctx) != -1) {
+                folderName = folderName.substring(0, resetLen) + " (" + String.valueOf(++count) + ')';
+            }
+            /*
+             * Insert default infostore folder
+             */
+            final long creatingTime = System.currentTimeMillis();
+            final OCLPermission defaultPerm = new OCLPermission();
+            defaultPerm.setEntity(userId);
+            defaultPerm.setGroupPermission(false);
+            defaultPerm.setAllPermission(
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION,
+                OCLPermission.ADMIN_PERMISSION);
+            defaultPerm.setFolderAdmin(true);
+            final FolderObject fo = new FolderObject();
+            fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
+            fo.setDefaultFolder(true);
+            fo.setParentFolderID(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+            fo.setType(FolderObject.PUBLIC);
+            fo.setFolderName(folderName);
+            fo.setModule(FolderObject.INFOSTORE);
+            final int newFolderId = OXFolderSQL.getNextSerialForAdmin(ctx, writeCon);
+            OXFolderSQL.insertDefaultFolderSQL(newFolderId, userId, fo, creatingTime, ctx, writeCon);
+            if (LOG.isInfoEnabled()) {
+                LOG.info("User's default INFOSTORE folder successfully created");
+            }
+            return newFolderId;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }

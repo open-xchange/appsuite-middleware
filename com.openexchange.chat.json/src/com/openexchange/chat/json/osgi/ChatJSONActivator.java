@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,64 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.i18n.LocalizableStrings;
+import javax.servlet.ServletException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.http.HttpService;
+import org.osgi.service.http.NamespaceException;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.chat.json.account.ChatAccountActionFactory;
+import com.openexchange.chat.json.conversation.ChatConversationActionFactory;
+import com.openexchange.chat.json.rest.RestServlet;
+import com.openexchange.server.osgiservice.SimpleRegistryListener;
+
 
 /**
- * {@link ChatExceptionMessages} - Exception messages for {@link OXException} that must be translated.
+ * {@link ChatJSONActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ChatExceptionMessages implements LocalizableStrings {
-
-    // An error occurred: %1$s
-    public static final String ERROR_MSG = "An error occurred: %1$s";
-
-    // An I/O error occurred: %1$s
-    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-    
-    // Method is not supported.
-    public static final String UNSUPPORTED_OPERATION_MSG = "Method is not supported.";
-
-    // No account found with identifier "%1$s".
-    public static final String ACCOUNT_NOT_FOUND_MSG = "No account found with identifier \"%1$s\".";
-
-    // Invalid presence packet.
-    public static final String INVALID_PRESENCE_PACKET_MSG = "Invalid presence packet.";
-
-    // A chat with identifier "%1$s" already exists.
-    public static final String CHAT_ALREADY_EXISTS_MSG = "A chat with identifier \"%1$s\" already exists.";
-
-    // Chat member "%1$s" already exists in chat "%2$s".
-    public static final String CHAT_MEMBER_ALREADY_EXISTS_MSG = "Chat member \"%1$s\" already exists in chat \"%2$s\".";
-
-    // No chat found with identifier "%1$s".
-    public static final String CHAT_NOT_FOUND_MSG = "No chat found with identifier \"%1$s\".";
-
-    // Unknown chat service: %1$s
-    public static final String UNKNOWN_CHAT_SERVICE_MSG = "Unknown chat service: %1$s";
-
-    // No message found with identifier "%1$s" in chat "%2$s".
-    public static final String MESSAGE_NOT_FOUND_MSG = "No message found with identifier \"%1$s\" in chat \"%2$s\".";
-    
+public final class ChatJSONActivator extends AJAXModuleActivator {
 
     /**
-     * Prevent instantiation.
+     * Initializes a new {@link ChatJSONActivator}.
      */
-    private ChatExceptionMessages() {
+    public ChatJSONActivator() {
         super();
     }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatJSONActivator.class));
+        registerModule(new ChatAccountActionFactory(this), "chat/account");
+        registerModule(new ChatConversationActionFactory(this), "conversation");
+        track(HttpService.class, new SimpleRegistryListener<HttpService>() {
+
+            @Override
+            public void added(final ServiceReference<HttpService> ref, final HttpService service) {
+                try {
+                    service.registerServlet("/conversation", new RestServlet(), null, null);
+                } catch (final ServletException e) {
+                    log.error("Servlet registration failed: " + RestServlet.class.getName(), e);
+                } catch (final NamespaceException e) {
+                    log.error("Servlet registration failed: " + RestServlet.class.getName(), e);
+                }
+            }
+
+            @Override
+            public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
+                service.unregister("/conversation");
+            }
+        });
+        openTrackers();
+    }
+
 }

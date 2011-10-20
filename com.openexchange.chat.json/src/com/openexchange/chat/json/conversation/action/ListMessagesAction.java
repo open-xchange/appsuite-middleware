@@ -49,33 +49,35 @@
 
 package com.openexchange.chat.json.conversation.action;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.ChatAccess;
-import com.openexchange.chat.ChatAccount;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
+import com.openexchange.chat.json.conversation.Writer;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link AllAction}
- *
+ * {@link ListMessagesAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction extends AbstractChatConversationAction {
+public final class ListMessagesAction extends AbstractChatConversationAction {
 
     /**
-     * Initializes a new {@link AllAction}.
-     *
+     * Initializes a new {@link ListMessagesAction}.
+     * 
      * @param services
      */
-    public AllAction(final ServiceLookup services) {
+    public ListMessagesAction(final ServiceLookup services) {
         super(services);
     }
 
@@ -86,31 +88,32 @@ public final class AllAction extends AbstractChatConversationAction {
          * Get services
          */
         final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
-        final JSONArray jsonArray = new JSONArray();
-        final ConversationID conversationId = new ConversationID();
-        for (final ChatService chatService : registry.getAllServices(session.getUserId(), session.getContextId())) {
-            conversationId.setServiceId(chatService.getId());
-            for (final ChatAccount chatAccount : chatService.getAccountManager().getAccounts(session)) {
-                conversationId.setAccountId(chatAccount.getId());
-                ChatAccess access = null;
-                try {
-                    access = chatService.access(chatAccount.getId(), session);
-                    access.login();
-                    for (final String chatId : access.getChats()) {
-                        conversationId.setChatId(chatId);
-                        jsonArray.put(conversationId.toString());
-                    }
-                } finally {
-                    if (null != access) {
-                        access.disconnect();
-                    }
-                }
+        final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        final JSONArray ids = req.getData();
+        final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
+        ChatAccess access = null;
+        try {
+            access = chatService.access(conversationID.getAccountId(), session);
+            access.login();
+            final int length = ids.length();
+            final List<String> messageIds = new ArrayList<String>(length);
+            for (int i = 0; i < length; i++) {
+                messageIds.add(ids.getString(i));
+            }
+            final List<Message> messages = access.getChat(conversationID.getChatId()).getMessages(messageIds);
+            /*
+             * Create JSON
+             */
+            final JSONArray json = Writer.writeMessages(messages, session.getUser().getTimeZone());
+            /*
+             * Return appropriate result
+             */
+            return new AJAXRequestResult(json, "json");
+        } finally {
+            if (null != access) {
+                access.disconnect();
             }
         }
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(jsonArray, "json");
     }
 
 }

@@ -101,7 +101,7 @@ public final class DBChatActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, UserService.class,
+            ThreadPoolService.class, TimerService.class, DatabaseService.class, UserService.class,
             ContextService.class, IDGeneratorService.class };
     }
 
@@ -126,6 +126,18 @@ public final class DBChatActivator extends HousekeepingActivator {
             @Override
             public void removed(final ServiceReference<MessageListener> ref, final MessageListener messageListener) {
                 DBChat.removeMessageListenerStatic(messageListener);
+            }
+        });
+        track(SessiondService.class, new SimpleRegistryListener<SessiondService>() {
+
+            @Override
+            public void added(final ServiceReference<SessiondService> ref, final SessiondService service) {
+                DBRoster.set(service);
+            }
+
+            @Override
+            public void removed(final ServiceReference<SessiondService> ref, final SessiondService service) {
+                DBRoster.set(null);
             }
         });
         openTrackers();

@@ -47,88 +47,65 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.chat.json.conversation.action;
 
-import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.Chat;
+import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
+import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChatAccess} - Provides access to chat functionality in the name of associated user.
+ * {@link DeleteMessagesAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatAccess {
+public final class DeleteMessagesAction extends AbstractChatConversationAction {
 
     /**
-     * Closes the connection by setting presence to unavailable then closing the connection.
-     */
-    void disconnect();
-
-    /**
-     * Logs in to the server, then sets presence to available.
+     * Initializes a new {@link DeleteMessagesAction}.
      * 
-     * @throws OXException If an error occurs.
+     * @param services
      */
-    void login() throws OXException;
+    public DeleteMessagesAction(final ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Gets the associated user.
-     * 
-     * @return The user
-     */
-    ChatUser getUser();
-
-    /**
-     * Sends given presence packet for associated {@link #getUser() user}.
-     * 
-     * @param presence The presence packet
-     * @throws OXException If sending presence packet fails
-     */
-    void sendPresence(Presence presence) throws OXException;
-
-    /**
-     * Gets the user's roster.
-     * 
-     * @return The roster
-     * @throws OXException If roster cannot be returned
-     */
-    Roster getRoster() throws OXException;
-
-    /**
-     * Gets all identifiers for opened chats for this access.
-     * 
-     * @return All identifiers for opened chats
-     * @throws OXException If an error occurs
-     */
-    List<String> getChats() throws OXException;
-
-    /**
-     * Gets existing chat with specified member.
-     * 
-     * @param chatId The chat identifier
-     * @return The existing chat
-     * @throws OXException If chat cannot be returned
-     */
-    Chat getChat(String chatId) throws OXException;
-
-    /**
-     * Opens described chat with specified member.
-     * 
-     * @param chatId The chat identifier or <code>null</code> to generate a unique one
-     * @param member The member with which to open the chat
-     * @return The opened chat
-     * @throws OXException If chat cannot be opened
-     */
-    Chat openChat(String chatId, MessageListener listener, ChatUser member) throws OXException;
-
-    /**
-     * Opens described chat with specified members.
-     * 
-     * @param chatId The chat identifier or <code>null</code> to generate a unique one; must not be Chat#DEFAULT_CHAT
-     * @param members The members with which to open the chat
-     * @return The opened chat
-     * @throws OXException If chat cannot be opened
-     */
-    Chat openChat(String chatId, MessageListener listener, ChatUser... members) throws OXException;
+    @Override
+    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
+        final ServerSession session = req.getSession();
+        /*
+         * Get services
+         */
+        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+        final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        final JSONArray ids = req.getData();
+        final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
+        ChatAccess access = null;
+        try {
+            access = chatService.access(conversationID.getAccountId(), session);
+            access.login();
+            final Chat chat = access.getChat(conversationID.getChatId());
+            final int length = ids.length();
+            for (int i = 0; i < length; i++) {
+                chat.deleteMessage(ids.getString(i));
+            }
+            /*
+             * Return appropriate result
+             */
+            return getJSONNullResult();
+        } finally {
+            if (null != access) {
+                access.disconnect();
+            }
+        }
+    }
 
 }

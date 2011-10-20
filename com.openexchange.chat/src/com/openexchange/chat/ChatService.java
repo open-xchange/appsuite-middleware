@@ -62,12 +62,12 @@ public interface ChatService {
     /**
      * The identifier for default account.
      */
-    public static final String DEFAULT_ACCOUNT = "default";
+    public static final String DEFAULT_ACCOUNT = "0";
 
     /**
      * Gets the access to specified chat account.
      * 
-     * @param accountId The account identifier; e.g. "default" for default account
+     * @param accountId The account identifier; e.g. "0" for default account
      * @return The access to specified chat account
      * @throws OXException If access cannot be provided; e.g. because no such account exists
      * @see #DEFAULT_ACCOUNT
@@ -82,7 +82,7 @@ public interface ChatService {
     ChatAccountManager getAccountManager();
 
     /**
-     * Gets the service's identifier. Usually the package name.
+     * Gets the service's identifier (numeric values preferred; e.g. <code>"1001"</code>).
      * 
      * @return The identifier
      */

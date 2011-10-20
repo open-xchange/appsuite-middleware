@@ -1115,8 +1115,6 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
         if (containsObjectID()) {
             try {
                 return OXFolderSQL.exists(getObjectID(), null, ctx);
-            } catch (final OXException e) {
-                throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
@@ -1128,8 +1126,6 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 }
                 setObjectID(fuid);
                 return true;
-            } catch (final OXException e) {
-                throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
             } catch (final SQLException e) {
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }

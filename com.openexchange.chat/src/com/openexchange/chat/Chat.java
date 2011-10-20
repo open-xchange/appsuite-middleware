@@ -100,12 +100,44 @@ public interface Chat {
     void part(String user) throws OXException;
 
     /**
+     * Deletes a message by specified identifier.
+     * 
+     * @param messageId The message identifier
+     */
+    void deleteMessage(String messageId) throws OXException;
+
+    /**
      * Posts specified packet to this chat.
      * 
      * @param packet The packet to post
      * @throws OXException If posting the packet fails
      */
     void post(Packet packet) throws OXException;
+
+    /**
+     * Polls all messages from this chat that were posted after specified date.
+     * 
+     * @param since The date or <code>null</code> to poll whole chat's time line
+     * @return All messages
+     * @throws OXException If messages cannot be polled
+     */
+    List<Message> pollMessages(Date since) throws OXException;
+
+    /**
+     * Gets a message by specified identifier.
+     * 
+     * @param messageId The message identifier
+     * @return The associated message
+     */
+    Message getMessage(String messageId) throws OXException;
+
+    /**
+     * Gets messages by specified identifiers.
+     * 
+     * @param messageIds The message identifiers
+     * @return The associated messages
+     */
+    List<Message> getMessages(Collection<String> messageIds) throws OXException;
 
     /**
      * Adds given message listener that will be notified of any new messages in the chat.
