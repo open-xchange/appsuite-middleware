@@ -257,7 +257,15 @@ public class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
+    /**
+     * Sends a proper response to requesting client after request has been orderly dispatched.
+     * 
+     * @param request The AJAX request data
+     * @param result The AJAX request result
+     * @param hReq The associated HTTP Servlet request
+     * @param hResp The associated HTTP Servlet response
+     */
+    protected void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
         int highest = Integer.MIN_VALUE;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
@@ -272,28 +280,31 @@ public class DispatcherServlet extends SessionServlet {
         candidate.write(request, result, hReq, hResp);
     }
 
-    protected static AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
+    /**
+     * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
+     * 
+     * @param req The HTTP Servlet request
+     * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
+     * @param isFileUpload Whether passed request is considered as a file upload
+     * @param session The associated session
+     * @return An appropriate {@link AJAXRequestData} instance
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
+     */
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
-        retval.setSecure(Tools.considerSecure(req));
-        {
-            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            if (null == hostnameService) {
-                retval.setHostname(req.getServerName());
-            } else {
-                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                retval.setHostname(null == hn ? req.getServerName() : hn);
-            }
-        }
-        retval.setRoute(Tools.getRoute(req.getSession(true).getId()));
+        parseHostName(retval, req, session);
         /*
          * Set the module
          */
-        String pathInfo = req.getRequestURI();
-        final int lastIndex = pathInfo.lastIndexOf(';');
-        if (lastIndex > 0) {
-            pathInfo = pathInfo.substring(0, lastIndex);
+        {
+            String pathInfo = req.getRequestURI();
+            final int lastIndex = pathInfo.lastIndexOf(';');
+            if (lastIndex > 0) {
+                pathInfo = pathInfo.substring(0, lastIndex);
+            }
+            retval.setModule(pathInfo.substring(PREFIX.get().length()));
         }
-        retval.setModule(pathInfo.substring(PREFIX.get().length()));
         /*
          * Set request URI
          */
@@ -379,6 +390,27 @@ public class DispatcherServlet extends SessionServlet {
             }
         }
         return retval;
+    }
+
+    /**
+     * Parses host name, secure and AJP route.
+     * 
+     * @param request The AJAX request data
+     * @param req The HTTP Servlet request
+     * @param session The associated session
+     */
+    public void parseHostName(final AJAXRequestData request, final HttpServletRequest req, final ServerSession session) {
+        request.setSecure(Tools.considerSecure(req));
+        {
+            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+            if (null == hostnameService) {
+                request.setHostname(req.getServerName());
+            } else {
+                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                request.setHostname(null == hn ? req.getServerName() : hn);
+            }
+        }
+        request.setRoute(Tools.getRoute(req.getSession(true).getId()));
     }
 
     private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {

@@ -533,7 +533,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param req the request that url should be parsed
      * @return the URI part after the path to your servlet.
      */
-    protected static String getServletSpecificURI(final HttpServletRequest req) {
+    public static String getServletSpecificURI(final HttpServletRequest req) {
         String uri;
         try {
             final String characterEncoding = req.getCharacterEncoding();
