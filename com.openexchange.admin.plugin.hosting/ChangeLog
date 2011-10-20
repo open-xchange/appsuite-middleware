@@ -1,6 +1,7 @@
-* 2011-10-19 - marcus.klein@open-xchange.com
+* 2011-10-20 - marcus.klein@open-xchange.com
 
- - Bugfix #20571: Properly rolling back transaction if the method for changing login mappings throws an exception.
+ - Bugfix #20571: Properly rolling back transaction if the method for changing login mappings throws an exception. Removing all login
+   mappings is possible again.
 
 * 2011-06-20 - marcus.klein@open-xchange.com
 
