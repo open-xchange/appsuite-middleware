@@ -2193,7 +2193,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void changeLoginMappingsForContext(final Context ctx, final Connection con) throws SQLException, StorageException {
-        if (null == ctx.getLoginMappings() || ctx.getLoginMappings().size() == 0) {
+        if (null == ctx.getLoginMappings()) {
             return;
         }
         final Set<String> loginMappings = ctx.getLoginMappings();
