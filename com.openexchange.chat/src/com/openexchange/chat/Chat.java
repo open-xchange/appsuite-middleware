@@ -100,6 +100,13 @@ public interface Chat {
     void part(String user) throws OXException;
 
     /**
+     * Deletes a message by specified identifier.
+     * 
+     * @param messageId The message identifier
+     */
+    void deleteMessage(String messageId) throws OXException;
+
+    /**
      * Posts specified packet to this chat.
      * 
      * @param packet The packet to post

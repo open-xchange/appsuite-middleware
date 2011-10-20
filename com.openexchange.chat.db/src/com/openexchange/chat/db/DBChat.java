@@ -692,6 +692,7 @@ public final class DBChat implements Chat {
 
     private void part(final String user, final Connection con) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         int pos;
         try {
             stmt = con.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND user = ? AND chatId = ?");
@@ -700,10 +701,29 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, Integer.parseInt(user));
             stmt.setInt(pos, chatId);
             stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            stmt = con.prepareStatement("SELECT COUNT(cm.user) FROM chatMember AS cm WHERE cm.cid = ? AND cm.chatId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos, chatId);
+            rs = stmt.executeQuery();
+            final int count = rs.getInt(1);
+            if (count > 1) {
+                return;
+            }
+            closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+            /*
+             * Drop chat, too
+             */
+            final TIntList list = new TIntArrayList(1);
+            list.add(chatId);
+            DBChat.removeDBChats(list, contextId, con);
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -742,6 +762,49 @@ public final class DBChat implements Chat {
             stmt.setString(pos++, UUID.randomUUID().toString());
             stmt.setString(pos++, message.getText());
             stmt.setLong(pos, System.currentTimeMillis());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    /**
+     * Deletes a message by specified identifier.
+     * 
+     * @param messageId The message identifier
+     */
+    @Override
+    public void deleteMessage(final String messageId) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            deleteMessage(messageId, con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private void deleteMessage(final String messageId, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        int pos;
+        try {
+            stmt =
+                con.prepareStatement("DELETE FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString());
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setString(pos, messageId.toString());
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());

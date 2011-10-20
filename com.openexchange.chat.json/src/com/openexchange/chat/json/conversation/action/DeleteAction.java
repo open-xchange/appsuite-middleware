@@ -47,47 +47,68 @@
  *
  */
 
-package com.openexchange.chat.json.conversation;
+package com.openexchange.chat.json.conversation.action;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.chat.json.conversation.action.AbstractChatConversationAction;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.Chat;
+import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
+import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ChatConversationActionFactory}
- *
+ * {@link DeleteAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ChatConversationActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractChatConversationAction> actions;
+public final class DeleteAction extends AbstractChatConversationAction {
 
     /**
-     * Initializes a new {@link ChatConversationActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link DeleteAction}.
+     * 
+     * @param services
      */
-    public ChatConversationActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractChatConversationAction>(16);
-        actions.put("all", new com.openexchange.chat.json.conversation.action.AllAction(services));
-        actions.put("delete", new com.openexchange.chat.json.conversation.action.DeleteAction(services));
-        actions.put("get", new com.openexchange.chat.json.conversation.action.GetAction(services));
-        actions.put("list", new com.openexchange.chat.json.conversation.action.ListAction(services));
-        actions.put("allMessages", new com.openexchange.chat.json.conversation.action.AllMessagesAction(services));
-        actions.put("listMessages", new com.openexchange.chat.json.conversation.action.ListMessagesAction(services));
-        actions.put("getMessage", new com.openexchange.chat.json.conversation.action.GetMessageAction(services));
-        actions.put("deleteMessages", new com.openexchange.chat.json.conversation.action.DeleteMessagesAction(services));
-        
+    public DeleteAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
+        final ServerSession session = req.getSession();
+        /*
+         * Get services
+         */
+        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+        final JSONArray ids = req.getData();
+        final int len = ids.length();
+        for (int i = 0; i < len; i++) {
+            final ConversationID conversationID = ConversationID.valueOf(ids.getString(i));
+            final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
+            ChatAccess access = null;
+            try {
+                access = chatService.access(conversationID.getAccountId(), session);
+                access.login();
+                /*
+                 * Part from chat
+                 */
+                final Chat chat = access.getChat(conversationID.getChatId());
+                chat.part(access.getUser().getId());
+            } finally {
+                if (null != access) {
+                    access.disconnect();
+                }
+            }
+        }
+        /*
+         * Return appropriate result
+         */
+        return getJSONNullResult();
     }
 
 }

@@ -233,6 +233,19 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks for presence of specified parameter.
+     * 
+     * @param name The parameter name
+     * @return <code>true</code> if such a parameter exists; otherwise <code>false</code> if absent
+     */
+    public boolean containsParameter(final String name) {
+        if (null == name) {
+            throw new NullPointerException("name is null");
+        }
+        return params.containsKey(name);
+    }
+
+    /**
      * Gets optional <code>int</code> parameter.
      *
      * @param name The parameter name

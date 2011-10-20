@@ -66,12 +66,12 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GetMethodHandler implements MethodHandler {
+public final class DeleteMethodHandler implements MethodHandler {
 
     /**
-     * Initializes a new {@link GetMethodHandler}.
+     * Initializes a new {@link DeleteMethodHandler}.
      */
-    public GetMethodHandler() {
+    public DeleteMethodHandler() {
         super();
     }
 
@@ -93,63 +93,43 @@ public final class GetMethodHandler implements MethodHandler {
          */
         final String pathInfo = req.getPathInfo();
         if (null == pathInfo) {
-            retval.setAction("all");
-        } else {
-            final String[] pathElements = RestServlet.SPLIT_PATH.split(pathInfo);
-            final int length = pathElements.length;
-            if (0 == length) {
-                /*-
-                 * "Get all conversations"
-                 *  GET /conversation
-                 */
-                retval.setAction("all");
-            } else if (1 == length) {
-                /*-
-                 * "Get specific conversation"
-                 *  GET /conversation/11
-                 */
-                final String element = pathElements[0];
-                if (element.indexOf(',') < 0) {
-                    retval.setAction("get");
-                    retval.putParameter("id", element);
-                } else {
-                    retval.setAction("list");
-                    final JSONArray array = new JSONArray();
-                    for (final String id : RestServlet.SPLIT_CSV.split(element)) {
-                        array.put(id);
-                    }
-                    retval.setData(array);
-                }
-            } else if ("message".equals(pathElements[1])) {
-                if (2 == length) {
-                    /*-
-                     * "Get all messages"
-                     *  GET /conversation/11/message?since=<long:timestamp>
-                     */
-                    retval.setAction("allMessages");
-                    retval.putParameter("id", pathElements[0]);
-                } else {
-                    /*-
-                     * "Get specific message"
-                     *  GET /conversation/11/message/1234
-                     */
-                    retval.putParameter("id", pathElements[0]);
-                    final String element = pathElements[2];
-                    if (element.indexOf(',') < 0) {
-                        retval.setAction("getMessage");
-                        retval.putParameter("messageId", element);
-                    } else {
-                        retval.setAction("listMessages");
-                        final JSONArray array = new JSONArray();
-                        for (final String id : RestServlet.SPLIT_CSV.split(element)) {
-                            array.put(id);
-                        }
-                        retval.setData(array);
-                    }
-                }
-            } else {
-                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        final String[] pathElements = RestServlet.SPLIT_PATH.split(pathInfo);
+        final int length = pathElements.length;
+        if (0 == length) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
+        }
+        if (1 == length) {
+            /*-
+             * "Delete/part specific conversation"
+             *  DELETE /conversation/11
+             */
+            final String element = pathElements[0];
+            retval.setAction("delete");
+            final JSONArray array = new JSONArray();
+            for (final String id : RestServlet.SPLIT_CSV.split(element)) {
+                array.put(id);
             }
+            retval.setData(array);
+        } else if ("message".equals(pathElements[1])) {
+            if (2 == length) {
+                throw AjaxExceptionCodes.BAD_REQUEST.create();
+            }
+            /*-
+             * "Delete specific message"
+             *  DELETE /conversation/11/message/1234
+             */
+            retval.putParameter("id", pathElements[0]);
+            final String element = pathElements[2];
+            retval.setAction("deleteMessages");
+            final JSONArray array = new JSONArray();
+            for (final String id : RestServlet.SPLIT_CSV.split(element)) {
+                array.put(id);
+            }
+            retval.setData(array);
+        } else {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
         }
         /*
          * Set the format

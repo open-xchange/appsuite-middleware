@@ -85,7 +85,11 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      * Too many concurrent requests. Please try again later.
      */
     TOO_MANY_REQUESTS("Too many concurrent requests. Please try again later.", Category.CATEGORY_TRY_AGAIN, 19),
-
+    /**
+     * Bad request. The server is unable to handle the request.
+     */
+    BAD_REQUEST("Bad request. The server is unable to handle the request.", Category.CATEGORY_ERROR, 20),
+    
     ;
 
     /**
