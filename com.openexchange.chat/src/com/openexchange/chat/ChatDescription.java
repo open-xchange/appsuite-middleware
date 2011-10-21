@@ -69,12 +69,21 @@ public class ChatDescription {
 
     /**
      * Initializes a new {@link ChatDescription}.
+     * 
+     * @param chatId The chat identifier; <code>null</code> for a new chat
      */
     public ChatDescription(final String chatId) {
         super();
         this.chatId = chatId;
         newMembers = new ArrayList<String>(8);
         delMembers = new ArrayList<String>(8);
+    }
+
+    /**
+     * Initializes a new {@link ChatDescription}.
+     */
+    public ChatDescription() {
+        this(null);
     }
 
     /**

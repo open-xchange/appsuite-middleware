@@ -77,7 +77,7 @@ public final class DBChatService implements ChatService {
         return service;       
     }
 
-    private static final String IDENTIFIER = "1001";
+    private static final String IDENTIFIER = ChatService.DEFAULT_SERVICE;
 
     /**
      * Gets the identifier

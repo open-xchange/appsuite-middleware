@@ -76,7 +76,7 @@ public final class Parser {
      * @return The parsed chat instance
      * @throws JSONException If a JSON error occurs
      */
-    public static ChatDescription parseJSONChatDescription(final JSONObject jsonChat) throws JSONException {
+    public static ChatDescription parseJSONChatDescriptionForUpdate(final JSONObject jsonChat) throws JSONException {
         final ChatDescription chatDesc = new ChatDescription(jsonChat.getString("id"));
         if (jsonChat.hasAndNotNull("subject")) {
             chatDesc.setSubject(jsonChat.getString("subject"));
@@ -93,6 +93,28 @@ public final class Parser {
             final int length = jsonDeleteMembers.length();
             for (int i = 0; i < length; i++) {
                 chatDesc.addDeleteMember(jsonDeleteMembers.getString(i));
+            }
+        }
+        return chatDesc;
+    }
+
+    /**
+     * Parses JSON to a chat instance.
+     * 
+     * @param jsonChat The JSON chat representation
+     * @return The parsed chat instance
+     * @throws JSONException If a JSON error occurs
+     */
+    public static ChatDescription parseJSONChatDescriptionForCreate(final JSONObject jsonChat) throws JSONException {
+        final ChatDescription chatDesc = new ChatDescription();
+        if (jsonChat.hasAndNotNull("subject")) {
+            chatDesc.setSubject(jsonChat.getString("subject"));
+        }
+        if (jsonChat.hasAndNotNull("newMembers")) {
+            final JSONArray jsonNewMembers = jsonChat.getJSONArray("newMembers");
+            final int length = jsonNewMembers.length();
+            for (int i = 0; i < length; i++) {
+                chatDesc.addNewMember(jsonNewMembers.getString(i));
             }
         }
         return chatDesc;

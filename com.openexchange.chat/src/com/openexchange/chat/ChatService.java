@@ -60,6 +60,11 @@ import com.openexchange.session.Session;
 public interface ChatService {
 
     /**
+     * The identifier for default service.
+     */
+    public static final String DEFAULT_SERVICE = "db";
+
+    /**
      * The identifier for default account.
      */
     public static final String DEFAULT_ACCOUNT = "0";

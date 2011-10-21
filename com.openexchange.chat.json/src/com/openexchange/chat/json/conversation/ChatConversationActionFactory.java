@@ -78,6 +78,9 @@ public class ChatConversationActionFactory implements AJAXActionServiceFactory {
         actions.put("delete", new com.openexchange.chat.json.conversation.action.DeleteAction(services));
         actions.put("get", new com.openexchange.chat.json.conversation.action.GetAction(services));
         actions.put("list", new com.openexchange.chat.json.conversation.action.ListAction(services));
+        actions.put("update", new com.openexchange.chat.json.conversation.action.UpdateAction(services));
+        actions.put("new", new com.openexchange.chat.json.conversation.action.NewAction(services));
+
         actions.put("allMessages", new com.openexchange.chat.json.conversation.action.AllMessagesAction(services));
         actions.put("listMessages", new com.openexchange.chat.json.conversation.action.ListMessagesAction(services));
         actions.put("getMessage", new com.openexchange.chat.json.conversation.action.GetMessageAction(services));

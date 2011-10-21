@@ -77,7 +77,7 @@ public class DBChatAccountManager implements ChatAccountManager {
         super();
         defaultAccount = new ChatAccountImpl();
         defaultAccount.setDisplayName("OX7 Chat");
-        defaultAccount.setId(ChatService.DEFAULT_ACCOUNT);
+        defaultAccount.setId(DEFAULT_ACCOUNT);
     }
 
     /**
