@@ -52,7 +52,7 @@ package com.openexchange.chat.json.roster;
 import java.util.regex.Pattern;
 
 /**
- * {@link RosterID} - Represents a conversation identifier.
+ * {@link RosterID} - Represents a roster identifier.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
