@@ -50,7 +50,7 @@
 package com.openexchange.chat;
 
 /**
- * {@link MessageDescription}
+ * {@link MessageDescription} - Provides changeable attributes of a {@link Message message}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
