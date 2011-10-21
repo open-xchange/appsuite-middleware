@@ -47,59 +47,38 @@
  *
  */
 
-package com.openexchange.chat.db;
+package com.openexchange.ajax.chat.conversation;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessiondService;
+import org.json.JSONArray;
+import com.openexchange.ajax.chat.conversation.actions.AllChatConversationRequest;
+import com.openexchange.ajax.chat.conversation.actions.AllChatConversationResponse;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+
 
 /**
- * {@link DBChatServiceLookup}
- * 
+ * {@link AllTest}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DBChatServiceLookup {
+public final class AllTest extends AbstractAJAXSession {
 
     /**
-     * Initializes a new {@link DBChatServiceLookup}.
+     * Initializes a new {@link AllTest}.
      */
-    private DBChatServiceLookup() {
-        super();
+    public AllTest() {
+        super("AllTest");
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+    public void testAllRequest() {
+        try {
+            final AllChatConversationRequest request = new AllChatConversationRequest();
+            final AllChatConversationResponse response = getClient().execute(request);
 
-    /**
-     * Gets the service look-up
-     * 
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        if (SessiondService.class.equals(clazz)) {
-            return (S) DBRoster.get();
+            final JSONArray ja = (JSONArray) response.getData();
+        } catch (final Exception e) {
+            fail(e.getMessage());
+            e.printStackTrace();
         }
-        final ServiceLookup serviceLookup = ref.get();
-        return null == serviceLookup ? null : serviceLookup.getService(clazz);
-    }
-
-    /**
-     * Sets the service look-up
-     * 
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
     }
 
 }

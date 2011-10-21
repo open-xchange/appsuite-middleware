@@ -73,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
@@ -92,6 +93,23 @@ public final class DBRoster implements Roster {
      */
     public static void set(final SessiondService service) {
         SERVICE_REF.set(service);
+    }
+
+    /**
+     * Gets the service.
+     * 
+     * @return The service
+     */
+    public static SessiondService get() {
+        return SERVICE_REF.get();
+    }
+
+    /**
+     * Gets the first session that matches the given userId and contextId.
+     */
+    public static Session getAnyActiveSessionForUser(final int userId, final int contextId) {
+        final SessiondService sessiondService = SERVICE_REF.get();
+        return null == sessiondService ? null : sessiondService.getAnyActiveSessionForUser(userId, contextId);
     }
 
     private static final ConcurrentTIntObjectHashMap<DBRoster> ROSTER_MAP = new ConcurrentTIntObjectHashMap<DBRoster>(128);

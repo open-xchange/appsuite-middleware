@@ -196,7 +196,7 @@ public final class DBChatActivator extends HousekeepingActivator {
 
                 private void handleRemovedSession(final Session session) {
                     try {
-                        if (null != getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                        if (null != DBRoster.getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                             // Other active session present
                             return;
                         }

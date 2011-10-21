@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.json.account.ChatAccountActionFactory;
 import com.openexchange.chat.json.conversation.ChatConversationActionFactory;
 import com.openexchange.chat.json.roster.ChatRosterActionFactory;
@@ -78,7 +79,7 @@ public final class ChatJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { ChatServiceRegistry.class };
     }
 
     @Override

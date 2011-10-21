@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,44 @@
  *
  */
 
-package com.openexchange.chat.db;
+package com.openexchange.ajax.chat.conversation.actions;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessiondService;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link DBChatServiceLookup}
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public final class DBChatServiceLookup {
+public abstract class AbstractChatConversationRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+
+    private boolean failOnError;
 
     /**
-     * Initializes a new {@link DBChatServiceLookup}.
+     * URL of the conversation AJAX interface.
      */
-    private DBChatServiceLookup() {
+    public static final String CONVERSATION_URL = "/ajax/conversation";
+
+    protected AbstractChatConversationRequest() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     * 
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
+    @Override
+    public String getServletPath() {
+        return CONVERSATION_URL;
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        if (SessiondService.class.equals(clazz)) {
-            return (S) DBRoster.get();
-        }
-        final ServiceLookup serviceLookup = ref.get();
-        return null == serviceLookup ? null : serviceLookup.getService(clazz);
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
-    /**
-     * Sets the service look-up
-     * 
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
+    public void setFailOnError(final boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
     }
 
 }

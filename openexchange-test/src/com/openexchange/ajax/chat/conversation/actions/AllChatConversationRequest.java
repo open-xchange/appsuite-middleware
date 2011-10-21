@@ -47,59 +47,58 @@
  *
  */
 
-package com.openexchange.chat.db;
+package com.openexchange.ajax.chat.conversation.actions;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessiondService;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link DBChatServiceLookup}
- * 
+ * {@link AllChatConversationRequest}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DBChatServiceLookup {
+public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
 
     /**
-     * Initializes a new {@link DBChatServiceLookup}.
+     * Initializes a new {@link AllChatConversationRequest}.
      */
-    private DBChatServiceLookup() {
+    public AllChatConversationRequest() {
         super();
+        setFailOnError(true);
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     * 
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> is absent
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        if (SessiondService.class.equals(clazz)) {
-            return (S) DBRoster.get();
-        }
-        final ServiceLookup serviceLookup = ref.get();
-        return null == serviceLookup ? null : serviceLookup.getService(clazz);
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        return params.toArray(new Parameter[params.size()]);
     }
 
-    /**
-     * Sets the service look-up
-     * 
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
+    @Override
+    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
+        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
+
+            @Override
+            protected AllChatConversationResponse createResponse(final Response response) {
+                return new AllChatConversationResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }
