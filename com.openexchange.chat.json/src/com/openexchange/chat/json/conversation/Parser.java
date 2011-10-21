@@ -54,13 +54,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chat.ChatDescription;
 import com.openexchange.chat.Message;
+import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.MessageImpl;
 
-
 /**
  * {@link Parser}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Parser {
@@ -94,6 +94,29 @@ public final class Parser {
             message.setText(jsonMessage.getString("text"));
         }
         return message;
+    }
+
+    /**
+     * Parses JSON to a message description.
+     * 
+     * @param jsonMessage The JSON data
+     * @return The parsed message description
+     * @throws JSONException If a JSON error occurs
+     */
+    public static MessageDescription parseMessageDescription(final JSONObject jsonMessage) throws JSONException {
+        final MessageDescription messageDesc;
+        if (jsonMessage.hasAndNotNull("id")) {
+            messageDesc = new MessageDescription(jsonMessage.getString("id"));
+        } else {
+            messageDesc = new MessageDescription();
+        }
+        if (jsonMessage.hasAndNotNull("subject")) {
+            messageDesc.setSubject(jsonMessage.getString("subject"));
+        }
+        if (jsonMessage.hasAndNotNull("text")) {
+            messageDesc.setMessage(jsonMessage.getString("text"));
+        }
+        return messageDesc;
     }
 
     /**

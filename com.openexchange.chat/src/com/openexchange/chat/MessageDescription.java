@@ -47,56 +47,67 @@
  *
  */
 
-package com.openexchange.chat.json.conversation;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import com.openexchange.chat.Chat;
-import com.openexchange.chat.ChatExceptionCodes;
-import com.openexchange.chat.Message;
-import com.openexchange.chat.MessageListener;
-import com.openexchange.chat.Packet;
-import com.openexchange.exception.OXException;
+package com.openexchange.chat;
 
 /**
- * {@link ParsedChat}
+ * {@link MessageDescription}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ParsedChat implements Chat {
+public class MessageDescription {
 
-    private String chatId;
+    private final String messageId;
 
     private String subject;
 
-    private final List<String> members;
+    private String message;
 
     /**
-     * Initializes a new {@link ParsedChat}.
-     */
-    public ParsedChat() {
-        super();
-        members = new LinkedList<String>();
-    }
-
-    @Override
-    public String getChatId() {
-        return chatId;
-    }
-
-    /**
-     * Sets the chatId
+     * Initializes a new {@link MessageDescription}.
      * 
-     * @param chatId The chatId to set
+     * @param messageId The message identifier; <code>null</code> for new messages
      */
-    public void setChatId(final String chatId) {
-        this.chatId = chatId;
+    public MessageDescription(final String messageId) {
+        super();
+        this.messageId = messageId;
     }
 
-    @Override
+    /**
+     * Initializes a new {@link MessageDescription}.
+     */
+    public MessageDescription() {
+        this(null);
+    }
+
+    /**
+     * Checks if this message description provides any changed attribute.
+     * 
+     * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
+     */
+    public boolean hasAnyAttribute() {
+        if (null != subject) {
+            return true;
+        }
+        if (null != message) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets the message identifier
+     * 
+     * @return The message identifier
+     */
+    public String getMessageId() {
+        return messageId;
+    }
+
+    /**
+     * Gets the subject
+     * 
+     * @return The subject
+     */
     public String getSubject() {
         return subject;
     }
@@ -110,59 +121,22 @@ public final class ParsedChat implements Chat {
         this.subject = subject;
     }
 
-    @Override
-    public List<String> getMembers() {
-        return members;
+    /**
+     * Gets the message
+     * 
+     * @return The message
+     */
+    public String getMessage() {
+        return message;
     }
 
-    @Override
-    public void join(final String user) {
-        members.add(user);
-    }
-
-    @Override
-    public void part(final String user) {
-        members.remove(user);
-    }
-
-    @Override
-    public void deleteMessage(final String messageId) {
-        // Nope
-    }
-
-    @Override
-    public void post(final Packet packet) {
-        // Nope
-    }
-
-    @Override
-    public List<Message> pollMessages(final Date since) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public Message getMessage(final String messageId) throws OXException {
-        throw ChatExceptionCodes.MESSAGE_NOT_FOUND.create(messageId, chatId);
-    }
-
-    @Override
-    public List<Message> getMessages(final Collection<String> messageIds) {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean addMessageListener(final MessageListener listener) {
-        return false;
-    }
-
-    @Override
-    public void removeMessageListener(final MessageListener listener) {
-        // Nope
-    }
-
-    @Override
-    public Collection<MessageListener> getListeners() {
-        return Collections.emptyList();
+    /**
+     * Sets the message
+     * 
+     * @param message The message to set
+     */
+    public void setMessage(final String message) {
+        this.message = message;
     }
 
 }

@@ -76,6 +76,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.Message;
+import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.MessageListener;
 import com.openexchange.chat.Packet;
 import com.openexchange.chat.util.ChatUserImpl;
@@ -762,6 +763,68 @@ public final class DBChat implements Chat {
             stmt.setString(pos++, UUID.randomUUID().toString());
             stmt.setString(pos++, message.getText());
             stmt.setLong(pos, System.currentTimeMillis());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public void updateMessage(final MessageDescription messageDesc) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            updateMessage(messageDesc, con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private void updateMessage(final MessageDescription messageDesc, final Connection con) throws OXException {
+        if (null == messageDesc || !messageDesc.hasAnyAttribute()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        int pos;
+        try {
+            final StringBuilder sql = new StringBuilder(192);
+            sql.append("UPDATE chatMessage SET");
+            final List<Object> values = new LinkedList<Object>();
+            {
+                final String subject = messageDesc.getSubject();
+                if (null != subject) {
+                    sql.append(" subject = ?,");
+                    values.add(subject);
+                }
+            }
+            {
+                final String msg = messageDesc.getMessage();
+                if (null != msg) {
+                    sql.append(" message = ?,");
+                    values.add(msg);
+                }
+            }
+            sql.append(" createdAt = ? WHERE cid = ? AND chatId = ? AND messageId = ").append(DBChatUtility.getUnhexReplaceString());
+            stmt = con.prepareStatement(sql.toString());
+            pos = 1;
+            for (final Object value : values) {
+                stmt.setObject(pos++, value);
+            }
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setString(pos, messageDesc.getMessageId());
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
