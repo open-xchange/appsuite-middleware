@@ -62,7 +62,7 @@ import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.Writer;
+import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
@@ -121,7 +121,7 @@ public final class AllMessagesAction extends AbstractChatConversationAction {
             /*
              * Create JSON array
              */
-            final JSONArray jsonArray = Writer.writeMessages(messages, timeZone);
+            final JSONArray jsonArray = JSONConversationWriter.writeMessages(messages, timeZone);
             /*
              * Return appropriate result
              */

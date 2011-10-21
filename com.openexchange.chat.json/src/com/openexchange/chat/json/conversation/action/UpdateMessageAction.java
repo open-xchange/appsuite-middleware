@@ -60,8 +60,8 @@ import com.openexchange.chat.Message;
 import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.Parser;
-import com.openexchange.chat.json.conversation.Writer;
+import com.openexchange.chat.json.conversation.JSONConversationParser;
+import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -105,13 +105,13 @@ public final class UpdateMessageAction extends AbstractChatConversationAction {
             /*
              * Get message
              */
-            final MessageDescription messageDescription = Parser.parseMessageDescription(jsonMessage);
+            final MessageDescription messageDescription = JSONConversationParser.parseMessageDescription(jsonMessage);
             chat.updateMessage(messageDescription);
             /*
              * Create JSON
              */
             final Message message = chat.getMessage(messageDescription.getMessageId());
-            final JSONObject json = Writer.writeMessage(message, session.getUser().getTimeZone());
+            final JSONObject json = JSONConversationWriter.writeMessage(message, session.getUser().getTimeZone());
             /*
              * Return appropriate result
              */

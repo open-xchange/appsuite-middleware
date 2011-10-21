@@ -59,7 +59,7 @@ import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.roster.ChatRosterAJAXRequest;
 import com.openexchange.chat.json.roster.RosterID;
-import com.openexchange.chat.json.roster.Writer;
+import com.openexchange.chat.json.roster.JSONRosterWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -108,7 +108,7 @@ public final class GetAction extends AbstractChatRosterAction {
             /*
              * Write JSON
              */
-            final JSONObject json = Writer.writeChatUser(chatUser, roster.getPresence(chatUser), session.getUser().getTimeZone());
+            final JSONObject json = JSONRosterWriter.writeChatUser(chatUser, roster.getPresence(chatUser), session.getUser().getTimeZone());
             /*
              * Return appropriate result
              */

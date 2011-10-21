@@ -64,16 +64,16 @@ import com.openexchange.chat.Message;
 import com.openexchange.chat.Presence;
 
 /**
- * {@link Writer} - Provides write methods.
+ * {@link JSONConversationWriter} - Provides write methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Writer {
+public final class JSONConversationWriter {
 
     /**
-     * Initializes a new {@link Writer}.
+     * Initializes a new {@link JSONConversationWriter}.
      */
-    private Writer() {
+    private JSONConversationWriter() {
         super();
     }
 

@@ -59,16 +59,16 @@ import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.MessageImpl;
 
 /**
- * {@link Parser}
+ * {@link JSONConversationParser}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Parser {
+public final class JSONConversationParser {
 
     /**
-     * Initializes a new {@link Parser}.
+     * Initializes a new {@link JSONConversationParser}.
      */
-    private Parser() {
+    private JSONConversationParser() {
         super();
     }
 

@@ -63,16 +63,16 @@ import com.openexchange.chat.Roster;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link Writer} - Provides write methods.
+ * {@link JSONRosterWriter} - Provides write methods.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Writer {
+public final class JSONRosterWriter {
 
     /**
-     * Initializes a new {@link Writer}.
+     * Initializes a new {@link JSONRosterWriter}.
      */
-    private Writer() {
+    private JSONRosterWriter() {
         super();
     }
 

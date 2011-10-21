@@ -57,7 +57,7 @@ import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.Presence;
 import com.openexchange.chat.json.roster.ChatRosterAJAXRequest;
-import com.openexchange.chat.json.roster.Parser;
+import com.openexchange.chat.json.roster.JSONRosterParser;
 import com.openexchange.chat.json.roster.RosterID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -103,7 +103,7 @@ public final class UpdateAction extends AbstractChatRosterAction {
         try {
             access = chatService.access(rosterId.getAccountId(), session);
             access.login();
-            final Presence presence = Parser.parsePresence(jsonPresence, user);
+            final Presence presence = JSONRosterParser.parsePresence(jsonPresence, user);
             access.sendPresence(presence);
             /*
              * Return appropriate result

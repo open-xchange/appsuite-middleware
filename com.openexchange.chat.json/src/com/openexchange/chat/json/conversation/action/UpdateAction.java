@@ -58,7 +58,7 @@ import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.Parser;
+import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -97,7 +97,7 @@ public final class UpdateAction extends AbstractChatConversationAction {
             /*
              * Parse chat description
              */
-            final ChatDescription chatDescription = Parser.parseJSONChatDescriptionForUpdate(jsonChatObject);
+            final ChatDescription chatDescription = JSONConversationParser.parseJSONChatDescriptionForUpdate(jsonChatObject);
             if (null == chatDescription.getChatId()) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("chatId");
             }
