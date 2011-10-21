@@ -65,17 +65,17 @@ public final class ConversationID {
      * @return The conversation identifier
      */
     public static ConversationID valueOf(final String uid) {
-        final ConversationID cId = new ConversationID();
-        cId.uid = uid;
-        parseUid(cId, uid);
-        return cId;
+        final ConversationID conversationId = new ConversationID();
+        conversationId.uid = uid;
+        parseUid(conversationId, uid);
+        return conversationId;
     }
 
     private static final char DELIM = '-';
 
     private static final Pattern SPLIT = Pattern.compile(Pattern.quote(String.valueOf(DELIM)));
 
-    private static void parseUid(final ConversationID cId, final String uid) {
+    private static void parseUid(final ConversationID conversationId, final String uid) {
         if (null == uid) {
             return;
         }
@@ -84,9 +84,9 @@ public final class ConversationID {
         if (length != 3) {
             return;
         }
-        cId.serviceId = args[0];
-        cId.accountId = args[1];
-        cId.chatId = args[2];
+        conversationId.serviceId = args[0];
+        conversationId.accountId = args[1];
+        conversationId.chatId = args[2];
     }
 
     /*-
