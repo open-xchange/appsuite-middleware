@@ -47,44 +47,28 @@
  *
  */
 
-package com.openexchange.chat.json.rest.conversation;
+package com.openexchange.chat.json.rest;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.chat.json.rest.Method;
-import com.openexchange.chat.json.rest.MethodHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RestServlet}
+ * {@link AbstractRestServlet} - The abstract Servlet to handle REST-like requests.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RestServlet extends DispatcherServlet {
+public abstract class AbstractRestServlet extends DispatcherServlet {
 
-    private static final long serialVersionUID = 8536451759619846580L;
-
-    private static final Map<Method, MethodHandler> HANDLER_MAP;
-
-    static {
-        final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
-        m.put(Method.GET, new GetMethodHandler());
-        m.put(Method.PUT, new PutMethodHandler());
-        m.put(Method.DELETE, new DeleteMethodHandler());
-        m.put(Method.POST, new PostMethodHandler());
-        HANDLER_MAP = Collections.unmodifiableMap(m);
-    }
+    private static final long serialVersionUID = 3164103914795844167L;
 
     /**
-     * Initializes a new {@link RestServlet}.
+     * Initializes a new {@link AbstractRestServlet}.
      */
-    public RestServlet() {
+    public AbstractRestServlet() {
         super();
     }
 
@@ -100,11 +84,19 @@ public final class RestServlet extends DispatcherServlet {
         if (null == method) {
             return super.parseRequest(req, preferStream, isFileUpload, session);
         }
-        final MethodHandler methodHandler = HANDLER_MAP.get(method);
+        final MethodHandler methodHandler = getMethodHandler(method);
         if (null == methodHandler) {
             return super.parseRequest(req, preferStream, isFileUpload, session);
         }
         return methodHandler.parseRequest(req, session, this);
     }
+
+    /**
+     * Gets the method handler appropriate for specified method.
+     * 
+     * @param method The HTTP method
+     * @return The associated method handler or <code>null</code> if none appropriate
+     */
+    protected abstract MethodHandler getMethodHandler(Method method);
 
 }

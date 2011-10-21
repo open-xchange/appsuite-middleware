@@ -47,28 +47,23 @@
  *
  */
 
-package com.openexchange.chat.json.rest.roster;
+package com.openexchange.chat.json.rest.conversation;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.chat.json.rest.AbstractRestServlet;
 import com.openexchange.chat.json.rest.Method;
 import com.openexchange.chat.json.rest.MethodHandler;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RestServlet}
+ * {@link ConversationRestServlet} - The REST Servlet for module "conversation".
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RestServlet extends DispatcherServlet {
+public final class ConversationRestServlet extends AbstractRestServlet {
 
-    private static final long serialVersionUID = 8386516801873375179L;
+    private static final long serialVersionUID = 8536451759619846580L;
 
     private static final Map<Method, MethodHandler> HANDLER_MAP;
 
@@ -76,33 +71,21 @@ public final class RestServlet extends DispatcherServlet {
         final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
         m.put(Method.GET, new GetMethodHandler());
         m.put(Method.PUT, new PutMethodHandler());
+        m.put(Method.DELETE, new DeleteMethodHandler());
+        m.put(Method.POST, new PostMethodHandler());
         HANDLER_MAP = Collections.unmodifiableMap(m);
     }
 
     /**
-     * Initializes a new {@link RestServlet}.
+     * Initializes a new {@link ConversationRestServlet}.
      */
-    public RestServlet() {
+    public ConversationRestServlet() {
         super();
     }
 
     @Override
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
-        if (isFileUpload) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
-        }
-        /*
-         * Parse dependent on HTTP method and/or servlet path
-         */
-        final Method method = Method.valueOf(req);
-        if (null == method) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
-        }
-        final MethodHandler methodHandler = HANDLER_MAP.get(method);
-        if (null == methodHandler) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
-        }
-        return methodHandler.parseRequest(req, session, this);
+    protected MethodHandler getMethodHandler(final Method method) {
+        return HANDLER_MAP.get(method);
     }
 
 }
