@@ -65,17 +65,17 @@ public final class RosterID {
      * @return The conversation identifier
      */
     public static RosterID valueOf(final String uid) {
-        final RosterID cId = new RosterID();
-        cId.uid = uid;
-        parseUid(cId, uid);
-        return cId;
+        final RosterID rosterId = new RosterID();
+        rosterId.uid = uid;
+        parseUid(rosterId, uid);
+        return rosterId;
     }
 
     private static final char DELIM = '-';
 
     private static final Pattern SPLIT = Pattern.compile(Pattern.quote(String.valueOf(DELIM)));
 
-    private static void parseUid(final RosterID rId, final String uid) {
+    private static void parseUid(final RosterID rosterId, final String uid) {
         if (null == uid) {
             return;
         }
@@ -84,8 +84,8 @@ public final class RosterID {
         if (length != 3) {
             return;
         }
-        rId.serviceId = args[0];
-        rId.accountId = args[1];
+        rosterId.serviceId = args[0];
+        rosterId.accountId = args[1];
     }
 
     /*-
