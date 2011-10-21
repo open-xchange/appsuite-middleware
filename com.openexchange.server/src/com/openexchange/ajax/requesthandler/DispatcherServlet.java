@@ -367,7 +367,7 @@ public class DispatcherServlet extends SessionServlet {
              * Guess an appropriate body object
              */
             final String body = AJAXServlet.getBody(req);
-            if (startsWith('{', body, true)) {
+            if (startsWith('{', body)) {
                 /*
                  * Expect the body to be a JSON object
                  */
@@ -376,7 +376,7 @@ public class DispatcherServlet extends SessionServlet {
                 } catch (final JSONException e) {
                     retval.setData(body);
                 }
-            } else if (startsWith('[', body, true)) {
+            } else if (startsWith('[', body)) {
                 /*
                  * Expect the body to be a JSON array
                  */
@@ -413,16 +413,13 @@ public class DispatcherServlet extends SessionServlet {
         request.setRoute(Tools.getRoute(req.getSession(true).getId()));
     }
 
-    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+    private static boolean startsWith(final char startingChar, final String toCheck) {
         if (null == toCheck) {
             return false;
         }
         final int len = toCheck.length();
         if (len <= 0) {
             return false;
-        }
-        if (!ignoreHeadingWhitespaces) {
-            return startingChar == toCheck.charAt(0);
         }
         int i = 0;
         if (Character.isWhitespace(toCheck.charAt(i))) {
