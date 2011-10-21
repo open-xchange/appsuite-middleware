@@ -809,7 +809,7 @@ public final class DBChat implements Chat {
                 }
             }
             {
-                final String msg = messageDesc.getMessage();
+                final String msg = messageDesc.getText();
                 if (null != msg) {
                     sql.append(" message = ?,");
                     values.add(msg);

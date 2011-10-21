@@ -114,7 +114,7 @@ public final class Parser {
             messageDesc.setSubject(jsonMessage.getString("subject"));
         }
         if (jsonMessage.hasAndNotNull("text")) {
-            messageDesc.setMessage(jsonMessage.getString("text"));
+            messageDesc.setText(jsonMessage.getString("text"));
         }
         return messageDesc;
     }

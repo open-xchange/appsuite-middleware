@@ -60,7 +60,7 @@ public class MessageDescription {
 
     private String subject;
 
-    private String message;
+    private String text;
 
     /**
      * Initializes a new {@link MessageDescription}.
@@ -88,7 +88,7 @@ public class MessageDescription {
         if (null != subject) {
             return true;
         }
-        if (null != message) {
+        if (null != text) {
             return true;
         }
         return false;
@@ -122,21 +122,21 @@ public class MessageDescription {
     }
 
     /**
-     * Gets the message
+     * Gets the text
      * 
-     * @return The message
+     * @return The text
      */
-    public String getMessage() {
-        return message;
+    public String getText() {
+        return text;
     }
 
     /**
-     * Sets the message
+     * Sets the text
      * 
-     * @param message The message to set
+     * @param text The text to set
      */
-    public void setMessage(final String message) {
-        this.message = message;
+    public void setText(final String text) {
+        this.text = text;
     }
 
 }
