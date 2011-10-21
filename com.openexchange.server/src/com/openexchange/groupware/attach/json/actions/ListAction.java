@@ -89,14 +89,14 @@ public final class ListAction extends AbstractAttachmentAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            require(request, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID);
-            final int folderId = requireNumber(request, AJAXServlet.PARAMETER_FOLDERID);
-            final int attachedId = requireNumber(request, AJAXServlet.PARAMETER_ATTACHEDID);
-            final int moduleId = requireNumber(request, AJAXServlet.PARAMETER_MODULE);
+            require(requestData, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID);
+            final int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
+            final int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
+            final int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
 
-            final JSONArray idsArray = (JSONArray) request.getData();
+            final JSONArray idsArray = (JSONArray) requestData.getData();
 
             final int[] ids = new int[idsArray.length()];
             for (int i = 0; i < idsArray.length(); i++) {
@@ -111,7 +111,7 @@ public final class ListAction extends AbstractAttachmentAction {
                     }
                 }
             }
-            final AttachmentField[] columns = PARSER.getColumns(request.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
+            final AttachmentField[] columns = PARSER.getColumns(requestData.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
             final JSONValue jsonValue = list(session, folderId, attachedId, moduleId, ids, columns);
             return new AJAXRequestResult(jsonValue, "apiResponse");
         } catch (final JSONException e) {

@@ -99,10 +99,10 @@ public abstract class AbstractConfigAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final ConfigAJAXRequest ajaxRequest = new ConfigAJAXRequest(request, session);
-            final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            final ConfigAJAXRequest ajaxRequest = new ConfigAJAXRequest(requestData, session);
+            final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             if (null != sTimeZone) {
                 ajaxRequest.setTimeZone(getTimeZone(sTimeZone));
             }

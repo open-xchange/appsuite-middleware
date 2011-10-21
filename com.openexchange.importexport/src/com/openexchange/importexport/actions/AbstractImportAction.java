@@ -15,9 +15,9 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class AbstractImportAction implements AJAXActionService {
 
 	@Override
-	public AJAXRequestResult perform(AJAXRequestData request,
+	public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		return perform(new ImportRequest(request,session));
+		return perform(new ImportRequest(requestData,session));
 	}
 
 	public abstract Format getFormat();

@@ -73,9 +73,9 @@ public abstract class AbstractSubscribeSourcesAction  implements AJAXActionServi
 	public abstract AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException;
 
 	@Override
-    public AJAXRequestResult perform(AJAXRequestData request,
+    public AJAXRequestResult perform(AJAXRequestData requestData,
 			ServerSession session) throws OXException {
-		SubscribeRequest subscribeRequest = new SubscribeRequest(request, session);
+		SubscribeRequest subscribeRequest = new SubscribeRequest(requestData, session);
 		return perform(subscribeRequest);
 	}
 

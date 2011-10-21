@@ -83,15 +83,15 @@ public final class ListAction extends AbstractMailAccountAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final String colString = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final String colString = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
         try {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final JSONArray ids = (JSONArray) request.getData();
+            final JSONArray ids = (JSONArray) requestData.getData();
             final int len = ids.length();
             final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
             final List<MailAccount> accounts = new ArrayList<MailAccount>(len);

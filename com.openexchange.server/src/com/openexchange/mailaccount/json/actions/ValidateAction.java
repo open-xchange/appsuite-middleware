@@ -100,8 +100,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final JSONObject jData = (JSONObject) request.getData();
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final JSONObject jData = (JSONObject) requestData.getData();
 
         try {
             if (!session.getUserConfiguration().isMultipleMailAccounts()) {
@@ -137,7 +137,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             // Check for tree parameter
             final boolean tree;
             {
-                final String tmp = request.getParameter("tree");
+                final String tmp = requestData.getParameter("tree");
                 tree = Boolean.parseBoolean(tmp);
             }
             // List for possible warnings

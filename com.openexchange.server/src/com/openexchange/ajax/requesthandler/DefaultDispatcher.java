@@ -101,14 +101,14 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final AJAXState state, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final AJAXState state, final ServerSession session) throws OXException {
         List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
         final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
         /*
          * Create customizers
          */
         for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
-            final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(request, session);
+            final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(requestData, session);
             if (customizer != null) {
                 todo.add(customizer);
             }
@@ -116,15 +116,15 @@ public class DefaultDispatcher implements Dispatcher {
         /*
          * Iterate customizers for AJAXRequestData
          */
-        AJAXRequestData modifiedRequest = request;
+        AJAXRequestData modifiedRequestData = requestData;
         while (!todo.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = todo.iterator();
             while (iterator.hasNext()) {
                 final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    final AJAXRequestData modified = customizer.incoming(modifiedRequest, session);
+                    final AJAXRequestData modified = customizer.incoming(modifiedRequestData, session);
                     if (modified != null) {
-                        modifiedRequest = modified;
+                        modifiedRequestData = modified;
                     }
                     outgoing.add(customizer);
                     iterator.remove();
@@ -136,26 +136,26 @@ public class DefaultDispatcher implements Dispatcher {
         /*
          * Look-up appropriate factory for request's module
          */
-        final AJAXActionServiceFactory factory = lookupFactory(modifiedRequest.getModule());
+        final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
         if (factory == null) {
-            throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequest.getModule());
+            throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
         }
         /*
          * Get associated action
          */
-        final AJAXActionService action = factory.createActionService(modifiedRequest.getAction());
+        final AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
         if (action == null) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(modifiedRequest.getAction());
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(modifiedRequestData.getAction());
         }
         /*
          * Is it possible to serve request by ETag?
          */
         {
-            final String eTag = modifiedRequest.getETag();
-            if (null != eTag && (action instanceof ETagAwareAJAXActionService) && ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequest, session)) {
+            final String eTag = modifiedRequestData.getETag();
+            if (null != eTag && (action instanceof ETagAwareAJAXActionService) && ((ETagAwareAJAXActionService) action).checkETag(eTag, modifiedRequestData, session)) {
                 final AJAXRequestResult etagResult = new AJAXRequestResult();
                 etagResult.setType(AJAXRequestResult.ResultType.ETAG);
-                final long newExpires = modifiedRequest.getExpires();
+                final long newExpires = modifiedRequestData.getExpires();
                 if (newExpires > 0) {
                     etagResult.setExpires(newExpires);
                 }
@@ -167,12 +167,12 @@ public class DefaultDispatcher implements Dispatcher {
          */
         final Action actionMetadata = getActionMetadata(action);
         if (actionMetadata == null) {
-            if (modifiedRequest.getFormat() == null) {
-                modifiedRequest.setFormat("apiResponse");
+            if (modifiedRequestData.getFormat() == null) {
+                modifiedRequestData.setFormat("apiResponse");
             }
         } else {
-            if (modifiedRequest.getFormat() == null) {
-                modifiedRequest.setFormat(actionMetadata.defaultFormat());
+            if (modifiedRequestData.getFormat() == null) {
+                modifiedRequestData.setFormat(actionMetadata.defaultFormat());
             }
         }
         /*
@@ -180,17 +180,17 @@ public class DefaultDispatcher implements Dispatcher {
          */
         if (factory instanceof AJAXStateHandler) {
             final AJAXStateHandler handler = (AJAXStateHandler) factory;
-            if (state.addInitializer(modifiedRequest.getModule(), handler)) {
+            if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
                 handler.initialize(state);
             }
         }
-        modifiedRequest.setState(state);
+        modifiedRequestData.setState(state);
         /*
          * Perform request
          */
         AJAXRequestResult result;
         try {
-            result = action.perform(modifiedRequest, session);
+            result = action.perform(modifiedRequestData, session);
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -209,7 +209,7 @@ public class DefaultDispatcher implements Dispatcher {
             while (iterator.hasNext()) {
                 final AJAXActionCustomizer customizer = iterator.next();
                 try {
-                    final AJAXRequestResult modified = customizer.outgoing(modifiedRequest, result, session);
+                    final AJAXRequestResult modified = customizer.outgoing(modifiedRequestData, result, session);
                     if (modified != null) {
                         result = modified;
                     }

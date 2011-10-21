@@ -85,18 +85,18 @@ public final class GetAction extends AbstractAttachmentAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             require(
-                request,
+                requestData,
                 AJAXServlet.PARAMETER_FOLDERID,
                 AJAXServlet.PARAMETER_ATTACHEDID,
                 AJAXServlet.PARAMETER_MODULE,
                 AJAXServlet.PARAMETER_ID);
-            final int folderId = requireNumber(request, AJAXServlet.PARAMETER_FOLDERID);
-            final int attachedId = requireNumber(request, AJAXServlet.PARAMETER_ATTACHEDID);
-            final int moduleId = requireNumber(request, AJAXServlet.PARAMETER_MODULE);
-            final int id = requireNumber(request, AJAXServlet.PARAMETER_ID);
+            final int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
+            final int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
+            final int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
+            final int id = requireNumber(requestData, AJAXServlet.PARAMETER_ID);
 
             return new AJAXRequestResult(get(folderId, attachedId, moduleId, id, session), "apiResponse");
         } catch (final RuntimeException e) {

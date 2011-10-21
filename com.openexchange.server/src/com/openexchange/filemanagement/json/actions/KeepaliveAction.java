@@ -76,8 +76,8 @@ public final class KeepaliveAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final String id = request.checkParameter(AJAXFile.PARAMETER_ID);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final String id = requestData.checkParameter(AJAXFile.PARAMETER_ID);
         final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
         management.getByID(id);
         return new AJAXRequestResult(JSONObject.NULL, "json");

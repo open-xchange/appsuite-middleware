@@ -89,8 +89,8 @@ public abstract class AbstractMessagingAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final MessagingRequestData req = new MessagingRequestData(request, session, registry, parser, cache);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final MessagingRequestData req = new MessagingRequestData(requestData, session, registry, parser, cache);
         try {
             final AJAXRequestResult result = doIt(req, session);
             return result;
