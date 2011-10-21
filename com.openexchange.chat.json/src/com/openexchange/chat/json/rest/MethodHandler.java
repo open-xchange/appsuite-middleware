@@ -51,71 +51,26 @@ package com.openexchange.chat.json.rest;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MethodHandlerImplementation}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * Handles requests for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
  */
-public final class DeleteMethodHandler extends AbstractMethodHandler {
+public interface MethodHandler {
 
     /**
-     * Initializes a new {@link DeleteMethodHandler}.
+     * Parses REST-like HTTP Servlet request to an appropriate {@link AJAXRequestData} instance.
+     * 
+     * @param req The HTTP Servlet request
+     * @param session The session
+     * @param servlet The dispatcher Servlet
+     * @return An appropriate {@link AJAXRequestData} instance
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
      */
-    public DeleteMethodHandler() {
-        super();
-    }
-
-    @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
-        if (isEmpty(pathInfo)) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        final String[] pathElements = SPLIT_PATH.split(pathInfo);
-        final int length = pathElements.length;
-        if (0 == length) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        if (1 == length) {
-            /*-
-             * "Delete/part specific conversation"
-             *  DELETE /conversation/11
-             */
-            final String element = pathElements[0];
-            retval.setAction("delete");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
-        } else if ("message".equals(pathElements[1])) {
-            if (2 == length) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create();
-            }
-            /*-
-             * "Delete specific message"
-             *  DELETE /conversation/11/message/1234
-             */
-            retval.putParameter("id", pathElements[0]);
-            final String element = pathElements[2];
-            retval.setAction("deleteMessages");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
-        } else {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
-        }
-    }
-
-    @Override
-    protected boolean applyBody() {
-        return false;
-    }
+    AJAXRequestData parseRequest(HttpServletRequest req, ServerSession session, DispatcherServlet servlet) throws IOException, OXException;
 
 }

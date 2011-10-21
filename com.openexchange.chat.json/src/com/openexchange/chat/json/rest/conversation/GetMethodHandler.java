@@ -47,11 +47,13 @@
  *
  */
 
-package com.openexchange.chat.json.rest;
+package com.openexchange.chat.json.rest.conversation;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
+import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.chat.json.rest.AbstractMethodHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -60,36 +62,77 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PostMethodHandler extends AbstractMethodHandler {
+public final class GetMethodHandler extends AbstractMethodHandler {
 
     /**
-     * Initializes a new {@link PostMethodHandler}.
+     * Initializes a new {@link GetMethodHandler}.
      */
-    public PostMethodHandler() {
+    public GetMethodHandler() {
         super();
     }
 
     @Override
+    protected String getModule() {
+        return "conversation";
+    }
+    
+    @Override
     protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {
-            retval.setAction("new");
+            retval.setAction("all");
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);
             final int length = pathElements.length;
             if (0 == length) {
-                retval.setAction("new");
+                /*-
+                 * "Get all conversations"
+                 *  GET /conversation
+                 */
+                retval.setAction("all");
             } else if (1 == length) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create();
+                /*-
+                 * "Get specific conversation"
+                 *  GET /conversation/11
+                 */
+                final String element = pathElements[0];
+                if (element.indexOf(',') < 0) {
+                    retval.setAction("get");
+                    retval.putParameter("id", element);
+                } else {
+                    retval.setAction("list");
+                    final JSONArray array = new JSONArray();
+                    for (final String id : SPLIT_CSV.split(element)) {
+                        array.put(id);
+                    }
+                    retval.setData(array);
+                }
             } else if ("message".equals(pathElements[1])) {
                 if (2 == length) {
-                    throw AjaxExceptionCodes.BAD_REQUEST.create();
+                    /*-
+                     * "Get all messages"
+                     *  GET /conversation/11/message?since=<long:timestamp>
+                     */
+                    retval.setAction("allMessages");
+                    retval.putParameter("id", pathElements[0]);
+                } else {
+                    /*-
+                     * "Get specific message"
+                     *  GET /conversation/11/message/1234
+                     */
+                    retval.putParameter("id", pathElements[0]);
+                    final String element = pathElements[2];
+                    if (element.indexOf(',') < 0) {
+                        retval.setAction("getMessage");
+                        retval.putParameter("messageId", element);
+                    } else {
+                        retval.setAction("listMessages");
+                        final JSONArray array = new JSONArray();
+                        for (final String id : SPLIT_CSV.split(element)) {
+                            array.put(id);
+                        }
+                        retval.setData(array);
+                    }
                 }
-                /*-
-                 * "Post new message for Conv. #11"
-                 *  POST /conversation/11/message
-                 */
-                retval.putParameter("id", pathElements[0]);
-                retval.setAction("newMessage");
             } else {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
             }
@@ -98,7 +141,7 @@ public final class PostMethodHandler extends AbstractMethodHandler {
 
     @Override
     protected boolean applyBody() {
-        return true;
+        return false;
     }
 
 }

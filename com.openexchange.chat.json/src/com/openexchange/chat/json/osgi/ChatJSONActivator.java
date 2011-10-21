@@ -58,7 +58,7 @@ import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.chat.json.account.ChatAccountActionFactory;
 import com.openexchange.chat.json.conversation.ChatConversationActionFactory;
-import com.openexchange.chat.json.rest.RestServlet;
+import com.openexchange.chat.json.roster.ChatRosterActionFactory;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
 
 
@@ -86,22 +86,41 @@ public final class ChatJSONActivator extends AJAXModuleActivator {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatJSONActivator.class));
         registerModule(new ChatAccountActionFactory(this), "chat/account");
         registerModule(new ChatConversationActionFactory(this), "conversation");
+        registerModule(new ChatRosterActionFactory(this), "roster");
         track(HttpService.class, new SimpleRegistryListener<HttpService>() {
 
             @Override
             public void added(final ServiceReference<HttpService> ref, final HttpService service) {
                 try {
-                    service.registerServlet("/conversation", new RestServlet(), null, null);
+                    service.registerServlet("/conversation", new com.openexchange.chat.json.rest.conversation.RestServlet(), null, null);
                 } catch (final ServletException e) {
-                    log.error("Servlet registration failed: " + RestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.conversation.RestServlet.class.getName(), e);
                 } catch (final NamespaceException e) {
-                    log.error("Servlet registration failed: " + RestServlet.class.getName(), e);
+                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.conversation.RestServlet.class.getName(), e);
                 }
             }
 
             @Override
             public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
                 service.unregister("/conversation");
+            }
+        });
+        track(HttpService.class, new SimpleRegistryListener<HttpService>() {
+
+            @Override
+            public void added(final ServiceReference<HttpService> ref, final HttpService service) {
+                try {
+                    service.registerServlet("/roster", new com.openexchange.chat.json.rest.roster.RestServlet(), null, null);
+                } catch (final ServletException e) {
+                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.roster.RestServlet.class.getName(), e);
+                } catch (final NamespaceException e) {
+                    log.error("Servlet registration failed: " + com.openexchange.chat.json.rest.roster.RestServlet.class.getName(), e);
+                }
+            }
+
+            @Override
+            public void removed(final ServiceReference<HttpService> ref, final HttpService service) {
+                service.unregister("/roster");
             }
         });
         openTrackers();

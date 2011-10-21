@@ -47,71 +47,64 @@
  *
  */
 
-package com.openexchange.chat.json.conversation.action;
+package com.openexchange.chat.json.rest.conversation;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chat.ChatAccess;
-import com.openexchange.chat.ChatAccount;
-import com.openexchange.chat.ChatService;
-import com.openexchange.chat.ChatServiceRegistry;
-import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
-import com.openexchange.chat.json.conversation.ConversationID;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.chat.json.rest.Method;
+import com.openexchange.chat.json.rest.MethodHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link AllAction}
- *
+ * {@link RestServlet}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction extends AbstractChatConversationAction {
+public final class RestServlet extends DispatcherServlet {
+
+    private static final long serialVersionUID = 8536451759619846580L;
+
+    private static final Map<Method, MethodHandler> HANDLER_MAP;
+
+    static {
+        final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
+        m.put(Method.GET, new GetMethodHandler());
+        m.put(Method.PUT, new PutMethodHandler());
+        m.put(Method.DELETE, new DeleteMethodHandler());
+        m.put(Method.POST, new PostMethodHandler());
+        HANDLER_MAP = Collections.unmodifiableMap(m);
+    }
 
     /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services
+     * Initializes a new {@link RestServlet}.
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    public RestServlet() {
+        super();
     }
 
     @Override
-    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
-        final ServerSession session = req.getSession();
-        /*
-         * Get services
-         */
-        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
-        final JSONArray jsonArray = new JSONArray();
-        final ConversationID conversationId = new ConversationID();
-        for (final ChatService chatService : registry.getAllServices(session.getUserId(), session.getContextId())) {
-            conversationId.reset();
-            conversationId.setServiceId(chatService.getId());
-            for (final ChatAccount chatAccount : chatService.getAccountManager().getAccounts(session)) {
-                conversationId.setAccountId(chatAccount.getId());
-                ChatAccess access = null;
-                try {
-                    access = chatService.access(chatAccount.getId(), session);
-                    access.login();
-                    for (final String chatId : access.getChats()) {
-                        conversationId.setChatId(chatId);
-                        jsonArray.put(conversationId.toString());
-                    }
-                } finally {
-                    if (null != access) {
-                        access.disconnect();
-                    }
-                }
-            }
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
+        if (isFileUpload) {
+            return super.parseRequest(req, preferStream, isFileUpload, session);
         }
         /*
-         * Return appropriate result
+         * Parse dependent on HTTP method and/or servlet path
          */
-        return new AJAXRequestResult(jsonArray, "json");
+        final Method method = Method.valueOf(req);
+        if (null == method) {
+            return super.parseRequest(req, preferStream, isFileUpload, session);
+        }
+        final MethodHandler methodHandler = HANDLER_MAP.get(method);
+        if (null == methodHandler) {
+            return super.parseRequest(req, preferStream, isFileUpload, session);
+        }
+        return methodHandler.parseRequest(req, session, this);
     }
 
 }

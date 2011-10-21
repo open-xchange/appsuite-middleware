@@ -47,71 +47,79 @@
  *
  */
 
-package com.openexchange.chat.json.conversation.action;
+package com.openexchange.chat.json.rest.conversation;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.chat.ChatAccess;
-import com.openexchange.chat.ChatAccount;
-import com.openexchange.chat.ChatService;
-import com.openexchange.chat.ChatServiceRegistry;
-import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
-import com.openexchange.chat.json.conversation.ConversationID;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.chat.json.rest.AbstractMethodHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link AllAction}
+ * {@link MethodHandlerImplementation}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction extends AbstractChatConversationAction {
+public final class PutMethodHandler extends AbstractMethodHandler {
 
     /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services
+     * Initializes a new {@link PutMethodHandler}.
      */
-    public AllAction(final ServiceLookup services) {
-        super(services);
+    public PutMethodHandler() {
+        super();
     }
 
     @Override
-    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
-        final ServerSession session = req.getSession();
-        /*
-         * Get services
-         */
-        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
-        final JSONArray jsonArray = new JSONArray();
-        final ConversationID conversationId = new ConversationID();
-        for (final ChatService chatService : registry.getAllServices(session.getUserId(), session.getContextId())) {
-            conversationId.reset();
-            conversationId.setServiceId(chatService.getId());
-            for (final ChatAccount chatAccount : chatService.getAccountManager().getAccounts(session)) {
-                conversationId.setAccountId(chatAccount.getId());
-                ChatAccess access = null;
-                try {
-                    access = chatService.access(chatAccount.getId(), session);
-                    access.login();
-                    for (final String chatId : access.getChats()) {
-                        conversationId.setChatId(chatId);
-                        jsonArray.put(conversationId.toString());
-                    }
-                } finally {
-                    if (null != access) {
-                        access.disconnect();
-                    }
+    protected String getModule() {
+        return "conversation";
+    }
+
+    @Override
+    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+        if (isEmpty(pathInfo)) {
+            final String action = req.getParameter("action");
+            if (null == action) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
+            }
+            retval.setAction(action);
+        } else {
+            final String[] pathElements = SPLIT_PATH.split(pathInfo);
+            final int length = pathElements.length;
+            if (0 == length) {
+                final String action = req.getParameter("action");
+                if (null == action) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
                 }
+                retval.setAction(action);
+            } else if (1 == length) {
+                /*-
+                 * "Update conv."
+                 *  PUT /conversation/11
+                 */
+                final String element = pathElements[0];
+                retval.setAction("update");
+                retval.putParameter("id", element);
+            } else if ("message".equals(pathElements[1])) {
+                if (2 == length) {
+                    throw AjaxExceptionCodes.BAD_REQUEST.create();
+                }
+                /*-
+                 * "Update message"
+                 *  PUT /conversation/11/message/1234
+                 */
+                retval.putParameter("id", pathElements[0]);
+                retval.setAction("updateMessage");
+                retval.putParameter("messageId", pathElements[2]);
+            } else {
+                throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
             }
         }
-        /*
-         * Return appropriate result
-         */
-        return new AJAXRequestResult(jsonArray, "json");
+    }
+
+    @Override
+    protected boolean applyBody() {
+        return true;
     }
 
 }

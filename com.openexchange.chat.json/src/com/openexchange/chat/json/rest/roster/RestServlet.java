@@ -47,17 +47,17 @@
  *
  */
 
-package com.openexchange.chat.json.rest;
+package com.openexchange.chat.json.rest.roster;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.chat.json.rest.Method;
+import com.openexchange.chat.json.rest.MethodHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
@@ -68,60 +68,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class RestServlet extends DispatcherServlet {
 
-    private static final long serialVersionUID = 8536451759619846580L;
-
-    private static enum Method {
-        GET, PUT, POST, DELETE;
-
-        private static final Map<String, Method> MAP;
-
-        static {
-            final Method[] values = Method.values();
-            final Map<String, Method> m = new HashMap<String, Method>(values.length);
-            for (final Method method : values) {
-                m.put(method.name(), method);
-            }
-            MAP = Collections.unmodifiableMap(m);
-        }
-
-        /**
-         * Gets the method appropriate for specified HTTP Servlet request.
-         * 
-         * @param req The HTTP Servlet request
-         * @return The appropriate method or <code>null</code>
-         */
-        public static Method valueOf(final HttpServletRequest req) {
-            return MAP.get(req.getMethod().toUpperCase(Locale.US));
-        }
-    }
-
-    /**
-     * Handles requests for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
-     */
-    public static interface MethodHandler {
-
-        /**
-         * Parses REST-like HTTP Servlet request to an appropriate {@link AJAXRequestData} instance.
-         * 
-         * @param req The HTTP Servlet request
-         * @param session The session
-         * @param servlet The dispatcher Servlet
-         * @return An appropriate {@link AJAXRequestData} instance
-         * @throws IOException If an I/O error occurs
-         * @throws OXException If an OX error occurs
-         */
-        AJAXRequestData parseRequest(HttpServletRequest req, ServerSession session, RestServlet servlet) throws IOException, OXException;
-
-    }
+    private static final long serialVersionUID = 8386516801873375179L;
 
     private static final Map<Method, MethodHandler> HANDLER_MAP;
 
     static {
-        final EnumMap<Method, MethodHandler> m = new EnumMap<RestServlet.Method, RestServlet.MethodHandler>(Method.class);
+        final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
         m.put(Method.GET, new GetMethodHandler());
-        m.put(Method.PUT, new PutMethodHandler());
-        m.put(Method.DELETE, new DeleteMethodHandler());
-        m.put(Method.POST, new PostMethodHandler());
         HANDLER_MAP = Collections.unmodifiableMap(m);
     }
 

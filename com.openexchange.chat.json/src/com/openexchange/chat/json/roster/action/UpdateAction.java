@@ -47,71 +47,73 @@
  *
  */
 
-package com.openexchange.chat.json.conversation.action;
+package com.openexchange.chat.json.roster.action;
 
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.ChatAccess;
-import com.openexchange.chat.ChatAccount;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
-import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
-import com.openexchange.chat.json.conversation.ConversationID;
+import com.openexchange.chat.Presence;
+import com.openexchange.chat.json.roster.ChatRosterAJAXRequest;
+import com.openexchange.chat.json.roster.Parser;
+import com.openexchange.chat.json.roster.RosterID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link AllAction}
- *
+ * {@link UpdateAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllAction extends AbstractChatConversationAction {
+public final class UpdateAction extends AbstractChatRosterAction {
 
     /**
-     * Initializes a new {@link AllAction}.
-     *
-     * @param services
+     * Initializes a new {@link UpdateAction}.
      */
-    public AllAction(final ServiceLookup services) {
+    public UpdateAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
+    protected AJAXRequestResult perform(final ChatRosterAJAXRequest req) throws OXException, JSONException {
         final ServerSession session = req.getSession();
         /*
-         * Get services
+         * Get parameters
          */
-        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
-        final JSONArray jsonArray = new JSONArray();
-        final ConversationID conversationId = new ConversationID();
-        for (final ChatService chatService : registry.getAllServices(session.getUserId(), session.getContextId())) {
-            conversationId.reset();
-            conversationId.setServiceId(chatService.getId());
-            for (final ChatAccount chatAccount : chatService.getAccountManager().getAccounts(session)) {
-                conversationId.setAccountId(chatAccount.getId());
-                ChatAccess access = null;
-                try {
-                    access = chatService.access(chatAccount.getId(), session);
-                    access.login();
-                    for (final String chatId : access.getChats()) {
-                        conversationId.setChatId(chatId);
-                        jsonArray.put(conversationId.toString());
-                    }
-                } finally {
-                    if (null != access) {
-                        access.disconnect();
-                    }
-                }
+        final RosterID rosterId;
+        {
+            final String id = req.getParameter("id");
+            if (null == id) {
+                rosterId = new RosterID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT);
+            } else {
+                rosterId = RosterID.valueOf(id);
             }
         }
+        final String user = req.checkParameter("user");
+        final JSONObject jsonPresence = req.getData();
         /*
-         * Return appropriate result
+         * Get service
          */
-        return new AJAXRequestResult(jsonArray, "json");
+        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+        final ChatService chatService = registry.getChatService(rosterId.getServiceId(), session.getUserId(), session.getContextId());
+        ChatAccess access = null;
+        try {
+            access = chatService.access(rosterId.getAccountId(), session);
+            access.login();
+            final Presence presence = Parser.parsePresence(jsonPresence, user);
+            access.sendPresence(presence);
+            /*
+             * Return appropriate result
+             */
+            return getJSONNullResult();
+        } finally {
+            if (null != access) {
+                access.disconnect();
+            }
+        }
     }
 
 }

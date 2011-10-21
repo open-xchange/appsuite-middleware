@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.chat.json.rest;
+package com.openexchange.chat.json.rest.roster;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.chat.json.rest.AbstractMethodHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -69,6 +70,11 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     public GetMethodHandler() {
         super();
     }
+
+    @Override
+    protected String getModule() {
+        return "roster";
+    }
     
     // GET /roster (all) GET /roster/[identifier/email-adresse-denke-ich] ... UPDATE /roster/depp@horst.de etc.
 
@@ -81,19 +87,19 @@ public final class GetMethodHandler extends AbstractMethodHandler {
             final int length = pathElements.length;
             if (0 == length) {
                 /*-
-                 * "Get all conversations"
-                 *  GET /conversation
+                 * "Get all roster's presences"
+                 *  GET /roster
                  */
                 retval.setAction("all");
             } else if (1 == length) {
                 /*-
-                 * "Get specific conversation"
-                 *  GET /conversation/11
+                 * "Get specific presence"
+                 *  GET /roster/11
                  */
                 final String element = pathElements[0];
                 if (element.indexOf(',') < 0) {
                     retval.setAction("get");
-                    retval.putParameter("id", element);
+                    retval.putParameter("user", element);
                 } else {
                     retval.setAction("list");
                     final JSONArray array = new JSONArray();
@@ -101,33 +107,6 @@ public final class GetMethodHandler extends AbstractMethodHandler {
                         array.put(id);
                     }
                     retval.setData(array);
-                }
-            } else if ("message".equals(pathElements[1])) {
-                if (2 == length) {
-                    /*-
-                     * "Get all messages"
-                     *  GET /conversation/11/message?since=<long:timestamp>
-                     */
-                    retval.setAction("allMessages");
-                    retval.putParameter("id", pathElements[0]);
-                } else {
-                    /*-
-                     * "Get specific message"
-                     *  GET /conversation/11/message/1234
-                     */
-                    retval.putParameter("id", pathElements[0]);
-                    final String element = pathElements[2];
-                    if (element.indexOf(',') < 0) {
-                        retval.setAction("getMessage");
-                        retval.putParameter("messageId", element);
-                    } else {
-                        retval.setAction("listMessages");
-                        final JSONArray array = new JSONArray();
-                        for (final String id : SPLIT_CSV.split(element)) {
-                            array.put(id);
-                        }
-                        retval.setData(array);
-                    }
                 }
             } else {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
