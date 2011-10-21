@@ -69,6 +69,8 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     public GetMethodHandler() {
         super();
     }
+    
+    // GET /roster (all) GET /roster/[identifier/email-adresse-denke-ich] ... UPDATE /roster/depp@horst.de etc.
 
     @Override
     protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
