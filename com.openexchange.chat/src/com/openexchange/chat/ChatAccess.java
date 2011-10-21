@@ -124,11 +124,19 @@ public interface ChatAccess {
     /**
      * Opens described chat with specified members.
      * 
-     * @param chatId The chat identifier or <code>null</code> to generate a unique one; must not be Chat#DEFAULT_CHAT
+     * @param chatId The chat identifier or <code>null</code> to generate a unique one
      * @param members The members with which to open the chat
      * @return The opened chat
      * @throws OXException If chat cannot be opened
      */
     Chat openChat(String chatId, MessageListener listener, ChatUser... members) throws OXException;
+
+    /**
+     * Updates the denoted chat by {@link ChatDescription}'s arguments.
+     * 
+     * @param chatDescription The chat description
+     * @throws OXException If update operation fails
+     */
+    void updateChat(ChatDescription chatDescription) throws OXException;
 
 }

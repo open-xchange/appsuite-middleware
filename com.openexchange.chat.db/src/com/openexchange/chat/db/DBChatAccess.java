@@ -64,6 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatDescription;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.MessageListener;
@@ -350,6 +351,92 @@ public final class DBChatAccess implements ChatAccess {
             throw ChatExceptionCodes.CHAT_NOT_FOUND.create(chatId);
         }
         return dbChat;
+    }
+
+    @Override
+    public void updateChat(final ChatDescription chatDescription) throws OXException {
+        if (null == chatDescription || !chatDescription.hasAnyAttribute()) {
+            return;
+        }
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            updateChat(chatDescription, con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private void updateChat(final ChatDescription chatDescription, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        int pos;
+        try {
+            final int chatId = Integer.parseInt(chatDescription.getChatId());
+            /*
+             * Update subject
+             */
+            {
+                final String subject = chatDescription.getSubject();
+                if (null != subject) {
+                    stmt = con.prepareStatement("UPDATE chat SET subject = ? WHERE cid = ? AND chatId = ?");
+                    pos = 1;
+                    stmt.setString(pos++, subject);
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos, chatId);
+                    stmt.executeUpdate();
+                }
+            }
+            /*
+             * Insert new members
+             */
+            {
+                final List<String> newMembers = chatDescription.getNewMembers();
+                if (null != newMembers && !newMembers.isEmpty()) {
+                    closeSQLStuff(stmt);
+                    stmt = con.prepareStatement("INSERT INTO chatMember (cid,chatId,opMode,user) VALUES (?,?,?,?)");
+                    pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, chatId);
+                    stmt.setInt(pos++, 0);
+                    for (final String user : newMembers) {
+                        stmt.setInt(pos, Integer.parseInt(user));
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+            /*
+             * Delete members
+             */
+            {
+                final List<String> deleteMembers = chatDescription.getDeletedMembers();
+                if (null != deleteMembers && !deleteMembers.isEmpty()) {
+                    closeSQLStuff(stmt);
+                    stmt = con.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND chatId = ? AND user = ?");
+                    pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, chatId);
+                    for (final String user : deleteMembers) {
+                        stmt.setInt(pos, Integer.parseInt(user));
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 
     @Override

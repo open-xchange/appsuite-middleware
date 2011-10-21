@@ -47,55 +47,115 @@
  *
  */
 
-package com.openexchange.chat.json.conversation;
+package com.openexchange.chat;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.chat.ChatDescription;
-
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * {@link Parser}
- *
+ * {@link ChatDescription} - Provides changeable attributes of a {@link Chat chat}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Parser {
+public class ChatDescription {
+
+    private final String chatId;
+
+    private final List<String> newMembers;
+
+    private final List<String> delMembers;
+
+    private String subject;
 
     /**
-     * Initializes a new {@link Parser}.
+     * Initializes a new {@link ChatDescription}.
      */
-    private Parser() {
+    public ChatDescription(final String chatId) {
         super();
+        this.chatId = chatId;
+        newMembers = new ArrayList<String>(8);
+        delMembers = new ArrayList<String>(8);
     }
 
     /**
-     * Parses JSON to a chat instance.
+     * Checks if this chat description provides any changed attribute.
      * 
-     * @param jsonChat The JSON chat representation
-     * @return The parsed chat instance
-     * @throws JSONException If a JSON error occurs
+     * @return <code>true</code> if this chat description provides any changed attribute; otherwise <code>false</code>
      */
-    public static ChatDescription parseJSONChatDescription(final JSONObject jsonChat) throws JSONException {
-        final ChatDescription chatDesc = new ChatDescription(jsonChat.getString("id"));
-        if (jsonChat.hasAndNotNull("subject")) {
-            chatDesc.setSubject(jsonChat.getString("subject"));
+    public boolean hasAnyAttribute() {
+        if (null != subject) {
+            return true;
         }
-        if (jsonChat.hasAndNotNull("newMembers")) {
-            final JSONArray jsonNewMembers = jsonChat.getJSONArray("newMembers");
-            final int length = jsonNewMembers.length();
-            for (int i = 0; i < length; i++) {
-                chatDesc.addNewMember(jsonNewMembers.getString(i));
-            }
+        if (!newMembers.isEmpty()) {
+            return true;
         }
-        if (jsonChat.hasAndNotNull("deleteMembers")) {
-            final JSONArray jsonDeleteMembers = jsonChat.getJSONArray("deleteMembers");
-            final int length = jsonDeleteMembers.length();
-            for (int i = 0; i < length; i++) {
-                chatDesc.addDeleteMember(jsonDeleteMembers.getString(i));
-            }
+        if (!delMembers.isEmpty()) {
+            return true;
         }
-        return chatDesc;
+        return false;
+    }
+
+    /**
+     * Gets the chat identifier
+     * 
+     * @return The chat identifier
+     */
+    public String getChatId() {
+        return chatId;
+    }
+
+    /**
+     * Adds the identifier of the user who shall be added to denoted chat.
+     * 
+     * @param user The user identifier
+     */
+    public void addNewMember(final String user) {
+        newMembers.add(user);
+    }
+
+    /**
+     * Gets the identifiers of the users who shall be added to denoted chat.
+     * 
+     * @return The user identifiers
+     */
+    public List<String> getNewMembers() {
+        return newMembers;
+    }
+
+    /**
+     * Adds the identifier of the user who shall be deleted from denoted chat.
+     * 
+     * @param user The user identifier
+     */
+    public void addDeleteMember(final String user) {
+        delMembers.add(user);
+    }
+
+    /**
+     * Gets the identifiers of the users who shall be deleted from denoted chat.
+     * 
+     * @return The user identifiers
+     */
+    public List<String> getDeletedMembers() {
+        return delMembers;
+    }
+
+    /**
+     * Gets the subject
+     * 
+     * @return The subject
+     */
+    public String getSubject() {
+        return subject;
+    }
+
+    /**
+     * Sets the subject
+     * 
+     * @param subject The subject to set
+     */
+    public void setSubject(final String subject) {
+        this.subject = subject;
     }
 
 }

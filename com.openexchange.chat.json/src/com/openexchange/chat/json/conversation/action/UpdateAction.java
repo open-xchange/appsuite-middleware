@@ -57,7 +57,6 @@ import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.ParsedChat;
 import com.openexchange.chat.json.conversation.Parser;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -72,7 +71,7 @@ public final class UpdateAction extends AbstractChatConversationAction {
 
     /**
      * Initializes a new {@link UpdateAction}.
-     * 
+     *
      * @param services
      */
     public UpdateAction(final ServiceLookup services) {
@@ -94,18 +93,9 @@ public final class UpdateAction extends AbstractChatConversationAction {
             access = chatService.access(conversationID.getAccountId(), session);
             access.login();
             /*
-             * Parse chat
+             * Parse chat description
              */
-            final ParsedChat parsedChat = Parser.parseJSONChat(jsonChatObject);
-            
-            
-            
-            
-
-            
-            
-
-
+            access.updateChat(Parser.parseJSONChatDescription(jsonChatObject));
             /*
              * Return appropriate result
              */

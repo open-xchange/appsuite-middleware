@@ -68,19 +68,6 @@ public final class PostMethodHandler extends AbstractMethodHandler {
     public PostMethodHandler() {
         super();
     }
-    
-    /*-
-     * Handle:
-     * 
-     * "Update conv."
-     *  PUT /conversation/11
-     *   
-     * "Search for stuff"
-     *  PUT /conversation?action=search
-     * 
-     * "Update message"
-     *  PUT /conversation/11/message/1234
-     */
 
     @Override
     protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {

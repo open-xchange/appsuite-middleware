@@ -17,7 +17,8 @@ CREATE TABLE chatMember (
  chatId INT4 unsigned NOT NULL,
  opMode INT4 unsigned NOT NULL,
  PRIMARY KEY (cid, user, chatId),
- INDEX `user` (cid, user)
+ INDEX `user` (cid, user),
+ INDEX `chat` (cid, chatId)
  -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
