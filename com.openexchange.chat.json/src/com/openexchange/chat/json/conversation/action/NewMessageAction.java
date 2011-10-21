@@ -47,51 +47,72 @@
  *
  */
 
-package com.openexchange.chat.json.conversation;
+package com.openexchange.chat.json.conversation.action;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.chat.json.conversation.action.AbstractChatConversationAction;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.Chat;
+import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatService;
+import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.Message;
+import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
+import com.openexchange.chat.json.conversation.ConversationID;
+import com.openexchange.chat.json.conversation.Parser;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link ChatConversationActionFactory}
+ * {@link NewMessageAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ChatConversationActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractChatConversationAction> actions;
+public final class NewMessageAction extends AbstractChatConversationAction {
 
     /**
-     * Initializes a new {@link ChatConversationActionFactory}.
+     * Initializes a new {@link NewMessageAction}.
      *
-     * @param services The service look-up
+     * @param services
      */
-    public ChatConversationActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractChatConversationAction>(16);
-        actions.put("all", new com.openexchange.chat.json.conversation.action.AllAction(services));
-        actions.put("delete", new com.openexchange.chat.json.conversation.action.DeleteAction(services));
-        actions.put("get", new com.openexchange.chat.json.conversation.action.GetAction(services));
-        actions.put("list", new com.openexchange.chat.json.conversation.action.ListAction(services));
-        actions.put("update", new com.openexchange.chat.json.conversation.action.UpdateAction(services));
-        actions.put("new", new com.openexchange.chat.json.conversation.action.NewAction(services));
-
-        actions.put("allMessages", new com.openexchange.chat.json.conversation.action.AllMessagesAction(services));
-        actions.put("listMessages", new com.openexchange.chat.json.conversation.action.ListMessagesAction(services));
-        actions.put("getMessage", new com.openexchange.chat.json.conversation.action.GetMessageAction(services));
-        actions.put("deleteMessages", new com.openexchange.chat.json.conversation.action.DeleteMessagesAction(services));
-        actions.put("newMessage", new com.openexchange.chat.json.conversation.action.NewMessageAction(services));
-        
+    public NewMessageAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
+        final ServerSession session = req.getSession();
+        final JSONObject jsonMessage = req.getData();
+        /*
+         * Get service
+         */
+        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+        final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
+        ChatAccess access = null;
+        try {
+            access = chatService.access(conversationID.getAccountId(), session);
+            access.login();
+            /*
+             * Get chat
+             */
+            final Chat chat = access.getChat(conversationID.getChatId());
+            /*
+             * Parse message
+             */
+            final Message msg = Parser.parseMessage(jsonMessage);
+            chat.post(msg);
+            /*
+             * Return appropriate result
+             */
+            return getJSONNullResult();
+        } finally {
+            if (null != access) {
+                access.disconnect();
+            }
+        }
     }
 
 }

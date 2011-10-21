@@ -53,6 +53,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chat.ChatDescription;
+import com.openexchange.chat.Message;
+import com.openexchange.chat.util.ChatUserImpl;
+import com.openexchange.chat.util.MessageImpl;
 
 
 /**
@@ -67,6 +70,30 @@ public final class Parser {
      */
     private Parser() {
         super();
+    }
+
+    /**
+     * Parses JSON to a message instance.
+     * 
+     * @param jsonMessage The JSON message
+     * @return The parsed message
+     * @throws JSONException If parsing fails
+     */
+    public static Message parseMessage(final JSONObject jsonMessage) throws JSONException {
+        final MessageImpl message = new MessageImpl();
+        if (jsonMessage.hasAndNotNull("id")) {
+            message.setPacketId(jsonMessage.getString("id"));
+        }
+        if (jsonMessage.hasAndNotNull("from")) {
+            message.setFrom(new ChatUserImpl(jsonMessage.getString("from"), null));
+        }
+        if (jsonMessage.hasAndNotNull("subject")) {
+            message.setSubject(jsonMessage.getString("subject"));
+        }
+        if (jsonMessage.hasAndNotNull("text")) {
+            message.setText(jsonMessage.getString("text"));
+        }
+        return message;
     }
 
     /**
