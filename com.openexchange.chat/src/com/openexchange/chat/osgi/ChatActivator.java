@@ -65,7 +65,7 @@ public class ChatActivator implements BundleActivator {
 
     private OSGiChatServiceRegistry registry;
     
-    private ServiceRegistration<ChatServiceRegistry> registration;
+    private ServiceRegistration<ChatServiceRegistry> serviceRegistration;
     
     /**
      * Initializes a new {@link ChatActivator}.
@@ -81,7 +81,7 @@ public class ChatActivator implements BundleActivator {
 	    try {
 	        registry = new OSGiChatServiceRegistry();
 	        registry.start(context);
-            registration = context.registerService(ChatServiceRegistry.class, registry, null);
+            serviceRegistration = context.registerService(ChatServiceRegistry.class, registry, null);
         } catch (final Exception e) {
             log.error("Starting bundle failed: com.openexchange.chat");
         }
@@ -92,9 +92,9 @@ public class ChatActivator implements BundleActivator {
 	    final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(ChatActivator.class));
         log.info("Stopping bundle: com.openexchange.chat");
         try {
-            if (null != registration) {
-                registration.unregister();
-                registration = null;
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                serviceRegistration = null;
             }
             if (null != registry) {
                 registry.stop();
