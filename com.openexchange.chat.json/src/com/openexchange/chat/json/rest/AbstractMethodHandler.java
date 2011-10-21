@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AbstractMethodHandler}
+ * {@link AbstractMethodHandler} - The abstract method handler.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

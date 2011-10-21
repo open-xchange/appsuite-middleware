@@ -50,59 +50,55 @@
 package com.openexchange.chat.json.rest.roster;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.chat.json.rest.Method;
-import com.openexchange.chat.json.rest.MethodHandler;
+import com.openexchange.chat.json.rest.AbstractMethodHandler;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link RestServlet}
- * 
+ * {@link MethodHandlerImplementation}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RestServlet extends DispatcherServlet {
-
-    private static final long serialVersionUID = 8386516801873375179L;
-
-    private static final Map<Method, MethodHandler> HANDLER_MAP;
-
-    static {
-        final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
-        m.put(Method.GET, new GetMethodHandler());
-        m.put(Method.PUT, new PutMethodHandler());
-        HANDLER_MAP = Collections.unmodifiableMap(m);
-    }
+public final class PutMethodHandler extends AbstractMethodHandler {
 
     /**
-     * Initializes a new {@link RestServlet}.
+     * Initializes a new {@link PutMethodHandler}.
      */
-    public RestServlet() {
+    public PutMethodHandler() {
         super();
     }
 
     @Override
-    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
-        if (isFileUpload) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
+    protected String getModule() {
+        return "roster";
+    }
+    
+    @Override
+    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
+        if (isEmpty(pathInfo)) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
-        /*
-         * Parse dependent on HTTP method and/or servlet path
-         */
-        final Method method = Method.valueOf(req);
-        if (null == method) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
+        final String[] pathElements = SPLIT_PATH.split(pathInfo);
+        final int length = pathElements.length;
+        if (0 == length) {
+            throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
-        final MethodHandler methodHandler = HANDLER_MAP.get(method);
-        if (null == methodHandler) {
-            return super.parseRequest(req, preferStream, isFileUpload, session);
+        if (1 == length) {
+            /*-
+             *  PUT /roster/11
+             */
+            retval.setAction("update");
+            retval.putParameter("user", pathElements[0]);
+        } else {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
         }
-        return methodHandler.parseRequest(req, session, this);
+    }
+
+    @Override
+    protected boolean applyBody() {
+        return true;
     }
 
 }

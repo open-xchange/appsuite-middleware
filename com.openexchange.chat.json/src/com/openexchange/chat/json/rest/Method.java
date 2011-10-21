@@ -57,6 +57,8 @@ import javax.servlet.http.HttpServletRequest;
 
 /**
  * An enumeration for HTTP methods.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public enum Method {
     GET, PUT, POST, DELETE;

@@ -57,7 +57,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * Handles requests for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
+ * Handles requests in a REST-like manner for a certain HTTP method; like <code>GET</code>, <code>PUT</code>, ...
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MethodHandler {
 
