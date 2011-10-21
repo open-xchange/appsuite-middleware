@@ -47,46 +47,101 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.conversation;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.chat.json.conversation.ConversationID;
+import org.json.JSONObject;
 
 /**
- * {@link AllChatConversationResponse}
+ * {@link JSONChatUser}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationResponse extends AbstractAJAXResponse {
+public final class JSONChatUser {
 
     /**
-     * Initializes a new {@link AllChatConversationResponse}.
+     * Parses given JSON to a {@link JSONChatUser}
      * 
-     * @param response
+     * @param jsonPresence The JSON chat user data
+     * @return The parsed {@link JSONChatUser}
+     * @throws JSONException If a JSON error occurs
      */
-    public AllChatConversationResponse(final Response response) {
-        super(response);
+    public static JSONChatUser valueOf(final JSONObject jsonChatUser) throws JSONException {
+        final JSONChatUser ret = new JSONChatUser();
+        ret.setId(jsonChatUser.getString("id"));
+        ret.setName(jsonChatUser.getString("name"));
+        final JSONObject optJsonPresence = jsonChatUser.optJSONObject("presence");
+        if (null != optJsonPresence) {
+            ret.setPresence(JSONPresence.valueOf(optJsonPresence));
+        }
+        return ret;
+    }
+
+    private String id;
+
+    private String name;
+
+    private JSONPresence presence;
+
+    /**
+     * Initializes a new {@link JSONChatUser}.
+     */
+    public JSONChatUser() {
+        super();
     }
 
     /**
-     * Gets the identifiers of queried conversation streams.
+     * Gets the id
      * 
-     * @return The identifiers
-     * @throws JSONException If parsing JSON fails
+     * @return The id
      */
-    public List<ConversationID> getConversationIds() throws JSONException {
-        final JSONArray ids = (JSONArray) getData();
-        final int len = ids.length();
-        final List<ConversationID> list = new ArrayList<ConversationID>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
-        }
-        return list;
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the name
+     * 
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name
+     * 
+     * @param name The name to set
+     */
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the presence
+     * 
+     * @return The presence
+     */
+    public JSONPresence getPresence() {
+        return presence;
+    }
+
+    /**
+     * Sets the presence
+     * 
+     * @param presence The presence to set
+     */
+    public void setPresence(final JSONPresence presence) {
+        this.presence = presence;
     }
 
 }

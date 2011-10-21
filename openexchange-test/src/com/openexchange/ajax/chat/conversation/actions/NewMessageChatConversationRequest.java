@@ -49,44 +49,87 @@
 
 package com.openexchange.ajax.chat.conversation.actions;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ConversationID;
 
+
 /**
- * {@link AllChatConversationResponse}
- * 
+ * {@link NewMessageChatConversationRequest}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationResponse extends AbstractAJAXResponse {
+public final class NewMessageChatConversationRequest extends AbstractChatConversationRequest<NewMessageChatConversationResponse> {
+
+    private Message message;
+
+    private ConversationID conversationId;
 
     /**
-     * Initializes a new {@link AllChatConversationResponse}.
-     * 
-     * @param response
+     * Initializes a new {@link NewMessageChatConversationRequest}.
      */
-    public AllChatConversationResponse(final Response response) {
-        super(response);
+    public NewMessageChatConversationRequest() {
+        super();
+        setFailOnError(true);
     }
 
     /**
-     * Gets the identifiers of queried conversation streams.
-     * 
-     * @return The identifiers
-     * @throws JSONException If parsing JSON fails
+     * Sets the conversationId
+     *
+     * @param conversationId The conversationId to set
      */
-    public List<ConversationID> getConversationIds() throws JSONException {
-        final JSONArray ids = (JSONArray) getData();
-        final int len = ids.length();
-        final List<ConversationID> list = new ArrayList<ConversationID>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
-        }
-        return list;
+    public void setConversationId(final ConversationID conversationId) {
+        this.conversationId = conversationId;
+    }
+    
+    /**
+     * Sets the message
+     *
+     * @param message The message to set
+     */
+    public void setMessage(final Message message) {
+        this.message = message;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(3);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "newMessage"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, conversationId.toString()));
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends NewMessageChatConversationResponse> getParser() {
+        return new AbstractAJAXParser<NewMessageChatConversationResponse>(isFailOnError()) {
+
+            @Override
+            protected NewMessageChatConversationResponse createResponse(final Response response) {
+                return new NewMessageChatConversationResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        final JSONObject json = new JSONObject();
+        json.put("id", message.getPacketId());
+        json.put("from", message.getFrom().getId());
+        json.put("subject", message.getSubject());
+        json.put("text", message.getText());
+        return json;
     }
 
 }

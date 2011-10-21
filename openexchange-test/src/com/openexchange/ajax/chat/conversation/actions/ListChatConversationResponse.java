@@ -49,42 +49,44 @@
 
 package com.openexchange.ajax.chat.conversation.actions;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.chat.conversation.JSONChat;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.chat.json.conversation.ConversationID;
 
 /**
- * {@link AllChatConversationResponse}
+ * {@link ListChatConversationResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationResponse extends AbstractAJAXResponse {
+public final class ListChatConversationResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link AllChatConversationResponse}.
+     * Initializes a new {@link ListChatConversationResponse}.
      * 
      * @param response
      */
-    public AllChatConversationResponse(final Response response) {
+    public ListChatConversationResponse(final Response response) {
         super(response);
     }
 
     /**
-     * Gets the identifiers of queried conversation streams.
+     * Gets the requested JSON chats.
      * 
-     * @return The identifiers
-     * @throws JSONException If parsing JSON fails
+     * @return The JSON chats
+     * @throws JSONException If parsing JSON data fails
      */
-    public List<ConversationID> getConversationIds() throws JSONException {
-        final JSONArray ids = (JSONArray) getData();
-        final int len = ids.length();
-        final List<ConversationID> list = new ArrayList<ConversationID>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
+    public List<JSONChat> getChats() throws JSONException {
+        final List<JSONChat> list = new LinkedList<JSONChat>();
+        final JSONArray jsonChats = (JSONArray) getData();
+        final int length = jsonChats.length();
+        for (int i = 0; i < length; i++) {
+            final JSONObject jsonChat = jsonChats.getJSONObject(i);
+            list.add(JSONChat.valueOf(jsonChat));
         }
         return list;
     }

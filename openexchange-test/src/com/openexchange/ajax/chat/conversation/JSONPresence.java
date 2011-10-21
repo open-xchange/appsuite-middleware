@@ -47,46 +47,121 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.conversation;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
+import java.util.Date;
 import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.chat.json.conversation.ConversationID;
+import org.json.JSONObject;
+import com.openexchange.chat.Presence;
 
 /**
- * {@link AllChatConversationResponse}
+ * {@link JSONPresence}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationResponse extends AbstractAJAXResponse {
+public final class JSONPresence {
 
     /**
-     * Initializes a new {@link AllChatConversationResponse}.
+     * Parses given JSON to a {@link JSONPresence}
      * 
-     * @param response
+     * @param jsonPresence The JSON presence data
+     * @return The parsed {@link JSONPresence}
+     * @throws JSONException If a JSON error occurs
      */
-    public AllChatConversationResponse(final Response response) {
-        super(response);
+    public static JSONPresence valueOf(final JSONObject jsonPresence) throws JSONException {
+        final JSONPresence ret = new JSONPresence();
+        ret.setType(Presence.Type.typeOf(jsonPresence.getString("type")));
+        ret.setMode(Presence.Mode.modeOf(jsonPresence.getString("mode")));
+        ret.setStatus(jsonPresence.getString("status"));
+        ret.setTimeStamp(new Date(jsonPresence.getLong("timeStamp")));
+        return ret;
+    }
+
+    private Presence.Type type;
+
+    private Presence.Mode mode;
+
+    private String status;
+
+    private Date timeStamp;
+
+    /**
+     * Initializes a new {@link JSONPresence}.
+     */
+    public JSONPresence() {
+        super();
     }
 
     /**
-     * Gets the identifiers of queried conversation streams.
+     * Gets the type
      * 
-     * @return The identifiers
-     * @throws JSONException If parsing JSON fails
+     * @return The type
      */
-    public List<ConversationID> getConversationIds() throws JSONException {
-        final JSONArray ids = (JSONArray) getData();
-        final int len = ids.length();
-        final List<ConversationID> list = new ArrayList<ConversationID>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
-        }
-        return list;
+    public Presence.Type getType() {
+        return type;
+    }
+
+    /**
+     * Sets the type
+     * 
+     * @param type The type to set
+     */
+    public void setType(final Presence.Type type) {
+        this.type = type;
+    }
+
+    /**
+     * Gets the mode
+     * 
+     * @return The mode
+     */
+    public Presence.Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Sets the mode
+     * 
+     * @param mode The mode to set
+     */
+    public void setMode(final Presence.Mode mode) {
+        this.mode = mode;
+    }
+
+    /**
+     * Gets the status
+     * 
+     * @return The status
+     */
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * Sets the status
+     * 
+     * @param status The status to set
+     */
+    public void setStatus(final String status) {
+        this.status = status;
+    }
+
+    /**
+     * Gets the timeStamp
+     * 
+     * @return The timeStamp
+     */
+    public Date getTimeStamp() {
+        return timeStamp;
+    }
+
+    /**
+     * Sets the timeStamp
+     * 
+     * @param timeStamp The timeStamp to set
+     */
+    public void setTimeStamp(final Date timeStamp) {
+        this.timeStamp = timeStamp;
     }
 
 }

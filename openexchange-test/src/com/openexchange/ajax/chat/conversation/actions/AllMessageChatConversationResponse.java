@@ -53,38 +53,38 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import com.openexchange.ajax.chat.conversation.JSONMessage;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.chat.json.conversation.ConversationID;
 
 /**
- * {@link AllChatConversationResponse}
+ * {@link AllMessageChatConversationResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationResponse extends AbstractAJAXResponse {
+public final class AllMessageChatConversationResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link AllChatConversationResponse}.
+     * Initializes a new {@link AllMessageChatConversationResponse}.
      * 
      * @param response
      */
-    public AllChatConversationResponse(final Response response) {
+    public AllMessageChatConversationResponse(final Response response) {
         super(response);
     }
 
     /**
-     * Gets the identifiers of queried conversation streams.
+     * Gets requested JSON messages.
      * 
-     * @return The identifiers
-     * @throws JSONException If parsing JSON fails
+     * @return The JSON messages
+     * @throws JSONException If parsing JSON data fails
      */
-    public List<ConversationID> getConversationIds() throws JSONException {
-        final JSONArray ids = (JSONArray) getData();
-        final int len = ids.length();
-        final List<ConversationID> list = new ArrayList<ConversationID>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
+    public List<JSONMessage> getMessage() throws JSONException {
+        final JSONArray jsonArray = (JSONArray) getData();
+        final int length = jsonArray.length();
+        final List<JSONMessage> list = new ArrayList<JSONMessage>(length);
+        for (int i = 0; i < length; i++) {
+            list.add(JSONMessage.valueOf(jsonArray.getJSONObject(i)));
         }
         return list;
     }

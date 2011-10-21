@@ -49,44 +49,23 @@
 
 package com.openexchange.ajax.chat.conversation.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.chat.json.conversation.ConversationID;
 
 /**
- * {@link AllChatConversationResponse}
+ * {@link DeleteChatConversationResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationResponse extends AbstractAJAXResponse {
+public final class DeleteChatConversationResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link AllChatConversationResponse}.
+     * Initializes a new {@link DeleteChatConversationResponse}.
      * 
      * @param response
      */
-    public AllChatConversationResponse(final Response response) {
+    public DeleteChatConversationResponse(final Response response) {
         super(response);
-    }
-
-    /**
-     * Gets the identifiers of queried conversation streams.
-     * 
-     * @return The identifiers
-     * @throws JSONException If parsing JSON fails
-     */
-    public List<ConversationID> getConversationIds() throws JSONException {
-        final JSONArray ids = (JSONArray) getData();
-        final int len = ids.length();
-        final List<ConversationID> list = new ArrayList<ConversationID>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
-        }
-        return list;
     }
 
 }

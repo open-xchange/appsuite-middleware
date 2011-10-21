@@ -49,44 +49,37 @@
 
 package com.openexchange.ajax.chat.conversation.actions;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.chat.conversation.JSONChat;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.chat.json.conversation.ConversationID;
 
 /**
- * {@link AllChatConversationResponse}
+ * {@link GetChatConversationResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationResponse extends AbstractAJAXResponse {
+public final class GetChatConversationResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link AllChatConversationResponse}.
+     * Initializes a new {@link GetChatConversationResponse}.
      * 
      * @param response
      */
-    public AllChatConversationResponse(final Response response) {
+    public GetChatConversationResponse(final Response response) {
         super(response);
     }
 
     /**
-     * Gets the identifiers of queried conversation streams.
+     * Gets the requested JSON chat.
      * 
-     * @return The identifiers
-     * @throws JSONException If parsing JSON fails
+     * @return The JSON chat
+     * @throws JSONException If parsing JSON data fails
      */
-    public List<ConversationID> getConversationIds() throws JSONException {
-        final JSONArray ids = (JSONArray) getData();
-        final int len = ids.length();
-        final List<ConversationID> list = new ArrayList<ConversationID>(len);
-        for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
-        }
-        return list;
+    public JSONChat getChat() throws JSONException {
+        final JSONObject jsonChat = (JSONObject) getData();
+        return JSONChat.valueOf(jsonChat);
     }
 
 }
