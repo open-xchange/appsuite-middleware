@@ -4,6 +4,7 @@
  - Fix for bug 20609: Only removing obsolete folder from cache, no reload with possible not-up-to-date read-only connection
  - Fix for bug 20644: Introduced delete listener for folder storage
  - Fix for bug 20631: Lowered debug level to an appropriate value
+ - Fix for bug 20611: Using readable field name in data-truncation error message
 
 * 2011-10-20 - thorben.betten@open-xchange.com
 
