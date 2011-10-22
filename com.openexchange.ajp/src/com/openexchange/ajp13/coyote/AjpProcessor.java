@@ -321,6 +321,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private volatile int pingCount;
 
     /**
+     * Whether e secure connection is enforced.
+     */
+    private final boolean forceHttps;
+
+    /**
      * Direct buffer used for sending right away a pong message.
      */
     private static final byte[] pongMessageArray;
@@ -387,9 +392,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      *
      * @param packetSize The packet size
      * @param listenerMonitor The listener monitor
+     * @param forceHttps Whether HTTPS is enforced
      */
-    public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor) {
+    public AjpProcessor(final int packetSize, final AJPv13TaskMonitor listenerMonitor, final boolean forceHttps) {
         super();
+        this.forceHttps = forceHttps;
         bodyBytes = MessageBytes.newInstance();
         sink = new UnsynchronizedByteArrayOutputStream(Constants.MAX_PACKET_SIZE);
         certificates = MessageBytes.newInstance();
@@ -1607,6 +1614,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
                     } else {
@@ -1639,6 +1647,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
                     }
@@ -1660,6 +1669,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             jsessionIDVal.append('.').append(jvmRoute);
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIDVal.toString());
+        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = false;
         /*
@@ -1690,6 +1700,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             join = false;
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
+        jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = join;
         /*

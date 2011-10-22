@@ -68,6 +68,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.ajp13.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.log.LogProperties;
@@ -124,6 +125,8 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
      */
     private static final int REQUEST_TERMINATOR = 0xFF;
 
+    private static final boolean forceHttps;
+
     static {
         httpHeaderMapping = new TIntObjectHashMap<String>(14);
         httpHeaderMapping.put(0x01, "accept");
@@ -156,6 +159,13 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
         attributeMapping.put(0x0c, "secret_attribute");
         attributeMapping.put(0x0d, ATTR_STORED_METHOD);
         attributeMapping.put(REQUEST_TERMINATOR, "are_done");
+
+        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (configurationService == null) {
+            forceHttps = false;
+        } else {
+            forceHttps = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
+        }
     }
 
     /**
@@ -685,6 +695,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
                         /*
@@ -716,6 +727,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
                 }
@@ -764,6 +776,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             }
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
+        jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*
          * HttpServletRequestWrapper.getSession() adds the JSESSIONID cookie
