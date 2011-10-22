@@ -121,11 +121,11 @@ public class GetArisingReminder {
                         continue;
                     }
                     final OXException re = new OXException(e);
-                    LOG.error(re.getMessage(), re);
+                    LOG.debug(re.getMessage(), re);
                     continue;
                 } catch (final SQLException e) {
                     final OXException re = ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(re.getMessage(), re);
+                    LOG.debug(re.getMessage(), re);
                     continue;
                 }
                 if (appointment.containsUntil() && appointment.getUntil().after(now)) {
