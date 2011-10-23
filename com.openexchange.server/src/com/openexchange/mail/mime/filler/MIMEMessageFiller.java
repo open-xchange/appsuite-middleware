@@ -85,6 +85,8 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
@@ -278,9 +280,24 @@ public class MIMEMessageFiller {
          * Add header X-Originating-IP containing the IP address of the client
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
-            final Map<String, Object> logProperties = LogProperties.optLogProperties();
-            final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
-            mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+            /*
+             * Is IP check enabled
+             */
+            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final boolean ipCheck = service.getBoolProperty(ServerConfig.Property.IP_CHECK.getPropertyName(), false);
+            if (ipCheck) {
+                /*
+                 * Get IP from session
+                 */
+                mimeMessage.setHeader("X-Originating-IP", session.getLocalIp());
+            } else {
+                /*
+                 * IP check disabled: Prefer IP from client request
+                 */
+                final Map<String, Object> logProperties = LogProperties.optLogProperties();
+                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+                mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+            }
         }
     }
 
