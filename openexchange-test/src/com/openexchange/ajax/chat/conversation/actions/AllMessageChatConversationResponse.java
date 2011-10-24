@@ -79,7 +79,7 @@ public final class AllMessageChatConversationResponse extends AbstractAJAXRespon
      * @return The JSON messages
      * @throws JSONException If parsing JSON data fails
      */
-    public List<JSONMessage> getMessage() throws JSONException {
+    public List<JSONMessage> getMessages() throws JSONException {
         final JSONArray jsonArray = (JSONArray) getData();
         final int length = jsonArray.length();
         final List<JSONMessage> list = new ArrayList<JSONMessage>(length);

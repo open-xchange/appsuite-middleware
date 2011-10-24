@@ -69,7 +69,9 @@ public final class JSONChatUser {
     public static JSONChatUser valueOf(final JSONObject jsonChatUser) throws JSONException {
         final JSONChatUser ret = new JSONChatUser();
         ret.setId(jsonChatUser.getString("id"));
-        ret.setName(jsonChatUser.getString("name"));
+        if (jsonChatUser.hasAndNotNull("name")) {
+            ret.setName(jsonChatUser.getString("name"));
+        }
         final JSONObject optJsonPresence = jsonChatUser.optJSONObject("presence");
         if (null != optJsonPresence) {
             ret.setPresence(JSONPresence.valueOf(optJsonPresence));

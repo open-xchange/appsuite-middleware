@@ -72,8 +72,12 @@ public final class JSONPresence {
         final JSONPresence ret = new JSONPresence();
         ret.setType(Presence.Type.typeOf(jsonPresence.getString("type")));
         ret.setMode(Presence.Mode.modeOf(jsonPresence.getString("mode")));
-        ret.setStatus(jsonPresence.getString("status"));
-        ret.setTimeStamp(new Date(jsonPresence.getLong("timeStamp")));
+        if (jsonPresence.hasAndNotNull("status")) {
+            ret.setStatus(jsonPresence.getString("status"));
+        }
+        if (jsonPresence.hasAndNotNull("timeStamp")) {
+            ret.setTimeStamp(new Date(jsonPresence.getLong("timeStamp")));
+        }
         return ret;
     }
 

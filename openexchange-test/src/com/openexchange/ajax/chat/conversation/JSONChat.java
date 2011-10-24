@@ -72,12 +72,16 @@ public final class JSONChat {
     public static JSONChat valueOf(final JSONObject jsonChat) throws JSONException {
         final JSONChat ret = new JSONChat();
         ret.setChatId(jsonChat.getString("id"));
-        ret.setSubject(jsonChat.getString("subject"));
-        final JSONArray jsonMembers = jsonChat.getJSONArray("members");
-        final int length = jsonMembers.length();
-        for (int i = 0; i < length; i++) {
-            final JSONObject jsonChatUser = jsonMembers.getJSONObject(i);
-            ret.add(JSONChatUser.valueOf(jsonChatUser));
+        if (jsonChat.hasAndNotNull("subject")) {
+            ret.setSubject(jsonChat.getString("subject"));
+        }
+        final JSONArray jsonMembers = jsonChat.optJSONArray("members");
+        if (null != jsonMembers) {
+            final int length = jsonMembers.length();
+            for (int i = 0; i < length; i++) {
+                final JSONObject jsonChatUser = jsonMembers.getJSONObject(i);
+                ret.add(JSONChatUser.valueOf(jsonChatUser));
+            }
         }
         return ret;
     }
