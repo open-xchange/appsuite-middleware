@@ -102,9 +102,9 @@ public final class DBChat implements Chat {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChat.class));
 
-    private static abstract class LenientRunnable implements Runnable {
+    private static abstract class SafeRunnable implements Runnable {
 
-        protected LenientRunnable() {
+        protected SafeRunnable() {
             super();
         }
 
@@ -118,7 +118,7 @@ public final class DBChat implements Chat {
         }
 
         /**
-         * Executes this {@link LenientRunnable}'s task.
+         * Executes this {@link SafeRunnable}'s task.
          * 
          * @throws Exception If an error occurs
          */
@@ -126,9 +126,9 @@ public final class DBChat implements Chat {
 
     }
 
-    private static abstract class LenientTIntObjectProcedure<V> implements TIntObjectProcedure<V> {
+    private static abstract class SafeTIntObjectProcedure<V> implements TIntObjectProcedure<V> {
 
-        protected LenientTIntObjectProcedure() {
+        protected SafeTIntObjectProcedure() {
             super();
         }
 
@@ -158,7 +158,7 @@ public final class DBChat implements Chat {
 
     protected static final List<MessageListener> GLOBAL_LISTENERS = new CopyOnWriteArrayList<MessageListener>();
 
-    private static final class ChatProcedure extends LenientTIntObjectProcedure<DBChat> {
+    private static final class ChatProcedure extends SafeTIntObjectProcedure<DBChat> {
 
         private final Connection con;
 
@@ -216,17 +216,17 @@ public final class DBChat implements Chat {
      */
     public static void startUp() {
         final TimerService timerService = DBChatServiceLookup.getService(TimerService.class);
-        final Runnable task = new LenientRunnable() {
+        final Runnable task = new SafeRunnable() {
 
             private final TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>> procedure =
-                new LenientTIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
+                new SafeTIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
 
                     @Override
                     public void process(final int contextId, final ConcurrentTIntObjectHashMap<DBChat> map) {
                         if (map.isEmpty()) {
                             return;
                         }
-                        final Runnable subtask = new LenientRunnable() {
+                        final Runnable subtask = new SafeRunnable() {
 
                             @Override
                             public void execute() throws OXException {
