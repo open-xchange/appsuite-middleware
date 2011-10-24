@@ -49,7 +49,6 @@
 
 package com.openexchange.chat.json.conversation;
 
-import java.util.regex.Pattern;
 
 /**
  * {@link ConversationID} - Represents a conversation identifier.
@@ -73,20 +72,18 @@ public final class ConversationID {
 
     private static final char DELIM = '-';
 
-    private static final Pattern SPLIT = Pattern.compile(Pattern.quote(String.valueOf(DELIM)));
-
     private static void parseUid(final ConversationID conversationId, final String uid) {
         if (null == uid) {
             return;
         }
-        final String[] args = SPLIT.split(uid);
-        final int length = args.length;
-        if (length != 3) {
-            return;
-        }
-        conversationId.serviceId = args[0];
-        conversationId.accountId = args[1];
-        conversationId.chatId = args[2];
+        int off = 0;
+        int pos = uid.indexOf(DELIM, off);
+        conversationId.serviceId = uid.substring(off, pos);
+        off = pos + 1;
+        pos = uid.indexOf(DELIM, off);
+        conversationId.accountId = uid.substring(off, pos);
+        off = pos + 1;
+        conversationId.chatId = uid.substring(off);
     }
 
     /*-

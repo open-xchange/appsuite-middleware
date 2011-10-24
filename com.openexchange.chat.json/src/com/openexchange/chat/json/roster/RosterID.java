@@ -49,7 +49,6 @@
 
 package com.openexchange.chat.json.roster;
 
-import java.util.regex.Pattern;
 
 /**
  * {@link RosterID} - Represents a roster identifier.
@@ -73,19 +72,15 @@ public final class RosterID {
 
     private static final char DELIM = '-';
 
-    private static final Pattern SPLIT = Pattern.compile(Pattern.quote(String.valueOf(DELIM)));
-
     private static void parseUid(final RosterID rosterId, final String uid) {
         if (null == uid) {
             return;
         }
-        final String[] args = SPLIT.split(uid);
-        final int length = args.length;
-        if (length != 3) {
-            return;
-        }
-        rosterId.serviceId = args[0];
-        rosterId.accountId = args[1];
+        int off = 0;
+        final int pos = uid.indexOf(DELIM, off);
+        rosterId.serviceId = uid.substring(off, pos);
+        off = pos + 1;
+        rosterId.accountId = uid.substring(off);
     }
 
     /*-
