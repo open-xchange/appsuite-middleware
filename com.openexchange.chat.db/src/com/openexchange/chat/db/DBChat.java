@@ -168,6 +168,9 @@ public final class DBChat implements Chat {
 
         @Override
         public void process(final int chatId, final DBChat dbChat) throws OXException {
+            if (GLOBAL_LISTENERS.isEmpty() && dbChat.messageListeners.isEmpty()) {
+                return;
+            }
             final List<Message> messages = dbChat.getNewMessages(con);
             if (!messages.isEmpty()) {
                 for (final Message message : messages) {
@@ -242,7 +245,9 @@ public final class DBChat implements Chat {
 
             @Override
             public void execute() {
-                CHAT_MAP.forEachEntry(procedure);
+                if (!CHAT_MAP.isEmpty()) {
+                    CHAT_MAP.forEachEntry(procedure);
+                }
             }
         };
         TIMER_TASK.set(timerService.scheduleWithFixedDelay(task, 5000, 5000));
