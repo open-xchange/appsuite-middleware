@@ -50,8 +50,10 @@
 package com.openexchange.ajax.chat.conversation;
 
 import java.util.Date;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.chat.conversation.actions.AbstractChatConversationRequest;
 
 /**
  * {@link JSONMessage}
@@ -67,13 +69,21 @@ public final class JSONMessage {
      * @return The {@link JSONMessage}
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONMessage valueOf(final JSONObject jsonMessage) throws JSONException {
+    public static JSONMessage valueOf(final JSONObject jsonMessage, final TimeZone timeZone) throws JSONException {
         final JSONMessage ret = new JSONMessage();
         ret.setMessageId(jsonMessage.getString("id"));
-        ret.setFrom(JSONChatUser.valueOf(jsonMessage.getJSONObject("from")));
-        ret.setSubject(jsonMessage.getString("subject"));
-        ret.setText(jsonMessage.getString("text"));
-        ret.setTimeStamp(new Date(jsonMessage.getLong("timeStamp")));
+        if (jsonMessage.hasAndNotNull("from")) {
+            ret.setFrom(JSONChatUser.valueOf(jsonMessage.getJSONObject("from"), timeZone));
+        }
+        if (jsonMessage.hasAndNotNull("subject")) {
+            ret.setSubject(jsonMessage.getString("subject"));
+        }
+        if (jsonMessage.hasAndNotNull("text")) {
+            ret.setText(jsonMessage.getString("text"));
+        }
+        if (jsonMessage.hasAndNotNull("timeStamp")) {
+            ret.setTimeStamp(AbstractChatConversationRequest.getDateField(jsonMessage, "timeStamp", timeZone));
+        }
         return ret;
     }
 

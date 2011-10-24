@@ -916,7 +916,7 @@ public final class DBChat implements Chat {
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
-                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = ?";
+                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
@@ -930,7 +930,7 @@ public final class DBChat implements Chat {
                 pos = 1;
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
-                message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
+                message.setPacketId(messageId);
                 message.setText(rs.getString(pos++));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 messages.add(message);

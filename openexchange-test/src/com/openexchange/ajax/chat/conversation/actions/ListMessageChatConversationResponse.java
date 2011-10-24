@@ -51,6 +51,7 @@ package com.openexchange.ajax.chat.conversation.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.chat.conversation.JSONMessage;
@@ -79,12 +80,12 @@ public final class ListMessageChatConversationResponse extends AbstractAJAXRespo
      * @return The JSON messages
      * @throws JSONException If parsing JSON data fails
      */
-    public List<JSONMessage> getMessage() throws JSONException {
+    public List<JSONMessage> getMessage(final TimeZone timeZone) throws JSONException {
         final JSONArray jsonArray = (JSONArray) getData();
         final int length = jsonArray.length();
         final List<JSONMessage> list = new ArrayList<JSONMessage>(length);
         for (int i = 0; i < length; i++) {
-            list.add(JSONMessage.valueOf(jsonArray.getJSONObject(i)));
+            list.add(JSONMessage.valueOf(jsonArray.getJSONObject(i), timeZone));
         }
         return list;
     }

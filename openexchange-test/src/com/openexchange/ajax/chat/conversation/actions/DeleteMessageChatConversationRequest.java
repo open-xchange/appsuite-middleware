@@ -51,9 +51,10 @@ package com.openexchange.ajax.chat.conversation.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
@@ -62,93 +63,89 @@ import com.openexchange.chat.json.conversation.ConversationID;
 
 
 /**
- * {@link AllMessageChatConversationRequest}
+ * {@link DeleteMessageChatConversationRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllMessageChatConversationRequest extends AbstractChatConversationRequest<AllMessageChatConversationResponse> {
+public final class DeleteMessageChatConversationRequest extends AbstractChatConversationRequest<DeleteMessageChatConversationResponse> {
 
     private ConversationID conversationId;
-    private Date date;
-    private TimeZone timeZone;
+
+    private final List<String> messageIds;
 
     /**
-     * Initializes a new {@link AllMessageChatConversationRequest}.
+     * Initializes a new {@link ListChatConversationRequest}.
      */
-    public AllMessageChatConversationRequest() {
+    public DeleteMessageChatConversationRequest() {
         super();
         setFailOnError(true);
+        messageIds = new LinkedList<String>();
     }
 
     /**
-     * Sets the conversation identifier
+     * Sets the conversationId
      *
-     * @param conversationId The conversation identifier to set
+     * @param conversationId The conversationId to set
      */
     public void setConversationId(final ConversationID conversationId) {
         this.conversationId = conversationId;
     }
 
     /**
-     * Sets the since time stamp
-     * 
-     * @param date The time stamp
-     * @param timeZoneId The time zone identifier
+     * Adds the message identifiers
+     *
+     * @param messageIds The message identifiers to set
      */
-    public void setSince(final Date date, final String timeZoneId) {
-        this.date = date;
-        this.timeZone = null == timeZoneId ? TimeZone.getTimeZone("UTC") : TimeZone.getTimeZone(timeZoneId);
+    public void addMessageIds(final String... messageIds) {
+        if (null == messageIds) {
+            return;
+        }
+        this.messageIds.addAll(Arrays.asList(messageIds));
     }
 
     /**
-     * Sets the since time stamp
-     * 
-     * @param date The time stamp
-     * @param timeZone The time zone
+     * Adds the message identifiers
+     *
+     * @param conversationIds The message identifiers to set
      */
-    public void setSince(final Date date, final TimeZone timeZone) {
-        this.date = date;
-        this.timeZone = timeZone;
+    public void addMessageIds(final List<String> messageIds) {
+        if (null == messageIds) {
+            return;
+        }
+        this.messageIds.addAll(messageIds);
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> params = new ArrayList<Parameter>(2);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "allMessages"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "deleteMessages"));
         params.add(new Parameter(AJAXServlet.PARAMETER_ID, conversationId.toString()));
-        if (null != date) {
-            params.add(new Parameter("since", addTimeZone2Date(date, timeZone).getTime()));
-        }
         return params.toArray(new Parameter[params.size()]);
     }
 
-    private static Date addTimeZone2Date(final Date d, final TimeZone tz) {
-        return addTimeZone2Date(d.getTime(), tz);
-    }
-
-    private static Date addTimeZone2Date(final long timeMillis, final TimeZone tz) {
-        return new Date(timeMillis + tz.getOffset(timeMillis));
-    }
-
     @Override
-    public AbstractAJAXParser<? extends AllMessageChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllMessageChatConversationResponse>(isFailOnError()) {
+    public AbstractAJAXParser<? extends DeleteMessageChatConversationResponse> getParser() {
+        return new AbstractAJAXParser<DeleteMessageChatConversationResponse>(isFailOnError()) {
 
             @Override
-            protected AllMessageChatConversationResponse createResponse(final Response response) {
-                return new AllMessageChatConversationResponse(response);
+            protected DeleteMessageChatConversationResponse createResponse(final Response response) {
+                return new DeleteMessageChatConversationResponse(response);
             }
         };
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        return null;
+        final JSONArray ja = new JSONArray();
+        for (final String mid : messageIds) {
+            ja.put(mid);
+        }
+        return ja;
     }
 
 }

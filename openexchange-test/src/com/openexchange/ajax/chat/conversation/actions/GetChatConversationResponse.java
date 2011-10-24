@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chat.conversation.actions;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.chat.conversation.JSONChat;
@@ -77,9 +78,9 @@ public final class GetChatConversationResponse extends AbstractAJAXResponse {
      * @return The JSON chat
      * @throws JSONException If parsing JSON data fails
      */
-    public JSONChat getChat() throws JSONException {
+    public JSONChat getChat(final TimeZone timeZone) throws JSONException {
         final JSONObject jsonChat = (JSONObject) getData();
-        return JSONChat.valueOf(jsonChat);
+        return JSONChat.valueOf(jsonChat, timeZone);
     }
 
 }
