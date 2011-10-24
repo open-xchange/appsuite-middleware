@@ -181,7 +181,7 @@ public class RdbSettingStorage extends SettingStorage {
             throw SettingExceptionCodes.NOT_LEAF.create(setting.getName());
         }
         if (setting.isShared()) {
-            final IValueHandler value = ConfigTree.getSharedValue(setting);
+            final IValueHandler value = getSharedValue(setting);
             if (null != value && value.isWritable()) {
                 value.writeValue(session, ctx, user, setting);
             } else {
@@ -298,12 +298,8 @@ public class RdbSettingStorage extends SettingStorage {
         }
     }
 
-    /**
-     * Reads a shared value.
-     * @param setting setting Setting.
-     */
-    private void readSharedValue(final Setting setting) {
-        final IValueHandler reader = ConfigTree.getSharedValue(setting);
+    private void readSharedValue(final Setting setting) throws OXException {
+        final IValueHandler reader = getSharedValue(setting);
         if (null != reader) {
             if (reader.isAvailable(userConfig)) {
                 try {
@@ -367,5 +363,18 @@ public class RdbSettingStorage extends SettingStorage {
         if (setting.isLeaf()) {
             setting.getParent().removeElement(setting);
         }
+    }
+
+    /**
+     * Returns the corresponding reader for a setting.
+     * @param setting shared setting.
+     * @return the reader for the shared setting.
+     */
+    static IValueHandler getSharedValue(final Setting setting) {
+        IValueHandler retval = null;
+        if (setting.isLeaf()) {
+            retval = setting.getShared();
+        }
+        return retval;
     }
 }

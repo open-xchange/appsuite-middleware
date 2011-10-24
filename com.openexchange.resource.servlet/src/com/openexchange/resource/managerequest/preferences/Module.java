@@ -49,6 +49,7 @@
 
 package com.openexchange.resource.managerequest.preferences;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -85,11 +86,8 @@ public final class Module implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
 
-            /**
-             * {@inheritDoc}
-             */
             @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 setting.setSingleValue(Boolean.valueOf(userConfig.isEditResource()));
             }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.mail;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -84,7 +85,7 @@ public class SpamButton implements PreferencesItemService {
                 return userConfig.hasWebMail();
             }
             @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final UserSettingMail settings = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
                 setting.setSingleValue(Boolean.valueOf(settings.isSpamEnabled()));
             }

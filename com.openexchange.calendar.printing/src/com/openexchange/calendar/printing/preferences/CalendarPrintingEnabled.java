@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.printing.preferences;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -86,7 +87,7 @@ public class CalendarPrintingEnabled implements PreferencesItemService {
             }
 
             @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 setting.setSingleValue(Boolean.TRUE);
             }
         };

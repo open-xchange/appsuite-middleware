@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,56 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.modules.contacts;
+package com.openexchange.groupware.settings.impl;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactConfig;
-import com.openexchange.groupware.contact.ContactConfig.Property;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.settings.SettingExceptionCodes;
 
 /**
- * {@link AllFoldersForAutoComplete}
+ * {@link TreeSetting}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AllFoldersForAutoComplete implements PreferencesItemService {
+public class TreeSetting extends AbstractSetting<TreeSetting> {
 
-    public AllFoldersForAutoComplete() {
-        super();
+    public TreeSetting(String name, int id, IValueHandler shared) {
+        super(name, id, shared);
     }
 
-    @Override
-    public String[] getPath() {
-        return new String[] { "modules", "contacts", "allFoldersForAutoComplete" };
+    public Object[] getMultiValue() {
+        return null;
     }
 
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
+    public boolean isEmptyMultivalue() {
+        return true;
+    }
 
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                return true;
-            }
+    public Object getSingleValue() {
+        return null;
+    }
 
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.ALL_FOLDERS_FOR_AUTOCOMPLETE));
-            }
-        };
+    public void setSingleValue(Object value) throws OXException {
+        throw SettingExceptionCodes.NOT_ALLOWED.create();
+    }
+
+    public void addMultiValue(Object value) throws OXException {
+        throw SettingExceptionCodes.NOT_ALLOWED.create();
+    }
+
+    public void setEmptyMultiValue() throws OXException {
+        throw SettingExceptionCodes.NOT_ALLOWED.create();
+    }
+
+    public void removeElement(final Setting child) throws OXException {
+        if (!(child instanceof TreeSetting)) {
+            throw SettingExceptionCodes.NOT_ALLOWED.create();
+        }
+        removeElement((TreeSetting) child);
+    }
+
+    public void removeElement(final TreeSetting child) {
+        removeElementInternal(child);
     }
 }
