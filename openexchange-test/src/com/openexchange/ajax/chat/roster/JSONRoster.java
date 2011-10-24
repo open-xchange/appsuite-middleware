@@ -47,58 +47,90 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.roster;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import org.json.JSONObject;
+import com.openexchange.ajax.chat.conversation.JSONChatUser;
 
 /**
- * {@link AllChatConversationRequest}
- *
+ * {@link JSONRoster}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
+public final class JSONRoster {
 
     /**
-     * Initializes a new {@link AllChatConversationRequest}.
+     * Parses given JSON to a {@link JSONRoster}
+     * 
+     * @param jsonPresence The JSON roster data
+     * @return The parsed {@link JSONRoster}
+     * @throws JSONException If a JSON error occurs
      */
-    public AllChatConversationRequest() {
-        super();
-        setFailOnError(true);
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
-
-            @Override
-            protected AllChatConversationResponse createResponse(final Response response) {
-                return new AllChatConversationResponse(response);
+    public static JSONRoster valueOf(final JSONObject jsonRoster, final TimeZone timeZone) throws JSONException {
+        final JSONRoster ret = new JSONRoster();
+        ret.setId(jsonRoster.getString("id"));
+        final JSONArray members = jsonRoster.optJSONArray("members");
+        if (null != members) {
+            final int length = members.length();
+            for (int i = 0; i < length; i++) {
+                ret.addMember(JSONChatUser.valueOf(members.getJSONObject(i), timeZone));
             }
-        };
+        }
+        return ret;
     }
 
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    private String id;
+
+    private final List<JSONChatUser> members;
+
+    /**
+     * Initializes a new {@link JSONRoster}.
+     */
+    public JSONRoster() {
+        super();
+        members = new ArrayList<JSONChatUser>(8);
+    }
+
+    /**
+     * Gets the id
+     * 
+     * @return The id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public void setId(final String id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the members
+     * 
+     * @return The members
+     */
+    public List<JSONChatUser> getMembers() {
+        return Collections.unmodifiableList(members);
+    }
+
+    /**
+     * Adds given member.
+     * 
+     * @param user The member to add
+     */
+    public void addMember(final JSONChatUser user) {
+        members.add(user);
     }
 
 }

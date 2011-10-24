@@ -47,58 +47,47 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.roster.actions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.chat.conversation.JSONChatUser;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AllChatConversationRequest}
- *
+ * {@link ListChatRosterResponse}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
+public final class ListChatRosterResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link AllChatConversationRequest}.
+     * Initializes a new {@link ListChatRosterResponse}.
+     * 
+     * @param response
      */
-    public AllChatConversationRequest() {
-        super();
-        setFailOnError(true);
+    public ListChatRosterResponse(final Response response) {
+        super(response);
     }
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
-
-            @Override
-            protected AllChatConversationResponse createResponse(final Response response) {
-                return new AllChatConversationResponse(response);
-            }
-        };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    /**
+     * Gets the requested users.
+     * 
+     * @return The users
+     * @throws JSONException If parsing JSON fails
+     */
+    public List<JSONChatUser> getUsers(final TimeZone timeZone) throws JSONException {
+        final JSONArray ja = (JSONArray) getData();
+        final int length = ja.length();
+        final List<JSONChatUser> list = new ArrayList<JSONChatUser>(length);
+        for (int i = 0; i < length; i++) {
+            list.add(JSONChatUser.valueOf(ja.getJSONObject(i), timeZone));
+        }
+        return list;
     }
 
 }

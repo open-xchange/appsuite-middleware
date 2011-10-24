@@ -47,58 +47,85 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.roster.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.chat.Presence;
+import com.openexchange.chat.json.roster.RosterID;
 
 /**
- * {@link AllChatConversationRequest}
- *
+ * {@link UpdateChatRosterRequest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
+public final class UpdateChatRosterRequest extends AbstractChatRosterRequest<UpdateChatRosterResponse> {
+
+    private RosterID rosterId;
+
+    private Presence presence;
 
     /**
-     * Initializes a new {@link AllChatConversationRequest}.
+     * Initializes a new {@link UpdateChatRosterRequest}.
      */
-    public AllChatConversationRequest() {
+    public UpdateChatRosterRequest() {
         super();
-        setFailOnError(true);
+    }
+
+    /**
+     * Sets the presence
+     *
+     * @param presence The presence to set
+     */
+    public void setPresence(final Presence presence) {
+        this.presence = presence;
+    }
+
+    /**
+     * Sets the rosterId
+     * 
+     * @param rosterId The rosterId to set
+     */
+    public void setRosterId(final RosterID rosterId) {
+        this.rosterId = rosterId;
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "update"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, rosterId.toString()));
         return params.toArray(new Parameter[params.size()]);
     }
 
     @Override
-    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
+    public AbstractAJAXParser<? extends UpdateChatRosterResponse> getParser() {
+        return new AbstractAJAXParser<UpdateChatRosterResponse>(isFailOnError()) {
 
             @Override
-            protected AllChatConversationResponse createResponse(final Response response) {
-                return new AllChatConversationResponse(response);
+            protected UpdateChatRosterResponse createResponse(final Response response) {
+                return new UpdateChatRosterResponse(response);
             }
         };
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        return null;
+        final JSONObject json = new JSONObject();
+        json.put("mode", presence.getMode().toString());
+        json.put("status", presence.getStatus());
+        return json;
     }
 
 }

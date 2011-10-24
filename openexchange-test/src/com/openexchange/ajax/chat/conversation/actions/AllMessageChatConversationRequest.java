@@ -118,7 +118,7 @@ public final class AllMessageChatConversationRequest extends AbstractChatConvers
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(2);
+        final List<Parameter> params = new ArrayList<Parameter>(3);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "allMessages"));
         params.add(new Parameter(AJAXServlet.PARAMETER_ID, conversationId.toString()));
         if (null != date) {

@@ -47,58 +47,86 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.roster.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.chat.json.roster.RosterID;
 
 /**
- * {@link AllChatConversationRequest}
- *
+ * {@link ListChatRosterRequest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
+public final class ListChatRosterRequest extends AbstractChatRosterRequest<ListChatRosterResponse> {
+
+    private RosterID rosterId;
+
+    private final List<String> users;
 
     /**
-     * Initializes a new {@link AllChatConversationRequest}.
+     * Initializes a new {@link ListChatRosterRequest}.
      */
-    public AllChatConversationRequest() {
+    public ListChatRosterRequest() {
         super();
-        setFailOnError(true);
+        users = new ArrayList<String>();
+    }
+
+    /**
+     * Adds the user
+     * 
+     * @param user The user to add
+     */
+    public void addUser(final String user) {
+        this.users.add(user);
+    }
+
+    /**
+     * Sets the rosterId
+     * 
+     * @param rosterId The rosterId to set
+     */
+    public void setRosterId(final RosterID rosterId) {
+        this.rosterId = rosterId;
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
     }
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "list"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, rosterId.toString()));
         return params.toArray(new Parameter[params.size()]);
     }
 
     @Override
-    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
+    public AbstractAJAXParser<? extends ListChatRosterResponse> getParser() {
+        return new AbstractAJAXParser<ListChatRosterResponse>(isFailOnError()) {
 
             @Override
-            protected AllChatConversationResponse createResponse(final Response response) {
-                return new AllChatConversationResponse(response);
+            protected ListChatRosterResponse createResponse(final Response response) {
+                return new ListChatRosterResponse(response);
             }
         };
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        return null;
+        final JSONArray ja = new JSONArray();
+        for (final String user : users) {
+            ja.put(user);
+        }
+        return ja;
     }
 
 }

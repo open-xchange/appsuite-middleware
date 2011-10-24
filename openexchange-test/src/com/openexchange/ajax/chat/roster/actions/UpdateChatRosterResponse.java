@@ -47,58 +47,25 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.roster.actions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AllChatConversationRequest}
- *
+ * {@link UpdateChatRosterResponse}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
+public final class UpdateChatRosterResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link AllChatConversationRequest}.
+     * Initializes a new {@link UpdateChatRosterResponse}.
+     * 
+     * @param response
      */
-    public AllChatConversationRequest() {
-        super();
-        setFailOnError(true);
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
-
-            @Override
-            protected AllChatConversationResponse createResponse(final Response response) {
-                return new AllChatConversationResponse(response);
-            }
-        };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    public UpdateChatRosterResponse(final Response response) {
+        super(response);
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.roster.actions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,18 +59,17 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link AllChatConversationRequest}
+ * {@link AllChatRosterRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
+public final class AllChatRosterRequest extends AbstractChatRosterRequest<AllChatRosterResponse> {
 
     /**
-     * Initializes a new {@link AllChatConversationRequest}.
+     * Initializes a new {@link AllChatRosterRequest}.
      */
-    public AllChatConversationRequest() {
+    public AllChatRosterRequest() {
         super();
-        setFailOnError(true);
     }
 
     @Override
@@ -80,18 +79,18 @@ public final class AllChatConversationRequest extends AbstractChatConversationRe
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "all"));
         return params.toArray(new Parameter[params.size()]);
     }
 
     @Override
-    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
+    public AbstractAJAXParser<? extends AllChatRosterResponse> getParser() {
+        return new AbstractAJAXParser<AllChatRosterResponse>(isFailOnError()) {
 
             @Override
-            protected AllChatConversationResponse createResponse(final Response response) {
-                return new AllChatConversationResponse(response);
+            protected AllChatRosterResponse createResponse(final Response response) {
+                return new AllChatRosterResponse(response);
             }
         };
     }

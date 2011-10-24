@@ -47,58 +47,68 @@
  *
  */
 
-package com.openexchange.ajax.chat.conversation.actions;
+package com.openexchange.ajax.chat.roster.actions;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import org.json.JSONObject;
+import com.openexchange.ajax.chat.roster.JSONRoster;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AllChatConversationRequest}
- *
+ * {@link AllChatRosterResponse}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllChatConversationRequest extends AbstractChatConversationRequest<AllChatConversationResponse> {
+public final class AllChatRosterResponse extends AbstractAJAXResponse {
+
+    private final boolean isArray;
 
     /**
-     * Initializes a new {@link AllChatConversationRequest}.
+     * Initializes a new {@link AllChatRosterResponse}.
+     * 
+     * @param response
      */
-    public AllChatConversationRequest() {
-        super();
-        setFailOnError(true);
+    public AllChatRosterResponse(final Response response) {
+        super(response);
+        isArray = response.getData() instanceof JSONArray;
     }
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
+    /**
+     * Gets the rosters of all available chat accounts.
+     * 
+     * @return The rosters
+     * @throws JSONException If parsing JSON fails
+     */
+    public List<JSONRoster> getRosters(final TimeZone timeZone) throws JSONException {
+        if (!isArray) {
+            return Collections.singletonList(getRoster(timeZone));
+        }
+        /*
+         * Parse array
+         */
+        final JSONArray rosters = (JSONArray) getData();
+        final int len = rosters.length();
+        final List<JSONRoster> list = new ArrayList<JSONRoster>(len);
+        for (int i = 0; i < len; i++) {
+            list.add(JSONRoster.valueOf(rosters.getJSONObject(i), timeZone));
+        }
+        return list;
     }
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends AllChatConversationResponse> getParser() {
-        return new AbstractAJAXParser<AllChatConversationResponse>(isFailOnError()) {
-
-            @Override
-            protected AllChatConversationResponse createResponse(final Response response) {
-                return new AllChatConversationResponse(response);
-            }
-        };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
+    /**
+     * Gets the single roster.
+     * 
+     * @return The roster
+     * @throws JSONException If parsing JSON fails
+     */
+    public JSONRoster getRoster(final TimeZone timeZone) throws JSONException {
+        return JSONRoster.valueOf((JSONObject) getData(), timeZone);
     }
 
 }
