@@ -49,38 +49,23 @@
 
 package com.openexchange.ajax.chat.conversation.actions;
 
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.chat.conversation.JSONChat;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link NewChatConversationResponse}
+ * {@link DeleteMessageChatConversationResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class NewChatConversationResponse extends AbstractAJAXResponse {
+public final class DeleteMessageChatConversationResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link NewChatConversationResponse}.
+     * Initializes a new {@link DeleteMessageChatConversationResponse}.
      * 
      * @param response
      */
-    public NewChatConversationResponse(final Response response) {
+    public DeleteMessageChatConversationResponse(final Response response) {
         super(response);
-    }
-
-    /**
-     * Gets the requested JSON chat.
-     * 
-     * @return The JSON chat
-     * @throws JSONException If parsing JSON data fails
-     */
-    public JSONChat getChat(final TimeZone timeZone) throws JSONException {
-        final JSONObject jsonChat = (JSONObject) getData();
-        return JSONChat.valueOf(jsonChat, timeZone);
     }
 
 }

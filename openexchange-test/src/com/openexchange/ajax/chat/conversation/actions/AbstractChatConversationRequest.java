@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.chat.conversation.actions;
 
+import java.util.Date;
+import java.util.TimeZone;
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
@@ -85,6 +88,22 @@ public abstract class AbstractChatConversationRequest<T extends AbstractAJAXResp
 
     public boolean isFailOnError() {
         return failOnError;
+    }
+
+    /**
+     * Gets optional date parameter.
+     * 
+     * @param request The JSON object
+     * @param name The name
+     * @param timeZone The time zone
+     * @return The parsed date or <code>null</code> if absent
+     */
+    public static Date getDateField(final JSONObject json, final String name, final TimeZone timeZone) {
+        if (!json.hasAndNotNull(name)) {
+            return null;
+        }
+        final long time = json.optLong(name);
+        return new Date(time - timeZone.getOffset(time));
     }
 
 }

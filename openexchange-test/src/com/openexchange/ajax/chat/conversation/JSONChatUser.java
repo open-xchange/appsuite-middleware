@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chat.conversation;
 
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,7 +67,7 @@ public final class JSONChatUser {
      * @return The parsed {@link JSONChatUser}
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONChatUser valueOf(final JSONObject jsonChatUser) throws JSONException {
+    public static JSONChatUser valueOf(final JSONObject jsonChatUser, final TimeZone timeZone) throws JSONException {
         final JSONChatUser ret = new JSONChatUser();
         ret.setId(jsonChatUser.getString("id"));
         if (jsonChatUser.hasAndNotNull("name")) {
@@ -74,7 +75,7 @@ public final class JSONChatUser {
         }
         final JSONObject optJsonPresence = jsonChatUser.optJSONObject("presence");
         if (null != optJsonPresence) {
-            ret.setPresence(JSONPresence.valueOf(optJsonPresence));
+            ret.setPresence(JSONPresence.valueOf(optJsonPresence, timeZone));
         }
         return ret;
     }

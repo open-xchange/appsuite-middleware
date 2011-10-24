@@ -50,6 +50,7 @@
 package com.openexchange.ajax.chat.conversation.tests;
 
 import java.util.List;
+import java.util.TimeZone;
 import com.openexchange.ajax.chat.conversation.JSONChat;
 import com.openexchange.ajax.chat.conversation.JSONChatUser;
 import com.openexchange.ajax.chat.conversation.actions.AllChatConversationRequest;
@@ -113,7 +114,8 @@ public final class AllTest extends AbstractAJAXSession {
             newChatRequest.setOptAccountId(ChatService.DEFAULT_ACCOUNT);
             newChatRequest.setOptServiceId(ChatService.DEFAULT_SERVICE);
             final NewChatConversationResponse newChatResponse = client.execute(newChatRequest);
-            chat = newChatResponse.getChat();
+            final TimeZone timeZone = client.getValues().getTimeZone();
+            chat = newChatResponse.getChat(timeZone);
             /*
              * Request via all request
              */
@@ -138,7 +140,7 @@ public final class AllTest extends AbstractAJAXSession {
             final GetChatConversationRequest getRequest = new GetChatConversationRequest();
             getRequest.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId()));
             final GetChatConversationResponse getResponse = client.execute(getRequest);
-            final JSONChat fetchedChat = getResponse.getChat();
+            final JSONChat fetchedChat = getResponse.getChat(timeZone);
             assertEquals("Chat identifier mismatch.", chatId, fetchedChat.getChatId());
             assertEquals("Chat subject mismatch.", chat.getSubject(), fetchedChat.getSubject());
 

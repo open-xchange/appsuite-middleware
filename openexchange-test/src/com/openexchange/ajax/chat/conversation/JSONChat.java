@@ -51,6 +51,7 @@ package com.openexchange.ajax.chat.conversation;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,7 +70,7 @@ public final class JSONChat {
      * @return The parsed {@link JSONChat}
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONChat valueOf(final JSONObject jsonChat) throws JSONException {
+    public static JSONChat valueOf(final JSONObject jsonChat, final TimeZone timeZone) throws JSONException {
         final JSONChat ret = new JSONChat();
         ret.setChatId(jsonChat.getString("id"));
         if (jsonChat.hasAndNotNull("subject")) {
@@ -80,7 +81,7 @@ public final class JSONChat {
             final int length = jsonMembers.length();
             for (int i = 0; i < length; i++) {
                 final JSONObject jsonChatUser = jsonMembers.getJSONObject(i);
-                ret.add(JSONChatUser.valueOf(jsonChatUser));
+                ret.add(JSONChatUser.valueOf(jsonChatUser, timeZone));
             }
         }
         return ret;

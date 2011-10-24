@@ -50,8 +50,10 @@
 package com.openexchange.ajax.chat.conversation;
 
 import java.util.Date;
+import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.chat.conversation.actions.AbstractChatConversationRequest;
 import com.openexchange.chat.Presence;
 
 /**
@@ -68,7 +70,7 @@ public final class JSONPresence {
      * @return The parsed {@link JSONPresence}
      * @throws JSONException If a JSON error occurs
      */
-    public static JSONPresence valueOf(final JSONObject jsonPresence) throws JSONException {
+    public static JSONPresence valueOf(final JSONObject jsonPresence, final TimeZone timeZone) throws JSONException {
         final JSONPresence ret = new JSONPresence();
         ret.setType(Presence.Type.typeOf(jsonPresence.getString("type")));
         ret.setMode(Presence.Mode.modeOf(jsonPresence.getString("mode")));
@@ -76,7 +78,7 @@ public final class JSONPresence {
             ret.setStatus(jsonPresence.getString("status"));
         }
         if (jsonPresence.hasAndNotNull("timeStamp")) {
-            ret.setTimeStamp(new Date(jsonPresence.getLong("timeStamp")));
+            ret.setTimeStamp(AbstractChatConversationRequest.getDateField(jsonPresence, "timeStamp", timeZone));
         }
         return ret;
     }
