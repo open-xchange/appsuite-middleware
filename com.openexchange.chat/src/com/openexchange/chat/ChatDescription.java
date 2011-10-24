@@ -59,7 +59,7 @@ import java.util.List;
  */
 public class ChatDescription {
 
-    private final String chatId;
+    private String chatId;
 
     private final List<String> newMembers;
 
@@ -84,6 +84,15 @@ public class ChatDescription {
      */
     public ChatDescription() {
         this(null);
+    }
+
+    /**
+     * Sets the chat identifier
+     *
+     * @param chatId The chat identifier to set
+     */
+    public void setChatId(final String chatId) {
+        this.chatId = chatId;
     }
 
     /**

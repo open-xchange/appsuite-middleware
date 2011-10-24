@@ -59,6 +59,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.chat.ChatDescription;
+import com.openexchange.chat.json.conversation.ConversationID;
 
 
 /**
@@ -70,12 +71,23 @@ public final class UpdateChatConversationRequest extends AbstractChatConversatio
 
     private ChatDescription chatDescription;
 
+    private ConversationID conversationId;
+
     /**
      * Initializes a new {@link UpdateChatConversationRequest}.
      */
     public UpdateChatConversationRequest() {
         super();
         setFailOnError(true);
+    }
+
+    /**
+     * Sets the conversationId
+     *
+     * @param conversationId The conversationId to set
+     */
+    public void setConversationId(final ConversationID conversationId) {
+        this.conversationId = conversationId;
     }
 
     /**
@@ -95,7 +107,8 @@ public final class UpdateChatConversationRequest extends AbstractChatConversatio
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> params = new ArrayList<Parameter>(2);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, conversationId.toString()));
         return params.toArray(new Parameter[params.size()]);
     }
 

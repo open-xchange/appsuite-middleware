@@ -111,7 +111,7 @@ public final class ListChatConversationRequest extends AbstractChatConversationR
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(2);
+        final List<Parameter> params = new ArrayList<Parameter>(1);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
         return params.toArray(new Parameter[params.size()]);
     }

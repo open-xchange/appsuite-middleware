@@ -75,18 +75,18 @@ import com.openexchange.chat.util.MessageImpl;
 
 
 /**
- * {@link AllMessagesTest}
+ * {@link ChatMessageTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AllMessagesTest extends AbstractAJAXSession {
+public final class ChatMessageTest extends AbstractAJAXSession {
 
     private AJAXClient client2;
 
     /**
-     * Initializes a new {@link AllMessagesTest}.
+     * Initializes a new {@link ChatMessageTest}.
      */
-    public AllMessagesTest() {
+    public ChatMessageTest() {
         super("AllMessageTest");
     }
 
