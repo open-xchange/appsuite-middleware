@@ -47,53 +47,37 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.chat.db.groupware;
 
-import static com.openexchange.database.Databases.closeSQLStuff;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
-import com.openexchange.exception.OXException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * Abstract class for easily implementing {@link CreateTableService} services.
- *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link DBChatUpdateTaskProviderService}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCreateTableImpl implements CreateTableService {
+public class DBChatUpdateTaskProviderService implements UpdateTaskProviderService {
 
-    /**
-     * Initializes a new {@link AbstractCreateTableImpl}.
-     */
-    protected AbstractCreateTableImpl() {
+    private final List<UpdateTaskV2> taskList;
+
+    public DBChatUpdateTaskProviderService(final UpdateTaskV2... tasks) {
         super();
-    }
-
-    @Override
-    public final void perform(final Connection con) throws OXException {
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            for (final String create : getCreateStatements()) {
-                stmt.execute(create);
-            }
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
+        if (null == tasks || 0 == tasks.length) {
+            taskList = new ArrayList<UpdateTaskV2>(1);
+        } else {
+            taskList = new ArrayList<UpdateTaskV2>(tasks.length);
+            taskList.addAll(Arrays.asList(tasks));
         }
     }
 
-    /**
-     * Gets the CREATE-TABLE statements.
-     * 
-     * @return The CREATE-TABLE statements
-     */
-    protected abstract String[] getCreateStatements();
-
-    /**
-     * The constant to signal no dependencies to other tables.
-     */
-    protected static final String[] NO_TABLES = new String[0];
+    @Override
+    public Collection<UpdateTaskV2> getUpdateTasks() {
+        return taskList;
+    }
 
 }

@@ -47,86 +47,74 @@
  *
  */
 
-package com.openexchange.groupware.update;
+package com.openexchange.chat.db.groupware;
 
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
-import com.openexchange.database.CreateTableService;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.ServiceExceptionCodes;
 
 /**
- * {@link CreateTableUpdateTask}
+ * {@link DBChatCreateTableTask}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CreateTableUpdateTask implements UpdateTaskV2 {
-
-    private final CreateTableService create;
-    private final String[] dependencies;
-    private final int version;
-    private final DatabaseService databaseService;
+public class DBChatCreateTableTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
-     * 
-     * @param create The create-table service
-     * @param dependencies The dependencies to preceding update tasks
-     * @param version The version number
-     * @param databaseService The database service
+     * Initializes a new {@link DBChatCreateTableTask}.
+     *
+     * @param dbService
      */
-    public CreateTableUpdateTask(final CreateTableService create, final String[] dependencies, final int version, final DatabaseService databaseService) {
+    public DBChatCreateTableTask() {
         super();
-        this.create = create;
-        this.dependencies = dependencies;
-        this.version = version;
-        this.databaseService = databaseService;
-    }
-
-    @Override
-    public TaskAttributes getAttributes() {
-        // Creating Tables is blocking and schema level.
-        return new Attributes();
-
-    }
-
-    @Override
-    public String[] getDependencies() {
-        return dependencies;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return version;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.HIGH.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
-        Connection con = null;
+        final DatabaseService dbService = DBChatServiceLookup.getService(DatabaseService.class);
+        if (dbService == null) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
+        }
+        final int contextId = params.getContextId();
+        final Connection writeCon;
         try {
-            con = getConnection(contextId);
-            create.perform(con);
+            writeCon = dbService.getForUpdateTask(contextId);
+        } catch (final OXException e) {
+            throw e;
+        }
+        PreparedStatement stmt = null;
+        try {
+            final String[] tableNames = DBChatCreateTableService.getTablesToCreate();
+            final String[] createStmts = DBChatCreateTableService.getCreateStmts();
+            for (int i = 0; i < tableNames.length; i++) {
+                try {
+                    if (tableExists(writeCon, tableNames[i])) {
+                        return;
+                    }
+                    stmt = writeCon.prepareStatement(createStmts[i]);
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                }
+            }
         } finally {
-            releaseConnection(contextId, con);
+            closeSQLStuff(stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
-    private void releaseConnection(final int contextId, final Connection con) {
-        databaseService.backForUpdateTask(contextId, con);
-    }
-
-    private Connection getConnection(final int contextId) throws OXException {
-        return databaseService.getForUpdateTask(contextId);
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
     }
 
 }
