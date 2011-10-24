@@ -85,11 +85,6 @@ public class PresenceImpl extends PacketImpl implements Presence {
     }
 
     @Override
-    public String toString() {
-        return getStatus();
-    }
-
-    @Override
     public String getStatus() {
         return status;
     }
@@ -129,6 +124,21 @@ public class PresenceImpl extends PacketImpl implements Presence {
      */
     public void setStatus(final String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("PresenceImpl [");
+        if (type != null) {
+            builder.append("type=").append(type).append(", ");
+        }
+        if (mode != null) {
+            builder.append("mode=").append(mode).append(", ");
+        }
+        builder.append("status=").append(status);
+        builder.append(']');
+        return builder.toString();
     }
 
 }

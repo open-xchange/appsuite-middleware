@@ -80,11 +80,6 @@ public class MessageImpl extends PacketImpl implements Message {
     }
 
     @Override
-    public String toString() {
-        return getText();
-    }
-
-    @Override
     public Type getType() {
         return type;
     }
@@ -165,6 +160,35 @@ public class MessageImpl extends PacketImpl implements Message {
      */
     public void setText(final String text) {
         this.text = text;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("MessageImpl [");
+        if (type != null) {
+            builder.append("type=").append(type).append(", ");
+        }
+        if (subject != null) {
+            builder.append("subject=").append(subject).append(", ");
+        }
+        if (text != null) {
+            builder.append("text=").append(text).append(", ");
+        }
+        if (attachments != null) {
+            builder.append("attachments=").append(attachments).append(", ");
+        }
+        if (packetId != null) {
+            builder.append("packetId=").append(packetId).append(", ");
+        }
+        if (from != null) {
+            builder.append("from=").append(from).append(", ");
+        }
+        if (timeStamp != null) {
+            builder.append("timeStamp=").append(timeStamp);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

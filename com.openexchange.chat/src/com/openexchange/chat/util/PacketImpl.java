@@ -115,4 +115,21 @@ public abstract class PacketImpl implements Packet {
         this.timeStamp = timeStamp;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("PacketImpl [");
+        if (packetId != null) {
+            builder.append("packetId=").append(packetId).append(", ");
+        }
+        if (from != null) {
+            builder.append("from=").append(from).append(", ");
+        }
+        if (timeStamp != null) {
+            builder.append("timeStamp=").append(timeStamp);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

@@ -168,4 +168,24 @@ public class ChatAccountImpl implements ChatAccount {
         this.chatService = chatService;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("ChatAccountImpl [");
+        if (configuration != null) {
+            builder.append("configuration=").append(configuration).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName).append(", ");
+        }
+        if (chatService != null) {
+            builder.append("chatService=").append(chatService);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }
