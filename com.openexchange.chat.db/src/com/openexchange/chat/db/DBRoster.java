@@ -64,6 +64,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
+import com.openexchange.chat.Presence.Mode;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.RosterListener;
 import com.openexchange.chat.util.ChatUserImpl;
@@ -178,7 +179,7 @@ public final class DBRoster implements Roster {
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        final S service = getService(clazz);
+        final S service = DBChatServiceLookup.getService(clazz);
         if (null == service) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }
@@ -188,6 +189,48 @@ public final class DBRoster implements Roster {
     @Override
     public Map<String, ChatUser> getEntries() throws OXException {
         return entries;
+    }
+
+    /**
+     * Updates specified user's presence.
+     * 
+     * @param user The user
+     * @param presence The presence
+     * @throws OXException If updating presence fails
+     */
+    public void updatePresence(final ChatUser user, final Presence presence) throws OXException {
+        final DatabaseService databaseService = getService(DatabaseService.class);
+        PreparedStatement stmt = null;
+        final Connection con = databaseService.getWritable(context);
+        try {
+            stmt = con.prepareStatement("UPDATE chatPresence SET mode = ?, statusMessage = ?, lastModified = ? WHERE cid = ? AND user = ?");
+            int pos = 1;
+            {
+                final Mode mode = presence.getMode();
+                stmt.setInt(pos++, (null == mode ? Mode.AVAILABLE : mode).ordinal());
+            }
+            {
+                final String status = presence.getStatus();
+                if (null == status) {
+                    stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, status);
+                }
+            }
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos, Integer.parseInt(user.getId()));
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            databaseService.backWritable(context, con);
+        }
+        /*
+         * Notify roster listeners
+         */
+        notifyRosterListeners(presence);
     }
 
     @Override
@@ -203,18 +246,20 @@ public final class DBRoster implements Roster {
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
+            final boolean hasSession = (null != SERVICE_REF.get().getAnyActiveSessionForUser(userId, context.getContextId()));
             if (!rs.next()) {
-                final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
+                final PresenceImpl packetUnavailable = new PresenceImpl(hasSession ? Presence.Type.AVAILABLE : Presence.Type.UNAVAILABLE);
                 packetUnavailable.setFrom(user);
                 return packetUnavailable;
             }
-            if (null == SERVICE_REF.get().getAnyActiveSessionForUser(userId, context.getContextId())) {
+            if (!hasSession) {
                 final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
                 packetUnavailable.setFrom(user);
+                packetUnavailable.setStatus(rs.getString(2));
                 return packetUnavailable;
             }
             final PresenceImpl packetAvailable = new PresenceImpl(Presence.Type.AVAILABLE);
-            packetAvailable.setMode(Presence.Mode.valueOf(rs.getString(1)));
+            packetAvailable.setMode(Presence.Mode.modeOf(rs.getString(1)));
             packetAvailable.setFrom(user);
             packetAvailable.setStatus(rs.getString(2));
             return packetAvailable;

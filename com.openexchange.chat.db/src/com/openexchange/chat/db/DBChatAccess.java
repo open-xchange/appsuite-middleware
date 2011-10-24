@@ -69,7 +69,6 @@ import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.MessageListener;
 import com.openexchange.chat.Presence;
-import com.openexchange.chat.Presence.Mode;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.context.ContextService;
@@ -281,38 +280,7 @@ public final class DBChatAccess implements ChatAccess {
         if (!Presence.Type.AVAILABLE.equals(presence.getType())) {
             throw ChatExceptionCodes.INVALID_PRESENCE_PACKET.create();
         }
-        final DatabaseService databaseService = getDatabaseService();
-        PreparedStatement stmt = null;
-        final Connection con = databaseService.getWritable(context);
-        try {
-            stmt = con.prepareStatement("UPDATE chatPresence SET mode = ?, statusMessage = ?, lastModified = ? WHERE cid = ? AND user = ?");
-            int pos = 1;
-            {
-                final Mode mode = presence.getMode();
-                stmt.setInt(pos++, (null == mode ? Mode.AVAILABLE : mode).ordinal());
-            }
-            {
-                final String status = presence.getStatus();
-                if (null == status) {
-                    stmt.setNull(pos++, java.sql.Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, status);
-                }
-            }
-            stmt.setLong(pos++, System.currentTimeMillis());
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-            databaseService.backWritable(context, con);
-        }
-        /*
-         * Notify roster listeners
-         */
-        DBRoster.getRosterFor(context).notifyRosterListeners(presence);
+        DBRoster.getRosterFor(context).updatePresence(getUser(), presence);
     }
 
     @Override
@@ -454,7 +422,7 @@ public final class DBChatAccess implements ChatAccess {
         final Connection con = databaseService.getWritable(contextId);
         try {
             con.setAutoCommit(false);
-            final Chat chat = openChat0(chatId, listener, members, con);
+            final Chat chat = openChat0(chid, listener, members, con);
             con.commit();
             return chat;
         } catch (final SQLException e) {

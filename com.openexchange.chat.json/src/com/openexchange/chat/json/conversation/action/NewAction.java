@@ -135,6 +135,12 @@ public final class NewAction extends AbstractChatConversationAction {
             }
             Chat newChat = access.openChat(null, null, chatUsers);
             /*
+             * Add session user to members
+             */
+            final List<ChatUser> users = new ArrayList<ChatUser>(Arrays.asList(chatUsers));
+            users.add(access.getUser());
+            presences.add(roster.getPresence(access.getUser()));
+            /*
              * Subject
              */
             final String subject = chatDescription.getSubject();
@@ -150,7 +156,7 @@ public final class NewAction extends AbstractChatConversationAction {
             /*
              * Create JSON object for new chat
              */
-            final JSONObject jsonObject = JSONConversationWriter.writeChat(newChat, Arrays.asList(chatUsers), presences, session.getUser().getTimeZone());
+            final JSONObject jsonObject = JSONConversationWriter.writeChat(newChat, users, presences, session.getUser().getTimeZone());
             /*
              * Return appropriate result
              */

@@ -81,7 +81,7 @@ public class PresenceImpl extends PacketImpl implements Presence {
     public PresenceImpl(final Type type) {
         super();
         this.type = type;
-        mode = Mode.AVAILABLE;
+        mode = Type.UNAVAILABLE.equals(type) ? Mode.AWAY : Mode.AVAILABLE;
     }
 
     @Override
