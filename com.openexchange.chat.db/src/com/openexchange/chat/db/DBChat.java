@@ -713,6 +713,7 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, chatId);
             rs = stmt.executeQuery();
+            rs.next();
             final int count = rs.getInt(1);
             if (count > 1) {
                 return;
