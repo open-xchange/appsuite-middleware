@@ -49,316 +49,97 @@
 
 package com.openexchange.groupware.settings;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
+import com.openexchange.exception.OXException;
 
 /**
  * This class represents a single setting.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Setting {
-
-    /**
-     * Separator for pathes.
-     */
-    public static final char SEPARATOR = '/';
-
-    /**
-     * Unique identifier of this setting.
-     */
-    private final int id;
-
-    /**
-     * Reference to the parent Setting.
-     */
-    private Setting parent;
-
-    /**
-     * Reference to shared value reader.
-     */
-    private final IValueHandler shared;
-
-    /**
-     * Name of this setting.
-     */
-    private final String name;
-
-    /**
-     * Single value of this setting.
-     */
-    private Object singleValue;
-
-    /**
-     * Multi value of this setting.
-     */
-    private ArrayList<Object> multiValue;
-
-    /**
-     * Stores the sub elements.
-     */
-    private Map<String, Setting> elements;
-
-    /**
-     * Constructor for initializing especially shared values.
-     * @param name Name.
-     * @param shared shared value reader.
-     * @param id for shared values normally <code>-1</code>.
-     */
-    public Setting(final String name, final int id, final IValueHandler shared) {
-        super();
-        this.name = name;
-        this.shared = shared;
-        this.id = id;
-    }
-
-    /**
-     * Copy constructor.
-     * @param toCopy object to copy.
-     */
-    public Setting(final Setting toCopy) {
-        this(toCopy.name, toCopy.id, toCopy.shared);
-        parent = toCopy.parent;
-        if (null != toCopy.elements) {
-            elements = new HashMap<String, Setting>(toCopy.elements.size());
-            for (final Setting element : toCopy.elements.values()) {
-                addElement(new Setting(element));
-            }
-        }
-    }
+public interface Setting {
 
     /**
      * @return the multi value.
      */
-    public Object[] getMultiValue() {
-        Object[] retval;
-        synchronized (this) {
-            if (null == multiValue || 0 == multiValue.size()) {
-                retval = null;
-            } else {
-                retval = multiValue.toArray(new Object[multiValue.size()]);
-            }
-        }
-        return retval;
-    }
+    Object[] getMultiValue();
 
-    public boolean isEmptyMultivalue() {
-        return multiValue != null && multiValue.isEmpty();
-    }
+    boolean isEmptyMultivalue();
 
     /**
      * @return the single value.
      */
-    public Object getSingleValue() {
-        return singleValue;
-    }
+    Object getSingleValue();
 
     /**
      * @param value The value to set.
+     * @throws OXException if setting the value is not allowed on this element.
      */
-    public void setSingleValue(final Object value) {
-        this.singleValue = value;
-    }
+    void setSingleValue(final Object value) throws OXException;
 
     /**
      * @param value Value to add.
+     * @throws OXException if setting the value is not allowed on this element.
      */
-    public void addMultiValue(final Object value) {
-        if (null != value) {
-            synchronized (this) {
-                if (null == multiValue) {
-                    multiValue = new ArrayList<Object>();
-                }
-                multiValue.add(value);
-            }
-        }
-    }
+    void addMultiValue(final Object value) throws OXException;
 
-    public void setEmptyMultiValue() {
-        this.multiValue = new ArrayList<Object>();
-    }
+    /**
+     * @throws OXException if setting the value is not allowed on this element.
+     */
+    void setEmptyMultiValue() throws OXException;
 
     /**
      * @return Returns the name.
      */
-    public String getName() {
-        return name;
-    }
+    String getName();
 
     /**
      * Returns the sub setting that has the given name.
-     * @param subName Name of the sub setting.
+     * @param elementName Name of the sub setting.
      * @return the sub setting or <code>null</code> if it doesn't exist.
      */
-    public Setting getElement(final String subName) {
-        Setting element = null;
-        if (null != elements) {
-            element = elements.get(subName);
-        }
-        return element;
-    }
+    Setting getElement(final String elementName);
 
     /**
      * @return Returns the id.
      */
-    public int getId() {
-        return id;
-    }
+    int getId();
 
     /**
      * @return Returns the leaf.
      */
-    public boolean isLeaf() {
-        return null == elements || 0 == elements.size();
-    }
-
-    /**
-     * Adds a sub element to this element.
-     * @param child sub element to add.
-     */
-    public void addElement(final Setting child) {
-        if (null == elements) {
-            elements = new HashMap<String, Setting>();
-        }
-        elements.put(child.getName(), child);
-        child.setParent(this);
-    }
+    boolean isLeaf();
 
     /**
      * Removes the sub element from this element.
      * @param child sub element to remove.
+     * @throws OXException if removing the child is not allowed on this element.
      */
-    public void removeElement(final Setting child) {
-        if (null != elements) {
-            elements.remove(child.getName());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        final StringBuilder out = new StringBuilder();
-        out.append(name);
-        out.append('=');
-        if (null == elements) {
-            if (null != multiValue && multiValue.size() > 0) {
-                out.append(multiValue);
-            } else {
-                out.append(singleValue);
-            }
-        } else {
-            out.append('(');
-            final Iterator<Setting> iter = elements.values().iterator();
-            while (iter.hasNext()) {
-                out.append(iter.next().toString());
-                if (iter.hasNext()) {
-                    out.append(',');
-                }
-            }
-            out.append(')');
-        }
-        return out.toString();
-    }
+    void removeElement(final Setting child) throws OXException;
 
     /**
      * @return the sub elements of this element.
      */
-    public Setting[] getElements() {
-        Setting[] retval;
-        if (null == elements) {
-            retval = new Setting[0];
-        } else {
-            retval = elements.values().toArray(new Setting[elements.size()]);
-        }
-        return retval;
-    }
+    Setting[] getElements();
 
     /**
      * @return <code>true</code> if this setting is used in server and gui and
      * <code>false</code> if the setting is only used in gui.
      */
-    public boolean isShared() {
-        return -1 == shared.getId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (!(obj instanceof Setting)) {
-            return false;
-        }
-        final Setting other = (Setting) obj;
-        if (id != other.id || !name.equals(other.name)) {
-            return false;
-        }
-        if (parent != null && !parent.equals(other.parent)) {
-            return false;
-        }
-        if (singleValue != null && !singleValue.equals(other.singleValue)) {
-            return false;
-        }
-        if (multiValue != null && !multiValue.equals(other.multiValue)) {
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        int retval = id ^ name.hashCode();
-        if (singleValue != null) {
-            retval ^= singleValue.hashCode();
-        }
-        if (multiValue != null) {
-            retval ^= multiValue.hashCode();
-        }
-        if (isShared()) {
-            retval ^= Boolean.valueOf(isShared()).hashCode();
-        }
-        return retval;
-    }
-
-    /**
-     * @param parent the parent to set
-     */
-    private void setParent(final Setting parent) {
-        this.parent = parent;
-    }
+    boolean isShared();
 
     /**
      * @return the path for this setting.
      */
-    public String getPath() {
-        final String retval;
-        if (null == parent) {
-            retval = name;
-        } else {
-            retval = parent.getPath() + SEPARATOR + name;
-        }
-        return retval;
-    }
+    String getPath();
 
     /**
      * @return the parent
      */
-    public Setting getParent() {
-        return parent;
-    }
+    Setting getParent();
 
     /**
      * @return the shared
      */
-    public IValueHandler getShared() {
-        return shared;
-    }
+    IValueHandler getShared();
 
 }

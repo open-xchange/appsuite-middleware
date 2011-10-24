@@ -60,33 +60,21 @@ public final class ConfigTreeInit implements Initialization {
 
     private static final ConfigTreeInit singleton = new ConfigTreeInit();
 
-    /**
-     * Prevent instantiation.
-     */
     private ConfigTreeInit() {
         super();
     }
 
-    /**
-     * @return the singleton instance.
-     */
     public static final ConfigTreeInit getInstance() {
         return singleton;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void start() throws OXException {
-        ConfigTree.init();
+        ConfigTree.getInstance().init();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void stop() {
-        ConfigTree.stop();
+        ConfigTree.getInstance().stop();
     }
 }
