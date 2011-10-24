@@ -248,9 +248,9 @@ public final class DBRoster implements Roster {
             rs = stmt.executeQuery();
             final boolean hasSession = (null != SERVICE_REF.get().getAnyActiveSessionForUser(userId, context.getContextId()));
             if (!rs.next()) {
-                final PresenceImpl packetUnavailable = new PresenceImpl(hasSession ? Presence.Type.AVAILABLE : Presence.Type.UNAVAILABLE);
-                packetUnavailable.setFrom(user);
-                return packetUnavailable;
+                final PresenceImpl presence = new PresenceImpl(hasSession ? Presence.Type.AVAILABLE : Presence.Type.UNAVAILABLE);
+                presence.setFrom(user);
+                return presence;
             }
             if (!hasSession) {
                 final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
