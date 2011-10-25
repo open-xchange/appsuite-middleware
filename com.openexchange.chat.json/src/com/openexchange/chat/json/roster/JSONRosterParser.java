@@ -56,7 +56,7 @@ import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
 
 /**
- * {@link JSONRosterParser}
+ * {@link JSONRosterParser} - Parses the JSON representation of chat roster objects.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
