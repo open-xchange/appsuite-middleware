@@ -294,9 +294,6 @@ public final class MessageUtility {
              */
             return readBig5Bytes(getBytesFrom(inStream));
         }
-        /*
-         * TODO: Re-think to make this the default case...
-         */
         if (isGB2312(charset)) {
             /*
              * Special treatment for possible GB2312 encoded stream
@@ -305,7 +302,11 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            final String retval = new String(bytes, "GB2312");
+            String retval = new String(bytes, "GB2312");
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            retval = new String(bytes, "GB18030");
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
