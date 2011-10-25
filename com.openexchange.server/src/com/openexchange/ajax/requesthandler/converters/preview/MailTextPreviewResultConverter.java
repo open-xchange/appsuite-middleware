@@ -49,37 +49,19 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import com.openexchange.preview.PreviewOutput;
 
 /**
- * {@link HTMLPreviewResultConverter}
- *
+ * {@link MailTextPreviewResultConverter}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLPreviewResultConverter extends AbstractPreviewResultConverter {
-
-    private static final String FORMAT = "preview";
+public final class MailTextPreviewResultConverter extends AbstractMailPreviewResultConverter {
 
     /**
-     * Initializes a new {@link HTMLPreviewResultConverter}.
+     * Initializes a new {@link MailTextPreviewResultConverter}.
      */
-    public HTMLPreviewResultConverter() {
-        super();
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return FORMAT;
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public PreviewOutput getOutput() {
-        return PreviewOutput.HTML;
+    public MailTextPreviewResultConverter(final TextPreviewResultConverter resultConverter) {
+        super(resultConverter);
     }
 
 }
