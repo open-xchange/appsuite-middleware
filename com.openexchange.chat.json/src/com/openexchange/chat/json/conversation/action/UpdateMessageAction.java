@@ -64,6 +64,7 @@ import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -106,6 +107,12 @@ public final class UpdateMessageAction extends AbstractChatConversationAction {
              * Get message
              */
             final MessageDescription messageDescription = JSONConversationParser.parseMessageDescription(jsonMessage);
+            if (null == messageDescription.getMessageId()) {
+                if (null == messageId) {
+                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("messageId");
+                }
+                messageDescription.setMessageId(messageId);
+            }
             chat.updateMessage(messageDescription);
             /*
              * Create JSON
