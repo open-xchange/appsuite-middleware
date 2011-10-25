@@ -56,7 +56,7 @@ package com.openexchange.chat;
  */
 public class MessageDescription {
 
-    private final String messageId;
+    private String messageId;
 
     private String subject;
 
@@ -80,6 +80,15 @@ public class MessageDescription {
     }
 
     /**
+     * Sets the message identifier (aka packet identifier).
+     *
+     * @param messageId The message identifier to set
+     */
+    public void setMessageId(final String messageId) {
+        this.messageId = messageId;
+    }
+
+    /**
      * Checks if this message description provides any changed attribute.
      * 
      * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
@@ -95,7 +104,7 @@ public class MessageDescription {
     }
 
     /**
-     * Gets the message identifier
+     * Gets the message identifier (aka packet identifier).
      * 
      * @return The message identifier
      */
