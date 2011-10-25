@@ -50,6 +50,7 @@
 package com.openexchange.admin.soap.dataobjects;
 
 import java.util.HashSet;
+import java.util.Map;
 import com.openexchange.admin.rmi.dataobjects.Database;
 
 
@@ -76,6 +77,24 @@ public class Context {
     private String name;
 
     private String[] login_mappings;
+    
+    private SOAPStringMapMap userAttributes;
+    
+    
+    /**
+     * @return the userAttributes
+     */
+    public final SOAPStringMapMap getUserAttributes() {
+        return userAttributes;
+    }
+
+    
+    /**
+     * @param userAttributes the userAttributes to set
+     */
+    public final void setUserAttributes(SOAPStringMapMap userAttributes) {
+        this.userAttributes = userAttributes;
+    }
 
     public Context() {
         super();
@@ -105,6 +124,10 @@ public class Context {
         this.setReadDatabase(c.getReadDatabase());
         this.setUsedQuota(c.getUsedQuota());
         this.setWriteDatabase(c.getWriteDatabase());
+        Map<String, Map<String, String>> userattrs = c.getUserAttributes();
+        if( null != userattrs ) {
+            this.setUserAttributes(SOAPStringMapMap.convertFromMapMap(userattrs));
+        }
     }
     
     public final Integer getId() {

@@ -26,10 +26,6 @@
 		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
 	</operation> 
     <parameter name="beanPropertyRules">
-    	<bean class="com.openexchange.admin.rmi.dataobjects.Context" excludeProperties="namespace|userAttributes|userAttributesForSOAP"/>
-    	<bean class="com.openexchange.admin.rmi.dataobjects.UserModuleAccess" excludeProperties="properties" />
-    	<bean class="com.openexchange.admin.rmi.dataobjects.User" excludeProperties="extensions|userAttributes|guiPreferences|userAttributesForSOAP" />
-    	<bean class="com.openexchange.admin.rmi.dataobjects.Group" excludeProperties="extensions" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
     	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
@@ -65,8 +61,6 @@
 		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
 	</operation> 
     <parameter name="beanPropertyRules">
-    	<bean class="com.openexchange.admin.rmi.dataobjects.User" excludeProperties="extensions" />
-    	<bean class="com.openexchange.admin.rmi.dataobjects.Group" excludeProperties="extensions" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
     	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
@@ -93,7 +87,6 @@
 		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
 	</operation> 
     <parameter name="beanPropertyRules">
-    	<bean class="com.openexchange.admin.rmi.dataobjects.Resource" excludeProperties="extensions" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
     	<bean class="java.rmi.RemoteException" excludeProperties="cause" />
@@ -141,10 +134,6 @@
 		<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-only" class="org.apache.axis2.rpc.receivers.RPCMessageReceiver" /> 
 	</operation> 
     <parameter name="beanPropertyRules">
-    	<bean class="com.openexchange.admin.rmi.dataobjects.User" excludeProperties="extensionsextensions|userAttributesForSOAP" />
-    	<bean class="com.openexchange.admin.rmi.dataobjects.Group" excludeProperties="extensions" />
-    	<bean class="com.openexchange.admin.rmi.dataobjects.Context" excludeProperties="namespace|userAttributes|userAttributesForSOAP" />
-    	<bean class="com.openexchange.admin.rmi.dataobjects.UserModuleAccess" excludeProperties="properties" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.ExtendableDataObject" excludeProperties="allExtensionsAsHash" />
     	<bean class="com.openexchange.admin.rmi.dataobjects.EnforceableDataObject" excludeProperties="unsetMembers" />
     	<bean class="java.rmi.RemoteException" excludeProperties="cause" />

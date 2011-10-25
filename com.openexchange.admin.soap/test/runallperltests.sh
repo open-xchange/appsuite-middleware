@@ -1,11 +1,19 @@
 #! /bin/bash
 
+cleanup() {
+   ./deletecontext
+   ./unregisterdatabase
+   ./unregisterfilestore $FNR
+   ./unregisterserver
+}
+
 runcmd() {
    cmd="$1"
    arg="$2"
    echo "running \"$cmd $arg\" now" 1>&2
-   ./$cmd $arg || { echo "running $cmd failed" | tee FAIL; exit; }
+   ./$cmd $arg || { echo "running $cmd failed" | tee FAIL; cleanup; exit; }
 }
+
 
 cmdpath="$1/perl"
 test -z "$1" && cmdpath=./perl
@@ -23,6 +31,7 @@ runcmd createuser
 runcmd creategroup
 runcmd createresource
 runcmd changeresource
+runcmd changegroup
 runcmd changeuser
 runcmd listcontext
 runcmd listcontextbydatabase

@@ -52,6 +52,8 @@ import java.util.HashSet;
 import com.openexchange.admin.soap.dataobjects.Context;
 import com.openexchange.admin.soap.dataobjects.Group;
 import com.openexchange.admin.soap.dataobjects.Resource;
+import com.openexchange.admin.soap.dataobjects.SOAPStringMap;
+import com.openexchange.admin.soap.dataobjects.SOAPStringMapMap;
 import com.openexchange.admin.soap.dataobjects.User;
 import com.openexchange.admin.soap.dataobjects.UserModuleAccess;
 
@@ -214,6 +216,10 @@ public final class SOAPUtils {
         ret.setReadDatabase(ctx.getReadDatabase());
         ret.setUsedQuota(ctx.getUsedQuota());
         ret.setWriteDatabase(ctx.getWriteDatabase());
+        SOAPStringMapMap userattrs = ctx.getUserAttributes();
+        if( null != userattrs ) {
+            ret.setUserAttributes(SOAPStringMapMap.convertToMapMap(userattrs));
+        }
         return ret;
     }
 
@@ -616,8 +622,11 @@ public final class SOAPUtils {
         if( null != in.getFolderTree() ) {
             out.setFolderTree(in.getFolderTree());
         }
-        if( null != in.getGuiPreferencesForSoap() ) {
-            out.setGuiPreferencesForSoap(in.getGuiPreferencesForSoap());
+        if( null != in.getGuiPreferences() ) {
+            out.setGuiPreferencesForSoap(SOAPStringMap.convertFromMap(in.getGuiPreferences()));
+        }
+        if( null != in.getUserAttributes() ) {
+            out.setUserAttributes(SOAPStringMapMap.convertFromMapMap(in.getUserAttributes()));
         }
         out.setContextadmin(in.isContextadmin());
     }
@@ -987,7 +996,10 @@ public final class SOAPUtils {
             ret.setFolderTree(u.getFolderTree());
         }
         if( null != u.getGuiPreferencesForSoap() ) {
-            ret.setGuiPreferencesForSoap(u.getGuiPreferencesForSoap());
+            ret.setGuiPreferences(SOAPStringMap.convertToMap(u.getGuiPreferencesForSoap()));
+        }
+        if( null != u.getUserAttributes() ) {
+            ret.setUserAttributes(SOAPStringMapMap.convertToMapMap(u.getUserAttributes()));
         }
         ret.setContextadmin(u.isContextadmin());
         return ret;

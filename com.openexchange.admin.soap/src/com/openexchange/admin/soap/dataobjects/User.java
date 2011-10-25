@@ -53,7 +53,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.admin.rmi.dataobjects.SOAPStringMap;
 import com.openexchange.admin.soap.SOAPUtils;
 
 /**
@@ -299,6 +298,24 @@ public class User {
     private Integer folderTree;
 
     private SOAPStringMap guiPreferencesForSoap;
+    
+    private SOAPStringMapMap userAttributes;
+
+    
+    /**
+     * @return the userAttributes
+     */
+    public final SOAPStringMapMap getUserAttributes() {
+        return userAttributes;
+    }
+
+    
+    /**
+     * @param userAttributes the userAttributes to set
+     */
+    public final void setUserAttributes(SOAPStringMapMap userAttributes) {
+        this.userAttributes = userAttributes;
+    }
 
     /**
      * Instantiates a new empty user object

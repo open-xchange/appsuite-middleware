@@ -41,6 +41,12 @@ sub doRequest {
   my $birthday = "1900-01-01T00:00:00.00Z";
   my $pwmech = "{CRYPT}";
 
+# userAttribute
+  my $uattr = SOAP::Data->name("entries" =>
+		\SOAP::Data->value(
+                     SOAP::Data->name("value" => "testval"),
+                     SOAP::Data->name("key" => "soap/test/is/this")));
+
   my $som_entry = 
     $soap->create($inSelf->{'Context'},
 		  SOAP::Data->name("User" => \SOAP::Data->value(
@@ -85,6 +91,14 @@ sub doRequest {
 					\SOAP::Data->value(
 						SOAP::Data->name("value" => "{}"),
 						SOAP::Data->name("key" => "/fastgui")
+					)
+				)
+			)),
+			SOAP::Data->name("userAttributes" => \SOAP::Data->value(
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("key" => "config"),
+						SOAP::Data->name("value" => \SOAP::Data->value($uattr)),
 					)
 				)
 			)),
