@@ -1,3 +1,7 @@
+* 2011-10-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20664: Retry insert attempt on concurrent modification exception
+
 * 2011-10-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 20654: Remain received date field in S/MIME mails

@@ -164,30 +164,31 @@ public class MessageImpl extends PacketImpl implements Message {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("MessageImpl [");
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("MessageImpl {");
+        final String delim = ", ";
         if (type != null) {
-            builder.append("type=").append(type).append(", ");
+            builder.append("type=").append(type).append(delim);
         }
         if (subject != null) {
-            builder.append("subject=").append(subject).append(", ");
+            builder.append("subject=").append(subject).append(delim);
         }
         if (text != null) {
-            builder.append("text=").append(text).append(", ");
+            builder.append("text=").append(text).append(delim);
         }
         if (attachments != null) {
-            builder.append("attachments=").append(attachments).append(", ");
+            builder.append("attachments=").append(attachments).append(delim);
         }
         if (packetId != null) {
-            builder.append("packetId=").append(packetId).append(", ");
+            builder.append("packetId=").append(packetId).append(delim);
         }
         if (from != null) {
-            builder.append("from=").append(from).append(", ");
+            builder.append("from=").append(from).append(delim);
         }
         if (timeStamp != null) {
             builder.append("timeStamp=").append(timeStamp);
         }
-        builder.append("]");
+        builder.append('}');
         return builder.toString();
     }
 

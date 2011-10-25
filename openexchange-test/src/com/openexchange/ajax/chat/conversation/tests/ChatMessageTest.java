@@ -63,12 +63,14 @@ import com.openexchange.ajax.chat.conversation.actions.GetMessageChatConversatio
 import com.openexchange.ajax.chat.conversation.actions.NewChatConversationRequest;
 import com.openexchange.ajax.chat.conversation.actions.NewChatConversationResponse;
 import com.openexchange.ajax.chat.conversation.actions.NewMessageChatConversationRequest;
+import com.openexchange.ajax.chat.conversation.actions.UpdateMessageChatConversationRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.chat.ChatDescription;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.Message;
+import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.MessageImpl;
@@ -265,7 +267,7 @@ public final class ChatMessageTest extends AbstractAJAXSession {
             /*
              * Let the other user post a message
              */
-            final String otherText = "Yeah, read this!";
+            String otherText = "Yeah, read thes mispelled text!";
             {
                 final NewMessageChatConversationRequest newMesRequest = new NewMessageChatConversationRequest();
                 newMesRequest.setConversationId(conversationId);
@@ -280,13 +282,13 @@ public final class ChatMessageTest extends AbstractAJAXSession {
             /*
              * All messages
              */
+            String messageId = null;
             {
                 final AllMessageChatConversationRequest request = new AllMessageChatConversationRequest();
                 request.setConversationId(conversationId);
                 request.setSince(new Date(0), timeZone);
                 final AllMessageChatConversationResponse response = client.execute(request);
                 final List<JSONMessage> messages = response.getMessages(timeZone);
-                String messageId = null;
                 for (final JSONMessage jsonMessage : messages) {
                     if (otherText.equals(jsonMessage.getText())) {
                         messageId = jsonMessage.getMessageId();
@@ -294,6 +296,21 @@ public final class ChatMessageTest extends AbstractAJAXSession {
                     }
                 }
                 assertNotNull("New message not found.", messageId);
+            }
+            /*
+             * Update message
+             */
+            otherText = "Yeah, read this text!";
+            {
+                final UpdateMessageChatConversationRequest request = new UpdateMessageChatConversationRequest();
+                request.setConversationId(conversationId);
+                request.setOptMessageId(messageId);
+                final MessageDescription messageDescription = new MessageDescription();
+                messageDescription.setMessageId(messageId);
+                messageDescription.setText(otherText);
+                request.setMessageDescription(messageDescription);
+                final JSONMessage message = client2.execute(request).getMessage(timeZone);
+                assertEquals("Unexpected text", otherText, message.getText());
             }
         } catch (final Exception e) {
             fail(e.getMessage());

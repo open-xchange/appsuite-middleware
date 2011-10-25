@@ -92,7 +92,6 @@ public final class UpdateAction extends AbstractChatRosterAction {
                 rosterId = RosterID.valueOf(id);
             }
         }
-        final String user = req.checkParameter("user");
         final JSONObject jsonPresence = req.getData();
         /*
          * Get service
@@ -103,7 +102,7 @@ public final class UpdateAction extends AbstractChatRosterAction {
         try {
             access = chatService.access(rosterId.getAccountId(), session);
             access.login();
-            final Presence presence = JSONRosterParser.parsePresence(jsonPresence, user);
+            final Presence presence = JSONRosterParser.parsePresence(jsonPresence, access.getUser().getId());
             access.sendPresence(presence);
             /*
              * Return appropriate result

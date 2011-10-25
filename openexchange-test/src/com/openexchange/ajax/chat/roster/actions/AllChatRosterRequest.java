@@ -47,105 +47,57 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.ajax.chat.roster.actions;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link MessageDescription} - Provides changeable attributes of a {@link Message message}.
- * 
+ * {@link AllChatRosterRequest}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageDescription {
-
-    private String messageId;
-
-    private String subject;
-
-    private String text;
+public final class AllChatRosterRequest extends AbstractChatRosterRequest<AllChatRosterResponse> {
 
     /**
-     * Initializes a new {@link MessageDescription}.
-     * 
-     * @param messageId The message identifier; <code>null</code> for new messages
+     * Initializes a new {@link AllChatRosterRequest}.
      */
-    public MessageDescription(final String messageId) {
+    public AllChatRosterRequest() {
         super();
-        this.messageId = messageId;
     }
 
-    /**
-     * Initializes a new {@link MessageDescription}.
-     */
-    public MessageDescription() {
-        this(null);
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
     }
 
-    /**
-     * Sets the message identifier (aka packet identifier).
-     *
-     * @param messageId The message identifier to set
-     */
-    public void setMessageId(final String messageId) {
-        this.messageId = messageId;
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "all"));
+        return params.toArray(new Parameter[params.size()]);
     }
 
-    /**
-     * Checks if this message description provides any changed attribute.
-     * 
-     * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
-     */
-    public boolean hasAnyAttribute() {
-        if (null != subject) {
-            return true;
-        }
-        if (null != text) {
-            return true;
-        }
-        return false;
+    @Override
+    public AbstractAJAXParser<? extends AllChatRosterResponse> getParser() {
+        return new AbstractAJAXParser<AllChatRosterResponse>(isFailOnError()) {
+
+            @Override
+            protected AllChatRosterResponse createResponse(final Response response) {
+                return new AllChatRosterResponse(response);
+            }
+        };
     }
 
-    /**
-     * Gets the message identifier (aka packet identifier).
-     * 
-     * @return The message identifier
-     */
-    public String getMessageId() {
-        return messageId;
-    }
-
-    /**
-     * Gets the subject
-     * 
-     * @return The subject
-     */
-    public String getSubject() {
-        return subject;
-    }
-
-    /**
-     * Sets the subject
-     * 
-     * @param subject The subject to set
-     */
-    public void setSubject(final String subject) {
-        this.subject = subject;
-    }
-
-    /**
-     * Gets the text
-     * 
-     * @return The text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * Sets the text
-     * 
-     * @param text The text to set
-     */
-    public void setText(final String text) {
-        this.text = text;
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

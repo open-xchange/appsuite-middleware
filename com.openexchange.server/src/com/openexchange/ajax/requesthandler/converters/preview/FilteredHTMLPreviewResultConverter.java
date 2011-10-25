@@ -86,7 +86,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
     }
 
     @Override
-    protected PreviewOutput getOutput() {
+    public PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
     

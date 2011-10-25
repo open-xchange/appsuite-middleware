@@ -47,105 +47,86 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.ajax.chat.roster.actions;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.chat.json.roster.RosterID;
 
 /**
- * {@link MessageDescription} - Provides changeable attributes of a {@link Message message}.
+ * {@link ListChatRosterRequest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageDescription {
+public final class ListChatRosterRequest extends AbstractChatRosterRequest<ListChatRosterResponse> {
 
-    private String messageId;
+    private RosterID rosterId;
 
-    private String subject;
-
-    private String text;
+    private final List<String> users;
 
     /**
-     * Initializes a new {@link MessageDescription}.
-     * 
-     * @param messageId The message identifier; <code>null</code> for new messages
+     * Initializes a new {@link ListChatRosterRequest}.
      */
-    public MessageDescription(final String messageId) {
+    public ListChatRosterRequest() {
         super();
-        this.messageId = messageId;
+        users = new ArrayList<String>();
     }
 
     /**
-     * Initializes a new {@link MessageDescription}.
-     */
-    public MessageDescription() {
-        this(null);
-    }
-
-    /**
-     * Sets the message identifier (aka packet identifier).
-     *
-     * @param messageId The message identifier to set
-     */
-    public void setMessageId(final String messageId) {
-        this.messageId = messageId;
-    }
-
-    /**
-     * Checks if this message description provides any changed attribute.
+     * Adds the user
      * 
-     * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
+     * @param user The user to add
      */
-    public boolean hasAnyAttribute() {
-        if (null != subject) {
-            return true;
+    public void addUser(final String user) {
+        this.users.add(user);
+    }
+
+    /**
+     * Sets the rosterId
+     * 
+     * @param rosterId The rosterId to set
+     */
+    public void setRosterId(final RosterID rosterId) {
+        this.rosterId = rosterId;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "list"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, rosterId.toString()));
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends ListChatRosterResponse> getParser() {
+        return new AbstractAJAXParser<ListChatRosterResponse>(isFailOnError()) {
+
+            @Override
+            protected ListChatRosterResponse createResponse(final Response response) {
+                return new ListChatRosterResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        final JSONArray ja = new JSONArray();
+        for (final String user : users) {
+            ja.put(user);
         }
-        if (null != text) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Gets the message identifier (aka packet identifier).
-     * 
-     * @return The message identifier
-     */
-    public String getMessageId() {
-        return messageId;
-    }
-
-    /**
-     * Gets the subject
-     * 
-     * @return The subject
-     */
-    public String getSubject() {
-        return subject;
-    }
-
-    /**
-     * Sets the subject
-     * 
-     * @param subject The subject to set
-     */
-    public void setSubject(final String subject) {
-        this.subject = subject;
-    }
-
-    /**
-     * Gets the text
-     * 
-     * @return The text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * Sets the text
-     * 
-     * @param text The text to set
-     */
-    public void setText(final String text) {
-        this.text = text;
+        return ja;
     }
 
 }

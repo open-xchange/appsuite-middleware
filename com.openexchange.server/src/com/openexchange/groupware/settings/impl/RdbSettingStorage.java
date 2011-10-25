@@ -227,8 +227,23 @@ public class RdbSettingStorage extends SettingStorage {
      */
     private void saveInternal2(final Connection con, final Setting setting)
         throws OXException {
+        saveInternal2(con, setting, 0);
+    }
+
+    private static final int MAX_RETRY = 3;
+
+    /**
+     * Internally saves a setting into the database.
+     * @param con a writable database connection.
+     * @param setting setting to store.
+     * @param retryCount The current retry count
+     * @throws OXException if storing fails.
+     */
+    private void saveInternal2(final Connection con, final Setting setting, final int retryCount)
+        throws OXException {
         final boolean update = settingExists(con, userId, setting);
         PreparedStatement stmt = null;
+        boolean retry = false;
         try {
             if (update) {
                 stmt = con.prepareStatement(UPDATE_SETTING);
@@ -240,11 +255,29 @@ public class RdbSettingStorage extends SettingStorage {
             stmt.setInt(pos++, ctxId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, setting.getId());
-            stmt.executeUpdate();
+            if (update) {
+                stmt.executeUpdate();
+            } else {
+                try {
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    if (retryCount > MAX_RETRY) {
+                        throw e;
+                    }
+                    // Another thread inserted in the meantime: Retry
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Detected concurrent insertion of a user's setting.", e);
+                    }
+                    retry = true;
+                }
+            }
         } catch (final SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
+        }
+        if (retry) {
+            saveInternal2(con, setting, retryCount + 1);
         }
     }
 

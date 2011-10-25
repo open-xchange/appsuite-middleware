@@ -47,105 +47,39 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.ajax.chat.roster.actions;
+
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.chat.conversation.JSONChatUser;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link MessageDescription} - Provides changeable attributes of a {@link Message message}.
+ * {@link GetChatRosterResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageDescription {
-
-    private String messageId;
-
-    private String subject;
-
-    private String text;
+public final class GetChatRosterResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link MessageDescription}.
+     * Initializes a new {@link GetChatRosterResponse}.
      * 
-     * @param messageId The message identifier; <code>null</code> for new messages
+     * @param response
      */
-    public MessageDescription(final String messageId) {
-        super();
-        this.messageId = messageId;
+    public GetChatRosterResponse(final Response response) {
+        super(response);
     }
 
     /**
-     * Initializes a new {@link MessageDescription}.
-     */
-    public MessageDescription() {
-        this(null);
-    }
-
-    /**
-     * Sets the message identifier (aka packet identifier).
-     *
-     * @param messageId The message identifier to set
-     */
-    public void setMessageId(final String messageId) {
-        this.messageId = messageId;
-    }
-
-    /**
-     * Checks if this message description provides any changed attribute.
+     * Gets the requested user.
      * 
-     * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
+     * @return The user
+     * @throws JSONException If parsing JSON fails
      */
-    public boolean hasAnyAttribute() {
-        if (null != subject) {
-            return true;
-        }
-        if (null != text) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Gets the message identifier (aka packet identifier).
-     * 
-     * @return The message identifier
-     */
-    public String getMessageId() {
-        return messageId;
-    }
-
-    /**
-     * Gets the subject
-     * 
-     * @return The subject
-     */
-    public String getSubject() {
-        return subject;
-    }
-
-    /**
-     * Sets the subject
-     * 
-     * @param subject The subject to set
-     */
-    public void setSubject(final String subject) {
-        this.subject = subject;
-    }
-
-    /**
-     * Gets the text
-     * 
-     * @return The text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * Sets the text
-     * 
-     * @param text The text to set
-     */
-    public void setText(final String text) {
-        this.text = text;
+    public JSONChatUser getUser(final TimeZone timeZone) throws JSONException {
+        return JSONChatUser.valueOf((JSONObject) getData(), timeZone);
     }
 
 }

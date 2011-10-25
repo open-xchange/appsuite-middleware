@@ -63,6 +63,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Action;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -90,6 +91,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(defaultFormat = "file")
 public final class GetAttachmentAction extends AbstractMailAction implements ETagAwareAJAXActionService {
 
     /**

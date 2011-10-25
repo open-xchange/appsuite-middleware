@@ -111,15 +111,15 @@ public class ChatUserImpl implements ChatUser {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("ChatUserImpl [");
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("ChatUserImpl {");
         if (id != null) {
             builder.append("id=").append(id).append(", ");
         }
         if (name != null) {
             builder.append("name=").append(name);
         }
-        builder.append("]");
+        builder.append('}');
         return builder.toString();
     }
 

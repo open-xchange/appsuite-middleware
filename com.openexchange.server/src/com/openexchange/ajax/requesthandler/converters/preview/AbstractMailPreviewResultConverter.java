@@ -49,27 +49,42 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
-import com.openexchange.preview.PreviewOutput;
+import java.io.ByteArrayOutputStream;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
- * {@link HTMLPreviewResultConverter}
- *
+ * {@link AbstractMailPreviewResultConverter}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HTMLPreviewResultConverter extends AbstractPreviewResultConverter {
+abstract class AbstractMailPreviewResultConverter implements ResultConverter {
 
-    private static final String FORMAT = "preview";
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractMailPreviewResultConverter.class));
+
+    protected final AbstractPreviewResultConverter resultConverter;
 
     /**
-     * Initializes a new {@link HTMLPreviewResultConverter}.
+     * Initializes a new {@link AbstractMailPreviewResultConverter}.
      */
-    public HTMLPreviewResultConverter() {
+    protected AbstractMailPreviewResultConverter(final AbstractPreviewResultConverter resultConverter) {
         super();
+        this.resultConverter = resultConverter;
     }
 
     @Override
-    public String getOutputFormat() {
-        return FORMAT;
+    public String getInputFormat() {
+        return "mail";
     }
 
     @Override
@@ -78,8 +93,37 @@ public final class HTMLPreviewResultConverter extends AbstractPreviewResultConve
     }
 
     @Override
-    public PreviewOutput getOutput() {
-        return PreviewOutput.HTML;
+    public String getOutputFormat() {
+        return resultConverter.getOutputFormat();
+    }
+
+    @Override
+    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        /*
+         * Create file holder from mail
+         */
+        final MailMessage mail = (MailMessage) request.getData();
+        final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+        try {
+            mail.writeTo(baos);
+        } catch (final OXException e) {
+            if (!MailExceptionCode.NO_CONTENT.equals(e)) {
+                throw e;
+            }
+            LOG.debug(e.getMessage(), e);
+            baos.reset();
+        }
+        /*
+         * Create appropriate file holder
+         */
+        final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
+        fileHolder.setContentType("application/octet-stream");
+        fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
+        request.setData(fileHolder, "file");
+        /*
+         * Convert
+         */
+        resultConverter.convert(request, result, session, converter);
     }
 
 }

@@ -57,7 +57,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * {@link JSONChat}
+ * {@link JSONChat} - Represents a chat rendered with JSON.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

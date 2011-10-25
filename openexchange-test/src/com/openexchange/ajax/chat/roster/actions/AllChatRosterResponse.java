@@ -47,105 +47,68 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.ajax.chat.roster.actions;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.chat.roster.JSONRoster;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link MessageDescription} - Provides changeable attributes of a {@link Message message}.
+ * {@link AllChatRosterResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageDescription {
+public final class AllChatRosterResponse extends AbstractAJAXResponse {
 
-    private String messageId;
-
-    private String subject;
-
-    private String text;
+    private final boolean isArray;
 
     /**
-     * Initializes a new {@link MessageDescription}.
+     * Initializes a new {@link AllChatRosterResponse}.
      * 
-     * @param messageId The message identifier; <code>null</code> for new messages
+     * @param response
      */
-    public MessageDescription(final String messageId) {
-        super();
-        this.messageId = messageId;
+    public AllChatRosterResponse(final Response response) {
+        super(response);
+        isArray = response.getData() instanceof JSONArray;
     }
 
     /**
-     * Initializes a new {@link MessageDescription}.
-     */
-    public MessageDescription() {
-        this(null);
-    }
-
-    /**
-     * Sets the message identifier (aka packet identifier).
-     *
-     * @param messageId The message identifier to set
-     */
-    public void setMessageId(final String messageId) {
-        this.messageId = messageId;
-    }
-
-    /**
-     * Checks if this message description provides any changed attribute.
+     * Gets the rosters of all available chat accounts.
      * 
-     * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
+     * @return The rosters
+     * @throws JSONException If parsing JSON fails
      */
-    public boolean hasAnyAttribute() {
-        if (null != subject) {
-            return true;
+    public List<JSONRoster> getRosters(final TimeZone timeZone) throws JSONException {
+        if (!isArray) {
+            return Collections.singletonList(getRoster(timeZone));
         }
-        if (null != text) {
-            return true;
+        /*
+         * Parse array
+         */
+        final JSONArray rosters = (JSONArray) getData();
+        final int len = rosters.length();
+        final List<JSONRoster> list = new ArrayList<JSONRoster>(len);
+        for (int i = 0; i < len; i++) {
+            list.add(JSONRoster.valueOf(rosters.getJSONObject(i), timeZone));
         }
-        return false;
+        return list;
     }
 
     /**
-     * Gets the message identifier (aka packet identifier).
+     * Gets the single roster.
      * 
-     * @return The message identifier
+     * @return The roster
+     * @throws JSONException If parsing JSON fails
      */
-    public String getMessageId() {
-        return messageId;
-    }
-
-    /**
-     * Gets the subject
-     * 
-     * @return The subject
-     */
-    public String getSubject() {
-        return subject;
-    }
-
-    /**
-     * Sets the subject
-     * 
-     * @param subject The subject to set
-     */
-    public void setSubject(final String subject) {
-        this.subject = subject;
-    }
-
-    /**
-     * Gets the text
-     * 
-     * @return The text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * Sets the text
-     * 
-     * @param text The text to set
-     */
-    public void setText(final String text) {
-        this.text = text;
+    public JSONRoster getRoster(final TimeZone timeZone) throws JSONException {
+        return JSONRoster.valueOf((JSONObject) getData(), timeZone);
     }
 
 }

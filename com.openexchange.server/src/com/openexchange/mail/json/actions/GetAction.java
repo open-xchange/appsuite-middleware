@@ -61,6 +61,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
@@ -80,6 +81,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(defaultFormat = "mail")
 public final class GetAction extends AbstractMailAction {
 
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(GetAction.class));

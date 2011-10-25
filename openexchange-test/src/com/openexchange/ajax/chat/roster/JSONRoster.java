@@ -47,105 +47,90 @@
  *
  */
 
-package com.openexchange.chat;
+package com.openexchange.ajax.chat.roster;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.TimeZone;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.chat.conversation.JSONChatUser;
 
 /**
- * {@link MessageDescription} - Provides changeable attributes of a {@link Message message}.
+ * {@link JSONRoster} - Represents a chat roster rendered with JSON.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MessageDescription {
-
-    private String messageId;
-
-    private String subject;
-
-    private String text;
+public final class JSONRoster {
 
     /**
-     * Initializes a new {@link MessageDescription}.
+     * Parses given JSON to a {@link JSONRoster}
      * 
-     * @param messageId The message identifier; <code>null</code> for new messages
+     * @param jsonPresence The JSON roster data
+     * @return The parsed {@link JSONRoster}
+     * @throws JSONException If a JSON error occurs
      */
-    public MessageDescription(final String messageId) {
+    public static JSONRoster valueOf(final JSONObject jsonRoster, final TimeZone timeZone) throws JSONException {
+        final JSONRoster ret = new JSONRoster();
+        ret.setId(jsonRoster.getString("id"));
+        final JSONArray members = jsonRoster.optJSONArray("members");
+        if (null != members) {
+            final int length = members.length();
+            for (int i = 0; i < length; i++) {
+                ret.addMember(JSONChatUser.valueOf(members.getJSONObject(i), timeZone));
+            }
+        }
+        return ret;
+    }
+
+    private String id;
+
+    private final List<JSONChatUser> members;
+
+    /**
+     * Initializes a new {@link JSONRoster}.
+     */
+    public JSONRoster() {
         super();
-        this.messageId = messageId;
+        members = new ArrayList<JSONChatUser>(8);
     }
 
     /**
-     * Initializes a new {@link MessageDescription}.
-     */
-    public MessageDescription() {
-        this(null);
-    }
-
-    /**
-     * Sets the message identifier (aka packet identifier).
-     *
-     * @param messageId The message identifier to set
-     */
-    public void setMessageId(final String messageId) {
-        this.messageId = messageId;
-    }
-
-    /**
-     * Checks if this message description provides any changed attribute.
+     * Gets the id
      * 
-     * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
+     * @return The id
      */
-    public boolean hasAnyAttribute() {
-        if (null != subject) {
-            return true;
-        }
-        if (null != text) {
-            return true;
-        }
-        return false;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Gets the message identifier (aka packet identifier).
+     * Sets the id
      * 
-     * @return The message identifier
+     * @param id The id to set
      */
-    public String getMessageId() {
-        return messageId;
+    public void setId(final String id) {
+        this.id = id;
     }
 
     /**
-     * Gets the subject
+     * Gets the members
      * 
-     * @return The subject
+     * @return The members
      */
-    public String getSubject() {
-        return subject;
+    public List<JSONChatUser> getMembers() {
+        return Collections.unmodifiableList(members);
     }
 
     /**
-     * Sets the subject
+     * Adds given member.
      * 
-     * @param subject The subject to set
+     * @param user The member to add
      */
-    public void setSubject(final String subject) {
-        this.subject = subject;
-    }
-
-    /**
-     * Gets the text
-     * 
-     * @return The text
-     */
-    public String getText() {
-        return text;
-    }
-
-    /**
-     * Sets the text
-     * 
-     * @param text The text to set
-     */
-    public void setText(final String text) {
-        this.text = text;
+    public void addMember(final JSONChatUser user) {
+        members.add(user);
     }
 
 }

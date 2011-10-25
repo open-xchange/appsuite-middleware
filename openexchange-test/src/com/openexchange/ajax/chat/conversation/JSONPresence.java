@@ -57,7 +57,7 @@ import com.openexchange.ajax.chat.conversation.actions.AbstractChatConversationR
 import com.openexchange.chat.Presence;
 
 /**
- * {@link JSONPresence}
+ * {@link JSONPresence} - Represents a presence message rendered with JSON.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
