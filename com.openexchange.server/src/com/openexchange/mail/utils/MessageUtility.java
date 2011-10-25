@@ -305,7 +305,11 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            final String retval = new String(bytes, "GB2312");
+            String retval = new String(bytes, "GB2312");
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            retval = new String(bytes, "GB18030");
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
