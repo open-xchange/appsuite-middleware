@@ -140,3 +140,5 @@ com.openexchange.publish.online.infostore/jars
 com.openexchange.security/jars
 com.openexchange.smtp/jars
 com.openexchange.subscribe.facebook/jars
+com.openexchange.halo.json/build
+com.openexchange.halo.json/jars
