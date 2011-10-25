@@ -55,10 +55,9 @@ import com.openexchange.chat.Presence;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
 
-
 /**
  * {@link JSONRosterParser}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONRosterParser {
@@ -89,5 +88,5 @@ public final class JSONRosterParser {
         }
         return presence;
     }
-    
+
 }
