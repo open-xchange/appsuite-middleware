@@ -52,6 +52,7 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -88,13 +89,13 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
 
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final FileHolder fileHolder;
+        final IFileHolder fileHolder;
         {
             final Object resultObject = result.getResultObject();
-            if (!(resultObject instanceof FileHolder)) {
+            if (!(resultObject instanceof IFileHolder)) {
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(FileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
             }
-            fileHolder = (FileHolder) resultObject;
+            fileHolder = (IFileHolder) resultObject;
         }
         /*
          * Obtain preview document
