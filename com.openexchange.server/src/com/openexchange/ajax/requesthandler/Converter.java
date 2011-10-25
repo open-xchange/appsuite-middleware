@@ -52,12 +52,23 @@ package com.openexchange.ajax.requesthandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link Converter}
- *
+ * {@link Converter} - Converts a request result's data object from a source format to a target format.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public interface Converter {
-    public void convert(String from, String to, AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException;
+
+    /**
+     * Converts current request result's data object from format given by <code>from</code> to the format given by <code>to</code>.
+     * 
+     * @param fromFormat The from format
+     * @param toFormat The target format
+     * @param requestData The AJAX request data
+     * @param result The AJAX request result
+     * @param session The associated session
+     * @throws OXException If an error occurs
+     */
+    public void convert(String fromFormat, String toFormat, AJAXRequestData requestData, AJAXRequestResult result, ServerSession session) throws OXException;
 }

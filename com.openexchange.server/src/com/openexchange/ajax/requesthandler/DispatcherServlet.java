@@ -71,7 +71,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
@@ -224,6 +224,7 @@ public class DispatcherServlet extends SessionServlet {
              * Parse AJAXRequestData
              */
             final AJAXRequestData requestData = parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session);
+            requestData.setSession(session);
             /*
              * Start dispatcher processing
              */
@@ -245,11 +246,11 @@ public class DispatcherServlet extends SessionServlet {
             sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            JSONResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
+            APIResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            JSONResponseRenderer.writeResponse(new Response().setException(exception), action, httpRequest, httpResponse);
+            APIResponseRenderer.writeResponse(new Response().setException(exception), action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);

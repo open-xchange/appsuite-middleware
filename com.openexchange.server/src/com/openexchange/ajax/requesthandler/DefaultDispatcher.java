@@ -165,15 +165,9 @@ public class DefaultDispatcher implements Dispatcher {
         /*
          * Check for Action annotation
          */
-        final Action actionMetadata = getActionMetadata(action);
-        if (actionMetadata == null) {
-            if (modifiedRequestData.getFormat() == null) {
-                modifiedRequestData.setFormat("apiResponse");
-            }
-        } else {
-            if (modifiedRequestData.getFormat() == null) {
-                modifiedRequestData.setFormat(actionMetadata.defaultFormat());
-            }
+        if (modifiedRequestData.getFormat() == null) {
+            final Action actionMetadata = getActionMetadata(action);
+            modifiedRequestData.setFormat(actionMetadata == null ? "apiResponse" : actionMetadata.defaultFormat());
         }
         /*
          * State already initialized for module?

@@ -75,7 +75,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResult
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.HTMLResponseRenderer;
-import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
@@ -122,8 +122,10 @@ public class DispatcherActivator extends HousekeepingActivator {
             defaultConverter.addConverter(textPreviewResultConverter);
             defaultConverter.addConverter(filteredHTMLPreviewResultConverter);
             defaultConverter.addConverter(new DownloadPreviewResultConverter());
-            /*
-             * Mail converters
+            /*-
+             * TODO: Mail converters
+             * 
+             * Might throw: java.lang.IllegalArgumentException: Can't find path from mail to apiResponse
              */
             defaultConverter.addConverter(new MailTextPreviewResultConverter(textPreviewResultConverter));
             defaultConverter.addConverter(new MailFilteredHTMLPreviewResultConverter(filteredHTMLPreviewResultConverter));
@@ -150,7 +152,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         DispatcherServlet.setPrefix("/ajax/");
         Multiple.setDispatcher(dispatcher);
 
-        DispatcherServlet.registerRenderer(new JSONResponseRenderer());
+        DispatcherServlet.registerRenderer(new APIResponseRenderer());
         final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
