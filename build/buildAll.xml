@@ -27,6 +27,9 @@
         <ant antfile="build.xml" target="${allBuildType}">
             <property name="packageName" value="${packageName}"/>
         </ant>
+        <ant antfile="build.xml" target="clean">
+            <property name="packageName" value="${packageName}"/>
+        </ant>
     </target>
 
     <target name="setBuild" description="Sets the build type to build and install all bundles.">
