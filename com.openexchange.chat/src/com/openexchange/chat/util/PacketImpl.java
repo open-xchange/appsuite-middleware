@@ -117,8 +117,8 @@ public abstract class PacketImpl implements Packet {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("PacketImpl [");
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("PacketImpl {");
         if (packetId != null) {
             builder.append("packetId=").append(packetId).append(", ");
         }
@@ -128,7 +128,7 @@ public abstract class PacketImpl implements Packet {
         if (timeStamp != null) {
             builder.append("timeStamp=").append(timeStamp);
         }
-        builder.append("]");
+        builder.append('}');
         return builder.toString();
     }
 

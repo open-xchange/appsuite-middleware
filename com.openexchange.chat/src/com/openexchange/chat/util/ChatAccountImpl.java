@@ -170,8 +170,8 @@ public class ChatAccountImpl implements ChatAccount {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("ChatAccountImpl [");
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("ChatAccountImpl {");
         if (configuration != null) {
             builder.append("configuration=").append(configuration).append(", ");
         }
@@ -184,7 +184,7 @@ public class ChatAccountImpl implements ChatAccount {
         if (chatService != null) {
             builder.append("chatService=").append(chatService);
         }
-        builder.append("]");
+        builder.append('}');
         return builder.toString();
     }
 
