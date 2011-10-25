@@ -72,12 +72,23 @@ public final class UpdateMessageChatConversationRequest extends AbstractChatConv
 
     private ConversationID conversationId;
 
+    private String optMessageId;
+
     /**
      * Initializes a new {@link UpdateMessageChatConversationRequest}.
      */
     public UpdateMessageChatConversationRequest() {
         super();
         setFailOnError(true);
+    }
+
+    /**
+     * Sets the optMessageId
+     *
+     * @param optMessageId The optMessageId to set
+     */
+    public void setOptMessageId(final String optMessageId) {
+        this.optMessageId = optMessageId;
     }
 
     /**
@@ -108,6 +119,9 @@ public final class UpdateMessageChatConversationRequest extends AbstractChatConv
         final List<Parameter> params = new ArrayList<Parameter>(3);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "updateMessage"));
         params.add(new Parameter(AJAXServlet.PARAMETER_ID, conversationId.toString()));
+        if (null != optMessageId) {
+            params.add(new Parameter("messageId", optMessageId));
+        }
         return params.toArray(new Parameter[params.size()]);
     }
 
@@ -125,9 +139,20 @@ public final class UpdateMessageChatConversationRequest extends AbstractChatConv
     @Override
     public Object getBody() throws IOException, JSONException {
         final JSONObject json = new JSONObject();
-        json.put("id", messageDescription.getMessageId());
-        json.put("subject", messageDescription.getSubject());
-        json.put("text", messageDescription.getText());
+        if (null != messageDescription) {
+            final String messageId = messageDescription.getMessageId();
+            if (null != messageId) {
+                json.put("id", messageId);
+            }
+            final String subject = messageDescription.getSubject();
+            if (null != subject) {
+                json.put("subject", subject);
+            }
+            final String text = messageDescription.getText();
+            if (null != text) {
+                json.put("text", text);
+            }
+        }
         return json;
     }
 
