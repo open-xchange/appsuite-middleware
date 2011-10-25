@@ -78,6 +78,7 @@ public class ComputeBuildOrder extends Task {
     private File dir;
     private String propertyName;
     private String projectList;
+    private boolean strict = true;
     private Path classpath;
 
     public ComputeBuildOrder() {
@@ -86,6 +87,10 @@ public class ComputeBuildOrder extends Task {
 
     public final void setProjectList(final String projectList) {
         this.projectList = projectList;
+    }
+
+    public final void setStrict(final boolean strict) {
+        this.strict = strict;
     }
 
     public final void setPropertyName(final String propertyName) {
@@ -151,7 +156,7 @@ public class ComputeBuildOrder extends Task {
 
         // Compute dependencies in the bundles.
         for (AbstractModule module : allModules) {
-            module.computeDependencies(modulesByName, modulesByPackage);
+            module.computeDependencies(modulesByName, modulesByPackage, strict);
         }
         for (AbstractModule module : allModules) {
             module.computeDependenciesForFragments();

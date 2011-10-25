@@ -52,10 +52,10 @@ package com.openexchange.ant.data;
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.tools.ant.BuildException;
 import org.jdom.Attribute;
 import org.jdom.Document;
@@ -69,7 +69,46 @@ import org.jdom.input.SAXBuilder;
  */
 public class ProjectSetFileReader {
 
-    public static Map<String, Repository> parse(final String projectSetFileName) {
+    private final Map<String, Repository> projects = new HashMap<String, Repository>();
+    private final List<String> projectList = new ArrayList<String>();
+
+    public ProjectSetFileReader(final String filename) {
+        super();
+        parse(filename);
+    }
+
+    public Map<String, Repository> getProjects() {
+        return projects;
+    }
+
+    public List<String> getProjectList() {
+        return projectList;
+    }
+
+    private void parse(final String filename) {
+        try {
+            final Document document = new SAXBuilder().build(new File(filename));
+            final Element psf = document.getRootElement();
+            if (!"psf".equals(psf.getName())) {
+                throw new BuildException("Root element is not a PSF but a " + psf.toString());
+            }
+            for (final Object tmp : psf.getChildren()) {
+                if (!(tmp instanceof Element)) {
+                    throw new BuildException("PSF child is not an element but a " + tmp.getClass().getName());
+                }
+                for (final Repository repository : parseProvider((Element) tmp)) {
+                    projects.put(repository.getProjectName(), repository);
+                    projectList.add(repository.getProjectName());
+                }
+            }
+        } catch (final Exception e) {
+            final StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            throw new BuildException(sw.toString());
+        }
+    }
+
+    public static Map<String, Repository> parseMap(final String projectSetFileName) {
         try {
             final Document document = new SAXBuilder().build(new File(projectSetFileName));
             final Element psf = document.getRootElement();
@@ -93,7 +132,7 @@ public class ProjectSetFileReader {
         }
     }
 
-    private static Set<Repository> parseProvider(final Element providerElement) {
+    private static List<Repository> parseProvider(final Element providerElement) {
         if (!"provider".equals(providerElement.getName())) {
             throw new BuildException("PSF child is not a provider but a " + providerElement.getName());
         }
@@ -106,7 +145,7 @@ public class ProjectSetFileReader {
         if (null == type) {
             throw new BuildException("Unknown provider " + providerName);
         }
-        final Set<Repository> repositories = new HashSet<Repository>();
+        final List<Repository> repositories = new ArrayList<Repository>();
         for (final Object tmp : providerElement.getChildren()) {
             if (!(tmp instanceof Element)) {
                 throw new BuildException("Provider child is not an element but a " + tmp.getClass().getName());

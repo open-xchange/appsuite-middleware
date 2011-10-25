@@ -138,7 +138,7 @@ public final class SetBundleProperties extends Task {
 
         // Compute dependencies in the bundles.
         for (AbstractModule tmpModule : allModules) {
-            tmpModule.computeDependencies(modulesByName, modulesByPackage);
+            tmpModule.computeDependencies(modulesByName, modulesByPackage, true);
         }
         for (AbstractModule tmpModule : allModules) {
             tmpModule.computeDependenciesForFragments();

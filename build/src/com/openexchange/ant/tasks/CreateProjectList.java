@@ -49,9 +49,11 @@
 
 package com.openexchange.ant.tasks;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -89,13 +91,16 @@ public class CreateProjectList extends Task {
         // Parse the PSF files.
         final String[] projectSetFiles = projectSets.list();
         final Map<String, Repository> projects = new HashMap<String, Repository>();
+        final List<String> projectList = new ArrayList<String>();
         for (final String projectSetFile : projectSetFiles) {
             log("Parsing " + projectSetFile, Project.MSG_INFO);
-            projects.putAll(ProjectSetFileReader.parse(projectSetFile));
+            final ProjectSetFileReader reader = new ProjectSetFileReader(projectSetFile);
+            projects.putAll(reader.getProjects());
+            projectList.addAll(reader.getProjectList());
         }
 
         // Log the project list and output the property for it.
-        final String projectNamesList = joinCommaSeparated(projects.keySet());
+        final String projectNamesList = joinCommaSeparated(projectList);
         log(name + "=" + projectNamesList, Project.MSG_INFO);
         getProject().setInheritedProperty(name, projectNamesList);
 
@@ -127,7 +132,7 @@ public class CreateProjectList extends Task {
      * @param projects Projects to put into that list.
      * @return
      */
-    public String joinCommaSeparated(final Set<String> projects) {
+    public String joinCommaSeparated(final Collection<String> projects) {
         final StringBuffer buffer = new StringBuffer();
         for (final String project : projects) {
             buffer.append(project);

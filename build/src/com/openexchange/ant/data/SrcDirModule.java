@@ -131,14 +131,14 @@ public class SrcDirModule extends DirModule {
     }
 
     @Override
-    public void computeDependencies(final Map<String, AbstractModule> projectsByName, final Map<String, Set<AbstractModule>> projectsByPackage) {
+    public void computeDependencies(final Map<String, AbstractModule> projectsByName, final Map<String, Set<AbstractModule>> projectsByPackage, final boolean strict) {
         for (final String classpathProject : classpathDependencies) {
             final AbstractModule module = projectsByName.get(classpathProject);
             if (module != null && module != this) {
                 dependencies.add(module);
             }
         }
-        super.computeDependencies(projectsByName, projectsByPackage);
+        super.computeDependencies(projectsByName, projectsByPackage, strict);
     }
 
     @Override
