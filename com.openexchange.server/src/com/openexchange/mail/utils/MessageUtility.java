@@ -294,9 +294,6 @@ public final class MessageUtility {
              */
             return readBig5Bytes(getBytesFrom(inStream));
         }
-        /*
-         * TODO: Re-think to make this the default case...
-         */
         if (isGB2312(charset)) {
             /*
              * Special treatment for possible GB2312 encoded stream
