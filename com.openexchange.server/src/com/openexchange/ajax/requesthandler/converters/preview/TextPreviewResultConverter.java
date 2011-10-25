@@ -58,6 +58,8 @@ import com.openexchange.preview.PreviewOutput;
  */
 public final class TextPreviewResultConverter extends AbstractPreviewResultConverter {
 
+    private static final String FORMAT = "text";
+
     /**
      * Initializes a new {@link TextPreviewResultConverter}.
      */
@@ -67,7 +69,7 @@ public final class TextPreviewResultConverter extends AbstractPreviewResultConve
 
     @Override
     public String getOutputFormat() {
-        return "text";
+        return FORMAT;
     }
 
     @Override
@@ -76,7 +78,7 @@ public final class TextPreviewResultConverter extends AbstractPreviewResultConve
     }
 
     @Override
-    protected PreviewOutput getOutput() {
+    public PreviewOutput getOutput() {
         return PreviewOutput.TEXT;
     }
 

@@ -69,6 +69,8 @@ import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.DownloadPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.MailFilteredHTMLPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
@@ -110,10 +112,22 @@ public class DispatcherActivator extends HousekeepingActivator {
         /*
          * Add preview converters
          */
-        defaultConverter.addConverter(new HTMLPreviewResultConverter());
-        defaultConverter.addConverter(new TextPreviewResultConverter());
-        defaultConverter.addConverter(new FilteredHTMLPreviewResultConverter());
-        defaultConverter.addConverter(new DownloadPreviewResultConverter());
+        {
+            final TextPreviewResultConverter textPreviewResultConverter = new TextPreviewResultConverter();
+            final FilteredHTMLPreviewResultConverter filteredHTMLPreviewResultConverter = new FilteredHTMLPreviewResultConverter();
+            /*
+             * File converters
+             */
+            defaultConverter.addConverter(new HTMLPreviewResultConverter());
+            defaultConverter.addConverter(textPreviewResultConverter);
+            defaultConverter.addConverter(filteredHTMLPreviewResultConverter);
+            defaultConverter.addConverter(new DownloadPreviewResultConverter());
+            /*
+             * Mail converters
+             */
+            defaultConverter.addConverter(new MailTextPreviewResultConverter(textPreviewResultConverter));
+            defaultConverter.addConverter(new MailFilteredHTMLPreviewResultConverter(filteredHTMLPreviewResultConverter));
+        }
 
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 

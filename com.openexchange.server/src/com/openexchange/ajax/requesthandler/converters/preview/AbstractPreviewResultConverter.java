@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractPreviewResultConverter implements ResultConverter {
+abstract class AbstractPreviewResultConverter implements ResultConverter {
 
     /**
      * Initializes a new {@link AbstractPreviewResultConverter}.
@@ -93,7 +93,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         {
             final Object resultObject = result.getResultObject();
             if (!(resultObject instanceof IFileHolder)) {
-                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(FileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
             }
             fileHolder = (IFileHolder) resultObject;
         }
@@ -136,6 +136,6 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      *
      * @return The output format
      */
-    protected abstract PreviewOutput getOutput();
+    public abstract PreviewOutput getOutput();
 
 }
