@@ -66,6 +66,19 @@
                 </if>
                 <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
                 <!-- TODO include the dist build as a normal buildType in build-project.xml -->
+            	<if>
+            		<available file="${destDir}/${bundlesDir}" type="dir"/>
+            		<then>
+            			<path id="buildClasspath">
+            				<path refid="classpath"/>
+            				<fileset dir="${destDir}/${bundlesDir}" includes="*.jar"/>
+		                    <dirset dir="${destDir}/${bundlesDir}" includes="*"/>
+            			</path>
+            		</then>
+        			<else>
+        				<path id="buildClasspath" refid="classpath"/>
+            		</else>
+            	</if>
                 <if>
                     <equals arg1="dist" arg2="${buildType}"/>
                     <then>
@@ -73,9 +86,9 @@
                     </then>
                     <else>
                         <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
-                            <classpath refid="classpath"/>
+                            <classpath refid="buildClasspath"/>
                         </setBundleProperties>
-                        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build" />
+                        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
                     </else>
                 </if>
             </try>
@@ -121,7 +134,7 @@
         <property name="buildType" value="dist"/>
     </target>
 
-    <target name="readVersion" description="Reads the latest version from the changelog of the package.">
+    <target name="readVersion" depends="antExtensions" description="Reads the latest version from the changelog of the package.">
         <loadfile property="firstChangeLogLine" srcFile="${checkoutDir}/${packageName}/debian/changelog">
             <filterchain>
                 <headfilter lines="1"/>
