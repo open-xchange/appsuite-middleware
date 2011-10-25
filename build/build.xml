@@ -51,37 +51,56 @@
 
     <target name="buildProject" description="Copies the build.xml to the bundle if there is not already one and executes it.">
         <echo message="Build bundle ${projectName} ${buildType}"/>
-        <if>
-            <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
-            <then>
-                <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build-project.xml" overwrite="true"/>
-                <property name="deleteBuildXML" value="build-project.xml"/>
-            </then>
-            <else>
-                <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
-                <property name="deleteBuildXML" value="build.xml"/>
-            </else>
-        </if>
-        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
-        <!-- TODO include the dist build as a normal buildType in build-project.xml -->
-        <if>
-            <equals arg1="dist" arg2="${buildType}"/>
-            <then>
-                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
-            </then>
-            <else>
-                <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
-                    <classpath refid="classpath"/>
-                </setBundleProperties>
-                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build" />
-            </else>
-        </if>
-        <if>
-            <isset property="deleteBuildXML"/>
-            <then>
-                <delete file="${checkoutDir}/${projectName}/${deleteBuildXML}"/>
-            </then>
-        </if>
+        <trycatch>
+            <try>
+                <if>
+                    <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
+                    <then>
+                        <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build-project.xml" overwrite="true"/>
+                        <property name="deleteBuildXML" value="build-project.xml"/>
+                    </then>
+                    <else>
+                        <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
+                        <property name="deleteBuildXML" value="build.xml"/>
+                    </else>
+                </if>
+                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
+                <!-- TODO include the dist build as a normal buildType in build-project.xml -->
+            	<if>
+            		<available file="${destDir}/${bundlesDir}" type="dir"/>
+            		<then>
+            			<path id="buildClasspath">
+            				<path refid="classpath"/>
+            				<fileset dir="${destDir}/${bundlesDir}" includes="*.jar"/>
+		                    <dirset dir="${destDir}/${bundlesDir}" includes="*"/>
+            			</path>
+            		</then>
+        			<else>
+        				<path id="buildClasspath" refid="classpath"/>
+            		</else>
+            	</if>
+                <if>
+                    <equals arg1="dist" arg2="${buildType}"/>
+                    <then>
+                        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
+                    </then>
+                    <else>
+                        <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
+                            <classpath refid="buildClasspath"/>
+                        </setBundleProperties>
+                        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
+                    </else>
+                </if>
+            </try>
+            <finally>
+                <if>
+                    <isset property="deleteBuildXML"/>
+                    <then>
+                        <delete file="${checkoutDir}/${projectName}/${deleteBuildXML}"/>
+                    </then>
+                </if>
+            </finally>
+        </trycatch>
     </target>
 
     <target name="buildProjects" depends="antExtensions,prepare" description="Fetches projects from repository, computes build order and builds then each project.">
@@ -115,7 +134,7 @@
         <property name="buildType" value="dist"/>
     </target>
 
-    <target name="readVersion" description="Reads the latest version from the changelog of the package.">
+    <target name="readVersion" depends="antExtensions" description="Reads the latest version from the changelog of the package.">
         <loadfile property="firstChangeLogLine" srcFile="${checkoutDir}/${packageName}/debian/changelog">
             <filterchain>
                 <headfilter lines="1"/>
@@ -155,7 +174,7 @@
             <param name="packageDir" value="${packageDir}"/>
          </antcall>
         <!-- dpkg-source does not like anything else -->
-        <tar destfile="${tmpDir}/${packageName}_${version}.orig.tar.bz2" compression="bzip2">
+        <tar destfile="${tmpDir}/${packageName}_${version}.orig.tar.bz2" compression="bzip2" longfile="gnu">
             <fileset dir="${tmpDir}">
                 <include name="${packageName}-${version}/**"/>
                 <exclude name="${packageName}-${version}.tar.gz"/>

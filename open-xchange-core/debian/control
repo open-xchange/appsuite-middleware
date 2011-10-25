@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-core
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, sun-java6-jre|java6-runtime, open-xchange-osgi
+Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime, open-xchange-osgi
 Description: The main bundles for the  Open-Xchange collaboration suite

@@ -3,5 +3,6 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-core"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-database"/>
 </provider>
 </psf>

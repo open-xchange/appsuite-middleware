@@ -8,5 +8,5 @@ Standards-Version: 3.6.1
 
 Package: open-xchange-osgi
 Architecture: all
-Depends: ${shlibs:Depends}, ${misc:Depends}, adduser, sun-java6-jre|java6-runtime
+Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime
 Description: OSGi bundles commonly used by all Open-Xchange packages
