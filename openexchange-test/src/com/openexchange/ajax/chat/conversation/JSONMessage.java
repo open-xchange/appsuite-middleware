@@ -56,7 +56,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.chat.conversation.actions.AbstractChatConversationRequest;
 
 /**
- * {@link JSONMessage}
+ * {@link JSONMessage} - Represents a chat message rendered with JSON.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

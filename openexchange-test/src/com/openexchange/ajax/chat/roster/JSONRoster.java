@@ -59,7 +59,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.chat.conversation.JSONChatUser;
 
 /**
- * {@link JSONRoster}
+ * {@link JSONRoster} - Represents a chat roster rendered with JSON.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
