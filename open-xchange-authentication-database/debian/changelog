@@ -1,0 +1,5 @@
+open-xchange-authentication-database (7.0.0-1) unstable; urgency=low
+
+  * Initial build.
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 25 Oct 2011 17:53:45 +0200
