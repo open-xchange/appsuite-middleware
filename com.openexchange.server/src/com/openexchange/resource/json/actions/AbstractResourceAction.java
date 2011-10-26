@@ -92,10 +92,10 @@ public abstract class AbstractResourceAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final ResourceAJAXRequest reminderRequest = new ResourceAJAXRequest(request, session);
-            final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            final ResourceAJAXRequest reminderRequest = new ResourceAJAXRequest(requestData, session);
+            final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             if (null != sTimeZone) {
                 reminderRequest.setTimeZone(getTimeZone(sTimeZone));
             }

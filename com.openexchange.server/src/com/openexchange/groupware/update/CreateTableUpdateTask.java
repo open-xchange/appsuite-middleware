@@ -67,6 +67,14 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
     private final int version;
     private final DatabaseService databaseService;
 
+    /**
+     * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
+     * 
+     * @param create The create-table service
+     * @param dependencies The dependencies to preceding update tasks
+     * @param version The version number
+     * @param databaseService The database service
+     */
     public CreateTableUpdateTask(final CreateTableService create, final String[] dependencies, final int version, final DatabaseService databaseService) {
         super();
         this.create = create;

@@ -64,13 +64,13 @@ public interface Dispatcher {
     /**
      * Performs given request.
      *
-     * @param request The request to perform
+     * @param requestData The request data to perform
      * @param state The state
      * @param session The session providing needed user data
      * @return The result yielded from given request
      * @throws OXException If an error occurs
      */
-    AJAXRequestResult perform(AJAXRequestData request, AJAXState state, ServerSession session) throws OXException;
+    AJAXRequestResult perform(AJAXRequestData requestData, AJAXState state, ServerSession session) throws OXException;
 
     /**
      * Begins a dispatcher cycle.

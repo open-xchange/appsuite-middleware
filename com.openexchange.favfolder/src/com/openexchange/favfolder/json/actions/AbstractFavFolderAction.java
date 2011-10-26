@@ -122,9 +122,9 @@ public abstract class AbstractFavFolderAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final FavFolderAJAXRequest ajaxRequest = new FavFolderAJAXRequest(request, session);
+            final FavFolderAJAXRequest ajaxRequest = new FavFolderAJAXRequest(requestData, session);
             return perform(ajaxRequest);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());

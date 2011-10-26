@@ -89,7 +89,7 @@ public final class GETAction extends AbstractConfigAction {
         }
         final ServerSession session = req.getSession();
         final SettingStorage stor = SettingStorage.getInstance(session);
-        final Setting setting = ConfigTree.getSettingByPath(path);
+        final Setting setting = ConfigTree.getInstance().getSettingByPath(path);
         stor.readValues(setting);
         /*
          * TODO: What format?!

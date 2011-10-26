@@ -204,6 +204,7 @@ public abstract class SessionServlet extends AJAXServlet {
             properties.put("com.openexchange.session.sessionId", sessionId);
             properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
             properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+            // properties.put("com.openexchange.session.session", session);
         }
         if (!sessionId.equals(session.getSessionID())) {
             throw SessionExceptionCodes.WRONG_SESSION.create();

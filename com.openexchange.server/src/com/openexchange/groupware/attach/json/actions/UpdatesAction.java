@@ -89,42 +89,42 @@ public final class UpdatesAction extends AbstractAttachmentAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             require(
-                request,
+                requestData,
                 AJAXServlet.PARAMETER_FOLDERID,
                 AJAXServlet.PARAMETER_MODULE,
                 AJAXServlet.PARAMETER_ATTACHEDID,
                 AJAXServlet.PARAMETER_TIMESTAMP);
-            final int folderId = requireNumber(request, AJAXServlet.PARAMETER_FOLDERID);
-            final int attachedId = requireNumber(request, AJAXServlet.PARAMETER_ATTACHEDID);
-            final int moduleId = requireNumber(request, AJAXServlet.PARAMETER_MODULE);
+            final int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
+            final int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
+            final int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
 
             long timestamp = -1;
             try {
-                timestamp = Long.parseLong(request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP).trim());
+                timestamp = Long.parseLong(requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP).trim());
             } catch (final NumberFormatException nfe) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(
                     AJAXServlet.PARAMETER_TIMESTAMP,
-                    request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
+                    requestData.getParameter(AJAXServlet.PARAMETER_TIMESTAMP));
             }
 
-            final AttachmentField[] columns = PARSER.getColumns(request.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
+            final AttachmentField[] columns = PARSER.getColumns(requestData.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 
             AttachmentField sort = null;
-            if (null != request.getParameter(AJAXServlet.PARAMETER_SORT)) {
-                sort = AttachmentField.get(Integer.parseInt(request.getParameter(AJAXServlet.PARAMETER_SORT)));
+            if (null != requestData.getParameter(AJAXServlet.PARAMETER_SORT)) {
+                sort = AttachmentField.get(Integer.parseInt(requestData.getParameter(AJAXServlet.PARAMETER_SORT)));
             }
 
             int order = AttachmentBase.ASC;
-            if ("DESC".equalsIgnoreCase(request.getParameter(AJAXServlet.PARAMETER_ORDER))) {
+            if ("DESC".equalsIgnoreCase(requestData.getParameter(AJAXServlet.PARAMETER_ORDER))) {
                 order = AttachmentBase.DESC;
             }
 
-            final String delete = request.getParameter(AJAXServlet.PARAMETER_IGNORE);
+            final String delete = requestData.getParameter(AJAXServlet.PARAMETER_IGNORE);
 
-            final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            final String timeZoneId = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
 
             return new AJAXRequestResult(updates(
                 session,

@@ -64,31 +64,20 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
  */
 public class PreferencesCustomizer implements ServiceTrackerCustomizer<PreferencesItemService,PreferencesItemService> {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PreferencesCustomizer.class));
 
     private final BundleContext context;
 
-    /**
-     * Default constructor.
-     * @param context bundle context.
-     */
     public PreferencesCustomizer(final BundleContext context) {
         super();
         this.context = context;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public PreferencesItemService addingService(final ServiceReference<PreferencesItemService> reference) {
-        final PreferencesItemService item = context
-            .getService(reference);
+        final PreferencesItemService item = context.getService(reference);
         try {
-            ConfigTree.addPreferencesItem(item);
+            ConfigTree.getInstance().addPreferencesItem(item);
         } catch (final OXException e) {
             final StringBuilder sb = new StringBuilder();
             sb.append("Can't add service for preferences item. Path: ");
@@ -103,21 +92,15 @@ public class PreferencesCustomizer implements ServiceTrackerCustomizer<Preferenc
         return item;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void modifiedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
         // Nothing to do.
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removedService(final ServiceReference<PreferencesItemService> reference, final PreferencesItemService service) {
         final PreferencesItemService item = service;
-        ConfigTree.removePreferencesItem(item);
+        ConfigTree.getInstance().removePreferencesItem(item);
         context.ungetService(reference);
     }
 }

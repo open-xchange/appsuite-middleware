@@ -102,7 +102,7 @@ public class ConfigMenu extends SessionServlet {
         Setting setting;
         final Response response = new Response(sessionObj);
         try {
-            setting = ConfigTree.getSettingByPath(path);
+            setting = ConfigTree.getInstance().getSettingByPath(path);
             stor.readValues(setting);
             response.setData(convert2JS(setting));
         } catch (final OXException e) {
@@ -195,7 +195,7 @@ public class ConfigMenu extends SessionServlet {
         final SettingStorage stor = SettingStorage.getInstance(session);
         final Response response = new Response(session);
         try {
-            final Setting setting = ConfigTree.getSettingByPath(path);
+            final Setting setting = ConfigTree.getInstance().getSettingByPath(path);
             setting.setSingleValue(value);
             saveSettingWithSubs(stor, setting);
         } catch (final OXException e) {

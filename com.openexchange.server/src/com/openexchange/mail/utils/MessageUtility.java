@@ -292,34 +292,8 @@ public final class MessageUtility {
             /*
              * Special treatment for possible BIG5 encoded stream
              */
-            final byte[] bytes = getBytesFrom(inStream);
-            if (bytes.length == 0) {
-                return STR_EMPTY;
-            }
-            final String retval = new String(bytes, "big5");
-            if (retval.indexOf(UNKNOWN) < 0) {
-                return retval;
-            }
-            /*
-             * Expect the charset to be Big5-HKSCS
-             */
-            try {
-                return new String(bytes, "Big5-HKSCS");
-            } catch (final Error error) {
-                // Huh..?
-                final Throwable cause = error.getCause();
-                if (cause.getClass().getName().equals("sun.io.ConversionBufferFullException")) {
-                    /*
-                     * Retry with auto-detected charset
-                     */
-                    return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
-                }
-                throw error;
-            }
+            return readBig5Bytes(getBytesFrom(inStream));
         }
-        /*
-         * TODO: Re-think to make this the default case...
-         */
         if (isGB2312(charset)) {
             /*
              * Special treatment for possible GB2312 encoded stream
@@ -328,21 +302,53 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            final String retval = new String(bytes, "GB2312");
+            String retval = new String(bytes, "GB2312");
+            if (retval.indexOf(UNKNOWN) < 0) {
+                return retval;
+            }
+            retval = new String(bytes, "GB18030");
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
             /*
              * Detect the charset
              */
-            if (!DEBUG) {
-                return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
-            }
             final String detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
-            LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
+            if (DEBUG) {
+                LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
+            }
+            if (isBig5(detectedCharset)) {
+                return readBig5Bytes(bytes);
+            }
             return new String(bytes, detectedCharset);
         }
         return readStream0(inStream, charset);
+    }
+
+    private static String readBig5Bytes(final byte[] bytes) throws UnsupportedEncodingException, Error {
+        if (bytes.length == 0) {
+            return STR_EMPTY;
+        }
+        final String retval = new String(bytes, "big5");
+        if (retval.indexOf(UNKNOWN) < 0) {
+            return retval;
+        }
+        /*
+         * Expect the charset to be Big5-HKSCS
+         */
+        try {
+            return new String(bytes, "Big5-HKSCS");
+        } catch (final Error error) {
+            // Huh..?
+            final Throwable cause = error.getCause();
+            if (cause.getClass().getName().equals("sun.io.ConversionBufferFullException")) {
+                /*
+                 * Retry with auto-detected charset
+                 */
+                return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+            }
+            throw error;
+        }
     }
 
     private static String readStream0(final InputStream inStream, final String charset) throws IOException {

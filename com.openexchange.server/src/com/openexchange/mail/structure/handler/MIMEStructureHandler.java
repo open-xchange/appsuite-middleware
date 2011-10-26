@@ -57,6 +57,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -313,6 +314,8 @@ public final class MIMEStructureHandler implements StructureHandler {
         return true;
     }
 
+    private static final Set<String> REMAIN = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(KEY_HEADERS, MailJSONField.RECEIVED_DATE.getKey())));
+
     @Override
     public boolean handleSMIMEBodyText(final MailPart part) throws OXException {
         try {
@@ -325,7 +328,7 @@ public final class MIMEStructureHandler implements StructureHandler {
              */
             final JSONObject jsonObject = currentMailObject;
             for (final String name : new HashSet<String>(jsonObject.keySet())) {
-                if (!KEY_HEADERS.equals(name)) {
+                if (!REMAIN.contains(name)) {
                     jsonObject.remove(name);
                 }
             }

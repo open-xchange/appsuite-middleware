@@ -1,3 +1,23 @@
+* 2011-10-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20664: Retry insert attempt on concurrent modification exception
+
+* 2011-10-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20654: Remain received date field in S/MIME mails
+
+* 2011-10-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19952: Refactored preferences tree code to detect illegal changes in the preferences tree layout.
+
+* 2011-10-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20648: Add secure flag to JSESSIONID cookie
+ - Fix for bug 20609: Only removing obsolete folder from cache, no reload with possible not-up-to-date read-only connection
+ - Fix for bug 20644: Introduced delete listener for folder storage
+ - Fix for bug 20631: Lowered debug level to an appropriate value
+ - Fix for bug 20611: Using readable field name in data-truncation error message
+
 * 2011-10-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 19952: Ensured existence of default infostore folder

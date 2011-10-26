@@ -88,22 +88,22 @@ public final class AllAction extends AbstractAttachmentAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            require(request, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID);
-            final int folderId = requireNumber(request, AJAXServlet.PARAMETER_FOLDERID);
-            final int attachedId = requireNumber(request, AJAXServlet.PARAMETER_ATTACHEDID);
-            final int moduleId = requireNumber(request, AJAXServlet.PARAMETER_MODULE);
+            require(requestData, AJAXServlet.PARAMETER_FOLDERID, AJAXServlet.PARAMETER_MODULE, AJAXServlet.PARAMETER_ATTACHEDID);
+            final int folderId = requireNumber(requestData, AJAXServlet.PARAMETER_FOLDERID);
+            final int attachedId = requireNumber(requestData, AJAXServlet.PARAMETER_ATTACHEDID);
+            final int moduleId = requireNumber(requestData, AJAXServlet.PARAMETER_MODULE);
 
-            final AttachmentField[] columns = PARSER.getColumns(request.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
+            final AttachmentField[] columns = PARSER.getColumns(requestData.getParameterValues(AJAXServlet.PARAMETER_COLUMNS));
 
             AttachmentField sort = null;
-            if (null != request.getParameter(AJAXServlet.PARAMETER_SORT)) {
-                sort = AttachmentField.get(Integer.parseInt(request.getParameter(AJAXServlet.PARAMETER_SORT)));
+            if (null != requestData.getParameter(AJAXServlet.PARAMETER_SORT)) {
+                sort = AttachmentField.get(Integer.parseInt(requestData.getParameter(AJAXServlet.PARAMETER_SORT)));
             }
 
             int order = AttachmentBase.ASC;
-            if ("DESC".equalsIgnoreCase(request.getParameter(AJAXServlet.PARAMETER_ORDER))) {
+            if ("DESC".equalsIgnoreCase(requestData.getParameter(AJAXServlet.PARAMETER_ORDER))) {
                 order = AttachmentBase.DESC;
             }
             final JSONValue jsonValue = all(session, folderId, attachedId, moduleId, columns, sort, order);

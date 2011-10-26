@@ -65,8 +65,8 @@ import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
-import com.openexchange.chat.json.conversation.Parser;
-import com.openexchange.chat.json.conversation.Writer;
+import com.openexchange.chat.json.conversation.JSONConversationParser;
+import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -120,7 +120,7 @@ public final class NewAction extends AbstractChatConversationAction {
             /*
              * Parse chat description
              */
-            final ChatDescription chatDescription = Parser.parseJSONChatDescriptionForCreate(jsonChatObject);
+            final ChatDescription chatDescription = JSONConversationParser.parseJSONChatDescriptionForCreate(jsonChatObject);
             final List<String> newMembers = chatDescription.getNewMembers();
             if (null == newMembers || newMembers.isEmpty()) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("newMembers");
@@ -134,6 +134,12 @@ public final class NewAction extends AbstractChatConversationAction {
                 presences.add(roster.getPresence(chatUser));
             }
             Chat newChat = access.openChat(null, null, chatUsers);
+            /*
+             * Add session user to members
+             */
+            final List<ChatUser> users = new ArrayList<ChatUser>(Arrays.asList(chatUsers));
+            users.add(access.getUser());
+            presences.add(roster.getPresence(access.getUser()));
             /*
              * Subject
              */
@@ -150,7 +156,7 @@ public final class NewAction extends AbstractChatConversationAction {
             /*
              * Create JSON object for new chat
              */
-            final JSONObject jsonObject = Writer.writeChat(newChat, Arrays.asList(chatUsers), presences, session.getUser().getTimeZone());
+            final JSONObject jsonObject = JSONConversationWriter.writeChat(newChat, users, presences, session.getUser().getTimeZone());
             /*
              * Return appropriate result
              */

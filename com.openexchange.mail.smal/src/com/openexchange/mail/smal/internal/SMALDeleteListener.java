@@ -81,11 +81,8 @@ public class SMALDeleteListener implements DeleteListener {
         final int contextId = event.getContext().getContextId();
         PreparedStatement stmt = null;
         try {
-            final int userId = event.getId();
             stmt = writeCon.prepareStatement("DELETE FROM " + MAIL_SYNC_TABLE + " WHERE cid = ?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
+            stmt.setInt(1, contextId);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());

@@ -83,22 +83,22 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         require(
-            request,
+            requestData,
             Attachment.PARAMETER_FOLDERID,
             Attachment.PARAMETER_ATTACHEDID,
             Attachment.PARAMETER_MODULE,
             Attachment.PARAMETER_ID);
 
         int folderId, attachedId, moduleId, id;
-        final String contentType = request.getParameter(Attachment.PARAMETER_CONTENT_TYPE);
-        folderId = requireNumber(request, Attachment.PARAMETER_FOLDERID);
-        attachedId = requireNumber(request, Attachment.PARAMETER_ATTACHEDID);
-        moduleId = requireNumber(request, Attachment.PARAMETER_MODULE);
-        id = requireNumber(request, Attachment.PARAMETER_ID);
+        final String contentType = requestData.getParameter(Attachment.PARAMETER_CONTENT_TYPE);
+        folderId = requireNumber(requestData, Attachment.PARAMETER_FOLDERID);
+        attachedId = requireNumber(requestData, Attachment.PARAMETER_ATTACHEDID);
+        moduleId = requireNumber(requestData, Attachment.PARAMETER_MODULE);
+        id = requireNumber(requestData, Attachment.PARAMETER_ID);
 
-        request.setFormat("file");
+        requestData.setFormat("file");
         return document(
             folderId,
             attachedId,

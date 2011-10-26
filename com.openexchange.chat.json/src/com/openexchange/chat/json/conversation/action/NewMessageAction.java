@@ -59,7 +59,7 @@ import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.Parser;
+import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -102,7 +102,7 @@ public final class NewMessageAction extends AbstractChatConversationAction {
             /*
              * Parse message
              */
-            final Message msg = Parser.parseMessage(jsonMessage);
+            final Message msg = JSONConversationParser.parseMessage(jsonMessage);
             chat.post(msg);
             /*
              * Return appropriate result

@@ -85,6 +85,7 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.database.PrivateFlag;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
@@ -2502,7 +2503,12 @@ public final class Contacts {
         final StringBuilder sFields = new StringBuilder();
 
         for (final String field : fields) {
-            sFields.append(field);
+            final ContactField cf = ContactField.getByFieldName(field);
+            if (cf == null) {
+                sFields.append(field);
+            } else {
+                sFields.append(cf.getReadableName());
+            }
             sFields.append(", ");
         }
         sFields.setLength(sFields.length() - 2);

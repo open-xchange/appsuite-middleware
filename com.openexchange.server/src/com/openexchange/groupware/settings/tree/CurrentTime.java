@@ -50,6 +50,7 @@
 package com.openexchange.groupware.settings.tree;
 
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -87,7 +88,7 @@ public final class CurrentTime implements PreferencesItemService {
             }
 
             @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final TimeZone zone = TimeZoneUtils.getTimeZone(user.getTimeZone());
                 long time = System.currentTimeMillis();
                 time  += zone.getOffset(time);

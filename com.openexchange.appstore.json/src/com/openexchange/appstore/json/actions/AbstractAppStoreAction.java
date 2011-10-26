@@ -75,7 +75,7 @@ public abstract class AbstractAppStoreAction implements AJAXActionService {
      * @see com.openexchange.ajax.requesthandler.AJAXActionService#perform(com.openexchange.ajax.requesthandler.AJAXRequestData, com.openexchange.tools.session.ServerSession)
      */
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         return null;
     }
 

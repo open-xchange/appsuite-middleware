@@ -71,7 +71,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
@@ -180,7 +180,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
-     * CLears all registered renderer.
+     * Clears all registered renderer.
      */
     public static void clearRenderer() {
         RESPONSE_RENDERERS.clear();
@@ -204,26 +204,27 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
-     * @param req The HTTP request to handle
-     * @param resp The HTTP response to write to
+     * @param httpRequest The HTTP request to handle
+     * @param httpResponse The HTTP response to write to
      * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    protected void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException {
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-        Tools.disableCaching(resp);
+    protected void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
+        httpResponse.setStatus(HttpServletResponse.SC_OK);
+        httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        Tools.disableCaching(httpResponse);
 
-        final String action = req.getParameter(PARAMETER_ACTION);
+        final String action = httpRequest.getParameter(PARAMETER_ACTION);
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final ServerSession session = getSessionObject(req);
+            final ServerSession session = getSessionObject(httpRequest);
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData request = parseRequest(req, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
+            final AJAXRequestData requestData = parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session);
+            requestData.setSession(session);
             /*
              * Start dispatcher processing
              */
@@ -231,25 +232,25 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Perform request
              */
-            final AJAXRequestResult result = dispatcher.perform(request, state, session);
+            final AJAXRequestResult result = dispatcher.perform(requestData, state, session);
             /*
              * Check result's type
              */
             if (AJAXRequestResult.ResultType.ETAG.equals(result.getType())) {
-                resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 return;
             }
             /*
              * A common result
              */
-            sendResponse(request, result, req, resp);
+            sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            JSONResponseRenderer.writeResponse(new Response().setException(e), action, req, resp);
+            APIResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            JSONResponseRenderer.writeResponse(new Response().setException(exception), action, req, resp);
+            APIResponseRenderer.writeResponse(new Response().setException(exception), action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -260,16 +261,16 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * Sends a proper response to requesting client after request has been orderly dispatched.
      * 
-     * @param request The AJAX request data
+     * @param requestData The AJAX request data
      * @param result The AJAX request result
-     * @param hReq The associated HTTP Servlet request
-     * @param hResp The associated HTTP Servlet response
+     * @param httpRequest The associated HTTP Servlet request
+     * @param httpResponse The associated HTTP Servlet response
      */
-    protected void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
+    protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
         int highest = Integer.MIN_VALUE;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if (renderer.handles(request, result) && highest <= renderer.getRanking()) {
+            if (renderer.handles(requestData, result) && highest <= renderer.getRanking()) {
                 highest = renderer.getRanking();
                 candidate = renderer;
             }
@@ -277,7 +278,7 @@ public class DispatcherServlet extends SessionServlet {
         if (null == candidate) {
             throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
         }
-        candidate.write(request, result, hReq, hResp);
+        candidate.write(requestData, result, httpRequest, httpResponse);
     }
 
     /**
@@ -367,7 +368,7 @@ public class DispatcherServlet extends SessionServlet {
              * Guess an appropriate body object
              */
             final String body = AJAXServlet.getBody(req);
-            if (startsWith('{', body, true)) {
+            if (startsWith('{', body)) {
                 /*
                  * Expect the body to be a JSON object
                  */
@@ -376,7 +377,7 @@ public class DispatcherServlet extends SessionServlet {
                 } catch (final JSONException e) {
                     retval.setData(body);
                 }
-            } else if (startsWith('[', body, true)) {
+            } else if (startsWith('[', body)) {
                 /*
                  * Expect the body to be a JSON array
                  */
@@ -413,16 +414,13 @@ public class DispatcherServlet extends SessionServlet {
         request.setRoute(Tools.getRoute(req.getSession(true).getId()));
     }
 
-    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+    private static boolean startsWith(final char startingChar, final String toCheck) {
         if (null == toCheck) {
             return false;
         }
         final int len = toCheck.length();
         if (len <= 0) {
             return false;
-        }
-        if (!ignoreHeadingWhitespaces) {
-            return startingChar == toCheck.charAt(0);
         }
         int i = 0;
         if (Character.isWhitespace(toCheck.charAt(i))) {

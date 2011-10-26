@@ -93,7 +93,7 @@ public final class BetaFeatures implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
             @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null == set || set.isEmpty()) {
                     // Return global configuration setting for beta features

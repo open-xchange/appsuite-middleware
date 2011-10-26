@@ -2,7 +2,7 @@
 <project name="Bundle Builder" basedir=".">
 
     <description>
-        Reads a ProjectSet file and builds all bundles referenced in that ProjectSet file.
+        Reads a ProjectSet file and builds or uploads all bundles referenced in that ProjectSet file.
     </description>
 
     <!-- customizable values -->
@@ -16,28 +16,11 @@
     <!-- Constants -->
     <property name="mainDir" value=".."/>
     <property name="checkoutDir" value="${mainDir}"/>
-    <property name="logDir" value="${mainDir}/log"/>
 
     <!-- Install Constants -->
     <property name="bundlesDir" value="${prefix}/bundles"/>
 
-    <target name="antExtensions" description="Compiles our additional Ant tasks and defines them for this build.">
-        <path id="ant3rdPartyLib">
-            <fileset dir="lib" includes="*.jar"/>
-        </path>
-        <property name="build" value="build"/>
-        <mkdir dir="${build}"/>
-        <javac srcdir="src" destdir="${build}" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5" includeantruntime="true">
-            <classpath refid="ant3rdPartyLib"/>
-        </javac>
-        <copy file="src/tasks.properties" todir="${build}"/>
-        <path id="antClasspath">
-            <path refid="ant3rdPartyLib"/>
-            <pathelement location="${build}"/>
-        </path>
-        <taskdef resource="tasks.properties" classpathref="antClasspath"/>
-        <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
-    </target>
+    <import file="antExtensions.xml"/>
 
     <target name="clean" description="Removes the build artifacts.">
         <delete dir="${build}"/>
@@ -67,38 +50,57 @@
     </target>
 
     <target name="buildProject" description="Copies the build.xml to the bundle if there is not already one and executes it.">
-        <echo message="Build bundle ${projectName}"/>
-        <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
-            <classpath refid="classpath"/>
-        </setBundleProperties>
-        <if>
-            <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
-            <then>
-                <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build-project.xml" overwrite="true"/>
-                <property name="deleteBuildXML" value="build-project.xml"/>
-            </then>
-            <else>
-                <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
-                <property name="deleteBuildXML" value="build.xml"/>
-            </else>
-        </if>
-        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
-        <!-- TODO include the dist build as a normal buildType in build-project.xml -->
-        <if>
-            <equals arg1="dist" arg2="${buildType}"/>
-            <then>
-                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
-            </then>
-            <else>
-                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build" />
-            </else>
-        </if>
-        <if>
-            <isset property="deleteBuildXML"/>
-            <then>
-                <delete file="${checkoutDir}/${projectName}/${deleteBuildXML}"/>
-            </then>
-        </if>
+        <echo message="Build bundle ${projectName} ${buildType}"/>
+        <trycatch>
+            <try>
+                <if>
+                    <available file="${checkoutDir}/${projectName}/build.xml" type="file"/>
+                    <then>
+                        <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build-project.xml" overwrite="true"/>
+                        <property name="deleteBuildXML" value="build-project.xml"/>
+                    </then>
+                    <else>
+                        <copy file="build-project.xml" tofile="${checkoutDir}/${projectName}/build.xml" overwrite="true"/>
+                        <property name="deleteBuildXML" value="build.xml"/>
+                    </else>
+                </if>
+                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
+                <!-- TODO include the dist build as a normal buildType in build-project.xml -->
+            	<if>
+            		<available file="${destDir}/${bundlesDir}" type="dir"/>
+            		<then>
+            			<path id="buildClasspath">
+            				<path refid="classpath"/>
+            				<fileset dir="${destDir}/${bundlesDir}" includes="*.jar"/>
+		                    <dirset dir="${destDir}/${bundlesDir}" includes="*"/>
+            			</path>
+            		</then>
+        			<else>
+        				<path id="buildClasspath" refid="classpath"/>
+            		</else>
+            	</if>
+                <if>
+                    <equals arg1="dist" arg2="${buildType}"/>
+                    <then>
+                        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="dist"/>
+                    </then>
+                    <else>
+                        <setBundleProperties dir="${checkoutDir}" currentBundle="${projectName}">
+                            <classpath refid="buildClasspath"/>
+                        </setBundleProperties>
+                        <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="build"/>
+                    </else>
+                </if>
+            </try>
+            <finally>
+                <if>
+                    <isset property="deleteBuildXML"/>
+                    <then>
+                        <delete file="${checkoutDir}/${projectName}/${deleteBuildXML}"/>
+                    </then>
+                </if>
+            </finally>
+        </trycatch>
     </target>
 
     <target name="buildProjects" depends="antExtensions,prepare" description="Fetches projects from repository, computes build order and builds then each project.">
@@ -116,7 +118,7 @@
             </else>
         </if>
         <!-- Computes the dependencies and sorts the projects accordingly -->
-        <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}">
+        <computeBuildOrder dir="${checkoutDir}" propertyName="projectsOrdered" projectList="${projectsList}" strict="false">
             <classpath refid="classpath"/>
         </computeBuildOrder>
         <foreach list="${projectsOrdered}" target="buildProject" param="projectName" inheritAll="true" inheritRefs="true"/>
@@ -128,51 +130,51 @@
 
     <target name="build" depends="setBuild,buildProjects" description="Builds and installs all bundles for the specified ProjectSet."/>
 
-    <target name="distBuild" description="Sets the build type to create a tar.gz for uploading to build service.">
+    <target name="setDist" description="Sets the build type to create a tar.gz for uploading to build service.">
         <property name="buildType" value="dist"/>
     </target>
 
-	<target name="readVersion">
+    <target name="readVersion" depends="antExtensions" description="Reads the latest version from the changelog of the package.">
         <loadfile property="firstChangeLogLine" srcFile="${checkoutDir}/${packageName}/debian/changelog">
             <filterchain>
                 <headfilter lines="1"/>
             </filterchain>
         </loadfile>
         <propertyregex property="version" input="${firstChangeLogLine}" regexp="^[\w-]+ \(([\d\.]+)-\d+\).*$" select="\1"/>
-	</target>
+    </target>
 
-    <target name="dist" depends="distBuild,antExtensions,readVersion" description="Creates the tar.gz for uploading to the build service.">
+    <target name="dist" depends="setDist,readVersion" description="Creates the tar.gz for uploading to the build service.">
         <!-- Packaging files -->
         <property name="packageDir" value="${basedir}/${tmpDir}/${packageName}-${version}"/>
         <mkdir dir="${packageDir}"/>
         <copy todir="${packageDir}">
             <fileset dir="${checkoutDir}">
-            	<include name="${packageName}/**"/>
+                <include name="${packageName}/**"/>
             </fileset>
         </copy>
-    	<move todir="${packageDir}">
-    		<fileset dir="${packageDir}/${packageName}">
-    			<include name="**"/>
-    			<exclude name=".*"/>
-    			<exclude name="*.psf"/>
-    		</fileset>
-    	</move>
+        <move todir="${packageDir}">
+            <fileset dir="${packageDir}/${packageName}">
+                <include name="**"/>
+                <exclude name=".*"/>
+                <exclude name="*.psf"/>
+            </fileset>
+        </move>
         <!-- Buildsystem -->
         <property name="buildDir" value="${packageDir}/build"/>
         <mkdir dir="${buildDir}"/>
         <copy todir="${buildDir}">
             <fileset dir="${checkoutDir}/build">
-            	<include name="**"/>
+                <include name="**"/>
                 <exclude name="${tmpDir}/**"/>
                 <exclude name="build/**"/>
-            	<exclude name="launcher/**"/>
+                <exclude name="launcher/**"/>
             </fileset>
         </copy>
         <antcall target="buildProjects">
             <param name="packageDir" value="${packageDir}"/>
          </antcall>
         <!-- dpkg-source does not like anything else -->
-        <tar destfile="${tmpDir}/${packageName}_${version}.orig.tar.bz2" compression="bzip2">
+        <tar destfile="${tmpDir}/${packageName}_${version}.orig.tar.bz2" compression="bzip2" longfile="gnu">
             <fileset dir="${tmpDir}">
                 <include name="${packageName}-${version}/**"/>
                 <exclude name="${packageName}-${version}.tar.gz"/>
@@ -180,34 +182,24 @@
         </tar>
     </target>
 
-	<target name="debianSource" depends="dist,readVersion">
-		<exec executable="dpkg-source" dir="${tmpDir}">
-			<arg value="-b"/>
-			<arg value="-Zbzip2"/>
-			<arg path="${tmpDir}/${packageName}-${version}"/>
-		</exec>
-	</target>
+    <target name="debianSource" depends="dist,readVersion" description="Generates the source files for building Debian packages.">
+        <exec executable="dpkg-source" dir="${tmpDir}">
+            <arg value="-b"/>
+            <arg value="-Zbzip2"/>
+            <arg path="${tmpDir}/${packageName}-${version}"/>
+        </exec>
+    </target>
 
-	<target name="upload" depends="debianSource">
-		<!-- TODO project must be defined somewhere -->
-		<uploadSource url="http://buildapi.netline.de" user="oxbuilduser" pass="openxchange" project="open-xchange-7-test" packageName="${packageName}">
-			<files>
-				<fileset dir="${tmpDir}">
-					<exclude name="${packageName}-${version}/**"/>
-					<include name="${packageName}_${version}*"/>
-				</fileset>
-			</files>
-		</uploadSource>
-	</target>
-
-    <target name="cpd" description="Find copied and pasted code.">
-        <mkdir dir="${logDir}"/>
-        <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask"/>
-        <cpd minimumTokenCount="100" encoding="US-ASCII" format="xml" outputFile="${logDir}/cpd.xml">
-            <fileset dir="${checkoutDir}">
-                <include name="**/*.java"/>
-            </fileset>
-        </cpd>
+    <target name="upload" depends="debianSource" description="Uploads a package to the build system.">
+        <!-- TODO project must be defined somewhere -->
+        <uploadSource url="http://buildapi.netline.de" user="oxbuilduser" pass="openxchange" project="open-xchange-7-test" packageName="${packageName}">
+            <files>
+                <fileset dir="${tmpDir}">
+                    <exclude name="${packageName}-${version}/**"/>
+                    <include name="${packageName}_${version}*"/>
+                </fileset>
+            </files>
+        </uploadSource>
     </target>
 
 </project>

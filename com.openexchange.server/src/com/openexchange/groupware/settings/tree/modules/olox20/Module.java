@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.olox20;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -78,7 +79,7 @@ public class Module implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 setting.setSingleValue(Boolean.FALSE);
             }
             @Override

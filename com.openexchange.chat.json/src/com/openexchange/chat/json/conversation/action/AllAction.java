@@ -89,6 +89,7 @@ public final class AllAction extends AbstractChatConversationAction {
         final JSONArray jsonArray = new JSONArray();
         final ConversationID conversationId = new ConversationID();
         for (final ChatService chatService : registry.getAllServices(session.getUserId(), session.getContextId())) {
+            conversationId.reset();
             conversationId.setServiceId(chatService.getId());
             for (final ChatAccount chatAccount : chatService.getAccountManager().getAccounts(session)) {
                 conversationId.setAccountId(chatAccount.getId());

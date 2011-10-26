@@ -105,6 +105,20 @@ public final class FolderMapManagement {
     }
 
     /**
+     * Drop caches for given session's user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public void dropFor(final int userId, final int contextId) {
+        map.remove(keyFor(userId, contextId));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(new StringBuilder("Cleaned user-sensitive folder cache for user ").append(userId).append(" in context ").append(
+                contextId).toString());
+        }
+    }
+
+    /**
      * Gets the folder map for specified session.
      *
      * @param session The session

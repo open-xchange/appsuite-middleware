@@ -58,6 +58,8 @@ import com.openexchange.preview.PreviewOutput;
  */
 public final class HTMLPreviewResultConverter extends AbstractPreviewResultConverter {
 
+    private static final String FORMAT = "preview";
+
     /**
      * Initializes a new {@link HTMLPreviewResultConverter}.
      */
@@ -67,7 +69,7 @@ public final class HTMLPreviewResultConverter extends AbstractPreviewResultConve
 
     @Override
     public String getOutputFormat() {
-        return "preview";
+        return FORMAT;
     }
 
     @Override
@@ -76,7 +78,7 @@ public final class HTMLPreviewResultConverter extends AbstractPreviewResultConve
     }
 
     @Override
-    protected PreviewOutput getOutput() {
+    public PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
 

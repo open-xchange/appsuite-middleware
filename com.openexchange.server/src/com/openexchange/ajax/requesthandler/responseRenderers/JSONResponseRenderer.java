@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -64,11 +65,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
  * {@link JSONResponseRenderer}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JSONResponseRenderer implements ResponseRenderer {
@@ -78,6 +80,15 @@ public class JSONResponseRenderer implements ResponseRenderer {
      */
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(JSONResponseRenderer.class));
 
+    private static final String FORMAT = "json";
+
+    /**
+     * Initializes a new {@link JSONResponseRenderer}.
+     */
+    public JSONResponseRenderer() {
+        super();
+    }
+
     @Override
     public int getRanking() {
         return 0;
@@ -85,12 +96,21 @@ public class JSONResponseRenderer implements ResponseRenderer {
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return Response.class.isAssignableFrom(result.getResultObject().getClass());
+        return FORMAT.equalsIgnoreCase(result.getFormat());
     }
 
     @Override
     public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
-        writeResponse((Response) result.getResultObject(), request.getAction(), req, resp);
+        final Response response = new Response(request.getSession());
+        response.setData(result.getResultObject());
+        response.setTimestamp(result.getTimestamp());
+        final Collection<OXException> warnings = result.getWarnings();
+        if (null != warnings && !warnings.isEmpty()) {
+            for (final OXException warning : warnings) {
+                response.addWarning(warning);
+            }
+        }
+        writeResponse(response, request.getAction(), req, resp);
     }
 
     /**
@@ -102,7 +122,7 @@ public class JSONResponseRenderer implements ResponseRenderer {
      * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
      * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
-     *
+     * 
      * @param response The response to write
      * @param action The request's action
      * @param req The HTTP Servlet request

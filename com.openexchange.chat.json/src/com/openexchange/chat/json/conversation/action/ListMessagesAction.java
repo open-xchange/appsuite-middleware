@@ -61,7 +61,7 @@ import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.Writer;
+import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -115,7 +115,7 @@ public final class ListMessagesAction extends AbstractChatConversationAction {
             /*
              * Create JSON
              */
-            final JSONArray json = Writer.writeMessages(messages, session.getUser().getTimeZone());
+            final JSONArray json = JSONConversationWriter.writeMessages(messages, session.getUser().getTimeZone());
             /*
              * Return appropriate result
              */

@@ -66,12 +66,19 @@ import com.openexchange.chat.db.DBChatAccess;
 import com.openexchange.chat.db.DBChatService;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.chat.db.DBRoster;
+import com.openexchange.chat.db.groupware.DBChatCreateTableService;
+import com.openexchange.chat.db.groupware.DBChatCreateTableTask;
+import com.openexchange.chat.db.groupware.DBChatDeleteListener;
+import com.openexchange.chat.db.groupware.DBChatUpdateTaskProviderService;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
@@ -101,8 +108,8 @@ public final class DBChatActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ThreadPoolService.class, TimerService.class, DatabaseService.class, UserService.class,
-            ContextService.class, IDGeneratorService.class };
+            ThreadPoolService.class, TimerService.class, DatabaseService.class, UserService.class, ContextService.class,
+            IDGeneratorService.class };
     }
 
     @Override
@@ -141,6 +148,14 @@ public final class DBChatActivator extends HousekeepingActivator {
             }
         });
         openTrackers();
+        /*
+         * Register update task, create table job and delete listener
+         */
+        {
+            registerService(CreateTableService.class, new DBChatCreateTableService());
+            registerService(UpdateTaskProviderService.class, new DBChatUpdateTaskProviderService(new DBChatCreateTableTask()));
+            registerService(DeleteListener.class, new DBChatDeleteListener());
+        }
         /*
          * Register event handler
          */
@@ -196,7 +211,7 @@ public final class DBChatActivator extends HousekeepingActivator {
 
                 private void handleRemovedSession(final Session session) {
                     try {
-                        if (null != getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                        if (null != DBRoster.getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                             // Other active session present
                             return;
                         }

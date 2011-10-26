@@ -94,8 +94,7 @@ public final class AvailableModules implements PreferencesItemService {
             public void getValue(final Session session, final Context ctx,
                 final User user, final UserConfiguration userConfig,
                 final Setting setting) throws OXException {
-                final Setting[] modules = ConfigTree.getSettingByPath("modules")
-                    .getElements();
+                final Setting[] modules = ConfigTree.getInstance().getSettingByPath("modules").getElements();
                 final SettingStorage sStor = SettingStorage.getInstance(session,
                     ctx, user, userConfig);
                 for (final Setting module : modules) {

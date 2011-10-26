@@ -124,6 +124,14 @@ public interface Chat {
     List<Message> pollMessages(Date since) throws OXException;
 
     /**
+     * Updates an existing message according {@link MessageDescription}'s arguments.
+     * 
+     * @param messageDesc The message description
+     * @throws OXException If update operation fails
+     */
+    void updateMessage(MessageDescription messageDesc) throws OXException;
+
+    /**
      * Gets a message by specified identifier.
      * 
      * @param messageId The message identifier

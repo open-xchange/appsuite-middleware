@@ -59,13 +59,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chat.json.rest.RestServlet.MethodHandler;
+import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AbstractMethodHandler}
+ * {@link AbstractMethodHandler} - The abstract method handler.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -83,13 +83,13 @@ public abstract class AbstractMethodHandler implements MethodHandler {
     protected static final Pattern SPLIT_PATH = Pattern.compile(Pattern.quote("/"));
 
     @Override
-    public AJAXRequestData parseRequest(final HttpServletRequest req, final ServerSession session, final RestServlet servlet) throws IOException, OXException {
+    public AJAXRequestData parseRequest(final HttpServletRequest req, final ServerSession session, final DispatcherServlet servlet) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
         servlet.parseHostName(retval, req, session);
         /*
          * Set the module
          */
-        retval.setModule("conversation");
+        retval.setModule(getModule());
         /*
          * Set request URI
          */
@@ -135,6 +135,13 @@ public abstract class AbstractMethodHandler implements MethodHandler {
          */
         return retval;
     }
+
+    /**
+     * Gets the module identifier.
+     * 
+     * @return The module identifier
+     */
+    protected abstract String getModule();
 
     /**
      * Parses by path info (extra path information follows the Servlet path but precedes the query string and will start with a "/" character)

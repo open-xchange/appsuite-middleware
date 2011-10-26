@@ -59,36 +59,37 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ConversionCustomizer}
+ * {@link ConversionCustomizer} - Converts from request data's format to the format indicated by request result.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Some JavaDoc
  */
 public class ConversionCustomizer implements AJAXActionCustomizer, AJAXActionCustomizerFactory {
 
     private Converter converter = null;
 
-    public ConversionCustomizer(Converter converter) {
+    public ConversionCustomizer(final Converter converter) {
         this.converter = converter;
     }
 
     @Override
-    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
+    public AJAXRequestData incoming(final AJAXRequestData request, final ServerSession session) throws OXException {
         return request;
     }
 
     @Override
-    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
-        String requestedFormat = request.getFormat();
-        String actualFormat = result.getFormat();
-        if (actualFormat.equals(requestedFormat)) {
+    public AJAXRequestResult outgoing(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        final String requestedFormat = request.getFormat();
+        final String currentFormat = result.getFormat();
+        if (currentFormat.equals(requestedFormat)) {
             return result;
         }
-        converter.convert(actualFormat, requestedFormat, request, result, session);
+        converter.convert(currentFormat, requestedFormat, request, result, session);
         return result;
     }
 
     @Override
-    public AJAXActionCustomizer createCustomizer(AJAXRequestData request, ServerSession session) {
+    public AJAXActionCustomizer createCustomizer(final AJAXRequestData request, final ServerSession session) {
         return this;
     }
 

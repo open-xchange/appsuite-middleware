@@ -80,11 +80,11 @@ public final class DeleteAction extends AbstractMailAccountAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         /*
          * Compose JSON array with id
          */
-        final JSONArray jsonArray = (JSONArray) request.getData();
+        final JSONArray jsonArray = (JSONArray) requestData.getData();
         final int len = jsonArray.length();
         /*
          * Delete

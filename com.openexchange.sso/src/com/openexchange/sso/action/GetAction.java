@@ -81,12 +81,12 @@ public final class GetAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
             /*
              * Ensure a secure connection to not transfer sensitive data in plain text
              */
-            if (!request.isSecure()) {
+            if (!requestData.isSecure()) {
                 throw AjaxExceptionCodes.NON_SECURE_DENIED.create( ACTION, SSOConstants.SERVLET_PATH);
             }
             /*

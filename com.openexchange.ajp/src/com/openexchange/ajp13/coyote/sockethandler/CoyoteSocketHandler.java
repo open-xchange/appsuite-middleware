@@ -60,6 +60,8 @@ import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.najp.IAJPv13SocketHandler;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -109,10 +111,21 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
     private final int linger;
 
     /**
+     * Whether e secure connection is enforced.
+     */
+    private final boolean forceHttps;
+
+    /**
      * Initializes a new {@link CoyoteSocketHandler}.
      */
     public CoyoteSocketHandler() {
         super();
+        final ConfigurationService configurationService = AJPv13ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        if (configurationService == null) {
+            forceHttps = false;
+        } else {
+            forceHttps = configurationService.getBoolProperty(ServerConfig.Property.FORCE_HTTPS.getPropertyName(), false);
+        }
         AJPv13TaskMonitor tmp = null;
         try {
             tmp = new AJPv13TaskMonitor();
@@ -226,7 +239,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
      */
     @Override
     public void handleSocket(final Socket client) {
-        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE, listenerMonitor);
+        final AjpProcessor ajpProcessor = new AjpProcessor(Constants.MAX_PACKET_SIZE, listenerMonitor, forceHttps);
         if (readTimeout > 0) {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
         }

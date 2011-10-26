@@ -66,26 +66,29 @@ import com.openexchange.groupware.settings.SharedNode;
  */
 public final class ConfigTree {
 
-    /**
-     * Logger.
-     */
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigTree.class));
+
+    private static final ConfigTree SINGLETON = new ConfigTree();
 
     /**
      * Reference to the settings tree.
      */
-    private static Setting tree;
+    private TreeSetting tree;
 
     /**
      * Set of all identifiers for the database to check for duplicate ones.
      */
-    private static Set<Integer> dbIdentifier = new HashSet<Integer>();
+    private Set<Integer> dbIdentifier = new HashSet<Integer>();
 
     /**
      * Prevent instantiation
      */
     private ConfigTree() {
         super();
+    }
+
+    public static ConfigTree getInstance() {
+        return SINGLETON;
     }
 
     /**
@@ -95,10 +98,9 @@ public final class ConfigTree {
      * @throws OXException if the path cannot be resolved to a setting
      * object.
      */
-    public static Setting getSettingByPath(final String path)
-        throws OXException {
+    public Setting getSettingByPath(final String path) throws OXException {
         final String[] pathParts = path.split("/");
-        return new Setting(getSettingByPath(tree, pathParts));
+        return new ValueSetting(getSettingByPath(tree, pathParts));
     }
 
     /**
@@ -135,25 +137,38 @@ public final class ConfigTree {
         return retval;
     }
 
-    /**
-     * Returns the corresponding reader for a setting.
-     * @param setting shared setting.
-     * @return the reader for the shared setting.
-     */
-    static IValueHandler getSharedValue(final Setting setting) {
-        IValueHandler retval = null;
-        if (setting.isLeaf()) {
-            retval = setting.getShared();
+    private static <T extends AbstractSetting<? extends T>> T getSettingByPath(final T actual, final String[] path) throws OXException {
+        T retval = actual;
+        if (path.length != 0) {
+            final String[] remainingPath = new String[path.length - 1];
+            System.arraycopy(path, 1, remainingPath, 0, path.length - 1);
+            final T child;
+            if (0 == path[0].length()) {
+                child = actual;
+            } else {
+                child = actual.getElement(path[0]);
+            }
+            if (null == child) {
+                final StringBuilder sb = new StringBuilder(path[0]);
+                Setting parent = actual;
+                while (null != parent) {
+                    sb.insert(0, '/');
+                    sb.insert(0, parent.getName());
+                    parent = parent.getParent();
+                }
+                throw SettingExceptionCodes.UNKNOWN_PATH.create(sb.toString());
+            }
+            retval = getSettingByPath(child, remainingPath);
         }
         return retval;
     }
 
-    public static void addPreferencesItem(final PreferencesItemService item)
+    public void addPreferencesItem(final PreferencesItemService item)
         throws OXException {
         addSharedValue(null, item.getPath(), item.getSharedValue());
     }
 
-    private static void addSharedValue(final Setting actual, final String[] path,
+    private void addSharedValue(final TreeSetting actual, final String[] path,
         final IValueHandler shared) throws OXException {
         if (null == actual) {
             addSharedValue(tree, path, shared);
@@ -165,13 +180,14 @@ public final class ConfigTree {
                 }
                 dbIdentifier.add(tmp);
             }
-            addElementWithoutOverwriting(actual, new Setting(path[0], shared.getId(), shared));
+            addElementWithoutOverwriting(actual, new TreeSetting(path[0], shared.getId(), shared));
         } else {
-            Setting sub = actual.getElement(path[0]);
-            if (null == sub) {
+            TreeSetting sub = actual.getElement(path[0]);
+            if (null == actual.getElement(path[0])) {
                 final IValueHandler node = new SharedNode(path[0]);
-                sub = new Setting(path[0], node.getId(), node);
-                addElementWithoutOverwriting(actual, sub);
+                final TreeSetting toAdd = new TreeSetting(path[0], node.getId(), node);
+                addElementWithoutOverwriting(actual, toAdd);
+                sub = toAdd;
             }
             final String[] subPath = new String[path.length - 1];
             System.arraycopy(path, 1, subPath, 0, subPath.length);
@@ -179,14 +195,15 @@ public final class ConfigTree {
         }
     }
 
-    private static void addElementWithoutOverwriting(final Setting actual, final Setting subSetting) throws OXException {
-        if(actual.getElement(subSetting.getName()) != null) {
-            throw SettingExceptionCodes.DUPLICATE_PATH.create(actual.getPath()+"/"+subSetting.getName());
+    private static void addElementWithoutOverwriting(final TreeSetting actual, final TreeSetting subSetting) throws OXException {
+        if (actual.getElement(subSetting.getName()) != null) {
+            throw SettingExceptionCodes.DUPLICATE_PATH.create(actual.getPath() + "/" + subSetting.getName());
         }
         actual.addElement(subSetting);
+        subSetting.setParent(actual);
     }
 
-    public static void removePreferencesItem(final PreferencesItemService item) {
+    public void removePreferencesItem(final PreferencesItemService item) {
         try {
             removeSharedValue(getSettingByPath(tree, item.getPath()));
         } catch (final OXException e) {
@@ -194,8 +211,8 @@ public final class ConfigTree {
         }
     }
 
-    private static void removeSharedValue(final Setting setting) {
-        final Setting parent = setting.getParent();
+    private void removeSharedValue(final TreeSetting setting) throws OXException {
+        final TreeSetting parent = setting.getParent();
         parent.removeElement(setting);
         if (-1 != setting.getId()) {
             dbIdentifier.remove(Integer.valueOf(setting.getId()));
@@ -328,12 +345,12 @@ public final class ConfigTree {
      * Initializes the configuration tree.
      * @throws OXException if initializing doesn't work.
      */
-    static void init() throws OXException {
+    void init() throws OXException {
         if (null != tree) {
             LOG.error("Duplicate initialization of configuration tree.");
             return;
         }
-        tree = new Setting("", -1, new SharedNode(""));
+        tree = new TreeSetting("", -1, new SharedNode(""));
         try {
             final Class< ? extends PreferencesItemService>[] clazzes = getClasses();
             final PreferencesItemService[] items = new PreferencesItemService[clazzes.length];
@@ -350,7 +367,7 @@ public final class ConfigTree {
         }
     }
 
-    static void stop() {
+    void stop() {
         if (null == tree) {
             LOG.error("Duplicate shutdown of configuration tree.");
             return;

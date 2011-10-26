@@ -95,7 +95,7 @@ public final class PUTAction extends AbstractConfigAction {
         }
         final SettingStorage stor = SettingStorage.getInstance(session);
         {
-            final Setting setting = ConfigTree.getSettingByPath(path);
+            final Setting setting = ConfigTree.getInstance().getSettingByPath(path);
             setting.setSingleValue(value);
             saveSettingWithSubs(stor, setting);
         }

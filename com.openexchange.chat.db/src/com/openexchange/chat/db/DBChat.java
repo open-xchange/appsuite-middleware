@@ -76,6 +76,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.Message;
+import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.MessageListener;
 import com.openexchange.chat.Packet;
 import com.openexchange.chat.util.ChatUserImpl;
@@ -101,9 +102,9 @@ public final class DBChat implements Chat {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DBChat.class));
 
-    private static abstract class LenientRunnable implements Runnable {
+    private static abstract class SafeRunnable implements Runnable {
 
-        protected LenientRunnable() {
+        protected SafeRunnable() {
             super();
         }
 
@@ -117,7 +118,7 @@ public final class DBChat implements Chat {
         }
 
         /**
-         * Executes this {@link LenientRunnable}'s task.
+         * Executes this {@link SafeRunnable}'s task.
          * 
          * @throws Exception If an error occurs
          */
@@ -125,9 +126,9 @@ public final class DBChat implements Chat {
 
     }
 
-    private static abstract class LenientTIntObjectProcedure<V> implements TIntObjectProcedure<V> {
+    private static abstract class SafeTIntObjectProcedure<V> implements TIntObjectProcedure<V> {
 
-        protected LenientTIntObjectProcedure() {
+        protected SafeTIntObjectProcedure() {
             super();
         }
 
@@ -157,7 +158,7 @@ public final class DBChat implements Chat {
 
     protected static final List<MessageListener> GLOBAL_LISTENERS = new CopyOnWriteArrayList<MessageListener>();
 
-    private static final class ChatProcedure extends LenientTIntObjectProcedure<DBChat> {
+    private static final class ChatProcedure extends SafeTIntObjectProcedure<DBChat> {
 
         private final Connection con;
 
@@ -167,6 +168,9 @@ public final class DBChat implements Chat {
 
         @Override
         public void process(final int chatId, final DBChat dbChat) throws OXException {
+            if (GLOBAL_LISTENERS.isEmpty() && dbChat.messageListeners.isEmpty()) {
+                return;
+            }
             final List<Message> messages = dbChat.getNewMessages(con);
             if (!messages.isEmpty()) {
                 for (final Message message : messages) {
@@ -212,17 +216,17 @@ public final class DBChat implements Chat {
      */
     public static void startUp() {
         final TimerService timerService = DBChatServiceLookup.getService(TimerService.class);
-        final Runnable task = new LenientRunnable() {
+        final Runnable task = new SafeRunnable() {
 
             private final TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>> procedure =
-                new LenientTIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
+                new SafeTIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
 
                     @Override
                     public void process(final int contextId, final ConcurrentTIntObjectHashMap<DBChat> map) {
                         if (map.isEmpty()) {
                             return;
                         }
-                        final Runnable subtask = new LenientRunnable() {
+                        final Runnable subtask = new SafeRunnable() {
 
                             @Override
                             public void execute() throws OXException {
@@ -241,7 +245,9 @@ public final class DBChat implements Chat {
 
             @Override
             public void execute() {
-                CHAT_MAP.forEachEntry(procedure);
+                if (!CHAT_MAP.isEmpty()) {
+                    CHAT_MAP.forEachEntry(procedure);
+                }
             }
         };
         TIMER_TASK.set(timerService.scheduleWithFixedDelay(task, 5000, 5000));
@@ -707,6 +713,7 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, chatId);
             rs = stmt.executeQuery();
+            rs.next();
             final int count = rs.getInt(1);
             if (count > 1) {
                 return;
@@ -762,6 +769,68 @@ public final class DBChat implements Chat {
             stmt.setString(pos++, UUID.randomUUID().toString());
             stmt.setString(pos++, message.getText());
             stmt.setLong(pos, System.currentTimeMillis());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public void updateMessage(final MessageDescription messageDesc) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            updateMessage(messageDesc, con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private void updateMessage(final MessageDescription messageDesc, final Connection con) throws OXException {
+        if (null == messageDesc || !messageDesc.hasAnyAttribute()) {
+            return;
+        }
+        PreparedStatement stmt = null;
+        int pos;
+        try {
+            final StringBuilder sql = new StringBuilder(192);
+            sql.append("UPDATE chatMessage SET");
+            final List<Object> values = new LinkedList<Object>();
+            {
+                final String subject = messageDesc.getSubject();
+                if (null != subject) {
+                    sql.append(" subject = ?,");
+                    values.add(subject);
+                }
+            }
+            {
+                final String msg = messageDesc.getText();
+                if (null != msg) {
+                    sql.append(" message = ?,");
+                    values.add(msg);
+                }
+            }
+            sql.append(" createdAt = ? WHERE cid = ? AND chatId = ? AND messageId = ").append(DBChatUtility.getUnhexReplaceString());
+            stmt = con.prepareStatement(sql.toString());
+            pos = 1;
+            for (final Object value : values) {
+                stmt.setObject(pos++, value);
+            }
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setString(pos, messageDesc.getMessageId());
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
@@ -847,7 +916,7 @@ public final class DBChat implements Chat {
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
-                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = ?";
+                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
@@ -861,7 +930,7 @@ public final class DBChat implements Chat {
                 pos = 1;
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
-                message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
+                message.setPacketId(messageId);
                 message.setText(rs.getString(pos++));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 messages.add(message);

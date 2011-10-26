@@ -359,12 +359,17 @@ public final class CacheFolderStorage implements FolderStorage {
                 putFolder(createdFolder, treeId, storageParameters);
             }
             /*
-             * Refresh parent
+             * Remove parent from cache(s)
              */
-            removeSingleFromCache(folder.getParentID(), treeId, storageParameters.getUserId(), storageParameters.getSession(), false);
-            final Folder parentFolder = loadFolder(treeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
-            if (parentFolder.isCacheable()) {
-                putFolder(parentFolder, treeId, storageParameters);
+            for (final String tid : new String[] { treeId, REAL_TREE_ID }) {
+                final Cache cache = globalCache;
+                final String sContextId = String.valueOf(storageParameters.getContextId());
+                final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
+                cache.removeFromGroup(cacheKey, sContextId);
+                final FolderMap folderMap = FolderMapManagement.getInstance().optFor(storageParameters.getUserId(), storageParameters.getContextId());
+                if (null != folderMap) {
+                    folderMap.remove(folder.getParentID(), tid);
+                }
             }
         } finally {
             lock.unlock();

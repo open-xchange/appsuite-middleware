@@ -64,7 +64,7 @@ import com.openexchange.chat.Presence;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.Writer;
+import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -118,7 +118,7 @@ public final class GetAction extends AbstractChatConversationAction {
             /*
              * Create JSON object for chat
              */
-            final JSONObject jsonObject = Writer.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            final JSONObject jsonObject = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
             /*
              * Return appropriate result
              */
