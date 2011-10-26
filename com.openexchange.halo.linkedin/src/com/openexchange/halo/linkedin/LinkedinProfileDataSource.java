@@ -55,13 +55,16 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
-import com.openexchange.halo.linkedin.helpers.ContactCompletor;
+import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
@@ -81,8 +84,17 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		int uid = session.getUserId();
 		int cid = session.getContextId();
 		
-		String email = getEMail(query.getContact());
+		Contact contact = query.getContact();
+		ContactInterfaceDiscoveryService cids = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+		UserService userService = serviceLookup.getService(UserService.class);
+		ContactEMailCompletor cc = new ContactEMailCompletor(session, cids, userService);
+		cc.complete(contact);
+		
+		String email = getEMail(contact);
+		if(email == null)
+			throw new OXException(2).setPrefix("HAL-LI").setLogMessage("Need an e-mail address to look up LinkedIn data");
 
+		
 		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
 		if(accounts.size() == 0)
 			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
@@ -101,15 +113,6 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 			return queryContact.getEmail2();
 		if(queryContact.containsEmail3())
 			return queryContact.getEmail3();
-		ContactCompletor cc = new ContactCompletor();
-		if(queryContact.containsParentFolderID() && queryContact.containsObjectID()){
-			cc.updateFromContactData(queryContact);
-			getEMail(queryContact);//TRÈS RISQUÉ - hat ein Kontakt immer eine E-Mail-Adresse?
-		}
-		if(queryContact.containsInternalUserId()){
-			cc.updateFromUserData(queryContact);
-			getEMail(queryContact);//TRÈS RISQUÉ - ein User hat immer eine E-Mail-Adresse... auf Standard-OX-Installationen.
-		}
 		return null;
 	}
 }

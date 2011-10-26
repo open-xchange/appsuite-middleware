@@ -1,6 +1,10 @@
 package com.openexchange.halo.linkedin.helpers;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.User;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -49,17 +53,48 @@ import com.openexchange.groupware.container.Contact;
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
-public class ContactCompletor {
+public class ContactEMailCompletor {
 
-	public void updateFromContactData(Contact queryContact) {
-		// TODO Auto-generated method stub
-		
+	private ServerSession session;
+	private ContactInterfaceDiscoveryService cids;
+	private UserService userService;
+
+	public ContactEMailCompletor(ServerSession session, ContactInterfaceDiscoveryService cids, UserService userService) {
+		this.session = session;
+		this.cids = cids;
+		this.userService = userService;
 	}
 
-	public void updateFromUserData(Contact queryContact) {
-		// TODO Auto-generated method stub
+	protected void completeFromContactData(Contact contact) throws OXException {
+		int fid = contact.getParentFolderID();
+		ContactInterface contactInterface = cids.newContactInterface(fid, session);
+		Contact fullContact = contactInterface.getObjectById(contact.getObjectID(), fid);
 		
+		if(fullContact.containsEmail1())
+			contact.setEmail1(fullContact.getEmail1());
+		if(fullContact.containsEmail2())
+			contact.setEmail2(fullContact.getEmail2());
+		if(fullContact.containsEmail3())
+			contact.setEmail3(fullContact.getEmail3());
+	}
+
+	protected void completeFromUserData(Contact contact) throws OXException {
+		User user = userService.getUser(contact.getInternalUserId(), session.getContext());
+		contact.setEmail1(user.getMail());
+	}
+
+	public void complete(Contact contact) throws OXException {
+		if(contact.containsInternalUserId()){
+			completeFromUserData(contact);
+			return;
+		}
+		if(contact.containsParentFolderID() && contact.containsObjectID()){
+			completeFromContactData(contact);
+			return;
+		}
 	}
 
 }
