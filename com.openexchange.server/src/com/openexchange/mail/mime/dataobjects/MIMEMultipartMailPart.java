@@ -63,6 +63,7 @@ import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -237,11 +238,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 if (LOG.isDebugEnabled()) {
                     final StringBuilder sb = new StringBuilder(dataBytes.length + 128);
                     sb.append("No boundary found in Multipart-Mail:\n");
-                    try {
-                        sb.append(new String(dataBytes, "US-ASCII"));
-                    } catch (final UnsupportedEncodingException e) {
-                        sb.append("<not available>");
-                    }
+                    sb.append(new String(dataBytes, Charsets.ISO_8859_1));
                     LOG.debug(sb.toString());
                 }
                 /*
@@ -265,11 +262,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                 if (LOG.isDebugEnabled()) {
                     final StringBuilder sb = new StringBuilder(dataBytes.length + 128);
                     sb.append("Missing ending boundary in Multipart-Mail:\n");
-                    try {
-                        sb.append(new String(dataBytes, "US-ASCII"));
-                    } catch (final UnsupportedEncodingException e) {
-                        sb.append("<not available>");
-                    }
+                    sb.append(new String(dataBytes, Charsets.ISO_8859_1));
                     LOG.debug(sb.toString());
                 }
                 if (count + 1 > positions.length) {

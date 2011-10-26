@@ -77,11 +77,15 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
      */
 
     private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern URL_PATTERN = Pattern.compile("url\\([^\\)]*\\)", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern HREF_PATTERN = Pattern.compile("href=\"[^#\"]*\"", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern REL_PATTERN = Pattern.compile("rel=\"[^\"]*\"", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 
-    private static final Pattern FILENAME_PATTERN = Pattern.compile(
-        "src=['\"]?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)['\"]?",
-        Pattern.CASE_INSENSITIVE);
+    private static final Pattern IMG_FILENAME_PATTERN = Pattern.compile("src=['\"]?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)['\"]?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern URL_FILENAME_PATTERN = Pattern.compile("url\\(([0-9a-z&&[^.\\s>\"\\)]]+\\.[0-9a-z&&[^.\\s>\"\\)]]+)\\)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern HREF_FILENAME_PATTERN = Pattern.compile("href=['\"]?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)['\"]?", Pattern.CASE_INSENSITIVE);
+    private static final Pattern REL_FILENAME_PATTERN = Pattern.compile("rel=['\"]?([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)['\"]?", Pattern.CASE_INSENSITIVE);
 
     private final StreamProvider streamProvider;
 
@@ -119,8 +123,12 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
         final UpdateMessages message = (UpdateMessages) obj;
         if (message.getKey().equals(UpdateMessages.HTML_TRANSFORMATION_FINISHED)) {
             try {
-                final String content = streamProvider.getDocumentContent();
-                this.content = replaceLinks(content);                
+//                final String content = streamProvider.getDocumentContent();
+//                String tmp = replaceUrlLinks(content);
+//                tmp = replaceHrefLinks(tmp);
+//                tmp = replaceRelLinks(tmp);
+//                this.content = replaceImgLinks(tmp);
+                this.content = streamProvider.getDocumentContent();
             } catch (final OXException e) {
                 exception = e;
             } finally {
@@ -130,47 +138,170 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
             final Exception e = (Exception) message.getData();
             exception = PreviewExceptionCodes.ERROR.create(e);
             done.compareAndSet(false, true);
-        }        
-    }
-
-    private String replaceLinks(final String content) throws OXException {
-        String retval = content;
-        final Matcher imgMatcher = IMG_PATTERN.matcher(retval);
-        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
-        final StringBuilder sb = new StringBuilder(retval.length());
-        if (imgMatcher.find()) {
-            final StringBuilder strBuffer = new StringBuilder(256);
-            final MatcherReplacer mr = new MatcherReplacer();
-            final StringBuilder linkBuilder = new StringBuilder(256);
-            do {
-                final String imgTag = imgMatcher.group();
-                strBuffer.setLength(0);
-                final Matcher m = FILENAME_PATTERN.matcher(imgTag);
-                mr.resetTo(m, imgTag);
-                if (m.find()) {
-                    final String fileName = m.group(1);
-                    /*
-                     * Compose corresponding image data
-                     */
-                    String imageURL = streamProvider.getLinkForFile(fileName, session);
-                    if (imageURL == null) {
-                        imageURL = fileName;
-                    }
-
-                    linkBuilder.setLength(0);
-                    linkBuilder.append("src=").append('"').append(imageURL).append('"');
-                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-                    
-                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
-                    strBuffer.setLength(0);
-                }
-                mr.appendTail(strBuffer);
-            } while (imgMatcher.find());
+        } else if (message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_STARTED) || message.getKey().equals(UpdateMessages.PREVIEW_IMAGE_CREATION_FAILED)) {
+            Object data = message.getData();
+            System.out.println(data.toString());
         }
-        imgReplacer.appendTail(sb);
-        retval = sb.toString();
-
-        return retval;
     }
+
+//    private String replaceImgLinks(final String content) throws OXException {
+//        String retval = content;
+//        final Matcher imgMatcher = IMG_PATTERN.matcher(retval);
+//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
+//        final StringBuilder sb = new StringBuilder(retval.length());
+//        if (imgMatcher.find()) {
+//            final StringBuilder strBuffer = new StringBuilder(256);
+//            final MatcherReplacer mr = new MatcherReplacer();
+//            final StringBuilder linkBuilder = new StringBuilder(256);
+//            do {
+//                final String imgTag = imgMatcher.group();
+//                strBuffer.setLength(0);
+//                final Matcher m = IMG_FILENAME_PATTERN.matcher(imgTag);
+//                mr.resetTo(m, imgTag);
+//                if (m.find()) {
+//                    final String fileName = m.group(1);
+//                    /*
+//                     * Compose corresponding image data
+//                     */
+//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
+//                    if (imageURL == null) {
+//                        imageURL = fileName;
+//                    }
+//
+//                    linkBuilder.setLength(0);
+//                    linkBuilder.append("src=").append('"').append(imageURL).append('"');
+//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
+//                    
+//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
+//                    strBuffer.setLength(0);
+//                }
+//                mr.appendTail(strBuffer);
+//            } while (imgMatcher.find());
+//        }
+//        imgReplacer.appendTail(sb);
+//        retval = sb.toString();
+//
+//        return retval;
+//    }
+
+//    private String replaceUrlLinks(final String content) throws OXException {
+//        String retval = content;
+//        final Matcher imgMatcher = URL_PATTERN.matcher(retval);
+//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
+//        final StringBuilder sb = new StringBuilder(retval.length());
+//        if (imgMatcher.find()) {
+//            final StringBuilder strBuffer = new StringBuilder(256);
+//            final MatcherReplacer mr = new MatcherReplacer();
+//            final StringBuilder linkBuilder = new StringBuilder(256);
+//            do {
+//                final String imgTag = imgMatcher.group();
+//                strBuffer.setLength(0);
+//                final Matcher m = URL_FILENAME_PATTERN.matcher(imgTag);
+//                mr.resetTo(m, imgTag);
+//                if (m.find()) {
+//                    final String fileName = m.group(1);
+//                    /*
+//                     * Compose corresponding image data
+//                     */
+//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
+//                    if (imageURL == null) {
+//                        imageURL = fileName;
+//                    }
+//
+//                    linkBuilder.setLength(0);
+//                    linkBuilder.append("url(").append(imageURL).append(")");
+//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
+//                    
+//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
+//                    strBuffer.setLength(0);
+//                }
+//                mr.appendTail(strBuffer);
+//            } while (imgMatcher.find());
+//        }
+//        imgReplacer.appendTail(sb);
+//        retval = sb.toString();
+//
+//        return retval;
+//    }
+//
+//    private String replaceHrefLinks(final String content) throws OXException {
+//        String retval = content;
+//        final Matcher imgMatcher = HREF_PATTERN.matcher(retval);
+//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
+//        final StringBuilder sb = new StringBuilder(retval.length());
+//        if (imgMatcher.find()) {
+//            final StringBuilder strBuffer = new StringBuilder(256);
+//            final MatcherReplacer mr = new MatcherReplacer();
+//            final StringBuilder linkBuilder = new StringBuilder(256);
+//            do {
+//                final String imgTag = imgMatcher.group();
+//                strBuffer.setLength(0);
+//                final Matcher m = HREF_FILENAME_PATTERN.matcher(imgTag);
+//                mr.resetTo(m, imgTag);
+//                if (m.find()) {
+//                    final String fileName = m.group(1);
+//                    /*
+//                     * Compose corresponding image data
+//                     */
+//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
+//                    if (imageURL == null) {
+//                        imageURL = fileName;
+//                    }
+//
+//                    linkBuilder.setLength(0);
+//                    linkBuilder.append("href=").append('"').append(imageURL).append('"');
+//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
+//                    
+//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
+//                    strBuffer.setLength(0);
+//                }
+//                mr.appendTail(strBuffer);
+//            } while (imgMatcher.find());
+//        }
+//        imgReplacer.appendTail(sb);
+//        retval = sb.toString();
+//
+//        return retval;
+//    }
+//
+//    private String replaceRelLinks(final String content) throws OXException {
+//        String retval = content;
+//        final Matcher imgMatcher = REL_PATTERN.matcher(retval);
+//        final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, retval);
+//        final StringBuilder sb = new StringBuilder(retval.length());
+//        if (imgMatcher.find()) {
+//            final StringBuilder strBuffer = new StringBuilder(256);
+//            final MatcherReplacer mr = new MatcherReplacer();
+//            final StringBuilder linkBuilder = new StringBuilder(256);
+//            do {
+//                final String imgTag = imgMatcher.group();
+//                strBuffer.setLength(0);
+//                final Matcher m = REL_FILENAME_PATTERN.matcher(imgTag);
+//                mr.resetTo(m, imgTag);
+//                if (m.find()) {
+//                    final String fileName = m.group(1);
+//                    /*
+//                     * Compose corresponding image data
+//                     */
+//                    String imageURL = streamProvider.getLinkForFile(fileName, session);
+//                    if (imageURL == null) {
+//                        imageURL = fileName;
+//                    }
+//
+//                    linkBuilder.setLength(0);
+//                    linkBuilder.append("rel=").append('"').append(imageURL).append('"');
+//                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
+//                    
+//                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
+//                    strBuffer.setLength(0);
+//                }
+//                mr.appendTail(strBuffer);
+//            } while (imgMatcher.find());
+//        }
+//        imgReplacer.appendTail(sb);
+//        retval = sb.toString();
+//
+//        return retval;
+//    }
 
 }

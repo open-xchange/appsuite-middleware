@@ -660,7 +660,7 @@ public final class MessageParser {
                          */
                         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
                         final String conformHTML =
-                            htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "US-ASCII");
+                            htmlService.getConformHTML(attachment.getString(MailJSONField.CONTENT.getKey()), "ISO-8859-1");
                         if (MIMETypes.MIME_TEXT_PLAIN.equals(contentType)) {
                             content = htmlService.html2text(conformHTML, true).getBytes(charsetName);
                         } else {

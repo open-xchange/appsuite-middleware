@@ -79,8 +79,8 @@ public final class CustomCharsetProviderInit implements Initialization {
          */
         provider.addAliasCharset("BIG5", "BIG-5", "BIG_5");
         provider.addAliasCharset("UTF-8", "UTF_8");
-        provider.addAliasCharset("US-ASCII", "x-unknown");
-        provider.addAliasCharset("ISO-8859-1", "ISO");
+        // provider.addAliasCharset("US-ASCII", "x-unknown");
+        provider.addAliasCharset("ISO-8859-1", "ISO", "x-unknown");
         provider.addAliasCharset("MacRoman", "MACINTOSH");
         provider.addAliasCharset("Shift_JIS", "shift-jis");
         /*

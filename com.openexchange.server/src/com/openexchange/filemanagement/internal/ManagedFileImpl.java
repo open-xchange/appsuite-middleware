@@ -89,6 +89,8 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
 
     private volatile long size;
 
+    private String contentDisposition;
+
     /**
      * Initializes a new {@link ManagedFileImpl}.
      *
@@ -240,5 +242,15 @@ final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry {
     @Override
     public void setSize(final long size) {
         this.size = size;
+    }
+
+    @Override
+    public String getContentDisposition() {
+        return contentDisposition;
+    }
+
+    @Override
+    public void setContentDisposition(String contentDisposition) {
+        this.contentDisposition = contentDisposition;
     }
 }

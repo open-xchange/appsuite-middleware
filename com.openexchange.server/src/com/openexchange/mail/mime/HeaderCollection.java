@@ -65,6 +65,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -90,8 +91,6 @@ public class HeaderCollection implements Serializable {
     public static final HeaderCollection EMPTY_COLLECTION = new HeaderCollection(0).getReadOnlyCollection();
 
     private static final String CRLF = "\r\n";
-
-    private static final String CHARSET_US_ASCII = "US-ASCII";
 
     private static final int DEFAULT_CAPACITY = 4096;
 
@@ -192,7 +191,7 @@ public class HeaderCollection implements Serializable {
                 }
                 buffer.write(i);
             }
-            load(new String(buffer.toByteArray(), CHARSET_US_ASCII));
+            load(new String(buffer.toByteArray(), Charsets.ISO_8859_1));
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }

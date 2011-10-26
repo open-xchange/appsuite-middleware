@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Map;
 import net.thirdwing.exception.XHTMLConversionException;
 import net.thirdwing.io.IStreamProvider;
+import net.thirdwing.io.Stream;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -84,15 +85,27 @@ public class StreamProvider implements IStreamProvider {
     private final Map<String, ManagedFile> createdFiles = new HashMap<String, ManagedFile>();
     
     private final ServiceLookup serviceLookup;
+
+    private Session session;
     
     
-    public StreamProvider(final ServiceLookup serviceLookup) {
+    public StreamProvider(final ServiceLookup serviceLookup, Session session) {
         super();
         this.serviceLookup = serviceLookup;
+        this.session = session;
     }
 
     @Override
-    public OutputStream createFile(final String fileName) throws XHTMLConversionException {
+    public Stream createFile(final String fileName) throws XHTMLConversionException {
+        return createInternal(fileName);
+    }
+
+    /**
+     * @param fileName
+     * @return
+     * @throws XHTMLConversionException
+     */
+    private Stream createInternal(final String fileName) throws XHTMLConversionException {
         try {
             final String extension;
             final int lastIndex = fileName.lastIndexOf('.');
@@ -108,9 +121,14 @@ public class StreamProvider implements IStreamProvider {
             final String mimeType = MIMEType2ExtMap.getContentType(fileName);
             final ManagedFile managedFile = fileManagement.createManagedFile(tempFile);
             managedFile.setContentType(mimeType);
+            managedFile.setFileName(fileName);
+            managedFile.setContentDisposition("inline");
             createdFiles.put(fileName, managedFile);
             
-            return fos;
+            Stream retval = new Stream();
+            retval.setStream(fos);
+            retval.setUri(managedFile.constructURL(session));
+            return retval;
         } catch (final OXException e) {
             throw new XHTMLConversionException("Could not create OutputStream for file " + fileName, e);
         } catch (final FileNotFoundException e) {
@@ -156,6 +174,16 @@ public class StreamProvider implements IStreamProvider {
         } finally {
             Streams.close(reader);
         }
+    }
+
+    @Override
+    public Stream createPreviewFile(String fileName) throws XHTMLConversionException {
+        return createInternal(fileName);
+    }
+
+    @Override
+    public Stream createDocumentFile(String fileName) throws XHTMLConversionException {
+        return createInternal(fileName);
     }
 
 }
