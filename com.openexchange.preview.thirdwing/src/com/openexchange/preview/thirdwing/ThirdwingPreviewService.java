@@ -66,8 +66,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import net.thirdwing.common.ConversionJobfactory;
 import net.thirdwing.common.IConversionJob;
+import net.thirdwing.exception.PreviewCreationException;
 import net.thirdwing.exception.XHTMLConversionException;
 import net.thirdwing.io.IOUnit;
+import net.thirdwing.io.IStreamProvider;
+import net.thirdwing.util.FileUtilities;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
@@ -183,7 +186,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     
     private PreviewDocument generatePreview(final File file, final Session session) throws OXException {
         final IConversionJob transformer = ConversionJobfactory.getTransformer(file);
-        final StreamProvider streamProvider = new StreamProvider(serviceLookup);        
+        final StreamProvider streamProvider = new StreamProvider(serviceLookup, session);        
         final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
         
         final ThreadPoolService poolService = serviceLookup.getService(ThreadPoolService.class);
@@ -194,7 +197,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             unit = new IOUnit((fis = new FileInputStream(file)));
             unit.setStreamProvider(streamProvider);
             transformer.addObserver(observationTask);
-            transformer.transformDocument(unit);
+            transformer.transformDocument(unit, 200F);
             
             final String content = future.get();
             if (content == null) {

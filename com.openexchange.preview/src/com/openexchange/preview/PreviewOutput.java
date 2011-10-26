@@ -73,5 +73,9 @@ public enum PreviewOutput {
      * Output only meta data
      */
     METADATA,
+    /**
+     * Output preview image (preview of the preview)
+     */
+    IMAGE,
     ;
 }

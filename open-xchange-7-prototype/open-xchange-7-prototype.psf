@@ -65,6 +65,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.facebook"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.msn"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.twitter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.yahoo"/>
@@ -97,6 +98,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sso"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.textxtraction"/>

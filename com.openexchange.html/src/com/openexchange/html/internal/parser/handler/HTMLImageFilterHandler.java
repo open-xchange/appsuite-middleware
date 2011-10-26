@@ -204,7 +204,6 @@ public class HTMLImageFilterHandler implements HTMLHandler {
             return false;
         }
     }
-
     @Override
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         if (IMG.equals(tag) || INPUT.equals(tag)) {
@@ -213,7 +212,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
                 attributes.put(SRC, BLANK);
             } else if (!isInlineImageSource(src)) {
                 /*
-                 * Replace external image's "src" attribute
+                 * Don't replace inline images
                  */
                 attributes.put(SRC, BLANK);
                 imageURLFound = true;

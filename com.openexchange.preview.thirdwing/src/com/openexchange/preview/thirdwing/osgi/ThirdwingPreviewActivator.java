@@ -51,6 +51,7 @@ package com.openexchange.preview.thirdwing.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.thirdwing.ThirdwingPreviewService;
@@ -66,7 +67,7 @@ public class ThirdwingPreviewActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagedFileManagement.class, ThreadPoolService.class };
+        return new Class<?>[] { ManagedFileManagement.class, ThreadPoolService.class, ConfigurationService.class };
     }
 
     @Override

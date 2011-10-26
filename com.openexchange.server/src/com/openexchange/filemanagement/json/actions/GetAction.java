@@ -124,6 +124,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
              * Content type
              */
             final String fileName = file.getFileName();
+            String disposition = file.getContentDisposition();
             final ContentType contentType = new ContentType(file.getContentType());
             if (contentType.getBaseType().equalsIgnoreCase("application/octet-stream")) {
                 /*
@@ -161,6 +162,7 @@ public final class GetAction implements ETagAwareAJAXActionService {
                 fileHolder.setName(fileName);
             }
             fileHolder.setContentType(contentType.toString());
+            fileHolder.setDisposition(disposition);
             final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
             /*
              * Set ETag
