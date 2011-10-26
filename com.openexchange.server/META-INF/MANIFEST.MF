@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 6.20.0.0
+Bundle-Version: 7.0.0.0
 OXVersion: 6.20.0
 OXRevision: 20
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator

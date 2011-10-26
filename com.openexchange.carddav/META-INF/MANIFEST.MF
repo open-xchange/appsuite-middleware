@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CardDAV
 Bundle-SymbolicName: com.openexchange.carddav
-Bundle-Version: 6.20.0.0
+Bundle-Version: 7.0.0.0
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
