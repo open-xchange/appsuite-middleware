@@ -51,17 +51,43 @@ package com.openexchange.mdns.internal;
 
 import static com.openexchange.java.util.UUIDs.getUnformattedString;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.UUID;
 import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSServiceEntryImpl}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
 
-    private final InetAddress address;
+    private static final Comparator<InetAddress> COMPARATOR = new Comparator<InetAddress>() {
+
+        @Override
+        public int compare(final InetAddress obj, final InetAddress obj1) {
+            final byte[] inet1 = obj.getAddress(); // 1st element is high-order byte
+            final byte[] inet2 = obj1.getAddress();
+            // Compare by length
+            final int length = inet1.length;
+            final int diff = length - inet2.length;
+            if (0 != diff) {
+                return diff;
+            }
+            // Compare bytes
+            for (int i = 0; i < length; ++i) {
+                final byte b1 = inet1[i];
+                final byte b2 = inet2[i];
+                if (b1 != b2) {
+                    return b1 - b2;
+                }
+            }
+            return 0;
+        }
+    };
+
+    private final InetAddress[] addresses;
 
     private final String info;
 
@@ -77,7 +103,7 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
 
     /**
      * Initializes a new {@link MDNSServiceEntryImpl}.
-     *
+     * 
      * @param address The address
      * @param port The port
      * @param number The number
@@ -85,9 +111,10 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
      * @param info The info
      * @param type The type
      */
-    public MDNSServiceEntryImpl(final InetAddress address, final int port, final UUID id, final String serviceId, final String info, final String type) {
+    public MDNSServiceEntryImpl(final InetAddress[] addresses, final int port, final UUID id, final String serviceId, final String info, final String type) {
         super();
-        this.address = address;
+        this.addresses = addresses;
+        Arrays.sort(this.addresses, COMPARATOR);
         this.port = port;
         this.id = id;
         this.serviceId = serviceId;
@@ -99,7 +126,7 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
     private int hashCode0() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((address == null) ? 0 : address.hashCode());
+        result = prime * result + ((addresses == null) ? 0 : Arrays.hashCode(addresses));
         result = prime * result + ((id == null) ? 0 : id.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
         result = prime * result + port;
@@ -108,8 +135,8 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
     }
 
     @Override
-    public InetAddress getAddress() {
-        return address;
+    public InetAddress[] getAddresses() {
+        return addresses;
     }
 
     @Override
@@ -140,7 +167,7 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
     @Override
     public String toString() {
         return new StringBuilder(64).append("{id=").append(getUnformattedString(id)).append(", serviceId=").append(serviceId).append(
-            ", address=").append(address.toString()).append(", port=").append(port).append('}').toString();
+            ", addresses=").append(Arrays.toString(addresses)).append(", port=").append(port).append('}').toString();
     }
 
     @Override
@@ -157,11 +184,11 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
             return false;
         }
         final MDNSServiceEntryImpl other = (MDNSServiceEntryImpl) obj;
-        if (address == null) {
-            if (other.address != null) {
+        if (addresses == null) {
+            if (other.addresses != null) {
                 return false;
             }
-        } else if (!address.equals(other.address)) {
+        } else if (!Arrays.equals(addresses, other.addresses)) {
             return false;
         }
         if (id == null) {

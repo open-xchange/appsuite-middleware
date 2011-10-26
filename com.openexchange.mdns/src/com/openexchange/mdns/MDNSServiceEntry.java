@@ -61,11 +61,11 @@ import java.util.UUID;
 public interface MDNSServiceEntry {
 
     /**
-     * Gets the host address of the service.
+     * Gets the host addresses of the service.
      *
-     * @return The host address of the service
+     * @return The host addresses of the service
      */
-    InetAddress getAddress();
+    InetAddress[] getAddresses();
 
     /**
      * Gets the port for the service.

@@ -49,6 +49,7 @@
 
 package com.openexchange.mdns.internal;
 
+import java.util.Arrays;
 import java.util.List;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
@@ -98,7 +99,7 @@ public final class MDNSCommandProvider implements CommandProvider {
         for (final MDNSServiceEntry mdnsServiceEntry : services) {
             sb.setLength(0);
             sb.append(delim).append("UUID: ").append(mdnsServiceEntry.getId());
-            sb.append(delim).append("Address: ").append(mdnsServiceEntry.getAddress());
+            sb.append(delim).append("Address: ").append(Arrays.toString(mdnsServiceEntry.getAddresses()));
             sb.append(delim).append("Port: ").append(mdnsServiceEntry.getPort());
             sb.append('\n');
             intp.print(sb.toString());

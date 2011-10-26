@@ -64,6 +64,8 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MDNSListener.class));
 
+    private static final boolean INFO = LOG.isInfoEnabled();
+
     private final ConcurrentMap<String, ConcurrentMap<UUID, MDNSServiceEntry>> map;
 
     private final MDNSReregisterer mdnsReregisterer;
@@ -105,7 +107,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
         if (inner.isEmpty()) {
             map.remove(serviceId);
         }
-        if (LOG.isInfoEnabled()) {
+        if (INFO) {
             LOG.info(new StringBuilder(64).append("Removed tracked service: ").append(n).toString());
         }
     }
@@ -135,7 +137,7 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
          * Add newly detected service
          */
         final MDNSServiceEntryImpl entry =
-            new MDNSServiceEntryImpl(info.getAddress(), info.getPort(), id, serviceId, info.toString(), Constants.SERVICE_TYPE);
+            new MDNSServiceEntryImpl(info.getInetAddresses(), info.getPort(), id, serviceId, info.toString(), Constants.SERVICE_TYPE);
         ConcurrentMap<UUID, MDNSServiceEntry> inner = map.get(serviceId);
         if (null == inner) {
             final ConcurrentMap<UUID, MDNSServiceEntry> newInner = new ConcurrentHashMap<UUID, MDNSServiceEntry>();
@@ -164,16 +166,18 @@ public final class MDNSListener implements javax.jmdns.ServiceListener {
                     prev = inner.get(id);
                     if (!prev.equals(entry)) {
                         inner.put(id, entry);
-                        if (LOG.isInfoEnabled()) {
+                        if (INFO) {
                             LOG.info(new StringBuilder(64).append("Updated new service: ").append(entry).toString());
                         }
-                    } else if (LOG.isInfoEnabled()) {
+                    } else if (INFO) {
                         LOG.info(new StringBuilder("Duplicate service discovered: ").append(entry).toString());
                     }
                 }
             }
-        } else if (LOG.isInfoEnabled()) {
-            LOG.info(new StringBuilder(64).append("Detected new service: ").append(entry).toString());
+        } else {
+            if (INFO) {
+                LOG.info(new StringBuilder(64).append("Detected new service: ").append(entry).toString());
+            }
             /*
              * Added a newly discovered service. Re-register own services to re-publish them.
              */
