@@ -61,7 +61,11 @@ import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.preview.PreviewDocument;
 
 /**
+<<<<<<< HEAD
  * {@link PreviewResponseRenderer} - The response renderer for {@link PreviewDocument}s.
+=======
+ * {@link PreviewResponseRenderer}
+>>>>>>> branch 'master' of https://git.open-xchange.com/git/wd/backend
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
