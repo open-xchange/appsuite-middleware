@@ -62,13 +62,13 @@ import com.openexchange.preview.PreviewDocument;
 
 
 /**
- * {@link HTMLResponseRenderer}
+ * {@link PreviewResponseRenderer}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class HTMLResponseRenderer implements ResponseRenderer {
+public class PreviewResponseRenderer implements ResponseRenderer {
     
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HTMLResponseRenderer.class));
+    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PreviewResponseRenderer.class));
 
 
     @Override
