@@ -130,6 +130,7 @@ public class DispatcherActivator extends HousekeepingActivator {
             defaultConverter.addConverter(new MailTextPreviewResultConverter(textPreviewResultConverter));
             defaultConverter.addConverter(new MailFilteredHTMLPreviewResultConverter(filteredHTMLPreviewResultConverter));
         }
+
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
             @Override
