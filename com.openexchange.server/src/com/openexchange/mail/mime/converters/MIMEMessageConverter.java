@@ -83,6 +83,7 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -1978,7 +1979,7 @@ public final class MIMEMessageConverter {
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
-                headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
+                headers = loadHeaders(new String(out.toByteArray(), Charsets.ISO_8859_1));
             } catch (final IOException e2) {
                 LOG.warn("Unable to parse headers. Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
@@ -1996,7 +1997,7 @@ public final class MIMEMessageConverter {
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(DEFAULT_MESSAGE_SIZE);
             try {
                 part.writeTo(out);
-                headers = loadHeaders(new String(out.toByteArray(), "US-ASCII"));
+                headers = loadHeaders(new String(out.toByteArray(), Charsets.ISO_8859_1));
             } catch (final IOException e2) {
                 LOG.warn("Unable to parse headers Assuming no headers...", e2);
                 headers = new HeaderCollection(0);
@@ -2040,15 +2041,7 @@ public final class MIMEMessageConverter {
      * @return The parsed headers as a {@link HeaderCollection collection}.
      */
     public static HeaderCollection loadHeaders(final byte[] bytes) {
-        try {
-            return loadHeaders(new String(bytes, "US-ASCII"));
-        } catch (final UnsupportedEncodingException e) {
-            /*
-             * Cannot occur
-             */
-            LOG.error(e.getMessage(), e);
-            return new HeaderCollection(0);
-        }
+        return loadHeaders(new String(bytes, Charsets.ISO_8859_1));
     }
 
     private static final Pattern PATTERN_PARSE_HEADER = Pattern.compile("(\\S+):\\p{Blank}?(.*)(?:(?:\r?\n)|(?:$))");

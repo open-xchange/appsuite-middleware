@@ -144,7 +144,7 @@ public abstract class InfostoreDocumentMailPart extends MailPart implements Comp
         if (getContentType().isMimeType("text/*")) {
             String charset = getContentType().getCharsetParameter();
             if (charset == null) {
-                charset = "US-ASCII";
+                charset = "ISO-8859-1";
             }
             InputStream docInputSream = null;
             try {

@@ -54,12 +54,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.activation.DataHandler;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -848,8 +848,6 @@ public abstract class MailPart implements Serializable, Cloneable {
         }
     }
 
-    private static final String US_ASCII = "US-ASCII";
-
     /**
      * Gets the mail part's source
      *
@@ -857,14 +855,7 @@ public abstract class MailPart implements Serializable, Cloneable {
      * @throws OXException If mail part's source cannot be returned
      */
     public String getSource() throws OXException {
-        try {
-            return new String(getSourceBytes(), US_ASCII);
-        } catch (final UnsupportedEncodingException e) {
-            /*
-             * Cannot occur
-             */
-            throw MailExceptionCode.ENCODING_ERROR.create(e, US_ASCII);
-        }
+        return new String(getSourceBytes(), Charsets.ISO_8859_1);
     }
 
     /**
