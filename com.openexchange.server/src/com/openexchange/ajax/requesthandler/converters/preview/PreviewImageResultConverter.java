@@ -69,7 +69,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     }
 
     @Override
-    protected PreviewOutput getOutput() {
+    public PreviewOutput getOutput() {
         return PreviewOutput.IMAGE;
     }
 

@@ -80,8 +80,8 @@ public abstract class ContactAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final ContactRequest contactRequest = new ContactRequest(request, session);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final ContactRequest contactRequest = new ContactRequest(requestData, session);
 
         return perform(contactRequest);
     }

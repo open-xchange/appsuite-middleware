@@ -11,10 +11,12 @@ Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.session,
  gnu.inet.encoding,
+ gnu.trove,
+ gnu.trove.map,
+ gnu.trove.map.hash,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/dom4j-1.6.1.jar,
  lib/smack-3.2.1.jar,
  lib/smackx-3.2.1.jar,

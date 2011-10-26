@@ -103,7 +103,7 @@ public final class DBChatUtility {
             throw new IllegalArgumentException("Byte array is null.");
         }
         if (bytes.length != UUID_BYTE_LENGTH) {
-            throw new IllegalArgumentException("UUID must be contructed using a byte array with length 16.");
+            throw new IllegalArgumentException("UUID must be contructed using a byte array with length 16, but is: " + bytes.length);
         }
         long msb = 0;
         long lsb = 0;

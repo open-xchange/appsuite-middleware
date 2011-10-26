@@ -88,8 +88,8 @@ public class DefaultContactComparator implements Comparator<Contact>{
     };
 
     private static final TIntObjectHashMap<ComparatorProvider> SPECIAL_COMPARATORS = new TIntObjectHashMap<ComparatorProvider>() {{
-        put(Contact.SPECIAL_SORTING, USE_COUNT_COMPARATOR_PROVIDER);
-        put(Contact.USE_COUNT_GLOBAL_FIRST, SPECIAL_COMPARATOR_PROVIDER);
+        put(Contact.SPECIAL_SORTING, SPECIAL_COMPARATOR_PROVIDER);
+        put(Contact.USE_COUNT_GLOBAL_FIRST, USE_COUNT_COMPARATOR_PROVIDER);
     }};
 
     private final int field;

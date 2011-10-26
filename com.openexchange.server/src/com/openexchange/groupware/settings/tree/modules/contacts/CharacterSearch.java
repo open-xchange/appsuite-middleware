@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree.modules.contacts;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactConfig.Property;
 import com.openexchange.groupware.contexts.Context;
@@ -84,7 +85,7 @@ public class CharacterSearch implements PreferencesItemService {
             }
 
             @Override
-            public void getValue(final Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) {
+            public void getValue(final Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 setting.setSingleValue(ContactConfig.getInstance().getBoolean(Property.CHARACTER_SEARCH));
             }
         };

@@ -181,7 +181,7 @@ public class RdbSettingStorage extends SettingStorage {
             throw SettingExceptionCodes.NOT_LEAF.create(setting.getName());
         }
         if (setting.isShared()) {
-            final IValueHandler value = ConfigTree.getSharedValue(setting);
+            final IValueHandler value = getSharedValue(setting);
             if (null != value && value.isWritable()) {
                 value.writeValue(session, ctx, user, setting);
             } else {
@@ -227,8 +227,23 @@ public class RdbSettingStorage extends SettingStorage {
      */
     private void saveInternal2(final Connection con, final Setting setting)
         throws OXException {
+        saveInternal2(con, setting, 0);
+    }
+
+    private static final int MAX_RETRY = 3;
+
+    /**
+     * Internally saves a setting into the database.
+     * @param con a writable database connection.
+     * @param setting setting to store.
+     * @param retryCount The current retry count
+     * @throws OXException if storing fails.
+     */
+    private void saveInternal2(final Connection con, final Setting setting, final int retryCount)
+        throws OXException {
         final boolean update = settingExists(con, userId, setting);
         PreparedStatement stmt = null;
+        boolean retry = false;
         try {
             if (update) {
                 stmt = con.prepareStatement(UPDATE_SETTING);
@@ -240,11 +255,29 @@ public class RdbSettingStorage extends SettingStorage {
             stmt.setInt(pos++, ctxId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, setting.getId());
-            stmt.executeUpdate();
+            if (update) {
+                stmt.executeUpdate();
+            } else {
+                try {
+                    stmt.executeUpdate();
+                } catch (final SQLException e) {
+                    if (retryCount > MAX_RETRY) {
+                        throw e;
+                    }
+                    // Another thread inserted in the meantime: Retry
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Detected concurrent insertion of a user's setting.", e);
+                    }
+                    retry = true;
+                }
+            }
         } catch (final SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(null, stmt);
+        }
+        if (retry) {
+            saveInternal2(con, setting, retryCount + 1);
         }
     }
 
@@ -298,12 +331,8 @@ public class RdbSettingStorage extends SettingStorage {
         }
     }
 
-    /**
-     * Reads a shared value.
-     * @param setting setting Setting.
-     */
-    private void readSharedValue(final Setting setting) {
-        final IValueHandler reader = ConfigTree.getSharedValue(setting);
+    private void readSharedValue(final Setting setting) throws OXException {
+        final IValueHandler reader = getSharedValue(setting);
         if (null != reader) {
             if (reader.isAvailable(userConfig)) {
                 try {
@@ -367,5 +396,18 @@ public class RdbSettingStorage extends SettingStorage {
         if (setting.isLeaf()) {
             setting.getParent().removeElement(setting);
         }
+    }
+
+    /**
+     * Returns the corresponding reader for a setting.
+     * @param setting shared setting.
+     * @return the reader for the shared setting.
+     */
+    static IValueHandler getSharedValue(final Setting setting) {
+        IValueHandler retval = null;
+        if (setting.isLeaf()) {
+            retval = setting.getShared();
+        }
+        return retval;
     }
 }

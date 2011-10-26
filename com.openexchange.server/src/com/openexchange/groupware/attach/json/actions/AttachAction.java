@@ -111,10 +111,10 @@ public final class AttachAction extends AbstractAttachmentAction {
     public static transient final AttachmentField[] REQUIRED = Attachment.REQUIRED;
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            if (request.hasUploads()) {
-                final UploadEvent upload = request.getUploadEvent();
+            if (requestData.hasUploads()) {
+                final UploadEvent upload = requestData.getUploadEvent();
                 final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                 final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
 
@@ -152,7 +152,7 @@ public final class AttachAction extends AbstractAttachmentAction {
 
                 return attach(attachments, uploadFiles, session, session.getContext(), session.getUser(), session.getUserConfiguration());
             }
-            final JSONObject object = (JSONObject) request.getData();
+            final JSONObject object = (JSONObject) requestData.getData();
 
             for (final AttachmentField required : Attachment.REQUIRED) {
                 if (!object.has(required.getName())) {

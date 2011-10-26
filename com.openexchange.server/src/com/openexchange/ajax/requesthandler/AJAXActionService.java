@@ -63,11 +63,11 @@ public interface AJAXActionService {
     /**
      * Performs given request.
      *
-     * @param request The request to perform
+     * @param requestData The request to perform
      * @param session The session providing needed user data
      * @return The result yielded from given request
      * @throws OXException If an error occurs
      */
-    AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException;
+    AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException;
 
 }

@@ -78,6 +78,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OXFolderAccess} - Provides access to OX folders.
@@ -324,8 +325,6 @@ public class OXFolderAccess {
             return fo.getEffectiveUserPermission(userId, userConfig, readCon);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -341,17 +340,41 @@ public class OXFolderAccess {
         try {
             final int folderId = OXFolderSQL.getUserDefaultFolder(userId, module, readCon, ctx);
             if (folderId == -1) {
-                throw
-                    OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
-                    folderModule2String(module),
-                    getUserName(userId, ctx),
-                    Integer.valueOf(ctx.getContextId()));
+                if (FolderObject.INFOSTORE != module) {
+                    throw
+                        OXFolderExceptionCode.NO_DEFAULT_FOLDER_FOUND.create(
+                        folderModule2String(module),
+                        getUserName(userId, ctx),
+                        Integer.valueOf(ctx.getContextId()));
+                }
+                /*
+                 * Re-Create default infostore folder
+                 */
+                final Connection wc = DBPool.pickupWriteable(ctx);
+                try {
+                    wc.setAutoCommit(false);
+                    final String displayName = UserStorage.getStorageUser(userId, ctx).getDisplayName();
+                    final int fuid = new OXFolderAdminHelper().addUserToInfoStore(userId, displayName, ctx.getContextId(), wc);
+                    wc.commit();
+                    return getFolderObject(fuid);
+                } catch (final SQLException e) {
+                    DBUtils.rollback(wc);
+                    throw e;
+                } catch (final Exception e) {
+                    DBUtils.rollback(wc);
+                    throw e;
+                } finally {
+                    DBUtils.autocommit(wc);
+                    DBPool.closeWriterSilent(ctx, wc);
+                }
             }
             return getFolderObject(folderId);
+        } catch (final OXException e) {
+            throw e;
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
+        } catch (final Exception e) {
+            throw OXFolderExceptionCode.RUNTIME_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         }
     }
 
@@ -399,8 +422,6 @@ public class OXFolderAccess {
             return isEmpty(fo, session, ctx);
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final Throwable t) {
             throw OXFolderExceptionCode.RUNTIME_ERROR.create(t, Integer.valueOf(ctx.getContextId()));
         }
@@ -457,8 +478,6 @@ public class OXFolderAccess {
             } else {
                 throw OXFolderExceptionCode.UNKNOWN_MODULE.create(folderModule2String(module), Integer.valueOf(ctx.getContextId()));
             }
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } catch (final Throwable t) {

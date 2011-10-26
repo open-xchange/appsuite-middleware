@@ -86,9 +86,9 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
         return new AJAXActionService() {
 
             @Override
-            public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+            public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
                 try {
-                    final String path = request.getParameter(PATH);
+                    final String path = requestData.getParameter(PATH);
                     if (path == null) {
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(PATH);
                     }

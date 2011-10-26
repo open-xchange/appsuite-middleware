@@ -51,6 +51,7 @@ package com.openexchange.chat.db;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link DBChatServiceLookup}
@@ -85,6 +86,9 @@ public final class DBChatServiceLookup {
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
     public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        if (SessiondService.class.equals(clazz)) {
+            return (S) DBRoster.get();
+        }
         final ServiceLookup serviceLookup = ref.get();
         return null == serviceLookup ? null : serviceLookup.getService(clazz);
     }

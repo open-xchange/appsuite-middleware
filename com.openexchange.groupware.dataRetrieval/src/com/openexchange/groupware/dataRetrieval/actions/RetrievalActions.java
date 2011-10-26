@@ -99,8 +99,8 @@ public class RetrievalActions implements AJAXActionServiceFactory {
     private final AJAXActionService REGISTER_ACTION = new AJAXActionService() {
 
         @Override
-        public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-            final String id = request.getParameter("datasource");
+        public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+            final String id = requestData.getParameter("datasource");
             DataProvider provider = null;
             Object state = null;
             try {
@@ -109,10 +109,10 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
                 final Map<String, Object> parameters = new HashMap<String, Object>();
 
-                final Iterator<String> parameterNames = request.getParameterNames();
+                final Iterator<String> parameterNames = requestData.getParameterNames();
                 while (parameterNames.hasNext()) {
                     final String name = parameterNames.next();
-                    parameters.put(name, request.getParameter(name));
+                    parameters.put(name, requestData.getParameter(name));
                 }
 
                 final FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
@@ -120,7 +120,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
                 parameters.put(Constants.CREATED, System.currentTimeMillis());
                 String token = paramMap.rememberForSession(session, parameters);
 
-                return new AJAXRequestResult(toJSON(metadata, getURI(token, request)));
+                return new AJAXRequestResult(toJSON(metadata, getURI(token, requestData)));
             } finally {
                 if (provider != null && state != null) {
                     provider.close(state);

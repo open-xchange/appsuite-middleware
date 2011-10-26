@@ -103,24 +103,40 @@ public interface ChatAccess {
     List<String> getChats() throws OXException;
 
     /**
+     * Gets existing chat with specified member.
+     * 
+     * @param chatId The chat identifier
+     * @return The existing chat
+     * @throws OXException If chat cannot be returned
+     */
+    Chat getChat(String chatId) throws OXException;
+
+    /**
      * Opens described chat with specified member.
      * 
      * @param chatId The chat identifier or <code>null</code> to generate a unique one
      * @param member The member with which to open the chat
      * @return The opened chat
      * @throws OXException If chat cannot be opened
-     * @see Chat#DEFAULT_CHAT
      */
     Chat openChat(String chatId, MessageListener listener, ChatUser member) throws OXException;
 
     /**
      * Opens described chat with specified members.
      * 
-     * @param chatId The chat identifier or <code>null</code> to generate a unique one; must not be Chat#DEFAULT_CHAT
+     * @param chatId The chat identifier or <code>null</code> to generate a unique one
      * @param members The members with which to open the chat
      * @return The opened chat
      * @throws OXException If chat cannot be opened
      */
     Chat openChat(String chatId, MessageListener listener, ChatUser... members) throws OXException;
+
+    /**
+     * Updates the denoted chat by {@link ChatDescription}'s arguments.
+     * 
+     * @param chatDescription The chat description
+     * @throws OXException If update operation fails
+     */
+    void updateChat(ChatDescription chatDescription) throws OXException;
 
 }

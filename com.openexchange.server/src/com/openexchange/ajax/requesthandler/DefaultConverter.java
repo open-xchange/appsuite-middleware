@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -60,18 +59,33 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DefaultConverter}
- *
+ * {@link DefaultConverter} - The default {@link Converter} implementation.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultConverter implements Converter {
 
-    private final Map<String, List<Node>> understandsFormat = new ConcurrentHashMap<String, List<Node>>();
+    private final Map<String, List<Node>> understandsFormat;
 
-    private final Map<String, List<Node>> suppliesFormat = new ConcurrentHashMap<String, List<Node>>();
+    private final Map<String, List<Node>> suppliesFormat;
 
-    private final Map<Conversion, Step> cachedSteps = new ConcurrentHashMap<Conversion, Step>();
+    private final Map<Conversion, Step> cachedSteps;
 
+    /**
+     * Initializes a new {@link DefaultConverter}.
+     */
+    public DefaultConverter() {
+        super();
+        understandsFormat = new ConcurrentHashMap<String, List<Node>>();
+        suppliesFormat = new ConcurrentHashMap<String, List<Node>>();
+        cachedSteps = new ConcurrentHashMap<Conversion, Step>();
+    }
+
+    /**
+     * Adds specified result converter.
+     * 
+     * @param converter The converter
+     */
     public void addConverter(final ResultConverter converter) {
         final Node n = new Node();
         n.converter = converter;
@@ -119,26 +133,36 @@ public class DefaultConverter implements Converter {
 
     }
 
-    public void removeConverter(final ResultConverter thing) {
-        // TODO Auto-generated method stub
-
+    /**
+     * Removes given result converter.
+     * 
+     * @param resultConverter The result converter
+     */
+    public void removeConverter(final ResultConverter resultConverter) {
+        // Nothing to do?
     }
 
-
     @Override
-    public void convert(final String from, final String to, final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
-        Step path = getShortestPath(from, to);
-        while(path != null) {
-            path.converter.convert(request, result, session, this);
+    public void convert(final String fromFormat, final String toFormat, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
+        Step path = getShortestPath(fromFormat, toFormat);
+        while (path != null) {
+            path.converter.convert(requestData, result, session, this);
             result.setFormat(path.converter.getOutputFormat());
             path = path.next;
         }
     }
 
+    /**
+     * Gets the shortest path from <code>from</code> to <code>to</code>.
+     * 
+     * @param from The from format
+     * @param to The target format
+     * @return The calculated path
+     */
     public Step getShortestPath(final String from, final String to) {
         final Conversion conversion = new Conversion(from, to);
         final Step step = cachedSteps.get(conversion);
-        if(step != null) {
+        if (step != null) {
             return step;
         }
         final Map<Node, Mark> markings = new HashMap<Node, Mark>();
@@ -223,8 +247,8 @@ public class DefaultConverter implements Converter {
     private List<Edge> getInitialEdges(final String format) {
         final List<Node> list = understandsFormat.get(format);
 
-        if(list == null || list.isEmpty()) {
-            throw new IllegalArgumentException("Can't convert from "+format);
+        if (list == null || list.isEmpty()) {
+            throw new IllegalArgumentException("Can't convert from " + format);
         }
         final List<Edge> edges = new ArrayList<Edge>(list.size());
         for (final Node node : list) {
@@ -236,12 +260,14 @@ public class DefaultConverter implements Converter {
         return edges;
     }
 
-    public static class Step {
+    public static final class Step {
+
         public Step next;
+
         public ResultConverter converter;
     }
 
-    public static class Mark {
+    public static final class Mark {
 
         public Node previous;
 
@@ -250,7 +276,7 @@ public class DefaultConverter implements Converter {
         public boolean visited = false;
     }
 
-    public static class Edge {
+    public static final class Edge {
 
         public Node node;
 
@@ -265,17 +291,19 @@ public class DefaultConverter implements Converter {
         }
     }
 
-    public static class Node {
+    public static final class Node {
 
         public ResultConverter converter;
 
         public List<Edge> edges = new LinkedList<Edge>();
     }
 
-    public static class Conversion {
+    public static final class Conversion {
 
         private final String from;
+
         private final String to;
+
         private final int hashCode;
 
         Conversion(final String from, final String to) {
@@ -289,19 +317,18 @@ public class DefaultConverter implements Converter {
             result = prime * result + ((to == null) ? 0 : to.hashCode());
             hashCode = result;
         }
+
         @Override
         public int hashCode() {
             return hashCode;
         }
+
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
-                return false;
-            }
-            if (getClass() != obj.getClass()) {
+            if (!(obj instanceof Conversion)) {
                 return false;
             }
             final Conversion other = (Conversion) obj;
@@ -321,8 +348,6 @@ public class DefaultConverter implements Converter {
             }
             return true;
         }
-
-
 
     }
 

@@ -113,8 +113,8 @@ public final class UpdateAction extends AbstractMailAccountAction {
         Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final JSONObject jData = (JSONObject) request.getData();
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final JSONObject jData = (JSONObject) requestData.getData();
 
         try {
             final MailAccountDescription accountDescription = new MailAccountDescription();

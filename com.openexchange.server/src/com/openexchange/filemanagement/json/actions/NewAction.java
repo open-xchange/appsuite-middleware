@@ -84,16 +84,16 @@ public final class NewAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        if (!request.hasUploads()) {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        if (!requestData.hasUploads()) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
-        final UploadEvent upload = request.getUploadEvent();
-        final String moduleParam = request.getParameter(AJAXFile.PARAMETER_MODULE);
+        final UploadEvent upload = requestData.getUploadEvent();
+        final String moduleParam = requestData.getParameter(AJAXFile.PARAMETER_MODULE);
         if (moduleParam == null) {
             throw UploadException.UploadCode.MISSING_PARAM.create(AJAXFile.PARAMETER_MODULE);
         }
-        final String fileTypeFilter = request.getParameter(AJAXFile.PARAMETER_TYPE);
+        final String fileTypeFilter = requestData.getParameter(AJAXFile.PARAMETER_TYPE);
         if (fileTypeFilter == null) {
             throw UploadException.UploadCode.MISSING_PARAM.create(AJAXFile.PARAMETER_TYPE);
         }

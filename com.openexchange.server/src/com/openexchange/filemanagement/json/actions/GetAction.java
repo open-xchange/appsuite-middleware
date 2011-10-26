@@ -112,9 +112,9 @@ public final class GetAction implements ETagAwareAJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final String id = request.getParameter(AJAXFile.PARAMETER_ID);
+            final String id = requestData.getParameter(AJAXFile.PARAMETER_ID);
             if (id == null || id.length() == 0) {
                 throw UploadException.UploadCode.MISSING_PARAM.create(AJAXFile.PARAMETER_ID).setAction(AJAXFile.ACTION_GET);
             }

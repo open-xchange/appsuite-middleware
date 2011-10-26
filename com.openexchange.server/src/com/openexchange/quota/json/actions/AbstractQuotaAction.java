@@ -92,10 +92,10 @@ public abstract class AbstractQuotaAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final QuotaAJAXRequest ajaxRequest = new QuotaAJAXRequest(request, session);
-            final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+            final QuotaAJAXRequest ajaxRequest = new QuotaAJAXRequest(requestData, session);
+            final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             if (null != sTimeZone) {
                 ajaxRequest.setTimeZone(getTimeZone(sTimeZone));
             }

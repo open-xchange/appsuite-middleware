@@ -2,28 +2,50 @@
 <project name="All Bundle Builder" basedir="." default="build">
 
     <description>
-        This build file reads the file packages.txt and executes build.xml for every ProjectSet listed there. This is a workaround for a
-        ProjectSet that lists all other ProjectSet projects.
+        This build file reads a ProjectSet file and executes build.xml for every ProjectSet listed there.
     </description>
 
-    <taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+    <!-- Constants -->
+    <property name="mainDir" value=".."/>
+    <property name="checkoutDir" value="${mainDir}"/>
+
+    <import file="antExtensions.xml"/>
+
+    <target name="prepare" depends="antExtensions" description="Reads the ProjectSet PSF file and generates the repository properties for each project listed there.">
+        <fail message="Please define projectSet to build." unless="projectSet"/>
+        <createProjectList name="packageList">
+            <projectSets>
+                <fileset dir="${checkoutDir}/${projectSet}" includes="*.psf"/>
+            </projectSets>
+        </createProjectList>
+    </target>
 
     <target name="buildPackage" description="Calls the build.xml with the packageName.">
-        <ant antfile="build.xml" target="build">
+        <ant antfile="build.xml" target="clean">
+            <property name="packageName" value="${packageName}"/>
+        </ant>
+        <ant antfile="build.xml" target="${allBuildType}">
+            <property name="packageName" value="${packageName}"/>
+        </ant>
+        <ant antfile="build.xml" target="clean">
             <property name="packageName" value="${packageName}"/>
         </ant>
     </target>
 
-    <target name="build" description="Reads packages.txt and executes build.xml for every ProjectSet project.">
-        <loadfile property="packageList" srcFile="packages.txt">
-            <filterchain>
-                <prefixlines prefix=" "/>
-                <striplinebreaks/>
-                <trim/>
-                <replacestring from=" " to=","/>
-            </filterchain>
-        </loadfile>
-        <foreach list="${packageList}" target="buildPackage" param="packageName"/>
+    <target name="setBuild" description="Sets the build type to build and install all bundles.">
+        <property name="allBuildType" value="build"/>
     </target>
+
+    <target name="setUpload" description="Sets the build type to create a tar.gz for uploading to build service.">
+        <property name="allBuildType" value="upload"/>
+    </target>
+
+    <target name="build" depends="setBuild,prepare" description="Reads project set and executes build.xml for every ProjectSet project.">
+        <foreach list="${packageList}" target="buildPackage" param="packageName" inheritall="true"/>
+    </target>
+
+	<target name="upload" depends="setUpload,prepare" description="Reads project set and uploads all packages to build service.">
+		<foreach list="${packageList}" target="buildPackage" param="packageName" inheritall="true"/>
+	</target>
 
 </project>

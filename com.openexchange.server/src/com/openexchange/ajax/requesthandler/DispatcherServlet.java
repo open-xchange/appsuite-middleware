@@ -71,7 +71,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.upload.UploadFile;
@@ -88,7 +88,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DispatcherServlet extends SessionServlet {
+public class DispatcherServlet extends SessionServlet {
 
     private static final long serialVersionUID = -8060034833311074781L;
 
@@ -108,25 +108,57 @@ public final class DispatcherServlet extends SessionServlet {
         }
     }
 
+    /*-
+     * /!\ These must be static for our servlet container to work properly. /!\
+     */
+
     private static final AtomicReference<Dispatcher> DISPATCHER = new AtomicReference<Dispatcher>();
 
-    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();;
+    /**
+     * Sets the dispatcher instance.
+     * 
+     * @param dispatcher The dispatcher instance or <code>null</code> to remove
+     */
+    public static void setDispatcher(final Dispatcher dispatcher) {
+        DISPATCHER.set(dispatcher);
+    }
+
+    /**
+     * Gets the dispatcher instance.
+     * 
+     * @return The dispatcher instance or <code>null</code> if absent
+     */
+    public static Dispatcher getDispatcher() {
+        return DISPATCHER.get();
+    }
+
+    private static final AtomicReference<String> PREFIX = new AtomicReference<String>();
+
+    /**
+     * Sets the prefix.
+     * 
+     * @param prefix The prefix or <code>null</code> to remove
+     */
+    public static void setPrefix(final String prefix) {
+        PREFIX.set(prefix);
+    }
+
+    /**
+     * Gets the prefix.
+     * 
+     * @return The prefix or <code>null</code> if absent
+     */
+    public static String getPrefix() {
+        return PREFIX.get();
+    }
 
     private static final List<ResponseRenderer> RESPONSE_RENDERERS = new CopyOnWriteArrayList<ResponseRenderer>();
 
     /**
      * Initializes a new {@link DispatcherServlet}.
-     *
-     * @param dispatcher The dispatcher
-     * @param prefix The prefix
      */
-    public DispatcherServlet(final Dispatcher dispatcher, final String prefix) {
-        if (null == dispatcher) {
-            throw new NullPointerException("Dispatcher is null.");
-        }
-        // These must be static for our servlet container to work properly.
-        DispatcherServlet.DISPATCHER.set(dispatcher);
-        DispatcherServlet.PREFIX.set(prefix);
+    public DispatcherServlet() {
+        super();
     }
 
     /**
@@ -147,6 +179,13 @@ public final class DispatcherServlet extends SessionServlet {
         RESPONSE_RENDERERS.remove(renderer);
     }
 
+    /**
+     * Clears all registered renderer.
+     */
+    public static void clearRenderer() {
+        RESPONSE_RENDERERS.clear();
+    }
+
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         handle(req, resp, false);
@@ -165,26 +204,27 @@ public final class DispatcherServlet extends SessionServlet {
     /**
      * Handles given HTTP request and generates an appropriate result using referred {@link AJAXActionService}.
      *
-     * @param req The HTTP request to handle
-     * @param resp The HTTP response to write to
+     * @param httpRequest The HTTP request to handle
+     * @param httpResponse The HTTP response to write to
      * @param preferStream <code>true</code> to prefer passing request's body as binary data using an {@link InputStream} (typically for
      *            HTTP POST method); otherwise <code>false</code> to generate an appropriate {@link Object} from request's body
      * @throws IOException If an I/O error occurs
      */
-    protected void handle(final HttpServletRequest req, final HttpServletResponse resp, final boolean preferStream) throws IOException {
-        resp.setStatus(HttpServletResponse.SC_OK);
-        resp.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
-        Tools.disableCaching(resp);
+    protected void handle(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse, final boolean preferStream) throws IOException {
+        httpResponse.setStatus(HttpServletResponse.SC_OK);
+        httpResponse.setContentType(AJAXServlet.CONTENTTYPE_JAVASCRIPT);
+        Tools.disableCaching(httpResponse);
 
-        final String action = req.getParameter(PARAMETER_ACTION);
+        final String action = httpRequest.getParameter(PARAMETER_ACTION);
         AJAXState state = null;
         final Dispatcher dispatcher = DISPATCHER.get();
         try {
-            final ServerSession session = getSessionObject(req);
+            final ServerSession session = getSessionObject(httpRequest);
             /*
              * Parse AJAXRequestData
              */
-            final AJAXRequestData request = parseRequest(req, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(req)), session);
+            final AJAXRequestData requestData = parseRequest(httpRequest, preferStream, FileUploadBase.isMultipartContent(new ServletRequestContext(httpRequest)), session);
+            requestData.setSession(session);
             /*
              * Start dispatcher processing
              */
@@ -192,25 +232,25 @@ public final class DispatcherServlet extends SessionServlet {
             /*
              * Perform request
              */
-            final AJAXRequestResult result = dispatcher.perform(request, state, session);
+            final AJAXRequestResult result = dispatcher.perform(requestData, state, session);
             /*
              * Check result's type
              */
             if (AJAXRequestResult.ResultType.ETAG.equals(result.getType())) {
-                resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
                 return;
             }
             /*
              * A common result
              */
-            sendResponse(request, result, req, resp);
+            sendResponse(requestData, result, httpRequest, httpResponse);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            JSONResponseRenderer.writeResponse(new Response().setException(e), action, req, resp);
+            APIResponseRenderer.writeResponse(new Response().setException(e), action, httpRequest, httpResponse);
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
             final OXException exception = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            JSONResponseRenderer.writeResponse(new Response().setException(exception), action, req, resp);
+            APIResponseRenderer.writeResponse(new Response().setException(exception), action, httpRequest, httpResponse);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -218,11 +258,19 @@ public final class DispatcherServlet extends SessionServlet {
         }
     }
 
-    private void sendResponse(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest hReq, final HttpServletResponse hResp) {
+    /**
+     * Sends a proper response to requesting client after request has been orderly dispatched.
+     * 
+     * @param requestData The AJAX request data
+     * @param result The AJAX request result
+     * @param httpRequest The associated HTTP Servlet request
+     * @param httpResponse The associated HTTP Servlet response
+     */
+    protected void sendResponse(final AJAXRequestData requestData, final AJAXRequestResult result, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) {
         int highest = Integer.MIN_VALUE;
         ResponseRenderer candidate = null;
         for (final ResponseRenderer renderer : RESPONSE_RENDERERS) {
-            if (renderer.handles(request, result) && highest <= renderer.getRanking()) {
+            if (renderer.handles(requestData, result) && highest <= renderer.getRanking()) {
                 highest = renderer.getRanking();
                 candidate = renderer;
             }
@@ -230,31 +278,34 @@ public final class DispatcherServlet extends SessionServlet {
         if (null == candidate) {
             throw new IllegalStateException("No appropriate " + ResponseRenderer.class.getSimpleName() + " for request data/result pair.");
         }
-        candidate.write(request, result, hReq, hResp);
+        candidate.write(requestData, result, httpRequest, httpResponse);
     }
 
-    protected static AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
+    /**
+     * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
+     * 
+     * @param req The HTTP Servlet request
+     * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
+     * @param isFileUpload Whether passed request is considered as a file upload
+     * @param session The associated session
+     * @return An appropriate {@link AJAXRequestData} instance
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
+     */
+    protected AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData();
-        retval.setSecure(Tools.considerSecure(req));
-        {
-            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
-            if (null == hostnameService) {
-                retval.setHostname(req.getServerName());
-            } else {
-                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
-                retval.setHostname(null == hn ? req.getServerName() : hn);
-            }
-        }
-        retval.setRoute(Tools.getRoute(req.getSession(true).getId()));
+        parseHostName(retval, req, session);
         /*
          * Set the module
          */
-        String pathInfo = req.getRequestURI();
-        final int lastIndex = pathInfo.lastIndexOf(';');
-        if (lastIndex > 0) {
-            pathInfo = pathInfo.substring(0, lastIndex);
+        {
+            String pathInfo = req.getRequestURI();
+            final int lastIndex = pathInfo.lastIndexOf(';');
+            if (lastIndex > 0) {
+                pathInfo = pathInfo.substring(0, lastIndex);
+            }
+            retval.setModule(pathInfo.substring(PREFIX.get().length()));
         }
-        retval.setModule(pathInfo.substring(PREFIX.get().length()));
         /*
          * Set request URI
          */
@@ -317,7 +368,7 @@ public final class DispatcherServlet extends SessionServlet {
              * Guess an appropriate body object
              */
             final String body = AJAXServlet.getBody(req);
-            if (startsWith('{', body, true)) {
+            if (startsWith('{', body)) {
                 /*
                  * Expect the body to be a JSON object
                  */
@@ -326,7 +377,7 @@ public final class DispatcherServlet extends SessionServlet {
                 } catch (final JSONException e) {
                     retval.setData(body);
                 }
-            } else if (startsWith('[', body, true)) {
+            } else if (startsWith('[', body)) {
                 /*
                  * Expect the body to be a JSON array
                  */
@@ -342,16 +393,34 @@ public final class DispatcherServlet extends SessionServlet {
         return retval;
     }
 
-    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
+    /**
+     * Parses host name, secure and AJP route.
+     * 
+     * @param request The AJAX request data
+     * @param req The HTTP Servlet request
+     * @param session The associated session
+     */
+    public void parseHostName(final AJAXRequestData request, final HttpServletRequest req, final ServerSession session) {
+        request.setSecure(Tools.considerSecure(req));
+        {
+            final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
+            if (null == hostnameService) {
+                request.setHostname(req.getServerName());
+            } else {
+                final String hn = hostnameService.getHostname(session.getUserId(), session.getContextId());
+                request.setHostname(null == hn ? req.getServerName() : hn);
+            }
+        }
+        request.setRoute(Tools.getRoute(req.getSession(true).getId()));
+    }
+
+    private static boolean startsWith(final char startingChar, final String toCheck) {
         if (null == toCheck) {
             return false;
         }
         final int len = toCheck.length();
         if (len <= 0) {
             return false;
-        }
-        if (!ignoreHeadingWhitespaces) {
-            return startingChar == toCheck.charAt(0);
         }
         int i = 0;
         if (Character.isWhitespace(toCheck.charAt(i))) {

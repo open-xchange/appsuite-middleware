@@ -90,9 +90,9 @@ public abstract class AbstractConversionAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            return perform(new ConversionAJAXRequest(request, session));
+            return perform(new ConversionAJAXRequest(requestData, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {

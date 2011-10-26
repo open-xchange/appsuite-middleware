@@ -88,7 +88,7 @@ public abstract class AbstractModule {
         return retval;
     }
 
-    public void computeDependencies(final Map<String, AbstractModule> modulesByName, final Map<String, Set<AbstractModule>> modulesByPackage) {
+    public void computeDependencies(final Map<String, AbstractModule> modulesByName, final Map<String, Set<AbstractModule>> modulesByPackage, final boolean strict) {
         if (osgiManifest != null) {
             for (final BundleImport imported : osgiManifest.getImports()) {
                 final Set<AbstractModule> exportingModules = modulesByPackage.get(imported.getPackageName());
@@ -98,7 +98,7 @@ public abstract class AbstractModule {
                             dependencies.add(module);
                         }
                     }
-                } else if (!JDK.exports(imported.getPackageName()) && !imported.isOptional()) {
+                } else if (!JDK.exports(imported.getPackageName()) && !imported.isOptional() && strict) {
                     throw new BuildException("Can not find bundle that exports \"" + imported + "\" to resolve import of bundle \"" + name + "\".");
                 }
             }

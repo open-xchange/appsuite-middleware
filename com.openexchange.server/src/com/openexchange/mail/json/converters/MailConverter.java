@@ -57,6 +57,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -100,7 +101,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     @Override
     public String getOutputFormat() {
-        return "json";
+        return "apiResponse";
     }
 
     @Override
@@ -110,6 +111,20 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     @Override
     public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        convert2JSON(request, result, session);
+        final Response response = new Response(session);
+        response.setData(result.getResultObject());
+        response.setTimestamp(result.getTimestamp());
+        final Collection<OXException> warnings = result.getWarnings();
+        if (null != warnings && !warnings.isEmpty()) {
+            for (final OXException warning : warnings) {
+                response.addWarning(warning);
+            }
+        }
+        result.setResultObject(response);
+    }
+
+    private void convert2JSON(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
         try {
             final Object resultObject = result.getResultObject();
             if (null == resultObject) {

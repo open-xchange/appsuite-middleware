@@ -51,11 +51,11 @@ package com.openexchange.ajax.container;
 
 import java.io.InputStream;
 
-
 /**
- * {@link FileHolder}
- *
+ * {@link FileHolder} - The basic {@link IFileHolder} implementation.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added some JavaDoc comments
  */
 public class FileHolder implements IFileHolder {
 
@@ -69,6 +69,14 @@ public class FileHolder implements IFileHolder {
 
     private String disposition;
 
+    /**
+     * Initializes a new {@link FileHolder}.
+     * 
+     * @param is The input stream
+     * @param length The stream length
+     * @param contentType The stream's MIME type
+     * @param name The stream's resource name
+     */
     public FileHolder(final InputStream is, final long length, final String contentType, final String name) {
         super();
         this.is = is;
@@ -77,45 +85,58 @@ public class FileHolder implements IFileHolder {
         this.name = name;
     }
 
-
     @Override
     public InputStream getStream() {
         return is;
     }
 
-
+    /**
+     * Sets the input stream
+     * 
+     * @param is The input stream
+     */
     public void setStream(final InputStream is) {
         this.is = is;
     }
-
 
     @Override
     public long getLength() {
         return length;
     }
 
-
+    /**
+     * Sets the stream length
+     * 
+     * @param length The length
+     */
     public void setLength(final long length) {
         this.length = length;
     }
-
 
     @Override
     public String getContentType() {
         return contentType;
     }
 
-
+    /**
+     * Sets stream's MIME type.
+     * 
+     * @param contentType The MIME type
+     */
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
-
 
     @Override
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets stream's resource name.
+     * 
+     * @param name The resource name
+     */
     public void setName(final String name) {
         this.name = name;
     }
@@ -127,7 +148,7 @@ public class FileHolder implements IFileHolder {
 
     /**
      * Sets the disposition.
-     *
+     * 
      * @param disposition The disposition
      */
     public void setDisposition(final String disposition) {

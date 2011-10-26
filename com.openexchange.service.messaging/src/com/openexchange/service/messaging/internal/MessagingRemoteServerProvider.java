@@ -193,7 +193,9 @@ public final class MessagingRemoteServerProvider extends ServiceTracker {
                     }
                     final List<InetSocketAddress> addrs = new ArrayList<InetSocketAddress>(entries.size());
                     for (final MDNSServiceEntry entry : entries) {
-                        addrs.add(new InetSocketAddress(entry.getAddress(), entry.getPort()));
+                        for (final InetAddress inetAddress : entry.getAddresses()) {
+                            addrs.add(new InetSocketAddress(inetAddress, entry.getPort()));
+                        }
                     }
                     return addrs;
                 } catch (final OXException e) {

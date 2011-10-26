@@ -406,21 +406,17 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
     }
 
     private static void deleteContainedContacts(final int folderID, final DowngradeEvent event) throws OXException {
+        Connection writeCon = event.getWriteCon();
+        final boolean createWriteCon = (writeCon == null);
+        if (createWriteCon) {
+            writeCon = DBPool.pickupWriteable(event.getContext());
+        }
         try {
-            Connection writeCon = event.getWriteCon();
-            final boolean createWriteCon = (writeCon == null);
-            if (createWriteCon) {
-                writeCon = DBPool.pickupWriteable(event.getContext());
+            Contacts.trashContactsFromFolder(folderID, event.getSession(), writeCon, writeCon, false);
+        } finally {
+            if (createWriteCon && writeCon != null) {
+                DBPool.closeWriterSilent(event.getContext(), writeCon);
             }
-            try {
-                Contacts.trashContactsFromFolder(folderID, event.getSession(), writeCon, writeCon, false);
-            } finally {
-                if (createWriteCon && writeCon != null) {
-                    DBPool.closeWriterSilent(event.getContext(), writeCon);
-                }
-            }
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(event.getContext().getContextId()));
         }
     }
 

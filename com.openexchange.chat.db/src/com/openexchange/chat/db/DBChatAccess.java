@@ -64,11 +64,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatDescription;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.MessageListener;
 import com.openexchange.chat.Presence;
-import com.openexchange.chat.Presence.Mode;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.context.ContextService;
@@ -87,6 +87,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBChatAccess implements ChatAccess {
+
+    private static final int MIN_CHAT_ID = 1000;
 
     private static final ConcurrentMap<Key, DBChatAccess> ACCESS_MAP = new ConcurrentHashMap<Key, DBChatAccess>();
 
@@ -278,38 +280,7 @@ public final class DBChatAccess implements ChatAccess {
         if (!Presence.Type.AVAILABLE.equals(presence.getType())) {
             throw ChatExceptionCodes.INVALID_PRESENCE_PACKET.create();
         }
-        final DatabaseService databaseService = getDatabaseService();
-        PreparedStatement stmt = null;
-        final Connection con = databaseService.getWritable(context);
-        try {
-            stmt = con.prepareStatement("UPDATE chatPresence SET mode = ?, statusMessage = ?, lastModified = ? WHERE cid = ? AND user = ?");
-            int pos = 1;
-            {
-                final Mode mode = presence.getMode();
-                stmt.setInt(pos++, (null == mode ? Mode.AVAILABLE : mode).ordinal());
-            }
-            {
-                final String status = presence.getStatus();
-                if (null == status) {
-                    stmt.setNull(pos++, java.sql.Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, status);
-                }
-            }
-            stmt.setLong(pos++, System.currentTimeMillis());
-            stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, userId);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-            databaseService.backWritable(context, con);
-        }
-        /*
-         * Notify roster listeners
-         */
-        DBRoster.getRosterFor(context).notifyRosterListeners(presence);
+        DBRoster.getRosterFor(context).updatePresence(getUser(), presence);
     }
 
     @Override
@@ -328,6 +299,7 @@ public final class DBChatAccess implements ChatAccess {
             stmt.setInt(1, contextId);
             rs = stmt.executeQuery();
             final List<String> ids = new LinkedList<String>();
+            // TODO: ids.add("default"); // The default chat where all users are participating
             while (rs.next()) {
                 ids.add(String.valueOf(rs.getInt(1)));
             }
@@ -341,6 +313,101 @@ public final class DBChatAccess implements ChatAccess {
     }
 
     @Override
+    public Chat getChat(final String chatId) throws OXException {
+        final DBChat dbChat = DBChat.optDBChat(Integer.parseInt(chatId), contextId);
+        if (null == dbChat) {
+            throw ChatExceptionCodes.CHAT_NOT_FOUND.create(chatId);
+        }
+        return dbChat;
+    }
+
+    @Override
+    public void updateChat(final ChatDescription chatDescription) throws OXException {
+        if (null == chatDescription || !chatDescription.hasAnyAttribute()) {
+            return;
+        }
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            updateChat(chatDescription, con);
+            con.commit();
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    private void updateChat(final ChatDescription chatDescription, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        int pos;
+        try {
+            final int chatId = Integer.parseInt(chatDescription.getChatId());
+            /*
+             * Update subject
+             */
+            {
+                final String subject = chatDescription.getSubject();
+                if (null != subject) {
+                    stmt = con.prepareStatement("UPDATE chat SET subject = ? WHERE cid = ? AND chatId = ?");
+                    pos = 1;
+                    stmt.setString(pos++, subject);
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos, chatId);
+                    stmt.executeUpdate();
+                }
+            }
+            /*
+             * Insert new members
+             */
+            {
+                final List<String> newMembers = chatDescription.getNewMembers();
+                if (null != newMembers && !newMembers.isEmpty()) {
+                    closeSQLStuff(stmt);
+                    stmt = con.prepareStatement("INSERT INTO chatMember (cid,chatId,opMode,user) VALUES (?,?,?,?)");
+                    pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, chatId);
+                    stmt.setInt(pos++, 0);
+                    for (final String user : newMembers) {
+                        stmt.setInt(pos, Integer.parseInt(user));
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+            /*
+             * Delete members
+             */
+            {
+                final List<String> deleteMembers = chatDescription.getDeletedMembers();
+                if (null != deleteMembers && !deleteMembers.isEmpty()) {
+                    closeSQLStuff(stmt);
+                    stmt = con.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND chatId = ? AND user = ?");
+                    pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, chatId);
+                    for (final String user : deleteMembers) {
+                        stmt.setInt(pos, Integer.parseInt(user));
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                }
+            }
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser member) throws OXException {
         return openChat(chatId, listener, member);
     }
@@ -349,13 +416,13 @@ public final class DBChatAccess implements ChatAccess {
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser... members) throws OXException {
         String chid = chatId;
         if (null == chid) {
-            chid = String.valueOf(getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId));
+            chid = String.valueOf(getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId, MIN_CHAT_ID));
         }
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getWritable(contextId);
         try {
             con.setAutoCommit(false);
-            final Chat chat = openChat0(chatId, listener, members, con);
+            final Chat chat = openChat0(chid, listener, members, con);
             con.commit();
             return chat;
         } catch (final SQLException e) {

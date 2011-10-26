@@ -1,3 +1,8 @@
+* 2011-10-20 - marcus.klein@open-xchange.com
+
+ - Bugfix #20571: Properly rolling back transaction if the method for changing login mappings throws an exception. Removing all login
+   mappings is possible again.
+
 * 2011-06-20 - marcus.klein@open-xchange.com
 
  - Bugfix #19495: listfilestore now works again if server_id something else than 2.

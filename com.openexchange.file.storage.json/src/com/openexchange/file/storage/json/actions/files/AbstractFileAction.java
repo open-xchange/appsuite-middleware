@@ -181,8 +181,8 @@ public abstract class AbstractFileAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final AJAXInfostoreRequest req = new AJAXInfostoreRequest(request, session);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final AJAXInfostoreRequest req = new AJAXInfostoreRequest(requestData, session);
         try {
             before(req);
             final AJAXRequestResult result = handle(req);
@@ -199,8 +199,8 @@ public abstract class AbstractFileAction implements AJAXActionService {
             after(req);
 
             // Delete tmp files
-            if (request.hasUploads()) {
-                request.getUploadEvent().cleanUp();
+            if (requestData.hasUploads()) {
+                requestData.getUploadEvent().cleanUp();
             }
         }
     }

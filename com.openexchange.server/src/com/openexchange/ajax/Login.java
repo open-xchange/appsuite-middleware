@@ -1063,7 +1063,7 @@ public class Login extends AJAXServlet {
         final String modules = "modules";
         if (parseBoolean(req.getParameter(modules))) {
             try {
-                final Setting setting = ConfigTree.getSettingByPath(modules);
+                final Setting setting = ConfigTree.getInstance().getSettingByPath(modules);
                 SettingStorage.getInstance(session).readValues(setting);
                 json.put(modules, convert2JS(setting));
             } catch (final OXException e) {

@@ -54,24 +54,34 @@ import java.util.Hashtable;
 import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.chat.ChatService;
+import com.openexchange.chat.MessageListener;
 import com.openexchange.chat.Presence;
 import com.openexchange.chat.db.DBChat;
 import com.openexchange.chat.db.DBChatAccess;
 import com.openexchange.chat.db.DBChatService;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.chat.db.DBRoster;
+import com.openexchange.chat.db.groupware.DBChatCreateTableService;
+import com.openexchange.chat.db.groupware.DBChatCreateTableTask;
+import com.openexchange.chat.db.groupware.DBChatDeleteListener;
+import com.openexchange.chat.db.groupware.DBChatUpdateTaskProviderService;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.server.osgiservice.SimpleRegistryListener;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -98,8 +108,8 @@ public final class DBChatActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, UserService.class,
-            ContextService.class, IDGeneratorService.class };
+            ThreadPoolService.class, TimerService.class, DatabaseService.class, UserService.class, ContextService.class,
+            IDGeneratorService.class };
     }
 
     @Override
@@ -109,7 +119,43 @@ public final class DBChatActivator extends HousekeepingActivator {
         /*
          * Register service
          */
-        registerService(ChatService.class, new DBChatService());
+        registerService(ChatService.class, DBChatService.newDbChatService());
+        /*
+         * Add tracker
+         */
+        track(MessageListener.class, new SimpleRegistryListener<MessageListener>() {
+
+            @Override
+            public void added(final ServiceReference<MessageListener> ref, final MessageListener messageListener) {
+                DBChat.addMessageListenerStatic(messageListener);
+            }
+
+            @Override
+            public void removed(final ServiceReference<MessageListener> ref, final MessageListener messageListener) {
+                DBChat.removeMessageListenerStatic(messageListener);
+            }
+        });
+        track(SessiondService.class, new SimpleRegistryListener<SessiondService>() {
+
+            @Override
+            public void added(final ServiceReference<SessiondService> ref, final SessiondService service) {
+                DBRoster.set(service);
+            }
+
+            @Override
+            public void removed(final ServiceReference<SessiondService> ref, final SessiondService service) {
+                DBRoster.set(null);
+            }
+        });
+        openTrackers();
+        /*
+         * Register update task, create table job and delete listener
+         */
+        {
+            registerService(CreateTableService.class, new DBChatCreateTableService());
+            registerService(UpdateTaskProviderService.class, new DBChatUpdateTaskProviderService(new DBChatCreateTableTask()));
+            registerService(DeleteListener.class, new DBChatDeleteListener());
+        }
         /*
          * Register event handler
          */
@@ -159,13 +205,13 @@ public final class DBChatActivator extends HousekeepingActivator {
                         }
                     } catch (final Exception e) {
                         // Failed handling session
-                        LOG.warn("Failed handling tracked added session for LIST/LSUB cache.", e);
+                        LOG.warn("Failed handling tracked added session for DB chat.", e);
                     }
                 }
 
                 private void handleRemovedSession(final Session session) {
                     try {
-                        if (null != getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                        if (null != DBRoster.getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                             // Other active session present
                             return;
                         }
@@ -186,7 +232,7 @@ public final class DBChatActivator extends HousekeepingActivator {
                         DBChatAccess.removeDbChatAccess(session);
                     } catch (final Exception e) {
                         // Failed handling session
-                        LOG.warn("Failed handling tracked removed session for LIST/LSUB cache.", e);
+                        LOG.warn("Failed handling tracked removed session for DB chat.", e);
                     }
                 }
 
@@ -203,7 +249,7 @@ public final class DBChatActivator extends HousekeepingActivator {
     @Override
     protected void cleanUp() {
         super.cleanUp();
-        DBChat.shutDone();
+        DBChat.shutDown();
         DBChatServiceLookup.set(null);
     }
 

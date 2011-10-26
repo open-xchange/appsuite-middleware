@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
@@ -89,7 +90,7 @@ public final class SpellCheck implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new AbstractUserFuncs() {
             @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final Set<String> set = user.getAttributes().get(NAME);
                 if (null != set && !set.isEmpty()) {
                     setting.setSingleValue(Boolean.valueOf(set.iterator().next()));

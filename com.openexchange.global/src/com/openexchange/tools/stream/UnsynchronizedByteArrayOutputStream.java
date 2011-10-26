@@ -137,7 +137,9 @@ public final class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputSt
      */
     @Override
     public void writeTo(final OutputStream out) throws IOException {
-        out.write(buf, 0, count);
+        if (null != out) {
+            out.write(buf, 0, count);
+        }
     }
 
     /**

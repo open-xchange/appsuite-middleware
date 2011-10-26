@@ -125,7 +125,6 @@ public final class FileEmbeddedDocumentExtractor implements EmbeddedDocumentExtr
             if (name == null) {
                 name = Integer.toString(count++);
             }
-            // �contentHandler.s
             /*
              * MIME type
              */

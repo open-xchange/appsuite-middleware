@@ -49,6 +49,9 @@
 
 package com.openexchange.chat;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+
 /**
  * {@link Presence}
  * 
@@ -95,6 +98,23 @@ public interface Presence extends Packet {
          */
         ERROR;
 
+        private static final TIntObjectMap<Type> ORDINAL_MAP;
+
+        static {
+            final TIntObjectMap<Type> map = new TIntObjectHashMap<Type>(6);
+            for (final Type type : Type.values()) {
+                map.put(type.ordinal(), type);
+            }
+            ORDINAL_MAP = map;
+        }
+
+        /**
+         * Gets the type for specified ordinal or <code>null</code>.
+         */
+        public static Type typeOf(final int ordninal) {
+            return ORDINAL_MAP.get(ordninal);
+        }
+
         /**
          * Gets the type for specified string or <code>null</code>.
          */
@@ -133,6 +153,23 @@ public interface Presence extends Packet {
          * Do not disturb.
          */
         DND;
+
+        private static final TIntObjectMap<Mode> ORDINAL_MAP;
+
+        static {
+            final TIntObjectMap<Mode> map = new TIntObjectHashMap<Mode>(6);
+            for (final Mode mode : Mode.values()) {
+                map.put(mode.ordinal(), mode);
+            }
+            ORDINAL_MAP = map;
+        }
+
+        /**
+         * Gets the mode for specified ordinal or <code>null</code>.
+         */
+        public static Mode modeOf(final int ordninal) {
+            return ORDINAL_MAP.get(ordninal);
+        }
 
         /**
          * Gets the mode for specified string or <code>null</code>.

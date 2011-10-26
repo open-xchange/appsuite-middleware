@@ -90,9 +90,9 @@ public abstract class AbstractTemplatingAction implements AJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            return perform(new TemplatingAJAXRequest(request, session));
+            return perform(new TemplatingAJAXRequest(requestData, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final IllegalStateException e) {

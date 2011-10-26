@@ -81,8 +81,8 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, request);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
         try {
             final MailAccountStorageService storageService =

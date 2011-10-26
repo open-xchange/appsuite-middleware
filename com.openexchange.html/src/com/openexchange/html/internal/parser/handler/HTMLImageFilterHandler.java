@@ -53,9 +53,12 @@ import static com.openexchange.html.internal.HTMLServiceImpl.PATTERN_URL;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSS;
 import static com.openexchange.html.internal.css.CSSMatcher.checkCSSElements;
 import static com.openexchange.html.internal.css.CSSMatcher.containsCSSElement;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -188,15 +191,29 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
     private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
 
+    private static boolean isInlineImageSrc(final String src) {
+        final String lcSrc = src.toLowerCase(Locale.ENGLISH);
+        if (lcSrc.startsWith(CID, 0) || PATTERN_FILENAME.matcher(lcSrc).matches()) {
+            return true;
+        }
+        try {
+            final URI uri = new URI(lcSrc);
+            return (null == uri.getHost()) && "/ajax/image".equals(uri.getPath());
+        } catch (final URISyntaxException e) {
+            // Invalid image URI
+            return false;
+        }
+    }
+
     @Override
     public void handleSimpleTag(final String tag, final Map<String, String> attributes) {
         if (IMG.equals(tag) || INPUT.equals(tag)) {
             final String src = attributes.get(SRC);
             if (null == src) {
                 attributes.put(SRC, BLANK);
-            } else if (!(src.regionMatches(true, 0, CID, 0, 4)) && !(PATTERN_FILENAME.matcher(src).matches())) {
+            } else if (!isInlineImageSrc(src)) {
                 /*
-                 * Don't replace inline images
+                 * Replace external image's "src" attribute
                  */
                 attributes.put(SRC, BLANK);
                 imageURLFound = true;

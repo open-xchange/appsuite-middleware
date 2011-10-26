@@ -1,2 +1,0 @@
-open-xchange-osgi
-open-xchange-7-prototype

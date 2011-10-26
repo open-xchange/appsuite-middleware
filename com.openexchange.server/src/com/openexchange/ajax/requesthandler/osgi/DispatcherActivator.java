@@ -69,12 +69,13 @@ import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.DownloadPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
-import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.MailFilteredHTMLPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.HTMLResponseRenderer;
-import com.openexchange.ajax.requesthandler.responseRenderers.JSONResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
@@ -111,12 +112,24 @@ public class DispatcherActivator extends HousekeepingActivator {
         /*
          * Add preview converters
          */
-        defaultConverter.addConverter(new HTMLPreviewResultConverter());
-        defaultConverter.addConverter(new TextPreviewResultConverter());
-        defaultConverter.addConverter(new FilteredHTMLPreviewResultConverter());
-        defaultConverter.addConverter(new DownloadPreviewResultConverter());
-        defaultConverter.addConverter(new PreviewImageResultConverter());
-
+        {
+            final TextPreviewResultConverter textPreviewResultConverter = new TextPreviewResultConverter();
+            final FilteredHTMLPreviewResultConverter filteredHTMLPreviewResultConverter = new FilteredHTMLPreviewResultConverter();
+            /*
+             * File converters
+             */
+            defaultConverter.addConverter(new HTMLPreviewResultConverter());
+            defaultConverter.addConverter(textPreviewResultConverter);
+            defaultConverter.addConverter(filteredHTMLPreviewResultConverter);
+            defaultConverter.addConverter(new DownloadPreviewResultConverter());
+            /*-
+             * TODO: Mail converters
+             * 
+             * Might throw: java.lang.IllegalArgumentException: Can't find path from mail to apiResponse
+             */
+            defaultConverter.addConverter(new MailTextPreviewResultConverter(textPreviewResultConverter));
+            defaultConverter.addConverter(new MailFilteredHTMLPreviewResultConverter(filteredHTMLPreviewResultConverter));
+        }
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
             @Override
@@ -133,10 +146,12 @@ public class DispatcherActivator extends HousekeepingActivator {
 
         dispatcher.addCustomizer(new ConversionCustomizer(defaultConverter));
 
-        final DispatcherServlet servlet = new DispatcherServlet(dispatcher, "/ajax/");
+        final DispatcherServlet servlet = new DispatcherServlet();
+        DispatcherServlet.setDispatcher(dispatcher);
+        DispatcherServlet.setPrefix("/ajax/");
         Multiple.setDispatcher(dispatcher);
 
-        DispatcherServlet.registerRenderer(new JSONResponseRenderer());
+        DispatcherServlet.registerRenderer(new APIResponseRenderer());
         final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
@@ -174,6 +189,15 @@ public class DispatcherActivator extends HousekeepingActivator {
         });
 
         openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        DispatcherServlet.clearRenderer();
+        DispatcherServlet.setDispatcher(null);
+        DispatcherServlet.setPrefix(null);
+        Multiple.setDispatcher(null);
     }
 
     private final class Registerer implements SimpleRegistryListener<AJAXActionServiceFactory> {

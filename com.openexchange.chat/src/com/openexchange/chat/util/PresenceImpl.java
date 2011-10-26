@@ -81,12 +81,7 @@ public class PresenceImpl extends PacketImpl implements Presence {
     public PresenceImpl(final Type type) {
         super();
         this.type = type;
-        mode = Mode.AVAILABLE;
-    }
-
-    @Override
-    public String toString() {
-        return getStatus();
+        mode = Type.UNAVAILABLE.equals(type) ? Mode.AWAY : Mode.AVAILABLE;
     }
 
     @Override
@@ -129,6 +124,30 @@ public class PresenceImpl extends PacketImpl implements Presence {
      */
     public void setStatus(final String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("PresenceImpl {");
+        if (type != null) {
+            builder.append("type=").append(type).append(", ");
+        }
+        if (mode != null) {
+            builder.append("mode=").append(mode).append(", ");
+        }
+        builder.append("status=").append(status).append(", ");
+        if (packetId != null) {
+            builder.append("packetId=").append(packetId).append(", ");
+        }
+        if (from != null) {
+            builder.append("from=").append(from).append(", ");
+        }
+        if (timeStamp != null) {
+            builder.append("timeStamp=").append(timeStamp);
+        }
+        builder.append('}');
+        return builder.toString();
     }
 
 }

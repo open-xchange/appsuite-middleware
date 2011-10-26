@@ -62,7 +62,10 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractCreateTableImpl implements CreateTableService {
 
-    public AbstractCreateTableImpl() {
+    /**
+     * Initializes a new {@link AbstractCreateTableImpl}.
+     */
+    protected AbstractCreateTableImpl() {
         super();
     }
 
@@ -81,8 +84,16 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
         }
     }
 
+    /**
+     * Gets the CREATE-TABLE statements.
+     * 
+     * @return The CREATE-TABLE statements
+     */
     protected abstract String[] getCreateStatements();
 
+    /**
+     * The constant to signal no dependencies to other tables.
+     */
     protected static final String[] NO_TABLES = new String[0];
 
 }

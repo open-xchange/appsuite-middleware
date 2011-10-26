@@ -75,7 +75,7 @@
 
     <target name="compile" description="Generic compile target used for compiling src, sim and test folder.">
         <mkdir dir="${binDir}"/>
-        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.5" target="1.5" includeAntRuntime="false">
+        <javac srcdir="${srcDir}" destdir="${binDir}" debug="true" encoding="US-ASCII" source="1.6" target="1.6" includeAntRuntime="false" debuglevel="lines,vars,source">
             <classpath refid="${compileClasspath}"/>
         </javac>
     </target>

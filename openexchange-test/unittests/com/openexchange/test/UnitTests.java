@@ -156,7 +156,7 @@ public class UnitTests {
         tests.addTestSuite(com.openexchange.groupware.contact.ContactMergeratorTest.class);
         tests.addTestSuite(com.openexchange.groupware.contact.UseCountGlobalFirstComparatorTest.class);
         tests.addTestSuite(com.openexchange.groupware.contact.DefaultContactComparatorTest.class);
-        tests.addTestSuite(com.openexchange.groupware.contact.ContactSearchMuliplexerTest.class);
+        tests.addTestSuite(com.openexchange.groupware.contact.ContactSearchMultiplexerTest.class);
 
 
         tests.addTestSuite(com.openexchange.sessiond.SessiondTest.class);

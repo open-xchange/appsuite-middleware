@@ -131,7 +131,7 @@ public class PreviewActivator extends HousekeepingActivator {
      * 
      * 
      * -----
-     * Generating PDF and Previewing it as an Image � iText and PDF Renderer
+     * Generating PDF and Previewing it as an Image iText and PDF Renderer
      * http://technology.amis.nl/blog/4174/java-generating-pdf-and-previewing-it-as-an-image-itext-and-pdf-renderer
      * http://jmupdf.sourceforge.net/joomla/
      * -----

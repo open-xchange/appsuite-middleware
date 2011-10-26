@@ -98,7 +98,7 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
     }
 
     @Override
-    protected PreviewOutput getOutput() {
+    public PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
     

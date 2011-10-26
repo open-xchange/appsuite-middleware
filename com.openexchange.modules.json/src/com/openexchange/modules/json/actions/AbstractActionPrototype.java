@@ -81,8 +81,8 @@ public abstract class AbstractActionPrototype<T extends Model<T>> implements AJA
 
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final RequestPrototype<T> req = createRequest(request, parser, session);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        final RequestPrototype<T> req = createRequest(requestData, parser, session);
         try {
             return perform(req);
         } catch (final JSONException e) {

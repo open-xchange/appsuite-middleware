@@ -87,7 +87,7 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 		}
 
 		@Override
-		public AJAXRequestResult perform(AJAXRequestData request,
+		public AJAXRequestResult perform(AJAXRequestData requestData,
 				ServerSession session) throws OXException {
 			return retval;
 		}
@@ -104,11 +104,11 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 		}
 
 		@Override
-		public AJAXRequestResult perform(AJAXRequestData request,
+		public AJAXRequestResult perform(AJAXRequestData requestData,
 				ServerSession session) throws OXException {
 			try {
 				Context cx = Context.enter();
-				Object result = function.call(cx, function.getParentScope(), scriptable, new Object[]{request, session});
+				Object result = function.call(cx, function.getParentScope(), scriptable, new Object[]{requestData, session});
 				return adapt(result);
 			} finally {
 				Context.exit();

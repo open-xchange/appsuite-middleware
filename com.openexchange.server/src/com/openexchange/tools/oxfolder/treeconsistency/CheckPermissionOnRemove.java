@@ -120,8 +120,6 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
@@ -146,8 +144,6 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             if (!toRemove.isEmpty()) {
                 removeSystemPermissions(lastModified, toRemove);
             }
-        } catch (final OXException e) {
-            throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }

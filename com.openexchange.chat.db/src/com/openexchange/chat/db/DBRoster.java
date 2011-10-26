@@ -55,22 +55,27 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
+import com.openexchange.chat.Presence.Mode;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.RosterListener;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
+import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
@@ -81,7 +86,35 @@ import com.openexchange.user.UserService;
  */
 public final class DBRoster implements Roster {
 
-    private static final ConcurrentTIntObjectHashMap<DBRoster> ROSTER_MAP = new ConcurrentTIntObjectHashMap<DBRoster>();
+    private static final AtomicReference<SessiondService> SERVICE_REF = new AtomicReference<SessiondService>();
+
+    /**
+     * Sets the {@link SessiondService} service instance.
+     * 
+     * @param service The service
+     */
+    public static void set(final SessiondService service) {
+        SERVICE_REF.set(service);
+    }
+
+    /**
+     * Gets the service.
+     * 
+     * @return The service
+     */
+    public static SessiondService get() {
+        return SERVICE_REF.get();
+    }
+
+    /**
+     * Gets the first session that matches the given userId and contextId.
+     */
+    public static Session getAnyActiveSessionForUser(final int userId, final int contextId) {
+        final SessiondService sessiondService = SERVICE_REF.get();
+        return null == sessiondService ? null : sessiondService.getAnyActiveSessionForUser(userId, contextId);
+    }
+
+    private static final ConcurrentTIntObjectHashMap<DBRoster> ROSTER_MAP = new ConcurrentTIntObjectHashMap<DBRoster>(128);
 
     /**
      * Gets the roster for specified context.
@@ -98,8 +131,20 @@ public final class DBRoster implements Roster {
      * 
      * @param context The context
      * @return The roster
+     * @throws OXException If initialization fails
      */
-    public static DBRoster getRosterFor(final Context context) {
+    public static DBRoster getRosterFor(final int contextId) throws OXException {
+        return getRosterFor(DBChatServiceLookup.getService(ContextService.class).getContext(contextId));
+    }
+
+    /**
+     * Gets the roster for specified context.
+     * 
+     * @param context The context
+     * @return The roster
+     * @throws OXException If initialization fails
+     */
+    public static DBRoster getRosterFor(final Context context) throws OXException {
         final int key = context.getContextId();
         DBRoster dbRoster = ROSTER_MAP.get(key);
         if (null == dbRoster) {
@@ -116,17 +161,37 @@ public final class DBRoster implements Roster {
 
     private final List<RosterListener> listeners;
 
+    private final Map<String, ChatUser> entries;
+
     /**
      * Initializes a new {@link DBRoster}.
+     * 
+     * @throws OXException If initialization fails
      */
-    private DBRoster(final Context context) {
+    private DBRoster(final Context context) throws OXException {
         super();
         this.context = context;
         listeners = new CopyOnWriteArrayList<RosterListener>();
+        entries = Collections.unmodifiableMap(generateEntries());
+    }
+
+    private Map<String, ChatUser> generateEntries() throws OXException {
+        final UserService userService = getService(UserService.class);
+        final User[] users = userService.getUser(context);
+        final Map<String, ChatUser> tmp = new HashMap<String, ChatUser>(users.length);
+        for (int i = 0; i < users.length; i++) {
+            final User u = users[i];
+            final ChatUserImpl chatUser = new ChatUserImpl();
+            final String id = String.valueOf(u.getId());
+            chatUser.setId(id);
+            chatUser.setName(u.getDisplayName());
+            tmp.put(id, chatUser);
+        }
+        return tmp;
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
-        final S service = getService(clazz);
+        final S service = DBChatServiceLookup.getService(clazz);
         if (null == service) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }
@@ -134,18 +199,113 @@ public final class DBRoster implements Roster {
     }
 
     @Override
-    public Collection<ChatUser> getEntries() throws OXException {
-        final UserService userService = getService(UserService.class);
-        final User[] users = userService.getUser(context);
-        final List<ChatUser> ret = new ArrayList<ChatUser>(users.length);
-        for (int i = 0; i < users.length; i++) {
-            final User u = users[i];
-            final ChatUserImpl chatUser = new ChatUserImpl();
-            chatUser.setId(String.valueOf(u.getId()));
-            chatUser.setName(u.getDisplayName());
-            ret.add(chatUser);
+    public Map<String, ChatUser> getEntries() throws OXException {
+        return entries;
+    }
+
+    /**
+     * Updates specified user's presence.
+     * 
+     * @param presence The presence
+     * @throws OXException If updating presence fails
+     */
+    public void updatePresence(final Presence presence) throws OXException {
+        updatePresence(presence.getFrom(), presence);
+    }
+
+    /**
+     * Updates specified user's presence.
+     * 
+     * @param user The user
+     * @param presence The presence
+     * @throws OXException If updating presence fails
+     */
+    public void updatePresence(final ChatUser user, final Presence presence) throws OXException {
+        final DatabaseService databaseService = getService(DatabaseService.class);
+        PreparedStatement stmt = null;
+        final Connection con = databaseService.getWritable(context);
+        try {
+            stmt = con.prepareStatement("UPDATE chatPresence SET mode = ?, statusMessage = ?, lastModified = ? WHERE cid = ? AND user = ?");
+            int pos = 1;
+            {
+                final Mode mode = presence.getMode();
+                stmt.setInt(pos++, (null == mode ? Mode.AVAILABLE : mode).ordinal());
+            }
+            {
+                final String status = presence.getStatus();
+                if (null == status) {
+                    stmt.setNull(pos++, java.sql.Types.VARCHAR);
+                } else {
+                    stmt.setString(pos++, status);
+                }
+            }
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos, Integer.parseInt(user.getId()));
+            final int rowCount = stmt.executeUpdate();
+            if (rowCount <= 0) {
+                try {
+                    insertPresence(user, presence);
+                } catch (final Exception e) {
+                    // Concurrent insert attempt
+                    updatePresence(user, presence);
+                }
+            }
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            databaseService.backWritable(context, con);
         }
-        return ret;
+        /*
+         * Notify roster listeners
+         */
+        notifyRosterListeners(presence);
+    }
+
+    /**
+     * Inserts given presence.
+     * 
+     * @param user The user
+     * @param presence The presence
+     * @throws OXException If updating presence fails
+     */
+    public void insertPresence(final Presence presence) throws OXException {
+        insertPresence(presence.getFrom(), presence);
+    }
+
+    /**
+     * Inserts given presence.
+     * 
+     * @param user The user
+     * @param presence The presence
+     * @throws OXException If updating presence fails
+     */
+    public void insertPresence(final ChatUser user, final Presence presence) throws OXException {
+        final DatabaseService databaseService = getService(DatabaseService.class);
+        PreparedStatement stmt = null;
+        final Connection con = databaseService.getWritable(context);
+        try {
+            stmt = con.prepareStatement("INSERT INTO chatPresence (cid, user, statusMessage, mode, lastModified) VALUES (?, ?, ?, ?, ?)");
+            int pos = 1;
+            stmt.setInt(pos++, context.getContextId());
+            stmt.setInt(pos++, Integer.parseInt(user.getId()));
+            stmt.setString(pos++, presence.getStatus());
+            stmt.setInt(pos++, presence.getMode().ordinal());
+            stmt.setLong(pos, System.currentTimeMillis());
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            databaseService.backWritable(context, con);
+        }
+        /*
+         * Notify roster listeners
+         */
+        notifyRosterListeners(presence);
     }
 
     @Override
@@ -161,18 +321,32 @@ public final class DBRoster implements Roster {
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
+            final boolean hasSession = (null != SERVICE_REF.get().getAnyActiveSessionForUser(userId, context.getContextId()));
             if (!rs.next()) {
-                final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
-                packetUnavailable.setFrom(user);
-                return packetUnavailable;
+                if (hasSession) {
+                    final PresenceImpl presence = new PresenceImpl();
+                    presence.setFrom(user);
+                    presence.setStatus("Hey there, I'm using OX7 chat...");
+                    try {
+                        insertPresence(user, presence);
+                        return presence;
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+                final PresenceImpl presence = new PresenceImpl(hasSession ? Presence.Type.AVAILABLE : Presence.Type.UNAVAILABLE);
+                presence.setFrom(user);
+                return presence;
             }
-            if (null == getService(SessiondService.class).getAnyActiveSessionForUser(userId, context.getContextId())) {
+            if (!hasSession) {
                 final PresenceImpl packetUnavailable = new PresenceImpl(Presence.Type.UNAVAILABLE);
+                packetUnavailable.setMode(Presence.Mode.modeOf(rs.getInt(1)));
                 packetUnavailable.setFrom(user);
+                packetUnavailable.setStatus(rs.getString(2));
                 return packetUnavailable;
             }
             final PresenceImpl packetAvailable = new PresenceImpl(Presence.Type.AVAILABLE);
-            packetAvailable.setMode(Presence.Mode.valueOf(rs.getString(1)));
+            packetAvailable.setMode(Presence.Mode.modeOf(rs.getInt(1)));
             packetAvailable.setFrom(user);
             packetAvailable.setStatus(rs.getString(2));
             return packetAvailable;
@@ -185,7 +359,7 @@ public final class DBRoster implements Roster {
     }
 
     /**
-     * Notify listeners about changed presence.
+     * Notifies listeners about changed presence.
      * 
      * @param presence The changed presence
      */

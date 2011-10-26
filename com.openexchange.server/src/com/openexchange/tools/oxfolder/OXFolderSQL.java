@@ -1478,7 +1478,7 @@ public final class OXFolderSQL {
                     callWriteCon.rollback(); // ROLLBACK
                     callWriteCon.setAutoCommit(true);
                 }
-                throw OXFolderExceptionCode.DBPOOLING_ERROR.create(e, Integer.valueOf(ctx.getContextId()));
+                throw e;
             }
         } finally {
             NEXTSERIAL_LOCK.unlock();

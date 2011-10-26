@@ -49,6 +49,7 @@
 
 package com.openexchange.secret.recovery.json.preferences;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -79,7 +80,7 @@ public class Enabled implements PreferencesItemService {
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
             @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) {
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 setting.setSingleValue(Boolean.valueOf(true));
             }
 

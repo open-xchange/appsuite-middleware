@@ -403,8 +403,8 @@ public class DefaultDispatcherTest extends TestCase {
         }
 
         @Override
-        public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-            this.request = request;
+        public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+            this.request = requestData;
             this.session = session;
             return result;
         }
