@@ -15,3 +15,4 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.rdiff
+Bundle-Activator: com.openexchange.rdiff.osgi.RdiffActivator
