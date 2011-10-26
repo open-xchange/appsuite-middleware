@@ -191,7 +191,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
 
     private static final Pattern PATTERN_FILENAME = Pattern.compile("([0-9a-z&&[^.\\s>\"]]+\\.[0-9a-z&&[^.\\s>\"]]+)");
 
-    private static boolean isInlineImageSrc(final String src) {
+    private static boolean isInlineImageSource(final String src) {
         final String lcSrc = src.toLowerCase(Locale.ENGLISH);
         if (lcSrc.startsWith(CID, 0) || PATTERN_FILENAME.matcher(lcSrc).matches()) {
             return true;
@@ -210,7 +210,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
             final String src = attributes.get(SRC);
             if (null == src) {
                 attributes.put(SRC, BLANK);
-            } else if (!(src.regionMatches(true, 0, CID, 0, 4)) && !(PATTERN_FILENAME.matcher(src).matches())) {
+            } else if (!isInlineImageSource(src)) {
                 /*
                  * Don't replace inline images
                  */
