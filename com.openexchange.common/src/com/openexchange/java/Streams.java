@@ -52,6 +52,7 @@ package com.openexchange.java;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -133,6 +134,21 @@ public class Streams {
         if (null != toClose) {
             try {
                 toClose.close();
+            } catch (final IOException e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Safely flushes specified {@link Flushable} instance.
+     *
+     * @param toFlush The {@link Flushable} instance
+     */
+    public static void flush(final Flushable toFlush) {
+        if (null != toFlush) {
+            try {
+                toFlush.flush();
             } catch (final IOException e) {
                 // Ignore
             }
