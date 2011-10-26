@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.DownloadPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
@@ -114,6 +115,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         defaultConverter.addConverter(new TextPreviewResultConverter());
         defaultConverter.addConverter(new FilteredHTMLPreviewResultConverter());
         defaultConverter.addConverter(new DownloadPreviewResultConverter());
+        defaultConverter.addConverter(new PreviewImageResultConverter());
 
         track(ResultConverter.class, new SimpleRegistryListener<ResultConverter>() {
 
