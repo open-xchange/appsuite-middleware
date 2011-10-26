@@ -148,7 +148,7 @@ public final class ImageUtility {
      * @param sb The string builder to write to
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final StringBuilder sb) {
-        String prefix;
+        final String prefix;
         final String route;
         {
             final HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
@@ -160,21 +160,22 @@ public final class ImageUtility {
                 route = null;
             } else {
                 /*
-                 * Compose absolute URL
+                 * Compose absolute URL if a relative one is not preferred
                  */
-                sb.append(hostData.isSecure() ? "https://" : "http://");
-                sb.append(hostData.getHost());
-                final int port = hostData.getPort();
-                if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
-                    sb.append(':').append(port);
+                if (preferRelativeUrl) {
+                    prefix = "";
+                } else {
+                    sb.append(hostData.isSecure() ? "https://" : "http://");
+                    sb.append(hostData.getHost());
+                    final int port = hostData.getPort();
+                    if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                        sb.append(':').append(port);
+                    }
+                    prefix = sb.toString();
+                    sb.setLength(0);
                 }
-                prefix = sb.toString();
-                sb.setLength(0);
                 route = hostData.getRoute();
             }
-        }
-        if (preferRelativeUrl) {
-            prefix = "";
         }
         /*
          * Compose signature
