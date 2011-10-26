@@ -55,8 +55,10 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.halo.linkedin.helpers.ContactCompletor;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -79,7 +81,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		int uid = session.getUserId();
 		int cid = session.getContextId();
 		
-		String email = query.getContact().getEmail1();
+		String email = getEMail(query.getContact());
 
 		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
 		if(accounts.size() == 0)
@@ -90,5 +92,24 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		AJAXRequestResult result = new AJAXRequestResult();
 		result.setResultObject(json, "json");
 		return result;
+	}
+
+	private String getEMail(Contact queryContact) {
+		if(queryContact.containsEmail1())
+			return queryContact.getEmail1();
+		if(queryContact.containsEmail2())
+			return queryContact.getEmail2();
+		if(queryContact.containsEmail3())
+			return queryContact.getEmail3();
+		ContactCompletor cc = new ContactCompletor();
+		if(queryContact.containsParentFolderID() && queryContact.containsObjectID()){
+			cc.updateFromContactData(queryContact);
+			getEMail(queryContact);//TRÈS RISQUÉ - hat ein Kontakt immer eine E-Mail-Adresse?
+		}
+		if(queryContact.containsInternalUserId()){
+			cc.updateFromUserData(queryContact);
+			getEMail(queryContact);//TRÈS RISQUÉ - ein User hat immer eine E-Mail-Adresse... auf Standard-OX-Installationen.
+		}
+		return null;
 	}
 }
