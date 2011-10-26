@@ -22,6 +22,11 @@ Import-Package: com.openexchange.exception,
  javax.security.auth.x500,
  javax.security.cert,
  javax.security.sasl,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
+ org.apache.commons.codec.digest,
+ org.apache.commons.codec.language,
+ org.apache.commons.codec.net,
  org.apache.commons.logging,
  org.osgi.framework
 Export-Package: com.openexchange.rdiff
