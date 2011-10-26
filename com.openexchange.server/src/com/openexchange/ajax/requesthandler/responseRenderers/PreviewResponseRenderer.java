@@ -60,23 +60,22 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.preview.PreviewDocument;
 
-
 /**
  * {@link PreviewResponseRenderer}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class PreviewResponseRenderer implements ResponseRenderer {
-    
+
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PreviewResponseRenderer.class));
 
+    private static final boolean WARN = LOG.isWarnEnabled();
 
     @Override
-    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
+    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
         if (result.getResultObject() instanceof PreviewDocument) {
             return true;
         }
-        
         return false;
     }
 
@@ -86,17 +85,16 @@ public class PreviewResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) {
-        PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();        
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
         httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
-            String content = previewDocument.getContent();
-            if (content == null) {
+            final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
+            if (previewDocument.hasContent()) {
+                httpResp.getWriter().write(previewDocument.getContent());
+            } else if (WARN) {
                 LOG.warn("Content of PreviewDocument was null.");
-            } else {
-                httpResp.getWriter().write(content);
-            }            
-        } catch (IOException e) {
+            }
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }

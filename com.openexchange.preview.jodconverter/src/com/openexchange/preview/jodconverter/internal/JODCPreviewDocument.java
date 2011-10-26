@@ -53,23 +53,26 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.preview.PreviewDocument;
 
-
 /**
  * {@link JODCPreviewDocument}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class JODCPreviewDocument implements PreviewDocument {
-    
+
     private String content;
-    
+
     private final Map<String, String> metaData;
-    
-    
+
     public JODCPreviewDocument() {
         super();
         metaData = new HashMap<String, String>();
-    }    
+    }
+
+    @Override
+    public boolean hasContent() {
+        return null != content;
+    }
 
     @Override
     public Map<String, String> getMetaData() {
@@ -80,11 +83,11 @@ public class JODCPreviewDocument implements PreviewDocument {
     public String getContent() {
         return content;
     }
-    
+
     public void setContent(final String content) {
         this.content = content;
     }
-    
+
     public void setMetaData(final Map<String, String> metaData) {
         this.metaData.clear();
         this.metaData.putAll(metaData);

@@ -77,6 +77,11 @@ public final class TikaPreviewDocument implements PreviewDocument {
     }
 
     @Override
+    public boolean hasContent() {
+        return null != content;
+    }
+
+    @Override
     public Map<String, String> getMetaData() {
         return map;
     }
