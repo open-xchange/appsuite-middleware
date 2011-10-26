@@ -60,24 +60,21 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.preview.PreviewDocument;
 
-
 /**
- * {@link PreviewResponseRenderer}
- *
+ * {@link PreviewResponseRenderer} - The response renderer for {@link PreviewDocument}s.
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PreviewResponseRenderer implements ResponseRenderer {
-    
+
     private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(PreviewResponseRenderer.class));
 
+    private static final boolean WARN = LOG.isWarnEnabled();
 
     @Override
-    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
-        if (result.getResultObject() instanceof PreviewDocument) {
-            return true;
-        }
-        
-        return false;
+    public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
+        return (result.getResultObject() instanceof PreviewDocument);
     }
 
     @Override
@@ -86,17 +83,16 @@ public class PreviewResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) {
-        PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();        
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
         httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
-            String content = previewDocument.getContent();
-            if (content == null) {
+            final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
+            if (previewDocument.hasContent()) {
+                httpResp.getWriter().write(previewDocument.getContent());
+            } else if (WARN) {
                 LOG.warn("Content of PreviewDocument was null.");
-            } else {
-                httpResp.getWriter().write(content);
-            }            
-        } catch (IOException e) {
+            }
+        } catch (final IOException e) {
             LOG.error(e.getMessage(), e);
         }
     }
