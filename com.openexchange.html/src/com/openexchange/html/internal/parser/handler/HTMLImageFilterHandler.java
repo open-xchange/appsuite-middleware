@@ -200,7 +200,7 @@ public class HTMLImageFilterHandler implements HTMLHandler {
             final URI uri = new URI(lcSrc);
             return (null == uri.getHost()) && uri.getPath().startsWith("/ajax/image");
         } catch (final URISyntaxException e) {
-            // Invalid image URI
+            // Invalid image URI; return false
             return false;
         }
     }
