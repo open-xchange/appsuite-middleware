@@ -108,6 +108,9 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     @Override
     public InputStream getStream() throws OXException {
+        if (null == tmpFile) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Missing temporary file. Already closed?");
+        }
         try {
             return new FileInputStream(tmpFile);
         } catch (final IOException e) {

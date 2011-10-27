@@ -99,20 +99,22 @@ public class DocumentPatchAction extends AbstractFileAction {
                     baseOut.write(buf, 0, read);
                 }
                 baseOut.flush();
-                drop(closeables);
-                drop(closeables);
+                dropFirstFrom(closeables);
+                dropFirstFrom(closeables);
             }
             /*
              * Stream patch to patchOut
              */
             patchedFile = newTempFile();
-            final OutputStream patchOut = gen(new FileOutputStream(patchedFile), closeables);
-            final InputStream requestStream = gen(request.getUploadStream(), closeables);
-            final RdiffService rdiff = Services.getRdiffService();
-            rdiff.rebuildFile(baseFile, requestStream, patchOut);
-            patchOut.flush();
-            drop(closeables);
-            drop(closeables);
+            {
+                final OutputStream patchOut = gen(new FileOutputStream(patchedFile), closeables);
+                final InputStream requestStream = gen(request.getUploadStream(), closeables);
+                final RdiffService rdiff = Services.getRdiffService();
+                rdiff.rebuildFile(baseFile, requestStream, patchOut);
+                patchOut.flush();
+                dropFirstFrom(closeables);
+                dropFirstFrom(closeables);
+            }
             /*
              * Update
              */
@@ -141,7 +143,7 @@ public class DocumentPatchAction extends AbstractFileAction {
         return newInstance;
     }
 
-    private static void drop(final List<Closeable> col) {
+    private static void dropFirstFrom(final List<Closeable> col) {
         Streams.close(col.remove(0));
     }
 
