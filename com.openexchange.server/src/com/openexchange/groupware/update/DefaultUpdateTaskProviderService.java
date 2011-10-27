@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,34 @@
  *
  */
 
-package com.openexchange.chat.db.groupware;
+package com.openexchange.groupware.update;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
- * {@link DBChatUpdateTaskProviderService}
+ * {@link DefaultUpdateTaskProviderService} - The default {@link UpdateTaskProviderService} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DBChatUpdateTaskProviderService implements UpdateTaskProviderService {
+public class DefaultUpdateTaskProviderService implements UpdateTaskProviderService {
 
     private final List<UpdateTaskV2> taskList;
 
-    public DBChatUpdateTaskProviderService(final UpdateTaskV2... tasks) {
+    /**
+     * Initializes a new {@link DefaultUpdateTaskProviderService}.
+     * 
+     * @param tasks The update tasks of this provider service
+     */
+    public DefaultUpdateTaskProviderService(final UpdateTaskV2... tasks) {
         super();
         if (null == tasks || 0 == tasks.length) {
-            taskList = new ArrayList<UpdateTaskV2>(1);
+            taskList = Collections.emptyList();
         } else {
-            taskList = new ArrayList<UpdateTaskV2>(tasks.length);
-            taskList.addAll(Arrays.asList(tasks));
+            taskList = new ArrayList<UpdateTaskV2>(Arrays.asList(tasks));
         }
     }
 

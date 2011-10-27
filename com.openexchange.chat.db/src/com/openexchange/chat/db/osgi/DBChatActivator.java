@@ -69,7 +69,6 @@ import com.openexchange.chat.db.DBRoster;
 import com.openexchange.chat.db.groupware.DBChatCreateTableService;
 import com.openexchange.chat.db.groupware.DBChatCreateTableTask;
 import com.openexchange.chat.db.groupware.DBChatDeleteListener;
-import com.openexchange.chat.db.groupware.DBChatUpdateTaskProviderService;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
 import com.openexchange.context.ContextService;
@@ -78,6 +77,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
@@ -153,7 +153,7 @@ public final class DBChatActivator extends HousekeepingActivator {
          */
         {
             registerService(CreateTableService.class, new DBChatCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DBChatUpdateTaskProviderService(new DBChatCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBChatCreateTableTask()));
             registerService(DeleteListener.class, new DBChatDeleteListener());
         }
         /*
