@@ -47,81 +47,40 @@
  *
  */
 
-package com.openexchange.chat.json.rest.conversation;
+package com.openexchange.groupware.update;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chat.json.rest.AbstractMethodHandler;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * {@link MethodHandlerImplementation}
- *
+ * {@link DefaultUpdateTaskProviderService} - The default {@link UpdateTaskProviderService} implementation.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteMethodHandler extends AbstractMethodHandler {
+public class DefaultUpdateTaskProviderService implements UpdateTaskProviderService {
+
+    private final List<UpdateTaskV2> taskList;
 
     /**
-     * Initializes a new {@link DeleteMethodHandler}.
+     * Initializes a new {@link DefaultUpdateTaskProviderService}.
+     * 
+     * @param tasks The update tasks of this provider service
      */
-    public DeleteMethodHandler() {
+    public DefaultUpdateTaskProviderService(final UpdateTaskV2... tasks) {
         super();
-    }
-
-    @Override
-    protected String getModule() {
-        return "conversation";
-    }
-
-    @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
-        if (isEmpty(pathInfo)) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        final String[] pathElements = SPLIT_PATH.split(pathInfo);
-        final int length = pathElements.length;
-        if (0 == length) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        if (1 == length) {
-            /*-
-             * "Delete/part specific conversation"
-             *  DELETE /conversation/11
-             */
-            final String element = pathElements[0];
-            retval.setAction("delete");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
-        } else if ("message".equals(pathElements[1])) {
-            if (2 == length) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create();
-            }
-            /*-
-             * "Delete specific message"
-             *  DELETE /conversation/11/message/1234
-             */
-            retval.putParameter("id", pathElements[0]);
-            final String element = pathElements[2];
-            retval.setAction("deleteMessages");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
+        if (null == tasks || 0 == tasks.length) {
+            taskList = Collections.emptyList();
         } else {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
+            taskList = new ArrayList<UpdateTaskV2>(Arrays.asList(tasks));
         }
     }
 
     @Override
-    protected boolean shouldApplyBody() {
-        return false;
+    public Collection<UpdateTaskV2> getUpdateTasks() {
+        return taskList;
     }
 
 }

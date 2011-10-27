@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,81 +47,53 @@
  *
  */
 
-package com.openexchange.chat.json.rest.conversation;
+package com.openexchange.file.storage.json.actions.files;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.chat.json.rest.AbstractMethodHandler;
+import java.io.InputStream;
+import java.io.OutputStream;
+import com.openexchange.ajax.container.TmpFileFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Action;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.java.Streams;
+import com.openexchange.rdiff.RdiffService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link MethodHandlerImplementation}
- *
+ * {@link DocumentSigAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeleteMethodHandler extends AbstractMethodHandler {
-
-    /**
-     * Initializes a new {@link DeleteMethodHandler}.
-     */
-    public DeleteMethodHandler() {
-        super();
-    }
+@Action(defaultFormat = "file")
+public class DocumentSigAction extends AbstractFileAction {
 
     @Override
-    protected String getModule() {
-        return "conversation";
-    }
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+        request.require(AbstractFileAction.Param.ID);
 
-    @Override
-    protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
-        if (isEmpty(pathInfo)) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        final String[] pathElements = SPLIT_PATH.split(pathInfo);
-        final int length = pathElements.length;
-        if (0 == length) {
-            throw AjaxExceptionCodes.BAD_REQUEST.create();
-        }
-        if (1 == length) {
-            /*-
-             * "Delete/part specific conversation"
-             *  DELETE /conversation/11
-             */
-            final String element = pathElements[0];
-            retval.setAction("delete");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
-        } else if ("message".equals(pathElements[1])) {
-            if (2 == length) {
-                throw AjaxExceptionCodes.BAD_REQUEST.create();
-            }
-            /*-
-             * "Delete specific message"
-             *  DELETE /conversation/11/message/1234
-             */
-            retval.putParameter("id", pathElements[0]);
-            final String element = pathElements[2];
-            retval.setAction("deleteMessages");
-            final JSONArray array = new JSONArray();
-            for (final String id : SPLIT_CSV.split(element)) {
-                array.put(id);
-            }
-            retval.setData(array);
-        } else {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(pathInfo);
-        }
-    }
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
 
-    @Override
-    protected boolean shouldApplyBody() {
-        return false;
+        InputStream documentStream = null;
+        OutputStream sigOut = null;
+        try {
+            final RdiffService rdiff = Services.getRdiffService();
+            documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
+            // Make signature
+            final TmpFileFileHolder fileHolder = new TmpFileFileHolder();
+            sigOut = new FileOutputStream(fileHolder.getTmpFile());
+            rdiff.createSignatures(documentStream, sigOut);
+            sigOut.flush();
+            // Return FileHolder result
+            return new AJAXRequestResult(fileHolder, "file");
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(documentStream, sigOut);
+        }
     }
 
 }

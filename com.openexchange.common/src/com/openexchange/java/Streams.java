@@ -134,8 +134,25 @@ public class Streams {
         if (null != toClose) {
             try {
                 toClose.close();
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 // Ignore
+            }
+        }
+    }
+
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    public static void close(final Closeable... closeables) {
+        if (null != closeables) {
+            for (final Closeable toClose : closeables) {
+                try {
+                    toClose.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
             }
         }
     }
@@ -149,7 +166,7 @@ public class Streams {
         if (null != toFlush) {
             try {
                 toFlush.flush();
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 // Ignore
             }
         }

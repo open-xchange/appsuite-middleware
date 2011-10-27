@@ -86,6 +86,11 @@ public class FileHolder implements IFileHolder {
     }
 
     @Override
+    public void close() {
+        // Nope
+    }
+
+    @Override
     public InputStream getStream() {
         return is;
     }

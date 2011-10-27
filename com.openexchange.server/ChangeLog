@@ -1,3 +1,8 @@
+* 2011-10-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20683: Ensure to set token for JSON parts with disposition set to "attachment"
+ - Fix for bug 20682; Preserving links in plain-text mails
+
 * 2011-10-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 20664: Retry insert attempt on concurrent modification exception
