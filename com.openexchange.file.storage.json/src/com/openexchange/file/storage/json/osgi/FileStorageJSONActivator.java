@@ -85,8 +85,8 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-            Services.LOOKUP = this;
-            rememberTracker(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            Services.setServiceLookup(this);
+            rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
             trackService(RdiffService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
@@ -97,6 +97,12 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             LOG.error(x.getMessage(), x);
             throw x;
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }
