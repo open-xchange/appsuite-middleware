@@ -92,7 +92,7 @@ public class APIResponseRenderer implements ResponseRenderer {
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        return Response.class.isAssignableFrom(result.getResultObject().getClass());
+        return result.getResultObject() instanceof Response;
     }
 
     @Override

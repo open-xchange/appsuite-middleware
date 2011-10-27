@@ -74,7 +74,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewRe
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
-import com.openexchange.ajax.requesthandler.responseRenderers.HTMLResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
@@ -156,7 +156,7 @@ public class DispatcherActivator extends HousekeepingActivator {
         final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
-        DispatcherServlet.registerRenderer(new HTMLResponseRenderer());
+        DispatcherServlet.registerRenderer(new PreviewResponseRenderer());
 
         track(ResponseRenderer.class, new SimpleRegistryListener<ResponseRenderer>() {
 

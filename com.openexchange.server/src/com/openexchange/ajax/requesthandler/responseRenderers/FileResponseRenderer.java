@@ -113,11 +113,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        final Object data = result.getResultObject();
-        if (data == null) {
-            return false;
-        }
-        return IFileHolder.class.isAssignableFrom(data.getClass());
+        return result.getResultObject() instanceof IFileHolder;
     }
 
     @Override
