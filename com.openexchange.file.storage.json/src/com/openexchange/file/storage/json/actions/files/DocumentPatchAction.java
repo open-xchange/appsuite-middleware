@@ -80,7 +80,7 @@ public class DocumentPatchAction extends AbstractFileAction {
         request.require(AbstractFileAction.Param.ID);
 
         final IDBasedFileAccess fileAccess = request.getFileAccess();
-        
+
         final List<Closeable> closeables = new ArrayList<Closeable>(4);
         java.io.File baseFile = null;
         java.io.File patchedFile = null;
@@ -91,42 +91,36 @@ public class DocumentPatchAction extends AbstractFileAction {
              */
             baseFile = newTempFile();
             {
-                final InputStream documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
-                    closeables.add(0, documentStream);
-                final OutputStream baseOut = new FileOutputStream(baseFile);
-                    closeables.add(0, baseOut);
+                final InputStream documentStream = gen(fileAccess.getDocument(request.getId(), request.getVersion()), closeables);
+                final OutputStream baseOut = gen(new FileOutputStream(baseFile), closeables);
                 // Buffer
                 final byte[] buf = new byte[buflen];
                 for (int read; (read = documentStream.read(buf, 0, buflen)) > 0;) {
                     baseOut.write(buf, 0, read);
                 }
                 baseOut.flush();
-                Streams.close(baseOut);
-                    closeables.remove(0);
-                Streams.close(documentStream);
-                    closeables.remove(0);
+                drop(closeables);
+                drop(closeables);
             }
             /*
              * Stream patch to patchOut
              */
             patchedFile = newTempFile();
-            final OutputStream patchOut = new FileOutputStream(patchedFile);
-                closeables.add(0, patchOut);
-            final InputStream requestStream = request.getUploadStream();
-                closeables.add(0, requestStream);
+            final OutputStream patchOut = gen(new FileOutputStream(patchedFile), closeables);
+            final InputStream requestStream = gen(request.getUploadStream(), closeables);
             final RdiffService rdiff = Services.getRdiffService();
             rdiff.rebuildFile(baseFile, requestStream, patchOut);
-            Streams.close(requestStream);
-                closeables.remove(0);
             patchOut.flush();
-            Streams.close(patchOut);
-                closeables.remove(0);
+            drop(closeables);
+            drop(closeables);
             /*
              * Update
              */
-            final InputStream patchedIn = new FileInputStream(patchedFile);
-                closeables.add(patchedIn);
-            fileAccess.saveDocument(fileAccess.getFileMetadata(request.getId(), request.getVersion()), patchedIn, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+            final InputStream patchedIn = gen(new FileInputStream(patchedFile), closeables);
+            fileAccess.saveDocument(
+                fileAccess.getFileMetadata(request.getId(), request.getVersion()),
+                patchedIn,
+                FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
             /*
              * Return empty result
              */
@@ -140,6 +134,15 @@ public class DocumentPatchAction extends AbstractFileAction {
             delete(baseFile);
             delete(patchedFile);
         }
+    }
+
+    private static <C extends Closeable> C gen(final C newInstance, final List<Closeable> col) {
+        col.add(newInstance);
+        return newInstance;
+    }
+
+    private static void drop(final List<Closeable> col) {
+        Streams.close(col.remove(0));
     }
 
     private static void delete(final java.io.File file) {
