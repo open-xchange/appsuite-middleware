@@ -838,6 +838,13 @@ public final class JSONMessageHandler implements MailMessageHandler {
                         } else {
                             jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), true);
                         }
+                        if (token && !attachment.hasAndNotNull("token")) {
+                            try {
+                                addToken(attachment, attachment.getString(MailListField.ID.getKey()));
+                            } catch (final Exception e) {
+                                // Missing field "id"
+                            }
+                        }
                     }
                 }
             }
