@@ -5,10 +5,6 @@
         This build file overrides the installConf target to patch a lot of configuration files before installing them.
     </description>
 
-    <!-- Customizable values -->
-    <!-- This values must be changed for defining other installation places -->
-    <property name="logInstallDir" value="/var/log/open-xchange"/>
-
     <!-- Constants -->
     <property name="osgiDir" value="osgi"/>
     <property name="importCSVDir" value="importCSV"/>
@@ -65,23 +61,7 @@
 
     <target name="postInstall" description="Install several additional files that are necessary for the backend.">
         <!-- TODO create logging directory -->
-        <antcall target="patchAndInstallConfigIniTemplate"/>
         <antcall target="installImportCSV"/>
-    </target>
-
-    <target name="patchAndInstallConfigIniTemplate" description="Patches and installs config.ini.template file.">
-        <mkdir dir="${tmpDir}/${osgiDir}"/>
-        <copy todir="${tmpDir}/${osgiDir}" overwrite="true">
-            <fileset dir="${osgiDir}"/>
-        </copy>
-        <move tofile="${tmpDir}/${osgiDir}/config.ini.template" file="${tmpDir}/${osgiDir}/config.ini.template.in" overwrite="true"/>
-        <replace file="${tmpDir}/${osgiDir}/config.ini.template">
-            <replacefilter token="@bundlesdir@" value="${bundlesDir}"/>
-            <replacefilter token="@logfile@" value="${logInstallDir}/open-xchange-osgi.log"/>
-        </replace>
-        <copy todir="${destDir}/${prefix}/${osgiDir}">
-            <fileset dir="${tmpDir}/${osgiDir}"/>
-        </copy>
     </target>
 
     <target name="installImportCSV" description="Installs configuration files for importing CSV files.">

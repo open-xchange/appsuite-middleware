@@ -37,5 +37,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,net.freeutils.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.apache.tika"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,oxscripts"/>
 </provider>
 </psf>
