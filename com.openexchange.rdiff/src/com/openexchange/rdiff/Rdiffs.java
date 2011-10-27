@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,64 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers;
+package com.openexchange.rdiff;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
-import com.openexchange.preview.PreviewDocument;
-
+import java.io.InputStream;
+import org.apache.commons.codec.digest.DigestUtils;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 
 /**
- * {@link HTMLResponseRenderer}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link Rdiffs} - A utility class for rdiff.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HTMLResponseRenderer implements ResponseRenderer {
-    
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HTMLResponseRenderer.class));
+public final class Rdiffs {
 
-
-    @Override
-    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
-        if (result.getResultObject() instanceof PreviewDocument) {
-            return true;
-        }
-        
-        return false;
+    /**
+     * Initializes a new {@link Rdiffs}.
+     */
+    private Rdiffs() {
+        super();
     }
 
-    @Override
-    public int getRanking() {
-        return 0;
-    }
-
-    @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) {
-        PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();        
-        httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
+    /**
+     * Compute the MD5 checksum for a file and returns the value as a 32 character hex string.
+     * 
+     * @param fname The name of the file to checksum
+     * @return The 32 character hex string of the MD5 digest of the file
+     * @throws OXException If the file cannot be read
+     */
+    public static String fileChecksumString(final String fname) throws OXException {
+        InputStream in = null;
         try {
-            String content = previewDocument.getContent();
-            if (content == null) {
-                LOG.warn("Content of PreviewDocument was null.");
-            } else {
-                httpResp.getWriter().write(content);
-            }            
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
+            in = new FileInputStream(fname);
+            return DigestUtils.md5Hex(in);
+        } catch (final IOException e) {
+            throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
+        }
+    }
+
+    /**
+     * Compute the MD5 checksum for a file, returning it in a new buffer.
+     * 
+     * @param fname The name of the file to checksum
+     * @return The MD5 digest of the file.
+     * @throws OXException If the file cannot be read
+     */
+    public static byte[] fileChecksum(final String fname) throws OXException {
+        InputStream in = null;
+        try {
+            in = new FileInputStream(fname);
+            return DigestUtils.md5(in);
+        } catch (final IOException e) {
+            throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
         }
     }
 

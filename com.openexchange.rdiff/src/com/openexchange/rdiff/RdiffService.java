@@ -107,6 +107,8 @@ public interface RdiffService {
 
     /**
      * Write the signatures to the specified output stream.
+     * <p>
+     * Provided stream is closed/flushed orderly.
      * 
      * @param sigs The signatures to write.
      * @param out The OutputStream to write to.
