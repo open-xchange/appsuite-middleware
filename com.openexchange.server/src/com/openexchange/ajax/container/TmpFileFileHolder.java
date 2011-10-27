@@ -49,46 +49,77 @@
 
 package com.openexchange.ajax.container;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import com.openexchange.configuration.ServerConfig;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ByteArrayFileHolder} - A {@link IFileHolder} implementation backed by a <code>byte</code> array.
- *
+ * {@link TmpFileFileHolder} - The {@link IFileHolder file holder} backed by a temporary {@link File file}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ByteArrayFileHolder implements IFileHolder {
+public final class TmpFileFileHolder implements IFileHolder {
 
-    private final byte[] bytes;
+    private File tmpFile;
 
-    private String name;
+    private long length;
 
     private String contentType;
+
+    private String name;
 
     private String disposition;
 
     /**
-     * Initializes a new {@link ByteArrayFileHolder}.
+     * Initializes a new {@link TmpFileFileHolder}.
+     * 
+     * @throws OXException If initialization fails
      */
-    public ByteArrayFileHolder(final byte[] bytes) {
+    public TmpFileFileHolder() throws OXException {
         super();
-        this.bytes = bytes;
-        contentType = "application/octet-stream";
+        tmpFile = newTempFile();
+        length = -1L;
     }
 
     @Override
-    public void close() {
-        // Nope
+    public void close() throws IOException {
+        if (null == tmpFile) {
+            return;
+        }
+        try {
+            tmpFile.delete();
+        } finally {
+            tmpFile = null;
+        }
+    }
+
+    /**
+     * Gets the newly created file.
+     * 
+     * @return The file
+     */
+    public File getTmpFile() {
+        return tmpFile;
     }
 
     @Override
-    public InputStream getStream() {
-        return new UnsynchronizedByteArrayInputStream(bytes);
+    public InputStream getStream() throws OXException {
+        try {
+            return new FileInputStream(tmpFile);
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override
     public long getLength() {
-        return bytes.length;
+        return length;
     }
 
     @Override
@@ -107,29 +138,63 @@ public final class ByteArrayFileHolder implements IFileHolder {
     }
 
     /**
-     * Sets the disposition.
-     *
-     * @param disposition The disposition
+     * Sets the length
+     * 
+     * @param length The length to set
      */
-    public void setDisposition(final String disposition) {
-        this.disposition = disposition;
+    public void setLength(final long length) {
+        this.length = length;
     }
 
     /**
-     * Sets the content type; e.g. "application/octet-stream"
-     *
-     * @param contentType The content type
+     * Sets the content type
+     * 
+     * @param contentType The content type to set
      */
     public void setContentType(final String contentType) {
         this.contentType = contentType;
     }
 
     /**
-     * Sets the (file) name.
-     *
-     * @param name The name
+     * Sets the name
+     * 
+     * @param name The name to set
      */
     public void setName(final String name) {
         this.name = name;
     }
+
+    /**
+     * Sets the disposition
+     * 
+     * @param disposition The disposition to set
+     */
+    public void setDisposition(final String disposition) {
+        this.disposition = disposition;
+    }
+
+    /**
+     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
+     * <ol>
+     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
+     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
+     * machine.
+     * </ol>
+     * 
+     * @return An abstract pathname denoting a newly-created empty file
+     * @throws OXException If a file could not be created
+     */
+    public static File newTempFile() throws OXException {
+        try {
+            final File tmpFile =
+                File.createTempFile("open-xchange-", ".tmp", new File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory)));
+            tmpFile.deleteOnExit();
+            return tmpFile;
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
 }

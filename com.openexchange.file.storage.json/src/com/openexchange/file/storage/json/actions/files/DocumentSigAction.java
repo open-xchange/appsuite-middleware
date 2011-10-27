@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,89 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.container;
+package com.openexchange.file.storage.json.actions.files;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import java.io.OutputStream;
+import com.openexchange.ajax.container.TmpFileFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Action;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.java.Streams;
+import com.openexchange.rdiff.RdiffService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ByteArrayFileHolder} - A {@link IFileHolder} implementation backed by a <code>byte</code> array.
- *
+ * {@link DocumentSigAction}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ByteArrayFileHolder implements IFileHolder {
-
-    private final byte[] bytes;
-
-    private String name;
-
-    private String contentType;
-
-    private String disposition;
-
-    /**
-     * Initializes a new {@link ByteArrayFileHolder}.
-     */
-    public ByteArrayFileHolder(final byte[] bytes) {
-        super();
-        this.bytes = bytes;
-        contentType = "application/octet-stream";
-    }
+@Action(defaultFormat = "file")
+public class DocumentSigAction extends AbstractFileAction {
 
     @Override
-    public void close() {
-        // Nope
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+        request.require(AbstractFileAction.Param.ID);
+
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
+
+        InputStream documentStream = null;
+        OutputStream sigOut = null;
+        try {
+            final RdiffService rdiff = Services.getRdiffService();
+            documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
+            // Make signature
+            final TmpFileFileHolder fileHolder = new TmpFileFileHolder();
+            sigOut = new FileOutputStream(fileHolder.getTmpFile());
+            rdiff.createSignatures(documentStream, sigOut);
+            sigOut.flush();
+            // Return FileHolder result
+            return new AJAXRequestResult(fileHolder, "file");
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(documentStream);
+            Streams.close(sigOut);
+        }
     }
 
-    @Override
-    public InputStream getStream() {
-        return new UnsynchronizedByteArrayInputStream(bytes);
-    }
-
-    @Override
-    public long getLength() {
-        return bytes.length;
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getDisposition() {
-        return disposition;
-    }
-
-    /**
-     * Sets the disposition.
-     *
-     * @param disposition The disposition
-     */
-    public void setDisposition(final String disposition) {
-        this.disposition = disposition;
-    }
-
-    /**
-     * Sets the content type; e.g. "application/octet-stream"
-     *
-     * @param contentType The content type
-     */
-    public void setContentType(final String contentType) {
-        this.contentType = contentType;
-    }
-
-    /**
-     * Sets the (file) name.
-     *
-     * @param name The name
-     */
-    public void setName(final String name) {
-        this.name = name;
-    }
 }

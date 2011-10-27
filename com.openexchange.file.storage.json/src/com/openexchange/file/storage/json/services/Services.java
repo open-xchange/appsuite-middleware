@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.services;
 
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -68,5 +69,9 @@ public class Services {
 
     public static AttachmentBase getAttachmentBase() {
         return LOOKUP.getService(AttachmentBase.class);
+    }
+
+    public static RdiffService getRdiffService() {
+        return LOOKUP.getService(RdiffService.class);
     }
 }

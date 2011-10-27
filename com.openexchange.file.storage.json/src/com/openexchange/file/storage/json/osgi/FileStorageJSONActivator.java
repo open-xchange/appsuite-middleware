@@ -63,6 +63,7 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.rdiff.RdiffService;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -86,6 +87,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
         try {
             Services.LOOKUP = this;
             rememberTracker(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            trackService(RdiffService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");
