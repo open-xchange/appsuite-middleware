@@ -98,9 +98,7 @@ public class DocumentDeltaAction extends AbstractFileAction {
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(documentStream);
-            Streams.close(requestStream);
-            Streams.close(deltaOut);
+            Streams.close(documentStream, requestStream, deltaOut);
         }
     }
 

@@ -92,8 +92,7 @@ public class DocumentSigAction extends AbstractFileAction {
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(documentStream);
-            Streams.close(sigOut);
+            Streams.close(documentStream, sigOut);
         }
     }
 
