@@ -142,3 +142,5 @@ com.openexchange.smtp/jars
 com.openexchange.subscribe.facebook/jars
 com.openexchange.halo.json/build
 com.openexchange.halo.json/jars
+com.openexchange.rdiff/build
+oxscripts/tmp
