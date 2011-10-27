@@ -64,7 +64,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class TmpFileFileHolder implements IFileHolder {
 
-    private File tmpFile;
+    private final File tmpFile;
 
     private long length;
 
@@ -90,11 +90,7 @@ public final class TmpFileFileHolder implements IFileHolder {
         if (null == tmpFile) {
             return;
         }
-        try {
-            tmpFile.delete();
-        } finally {
-            tmpFile = null;
-        }
+        tmpFile.delete();
     }
 
     /**
@@ -108,9 +104,6 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     @Override
     public InputStream getStream() throws OXException {
-        if (null == tmpFile) {
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Missing temporary file. Already closed?");
-        }
         try {
             return new FileInputStream(tmpFile);
         } catch (final IOException e) {
