@@ -97,7 +97,7 @@ public final class PutMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected boolean applyBody() {
+    protected boolean shouldApplyBody() {
         return true;
     }
 

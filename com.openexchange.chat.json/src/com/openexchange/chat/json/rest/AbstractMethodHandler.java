@@ -127,7 +127,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
         /*
          * Body data
          */
-        if (applyBody()) {
+        if (shouldApplyBody()) {
             applyBodyObject(retval, req);
         }
         /*
@@ -157,7 +157,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
      * 
      * @return <code>true</code> to apply body data; else <code>false</code>
      */
-    protected abstract boolean applyBody();
+    protected abstract boolean shouldApplyBody();
 
     private void applyBodyObject(final AJAXRequestData request, final HttpServletRequest req) throws IOException {
         /*

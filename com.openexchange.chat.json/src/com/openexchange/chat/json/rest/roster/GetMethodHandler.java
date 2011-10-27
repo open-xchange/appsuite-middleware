@@ -115,7 +115,7 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected boolean applyBody() {
+    protected boolean shouldApplyBody() {
         return false;
     }
 

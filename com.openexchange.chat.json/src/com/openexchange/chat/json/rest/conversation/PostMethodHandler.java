@@ -103,7 +103,7 @@ public final class PostMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected boolean applyBody() {
+    protected boolean shouldApplyBody() {
         return true;
     }
 
