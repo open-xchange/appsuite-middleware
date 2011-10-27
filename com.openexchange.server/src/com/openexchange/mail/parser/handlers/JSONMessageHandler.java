@@ -106,6 +106,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link JSONMessageHandler} - Generates a JSON message representation considering user-sensitive data.
@@ -225,11 +226,10 @@ public final class JSONMessageHandler implements MailMessageHandler {
     }
 
     private static Context getContext(final Session session) throws OXException {
-        try {
-            return ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getContext();
         }
+        return ContextStorage.getStorageContext(session.getContextId());
     }
 
     /**
