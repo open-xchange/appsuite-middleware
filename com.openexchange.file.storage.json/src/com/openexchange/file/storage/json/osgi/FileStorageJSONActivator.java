@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.json.osgi;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -72,14 +71,9 @@ import com.openexchange.rdiff.RdiffService;
  */
 public class FileStorageJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class));
-
-    private static final Class<?>[] NEEDED_SERVICES =
-        new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
     }
 
     @Override
@@ -94,7 +88,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter());
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class)).error(x.getMessage(), x);
             throw x;
         }
     }
