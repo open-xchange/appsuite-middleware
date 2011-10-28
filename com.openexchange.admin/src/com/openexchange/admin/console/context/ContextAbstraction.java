@@ -269,6 +269,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         alignment.add("r");
         alignment.add("l");
         alignment.add("l");
+        alignment.add("l");
         for (int i = 0; i < humanReadableColumnsOfAllExtensions.size(); i++) {
             alignment.add("l");
         }
@@ -281,6 +282,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columnnames.add("qused");
         columnnames.add("name");
         columnnames.add("lmappings");
+        columnnames.add("attributes");
         columnnames.addAll(humanReadableColumnsOfAllExtensions);
     
         doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
@@ -297,6 +299,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("used_quota");
         columns.add("name");
         columns.add("lmappings");
+        columns.add("attributes");
         columns.addAll(getCSVColumnsOfAllExtensions(parser));
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
@@ -502,6 +505,24 @@ public abstract class ContextAbstraction extends UserAbstraction {
         } else {
             srv_data.add(null);
         }
+
+        final StringBuilder attrs = new StringBuilder();
+        final Map<String, Map<String, String>> attributes = ctx.getUserAttributes();
+        for (final Map.Entry<String, Map<String, String>> entry : attributes.entrySet()) {
+            final String namespace = entry.getKey();
+            for (final Map.Entry<String, String> attribute : entry.getValue().entrySet()) {
+                attrs.append(namespace);
+                attrs.append('/');
+                attrs.append(attribute.getKey());
+                attrs.append('=');
+                attrs.append(attribute.getValue());
+                attrs.append(',');
+            }
+        }
+        if (attrs.length() != 0) {
+            attrs.setLength(attrs.length() - 1);
+        }
+        srv_data.add(attrs.toString());
     
         srv_data.addAll(iface.getData(ctx));
     
