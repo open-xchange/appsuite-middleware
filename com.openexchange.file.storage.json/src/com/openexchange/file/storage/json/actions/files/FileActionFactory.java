@@ -49,8 +49,9 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -66,32 +67,43 @@ public class FileActionFactory implements AJAXActionServiceFactory {
 
     public static FileActionFactory INSTANCE = new FileActionFactory();
 
-    private static final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>(){{
-        put("new", new NewAction());
-        put("update", new UpdateAction());
-        put("delete", new DeleteAction());
-        put("detach", new DetachAction());
-        put("revert", new RevertAction());
-        put("lock", new LockAction());
-        put("unlock", new UnlockAction());
-        put("copy", new CopyAction());
+    private final Map<String, AJAXActionService> actions;
+    
+    /**
+     * Initializes a new {@link FileActionFactory}.
+     */
+    private FileActionFactory() {
+        super();
+        final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(20);
+        actions.put("new", new NewAction());
+        actions.put("update", new UpdateAction());
+        actions.put("delete", new DeleteAction());
+        actions.put("detach", new DetachAction());
+        actions.put("revert", new RevertAction());
+        actions.put("lock", new LockAction());
+        actions.put("unlock", new UnlockAction());
+        actions.put("copy", new CopyAction());
 
-        put("all", new AllAction());
-        put("updates", new UpdatesAction());
-        put("list", new ListAction());
-        put("versions", new VersionsAction());
-        put("get", new GetAction());
-        put("search", new SearchAction());
+        actions.put("all", new AllAction());
+        actions.put("updates", new UpdatesAction());
+        actions.put("list", new ListAction());
+        actions.put("versions", new VersionsAction());
+        actions.put("get", new GetAction());
+        actions.put("search", new SearchAction());
 
-        put("saveAs", new SaveAsAction());
+        actions.put("saveAs", new SaveAsAction());
 
-        put("document", new DocumentAction());
+        actions.put("document", new DocumentAction());
 
-    }};
+        actions.put("documentdelta", new DocumentDeltaAction());
+        actions.put("documentsig", new DocumentSigAction());
+        actions.put("documentpatch", new DocumentPatchAction());
+        this.actions = Collections.unmodifiableMap(actions);
+    }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        AJAXActionService handler = ACTIONS.get(action);
+    public AJAXActionService createActionService(final String action) throws OXException {
+        final AJAXActionService handler = actions.get(action);
         if(handler == null) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }

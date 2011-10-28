@@ -899,11 +899,11 @@ public class MIMEMessageFiller {
                 final String mailText;
                 if (isPlainText) {
                     /*
-                     * Convert html content to regular text
+                     * Convert HTML content to regular text (preserving links)
                      */
                     mailText =
                         performLineFolding(
-                            htmlService.html2text(htmlService.getConformHTML(content, charset), false),
+                            htmlService.html2text(htmlService.getConformHTML(content, charset), true),
                             usm.getAutoLinebreak());
                     // mailText =
                     // performLineFolding(getConverter().convertWithQuotes

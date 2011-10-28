@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -151,7 +152,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public String getFolderId() throws OXException {
-    	String parameter = data.getParameter(Param.FOLDER_ID.getName());
+    	final String parameter = data.getParameter(Param.FOLDER_ID.getName());
         if (parameter == null || parameter.equals("null") || parameter.equals("undefined")) {
             return FileStorageFileAccess.ALL_FOLDERS;
         }
@@ -458,6 +459,15 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
+    public InputStream getUploadStream() throws OXException {
+        try {
+            return data.getUploadStream();
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public InputStream getUploadedFileData() throws OXException {
         if(data.hasUploads()) {
             try {
@@ -465,7 +475,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 checkSize( uploadFile );
                 return new FileInputStream(uploadFile.getTmpFile());
             } catch (final FileNotFoundException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(  e.getMessage());
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
         return null;

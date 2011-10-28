@@ -47,37 +47,59 @@
  *
  */
 
-package com.openexchange.chat.db.groupware;
+package com.openexchange.file.storage.json.actions.files;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.ajax.container.TmpFileFileHolder;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Action;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.java.Streams;
+import com.openexchange.rdiff.ChecksumPair;
+import com.openexchange.rdiff.RdiffService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link DBChatUpdateTaskProviderService}
+ * {@link DocumentDeltaAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DBChatUpdateTaskProviderService implements UpdateTaskProviderService {
-
-    private final List<UpdateTaskV2> taskList;
-
-    public DBChatUpdateTaskProviderService(final UpdateTaskV2... tasks) {
-        super();
-        if (null == tasks || 0 == tasks.length) {
-            taskList = new ArrayList<UpdateTaskV2>(1);
-        } else {
-            taskList = new ArrayList<UpdateTaskV2>(tasks.length);
-            taskList.addAll(Arrays.asList(tasks));
-        }
-    }
+@Action(defaultFormat = "file")
+public class DocumentDeltaAction extends AbstractFileAction {
 
     @Override
-    public Collection<UpdateTaskV2> getUpdateTasks() {
-        return taskList;
+    public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {
+        request.require(AbstractFileAction.Param.ID);
+
+        final IDBasedFileAccess fileAccess = request.getFileAccess();
+
+        InputStream documentStream = null;
+        InputStream requestStream = null;
+        OutputStream deltaOut = null;
+        try {
+            final RdiffService rdiff = Services.getRdiffService();
+            documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
+            requestStream = request.getUploadStream();
+            // Read in signature
+            final List<ChecksumPair> signatures = rdiff.readSignatures(requestStream);
+            // Create delta against document and write it directly to HTTP output stream
+            final TmpFileFileHolder fileHolder = new TmpFileFileHolder();
+            deltaOut = new FileOutputStream(fileHolder.getTmpFile());
+            rdiff.createDeltas(signatures, documentStream, deltaOut);
+            deltaOut.flush();
+            // Return FileHolder result
+            return new AJAXRequestResult(fileHolder, "file");
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(documentStream, requestStream, deltaOut);
+        }
     }
 
 }

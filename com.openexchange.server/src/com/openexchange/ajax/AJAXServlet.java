@@ -95,6 +95,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
+import com.openexchange.java.Charsets;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -507,17 +508,16 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
                 baos.write(buf, 0, read);
             }
-            String charEnc = req.getCharacterEncoding();
-            if (charEnc == null) {
-                charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+            try {
+                String charEnc = req.getCharacterEncoding();
+                if (charEnc == null) {
+                    charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
+                }
+                return new String(baos.toByteArray(), charEnc);
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error("Unsupported encoding in request", e);
+                return new String(baos.toByteArray(), Charsets.ISO_8859_1);
             }
-            return new String(baos.toByteArray(), charEnc);
-        } catch (final UnsupportedEncodingException e) {
-            /*
-             * Should never occur
-             */
-            LOG.error("Unsupported encoding in request", e);
-            return STR_EMPTY;
         } finally {
             try {
                 inputStream.close();

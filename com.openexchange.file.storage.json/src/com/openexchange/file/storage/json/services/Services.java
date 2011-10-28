@@ -49,24 +49,42 @@
 
 package com.openexchange.file.storage.json.services;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link Services}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Services {
-    public static ServiceLookup LOOKUP = null;
+
+    private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service look-up instance.
+     * 
+     * @param serviceLookup The service look-up instance
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        LOOKUP_REF.set(serviceLookup);
+    }
 
     public static IDBasedFileAccessFactory getFileAccessFactory() {
-        return LOOKUP.getService(IDBasedFileAccessFactory.class);
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(IDBasedFileAccessFactory.class);
     }
 
     public static AttachmentBase getAttachmentBase() {
-        return LOOKUP.getService(AttachmentBase.class);
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(AttachmentBase.class);
+    }
+
+    public static RdiffService getRdiffService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(RdiffService.class);
     }
 }

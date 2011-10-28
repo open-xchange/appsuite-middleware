@@ -49,46 +49,62 @@
 
 package com.openexchange.ajax.container;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link IFileHolder}
- *
+ * {@link IFileHolder} - The container for binary content.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added {@link #close()} method
  */
-public interface IFileHolder {
+public interface IFileHolder extends Closeable {
+
+    /**
+     * Closes this file holder and releases any system resources associated with it. If the file holder is already closed then invoking this
+     * method has no effect.
+     * 
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    public void close() throws IOException;
 
     /**
      * Gets the content's input stream.
-     *
+     * <p>
+     * <b>Note</b>: The {@link #close()} method is supposed being invoked in a wrapping <code>try-finally</code> block.
+     * 
      * @return The input stream
+     * @throws OXException If input stream cannot be returned
      */
-    InputStream getStream();
+    InputStream getStream() throws OXException;
 
     /**
      * Gets the content's length.
-     *
+     * 
      * @return The content length
      */
     long getLength();
 
     /**
      * Gets the content type.
-     *
+     * 
      * @return The content type
      */
     String getContentType();
 
     /**
      * Gets the name
-     *
+     * 
      * @return The name
      */
     String getName();
 
     /**
      * Gets the (optional) disposition.
-     *
+     * 
      * @return The disposition or <code>null</code>
      */
     String getDisposition();
