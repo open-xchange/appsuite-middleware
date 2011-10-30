@@ -1,3 +1,7 @@
+* 2011-10-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20658: Dropping running Imap-Idle listener on password change
+
 * 2011-10-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 20683: Ensure to set token for JSON parts with disposition set to "attachment"

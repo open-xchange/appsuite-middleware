@@ -51,6 +51,7 @@ package com.openexchange.push.imapidle;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
@@ -66,6 +67,7 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.imap.IMAPFolder;
@@ -80,7 +82,7 @@ public final class ImapIdlePushListener implements PushListener {
      * @author choeger
      *
      */
-    public enum PushMode {
+    public static enum PushMode {
         NEWMAIL("newmail"),
         ALWAYS("always");
 
@@ -146,18 +148,18 @@ public final class ImapIdlePushListener implements PushListener {
     }
 
     /**
-     * Sets static folder fullname.
+     * Sets static folder full name.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      */
     public static void setFolder(final String folder) {
         ImapIdlePushListener.folder = folder;
     }
 
     /**
-     * Gets static folder fullname.
+     * Gets static folder full name.
      *
-     * @return The folder fullname
+     * @return The folder full name
      */
     public static String getFolder() {
         return folder;
@@ -166,12 +168,22 @@ public final class ImapIdlePushListener implements PushListener {
     /**
      * Initializes a new {@link ImapIdlePushListener}.
      *
-     * @param session The needed session to obtain and connect mail access instance
-     * @param startTimerTask <code>true</code> to start a timer task for this listener
+     * @param session The user session
      * @return A new {@link ImapIdlePushListener}.
      */
     public static ImapIdlePushListener newInstance(final Session session) {
-        return new ImapIdlePushListener(session);
+        return newInstance(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Initializes a new {@link ImapIdlePushListener}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return A new {@link ImapIdlePushListener}.
+     */
+    public static ImapIdlePushListener newInstance(final int userId, final int contextId) {
+        return new ImapIdlePushListener(userId, contextId);
     }
 
     /*
@@ -180,7 +192,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     private final AtomicBoolean running;
 
-    private final Session session;
+    private final AtomicReference<Session> sessionRef;
 
     private final int userId;
 
@@ -188,24 +200,19 @@ public final class ImapIdlePushListener implements PushListener {
 
     private volatile Future<Object> imapIdleFuture;
 
-    private MailAccess<?, ?> mailAccess;
-
     private MailService mailService;
 
     private boolean shutdown;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
-     *
-     * @param session The needed session to obtain and connect mail access instance
      */
-    private ImapIdlePushListener(final Session session) {
+    private ImapIdlePushListener(final int userId, final int contextId) {
         super();
         running = new AtomicBoolean();
-        this.session = session;
-        userId = session.getUserId();
-        contextId = session.getContextId();
-        mailAccess = null;
+        sessionRef = new AtomicReference<Session>();
+        this.userId = userId;
+        this.contextId = contextId;
         mailService = null;
         errordelay = 1000;
         shutdown = false;
@@ -227,8 +234,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(128).append("session-ID=").append(session.getSessionID());
-        sb.append(", user=").append(userId).append(", context=").append(contextId);
+        final StringBuilder sb = new StringBuilder(128).append("user=").append(userId).append(", context=").append(contextId);
         sb.append(", imapIdleFuture=").append(imapIdleFuture);
         return sb.toString();
     }
@@ -239,6 +245,14 @@ public final class ImapIdlePushListener implements PushListener {
      * @return The session
      */
     public Session getSession() {
+        Session session = sessionRef.get();
+        if (null == session) {
+            final SessiondService service = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            session = service.getAnyActiveSessionForUser(userId, contextId);
+            if (!sessionRef.compareAndSet(null, session)) {
+                session = sessionRef.get();
+            }
+        }
         return session;
     }
 
@@ -255,7 +269,7 @@ public final class ImapIdlePushListener implements PushListener {
             /*
              * Get access
              */
-            final MailAccess<?, ?> access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+            final MailAccess<?, ?> access = mailService.getMailAccess(getSession(), MailAccount.DEFAULT_ID);
             /*
              * Check protocol
              */
@@ -293,7 +307,7 @@ public final class ImapIdlePushListener implements PushListener {
      */
     public void close() {
         if (DEBUG_ENABLED) {
-            LOG.info("stopping IDLE for Context: " + session.getContextId() + ", Login: " + session.getLoginName());
+            LOG.info("stopping IDLE for Context: " + contextId + ", Login: " + getSession().getLoginName());
         }
         shutdown = true;
         if (null != imapIdleFuture) {
@@ -321,7 +335,9 @@ public final class ImapIdlePushListener implements PushListener {
             }
             return true;
         }
+        MailAccess<?, ?> mailAccess = null;
         try {
+            final Session session = getSession();
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
             mailAccess.connect(false);
             final IMAPFolderStorage istore;
@@ -417,6 +433,7 @@ public final class ImapIdlePushListener implements PushListener {
                 LOG.info("Missing (default) mail account for user " + userId + ". Stopping obsolete IMAP-IDLE listener.");
                 return false;
             }
+            sessionRef.set(null);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
@@ -429,6 +446,20 @@ public final class ImapIdlePushListener implements PushListener {
                 }
             }
         } catch (final MessagingException e) {
+            sessionRef.set(null);
+            LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
+            if (DEBUG_ENABLED) {
+                LOG.error(e);
+            }
+            try {
+                Thread.sleep(errordelay);
+            } catch (final InterruptedException e1) {
+                if (DEBUG_ENABLED) {
+                    LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
+                }
+            }
+        } catch (final RuntimeException e) {
+            sessionRef.set(null);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
@@ -452,7 +483,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
+        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), getSession());
     }
 
 }
