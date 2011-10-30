@@ -1,6 +1,7 @@
 * 2011-10-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 20658: Dropping running Imap-Idle listener on password change
+ - Fix for bug 20657: Checking for both "imapflags" and "imap4flags" capability to support user flags in SIEVE rules
 
 * 2011-10-27 - thorben.betten@open-xchange.com
 
