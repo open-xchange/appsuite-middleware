@@ -93,7 +93,7 @@ public interface PreviewDocument {
     /**
      * Gets the preview image (thumbnail).
      * 
-     * @return The OutputStream for the image or <code>null</code> if the image is not available.
+     * @return The input stream for the image or <code>null</code> if the image is not available.
      */
     InputStream getThumbnail();
 
