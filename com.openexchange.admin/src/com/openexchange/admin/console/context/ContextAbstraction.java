@@ -256,7 +256,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 public ArrayList<String> getData(final Context ctx) {
                     return getHumanReableDataOfAllExtensions(ctx, parser);
                 }
-            }));
+            }, false));
         }
     
         final ArrayList<String> humanReadableColumnsOfAllExtensions = getHumanReadableColumnsOfAllExtensions(parser);
@@ -267,7 +267,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
         alignment.add("l");
         alignment.add("r");
         alignment.add("r");
-        alignment.add("l");
         alignment.add("l");
         alignment.add("l");
         for (int i = 0; i < humanReadableColumnsOfAllExtensions.size(); i++) {
@@ -282,7 +281,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columnnames.add("qused");
         columnnames.add("name");
         columnnames.add("lmappings");
-        columnnames.add("attributes");
         columnnames.addAll(humanReadableColumnsOfAllExtensions);
     
         doOutput(alignment.toArray(new String[alignment.size()]), columnnames.toArray(new String[columnnames.size()]), data);
@@ -309,7 +307,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                     return getCSVDataOfAllExtensions(ctx_tmp, parser);
                 }
 
-            }));
+            }, true));
         }
     
         doCSVOutput(columns, data);
@@ -451,7 +449,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         return new ArrayList<String>();
     }
 
-    private ArrayList<String> makeData(final Context ctx, final ClosureInterface iface) {
+    private ArrayList<String> makeData(final Context ctx, final ClosureInterface iface, final boolean csv) {
         final ArrayList<String> srv_data = new ArrayList<String>();
         srv_data.add(String.valueOf(ctx.getId()));
     
@@ -506,23 +504,25 @@ public abstract class ContextAbstraction extends UserAbstraction {
             srv_data.add(null);
         }
 
-        final StringBuilder attrs = new StringBuilder();
-        final Map<String, Map<String, String>> attributes = ctx.getUserAttributes();
-        for (final Map.Entry<String, Map<String, String>> entry : attributes.entrySet()) {
-            final String namespace = entry.getKey();
-            for (final Map.Entry<String, String> attribute : entry.getValue().entrySet()) {
-                attrs.append(namespace);
-                attrs.append('/');
-                attrs.append(attribute.getKey());
-                attrs.append('=');
-                attrs.append(attribute.getValue());
-                attrs.append(',');
+        if (csv) {
+            final StringBuilder attrs = new StringBuilder();
+            final Map<String, Map<String, String>> attributes = ctx.getUserAttributes();
+            for (final Map.Entry<String, Map<String, String>> entry : attributes.entrySet()) {
+                final String namespace = entry.getKey();
+                for (final Map.Entry<String, String> attribute : entry.getValue().entrySet()) {
+                    attrs.append(namespace);
+                    attrs.append('/');
+                    attrs.append(attribute.getKey());
+                    attrs.append('=');
+                    attrs.append(attribute.getValue());
+                    attrs.append(',');
+                }
             }
+            if (attrs.length() != 0) {
+                attrs.setLength(attrs.length() - 1);
+            }
+            srv_data.add(attrs.toString());
         }
-        if (attrs.length() != 0) {
-            attrs.setLength(attrs.length() - 1);
-        }
-        srv_data.add(attrs.toString());
     
         srv_data.addAll(iface.getData(ctx));
     
