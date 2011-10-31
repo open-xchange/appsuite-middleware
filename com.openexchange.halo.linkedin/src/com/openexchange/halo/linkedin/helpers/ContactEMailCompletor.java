@@ -1,3 +1,10 @@
+package com.openexchange.halo.linkedin.helpers;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactInterface;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.ldap.User;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -46,35 +53,48 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.halo.linkedin.osgi;
-
-import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.halo.HaloContactDataSource;
-import com.openexchange.halo.linkedin.LinkedinInboxDataSource;
-import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
-import com.openexchange.halo.linkedin.LinkedinUpdatesDataSource;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.linkedin.LinkedInService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
-public class LinkedinHaloActivator extends HousekeepingActivator {
+public class ContactEMailCompletor {
 
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{
-			LinkedInService.class, 
-			OAuthService.class, 
-			ContactInterfaceDiscoveryService.class, 
-			UserService.class};
+	private ServerSession session;
+	private ContactInterfaceDiscoveryService cids;
+	private UserService userService;
+
+	public ContactEMailCompletor(ServerSession session, ContactInterfaceDiscoveryService cids, UserService userService) {
+		this.session = session;
+		this.cids = cids;
+		this.userService = userService;
 	}
 
-	@Override
-	protected void startBundle() throws Exception {
-		registerService(HaloContactDataSource.class, new LinkedinProfileDataSource(this));
-		registerService(HaloContactDataSource.class, new LinkedinInboxDataSource(this));
-		registerService(HaloContactDataSource.class, new LinkedinUpdatesDataSource(this));
+	protected void completeFromContactData(Contact contact) throws OXException {
+		int fid = contact.getParentFolderID();
+		ContactInterface contactInterface = cids.newContactInterface(fid, session);
+		Contact fullContact = contactInterface.getObjectById(contact.getObjectID(), fid);
+		
+		if(fullContact.containsEmail1())
+			contact.setEmail1(fullContact.getEmail1());
+		if(fullContact.containsEmail2())
+			contact.setEmail2(fullContact.getEmail2());
+		if(fullContact.containsEmail3())
+			contact.setEmail3(fullContact.getEmail3());
 	}
 
+	protected void completeFromUserData(Contact contact) throws OXException {
+		User user = userService.getUser(contact.getInternalUserId(), session.getContext());
+		contact.setEmail1(user.getMail());
+	}
+
+	public void complete(Contact contact) throws OXException {
+		if(contact.containsInternalUserId()){
+			completeFromUserData(contact);
+			return;
+		}
+		if(contact.containsParentFolderID() && contact.containsObjectID()){
+			completeFromContactData(contact);
+			return;
+		}
+	}
 
 }

@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.contact.helpers;
 
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.ContactFields;
@@ -330,6 +332,21 @@ public enum ContactField{
 		}
 		return null;
 	}
+	
+	public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
+		String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
+		for(final ContactField field: values()){
+			List<String> haystack = Arrays.asList(new String[]{
+				field.getAjaxName().replaceAll("[_\\. ]", "").toLowerCase(),
+				field.getReadableName().replaceAll("[_\\. ]", "").toLowerCase(),
+				field.getDBName().replaceAll("[_\\. ]", "").toLowerCase()
+			});
+			if(haystack.contains(needle))
+				return field;
+		}
+		return null;
+	}
+
 
 
 
