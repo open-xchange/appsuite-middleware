@@ -49,6 +49,7 @@
 
 package com.openexchange.preview.jodconverter.internal;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.preview.PreviewDocument;
@@ -91,6 +92,11 @@ public class JODCPreviewDocument implements PreviewDocument {
     public void setMetaData(final Map<String, String> metaData) {
         this.metaData.clear();
         this.metaData.putAll(metaData);
+    }
+
+    @Override
+    public InputStream getThumbnail() {
+        return null;
     }
 
 }
