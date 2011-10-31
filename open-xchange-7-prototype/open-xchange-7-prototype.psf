@@ -10,6 +10,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.calendar.printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.carddav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.charset"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.db"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade.context"/>
@@ -71,6 +74,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.yahoo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pop3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview.thirdwing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.proxy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.proxy.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish"/>
@@ -80,6 +84,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push.udp"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.rdiff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.resource.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.scripting.rhino"/>
