@@ -71,6 +71,7 @@ import com.openexchange.ajax.requesthandler.converters.preview.FilteredHTMLPrevi
 import com.openexchange.ajax.requesthandler.converters.preview.HTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.MailFilteredHTMLPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewResultConverter;
+import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
@@ -122,6 +123,7 @@ public class DispatcherActivator extends HousekeepingActivator {
             defaultConverter.addConverter(textPreviewResultConverter);
             defaultConverter.addConverter(filteredHTMLPreviewResultConverter);
             defaultConverter.addConverter(new DownloadPreviewResultConverter());
+            defaultConverter.addConverter(new PreviewImageResultConverter());
             /*-
              * TODO: Mail converters
              * 

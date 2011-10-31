@@ -49,21 +49,23 @@
 
 package com.openexchange.preview.thirdwing;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.preview.PreviewDocument;
 
-
 /**
  * {@link ThirdwingPreviewDocument}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ThirdwingPreviewDocument implements PreviewDocument {
-    
+
     private final Map<String, String> metaData;
-    
+
     private final String content;
+
+    private InputStream thumbnail;
 
     /**
      * Initializes a new {@link ThirdwingPreviewDocument}.
@@ -71,11 +73,12 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
      * @param metaData The meta data
      * @param content The textual content
      */
-    public ThirdwingPreviewDocument(final Map<String, String> metaData, final String content) {
+    public ThirdwingPreviewDocument(final Map<String, String> metaData, final String content, InputStream thumbnail) {
         super();
         this.metaData = new HashMap<String, String>();        
         this.metaData.putAll(metaData);
         this.content = content;
+        this.thumbnail = thumbnail;
     }
 
     @Override
@@ -92,7 +95,12 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
     public String getContent() {
         return content;
     }
-    
+
+    @Override
+    public InputStream getThumbnail() {
+        return thumbnail;
+    }
+
     @Override
     public String toString() {
         return content == null ? super.toString() : content;

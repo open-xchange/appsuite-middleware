@@ -49,6 +49,7 @@
 
 package com.openexchange.preview;
 
+import java.io.InputStream;
 import java.util.Map;
 
 /**
@@ -88,5 +89,12 @@ public interface PreviewDocument {
      * @return The content (or <code>null</code> if output format does not imply a content; e.g. {@link PreviewOutput#METADATA})
      */
     String getContent();
+    
+    /**
+     * Gets the preview image (thumbnail).
+     * 
+     * @return The input stream for the image or <code>null</code> if the image is not available.
+     */
+    InputStream getThumbnail();
 
 }
