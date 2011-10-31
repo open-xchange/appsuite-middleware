@@ -247,6 +247,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 			}
 			
 		} catch (JSONException e) {
+			LOG.error(e);
 			throw new OXException(1).setPrefix("OAUTH-LI").setLogMessage("Could not parse JSON");
 		}
 		
