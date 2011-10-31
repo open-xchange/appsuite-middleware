@@ -108,10 +108,14 @@
                 </copy>
                 <foreach list="${requiredClasspath}" target="add3rdPartyLibToBundle" param="lib" inheritAll="true"/>
                 <!-- Eclipse puts "." as path into MANIFEST.MF. We need to replace this with Bundle-SymbolicName.jar -->
-                <replace file="${jarsDir}/${Bundle-SymbolicName}/META-INF/MANIFEST.MF">
-                	<!-- TODO write a regex that is able to detect and replace the . path in every possible row of the Bundle-Classpath -->
-                    <replacefilter token="Bundle-ClassPath: .," value="Bundle-ClassPath: ${Bundle-SymbolicName}.jar,"/>
-                </replace>
+            	<replaceregexp file="${jarsDir}/${Bundle-SymbolicName}/META-INF/MANIFEST.MF" flags="gm">
+            		<regexp pattern="(Bundle-ClassPath: )(.)(,)"/>
+        			<substitution expression="\1${Bundle-SymbolicName}.jar\3"/>
+        		</replaceregexp>
+                <replaceregexp file="${jarsDir}/${Bundle-SymbolicName}/META-INF/MANIFEST.MF" flags="gm">
+                    <regexp pattern="(Bundle-ClassPath:[ \w/\.,\n-]*^ )(\.)(,?$)"/>
+                    <substitution expression="\1${Bundle-SymbolicName}.jar\3"/>
+                </replaceregexp>
             </then>
             <else>
                 <jar jarfile="${jarsDir}/${Bundle-SymbolicName}.jar" manifest="META-INF/MANIFEST.MF">

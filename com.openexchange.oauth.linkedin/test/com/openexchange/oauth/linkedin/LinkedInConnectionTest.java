@@ -91,8 +91,8 @@ public class LinkedInConnectionTest extends TestCase {
 
     private LinkedInServiceImpl linkedIn;
 
-    private String apiKey = "HANYG4YSMun5b1lhv-aIEUtnIvNaHK2Bemjv7VvYI_frJpllhVY9HH8ZVOrII7UV";
-    private String apiSecret = "t2-AWfC0YqMwUjt3v5lxw9VJlDE3BZ-88k7-834Rq-QH-tq_xjqdLUHQz_glLaEb";  
+    private String apiKey = "";
+    private String apiSecret = "";  
     private String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
     private String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
     
@@ -109,38 +109,40 @@ public class LinkedInConnectionTest extends TestCase {
 
     }
 
-    /*public void testAccountCreation(){
-        // This is basically scribes example
-        org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
-
-        System.out.println("=== LinkedIn's OAuth Workflow ===");
-        System.out.println();
-
-        // Obtain the Request Token
-        System.out.println("Fetching the Request Token...");
-        Token requestToken = service.getRequestToken();
-        System.out.println("Got the Request Token!");
-        System.out.println();
-
-        DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
-        oAuthToken.setToken(requestToken.getToken());
-        oAuthToken.setSecret(requestToken.getSecret());
-
-        System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
-        System.out.println("And paste the verifier here");
-        System.out.print(">>");
-
-        Scanner in = new Scanner(System.in);
-        Verifier verifier = new Verifier(in.nextLine());
-        System.out.println();
-
-        // Trade the Request Token and Verifier for the Access Token
-        System.out.println("Trading the Request Token for an Access Token...");
-        Token accessToken = service.getAccessToken(requestToken, verifier);
-        System.out.println("Got the Access Token!");
-        System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
-        System.out.println();
-    } */
+//    public void testAccountCreation(){
+//    	//8cede13f-0881-4e05-99aa-81dfc0f1aa08(Token), 16fb16ca-7fff-4de0-9663-5dc0185e8488(Secret)
+//    	
+//        // This is basically scribes example
+//        org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
+//
+//        System.out.println("=== LinkedIn's OAuth Workflow ===");
+//        System.out.println();
+//
+//        // Obtain the Request Token
+//        System.out.println("Fetching the Request Token...");
+//        Token requestToken = service.getRequestToken();
+//        System.out.println("Got the Request Token!");
+//        System.out.println();
+//
+//        DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
+//        oAuthToken.setToken(requestToken.getToken());
+//        oAuthToken.setSecret(requestToken.getSecret());
+//
+//        System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
+//        System.out.println("And paste the verifier here");
+//        System.out.print(">>");
+//
+//        Scanner in = new Scanner(System.in);
+//        Verifier verifier = new Verifier(in.nextLine());
+//        System.out.println();
+//
+//        // Trade the Request Token and Verifier for the Access Token
+//        System.out.println("Trading the Request Token for an Access Token...");
+//        Token accessToken = service.getAccessToken(requestToken, verifier);
+//        System.out.println("Got the Access Token!");
+//        System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
+//        System.out.println();
+//    }
 //
 //    public void testXMLParsing(){
 //
@@ -207,7 +209,7 @@ public class LinkedInConnectionTest extends TestCase {
 	
 	public void testGetRelationToViewer() throws Exception {
 		JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, "password",1,1,1);
-		assertEquals("Should know Martin", 1, relations.getJSONObject("relationToViewer").getInt("distance"));
+		assertTrue("Should know Martin", relations.getJSONObject("relationToViewer").getInt("distance") > 0);
 	}
 	
 	public void testNetworkUpdates() throws Exception {
