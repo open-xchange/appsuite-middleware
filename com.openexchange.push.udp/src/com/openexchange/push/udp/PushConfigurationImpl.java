@@ -114,6 +114,11 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
             LOG.debug("PushHandler property: com.openexchange.push.udp.pushEnabled=" + isPushEnabled);
         }
 
+        registerPort = parseProperty(conf, "com.openexchange.push.udp.registerPort", registerPort);
+        if (DEBUG) {
+            LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort=" + registerPort);
+        }
+
         String[] remoteAddressAndPort = null;
         remoteAddressAndPort = parseProperty(conf, "com.openexchange.push.udp.remoteHost", remoteAddressAndPort);
         if (DEBUG) {
@@ -127,6 +132,7 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
                 try {
                     if (addressAndPort.length == 1) {
                         remoteHostObject.setHost(InetAddress.getByName(addressAndPort[0]));
+                        remoteHostObject.setPort(registerPort);
                     } else if (addressAndPort.length >= 2) {
                         remoteHostObject.setHost(InetAddress.getByName(addressAndPort[0]));
                         remoteHostObject.setPort(Integer.parseInt(addressAndPort[1]));
@@ -147,11 +153,6 @@ public class PushConfigurationImpl extends AbstractConfigWrapper implements Push
         outputQueueDelay = parseProperty(conf, "com.openexchange.push.udp.outputQueueDelay", outputQueueDelay);
         if (DEBUG) {
             LOG.debug("PushHandler property: com.openexchange.push.udp.outputQueueDelay=" + outputQueueDelay);
-        }
-
-        registerPort = parseProperty(conf, "com.openexchange.push.udp.registerPort", registerPort);
-        if (DEBUG) {
-            LOG.debug("PushHandler property: com.openexchange.push.udp.registerPort=" + registerPort);
         }
 
         isRegisterDistributionEnabled = parseProperty(

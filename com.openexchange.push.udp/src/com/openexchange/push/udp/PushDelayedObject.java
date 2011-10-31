@@ -60,7 +60,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PushDelayedObject implements Delayed {
 
-    private final long delay;
+    private long delay;
 
     private final AbstractPushObject abstractPushObject;
 
@@ -83,13 +83,17 @@ public class PushDelayedObject implements Delayed {
         return (creationTime + delay) - System.currentTimeMillis();
     }
 
+    public void setDelay(final long delay) {
+        this.delay = delay;
+    }
+
     public AbstractPushObject getPushObject() {
         return abstractPushObject;
     }
 
     @Override
     public int compareTo(final Delayed delayed) {
-        return 0;
+        return (int) (getDelay(TimeUnit.MILLISECONDS) - delayed.getDelay(TimeUnit.MILLISECONDS));
     }
 
     public void updateTime() {

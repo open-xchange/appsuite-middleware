@@ -104,7 +104,7 @@ public class PushOutputQueue implements Runnable {
      * @param pushObject The push object to deliver
      * @throws OXException If an event exception occurs
      */
-    public static void add(final PushObject pushObject) throws OXException {
+    public static void add(final PushObject pushObject, final boolean noDelay) throws OXException {
         if (DEBUG) {
             LOG.debug("add PushObject: " + pushObject);
         }
@@ -120,7 +120,13 @@ public class PushOutputQueue implements Runnable {
         final PushDelayedObject pushDelayedObject;
         if (existingPushObjects.containsKey(pushObject)) {
             pushDelayedObject = existingPushObjects.get(pushObject);
-            pushDelayedObject.updateTime();
+            if (noDelay) {
+                pushDelayedObject.setDelay(0);
+            } else {
+                pushDelayedObject.updateTime();
+            }
+        } else if (noDelay) {
+            pushDelayedObject = new PushDelayedObject(0, pushObject);
         } else {
             pushDelayedObject = new PushDelayedObject(delay, pushObject);
         }
@@ -202,7 +208,7 @@ public class PushOutputQueue implements Runnable {
                 if (RegisterHandler.isRegistered(user, contextId)) {
                     final RegisterObject registerObj = RegisterHandler.getRegisterObject(user, contextId);
                     try {
-                        channels.makeAndSendPackage(bytes, registerObj.getHostAddress(), registerObj.getPort(), INTERNAL);
+                        channels.makeAndSendPackage(bytes, registerObj.getHostAddress(), registerObj.getPort(), EXTERNAL);
                     } catch (final Exception exc) {
                         LOG.error("createPushPackage", exc);
                     }
@@ -275,7 +281,7 @@ public class PushOutputQueue implements Runnable {
                     final byte b[] = sb.toString().getBytes();
 
                     if (System.currentTimeMillis() <= (remoteHostObject.getTimer().getTime() + remoteHostTimeOut)) {
-                        channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), EXTERNAL);
+                        channels.makeAndSendPackage(b, remoteHostObject.getHost(), remoteHostObject.getPort(), INTERNAL);
                     } else {
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("remote host object is timed out");
