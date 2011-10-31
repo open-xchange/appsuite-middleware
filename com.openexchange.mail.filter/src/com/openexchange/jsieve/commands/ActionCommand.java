@@ -49,6 +49,7 @@
 package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -72,14 +73,14 @@ public class ActionCommand extends ControlOrActionCommand {
      */
 
     public enum Commands {
-        KEEP("keep", 0, new Hashtable<String, Integer>(), null, "keep"),
-        DISCARD("discard", 0, new Hashtable<String, Integer>(), null, "discard"),
-        REDIRECT("redirect", 1, new Hashtable<String, Integer>(), null, "redirect"),
-        FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "fileinto", "move"),
-        REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", "reject"),
-        STOP("stop", 0, new Hashtable<String, Integer>(), null , "stop"),
-        VACATION("vacation", 1, vacationtags(), "vacation", "vacation"),
-        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "imapflags", "addflags");
+        KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", Collections.<String> emptyList()),
+        DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", Collections.<String> emptyList()),
+        REDIRECT("redirect", 1, new Hashtable<String, Integer>(), "redirect", Collections.<String> emptyList()),
+        FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
+        REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
+        STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
+        VACATION("vacation", 1, vacationtags(), "vacation", Collections.singletonList("vacation")),
+        ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags"));
 
         private static Hashtable<String, Integer> vacationtags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
@@ -88,9 +89,9 @@ public class ActionCommand extends ControlOrActionCommand {
             // The tags :handle and :mime are intentionally left out because
             // there's no way to deal with that
             // later in the frontend
-            retval.put(":days", 1);
-            retval.put(":addresses", 1);
-            retval.put(":subject", 1);
+            retval.put(":days", Integer.valueOf(1));
+            retval.put(":addresses", Integer.valueOf(1));
+            retval.put(":subject", Integer.valueOf(1));
             return retval;
         }
 
@@ -112,18 +113,18 @@ public class ActionCommand extends ControlOrActionCommand {
         /**
          * Defines what must be included for this command to run
          */
-        private final String required;
+        private final List<String> required;
 
         /**
          * Stores the name of the parameter for the json object
          */
         private final String jsonname;
 
-        Commands(final String commandname, final int minNumberOfArguments, final Hashtable<String, Integer> tagargs, final String required, final String jsonname) {
+        Commands(final String commandname, final int minNumberOfArguments, final Hashtable<String, Integer> tagargs, final String jsonname, final List<String> required) {
             this.commandname = commandname;
             this.minNumberOfArguments = minNumberOfArguments;
             this.tagargs = tagargs;
-            this.required = required;
+            this.required = null == required || required.isEmpty() ? Collections.<String> emptyList() : Collections.unmodifiableList(required);
             this.jsonname = jsonname;
         }
 
@@ -142,7 +143,7 @@ public class ActionCommand extends ControlOrActionCommand {
             return jsonname;
         }
 
-        public final String getRequired() {
+        public final List<String> getRequired() {
             return required;
         }
 
@@ -286,11 +287,6 @@ public class ActionCommand extends ControlOrActionCommand {
 
     @Override
     public HashSet<String> getRequired() {
-        final HashSet<String> retval = new HashSet<String>();
-        final String required = this.command.getRequired();
-        if (null != required) {
-            retval.add(required);
-        }
-        return retval;
+        return new HashSet<String>(this.command.getRequired());
     }
 }

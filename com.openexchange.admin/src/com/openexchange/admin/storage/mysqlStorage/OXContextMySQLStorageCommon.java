@@ -211,7 +211,7 @@ public class OXContextMySQLStorageCommon {
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
      * @throws StorageException 
      */
-    private String[] parseDynamicAttribute(final String name) throws StorageException {
+    public static String[] parseDynamicAttribute(final String name) throws StorageException {
         final int pos = name.indexOf('/');
         if(pos == -1) {
             throw new StorageException("Could not parse dynamic attribute name: "+name);
@@ -222,7 +222,7 @@ public class OXContextMySQLStorageCommon {
         return parsed;
     }
 
-    private boolean isDynamicAttribute(final String name) {
+    public static boolean isDynamicAttribute(final String name) {
         return name.indexOf('/') >= 0;
     }
 
@@ -268,7 +268,7 @@ public class OXContextMySQLStorageCommon {
                 output = output.addFilter((Filter<Context, Context>) f);
             }
         }
-        output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize));
+        output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize)).addFilter(new DynamicAttributesLoader(cache));
         SortedMap<Integer, Context> retval = new TreeMap<Integer, Context>();
         try {
             while (output.hasData()) {
