@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,46 @@
  *
  */
 
-package com.openexchange.mail.json.osgi;
+package com.openexchange.mail.json.converters;
 
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.mail.json.MailActionFactory;
-import com.openexchange.mail.json.converters.MailConverter;
-import com.openexchange.mail.json.converters.MailJSONConverter;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MailJSONActivator}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link MailJSONConverter}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public final class MailJSONActivator extends AJAXModuleActivator {
+public class MailJSONConverter implements ResultConverter {
 
-    /**
-     * Initializes a new {@link MailJSONActivator}.
-     */
-    public MailJSONActivator() {
-        super();
+    private MailConverter mailConverter = new MailConverter();
+
+    @Override
+    public String getInputFormat() {
+        return "mail";
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    public String getOutputFormat() {
+        return "json";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
-        registerService(ResultConverter.class, new MailConverter());
-        registerService(ResultConverter.class, new MailJSONConverter());
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        mailConverter.convert(request, result, session, converter);
+        Response resultObject = (Response) result.getResultObject();
+        Object data = resultObject.getData();
+        result.setResultObject(data, "json");
     }
 
 }
