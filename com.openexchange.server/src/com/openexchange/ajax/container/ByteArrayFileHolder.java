@@ -77,6 +77,11 @@ public final class ByteArrayFileHolder implements IFileHolder {
     }
 
     @Override
+    public void close() {
+        // Nope
+    }
+
+    @Override
     public InputStream getStream() {
         return new UnsynchronizedByteArrayInputStream(bytes);
     }

@@ -61,10 +61,12 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AJAXRequestResult} - Simple container for a {@link JSONValue result}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AJAXRequestResult {
+
+    private static final String JSON = "json".intern();
 
     public static final long SECOND_IN_MILLIS = 1000;
 
@@ -120,7 +122,7 @@ public final class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
-     *
+     * 
      * @see #EMPTY_REQUEST_RESULT
      */
     public AJAXRequestResult() {
@@ -129,7 +131,7 @@ public final class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} with time stamp set to <code>null</code>.
-     *
+     * 
      * @param resultObject The result object
      */
     public AJAXRequestResult(final Object resultObject) {
@@ -138,7 +140,7 @@ public final class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult}.
-     *
+     * 
      * @param resultObject The result object
      * @param timestamp The server's last-modified time stamp (corresponding to either a GET, ALL, or LIST request)
      */
@@ -148,7 +150,7 @@ public final class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult} with time stamp set to <code>null</code>.
-     *
+     * 
      * @param resultObject The result object
      * @param format The format of the result object
      */
@@ -158,7 +160,7 @@ public final class AJAXRequestResult {
 
     /**
      * Initializes a new {@link AJAXRequestResult}.
-     *
+     * 
      * @param resultObject The result object
      * @param timestamp The server's last-modified time stamp (corresponding to either a GET, ALL, or LIST request)
      * @param format The format of the result object
@@ -169,7 +171,7 @@ public final class AJAXRequestResult {
         this.resultObject = resultObject;
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         if (format == null) {
-            this.format = "json";
+            this.format = JSON;
         } else {
             this.format = format;
         }
@@ -179,7 +181,7 @@ public final class AJAXRequestResult {
 
     /**
      * Gets the result type
-     *
+     * 
      * @return The result type
      */
     public ResultType getType() {
@@ -188,7 +190,7 @@ public final class AJAXRequestResult {
 
     /**
      * Sets the result type
-     *
+     * 
      * @param resultType The result type to set
      */
     public void setType(final ResultType resultType) {
@@ -199,7 +201,7 @@ public final class AJAXRequestResult {
      * Gets the expires time.
      * <p>
      * Have a notion of a time-to-live value.
-     *
+     * 
      * @return The expires time or <code>-1</code> for no expiry
      */
     public long getExpires() {
@@ -208,7 +210,7 @@ public final class AJAXRequestResult {
 
     /**
      * Sets the expires time
-     *
+     * 
      * @param expires The expires time or <code>-1</code> for no expiry
      */
     public void setExpires(final long expires) {
@@ -217,7 +219,7 @@ public final class AJAXRequestResult {
 
     /**
      * Gets the deferred flag
-     *
+     * 
      * @return The deferred flag
      */
     public boolean isDeferred() {
@@ -226,7 +228,7 @@ public final class AJAXRequestResult {
 
     /**
      * Sets the deferred flag
-     *
+     * 
      * @param deferred The deferred flag to set
      */
     public void setDeferred(final boolean deferred) {
@@ -270,7 +272,7 @@ public final class AJAXRequestResult {
 
     /**
      * Gets the result object.
-     *
+     * 
      * @return The result object
      */
     public Object getResultObject() {
@@ -279,7 +281,7 @@ public final class AJAXRequestResult {
 
     /**
      * Sets the resultObject
-     *
+     * 
      * @param resultObject The resultObject to set
      */
     public void setResultObject(final Object resultObject) {
@@ -288,7 +290,7 @@ public final class AJAXRequestResult {
 
     /**
      * Gets the result's format.
-     *
+     * 
      * @return The format
      */
     public String getFormat() {
@@ -297,7 +299,7 @@ public final class AJAXRequestResult {
 
     /**
      * Sets this result's format.
-     *
+     * 
      * @param format The format
      */
     public void setFormat(final String format) {
@@ -306,20 +308,25 @@ public final class AJAXRequestResult {
 
     /**
      * Gets the time stamp.
-     *
+     * 
      * @return The time stamp
      */
     public Date getTimestamp() {
         return null == timestamp ? null : new Date(timestamp.getTime());
     }
 
+    /**
+     * sets the time stamp.
+     * 
+     * @param timestamp The time stamp.
+     */
     public void setTimestamp(final Date timestamp) {
         this.timestamp = timestamp;
     }
 
     /**
      * Gets the warnings.
-     *
+     * 
      * @return The warnings
      */
     public Collection<OXException> getWarnings() {
@@ -328,7 +335,7 @@ public final class AJAXRequestResult {
 
     /**
      * Sets the warnings.
-     *
+     * 
      * @param warnings The warnings to set
      * @return This request result with specified warnings added
      */
@@ -360,7 +367,7 @@ public final class AJAXRequestResult {
 
     /**
      * Gets the headers
-     *
+     * 
      * @return The headers
      */
     public Map<String, String> getHeaders() {
@@ -373,6 +380,12 @@ public final class AJAXRequestResult {
             timestamp).append(" warnings=").append(null == warnings ? "<none>" : warnings.toString()).toString();
     }
 
+    /**
+     * Sets the result object and its format.
+     * 
+     * @param object The result format
+     * @param format The format
+     */
     public void setResultObject(final Object object, final String format) {
         setResultObject(object);
         setFormat(format);

@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.json.osgi;
 
-import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -63,6 +62,7 @@ import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.rdiff.RdiffService;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -71,30 +71,32 @@ import com.openexchange.i18n.I18nService;
  */
 public class FileStorageJSONActivator extends AJAXModuleActivator {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class));
-
-    private static final Class<?>[] NEEDED_SERVICES =
-        new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, AttachmentBase.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            Services.LOOKUP = this;
-            rememberTracker(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            Services.setServiceLookup(this);
+            rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            trackService(RdiffService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter());
         } catch (final Exception x) {
-            LOG.error(x.getMessage(), x);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(FileStorageJSONActivator.class)).error(x.getMessage(), x);
             throw x;
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

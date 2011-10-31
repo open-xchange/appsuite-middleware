@@ -100,7 +100,7 @@ public final class ImapIdleActivator extends DeferredActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            MailService.class, EventAdmin.class, ConfigurationService.class, ContextService.class, ThreadPoolService.class };
+            MailService.class, EventAdmin.class, ConfigurationService.class, ContextService.class, ThreadPoolService.class, SessiondService.class };
     }
 
     @Override

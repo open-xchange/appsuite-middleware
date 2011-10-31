@@ -51,6 +51,9 @@ package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -358,7 +361,7 @@ public class DispatcherServlet extends SessionServlet {
                 retval.putParameter(name, upload.getFormField(name));
             }
             retval.setUploadEvent(upload);
-        } else if (preferStream) {
+        } else if (preferStream || parseBoolParameter("binary", req)) {
             /*
              * Pass request's stream
              */
@@ -391,6 +394,16 @@ public class DispatcherServlet extends SessionServlet {
             }
         }
         return retval;
+    }
+
+    private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes")));
+
+    private static boolean parseBoolParameter(final String name, final HttpServletRequest req) {
+        final String parameter = req.getParameter(name);
+        if (null == parameter) {
+            return false;
+        }
+        return BOOL_VALS.contains(parameter.toLowerCase(Locale.ENGLISH));
     }
 
     /**

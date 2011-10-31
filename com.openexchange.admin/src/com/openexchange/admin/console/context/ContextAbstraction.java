@@ -256,7 +256,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                 public ArrayList<String> getData(final Context ctx) {
                     return getHumanReableDataOfAllExtensions(ctx, parser);
                 }
-            }));
+            }, false));
         }
     
         final ArrayList<String> humanReadableColumnsOfAllExtensions = getHumanReadableColumnsOfAllExtensions(parser);
@@ -297,6 +297,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         columns.add("used_quota");
         columns.add("name");
         columns.add("lmappings");
+        columns.add("attributes");
         columns.addAll(getCSVColumnsOfAllExtensions(parser));
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
     
@@ -306,7 +307,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
                     return getCSVDataOfAllExtensions(ctx_tmp, parser);
                 }
 
-            }));
+            }, true));
         }
     
         doCSVOutput(columns, data);
@@ -448,7 +449,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         return new ArrayList<String>();
     }
 
-    private ArrayList<String> makeData(final Context ctx, final ClosureInterface iface) {
+    private ArrayList<String> makeData(final Context ctx, final ClosureInterface iface, final boolean csv) {
         final ArrayList<String> srv_data = new ArrayList<String>();
         srv_data.add(String.valueOf(ctx.getId()));
     
@@ -501,6 +502,26 @@ public abstract class ContextAbstraction extends UserAbstraction {
             srv_data.add(getObjectsAsString(loginMappings.toArray()));
         } else {
             srv_data.add(null);
+        }
+
+        if (csv) {
+            final StringBuilder attrs = new StringBuilder();
+            final Map<String, Map<String, String>> attributes = ctx.getUserAttributes();
+            for (final Map.Entry<String, Map<String, String>> entry : attributes.entrySet()) {
+                final String namespace = entry.getKey();
+                for (final Map.Entry<String, String> attribute : entry.getValue().entrySet()) {
+                    attrs.append(namespace);
+                    attrs.append('/');
+                    attrs.append(attribute.getKey());
+                    attrs.append('=');
+                    attrs.append(attribute.getValue());
+                    attrs.append(',');
+                }
+            }
+            if (attrs.length() != 0) {
+                attrs.setLength(attrs.length() - 1);
+            }
+            srv_data.add(attrs.toString());
         }
     
         srv_data.addAll(iface.getData(ctx));

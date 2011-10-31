@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,28 @@
  *
  */
 
-package com.openexchange.chat.db.groupware;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskV2;
+package com.openexchange.rdiff;
 
 /**
- * {@link DBChatUpdateTaskProviderService}
+ * {@link Delta} - A Delta is, in the Rsync algorithm, one of two things: (1) a block of bytes and an offset, or (2) a pair of offsets, one
+ * old and one new.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DBChatUpdateTaskProviderService implements UpdateTaskProviderService {
+public interface Delta {
 
-    private final List<UpdateTaskV2> taskList;
+    /**
+     * Gets the size of the block of data this class represents.
+     * 
+     * @return The size of the block of data this class represents.
+     */
+    public int getBlockLength();
 
-    public DBChatUpdateTaskProviderService(final UpdateTaskV2... tasks) {
-        super();
-        if (null == tasks || 0 == tasks.length) {
-            taskList = new ArrayList<UpdateTaskV2>(1);
-        } else {
-            taskList = new ArrayList<UpdateTaskV2>(tasks.length);
-            taskList.addAll(Arrays.asList(tasks));
-        }
-    }
-
-    @Override
-    public Collection<UpdateTaskV2> getUpdateTasks() {
-        return taskList;
-    }
+    /**
+     * Gets the offset at which this delta should be written.
+     * 
+     * @return The write offset.
+     */
+    public long getWriteOffset();
 
 }

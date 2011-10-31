@@ -85,6 +85,7 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -2021,6 +2022,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
+        // Clear possible cached MailAccess instances
+        cleanUp(user, cid);
+        // Migrate password
         Connection con = null;
         PreparedStatement select = null;
         PreparedStatement update = null;
@@ -2092,6 +2096,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     // Don't care
                 }
                 Database.back(cid, true, con);
+            }
+        }
+    }
+
+    private void cleanUp(final int user, final int cid) {
+        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null != service) {
+            final Session session = service.getAnyActiveSessionForUser(user, cid);
+            if (null != session) {
+                try {
+                    final IMailAccessCache mac = MailAccess.getMailAccessCache();
+                    final int[] ids = getUserMailAccountIDs(user, cid);
+                    for (final int id : ids) {
+                        while (mac.removeMailAccess(session, id) != null) {
+                            // Nope...
+                        }
+                    }
+                } catch (final Exception exc) {
+                    LOG.error("Unable to clear cached mail accesses.", exc);
+                }
             }
         }
     }

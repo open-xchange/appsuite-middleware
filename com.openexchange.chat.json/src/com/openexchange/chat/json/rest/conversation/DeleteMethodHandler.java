@@ -120,7 +120,7 @@ public final class DeleteMethodHandler extends AbstractMethodHandler {
     }
 
     @Override
-    protected boolean applyBody() {
+    protected boolean shouldApplyBody() {
         return false;
     }
 

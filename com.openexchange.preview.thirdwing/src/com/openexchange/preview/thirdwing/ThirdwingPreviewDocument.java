@@ -67,10 +67,15 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
 
     private InputStream thumbnail;
 
+    /**
+     * Initializes a new {@link ThirdwingPreviewDocument}.
+     * 
+     * @param metaData The meta data
+     * @param content The textual content
+     */
     public ThirdwingPreviewDocument(final Map<String, String> metaData, final String content, InputStream thumbnail) {
         super();
-        this.metaData = new HashMap<String, String>();
-        this.metaData.clear();
+        this.metaData = new HashMap<String, String>();        
         this.metaData.putAll(metaData);
         this.content = content;
         this.thumbnail = thumbnail;
@@ -79,6 +84,11 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
     @Override
     public Map<String, String> getMetaData() {
         return metaData;
+    }
+
+    @Override
+    public boolean hasContent() {
+        return null != content;
     }
 
     @Override

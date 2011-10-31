@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.responseRenderers;
+package com.openexchange.rdiff.internal;
 
-import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
-import com.openexchange.preview.PreviewDocument;
-
+import org.metastatic.rsync.Delta;
 
 /**
- * {@link HTMLResponseRenderer}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link DeltaImpl}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HTMLResponseRenderer implements ResponseRenderer {
-    
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(HTMLResponseRenderer.class));
+public final class DeltaImpl implements com.openexchange.rdiff.Delta {
 
+    private final Delta metastaticDelta;
 
-    @Override
-    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
-        if (result.getResultObject() instanceof PreviewDocument) {
-            return true;
-        }
-        
-        return false;
+    /**
+     * Initializes a new {@link DeltaImpl}.
+     */
+    public DeltaImpl(final Delta metastaticDelta) {
+        super();
+        this.metastaticDelta = metastaticDelta;
     }
 
     @Override
-    public int getRanking() {
-        return 0;
+    public int getBlockLength() {
+        return metastaticDelta.getBlockLength();
     }
 
     @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) {
-        PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();        
-        httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-        try {
-            String content = previewDocument.getContent();
-            if (content == null) {
-                LOG.warn("Content of PreviewDocument was null.");
-            } else {
-                httpResp.getWriter().write(content);
-            }            
-        } catch (IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
+    public long getWriteOffset() {
+        return metastaticDelta.getWriteOffset();
     }
 
 }

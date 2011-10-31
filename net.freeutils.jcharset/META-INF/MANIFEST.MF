@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Jcharset
 Bundle-SymbolicName: net.freeutils.jcharset
-Bundle-Version: 6.20.0.0
+Bundle-Version: 7.0.0.0
 Bundle-Vendor: freeutils.net
 Bundle-Activator: net.freeutils.charset.osgi.JCharsetActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

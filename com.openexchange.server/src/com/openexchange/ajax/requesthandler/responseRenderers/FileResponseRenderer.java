@@ -68,6 +68,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -113,11 +114,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     @Override
     public boolean handles(final AJAXRequestData request, final AJAXRequestResult result) {
-        final Object data = result.getResultObject();
-        if (data == null) {
-            return false;
-        }
-        return IFileHolder.class.isAssignableFrom(data.getClass());
+        return result.getResultObject() instanceof IFileHolder;
     }
 
     @Override
@@ -186,7 +183,8 @@ public class FileResponseRenderer implements ResponseRenderer {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-             close(documentData);
+            close(file);
+            close(documentData);
         }
     }
 
@@ -227,11 +225,15 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (width == -1 && height == -1) {
             return file;
         }
-        /*
-         * Scale to new input stream
-         */
-        final InputStream scaled = scaler.scale(file.getStream(), width, height);
-        return new FileHolder(scaled, -1, "image/png", "");
+        try {
+            /*
+             * Scale to new input stream
+             */
+            final InputStream scaled = scaler.scale(file.getStream(), width, height);
+            return new FileHolder(scaled, -1, "image/png", "");
+        } finally {
+            Streams.close(file);
+        }
     }
 
 }

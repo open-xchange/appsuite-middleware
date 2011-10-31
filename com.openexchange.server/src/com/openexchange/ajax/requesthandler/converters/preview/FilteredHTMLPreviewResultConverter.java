@@ -157,6 +157,11 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         }
 
         @Override
+        public boolean hasContent() {
+            return null != sanitizedHtml;
+        }
+
+        @Override
         public String getContent() {
             return sanitizedHtml;
         }
