@@ -16,5 +16,10 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="lib/common.jar"/>
+	<classpathentry kind="lib" path="lib/2003core.jar"/>
+	<classpathentry kind="lib" path="lib/2007core.jar"/>
+	<classpathentry kind="lib" path="lib/PDFRenderer-0.9.1.jar"/>
+	<classpathentry kind="lib" path="lib/visitors.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

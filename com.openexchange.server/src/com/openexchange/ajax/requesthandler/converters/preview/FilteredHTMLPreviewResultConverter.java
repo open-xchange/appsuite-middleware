@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview;
 
+import java.io.InputStream;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -122,7 +123,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             content = htmlService.filterExternalImages(content, modified);
             sanitizedHtml = content;
         }
-        result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml), FORMAT);
+        result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
     }
 
     /**
@@ -136,15 +137,18 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
 
         private final String sanitizedHtml;
 
+        private InputStream thumbnail;
+
         /**
          * Initializes a new {@link SanitizedPreviewDocument}.
          * 
          * @param metaData
          * @param sanitizedHtml
          */
-        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml) {
+        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml, InputStream thumbnail) {
             this.metaData = metaData;
             this.sanitizedHtml = sanitizedHtml;
+            this.thumbnail = thumbnail;
         }
 
         @Override
@@ -155,6 +159,11 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         @Override
         public String getContent() {
             return sanitizedHtml;
+        }
+
+        @Override
+        public InputStream getThumbnail() {
+            return thumbnail;
         }
     } // End of class SanitizedPreviewDocument
 
