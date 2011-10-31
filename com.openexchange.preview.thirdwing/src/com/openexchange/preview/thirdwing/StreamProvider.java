@@ -55,8 +55,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,23 +72,24 @@ import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link StreamProvider}
- *
+ * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class StreamProvider implements IStreamProvider {
+
+    private String document;
     
-    private static final String DOCUMENT = "document.html";
-    
+    private String image;
+
     private final Map<String, ManagedFile> createdFiles = new HashMap<String, ManagedFile>();
-    
+
     private final ServiceLookup serviceLookup;
 
     private Session session;
-    
-    
+
     public StreamProvider(final ServiceLookup serviceLookup, Session session) {
         super();
         this.serviceLookup = serviceLookup;
@@ -97,7 +98,22 @@ public class StreamProvider implements IStreamProvider {
 
     @Override
     public Stream createFile(final String fileName) throws XHTMLConversionException {
-        return createInternal(fileName);
+        Stream stream = createInternal(fileName);
+        return stream;
+    }
+
+    @Override
+    public Stream createPreviewFile(String fileName) throws XHTMLConversionException {
+        Stream stream = createInternal(fileName);
+        this.image = fileName;
+        return stream;
+    }
+
+    @Override
+    public Stream createDocumentFile(String fileName) throws XHTMLConversionException {
+        Stream stream = createInternal(fileName);
+        this.document = fileName;
+        return stream;
     }
 
     /**
@@ -114,7 +130,7 @@ public class StreamProvider implements IStreamProvider {
             } else {
                 extension = fileName;
             }
-            
+
             final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
             final File tempFile = fileManagement.newTempFile("open-xchange", extension);
             final FileOutputStream fos = new FileOutputStream(tempFile);
@@ -124,7 +140,7 @@ public class StreamProvider implements IStreamProvider {
             managedFile.setFileName(fileName);
             managedFile.setContentDisposition("inline");
             createdFiles.put(fileName, managedFile);
-            
+
             Stream retval = new Stream();
             retval.setStream(fos);
             retval.setUri(managedFile.constructURL(session));
@@ -135,23 +151,31 @@ public class StreamProvider implements IStreamProvider {
             throw new XHTMLConversionException("Could not create OutputStream for file " + fileName, e);
         }
     }
-        
+
     public String getLinkForFile(final String fileName, final Session session) throws OXException {
         final ManagedFile managedFile = createdFiles.get(fileName);
-        if (managedFile == null) { 
+        if (managedFile == null) {
             return null;
         }
-        
+
         return managedFile.constructURL(session);
     }
     
+    public InputStream getPreviewImage() throws OXException {
+        try {
+            return new FileInputStream(createdFiles.get(image).getFile());
+        } catch (FileNotFoundException e) {
+            throw PreviewExceptionCodes.ERROR.create();
+        }
+    }
+
     public String getDocumentContent() throws OXException {
-        final ManagedFile managedFile = createdFiles.get(DOCUMENT);
-        if (managedFile == null) { 
+        final ManagedFile managedFile = createdFiles.get(document);
+        if (managedFile == null) {
             // TODO: throw proper exception
             throw PreviewExceptionCodes.ERROR.create();
         }
-        
+
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(managedFile.getFile()), "UTF-8"));
@@ -160,7 +184,7 @@ public class StreamProvider implements IStreamProvider {
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-            
+
             return sb.toString();
         } catch (final FileNotFoundException e) {
             // TODO: throw proper exception
@@ -174,16 +198,6 @@ public class StreamProvider implements IStreamProvider {
         } finally {
             Streams.close(reader);
         }
-    }
-
-    @Override
-    public Stream createPreviewFile(String fileName) throws XHTMLConversionException {
-        return createInternal(fileName);
-    }
-
-    @Override
-    public Stream createDocumentFile(String fileName) throws XHTMLConversionException {
-        return createInternal(fileName);
     }
 
 }

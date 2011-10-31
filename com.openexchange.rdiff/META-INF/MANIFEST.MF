@@ -6,9 +6,9 @@ Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.rdiff.osgi.RdiffActivator
-Bundle-ClassPath: lib/jarsync.jar,
- lib/log4j-1.2.16.jar,
- .
+Bundle-ClassPath: .,
+ lib/jarsync.jar,
+ lib/log4j-1.2.16.jar
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
@@ -25,7 +25,6 @@ Import-Package: com.openexchange.exception,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.digest,
- org.apache.commons.codec.language,
  org.apache.commons.codec.net,
  org.apache.commons.logging,
  org.osgi.framework

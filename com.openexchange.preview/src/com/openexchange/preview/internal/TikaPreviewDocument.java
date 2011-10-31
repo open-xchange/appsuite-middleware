@@ -49,6 +49,7 @@
 
 package com.openexchange.preview.internal;
 
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.Map;
 import com.openexchange.preview.PreviewDocument;
@@ -89,6 +90,11 @@ public final class TikaPreviewDocument implements PreviewDocument {
     @Override
     public String getContent() {
         return content;
+    }
+
+    @Override
+    public InputStream getThumbnail() {
+        return null;
     }
 
 }

@@ -100,26 +100,47 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     
     static {
         POLICIES.add(new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD));
-        POLICIES.add(new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/msword", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.document", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.document", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.template", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.wordprocessingml.template", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-word.document.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-word.document.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-word.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-word.template.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-excel", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.template", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.spreadsheetml.template", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.sheet.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.sheet.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.template.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.addin.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.sheet.binary.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-excel.sheet.binary.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.presentation", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.presentation", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.template", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.template", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.slideshow", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.openxmlformats-officedocument.presentationml.slideshow", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.addin.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.addin.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.presentation.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.presentation.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.template.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.template.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.slideshow.macroEnabled.12", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.slideshow.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/pdf", PreviewOutput.HTML, Quality.GOOD));
+        POLICIES.add(new PreviewPolicy("application/pdf", PreviewOutput.IMAGE, Quality.GOOD));
     }  
 
     public ThirdwingPreviewService(final ServiceLookup serviceLookup) {
@@ -197,7 +218,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             unit = new IOUnit((fis = new FileInputStream(file)));
             unit.setStreamProvider(streamProvider);
             transformer.addObserver(observationTask);
-            transformer.transformDocument(unit, 200F);
+            transformer.transformDocument(unit, 80);
             
             final String content = future.get();
             if (content == null) {
@@ -207,7 +228,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             final Map<String, String> metaData = new HashMap<String, String>();
             metaData.put("content-type", "text/html");
             metaData.put("resourcename", "document.html");
-            final ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content);
+            final ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content, streamProvider.getPreviewImage());
             
             return previewDocument;
         } catch (final FileNotFoundException e) {
