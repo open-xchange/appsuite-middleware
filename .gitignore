@@ -53,6 +53,7 @@ com.openexchange.modules.json/jars
 com.openexchange.modules.model/jars
 com.openexchange.modules.storage/jars
 com.openexchange.oauth.linkedin/jars
+com.openexchange.oauth.linkedin.json/jars
 com.openexchange.oauth/jars
 com.openexchange.secret.recovery/jars
 com.openexchange.sessiond/jars
