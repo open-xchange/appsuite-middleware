@@ -49,6 +49,9 @@
 
 package com.openexchange.push.imapidle;
 
+import java.util.Collection;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -194,6 +197,8 @@ public final class ImapIdlePushListener implements PushListener {
 
     private final AtomicReference<Session> sessionRef;
 
+    private final ConcurrentMap<String, String> invalidSessionIds;
+
     private final int userId;
 
     private final int contextId;
@@ -211,6 +216,7 @@ public final class ImapIdlePushListener implements PushListener {
         super();
         running = new AtomicBoolean();
         sessionRef = new AtomicReference<Session>();
+        invalidSessionIds = new ConcurrentHashMap<String, String>(2);
         this.userId = userId;
         this.contextId = contextId;
         mailService = null;
@@ -248,12 +254,35 @@ public final class ImapIdlePushListener implements PushListener {
         Session session = sessionRef.get();
         if (null == session) {
             final SessiondService service = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-            session = service.getAnyActiveSessionForUser(userId, contextId);
+            if (invalidSessionIds.isEmpty()) {
+                session = service.getAnyActiveSessionForUser(userId, contextId);
+            } else {
+                final Collection<Session> sessions = service.getSessions(userId, contextId);
+                for (final Session s : sessions) {
+                    if (!invalidSessionIds.containsKey(s.getSessionID())) {
+                        session = s;
+                    }
+                }
+            }
             if (!sessionRef.compareAndSet(null, session)) {
                 session = sessionRef.get();
             }
         }
         return session;
+    }
+
+    private void dropSessionRef(final boolean failedAuth) {
+        Session session;
+        do {
+            session = sessionRef.get();
+            if (null == session) {
+                return;
+            }
+        } while (!sessionRef.compareAndSet(session, null));
+        if (failedAuth) {
+            final String sessionID = session.getSessionID();
+            invalidSessionIds.put(sessionID, sessionID);
+        }
     }
 
     /**
@@ -433,7 +462,7 @@ public final class ImapIdlePushListener implements PushListener {
                 LOG.info("Missing (default) mail account for user " + userId + ". Stopping obsolete IMAP-IDLE listener.");
                 return false;
             }
-            sessionRef.set(null);
+            dropSessionRef("MSG".equals(e.getPrefix()) && 1001 == e.getCode());
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
@@ -446,7 +475,7 @@ public final class ImapIdlePushListener implements PushListener {
                 }
             }
         } catch (final MessagingException e) {
-            sessionRef.set(null);
+            dropSessionRef(e instanceof javax.mail.AuthenticationFailedException);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
@@ -459,7 +488,7 @@ public final class ImapIdlePushListener implements PushListener {
                 }
             }
         } catch (final RuntimeException e) {
-            sessionRef.set(null);
+            dropSessionRef(false);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
             if (DEBUG_ENABLED) {
                 LOG.error(e);
