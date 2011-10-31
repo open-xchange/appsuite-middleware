@@ -107,6 +107,7 @@ public final class GetReplyAction extends AbstractMailAction {
                 requestData.putParameter(Mail.PARAMETER_FOLDERID, folderAndID.getString(Mail.PARAMETER_FOLDERID));
                 requestData.putParameter(Mail.PARAMETER_ID, folderAndID.get(Mail.PARAMETER_ID).toString());
             }
+            requestData.setState(request.getState());
             /*
              * ... and fake a GET request
              */
