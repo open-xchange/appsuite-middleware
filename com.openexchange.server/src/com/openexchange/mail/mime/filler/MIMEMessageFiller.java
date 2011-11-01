@@ -56,6 +56,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -289,7 +291,15 @@ public class MIMEMessageFiller {
                 /*
                  * Get IP from session
                  */
-                mimeMessage.setHeader("X-Originating-IP", session.getLocalIp());
+                final String localIp = session.getLocalIp();
+                if (isLocalhost(localIp)) {
+                    // Prefer request's remote address if local IP seems to denote local host
+                    final Map<String, Object> logProperties = LogProperties.optLogProperties();
+                    final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+                    mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
+                } else {
+                    mimeMessage.setHeader("X-Originating-IP", localIp);
+                }
             } else {
                 /*
                  * IP check disabled: Prefer IP from client request
@@ -299,6 +309,12 @@ public class MIMEMessageFiller {
                 mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
             }
         }
+    }
+
+    private static final Set<String> LOCAL_ADDRS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("127.0.0.1", "localhost", "::1")));
+
+    private static boolean isLocalhost(final String localIp) {
+        return LOCAL_ADDRS.contains(localIp);
     }
 
     private static final String[] SUPPRESS_HEADERS = {
