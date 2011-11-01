@@ -129,7 +129,7 @@ public class ContactJSONResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         this.session = session;
         final Object resultObject = result.getResultObject();
         final Object newResultObject;
@@ -141,13 +141,13 @@ public class ContactJSONResultConverter implements ResultConverter {
         } else {
         	
             final int[] columns;
-            if (request.isSet("columns")) {
-            	columns = RequestTools.getColumnsAsIntArray(request, "columns");
+            if (requestData.isSet("columns")) {
+            	columns = RequestTools.getColumnsAsIntArray(requestData, "columns");
             } else {
             	columns = Contact.ALL_COLUMNS;
             }
 
-            if (request.getAction().equals("updates")) {
+            if (requestData.getAction().equals("updates")) {
 
                 // result contains a Map<String, List<Contact>> to decide between deleted and modified contacts
                 @SuppressWarnings("unchecked")

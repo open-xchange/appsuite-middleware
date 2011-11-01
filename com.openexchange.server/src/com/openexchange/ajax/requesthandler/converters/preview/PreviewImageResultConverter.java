@@ -88,7 +88,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
     }
 
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         IFileHolder fileHolder;
         Object resultObject = result.getResultObject();
         if (!(resultObject instanceof IFileHolder)) {
@@ -106,7 +106,7 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         
         PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
         
-        request.setFormat("file");
+        requestData.setFormat("file");
         
         InputStream thumbnail = previewDocument.getThumbnail();
         String fileName = previewDocument.getMetaData().get("resourcename");

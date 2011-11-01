@@ -98,11 +98,11 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         /*
          * Create file holder from mail
          */
-        final MailMessage mail = (MailMessage) request.getData();
+        final MailMessage mail = (MailMessage) requestData.getData();
         final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
         try {
             mail.writeTo(baos);
@@ -119,11 +119,11 @@ abstract class AbstractMailPreviewResultConverter implements ResultConverter {
         final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(baos.toByteArray());
         fileHolder.setContentType("application/octet-stream");
         fileHolder.setName(new StringBuilder(mail.getSubject()).append(".eml").toString());
-        request.setData(fileHolder, "file");
+        requestData.setData(fileHolder, "file");
         /*
          * Convert
          */
-        resultConverter.convert(request, result, session, converter);
+        resultConverter.convert(requestData, result, session, converter);
     }
 
 }

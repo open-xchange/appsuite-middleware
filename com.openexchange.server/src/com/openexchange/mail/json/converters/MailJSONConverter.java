@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.converters;
 
-import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -61,10 +60,19 @@ import com.openexchange.tools.session.ServerSession;
  * {@link MailJSONConverter}
  * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MailJSONConverter implements ResultConverter {
 
-    private MailConverter mailConverter = new MailConverter();
+    private final MailConverter mailConverter;
+
+    /**
+     * Initializes a new {@link MailJSONConverter}.
+     */
+    public MailJSONConverter() {
+        super();
+        mailConverter = new MailConverter();
+    }
 
     @Override
     public String getInputFormat() {
@@ -82,11 +90,8 @@ public class MailJSONConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        mailConverter.convert(request, result, session, converter);
-        Response resultObject = (Response) result.getResultObject();
-        Object data = resultObject.getData();
-        result.setResultObject(data, "json");
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        mailConverter.convert2JSON(requestData, result, session);
     }
 
 }

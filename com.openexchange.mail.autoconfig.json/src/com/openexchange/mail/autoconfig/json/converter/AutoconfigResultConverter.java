@@ -83,7 +83,7 @@ public class AutoconfigResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Autoconfig autoconfig = (Autoconfig) result.getResultObject();
 
         result.setResultObject(convert(autoconfig), "json");

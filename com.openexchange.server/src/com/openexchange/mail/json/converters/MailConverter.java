@@ -110,8 +110,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
     }
 
     @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        convert2JSON(request, result, session);
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        convert2JSON(requestData, result, session);
         final Response response = new Response(session);
         response.setData(result.getResultObject());
         response.setTimestamp(result.getTimestamp());
@@ -124,7 +124,15 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(response);
     }
 
-    private void convert2JSON(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session) throws OXException {
+    /**
+     * Converts to JSON output format.
+     * 
+     * @param requestData The AJAX request data
+     * @param result The AJAX result
+     * @param session The associated session
+     * @throws OXException If an error occurs
+     */
+    public void convert2JSON(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
         try {
             final Object resultObject = result.getResultObject();
             if (null == resultObject) {
@@ -134,20 +142,20 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 result.setResultObject(JSONObject.NULL, "json");
                 return;
             }
-            final String action = request.getParameter("action");
+            final String action = requestData.getParameter("action");
             if (resultObject instanceof MailMessage) {
                 final MailMessage mail = (MailMessage) resultObject;
                 if (Mail.ACTION_GET.equals(action)) {
-                    convertSingle4Get(mail, request, result, session);
+                    convertSingle4Get(mail, requestData, result, session);
                 } else {
-                    convertSingle(mail, request, result, session);
+                    convertSingle(mail, requestData, result, session);
                 }
             } else {
                 @SuppressWarnings("unchecked") final Collection<MailMessage> mails = (Collection<MailMessage>) resultObject;
                 if (Mail.ACTION_ALL.equalsIgnoreCase(action)) {
-                    convertMultiple4All(mails, request, result, session);
+                    convertMultiple4All(mails, requestData, result, session);
                 } else if (Mail.ACTION_LIST.equalsIgnoreCase(action)) {
-                    convertMultiple4List(mails, request, result, session);
+                    convertMultiple4List(mails, requestData, result, session);
                 } else {
                     throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
                 }

@@ -49,24 +49,16 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.fileupload.FileUploadBase;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
  * {@link JSONResponseRenderer}
@@ -110,56 +102,7 @@ public class JSONResponseRenderer implements ResponseRenderer {
                 response.addWarning(warning);
             }
         }
-        writeResponse(response, request.getAction(), req, resp);
-    }
-
-    /**
-     * Write specified response to Servlet output stream either as HTML callback or as JSON data.
-     * <p>
-     * The response is considered as HTML callback if one of these conditions is met:
-     * <ul>
-     * <li>The HTTP Servlet request indicates <i>multipart/*</i> content type</li>
-     * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
-     * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
-     * </ul>
-     * 
-     * @param response The response to write
-     * @param action The request's action
-     * @param req The HTTP Servlet request
-     * @param resp The HTTP Servlet response
-     */
-    public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
-        try {
-            if (FileUploadBase.isMultipartContent(new ServletRequestContext(req)) || (isRespondWithHTML(req)) || req.getParameter("callback") != null) {
-                resp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
-                String callback = req.getParameter("callback");
-                if (callback == null) {
-                    callback = action;
-                }
-                final Writer w = new UnsynchronizedStringWriter();
-                ResponseWriter.write(response, w);
-                resp.getWriter().print(substituteJS(w.toString(), callback));
-            } else {
-                ResponseWriter.write(response, resp.getWriter());
-            }
-        } catch (final JSONException e) {
-            LOG.error(e.getMessage(), e);
-            try {
-                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
-            } catch (final IOException ioe) {
-                LOG.error(ioe.getMessage(), ioe);
-            }
-        } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-        }
-    }
-
-    private static boolean isRespondWithHTML(final HttpServletRequest req) {
-        return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
-    }
-
-    private static String substituteJS(final String json, final String action) {
-        return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**", action);
+        APIResponseRenderer.writeResponse(response, request.getAction(), req, resp);
     }
 
 }

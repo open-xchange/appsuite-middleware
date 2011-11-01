@@ -80,9 +80,9 @@ public abstract class AbstractCalendarJSONResultConverter implements ResultConve
     }
 
     @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         final TimeZone timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
-        convertCalendar(AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(request, session), result, session, converter, timeZone);
+        convertCalendar(AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session), result, session, converter, timeZone);
     }
 
     protected abstract void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone userTimeZone) throws OXException;
