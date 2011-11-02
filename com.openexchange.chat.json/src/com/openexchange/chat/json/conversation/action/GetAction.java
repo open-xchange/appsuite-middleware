@@ -112,7 +112,11 @@ public final class GetAction extends AbstractChatConversationAction {
             final List<Presence> presences = new ArrayList<Presence>(memberIds.size());
             for (final String memberId : memberIds) {
                 final ChatUser chatUser = entries.get(memberId);
-                if (null != chatUser) {
+                if (null == chatUser) {
+                    /*
+                     * TODO: User is unknown in roster
+                     */ 
+                } else {
                     chatUsers.add(chatUser);
                     presences.add(roster.getPresence(chatUser));
                 }
