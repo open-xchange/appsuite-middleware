@@ -100,7 +100,8 @@ public final class ListAction extends AbstractChatConversationAction {
             final JSONArray json = new JSONArray();
             final int length = ids.length();
             for (int i = 0; i < length; i++) {
-                final ConversationID conversationID = ConversationID.valueOf(ids.getString(i));
+                final JSONObject tmp = ids.getJSONObject(i);
+                final ConversationID conversationID = ConversationID.valueOf(tmp.getString("id"));
                 final Key key = new Key(conversationID.getAccountId(), conversationID.getServiceId());
                 ChatAccess access = accessMap.get(key);
                 if (null == access) {
