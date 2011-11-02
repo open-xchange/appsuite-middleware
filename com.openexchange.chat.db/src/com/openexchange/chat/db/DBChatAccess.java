@@ -463,12 +463,13 @@ public final class DBChatAccess implements ChatAccess {
         }
         rs = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO chat (cid, user, chatId, subject) VALUES (?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO chat (cid, user, chatId, subject, createdAt) VALUES (?, ?, ?, ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, chid);
-            stmt.setString(pos, "");
+            stmt.setString(pos++, "");
+            stmt.setLong(pos, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
