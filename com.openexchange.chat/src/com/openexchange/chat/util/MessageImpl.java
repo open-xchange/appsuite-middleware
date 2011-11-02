@@ -57,7 +57,7 @@ import com.openexchange.chat.ChatAttachment;
 import com.openexchange.chat.Message;
 
 /**
- * {@link MessageImpl}
+ * {@link MessageImpl} - The basic {@link Message message} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

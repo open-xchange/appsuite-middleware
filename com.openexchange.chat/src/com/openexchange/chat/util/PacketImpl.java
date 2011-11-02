@@ -54,7 +54,7 @@ import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Packet;
 
 /**
- * {@link PacketImpl}
+ * {@link PacketImpl} - The abstract {@link Packet packet} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
