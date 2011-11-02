@@ -72,6 +72,7 @@ import com.openexchange.chat.db.groupware.DBChatDeleteListener;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -109,7 +110,7 @@ public final class DBChatActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ThreadPoolService.class, TimerService.class, DatabaseService.class, UserService.class, ContextService.class,
-            IDGeneratorService.class };
+            IDGeneratorService.class, CryptoService.class };
     }
 
     @Override

@@ -82,6 +82,7 @@ import com.openexchange.chat.Packet;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.MessageImpl;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -475,6 +476,8 @@ public final class DBChat implements Chat {
 
     private final int chatId;
 
+    private final String sChatId;
+
     protected final List<MessageListener> messageListeners;
 
     private final int contextId;
@@ -492,6 +495,7 @@ public final class DBChat implements Chat {
         super();
         userNameCache = new ConcurrentTIntObjectHashMap<String>(128);
         this.chatId = chatId;
+        sChatId = String.valueOf(chatId);
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
     }
@@ -540,7 +544,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
-                message.setText(rs.getString(pos++));
+                message.setText(getCryptoService().decrypt(rs.getString(pos++), sChatId));
                 final long createdAt = rs.getLong(pos);
                 message.setTimeStamp(new Date(createdAt));
                 if (createdAt > lc) {
@@ -582,7 +586,7 @@ public final class DBChat implements Chat {
 
     @Override
     public String getChatId() {
-        return String.valueOf(chatId);
+        return sChatId;
     }
 
     @Override
@@ -783,7 +787,7 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, Integer.parseInt(message.getFrom().getId()));
             stmt.setInt(pos++, chatId);
             stmt.setString(pos++, UUID.randomUUID().toString());
-            stmt.setString(pos++, message.getText());
+            stmt.setString(pos++, getCryptoService().encrypt(message.getText(), sChatId));
             stmt.setLong(pos, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (final SQLException e) {
@@ -834,7 +838,7 @@ public final class DBChat implements Chat {
                 final String msg = messageDesc.getText();
                 if (null != msg) {
                     sql.append(" message = ?,");
-                    values.add(msg);
+                    values.add(getCryptoService().encrypt(msg, sChatId));
                 }
             }
             sql.append(" createdAt = ? WHERE cid = ? AND chatId = ? AND messageId = ").append(DBChatUtility.getUnhexReplaceString());
@@ -926,6 +930,7 @@ public final class DBChat implements Chat {
         try {
             int pos;
             final List<Message> messages = new ArrayList<Message>(messageIds.size());
+            final CryptoService cryptoService = getCryptoService();
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
@@ -945,7 +950,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(messageId);
-                message.setText(rs.getString(pos++));
+                message.setText(cryptoService.decrypt(rs.getString(pos++), sChatId));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 messages.add(message);
             }
@@ -985,13 +990,14 @@ public final class DBChat implements Chat {
             }
             final Context context = getContext();
             final List<Message> list = new ArrayList<Message>();
+            final CryptoService cryptoService = getCryptoService();
             do {
                 final MessageImpl message = new MessageImpl();
                 pos = 1;
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
-                message.setText(rs.getString(pos++));
+                message.setText(cryptoService.decrypt(rs.getString(pos++), sChatId));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 list.add(message);
             } while (rs.next());
@@ -1088,6 +1094,14 @@ public final class DBChat implements Chat {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return databaseService;
+    }
+
+    protected static CryptoService getCryptoService() throws OXException {
+        final CryptoService cs = DBChatServiceLookup.getService(CryptoService.class);
+        if (null == cs) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptoService.class.getName());
+        }
+        return cs;
     }
 
 }
