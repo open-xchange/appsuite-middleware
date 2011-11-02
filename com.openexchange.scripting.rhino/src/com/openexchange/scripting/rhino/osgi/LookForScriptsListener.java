@@ -30,8 +30,12 @@ public class LookForScriptsListener implements BundleListener {
 	public void runStartScripts(final Bundle bundle) {
 		URL entry = bundle.getEntry("/main.js");
 		if (entry == null) {
-			return;
+			entry = bundle.getEntry("/js/main.js");
+			if (entry == null) {
+				return;
+			}
 		}
+		System.out.println(bundle);
 		Reader r = null;
 		try {
 			r = new InputStreamReader(entry.openStream(), "UTF-8");

@@ -223,8 +223,20 @@ public class LinkedInServiceImpl implements LinkedInService{
 	}
 
     @Override
-    public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
-		String uri = "http://api.linkedin.com/v1/people/email="+email+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
+    public JSONObject getFullProfileByEMail(List<String> email, String password, int user, int contextId, int accountId) throws OXException {
+    	
+		String uri = null;
+		if (email.size() == 1) {
+			uri = "http://api.linkedin.com/v1/people/email="+email.get(0)+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
+		} else {
+			StringBuilder b = new StringBuilder("http://api.linkedin.com/v1/people::(");
+			for(String s : email) {
+				b.append("email=").append(s).append(",");
+			}
+			b.setLength(b.length()-1);
+			b.append("):(").append(RELATION_TO_VIEWER).append(",").append(PERSONAL_FIELDS).append(")");
+			uri = b.toString();
+		}
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
     	JSONObject data = extractJson(response);
     	return data;
