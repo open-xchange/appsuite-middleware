@@ -484,8 +484,6 @@ public final class DBChat implements Chat {
 
     private volatile Context context;
 
-    private volatile Context context;
-
     private volatile long lastChecked;
 
     private final ConcurrentTIntObjectHashMap<String> userNameCache;
