@@ -187,6 +187,25 @@ public final class DBChat implements Chat {
         }
     }
 
+    private static final AtomicReference<CryptoService> CRYPTO_SERVICE_REF = new AtomicReference<CryptoService>();
+
+    private static CryptoService getCryptoService() throws OXException {
+        final CryptoService cs = CRYPTO_SERVICE_REF.get();
+        if (null == cs) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptoService.class.getName());
+        }
+        return cs;
+    }
+
+    /**
+     * Sets the crypto service reference.
+     * 
+     * @param cryptoService The crypto service
+     */
+    public static void setCryptoService(final CryptoService cryptoService) {
+        CRYPTO_SERVICE_REF.set(cryptoService);
+    }
+
     /**
      * Adds specified message listener.
      * 
@@ -970,7 +989,6 @@ public final class DBChat implements Chat {
         try {
             int pos;
             final List<Message> messages = new ArrayList<Message>(messageIds.size());
-            final CryptoService cryptoService = getCryptoService();
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
@@ -1030,7 +1048,6 @@ public final class DBChat implements Chat {
             }
             final Context context = getContext();
             final List<Message> list = new ArrayList<Message>();
-            final CryptoService cryptoService = getCryptoService();
             do {
                 final MessageImpl message = new MessageImpl();
                 pos = 1;
@@ -1128,31 +1145,18 @@ public final class DBChat implements Chat {
         return builder.toString();
     }
 
-    private static DatabaseService getDatabaseService() throws OXException {
+    /**
+     * Gets the database service instance.
+     * 
+     * @return The database service
+     * @throws OXException If service cannot be returned
+     */
+    protected static DatabaseService getDatabaseService() throws OXException {
         final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         return databaseService;
-    }
-
-    private static final AtomicReference<CryptoService> CRYPTO_SERVICE_REF = new AtomicReference<CryptoService>();
-
-    private static CryptoService getCryptoService() throws OXException {
-        final CryptoService cs = CRYPTO_SERVICE_REF.get();
-        if (null == cs) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptoService.class.getName());
-        }
-        return cs;
-    }
-
-    /**
-     * Sets the crypto service reference.
-     * 
-     * @param cryptoService The crypto service
-     */
-    public static void setCryptoService(final CryptoService cryptoService) {
-        CRYPTO_SERVICE_REF.set(cryptoService);
     }
 
 }
