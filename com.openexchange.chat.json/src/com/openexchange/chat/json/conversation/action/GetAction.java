@@ -115,7 +115,7 @@ public final class GetAction extends AbstractChatConversationAction {
                 if (null == chatUser) {
                     /*
                      * TODO: User is unknown in roster
-                     */ 
+                     */
                 } else {
                     chatUsers.add(chatUser);
                     presences.add(roster.getPresence(chatUser));
