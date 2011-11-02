@@ -87,8 +87,6 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
@@ -157,6 +155,10 @@ import com.openexchange.user.UserService;
  */
 public class MIMEMessageFiller {
 
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageFiller.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final String PREFIX_PART = "part";
 
     private static final String EXT_EML = ".eml";
@@ -164,8 +166,6 @@ public class MIMEMessageFiller {
     private static final int BUF_SIZE = 0x2000;
 
     private static final String VERSION_1_0 = "1.0";
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageFiller.class));
 
     private static final String VCARD_ERROR = "Error while appending user VCard";
 
@@ -285,14 +285,17 @@ public class MIMEMessageFiller {
             /*
              * Is IP check enabled
              */
-            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            final boolean ipCheck = service.getBoolProperty(ServerConfig.Property.IP_CHECK.getPropertyName(), false);
-            if (ipCheck) {
+            //final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            //final boolean ipCheck = service.getBoolProperty(com.openexchange.configuration.ServerConfig.Property.IP_CHECK.getPropertyName(), false);
+            {
                 /*
                  * Get IP from session
                  */
                 final String localIp = session.getLocalIp();
                 if (isLocalhost(localIp)) {
+                    if (DEBUG) {
+                        LOG.debug("Session provides localhost as client IP address: " + localIp);
+                    }
                     // Prefer request's remote address if local IP seems to denote local host
                     final Map<String, Object> logProperties = LogProperties.optLogProperties();
                     final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
@@ -300,14 +303,15 @@ public class MIMEMessageFiller {
                 } else {
                     mimeMessage.setHeader("X-Originating-IP", localIp);
                 }
-            } else {
-                /*
-                 * IP check disabled: Prefer IP from client request
-                 */
-                final Map<String, Object> logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
-                mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
             }
+//            else {
+//                /*
+//                 * IP check disabled: Prefer IP from client request
+//                 */
+//                final Map<String, Object> logProperties = LogProperties.optLogProperties();
+//                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+//                mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+//            }
         }
     }
 
