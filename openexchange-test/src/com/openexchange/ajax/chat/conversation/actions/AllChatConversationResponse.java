@@ -56,6 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.chat.json.conversation.ConversationID;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link AllChatConversationResponse}
@@ -84,7 +85,11 @@ public final class AllChatConversationResponse extends AbstractAJAXResponse {
         final int len = ids.length();
         final List<ConversationID> list = new ArrayList<ConversationID>(len);
         for (int i = 0; i < len; i++) {
-            list.add(ConversationID.valueOf(ids.getString(i)));
+            try {
+                list.add(ConversationID.valueOf(ids.getString(i)));
+            } catch (final OXException e) {
+                // Ignore...
+            }
         }
         return list;
     }

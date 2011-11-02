@@ -479,6 +479,8 @@ public final class DBChat implements Chat {
 
     private final int contextId;
 
+    private volatile Context context;
+
     private volatile long lastChecked;
 
     private final ConcurrentTIntObjectHashMap<String> userNameCache;
@@ -492,6 +494,20 @@ public final class DBChat implements Chat {
         this.chatId = chatId;
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
+    }
+
+    private Context getContext() throws OXException {
+        Context tmp = context;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = context;
+                if (null == context) {
+                    tmp = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
+                    context = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
     /**
@@ -515,7 +531,7 @@ public final class DBChat implements Chat {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final Context context = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
+            final Context context = getContext();
             final List<Message> list = new ArrayList<Message>();
             long lc = lastChecked;
             do {
@@ -887,7 +903,7 @@ public final class DBChat implements Chat {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         try {
-            return getMessages(messageIds, DBChatServiceLookup.getService(ContextService.class).getContext(contextId), con);
+            return getMessages(messageIds, getContext(), con);
         } finally {
             databaseService.backReadOnly(contextId, con);
         }
@@ -898,10 +914,7 @@ public final class DBChat implements Chat {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         try {
-            return getMessages(
-                Collections.singletonList(messageId),
-                DBChatServiceLookup.getService(ContextService.class).getContext(contextId),
-                con).get(0);
+            return getMessages(Collections.singletonList(messageId), getContext(), con).get(0);
         } finally {
             databaseService.backReadOnly(contextId, con);
         }
@@ -916,7 +929,8 @@ public final class DBChat implements Chat {
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
-                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString();
+                    final String sql =
+                        "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
@@ -969,7 +983,7 @@ public final class DBChat implements Chat {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final Context context = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
+            final Context context = getContext();
             final List<Message> list = new ArrayList<Message>();
             do {
                 final MessageImpl message = new MessageImpl();
