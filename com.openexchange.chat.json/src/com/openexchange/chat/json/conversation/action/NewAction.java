@@ -68,6 +68,7 @@ import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
+import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
@@ -182,11 +183,12 @@ public final class NewAction extends AbstractChatConversationAction {
             /*
              * Create JSON object for new chat
              */
-            final JSONObject jsonObject = JSONConversationWriter.writeChat(newChat, users, presences, session.getUser().getTimeZone());
+            final JSONObject jsonChat = JSONConversationWriter.writeChat(newChat, users, presences, session.getUser().getTimeZone());
+            jsonChat.put("id", new ConversationID(serviceId, accountId, newChat.getChatId()));
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonObject, "json");
+            return new AJAXRequestResult(jsonChat, "json");
         } finally {
             if (null != access) {
                 access.disconnect();

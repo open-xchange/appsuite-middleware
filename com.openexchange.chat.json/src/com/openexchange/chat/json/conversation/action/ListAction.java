@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
@@ -135,7 +136,9 @@ public final class ListAction extends AbstractChatConversationAction {
                 /*
                  * Create JSON object for chat
                  */
-                json.put(JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone()));
+                final JSONObject jsonChat = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+                jsonChat.put("id", conversationID.toString());
+                json.put(jsonChat);
             }
             /*
              * Return appropriate result
