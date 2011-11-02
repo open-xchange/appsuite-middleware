@@ -85,8 +85,8 @@ public class ApplicationResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        String action = request.getAction();
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        String action = requestData.getAction();
         if (action.equals("get") || action.equals("crawl")) {
             convertGet(result);
         } else if (action.equals("installed")) {

@@ -90,12 +90,12 @@ public interface ResultConverter {
     /**
      * Converts specified request data and result pair using given converter.
      *
-     * @param request The request data
+     * @param requestData The request data
      * @param result The result
      * @param session The associated session
      * @param converter The converter
      * @throws OXException If conversion fails
      */
-    void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
+    void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
 
 }

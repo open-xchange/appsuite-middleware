@@ -71,18 +71,18 @@ import com.openexchange.tools.session.ServerSession;
 public class DebugConverter implements ResultConverter {
 
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(request.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(request.getAction()).append("</h1>");
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        StringBuilder out = new StringBuilder("<!DOCTYPE html><head><title>").append(requestData.getAction()+" Response").append("</title></head><body><h1>Request with action ").append(requestData.getAction()).append("</h1>");
         out.append("<h2>Parameters:</h2>");
         out.append("<table>");
-        Iterator<String> parameterNames = request.getParameterNames();
+        Iterator<String> parameterNames = requestData.getParameterNames();
         while(parameterNames.hasNext()) {
             String paramName = parameterNames.next();
-            out.append("<tr><th>").append(paramName).append("</th><td>").append(request.getParameter(paramName)).append("</td></tr>");
+            out.append("<tr><th>").append(paramName).append("</th><td>").append(requestData.getParameter(paramName)).append("</td></tr>");
         }
         out.append("</table>");
 
-        Object data = request.getData();
+        Object data = requestData.getData();
         if (data != null) {
             if (data instanceof JSONObject) {
                 try {
@@ -101,7 +101,7 @@ public class DebugConverter implements ResultConverter {
         out.append("<h1>Response</h1>");
 
         try {
-            converter.convert(result.getFormat(), "apiResponse", request, result, session);
+            converter.convert(result.getFormat(), "apiResponse", requestData, result, session);
             Response response = (Response) result.getResultObject();
             JSONObject json = new JSONObject();
             ResponseWriter.write(response, json);

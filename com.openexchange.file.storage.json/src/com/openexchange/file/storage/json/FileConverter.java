@@ -70,8 +70,8 @@ public class FileConverter implements ResultConverter {
     private static final FileMetadataWriter writer = new FileMetadataWriter();
 
     @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final AJAXInfostoreRequest iReq = new AJAXInfostoreRequest(request, session);
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final AJAXInfostoreRequest iReq = new AJAXInfostoreRequest(requestData, session);
         Object resultObject = result.getResultObject();
 
         if (resultObject instanceof File) {

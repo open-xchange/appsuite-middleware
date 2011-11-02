@@ -89,7 +89,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         final IFileHolder fileHolder;
         {
             final Object resultObject = result.getResultObject();
@@ -115,13 +115,13 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                     previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
     
             }
-            if (request.getIntParameter("save") == 1) {
+            if (requestData.getIntParameter("save") == 1) {
                 /*-
                  * Preview document should be saved.
                  * We set the request format to file and return a FileHolder 
                  * containing the preview document.
                  */
-                request.setFormat("file");
+                requestData.setFormat("file");
                 final byte[] documentBytes = previewDocument.getContent().getBytes();
                 final InputStream is = new ByteArrayInputStream(documentBytes);
                 final String contentType = previewDocument.getMetaData().get("content-type");

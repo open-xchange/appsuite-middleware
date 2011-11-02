@@ -47,49 +47,41 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.converters.preview;
+package com.openexchange.mail.json.converters;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.java.Streams;
-import com.openexchange.preview.PreviewDocument;
-import com.openexchange.preview.PreviewOutput;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link DownloadPreviewResultConverter}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * {@link MailJSONConverter}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DownloadPreviewResultConverter extends AbstractPreviewResultConverter {
-    
-    
+public class MailJSONConverter implements ResultConverter {
+
+    private final MailConverter mailConverter;
+
     /**
-     * Initializes a new {@link DownloadPreviewResultConverter}.
+     * Initializes a new {@link MailJSONConverter}.
      */
-    public DownloadPreviewResultConverter() {
+    public MailJSONConverter() {
         super();
+        mailConverter = new MailConverter();
     }
-    
+
     @Override
     public String getInputFormat() {
-        return "preview";
+        return "mail";
     }
 
     @Override
     public String getOutputFormat() {
-        return "preview_download";
+        return "json";
     }
 
     @Override
@@ -98,43 +90,8 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
     }
 
     @Override
-    public PreviewOutput getOutput() {
-        return PreviewOutput.HTML;
-    }
-    
-    @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        super.convert(requestData, result, session, converter);
-        
-        /*
-         * Provide URL to document
-         */
-        final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();
-        final ManagedFile managedFile;
-        try {
-            final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            final File tempFile = fileManagement.newTempFile();
-            final FileOutputStream fos = new FileOutputStream(tempFile);
-            try {
-                fos.write(previewDocument.getContent().getBytes("UTF-8"));
-                fos.flush();
-            } finally {
-                Streams.close(fos);
-            }
-            managedFile = fileManagement.createManagedFile(tempFile);
-        } catch (final IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-        /*
-         * Set meta data
-         */
-        final Map<String, String> metaData = previewDocument.getMetaData();
-        managedFile.setContentType(metaData.get("content-type"));
-        managedFile.setFileName(metaData.get("resourcename"));
-        /*
-         * Set result object
-         */
-        result.setResultObject(managedFile.constructURL(session), getOutputFormat());
+        mailConverter.convert2JSON(requestData, result, session);
     }
 
 }

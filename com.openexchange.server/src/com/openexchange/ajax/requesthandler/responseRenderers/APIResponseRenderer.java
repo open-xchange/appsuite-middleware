@@ -51,6 +51,8 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.FileUploadBase;
@@ -68,7 +70,7 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
  * {@link APIResponseRenderer}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class APIResponseRenderer implements ResponseRenderer {
@@ -109,7 +111,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
      * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
-     *
+     * 
      * @param response The response to write
      * @param action The request's action
      * @param req The HTTP Servlet request
@@ -145,8 +147,15 @@ public class APIResponseRenderer implements ResponseRenderer {
         return Boolean.parseBoolean(req.getParameter("respondWithHTML"));
     }
 
+    private static final String JS_FRAGMENT = AJAXServlet.JS_FRAGMENT;
+
+    private static final Pattern RPL_JSON = Pattern.compile("**json**", Pattern.LITERAL);
+
+    private static final Pattern RPL_ACTION = Pattern.compile("**action**", Pattern.LITERAL);
+
     private static String substituteJS(final String json, final String action) {
-        return AJAXServlet.JS_FRAGMENT.replace("**json**", json).replace("**action**", action);
+        return RPL_ACTION.matcher(RPL_JSON.matcher(JS_FRAGMENT).replaceAll(Matcher.quoteReplacement(json))).replaceAll(
+            Matcher.quoteReplacement(action));
     }
 
 }

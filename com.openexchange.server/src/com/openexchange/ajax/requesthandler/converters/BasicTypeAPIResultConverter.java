@@ -102,7 +102,7 @@ public class BasicTypeAPIResultConverter implements ResultConverter {
 	}
 
 	@Override
-	public void convert(final AJAXRequestData request, final AJAXRequestResult result,
+	public void convert(final AJAXRequestData requestData, final AJAXRequestResult result,
 			final ServerSession session, final Converter converter) throws OXException {
 		final Response response = new Response(session);
         response.setData(result.getResultObject());
