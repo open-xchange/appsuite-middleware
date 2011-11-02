@@ -282,37 +282,49 @@ public class MIMEMessageFiller {
          * Add header X-Originating-IP containing the IP address of the client
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
-            /*
-             * Is IP check enabled
-             */
-            //final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            //final boolean ipCheck = service.getBoolProperty(com.openexchange.configuration.ServerConfig.Property.IP_CHECK.getPropertyName(), false);
-            {
-                /*
-                 * Get IP from session
-                 */
-                final String localIp = session.getLocalIp();
-                if (isLocalhost(localIp)) {
-                    if (DEBUG) {
-                        LOG.debug("Session provides localhost as client IP address: " + localIp);
-                    }
-                    // Prefer request's remote address if local IP seems to denote local host
-                    final Map<String, Object> logProperties = LogProperties.optLogProperties();
-                    final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
-                    mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
-                } else {
-                    mimeMessage.setHeader("X-Originating-IP", localIp);
-                }
-            }
-//            else {
-//                /*
-//                 * IP check disabled: Prefer IP from client request
-//                 */
-//                final Map<String, Object> logProperties = LogProperties.optLogProperties();
-//                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
-//                mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
-//            }
+            addClientIPAddress(mimeMessage, session);
         }
+    }
+
+    /**
+     * Add "X-Originating-IP" header.
+     * 
+     * @param mimeMessage The MIME message
+     * @param session The session
+     * @throws MessagingException If an error occurs
+     */
+    public static void addClientIPAddress(final MimeMessage mimeMessage, final Session session) throws MessagingException {
+        /*
+         * Is IP check enabled
+         */
+        // final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        // final boolean ipCheck = service.getBoolProperty(com.openexchange.configuration.ServerConfig.Property.IP_CHECK.getPropertyName(),
+        // false);
+        {
+            /*
+             * Get IP from session
+             */
+            final String localIp = session.getLocalIp();
+            if (isLocalhost(localIp)) {
+                if (DEBUG) {
+                    LOG.debug("Session provides localhost as client IP address: " + localIp);
+                }
+                // Prefer request's remote address if local IP seems to denote local host
+                final Map<String, Object> logProperties = LogProperties.optLogProperties();
+                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+                mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
+            } else {
+                mimeMessage.setHeader("X-Originating-IP", localIp);
+            }
+        }
+        // else {
+        // /*
+        // * IP check disabled: Prefer IP from client request
+        // */
+        // final Map<String, Object> logProperties = LogProperties.optLogProperties();
+        // final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+        // mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+        // }
     }
 
     private static final Set<String> LOCAL_ADDRS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("127.0.0.1", "localhost", "::1")));
