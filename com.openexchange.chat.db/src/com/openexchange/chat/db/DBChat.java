@@ -57,6 +57,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.procedure.TIntObjectProcedure;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -790,6 +791,8 @@ public final class DBChat implements Chat {
             stmt.setString(pos++, getCryptoService().encrypt(message.getText(), sChatId));
             stmt.setLong(pos, System.currentTimeMillis());
             stmt.executeUpdate();
+        } catch (final DataTruncation e) {
+            throw ChatExceptionCodes.MESSAGE_TOO_LONG.create(e);
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -852,6 +855,8 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, chatId);
             stmt.setString(pos, messageDesc.getMessageId());
             stmt.executeUpdate();
+        } catch (final DataTruncation e) {
+            throw ChatExceptionCodes.MESSAGE_TOO_LONG.create(e);
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {

@@ -113,6 +113,10 @@ public enum ChatExceptionCodes implements OXExceptionCode {
      * Invalid roster identifier: "%1$s"
      */
     INVALID_ROSTER_ID(ChatExceptionMessages.INVALID_ROSTER_ID_MSG, Category.CATEGORY_USER_INPUT, 13),
+    /**
+     * Posted message is too long.
+     */
+    MESSAGE_TOO_LONG(ChatExceptionMessages.MESSAGE_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14)
 
     ;
 

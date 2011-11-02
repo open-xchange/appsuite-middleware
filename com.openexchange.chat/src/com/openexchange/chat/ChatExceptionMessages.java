@@ -97,7 +97,9 @@ public final class ChatExceptionMessages implements LocalizableStrings {
 
     // Invalid roster identifier: "%1$s"
     public static final String INVALID_ROSTER_ID_MSG = "Invalid roster identifier: \"%1$s\"";
-    
+
+    // Posted message is too long.
+    public static final String MESSAGE_TOO_LONG_MSG = "Posted message is too long.";
 
     /**
      * Prevent instantiation.
