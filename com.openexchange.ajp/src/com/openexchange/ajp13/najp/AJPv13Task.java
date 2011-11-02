@@ -478,6 +478,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
                 if (DEBUG_ENABLED) {
                     LOG.debug(e.getMessage(), e);
                 }
+                closeOrderly = false;
             } catch (final AJPv13BrokenCycleException e) {
                 final String dump = e.getDump();
                 LOG.error(e.getMessage() + (dump == null ? "" : "\nCorresponding AJP package:\n" + dump));
