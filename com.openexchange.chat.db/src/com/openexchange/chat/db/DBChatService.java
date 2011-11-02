@@ -98,7 +98,7 @@ public final class DBChatService implements ChatService {
     private DBChatService() {
         super();
         accountManager = new DBChatAccountManager();
-        displayName = "Database Chat Service";
+        displayName = "Default OX7 Chat Service";
     }
 
     @Override

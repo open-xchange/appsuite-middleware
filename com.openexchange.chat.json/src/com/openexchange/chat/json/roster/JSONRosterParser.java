@@ -79,12 +79,14 @@ public final class JSONRosterParser {
      */
     public static Presence parsePresence(final JSONObject jsonPresence, final String user) throws JSONException {
         final PresenceImpl presence = new PresenceImpl();
-        presence.setFrom(new ChatUserImpl(user, null));
-        if (jsonPresence.hasAndNotNull("mode")) {
-            presence.setMode(Presence.Mode.modeOf(jsonPresence.getString("mode")));
-        }
-        if (jsonPresence.hasAndNotNull("status")) {
-            presence.setStatus(jsonPresence.getString("status"));
+        if (null != jsonPresence) {
+            presence.setFrom(new ChatUserImpl(user, null));
+            if (jsonPresence.hasAndNotNull("mode")) {
+                presence.setMode(Presence.Mode.modeOf(jsonPresence.getString("mode")));
+            }
+            if (jsonPresence.hasAndNotNull("status")) {
+                presence.setStatus(jsonPresence.getString("status"));
+            }
         }
         return presence;
     }

@@ -52,7 +52,7 @@ package com.openexchange.chat.util;
 import com.openexchange.chat.ChatUser;
 
 /**
- * {@link ChatUserImpl}
+ * {@link ChatUserImpl} - The basic {@link ChatUser chat user} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -66,7 +66,16 @@ public class ChatUserImpl implements ChatUser {
      * Initializes a new {@link ChatUserImpl}.
      */
     public ChatUserImpl() {
-        super();
+        this(null);
+    }
+
+    /**
+     * Initializes a new {@link ChatUserImpl}.
+     * 
+     * @param id The identifier
+     */
+    public ChatUserImpl(final String id) {
+        this(id, null);
     }
 
     /**

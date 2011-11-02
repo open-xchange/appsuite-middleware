@@ -1056,6 +1056,18 @@ public final class DBChat implements Chat {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("DBChat {chatId=").append(chatId).append(", ");
+        builder.append("contextId=").append(contextId).append(", lastChecked=").append(lastChecked).append(", ");
+        if (messageListeners != null) {
+            builder.append("messageListeners=").append(messageListeners).append(", ");
+        }
+        builder.append('}');
+        return builder.toString();
+    }
+
     protected static DatabaseService getDatabaseService() throws OXException {
         final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
         if (null == databaseService) {

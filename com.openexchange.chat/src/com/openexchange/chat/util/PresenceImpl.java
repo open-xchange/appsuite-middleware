@@ -52,7 +52,7 @@ package com.openexchange.chat.util;
 import com.openexchange.chat.Presence;
 
 /**
- * {@link PresenceImpl}
+ * {@link PresenceImpl} - The basic {@link Presence presence} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
