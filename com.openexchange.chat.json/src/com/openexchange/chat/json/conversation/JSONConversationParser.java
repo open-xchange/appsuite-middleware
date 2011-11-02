@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chat.ChatDescription;
 import com.openexchange.chat.ChatUser;
+import com.openexchange.chat.Message;
 import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.util.MessageImpl;
 
@@ -79,7 +80,7 @@ public final class JSONConversationParser {
      * @return The parsed message
      * @throws JSONException If parsing fails
      */
-    public static MessageImpl parseMessage(final JSONObject jsonMessage, final ChatUser from) throws JSONException {
+    public static Message parseMessage(final JSONObject jsonMessage, final ChatUser from) throws JSONException {
         final MessageImpl message = new MessageImpl();
         if (null != jsonMessage) {
             if (jsonMessage.hasAndNotNull("id")) {
