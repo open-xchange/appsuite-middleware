@@ -110,7 +110,7 @@ public final class DBChatActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ThreadPoolService.class, TimerService.class, DatabaseService.class, UserService.class, ContextService.class,
-            IDGeneratorService.class, CryptoService.class };
+            IDGeneratorService.class };
     }
 
     @Override
@@ -146,6 +146,20 @@ public final class DBChatActivator extends HousekeepingActivator {
             @Override
             public void removed(final ServiceReference<SessiondService> ref, final SessiondService service) {
                 DBRoster.set(null);
+            }
+        });
+        track(CryptoService.class, new SimpleRegistryListener<CryptoService>() {
+
+            @Override
+            public void added(final ServiceReference<CryptoService> ref, final CryptoService service) {
+                DBChat.setCryptoService(service);
+                addService(CryptoService.class, service);
+            }
+
+            @Override
+            public void removed(final ServiceReference<CryptoService> ref, final CryptoService service) {
+                DBChat.setCryptoService(null);
+                removeService(CryptoService.class);
             }
         });
         openTrackers();

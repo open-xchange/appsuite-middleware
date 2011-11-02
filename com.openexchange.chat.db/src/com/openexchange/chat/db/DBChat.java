@@ -475,6 +475,10 @@ public final class DBChat implements Chat {
         }
     }
 
+    /*-
+     * -------------------------------------- MEMBER STUFF --------------------------------------
+     */
+
     private final int chatId;
 
     private final String sChatId;
@@ -489,6 +493,8 @@ public final class DBChat implements Chat {
 
     private final ConcurrentTIntObjectHashMap<String> userNameCache;
 
+    private final boolean secureMessaging;
+
     /**
      * Initializes a new {@link DBChat}.
      */
@@ -499,8 +505,15 @@ public final class DBChat implements Chat {
         sChatId = String.valueOf(chatId);
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
+        secureMessaging = false;
     }
 
+    /**
+     * Gets lazy initialized context.
+     * 
+     * @return The context
+     * @throws OXException If initializing context fails
+     */
     private Context getContext() throws OXException {
         Context tmp = context;
         if (null == tmp) {
@@ -513,6 +526,28 @@ public final class DBChat implements Chat {
             }
         }
         return tmp;
+    }
+
+    /**
+     * Prepares given text queried from database.
+     * 
+     * @param text The queried text
+     * @return The prepared text ready for being returned to caller
+     * @throws OXException If preparing text fails
+     */
+    private String prepareSelect(final String text) throws OXException {
+        return secureMessaging ? getCryptoService().decrypt(text, sChatId) : text;
+    }
+
+    /**
+     * Prepares given text intended for being written to database.
+     * 
+     * @param text The text to insert/update
+     * @return The prepared text ready for being written to database
+     * @throws OXException If preparing text fails
+     */
+    private String prepareInsert(final String text) throws OXException {
+        return secureMessaging ? getCryptoService().encrypt(text, sChatId) : text;
     }
 
     /**
@@ -545,7 +580,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
-                message.setText(getCryptoService().decrypt(rs.getString(pos++), sChatId));
+                message.setText(prepareSelect(rs.getString(pos++)));
                 final long createdAt = rs.getLong(pos);
                 message.setTimeStamp(new Date(createdAt));
                 if (createdAt > lc) {
@@ -788,7 +823,7 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, Integer.parseInt(message.getFrom().getId()));
             stmt.setInt(pos++, chatId);
             stmt.setString(pos++, UUID.randomUUID().toString());
-            stmt.setString(pos++, getCryptoService().encrypt(message.getText(), sChatId));
+            stmt.setString(pos++, prepareInsert(message.getText()));
             stmt.setLong(pos, System.currentTimeMillis());
             stmt.executeUpdate();
         } catch (final DataTruncation e) {
@@ -841,7 +876,7 @@ public final class DBChat implements Chat {
                 final String msg = messageDesc.getText();
                 if (null != msg) {
                     sql.append(" message = ?,");
-                    values.add(getCryptoService().encrypt(msg, sChatId));
+                    values.add(prepareInsert(msg));
                 }
             }
             sql.append(" createdAt = ? WHERE cid = ? AND chatId = ? AND messageId = ").append(DBChatUtility.getUnhexReplaceString());
@@ -955,7 +990,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(messageId);
-                message.setText(cryptoService.decrypt(rs.getString(pos++), sChatId));
+                message.setText(prepareSelect(rs.getString(pos++)));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 messages.add(message);
             }
@@ -1002,7 +1037,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
-                message.setText(cryptoService.decrypt(rs.getString(pos++), sChatId));
+                message.setText(prepareSelect(rs.getString(pos++)));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 list.add(message);
             } while (rs.next());
@@ -1093,7 +1128,7 @@ public final class DBChat implements Chat {
         return builder.toString();
     }
 
-    protected static DatabaseService getDatabaseService() throws OXException {
+    private static DatabaseService getDatabaseService() throws OXException {
         final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
@@ -1101,12 +1136,23 @@ public final class DBChat implements Chat {
         return databaseService;
     }
 
-    protected static CryptoService getCryptoService() throws OXException {
-        final CryptoService cs = DBChatServiceLookup.getService(CryptoService.class);
+    private static final AtomicReference<CryptoService> CRYPTO_SERVICE_REF = new AtomicReference<CryptoService>();
+
+    private static CryptoService getCryptoService() throws OXException {
+        final CryptoService cs = CRYPTO_SERVICE_REF.get();
         if (null == cs) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptoService.class.getName());
         }
         return cs;
+    }
+
+    /**
+     * Sets the crypto service reference.
+     * 
+     * @param cryptoService The crypto service
+     */
+    public static void setCryptoService(final CryptoService cryptoService) {
+        CRYPTO_SERVICE_REF.set(cryptoService);
     }
 
 }
