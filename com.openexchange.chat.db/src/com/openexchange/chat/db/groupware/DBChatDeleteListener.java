@@ -136,39 +136,68 @@ public class DBChatDeleteListener implements DeleteListener {
             /*
              * Determine single chats. Those chats with number of members less than 3 that associated user participates with
              */
-            final TIntList singleChatIds = new TIntLinkedList();
             {
-                ResultSet rs = null;
-                try {
-                    stmt =
-                        writeCon.prepareStatement("SELECT cm1.chatId FROM chatMember AS cm1 WHERE cid = ? AND (SELECT COUNT(cm2.user) FROM chatMember AS cm2 WHERE cm2.cid = ? AND cm2.chatId = cm1.chatId) < ? AND cm1.user = ? GROUP BY cm1.chatId");
-                    pos = 1;
-                    stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, contextId);
-                    stmt.setInt(pos++, 3); // Less than 3
-                    stmt.setInt(pos, userId);
-                    rs = stmt.executeQuery();
-                    while (rs.next()) {
-                        singleChatIds.add(rs.getInt(1));
+                final TIntList singleChatIds = new TIntLinkedList();
+                {
+                    ResultSet rs = null;
+                    try {
+                        stmt =
+                            writeCon.prepareStatement("SELECT cm1.chatId FROM chatMember AS cm1 WHERE cid = ? AND (SELECT COUNT(cm2.user) FROM chatMember AS cm2 WHERE cm2.cid = ? AND cm2.chatId = cm1.chatId) < ? AND cm1.user = ? GROUP BY cm1.chatId");
+                        pos = 1;
+                        stmt.setInt(pos++, contextId);
+                        stmt.setInt(pos++, contextId);
+                        stmt.setInt(pos++, 3); // Less than 3
+                        stmt.setInt(pos, userId);
+                        rs = stmt.executeQuery();
+                        while (rs.next()) {
+                            singleChatIds.add(rs.getInt(1));
+                        }
+                    } catch (final SQLException e) {
+                        throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+                    } finally {
+                        closeSQLStuff(rs, stmt);
                     }
-                } catch (final SQLException e) {
-                    throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
-                } finally {
-                    closeSQLStuff(rs, stmt);
                 }
+                /*
+                 * Delete single chats' stuff
+                 */
+                stmt = writeCon.prepareStatement("DELETE FROM chat WHERE cid = ? AND chatId = ?");
+                pos = 1;
+                stmt.setInt(pos++, contextId);
+                for (final TIntIterator it = singleChatIds.iterator(); it.hasNext();) {
+                    stmt.setInt(pos, it.next());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = writeCon.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND chatId = ?");
+                pos = 1;
+                stmt.setInt(pos++, contextId);
+                for (final TIntIterator it = singleChatIds.iterator(); it.hasNext();) {
+                    stmt.setInt(pos, it.next());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = writeCon.prepareStatement("DELETE FROM chatMessage WHERE cid = ? AND chatId = ?");
+                pos = 1;
+                stmt.setInt(pos++, contextId);
+                for (final TIntIterator it = singleChatIds.iterator(); it.hasNext();) {
+                    stmt.setInt(pos, it.next());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = writeCon.prepareStatement("DELETE FROM chatMessageMap WHERE cid = ? AND chatId = ?");
+                pos = 1;
+                stmt.setInt(pos++, contextId);
+                for (final TIntIterator it = singleChatIds.iterator(); it.hasNext();) {
+                    stmt.setInt(pos, it.next());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+                DBUtils.closeSQLStuff(stmt);
             }
-            /*
-             * Delete single chats
-             */
-            stmt = writeCon.prepareStatement("DELETE FROM chat WHERE cid = ? AND chatId = ?");
-            pos = 1;
-            stmt.setInt(pos++, contextId);
-            for (final TIntIterator it = singleChatIds.iterator(); it.hasNext();) {
-                stmt.setInt(pos, it.next());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-            DBUtils.closeSQLStuff(stmt);
             /*
              * Update ownership
              */
