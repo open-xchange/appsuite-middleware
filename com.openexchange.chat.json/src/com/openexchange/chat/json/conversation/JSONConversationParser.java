@@ -53,9 +53,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chat.ChatDescription;
-import com.openexchange.chat.Message;
+import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.MessageDescription;
-import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.MessageImpl;
 
 /**
@@ -76,17 +75,16 @@ public final class JSONConversationParser {
      * Parses JSON to a message instance.
      * 
      * @param jsonMessage The JSON message
+     * @param from The chat user posting the message
      * @return The parsed message
      * @throws JSONException If parsing fails
      */
-    public static Message parseMessage(final JSONObject jsonMessage) throws JSONException {
+    public static MessageImpl parseMessage(final JSONObject jsonMessage, final ChatUser from) throws JSONException {
         final MessageImpl message = new MessageImpl();
         if (jsonMessage.hasAndNotNull("id")) {
             message.setPacketId(jsonMessage.getString("id"));
         }
-        if (jsonMessage.hasAndNotNull("from")) {
-            message.setFrom(new ChatUserImpl(jsonMessage.getString("from"), null));
-        }
+        message.setFrom(from);
         if (jsonMessage.hasAndNotNull("subject")) {
             message.setSubject(jsonMessage.getString("subject"));
         }
@@ -127,7 +125,10 @@ public final class JSONConversationParser {
      * @throws JSONException If a JSON error occurs
      */
     public static ChatDescription parseJSONChatDescriptionForUpdate(final JSONObject jsonChat) throws JSONException {
-        final ChatDescription chatDesc = new ChatDescription(jsonChat.getString("id"));
+        final ChatDescription chatDesc = new ChatDescription();
+        if (jsonChat.hasAndNotNull("id")) {
+            chatDesc.setChatId(jsonChat.getString("id"));
+        }
         if (jsonChat.hasAndNotNull("subject")) {
             chatDesc.setSubject(jsonChat.getString("subject"));
         }
