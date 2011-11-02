@@ -124,11 +124,12 @@ public final class GetAction extends AbstractChatConversationAction {
             /*
              * Create JSON object for chat
              */
-            final JSONObject jsonObject = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            final JSONObject jsonChat = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            jsonChat.put("id", conversationID.toString());
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonObject, "json");
+            return new AJAXRequestResult(jsonChat, "json");
         } finally {
             if (null != access) {
                 access.disconnect();

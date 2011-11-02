@@ -101,6 +101,10 @@ public enum ChatExceptionCodes implements OXExceptionCode {
      * No message found with identifier "%1$s" in chat "%2$s".
      */
     MESSAGE_NOT_FOUND(ChatExceptionMessages.MESSAGE_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 10),
+    /**
+     * No member found with identifier "%1$s".
+     */
+    MEMBER_NOT_FOUND(ChatExceptionMessages.MEMBER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 11),
 
     ;
 
