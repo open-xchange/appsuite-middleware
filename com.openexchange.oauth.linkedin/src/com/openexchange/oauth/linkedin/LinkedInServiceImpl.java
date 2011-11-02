@@ -80,6 +80,7 @@ import com.openexchange.oauth.linkedin.osgi.Activator;
 public class LinkedInServiceImpl implements LinkedInService{
 
     private static final String PERSONAL_FIELDS = "id,first-name,last-name,phone-numbers,headline,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions,industry";
+    private static final String RELATION_TO_VIEWER = "relation-to-viewer:(connections:(person:(id,first-name,last-name,picture-url,headline)))";
 	private static final String PERSONAL_FIELD_QUERY = ":("+PERSONAL_FIELDS+")";
 	private static final String CONNECTIONS_URL = "http://api.linkedin.com/v1/people/~/connections:(id,first-name,last-name,phone-numbers,im-accounts,twitter-accounts,date-of-birth,main-address,picture-url,positions)";
     private static final String IN_JSON = "?format=json";
@@ -128,6 +129,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 		try {
 			json = new JSONObject(response.getBody());
 		} catch (JSONException e) {
+			LOG.error(e);
 			throw OXException.general("Could not parse JSON: " + response.getBody()); //TODO: Different exception - wasn't this supposed to get easier with the rewrite? 
 		}
         return json;
@@ -214,45 +216,20 @@ public class LinkedInServiceImpl implements LinkedInService{
 	}
 	
 	public JSONObject getFullProfileById(String id, String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer,"+PERSONAL_FIELDS+")";
+		String uri = "http://api.linkedin.com/v1/people/id="+id+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
     	JSONObject data = extractJson(response);
-    	addFullInformationToRelation(data, password, user, contextId, accountId);
     	return data;
 	}
 
-    
     @Override
     public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException{
-		String uri = "http://api.linkedin.com/v1/people/email="+email+":(relation-to-viewer,"+PERSONAL_FIELDS+")";
+		String uri = "http://api.linkedin.com/v1/people/email="+email+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
     	JSONObject data = extractJson(response);
-    	addFullInformationToRelation(data, password, user, contextId, accountId);
     	return data;
     }
     
-    
-	private void addFullInformationToRelation(JSONObject relation2, String password, int user, int contextId, int accountId) throws OXException {
-		try {
-			JSONObject relation = relation2.getJSONObject("relationToViewer");
-			JSONArray connections = relation.getJSONObject("connections").getJSONArray("values");
-			for(int i = 0, max = connections.length(); i < max; i++){
-				JSONObject contact = connections.getJSONObject(i);
-				if(!contact.has("person")) continue;
-				
-				JSONObject person = contact.getJSONObject("person");
-				String id = person.getString("id");
-				JSONObject fullProfile = getProfileForId(id, password, user, contextId, accountId);
-				contact.put("fullProfile",fullProfile);
-			}
-			
-		} catch (JSONException e) {
-			LOG.error(e);
-			throw new OXException(1).setPrefix("OAUTH-LI").setLogMessage("Could not parse JSON");
-		}
-		
-	}
-
 	@Override
 	public JSONObject getNetworkUpdates(String password, int user, int contextId, int accountId) throws OXException {
 		String uri = "http://api.linkedin.com/v1/people/~/network/updates" + IN_JSON + "&type=CONN";
@@ -263,7 +240,7 @@ public class LinkedInServiceImpl implements LinkedInService{
 
 	@Override
 	public JSONObject getMessageInbox(String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
+		String uri = "http://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions,body)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
 	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri);
     	JSONObject data = extractJson(response);
     	System.out.println(data);
