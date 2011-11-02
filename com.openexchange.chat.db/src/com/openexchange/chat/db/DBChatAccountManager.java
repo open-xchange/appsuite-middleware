@@ -113,7 +113,7 @@ public class DBChatAccountManager implements ChatAccountManager {
             synchronized (this) {
                 tmp = accounts;
                 if (null == tmp) {
-                    tmp = Collections.singletonList(getAccount(DEFAULT_ACCOUNT, session));
+                    tmp = Collections.<ChatAccount> singletonList(defaultAccount);
                     accounts = tmp;
                 }
             }
