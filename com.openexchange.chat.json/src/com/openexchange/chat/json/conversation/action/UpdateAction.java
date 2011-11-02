@@ -49,16 +49,24 @@
 
 package com.openexchange.chat.json.conversation.action;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatDescription;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
+import com.openexchange.chat.ChatUser;
+import com.openexchange.chat.Presence;
+import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationParser;
+import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -102,9 +110,32 @@ public final class UpdateAction extends AbstractChatConversationAction {
             }
             access.updateChat(chatDescription);
             /*
+             * Get roster
+             */
+            final Roster roster = access.getRoster();
+            final Map<String, ChatUser> entries = roster.getEntries();
+            /*
+             * Get chat
+             */
+            final Chat chat = access.getChat(conversationID.getChatId());
+            final List<String> memberIds = chat.getMembers();
+            final List<ChatUser> chatUsers = new ArrayList<ChatUser>(memberIds.size());
+            final List<Presence> presences = new ArrayList<Presence>(memberIds.size());
+            for (final String memberId : memberIds) {
+                final ChatUser chatUser = entries.get(memberId);
+                if (null != chatUser) {
+                    chatUsers.add(chatUser);
+                    presences.add(roster.getPresence(chatUser));
+                }
+            }
+            /*
+             * Create JSON object for chat
+             */
+            final JSONObject jsonObject = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            /*
              * Return appropriate result
              */
-            return getJSONNullResult();
+            return new AJAXRequestResult(jsonObject, "json");
         } finally {
             if (null != access) {
                 access.disconnect();
