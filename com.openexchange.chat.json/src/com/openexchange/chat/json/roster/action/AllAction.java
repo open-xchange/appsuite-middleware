@@ -58,8 +58,8 @@ import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.roster.ChatRosterAJAXRequest;
-import com.openexchange.chat.json.roster.RosterID;
 import com.openexchange.chat.json.roster.JSONRosterWriter;
+import com.openexchange.chat.json.roster.RosterID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -106,9 +106,9 @@ public final class AllAction extends AbstractChatRosterAction {
         /*
          * Return appropriate result
          */
-        if (1 == jsonArray.length()) {
-            return new AJAXRequestResult(jsonArray.getJSONObject(0), "json");
-        }
+//        if (1 == jsonArray.length()) {
+//            return new AJAXRequestResult(jsonArray.getJSONObject(0), "json");
+//        }
         return new AJAXRequestResult(jsonArray, "json");
     }
 

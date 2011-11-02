@@ -105,6 +105,14 @@ public enum ChatExceptionCodes implements OXExceptionCode {
      * No member found with identifier "%1$s".
      */
     MEMBER_NOT_FOUND(ChatExceptionMessages.MEMBER_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 11),
+    /**
+     * Invalid conversation identifier: "%1$s"
+     */
+    INVALID_CONVERSATION_ID(ChatExceptionMessages.INVALID_CONVERSATION_ID_MSG, Category.CATEGORY_USER_INPUT, 12),
+    /**
+     * Invalid roster identifier: "%1$s"
+     */
+    INVALID_ROSTER_ID(ChatExceptionMessages.INVALID_ROSTER_ID_MSG, Category.CATEGORY_USER_INPUT, 13),
 
     ;
 

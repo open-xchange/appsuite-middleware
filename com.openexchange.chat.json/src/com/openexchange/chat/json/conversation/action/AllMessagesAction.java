@@ -93,6 +93,9 @@ public final class AllMessagesAction extends AbstractChatConversationAction {
          */
         final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
         final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        if (null == conversationID.getServiceId()) {
+            conversationID.setServiceId(ChatService.DEFAULT_SERVICE);
+        }
         final TimeZone timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
         final Date since = getDateParameter(req.getRequest(), "since", timeZone);
         final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
