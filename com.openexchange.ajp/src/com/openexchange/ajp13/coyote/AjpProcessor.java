@@ -396,7 +396,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         certificates = MessageBytes.newInstance();
         mainLock = new ReentrantReadWriteLock();
         softLock = mainLock.readLock();
-        lastWriteAccess = Long.MAX_VALUE;
+        lastWriteAccess = 0L;
         this.listenerMonitor = listenerMonitor;
         this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
@@ -787,7 +787,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             boolean longRunningAccepted = false;
             if (!error) {
                 try {
+                    /*
+                     * Enter service stage...
+                     */
                     stage = Stage.STAGE_SERVICE;
+                    lastWriteAccess = System.currentTimeMillis();
                     listenerMonitor.incrementNumProcessing();
                     /*
                      * Form data?
@@ -1978,7 +1982,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servlet = null;
         servletPath = null;
         servletId.setLength(0);
-        lastWriteAccess = Long.MAX_VALUE;
+        lastWriteAccess = 0L;
         request.recycle();
         response.recycle();
         certificates.recycle();
