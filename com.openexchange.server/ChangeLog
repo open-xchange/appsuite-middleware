@@ -1,3 +1,7 @@
+* 2011-11-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20712: Setting proper last-accessed time stamp when entering AJP's service stage, thus keep-alive check works orderly
+
 * 2011-11-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 20692: Ignoring upload restrictions on forward if property "isPublishOnExceededQuota" is enabled

@@ -196,6 +196,15 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
     }
 
     /**
+     * Sets the last-accessed time stamp.
+     * 
+     * @param lastAccessed The time stamp to set
+     */
+    public void setLastAccessed(final long lastAccessed) {
+        this.lastAccessed = lastAccessed;
+    }
+
+    /**
      * Gets the last-accessed time stamp of this output stream.
      * <p>
      * The last-accessed time stamp reflects when data was lastly flushed.
