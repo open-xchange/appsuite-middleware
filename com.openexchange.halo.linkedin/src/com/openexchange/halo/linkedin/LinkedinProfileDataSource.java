@@ -48,6 +48,7 @@
  */
 package com.openexchange.halo.linkedin;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONObject;
@@ -55,7 +56,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.halo.HaloContactDataSource;
@@ -90,8 +90,8 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		ContactEMailCompletor cc = new ContactEMailCompletor(session, cids, userService);
 		cc.complete(contact);
 		
-		String email = getEMail(contact);
-		if(email == null)
+		List<String> email = getEMail(contact);
+		if(email == null || email.isEmpty())
 			throw new OXException(2).setPrefix("HAL-LI").setLogMessage("Need an e-mail address to look up LinkedIn data");
 
 		
@@ -106,13 +106,14 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		return result;
 	}
 
-	private String getEMail(Contact queryContact) {
+	private List<String> getEMail(Contact queryContact) {
+		List<String> emails = new ArrayList<String>(3);
 		if(queryContact.containsEmail1())
-			return queryContact.getEmail1();
+			emails.add(queryContact.getEmail1());
 		if(queryContact.containsEmail2())
-			return queryContact.getEmail2();
+			emails.add(queryContact.getEmail2());
 		if(queryContact.containsEmail3())
-			return queryContact.getEmail3();
-		return null;
+			emails.add(queryContact.getEmail3());
+		return emails;
 	}
 }

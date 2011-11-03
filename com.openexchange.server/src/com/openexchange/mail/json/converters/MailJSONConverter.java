@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,81 +47,51 @@
  *
  */
 
-package com.openexchange.chat.db;
+package com.openexchange.mail.json.converters;
 
-import com.openexchange.chat.ChatAccess;
-import com.openexchange.chat.ChatAccountManager;
-import com.openexchange.chat.ChatExceptionCodes;
-import com.openexchange.chat.ChatService;
-import com.openexchange.chat.util.ChatAccountImpl;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link DBChatService}
- *
+ * {@link MailJSONConverter}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DBChatService implements ChatService {
+public class MailJSONConverter implements ResultConverter {
+
+    private final MailConverter mailConverter;
 
     /**
-     * Gets a new service instance.
-     * 
-     * @return A new service instance
+     * Initializes a new {@link MailJSONConverter}.
      */
-    public static DBChatService newDbChatService() {
-        final DBChatService service = new DBChatService();
-        final ChatAccountImpl defaultAccount = service.accountManager.getDefaultAccount();
-        defaultAccount.setChatService(service);
-        return service;       
-    }
-
-    private static final String IDENTIFIER = ChatService.DEFAULT_SERVICE;
-
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public static String getIdentifier() {
-        return IDENTIFIER;
-    }
-
-    private final DBChatAccountManager accountManager;
-
-    private final String displayName;
-
-    /**
-     * Initializes a new {@link DBChatService}.
-     */
-    private DBChatService() {
+    public MailJSONConverter() {
         super();
-        accountManager = new DBChatAccountManager();
-        displayName = "Default OX7 Chat Service";
+        mailConverter = new MailConverter();
     }
 
     @Override
-    public String getId() {
-        return IDENTIFIER;
+    public String getInputFormat() {
+        return "mail";
     }
 
     @Override
-    public String getDisplayName() {
-        return displayName;
+    public String getOutputFormat() {
+        return "json";
     }
 
     @Override
-    public ChatAccess access(final String accountId, final Session session) throws OXException {
-        if (!DEFAULT_ACCOUNT.equals(accountId)) {
-            throw ChatExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
-        }
-        return DBChatAccess.getDbChatAccess(session);
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
     @Override
-    public ChatAccountManager getAccountManager() {
-        return accountManager;
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        mailConverter.convert2JSON(requestData, result, session);
     }
 
 }

@@ -1,9 +1,7 @@
 define("com.openexchange.halo.json/main", ["osgi", "httpAPI"], function (osgi, httpAPI) {
    var Contact = Packages.com.openexchange.groupware.container.Contact;
    var ContactParser = Packages.com.openexchange.ajax.parser.ContactParser;
-   console.log("loaded...");
    osgi.services(["com.openexchange.halo.ContactHalo"], function (contactHalo) {
-      console.log("Services discovered");
       httpAPI.defineModule("halo/contact", {
           services : function (req, session) {
               var retval = [];
@@ -20,8 +18,21 @@ define("com.openexchange.halo.json/main", ["osgi", "httpAPI"], function (osgi, h
               
               if (req.getData() != null) {
                   parser.parse(contact, req.getData());
+                  var obj = req.getData();
+                  var userId = obj.optInt("user_id");
+                  if (userId <= 0) {
+                      userId = obj.optInt("internal_userid");
+                  }
+                  if (userId > 0) {
+                      contact.setInternalUserId(userId);
+                  }
               } else {
                   contact.setEmail1(req.getParameter("email1"));
+                  contact.setEmail2(req.getParameter("email2"));
+                  contact.setEmail3(req.getParameter("email3"));
+                  if (req.isSet("internal_userid")) {
+                      contact.setInternalUserId(java.lang.Integer.parseInt(req.getParameter("internal_userid")));
+                  }
               }
               
               return contactHalo.investigate(provider, contact, req, session);

@@ -112,17 +112,24 @@ public final class GetAction extends AbstractChatConversationAction {
             final List<Presence> presences = new ArrayList<Presence>(memberIds.size());
             for (final String memberId : memberIds) {
                 final ChatUser chatUser = entries.get(memberId);
-                chatUsers.add(chatUser);
-                presences.add(roster.getPresence(chatUser));
+                if (null == chatUser) {
+                    /*
+                     * TODO: User is unknown in roster
+                     */
+                } else {
+                    chatUsers.add(chatUser);
+                    presences.add(roster.getPresence(chatUser));
+                }
             }
             /*
              * Create JSON object for chat
              */
-            final JSONObject jsonObject = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            final JSONObject jsonChat = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+            jsonChat.put("id", conversationID.toString());
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonObject, "json");
+            return new AJAXRequestResult(jsonChat, "json");
         } finally {
             if (null != access) {
                 access.disconnect();

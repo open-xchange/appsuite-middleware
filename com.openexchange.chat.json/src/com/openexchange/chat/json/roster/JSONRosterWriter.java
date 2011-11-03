@@ -80,14 +80,15 @@ public final class JSONRosterWriter {
      * Writes specified roster to its JSON representation.
      * 
      * @param roster The roster
-     * @param optPresence The optional presence
+     * @param rosterId The roster identifier
+     * @param timeZone The time zone
      * @return The JSON object
      * @throws JSONException If a JSON error occurs
      * @throws OXException If loading data from roster fails
      */
-    public static JSONObject writeRoster(final Roster roster, final String accountId, final String timeZone) throws JSONException, OXException {
+    public static JSONObject writeRoster(final Roster roster, final String rosterId, final String timeZone) throws JSONException, OXException {
         final JSONObject jsonChat = new JSONObject();
-        jsonChat.put("id", accountId);
+        jsonChat.put("id", rosterId);
         /*
          * Entries
          */
@@ -159,7 +160,7 @@ public final class JSONRosterWriter {
         jsonPresence.put("status", presence.getStatus());
         final Date timeStamp = presence.getTimeStamp();
         if (null != timeStamp) {
-            jsonPresence.put("timeStamp", addTimeZoneOffset(timeStamp.getTime(), timeZone));
+            jsonPresence.put("timestamp", addTimeZoneOffset(timeStamp.getTime(), timeZone));
         }
         return jsonPresence;
     }

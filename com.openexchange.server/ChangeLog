@@ -1,3 +1,8 @@
+* 2011-11-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20692: Ignoring upload restrictions on forward if property "isPublishOnExceededQuota" is enabled
+ - Fix for bug 20712: Check if an AJP response is expected according to current AJP cycle stage
+
 * 2011-10-31 - marcus.klein@open-xchange.com
 
  - Fix for bug 20465: Using correct UDP push channel for internal event distribution. More tolerant now with configured remote host.

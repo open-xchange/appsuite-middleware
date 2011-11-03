@@ -70,6 +70,8 @@ public class DBChatAccountManager implements ChatAccountManager {
 
     private final ChatAccountImpl defaultAccount;
 
+    private volatile List<ChatAccount> accounts;
+
     /**
      * Initializes a new {@link DBChatAccountManager}.
      */
@@ -106,7 +108,17 @@ public class DBChatAccountManager implements ChatAccountManager {
 
     @Override
     public List<ChatAccount> getAccounts(final Session session) throws OXException {
-        return Collections.singletonList(getAccount(DEFAULT_ACCOUNT, session));
+        List<ChatAccount> tmp = accounts;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = accounts;
+                if (null == tmp) {
+                    tmp = Collections.<ChatAccount> singletonList(defaultAccount);
+                    accounts = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
     @Override

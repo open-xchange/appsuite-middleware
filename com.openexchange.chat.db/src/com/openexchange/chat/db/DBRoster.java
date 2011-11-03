@@ -385,4 +385,21 @@ public final class DBRoster implements Roster {
         listeners.remove(rosterListener);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("DBRoster {");
+        if (context != null) {
+            builder.append("context=").append(context).append(", ");
+        }
+        if (entries != null) {
+            builder.append("entries=").append(entries);
+        }
+        if (listeners != null && !listeners.isEmpty()) {
+            builder.append("listeners=").append(listeners).append(", ");
+        }
+        builder.append('}');
+        return builder.toString();
+    }
+
 }

@@ -49,6 +49,9 @@
 
 package com.openexchange.chat.json.roster;
 
+import com.openexchange.chat.ChatExceptionCodes;
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link RosterID} - Represents a roster identifier.
@@ -62,11 +65,18 @@ public final class RosterID {
      * 
      * @param uid The conversation identifier
      * @return The conversation identifier
+     * @throws OXException If parsing fails
      */
-    public static RosterID valueOf(final String uid) {
+    public static RosterID valueOf(final String uid) throws OXException {
         final RosterID rosterId = new RosterID();
         rosterId.uid = uid;
         parseUid(rosterId, uid);
+        if (null == rosterId.accountId) {
+            throw ChatExceptionCodes.INVALID_ROSTER_ID.create(uid);
+        }
+        if (null == rosterId.serviceId) {
+            throw ChatExceptionCodes.INVALID_ROSTER_ID.create(uid);
+        }
         return rosterId;
     }
 

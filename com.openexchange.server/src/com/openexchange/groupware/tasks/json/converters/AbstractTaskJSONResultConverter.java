@@ -82,9 +82,9 @@ public abstract class AbstractTaskJSONResultConverter implements ResultConverter
     }
 
     @Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
-        convertTask(request, result, session, converter);
+        convertTask(requestData, result, session, converter);
     }
 
     protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;

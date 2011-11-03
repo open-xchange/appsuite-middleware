@@ -70,7 +70,7 @@ public interface LinkedInService {
     /**
      * @return all data on a contact identified by e-mail (special feature, only available with extended API keys) 
      */
-	public JSONObject getFullProfileByEMail(String email, String password, int user, int contextId, int accountId) throws OXException;
+	public JSONObject getFullProfileByEMail(List<String> email, String password, int user, int contextId, int accountId) throws OXException;
 
     /**
      * @return all data on a contact identified by id 

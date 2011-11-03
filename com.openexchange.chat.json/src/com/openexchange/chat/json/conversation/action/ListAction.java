@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
@@ -99,7 +100,7 @@ public final class ListAction extends AbstractChatConversationAction {
             final JSONArray json = new JSONArray();
             final int length = ids.length();
             for (int i = 0; i < length; i++) {
-                final ConversationID conversationID = ConversationID.valueOf(ids.getString(i));
+                final ConversationID conversationID = ConversationID.valueOf(ids.getJSONObject(i).getString("id"));
                 final Key key = new Key(conversationID.getAccountId(), conversationID.getServiceId());
                 ChatAccess access = accessMap.get(key);
                 if (null == access) {
@@ -123,13 +124,21 @@ public final class ListAction extends AbstractChatConversationAction {
                 final List<Presence> presences = new ArrayList<Presence>(memberIds.size());
                 for (final String memberId : memberIds) {
                     final ChatUser chatUser = entries.get(memberId);
-                    chatUsers.add(chatUser);
-                    presences.add(roster.getPresence(chatUser));
+                    if (null == chatUser) {
+                        /*
+                         * TODO: User is unknown in roster
+                         */
+                    } else {
+                        chatUsers.add(chatUser);
+                        presences.add(roster.getPresence(chatUser));
+                    }
                 }
                 /*
                  * Create JSON object for chat
                  */
-                json.put(JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone()));
+                final JSONObject jsonChat = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
+                jsonChat.put("id", conversationID.toString());
+                json.put(jsonChat);
             }
             /*
              * Return appropriate result

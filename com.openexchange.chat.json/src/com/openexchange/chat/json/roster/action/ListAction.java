@@ -53,13 +53,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.ChatAccess;
+import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.roster.ChatRosterAJAXRequest;
-import com.openexchange.chat.json.roster.RosterID;
 import com.openexchange.chat.json.roster.JSONRosterWriter;
+import com.openexchange.chat.json.roster.RosterID;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -110,7 +111,11 @@ public final class ListAction extends AbstractChatRosterAction {
              */
             final int length = jsonUserIds.length();
             for (int i = 0; i < length; i++) {
-                final ChatUser chatUser = roster.getEntries().get(jsonUserIds.getString(i));
+                final String user = jsonUserIds.getString(i);
+                final ChatUser chatUser = roster.getEntries().get(user);
+                if (null == chatUser) {
+                    throw ChatExceptionCodes.MEMBER_NOT_FOUND.create(user);
+                }
                 /*
                  * Write JSON
                  */

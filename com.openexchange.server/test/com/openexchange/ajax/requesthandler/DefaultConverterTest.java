@@ -158,7 +158,7 @@ public class DefaultConverterTest extends TestCase {
         }
 
         @Override
-        public void convert(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
 
         }
 

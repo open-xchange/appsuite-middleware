@@ -88,7 +88,18 @@ public final class ChatExceptionMessages implements LocalizableStrings {
 
     // No message found with identifier "%1$s" in chat "%2$s".
     public static final String MESSAGE_NOT_FOUND_MSG = "No message found with identifier \"%1$s\" in chat \"%2$s\".";
-    
+
+    // No member found with identifier "%1$s".
+    public static final String MEMBER_NOT_FOUND_MSG = "No member found with identifier \"%1$s\".";
+
+    // Invalid conversation identifier: "%1$s"
+    public static final String INVALID_CONVERSATION_ID_MSG = "Invalid conversation identifier: \"%1$s\"";
+
+    // Invalid roster identifier: "%1$s"
+    public static final String INVALID_ROSTER_ID_MSG = "Invalid roster identifier: \"%1$s\"";
+
+    // Posted message is too long.
+    public static final String MESSAGE_TOO_LONG_MSG = "Posted message is too long.";
 
     /**
      * Prevent instantiation.

@@ -87,9 +87,10 @@ public interface ChatService {
     ChatAccountManager getAccountManager();
 
     /**
-     * Gets the service's identifier (numeric values preferred; e.g. <code>"1001"</code>).
+     * Gets the service's identifier.
      * 
      * @return The identifier
+     * @see #DEFAULT_SERVICE
      */
     String getId();
 

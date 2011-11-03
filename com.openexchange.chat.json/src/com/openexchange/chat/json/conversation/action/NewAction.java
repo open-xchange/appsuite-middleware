@@ -49,8 +49,11 @@
 
 package com.openexchange.chat.json.conversation.action;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
@@ -65,9 +68,11 @@ import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Presence;
 import com.openexchange.chat.Roster;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
+import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -94,7 +99,23 @@ public final class NewAction extends AbstractChatConversationAction {
         /*
          * Get parameters
          */
-        final JSONObject jsonChatObject = req.getData();
+        JSONObject jsonChatObject = req.getData();
+        if (jsonChatObject == null) {
+            try {
+                final InputStream inputStream = req.getRequest().getUploadStream();
+                if (null != inputStream) {
+                    final int buflen = 2048;
+                    final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(buflen << 1);
+                    final byte[] buf = new byte[buflen];
+                    for (int read; (read = inputStream.read(buf, 0, buflen)) > 0;) {
+                        out.write(buf, 0, read);
+                    }
+                    jsonChatObject = new JSONObject(new String(out.toByteArray()));
+                }
+            } catch (final IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
+        }
         String serviceId = req.getParameter("serviceId");
         if (null == serviceId) {
             serviceId = ChatService.DEFAULT_SERVICE;
@@ -121,23 +142,29 @@ public final class NewAction extends AbstractChatConversationAction {
              * Parse chat description
              */
             final ChatDescription chatDescription = JSONConversationParser.parseJSONChatDescriptionForCreate(jsonChatObject);
-            final List<String> newMembers = chatDescription.getNewMembers();
-            if (null == newMembers || newMembers.isEmpty()) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("newMembers");
+            List<String> newMembers = chatDescription.getNewMembers();
+            if (null == newMembers) {
+                newMembers = Collections.emptyList();
             }
             final int size = newMembers.size();
-            final ChatUser[] chatUsers = new ChatUser[size];
+            final List<ChatUser> chatUsers = new ArrayList<ChatUser>(size);
             final List<Presence> presences = new ArrayList<Presence>(size);
             for (int i = 0; i < size; i++) {
                 final ChatUser chatUser = entries.get(newMembers.get(i));
-                chatUsers[i] = chatUser;
-                presences.add(roster.getPresence(chatUser));
+                if (null == chatUser) {
+                    /*
+                     * TODO: User is unknown in roster
+                     */
+                } else {
+                    chatUsers.add(chatUser);
+                    presences.add(roster.getPresence(chatUser));
+                }
             }
-            Chat newChat = access.openChat(null, null, chatUsers);
+            Chat newChat = access.openChat(null, null, chatUsers.toArray(new ChatUser[chatUsers.size()]));
             /*
              * Add session user to members
              */
-            final List<ChatUser> users = new ArrayList<ChatUser>(Arrays.asList(chatUsers));
+            final List<ChatUser> users = new ArrayList<ChatUser>(chatUsers);
             users.add(access.getUser());
             presences.add(roster.getPresence(access.getUser()));
             /*
@@ -156,11 +183,12 @@ public final class NewAction extends AbstractChatConversationAction {
             /*
              * Create JSON object for new chat
              */
-            final JSONObject jsonObject = JSONConversationWriter.writeChat(newChat, users, presences, session.getUser().getTimeZone());
+            final JSONObject jsonChat = JSONConversationWriter.writeChat(newChat, users, presences, session.getUser().getTimeZone());
+            jsonChat.put("id", new ConversationID(serviceId, accountId, newChat.getChatId()));
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonObject, "json");
+            return new AJAXRequestResult(jsonChat, "json");
         } finally {
             if (null != access) {
                 access.disconnect();

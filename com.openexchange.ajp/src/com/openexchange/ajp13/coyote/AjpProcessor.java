@@ -564,10 +564,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     @Override
     public void cancel() {
-        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-        action(ActionCode.CLIENT_FLUSH, null);
-        action(ActionCode.CLOSE, Boolean.FALSE);
-        action(ActionCode.STOP, null);
+        /*
+         * Is a response expected?
+         */
+        if (STAGE_AWAIT != stage && STAGE_KEEPALIVE != stage) {
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            action(ActionCode.CLIENT_FLUSH, null);
+            action(ActionCode.CLOSE, Boolean.FALSE);
+            action(ActionCode.STOP, null);
+        }
         /*
          * Drop socket
          */

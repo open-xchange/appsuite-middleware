@@ -56,6 +56,8 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -85,8 +87,6 @@ import javax.mail.internet.MimeUtility;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
@@ -155,6 +155,10 @@ import com.openexchange.user.UserService;
  */
 public class MIMEMessageFiller {
 
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageFiller.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final String PREFIX_PART = "part";
 
     private static final String EXT_EML = ".eml";
@@ -162,8 +166,6 @@ public class MIMEMessageFiller {
     private static final int BUF_SIZE = 0x2000;
 
     private static final String VERSION_1_0 = "1.0";
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MIMEMessageFiller.class));
 
     private static final String VCARD_ERROR = "Error while appending user VCard";
 
@@ -280,25 +282,55 @@ public class MIMEMessageFiller {
          * Add header X-Originating-IP containing the IP address of the client
          */
         if (MailProperties.getInstance().isAddClientIPAddress()) {
+            addClientIPAddress(mimeMessage, session);
+        }
+    }
+
+    /**
+     * Add "X-Originating-IP" header.
+     * 
+     * @param mimeMessage The MIME message
+     * @param session The session
+     * @throws MessagingException If an error occurs
+     */
+    public static void addClientIPAddress(final MimeMessage mimeMessage, final Session session) throws MessagingException {
+        /*
+         * Is IP check enabled
+         */
+        // final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        // final boolean ipCheck = service.getBoolProperty(com.openexchange.configuration.ServerConfig.Property.IP_CHECK.getPropertyName(),
+        // false);
+        {
             /*
-             * Is IP check enabled
+             * Get IP from session
              */
-            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-            final boolean ipCheck = service.getBoolProperty(ServerConfig.Property.IP_CHECK.getPropertyName(), false);
-            if (ipCheck) {
-                /*
-                 * Get IP from session
-                 */
-                mimeMessage.setHeader("X-Originating-IP", session.getLocalIp());
-            } else {
-                /*
-                 * IP check disabled: Prefer IP from client request
-                 */
+            final String localIp = session.getLocalIp();
+            if (isLocalhost(localIp)) {
+                if (DEBUG) {
+                    LOG.debug("Session provides localhost as client IP address: " + localIp);
+                }
+                // Prefer request's remote address if local IP seems to denote local host
                 final Map<String, Object> logProperties = LogProperties.optLogProperties();
                 final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
-                mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+                mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
+            } else {
+                mimeMessage.setHeader("X-Originating-IP", localIp);
             }
         }
+        // else {
+        // /*
+        // * IP check disabled: Prefer IP from client request
+        // */
+        // final Map<String, Object> logProperties = LogProperties.optLogProperties();
+        // final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+        // mimeMessage.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+        // }
+    }
+
+    private static final Set<String> LOCAL_ADDRS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("127.0.0.1", "localhost", "::1")));
+
+    private static boolean isLocalhost(final String localIp) {
+        return LOCAL_ADDRS.contains(localIp);
     }
 
     private static final String[] SUPPRESS_HEADERS = {

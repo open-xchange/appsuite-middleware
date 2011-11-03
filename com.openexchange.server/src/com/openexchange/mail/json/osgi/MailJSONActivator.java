@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.mail.json.converters.MailConverter;
+import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 
@@ -79,6 +80,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
         registerService(ResultConverter.class, new MailConverter());
+        registerService(ResultConverter.class, new MailJSONConverter());
     }
 
 }

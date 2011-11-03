@@ -53,9 +53,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chat.ChatDescription;
+import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Message;
 import com.openexchange.chat.MessageDescription;
-import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.MessageImpl;
 
 /**
@@ -76,22 +76,23 @@ public final class JSONConversationParser {
      * Parses JSON to a message instance.
      * 
      * @param jsonMessage The JSON message
+     * @param from The chat user posting the message
      * @return The parsed message
      * @throws JSONException If parsing fails
      */
-    public static Message parseMessage(final JSONObject jsonMessage) throws JSONException {
+    public static Message parseMessage(final JSONObject jsonMessage, final ChatUser from) throws JSONException {
         final MessageImpl message = new MessageImpl();
-        if (jsonMessage.hasAndNotNull("id")) {
-            message.setPacketId(jsonMessage.getString("id"));
-        }
-        if (jsonMessage.hasAndNotNull("from")) {
-            message.setFrom(new ChatUserImpl(jsonMessage.getString("from"), null));
-        }
-        if (jsonMessage.hasAndNotNull("subject")) {
-            message.setSubject(jsonMessage.getString("subject"));
-        }
-        if (jsonMessage.hasAndNotNull("text")) {
-            message.setText(jsonMessage.getString("text"));
+        if (null != jsonMessage) {
+            if (jsonMessage.hasAndNotNull("id")) {
+                message.setPacketId(jsonMessage.getString("id"));
+            }
+            message.setFrom(from);
+            if (jsonMessage.hasAndNotNull("subject")) {
+                message.setSubject(jsonMessage.getString("subject"));
+            }
+            if (jsonMessage.hasAndNotNull("text")) {
+                message.setText(jsonMessage.getString("text"));
+            }
         }
         return message;
     }
@@ -105,16 +106,20 @@ public final class JSONConversationParser {
      */
     public static MessageDescription parseMessageDescription(final JSONObject jsonMessage) throws JSONException {
         final MessageDescription messageDesc;
-        if (jsonMessage.hasAndNotNull("id")) {
-            messageDesc = new MessageDescription(jsonMessage.getString("id"));
-        } else {
+        if (null == jsonMessage) {
             messageDesc = new MessageDescription();
-        }
-        if (jsonMessage.hasAndNotNull("subject")) {
-            messageDesc.setSubject(jsonMessage.getString("subject"));
-        }
-        if (jsonMessage.hasAndNotNull("text")) {
-            messageDesc.setText(jsonMessage.getString("text"));
+        } else {
+            if (jsonMessage.hasAndNotNull("id")) {
+                messageDesc = new MessageDescription(jsonMessage.getString("id"));
+            } else {
+                messageDesc = new MessageDescription();
+            }
+            if (jsonMessage.hasAndNotNull("subject")) {
+                messageDesc.setSubject(jsonMessage.getString("subject"));
+            }
+            if (jsonMessage.hasAndNotNull("text")) {
+                messageDesc.setText(jsonMessage.getString("text"));
+            }
         }
         return messageDesc;
     }
@@ -127,22 +132,27 @@ public final class JSONConversationParser {
      * @throws JSONException If a JSON error occurs
      */
     public static ChatDescription parseJSONChatDescriptionForUpdate(final JSONObject jsonChat) throws JSONException {
-        final ChatDescription chatDesc = new ChatDescription(jsonChat.getString("id"));
-        if (jsonChat.hasAndNotNull("subject")) {
-            chatDesc.setSubject(jsonChat.getString("subject"));
-        }
-        if (jsonChat.hasAndNotNull("newMembers")) {
-            final JSONArray jsonNewMembers = jsonChat.getJSONArray("newMembers");
-            final int length = jsonNewMembers.length();
-            for (int i = 0; i < length; i++) {
-                chatDesc.addNewMember(jsonNewMembers.getString(i));
+        final ChatDescription chatDesc = new ChatDescription();
+        if (null != jsonChat) {
+            if (jsonChat.hasAndNotNull("id")) {
+                chatDesc.setChatId(jsonChat.getString("id"));
             }
-        }
-        if (jsonChat.hasAndNotNull("deleteMembers")) {
-            final JSONArray jsonDeleteMembers = jsonChat.getJSONArray("deleteMembers");
-            final int length = jsonDeleteMembers.length();
-            for (int i = 0; i < length; i++) {
-                chatDesc.addDeleteMember(jsonDeleteMembers.getString(i));
+            if (jsonChat.hasAndNotNull("subject")) {
+                chatDesc.setSubject(jsonChat.getString("subject"));
+            }
+            if (jsonChat.hasAndNotNull("newMembers")) {
+                final JSONArray jsonNewMembers = jsonChat.getJSONArray("newMembers");
+                final int length = jsonNewMembers.length();
+                for (int i = 0; i < length; i++) {
+                    chatDesc.addNewMember(jsonNewMembers.getString(i));
+                }
+            }
+            if (jsonChat.hasAndNotNull("deleteMembers")) {
+                final JSONArray jsonDeleteMembers = jsonChat.getJSONArray("deleteMembers");
+                final int length = jsonDeleteMembers.length();
+                for (int i = 0; i < length; i++) {
+                    chatDesc.addDeleteMember(jsonDeleteMembers.getString(i));
+                }
             }
         }
         return chatDesc;
@@ -157,14 +167,16 @@ public final class JSONConversationParser {
      */
     public static ChatDescription parseJSONChatDescriptionForCreate(final JSONObject jsonChat) throws JSONException {
         final ChatDescription chatDesc = new ChatDescription();
-        if (jsonChat.hasAndNotNull("subject")) {
-            chatDesc.setSubject(jsonChat.getString("subject"));
-        }
-        if (jsonChat.hasAndNotNull("newMembers")) {
-            final JSONArray jsonNewMembers = jsonChat.getJSONArray("newMembers");
-            final int length = jsonNewMembers.length();
-            for (int i = 0; i < length; i++) {
-                chatDesc.addNewMember(jsonNewMembers.getString(i));
+        if (null != jsonChat) {
+            if (jsonChat.hasAndNotNull("subject")) {
+                chatDesc.setSubject(jsonChat.getString("subject"));
+            }
+            if (jsonChat.hasAndNotNull("newMembers")) {
+                final JSONArray jsonNewMembers = jsonChat.getJSONArray("newMembers");
+                final int length = jsonNewMembers.length();
+                for (int i = 0; i < length; i++) {
+                    chatDesc.addNewMember(jsonNewMembers.getString(i));
+                }
             }
         }
         return chatDesc;

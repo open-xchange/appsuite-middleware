@@ -57,6 +57,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.procedure.TIntObjectProcedure;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,6 +83,7 @@ import com.openexchange.chat.Packet;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.MessageImpl;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -183,6 +185,25 @@ public final class DBChat implements Chat {
                 }
             }
         }
+    }
+
+    private static final AtomicReference<CryptoService> CRYPTO_SERVICE_REF = new AtomicReference<CryptoService>();
+
+    private static CryptoService getCryptoService() throws OXException {
+        final CryptoService cs = CRYPTO_SERVICE_REF.get();
+        if (null == cs) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptoService.class.getName());
+        }
+        return cs;
+    }
+
+    /**
+     * Sets the crypto service reference.
+     * 
+     * @param cryptoService The crypto service
+     */
+    public static void setCryptoService(final CryptoService cryptoService) {
+        CRYPTO_SERVICE_REF.set(cryptoService);
     }
 
     /**
@@ -473,15 +494,25 @@ public final class DBChat implements Chat {
         }
     }
 
+    /*-
+     * -------------------------------------- MEMBER STUFF --------------------------------------
+     */
+
     private final int chatId;
+
+    private final String sChatId;
 
     protected final List<MessageListener> messageListeners;
 
     private final int contextId;
 
+    private volatile Context context;
+
     private volatile long lastChecked;
 
     private final ConcurrentTIntObjectHashMap<String> userNameCache;
+
+    private final boolean secureMessaging;
 
     /**
      * Initializes a new {@link DBChat}.
@@ -490,8 +521,52 @@ public final class DBChat implements Chat {
         super();
         userNameCache = new ConcurrentTIntObjectHashMap<String>(128);
         this.chatId = chatId;
+        sChatId = String.valueOf(chatId);
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
+        secureMessaging = false;
+    }
+
+    /**
+     * Gets lazy initialized context.
+     * 
+     * @return The context
+     * @throws OXException If initializing context fails
+     */
+    private Context getContext() throws OXException {
+        Context tmp = context;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = context;
+                if (null == context) {
+                    tmp = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
+                    context = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Prepares given text queried from database.
+     * 
+     * @param text The queried text
+     * @return The prepared text ready for being returned to caller
+     * @throws OXException If preparing text fails
+     */
+    private String prepareSelect(final String text) throws OXException {
+        return secureMessaging ? getCryptoService().decrypt(text, sChatId) : text;
+    }
+
+    /**
+     * Prepares given text intended for being written to database.
+     * 
+     * @param text The text to insert/update
+     * @return The prepared text ready for being written to database
+     * @throws OXException If preparing text fails
+     */
+    private String prepareInsert(final String text) throws OXException {
+        return secureMessaging ? getCryptoService().encrypt(text, sChatId) : text;
     }
 
     /**
@@ -515,7 +590,7 @@ public final class DBChat implements Chat {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final Context context = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
+            final Context context = getContext();
             final List<Message> list = new ArrayList<Message>();
             long lc = lastChecked;
             do {
@@ -524,7 +599,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
-                message.setText(rs.getString(pos++));
+                message.setText(prepareSelect(rs.getString(pos++)));
                 final long createdAt = rs.getLong(pos);
                 message.setTimeStamp(new Date(createdAt));
                 if (createdAt > lc) {
@@ -566,7 +641,7 @@ public final class DBChat implements Chat {
 
     @Override
     public String getChatId() {
-        return String.valueOf(chatId);
+        return sChatId;
     }
 
     @Override
@@ -767,9 +842,11 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, Integer.parseInt(message.getFrom().getId()));
             stmt.setInt(pos++, chatId);
             stmt.setString(pos++, UUID.randomUUID().toString());
-            stmt.setString(pos++, message.getText());
+            stmt.setString(pos++, prepareInsert(message.getText()));
             stmt.setLong(pos, System.currentTimeMillis());
             stmt.executeUpdate();
+        } catch (final DataTruncation e) {
+            throw ChatExceptionCodes.MESSAGE_TOO_LONG.create(e);
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -818,7 +895,7 @@ public final class DBChat implements Chat {
                 final String msg = messageDesc.getText();
                 if (null != msg) {
                     sql.append(" message = ?,");
-                    values.add(msg);
+                    values.add(prepareInsert(msg));
                 }
             }
             sql.append(" createdAt = ? WHERE cid = ? AND chatId = ? AND messageId = ").append(DBChatUtility.getUnhexReplaceString());
@@ -832,6 +909,8 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, chatId);
             stmt.setString(pos, messageDesc.getMessageId());
             stmt.executeUpdate();
+        } catch (final DataTruncation e) {
+            throw ChatExceptionCodes.MESSAGE_TOO_LONG.create(e);
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -887,7 +966,7 @@ public final class DBChat implements Chat {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         try {
-            return getMessages(messageIds, DBChatServiceLookup.getService(ContextService.class).getContext(contextId), con);
+            return getMessages(messageIds, getContext(), con);
         } finally {
             databaseService.backReadOnly(contextId, con);
         }
@@ -898,10 +977,7 @@ public final class DBChat implements Chat {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         try {
-            return getMessages(
-                Collections.singletonList(messageId),
-                DBChatServiceLookup.getService(ContextService.class).getContext(contextId),
-                con).get(0);
+            return getMessages(Collections.singletonList(messageId), getContext(), con).get(0);
         } finally {
             databaseService.backReadOnly(contextId, con);
         }
@@ -916,7 +992,8 @@ public final class DBChat implements Chat {
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
-                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString();
+                    final String sql =
+                        "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
@@ -931,7 +1008,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(messageId);
-                message.setText(rs.getString(pos++));
+                message.setText(prepareSelect(rs.getString(pos++)));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 messages.add(message);
             }
@@ -969,7 +1046,7 @@ public final class DBChat implements Chat {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final Context context = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
+            final Context context = getContext();
             final List<Message> list = new ArrayList<Message>();
             do {
                 final MessageImpl message = new MessageImpl();
@@ -977,7 +1054,7 @@ public final class DBChat implements Chat {
                 final int userId = rs.getInt(pos++);
                 message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
-                message.setText(rs.getString(pos++));
+                message.setText(prepareSelect(rs.getString(pos++)));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 list.add(message);
             } while (rs.next());
@@ -1056,6 +1133,24 @@ public final class DBChat implements Chat {
         }
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("DBChat {chatId=").append(chatId).append(", ");
+        builder.append("contextId=").append(contextId).append(", lastChecked=").append(lastChecked).append(", ");
+        if (messageListeners != null) {
+            builder.append("messageListeners=").append(messageListeners).append(", ");
+        }
+        builder.append('}');
+        return builder.toString();
+    }
+
+    /**
+     * Gets the database service instance.
+     * 
+     * @return The database service
+     * @throws OXException If service cannot be returned
+     */
     protected static DatabaseService getDatabaseService() throws OXException {
         final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
         if (null == databaseService) {

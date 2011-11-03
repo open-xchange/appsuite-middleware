@@ -51,6 +51,7 @@ package com.openexchange.chat.json.conversation.action;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatAccount;
@@ -99,7 +100,9 @@ public final class AllAction extends AbstractChatConversationAction {
                     access.login();
                     for (final String chatId : access.getChats()) {
                         conversationId.setChatId(chatId);
-                        jsonArray.put(conversationId.toString());
+                        final JSONObject tmp = new JSONObject();
+                        tmp.put("id", conversationId.toString());
+                        jsonArray.put(tmp);
                     }
                 } finally {
                     if (null != access) {

@@ -34,7 +34,7 @@ public class PollResultConverter implements ResultConverter {
 	}
 
 	@Override
-    public void convert(AJAXRequestData request, AJAXRequestResult result,
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result,
 			ServerSession session, Converter converter) throws OXException {
 		Poll poll = (Poll) result.getResultObject();
 

@@ -72,6 +72,7 @@ import com.openexchange.chat.db.groupware.DBChatDeleteListener;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.chat.util.PresenceImpl;
 import com.openexchange.context.ContextService;
+import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -145,6 +146,20 @@ public final class DBChatActivator extends HousekeepingActivator {
             @Override
             public void removed(final ServiceReference<SessiondService> ref, final SessiondService service) {
                 DBRoster.set(null);
+            }
+        });
+        track(CryptoService.class, new SimpleRegistryListener<CryptoService>() {
+
+            @Override
+            public void added(final ServiceReference<CryptoService> ref, final CryptoService service) {
+                DBChat.setCryptoService(service);
+                addService(CryptoService.class, service);
+            }
+
+            @Override
+            public void removed(final ServiceReference<CryptoService> ref, final CryptoService service) {
+                DBChat.setCryptoService(null);
+                removeService(CryptoService.class);
             }
         });
         openTrackers();

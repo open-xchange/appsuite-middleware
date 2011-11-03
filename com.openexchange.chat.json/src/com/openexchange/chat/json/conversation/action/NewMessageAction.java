@@ -60,6 +60,7 @@ import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationParser;
+import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -102,7 +103,7 @@ public final class NewMessageAction extends AbstractChatConversationAction {
             /*
              * Parse message
              */
-            final Message msg = JSONConversationParser.parseMessage(jsonMessage);
+            final Message msg = JSONConversationParser.parseMessage(jsonMessage, new ChatUserImpl(String.valueOf(session.getUserId()), null));
             chat.post(msg);
             /*
              * Return appropriate result

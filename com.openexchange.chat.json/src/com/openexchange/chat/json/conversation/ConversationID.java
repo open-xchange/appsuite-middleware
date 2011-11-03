@@ -49,6 +49,9 @@
 
 package com.openexchange.chat.json.conversation;
 
+import com.openexchange.chat.ChatExceptionCodes;
+import com.openexchange.exception.OXException;
+
 
 /**
  * {@link ConversationID} - Represents a conversation identifier.
@@ -62,11 +65,21 @@ public final class ConversationID {
      * 
      * @param uid The conversation identifier
      * @return The conversation identifier
+     * @throws OXException If parsing fails
      */
-    public static ConversationID valueOf(final String uid) {
+    public static ConversationID valueOf(final String uid) throws OXException {
         final ConversationID conversationId = new ConversationID();
         conversationId.uid = uid;
         parseUid(conversationId, uid);
+        if (null == conversationId.serviceId) {
+            throw ChatExceptionCodes.INVALID_CONVERSATION_ID.create(uid);
+        }
+        if (null == conversationId.accountId) {
+            throw ChatExceptionCodes.INVALID_CONVERSATION_ID.create(uid);
+        }
+        if (null == conversationId.chatId) {
+            throw ChatExceptionCodes.INVALID_CONVERSATION_ID.create(uid);
+        }
         return conversationId;
     }
 

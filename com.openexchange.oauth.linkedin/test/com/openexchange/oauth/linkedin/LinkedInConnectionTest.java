@@ -64,6 +64,7 @@ package com.openexchange.oauth.linkedin;
 //import org.scribe.oauth.OAuthService;
 //import com.openexchange.oauth.DefaultOAuthToken;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -186,7 +187,7 @@ public class LinkedInConnectionTest extends TestCase {
     }
     
     public void testGetProfileForEMail() throws OXException, JSONException{
-    	JSONObject fullProfile = linkedIn.getFullProfileByEMail("tobiasprinz@gmx.net","password",1,1,1);
+    	JSONObject fullProfile = linkedIn.getFullProfileByEMail(Arrays.asList("tobiasprinz@gmx.net"),"password",1,1,1);
     	assertEquals("Tobias", fullProfile.getString("firstName"));
     	assertEquals("Prinz", fullProfile.getString("lastName"));
     }

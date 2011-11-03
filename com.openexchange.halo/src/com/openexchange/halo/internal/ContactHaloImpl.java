@@ -28,53 +28,87 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 public class ContactHaloImpl implements ContactHalo {
-	
+
 	private UserService userService;
 	private ContactInterfaceDiscoveryService contactDiscoveryService;
 	private ContactSearchMultiplexer contactSearchMultiplexer;
-	
+
 	private ConfigViewFactory configViews;
-	
+
 	private Map<String, HaloContactDataSource> contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>();
-	
-	public ContactHaloImpl(UserService userService, ContactInterfaceDiscoveryService contactDiscoveryService, SessionSpecificContainerRetrievalService sessionScope, ConfigViewFactory configViews) {
+
+	public ContactHaloImpl(UserService userService,
+			ContactInterfaceDiscoveryService contactDiscoveryService,
+			SessionSpecificContainerRetrievalService sessionScope,
+			ConfigViewFactory configViews) {
 		this.userService = userService;
 		this.contactDiscoveryService = contactDiscoveryService;
-		this.contactSearchMultiplexer = new ContactSearchMultiplexer(contactDiscoveryService);
+		this.contactSearchMultiplexer = new ContactSearchMultiplexer(
+				contactDiscoveryService);
 		this.configViews = configViews;
 	}
-	
+
 	@Override
-	public AJAXRequestResult investigate(String provider, Contact contact, AJAXRequestData req, ServerSession session) throws OXException {
+	public AJAXRequestResult investigate(String provider, Contact contact,
+			AJAXRequestData req, ServerSession session) throws OXException {
 		HaloContactDataSource dataSource = contactDataSources.get(provider);
 		if (dataSource == null) {
-			throw new OXException(1).setPrefix("HALO").setLogMessage("Unknown halo provider '"+provider+"'");
+			throw new OXException(1).setPrefix("HALO").setLogMessage(
+					"Unknown halo provider '" + provider + "'");
 		}
-		return dataSource.investigate(buildQuery(contact, session), req, session);
+		return dataSource.investigate(buildQuery(contact, session), req,
+				session);
 	}
-
 
 	private HaloContactQuery buildQuery(Contact contact, ServerSession session)
 			throws OXException {
 		HaloContactQuery contactQuery = new HaloContactQuery();
-		
+
 		// Try to find a user with a given eMail address
-		
+
 		User user = null;
-		try {
-			user = userService.searchUser(contact.getEmail1(), session.getContext());
-			contactQuery.setUser(user);
-		} catch (OXException x) {
-			// Don't care. This is all best effort anyway.
+		if (contact.getInternalUserId() > 0) {
+			user = userService.getUser(contact.getInternalUserId(), session.getContext());
+		}
+		if (user == null) {
+			try {
+				user = userService.searchUser(contact.getEmail1(),
+						session.getContext());
+			} catch (OXException x) {
+				// Don't care. This is all best effort anyway.
+			}
 		}
 		
+		if (user == null) {
+			try {
+				user = userService.searchUser(contact.getEmail2(),
+						session.getContext());
+			} catch (OXException x) {
+				// Don't care. This is all best effort anyway.
+			}
+		}
+
+		if (user == null) {
+			try {
+				user = userService.searchUser(contact.getEmail3(),
+						session.getContext());
+			} catch (OXException x) {
+				// Don't care. This is all best effort anyway.
+			}
+		}
+
+
+		contactQuery.setUser(user);
 		List<Contact> contactsToMerge = new ArrayList<Contact>();
 		if (user != null) {
 			// Load the associated contact
-			ContactInterfaceProvider contactInterfaceProvider = contactDiscoveryService.getContactInterfaceProvider(6, session.getContextId());
-			ContactInterface contactInterface = contactInterfaceProvider.newContactInterface(session);
-			contactsToMerge.add(contactInterface.getObjectById(user.getContactId(), 6));
-			
+			ContactInterfaceProvider contactInterfaceProvider = contactDiscoveryService
+					.getContactInterfaceProvider(6, session.getContextId());
+			ContactInterface contactInterface = contactInterfaceProvider
+					.newContactInterface(session);
+			contactsToMerge.add(contactInterface.getObjectById(
+					user.getContactId(), 6));
+
 		} else {
 			// Try to find a contact
 			ContactSearchObject cso = new ContactSearchObject();
@@ -82,14 +116,16 @@ public class ContactHaloImpl implements ContactHalo {
 			cso.setEmail2(contact.getEmail1());
 			cso.setEmail3(contact.getEmail1());
 			cso.setOrSearch(true);
-			
-			SearchIterator<Contact> result = contactSearchMultiplexer.extendedSearch(session, cso, -1, null, null, Contact.ALL_COLUMNS);
-			while(result.hasNext()) {
+
+			SearchIterator<Contact> result = contactSearchMultiplexer
+					.extendedSearch(session, cso, -1, null, null,
+							Contact.ALL_COLUMNS);
+			while (result.hasNext()) {
 				contactsToMerge.add(result.next());
 			}
 		}
 		contactQuery.setMergedContacts(contactsToMerge);
-		
+
 		ContactMerger contactMerger = new ContactMerger(false);
 		for (Contact c : contactsToMerge) {
 			contact = contactMerger.merge(contact, c);
@@ -97,13 +133,15 @@ public class ContactHaloImpl implements ContactHalo {
 		contactQuery.setContact(contact);
 		return contactQuery;
 	}
-	
+
 	@Override
 	public List<String> getProviders(ServerSession session) throws OXException {
-		ConfigView view = configViews.getView(session.getUserId(), session.getContextId());
+		ConfigView view = configViews.getView(session.getUserId(),
+				session.getContextId());
 		List<String> providers = new ArrayList<String>();
-		for(String provider: contactDataSources.keySet()) {
-			ComposedConfigProperty<Boolean> property = view.property(provider, boolean.class);
+		for (String provider : contactDataSources.keySet()) {
+			ComposedConfigProperty<Boolean> property = view.property(provider,
+					boolean.class);
 			if (property.isDefined() && property.get()) {
 				providers.add(provider);
 			}
@@ -111,14 +149,12 @@ public class ContactHaloImpl implements ContactHalo {
 		return providers;
 	}
 
-
-	
 	public void addContactDataSource(HaloContactDataSource ds) {
 		contactDataSources.put(ds.getId(), ds);
 	}
-	
+
 	public void removeContactDataSource(HaloContactDataSource ds) {
 		contactDataSources.remove(ds.getId());
 	}
-	
+
 }

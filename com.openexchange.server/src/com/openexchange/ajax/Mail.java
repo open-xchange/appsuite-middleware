@@ -129,7 +129,6 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.html.HTMLService;
 import com.openexchange.json.OXJSONWriter;
-import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -159,6 +158,7 @@ import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
+import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -3797,9 +3797,7 @@ public class Mail extends PermissionServlet implements UploadListener {
              * Send raw message source
              */
             if (MailProperties.getInstance().isAddClientIPAddress()) {
-                final Map<String, Object> logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
-                m.setHeader("X-Originating-IP", clientIp == null ? session.getLocalIp() : clientIp);
+                MIMEMessageFiller.addClientIPAddress(m, session);
             }
             /*
              * Get message bytes
