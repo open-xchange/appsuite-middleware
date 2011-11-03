@@ -307,6 +307,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
              * Forward request is immediately followed by a data package
              */
             ajpCon.incrementPackageNumber();
+            ajpCon.getOutputStream().setLastAccessed(System.currentTimeMillis());
             /*
              * We got a following request body package.
              */

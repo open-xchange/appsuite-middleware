@@ -52,6 +52,7 @@ package com.openexchange.ajp13.coyote.sockethandler;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,7 +69,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link CoyoteTask} - The coyote task.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CoyoteTask implements Task<Object> {
@@ -91,15 +92,25 @@ public final class CoyoteTask implements Task<Object> {
      */
     private final AJPv13TaskWatcher watcher;
 
+    /**
+     * The listener monitor
+     */
     private final AJPv13TaskMonitor listenerMonitor;
 
     /**
+     * The count-down latch to open this task for processing.
+     */
+    private final CountDownLatch latch;
+
+    /**
      * Initializes a new {@link AjpProcessorRunnable}.
-     *
+     * 
      * @param client The accepted client socket
      * @param ajpProcessor The AJP processor dedicated to the socket
      */
     protected CoyoteTask(final Socket client, final AjpProcessor ajpProcessor, final AJPv13TaskMonitor listenerMonitor, final AJPv13TaskWatcher watcher) {
+        super();
+        latch = new CountDownLatch(1);
         this.client = client;
         this.ajpProcessor = ajpProcessor;
         this.watcher = watcher;
@@ -107,8 +118,15 @@ public final class CoyoteTask implements Task<Object> {
     }
 
     /**
+     * Opens this task for processing
+     */
+    public void open() {
+        latch.countDown();
+    }
+
+    /**
      * Gets the associated AJP processor.
-     *
+     * 
      * @return The AJP processor
      */
     public AjpProcessor getAjpProcessor() {
@@ -127,7 +145,7 @@ public final class CoyoteTask implements Task<Object> {
 
     /**
      * Increments/decrements the number of running AJP tasks.
-     *
+     * 
      * @param increment whether to increment or to decrement
      */
     private static void changeNumberOfRunningAJPTasks(final boolean increment) {
@@ -153,6 +171,7 @@ public final class CoyoteTask implements Task<Object> {
     @Override
     public Object call() throws Exception {
         try {
+            latch.await();
             final int linger = Constants.DEFAULT_CONNECTION_LINGER;
             if (linger > 0) {
                 client.setSoLinger(true, linger);
@@ -161,38 +180,38 @@ public final class CoyoteTask implements Task<Object> {
             if (to > 0) {
                 client.setSoTimeout(to);
             }
-            //client.setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
+            // client.setServerSoTimeout(Constants.DEFAULT_SERVER_SOCKET_TIMEOUT);
             client.setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
         } catch (final SocketException e) {
             // Eh...
         }
-        //while (!client.isClosed()) {
-            try {
-                ajpProcessor.action(ActionCode.START, null);
-                ajpProcessor.process(client);
-            } catch (final java.net.SocketException e) {
-                // SocketExceptions are normal
-                LOG.debug(e.getMessage(), e);
-            } catch (final java.io.IOException e) {
-                // IOExceptions are normal
-                LOG.debug(e.getMessage(), e);
-            } catch (final ThreadDeath fatal) {
-                throw fatal;
-            } catch (final VirtualMachineError fatal) {
-                throw fatal;
-            } catch (final Throwable e) {
-                /*
-                 * Any other exception or error is odd.
-                 */
-                ExceptionUtils.handleThrowable(e);
-                LOG.error(e.getMessage(), e);
-            } finally {
-                ajpProcessor.action(ActionCode.STOP, null);
-                //ajpProcessor.recycle();
-                closeQuitely(client);
-                AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
-            }
-        //}
+        // while (!client.isClosed()) {
+        try {
+            ajpProcessor.action(ActionCode.START, null);
+            ajpProcessor.process(client);
+        } catch (final java.net.SocketException e) {
+            // SocketExceptions are normal
+            LOG.debug(e.getMessage(), e);
+        } catch (final java.io.IOException e) {
+            // IOExceptions are normal
+            LOG.debug(e.getMessage(), e);
+        } catch (final ThreadDeath fatal) {
+            throw fatal;
+        } catch (final VirtualMachineError fatal) {
+            throw fatal;
+        } catch (final Throwable e) {
+            /*
+             * Any other exception or error is odd.
+             */
+            ExceptionUtils.handleThrowable(e);
+            LOG.error(e.getMessage(), e);
+        } finally {
+            ajpProcessor.action(ActionCode.STOP, null);
+            // ajpProcessor.recycle();
+            closeQuitely(client);
+            AJPv13ServerImpl.decrementNumberOfOpenAJPSockets();
+        }
+        // }
         return null;
     }
 

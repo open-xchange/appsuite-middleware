@@ -80,12 +80,24 @@ public class TestServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setStatus(HttpServletResponse.SC_OK);
+        // Uncomment to test long-running task
+        /*-
+         * 
+        try {
+            System.out.println("Going asleep...");
+            Thread.sleep(100000);
+            System.out.println("... and now continues processing.");
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
+         * 
+         */
         final StringBuilder page = new StringBuilder();
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
         page.append("<html>\n");
         page.append("<head><title>TestServlet's doGet Page</title></head>\n");
         page.append("<body>\n");
-        page.append("<h1><blink>TestServlet's doGet Page</blink></h1><hr/>\n");
+        page.append("<h1>TestServlet's doGet Page</h1><hr/>\n");
         page.append("<p>This is a tiny paragraph with some text inside!</p>\n");
         page.append("<p>Again a tiny paragraph with some text inside!</p>\n");
         page.append("<ol><li>First list entry</li>");
