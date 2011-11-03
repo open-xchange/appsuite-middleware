@@ -225,6 +225,20 @@ public final class ImapIdlePushListener implements PushListener {
     }
 
     /**
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
      * @return the errordelay
      */
     public static final int getErrordelay() {
@@ -367,6 +381,10 @@ public final class ImapIdlePushListener implements PushListener {
         MailAccess<?, ?> mailAccess = null;
         try {
             final Session session = getSession();
+            if (null == session) {
+                // No active session found for associated user. Abort...
+                return false;
+            }
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
             mailAccess.connect(false);
             final IMAPFolderStorage istore;
