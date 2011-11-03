@@ -35,7 +35,6 @@ public class LookForScriptsListener implements BundleListener {
 				return;
 			}
 		}
-		System.out.println(bundle);
 		Reader r = null;
 		try {
 			r = new InputStreamReader(entry.openStream(), "UTF-8");
