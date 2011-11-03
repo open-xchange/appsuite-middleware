@@ -51,7 +51,6 @@ package com.openexchange.admin.soap.dataobjects;
 
 import java.util.HashSet;
 import java.util.Map;
-import com.openexchange.admin.rmi.dataobjects.Database;
 
 
 public class Context {
@@ -121,9 +120,9 @@ public class Context {
         }
         this.setMaxQuota(c.getMaxQuota());
         this.setName(c.getName());
-        this.setReadDatabase(c.getReadDatabase());
+        this.setReadDatabase(new Database(c.getReadDatabase()));
         this.setUsedQuota(c.getUsedQuota());
-        this.setWriteDatabase(c.getWriteDatabase());
+        this.setWriteDatabase(new Database(c.getWriteDatabase()));
         Map<String, Map<String, String>> userattrs = c.getUserAttributes();
         if( null != userattrs ) {
             this.setUserAttributes(SOAPStringMapMap.convertFromMapMap(userattrs));

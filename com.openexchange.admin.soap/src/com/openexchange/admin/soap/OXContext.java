@@ -52,8 +52,6 @@ import java.rmi.ConnectException;
 import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -65,6 +63,8 @@ import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.soap.dataobjects.Context;
+import com.openexchange.admin.soap.dataobjects.Database;
+import com.openexchange.admin.soap.dataobjects.Filestore;
 import com.openexchange.admin.soap.dataobjects.User;
 import com.openexchange.admin.soap.dataobjects.UserModuleAccess;
 
@@ -469,10 +469,10 @@ public class OXContext extends OXSOAPRMIMapper {
     public Context[] listByDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException {
         reconnect();
         try {
-            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByDatabase(db, auth));
+            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByDatabase(SOAPUtils.soapDatabase2Database(db), auth));
         } catch( ConnectException e) {
             reconnect(true);
-            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByDatabase(db, auth));
+            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByDatabase(SOAPUtils.soapDatabase2Database(db), auth));
         }
     }
 
@@ -491,10 +491,10 @@ public class OXContext extends OXSOAPRMIMapper {
     public Context[] listByFilestore(Filestore fs, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchFilestoreException {
         reconnect();
         try {
-            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByFilestore(fs, auth));
+            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByFilestore(SOAPUtils.soapFilestore2Filestore(fs), auth));
         } catch( ConnectException e) {
             reconnect(true);
-            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByFilestore(fs, auth));
+            return SOAPUtils.contexts2SoapContexts(((OXContextInterface)rmistub).listByFilestore(SOAPUtils.soapFilestore2Filestore(fs), auth));
         }
     }
 
@@ -516,10 +516,10 @@ public class OXContext extends OXSOAPRMIMapper {
     public int moveContextDatabase(Context ctx, Database dst_database_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, DatabaseUpdateException, OXContextException {
         reconnect();
         try {
-            return ((OXContextInterface)rmistub).moveContextDatabase(SOAPUtils.soapContext2Context(ctx), dst_database_id, auth);
+            return ((OXContextInterface)rmistub).moveContextDatabase(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapDatabase2Database(dst_database_id), auth);
         } catch( ConnectException e) {
             reconnect(true);
-            return ((OXContextInterface)rmistub).moveContextDatabase(SOAPUtils.soapContext2Context(ctx), dst_database_id, auth);
+            return ((OXContextInterface)rmistub).moveContextDatabase(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapDatabase2Database(dst_database_id), auth);
         }
     }
 
@@ -542,10 +542,10 @@ public class OXContext extends OXSOAPRMIMapper {
     public int moveContextFilestore(Context ctx, Filestore dst_filestore_id, Credentials auth) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException, NoSuchFilestoreException, NoSuchReasonException, OXContextException {
         reconnect();
         try {
-            return ((OXContextInterface)rmistub).moveContextFilestore(SOAPUtils.soapContext2Context(ctx), dst_filestore_id, auth);
+            return ((OXContextInterface)rmistub).moveContextFilestore(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapFilestore2Filestore(dst_filestore_id), auth);
         } catch( ConnectException e) {
             reconnect(true);
-            return ((OXContextInterface)rmistub).moveContextFilestore(SOAPUtils.soapContext2Context(ctx), dst_filestore_id, auth);
+            return ((OXContextInterface)rmistub).moveContextFilestore(SOAPUtils.soapContext2Context(ctx), SOAPUtils.soapFilestore2Filestore(dst_filestore_id), auth);
         }
     }
 

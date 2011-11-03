@@ -53,13 +53,13 @@ import java.rmi.RemoteException;
 
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.Database;
-import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
-import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.soap.dataobjects.Database;
+import com.openexchange.admin.soap.dataobjects.Filestore;
+import com.openexchange.admin.soap.dataobjects.Server;
 
 /**
  * SOAP Service implementing RMI Interface OXUtilInterface
@@ -67,7 +67,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  * @author choeger
  *
  */
-public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
+public class OXUtil extends OXSOAPRMIMapper {
 
     public OXUtil() throws RemoteException {
         super(OXUtilInterface.class);
@@ -79,10 +79,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public void changeDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            ((OXUtilInterface)rmistub).changeDatabase(db, auth);
+            ((OXUtilInterface)rmistub).changeDatabase(SOAPUtils.soapDatabase2Database(db), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXUtilInterface)rmistub).changeDatabase(db, auth);
+            ((OXUtilInterface)rmistub).changeDatabase(SOAPUtils.soapDatabase2Database(db), auth);
         }
     }
 
@@ -92,10 +92,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public void changeFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            ((OXUtilInterface)rmistub).changeFilestore(fstore, auth);
+            ((OXUtilInterface)rmistub).changeFilestore(SOAPUtils.soapFilestore2Filestore(fstore), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXUtilInterface)rmistub).changeFilestore(fstore, auth);
+            ((OXUtilInterface)rmistub).changeFilestore(SOAPUtils.soapFilestore2Filestore(fstore), auth);
         }
     }
 
@@ -131,10 +131,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Database[] listAllDatabase(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).listAllDatabase(auth);
+            return SOAPUtils.databases2SoapDatabases(((OXUtilInterface)rmistub).listAllDatabase(auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).listAllDatabase(auth);
+            return SOAPUtils.databases2SoapDatabases(((OXUtilInterface)rmistub).listAllDatabase(auth));
         }
     }
 
@@ -144,10 +144,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Filestore[] listAllFilestore(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).listAllFilestore(auth);
+            return SOAPUtils.filestores2SoapFilestores(((OXUtilInterface)rmistub).listAllFilestore(auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).listAllFilestore(auth);
+            return SOAPUtils.filestores2SoapFilestores(((OXUtilInterface)rmistub).listAllFilestore(auth));
         }
     }
 
@@ -170,10 +170,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Server[] listAllServer(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).listAllServer(auth);
+            return SOAPUtils.servers2SoapServers(((OXUtilInterface)rmistub).listAllServer(auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).listAllServer(auth);
+            return SOAPUtils.servers2SoapServers(((OXUtilInterface)rmistub).listAllServer(auth));
         }
     }
 
@@ -183,10 +183,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Database[] listDatabase(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).listDatabase(search_pattern, auth);
+            return SOAPUtils.databases2SoapDatabases(((OXUtilInterface)rmistub).listDatabase(search_pattern, auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).listDatabase(search_pattern, auth);
+            return SOAPUtils.databases2SoapDatabases(((OXUtilInterface)rmistub).listDatabase(search_pattern, auth));
         }
     }
 
@@ -196,10 +196,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Filestore[] listFilestore(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).listFilestore(search_pattern, auth);
+            return SOAPUtils.filestores2SoapFilestores(((OXUtilInterface)rmistub).listFilestore(search_pattern, auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).listFilestore(search_pattern, auth);
+            return SOAPUtils.filestores2SoapFilestores(((OXUtilInterface)rmistub).listFilestore(search_pattern, auth));
         }
     }
 
@@ -222,10 +222,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Server[] listServer(String search_pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).listServer(search_pattern, auth);
+            return SOAPUtils.servers2SoapServers(((OXUtilInterface)rmistub).listServer(search_pattern, auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).listServer(search_pattern, auth);
+            return SOAPUtils.servers2SoapServers(((OXUtilInterface)rmistub).listServer(search_pattern, auth));
         }
     }
 
@@ -235,10 +235,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Database registerDatabase(Database db, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).registerDatabase(db, auth);
+            return new Database(((OXUtilInterface)rmistub).registerDatabase(SOAPUtils.soapDatabase2Database(db), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).registerDatabase(db, auth);
+            return new Database(((OXUtilInterface)rmistub).registerDatabase(SOAPUtils.soapDatabase2Database(db), auth));
         }
     }
 
@@ -248,10 +248,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Filestore registerFilestore(Filestore fstore, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).registerFilestore(fstore, auth);
+            return new Filestore(((OXUtilInterface)rmistub).registerFilestore(SOAPUtils.soapFilestore2Filestore(fstore), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).registerFilestore(fstore, auth);
+            return new Filestore(((OXUtilInterface)rmistub).registerFilestore(SOAPUtils.soapFilestore2Filestore(fstore), auth));
         }
     }
 
@@ -261,10 +261,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public Server registerServer(Server srv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            return ((OXUtilInterface)rmistub).registerServer(srv, auth);
+            return new Server(((OXUtilInterface)rmistub).registerServer(SOAPUtils.soapServer2Server(srv), auth));
         } catch (ConnectException e) {
             reconnect(true);
-            return ((OXUtilInterface)rmistub).registerServer(srv, auth);
+            return new Server(((OXUtilInterface)rmistub).registerServer(SOAPUtils.soapServer2Server(srv), auth));
         }
     }
 
@@ -274,10 +274,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public void unregisterDatabase(Database dbhandle, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            ((OXUtilInterface)rmistub).unregisterDatabase(dbhandle, auth);
+            ((OXUtilInterface)rmistub).unregisterDatabase(SOAPUtils.soapDatabase2Database(dbhandle), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXUtilInterface)rmistub).unregisterDatabase(dbhandle, auth);
+            ((OXUtilInterface)rmistub).unregisterDatabase(SOAPUtils.soapDatabase2Database(dbhandle), auth);
         }
     }
 
@@ -287,10 +287,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public void unregisterFilestore(Filestore store, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            ((OXUtilInterface)rmistub).unregisterFilestore(store, auth);
+            ((OXUtilInterface)rmistub).unregisterFilestore(SOAPUtils.soapFilestore2Filestore(store), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXUtilInterface)rmistub).unregisterFilestore(store, auth);
+            ((OXUtilInterface)rmistub).unregisterFilestore(SOAPUtils.soapFilestore2Filestore(store), auth);
         }
     }
 
@@ -300,10 +300,10 @@ public class OXUtil extends OXSOAPRMIMapper implements OXUtilInterface {
     public void unregisterServer(Server serv, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         reconnect();
         try {
-            ((OXUtilInterface)rmistub).unregisterServer(serv, auth);
+            ((OXUtilInterface)rmistub).unregisterServer(SOAPUtils.soapServer2Server(serv), auth);
         } catch (ConnectException e) {
             reconnect(true);
-            ((OXUtilInterface)rmistub).unregisterServer(serv, auth);
+            ((OXUtilInterface)rmistub).unregisterServer(SOAPUtils.soapServer2Server(serv), auth);
         }
     }
 

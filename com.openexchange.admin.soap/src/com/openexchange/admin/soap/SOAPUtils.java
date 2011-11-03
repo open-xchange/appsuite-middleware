@@ -50,10 +50,13 @@ package com.openexchange.admin.soap;
 
 import java.util.HashSet;
 import com.openexchange.admin.soap.dataobjects.Context;
+import com.openexchange.admin.soap.dataobjects.Database;
+import com.openexchange.admin.soap.dataobjects.Filestore;
 import com.openexchange.admin.soap.dataobjects.Group;
 import com.openexchange.admin.soap.dataobjects.Resource;
 import com.openexchange.admin.soap.dataobjects.SOAPStringMap;
 import com.openexchange.admin.soap.dataobjects.SOAPStringMapMap;
+import com.openexchange.admin.soap.dataobjects.Server;
 import com.openexchange.admin.soap.dataobjects.User;
 import com.openexchange.admin.soap.dataobjects.UserModuleAccess;
 
@@ -213,9 +216,9 @@ public final class SOAPUtils {
         }
         ret.setMaxQuota(ctx.getMaxQuota());
         ret.setName(ctx.getName());
-        ret.setReadDatabase(ctx.getReadDatabase());
+        ret.setReadDatabase(soapDatabase2Database(ctx.getReadDatabase()));
         ret.setUsedQuota(ctx.getUsedQuota());
-        ret.setWriteDatabase(ctx.getWriteDatabase());
+        ret.setWriteDatabase(soapDatabase2Database(ctx.getWriteDatabase()));
         SOAPStringMapMap userattrs = ctx.getUserAttributes();
         if( null != userattrs ) {
             ret.setUserAttributes(SOAPStringMapMap.convertToMapMap(userattrs));
@@ -1075,6 +1078,73 @@ public final class SOAPUtils {
         for(int i=0; i<resources.length; i++) {
             ret[i] = new Resource(resources[i]);
         }
+        return ret;
+    }
+
+    public static com.openexchange.admin.rmi.dataobjects.Database soapDatabase2Database(Database db) {
+        if( null == db ) {
+            return null;
+        }
+        com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
+        ret.setId(db.getId());
+        ret.setClusterWeight(db.getClusterWeight());
+        ret.setCurrentUnits(db.getCurrentUnits());
+        ret.setMaxUnits(db.getMaxUnits());
+        ret.setPoolHardLimit(db.getPoolHardLimit());
+        ret.setPoolInitial(db.getPoolInitial());
+        ret.setPoolMax(db.getPoolMax());
+        ret.setDriver(db.getDriver());
+        ret.setLogin(db.getLogin());
+        ret.setMaster(db.getMaster());
+        ret.setMasterId(db.getMasterId());
+        ret.setName(db.getName());
+        ret.setPassword(db.getPassword());
+        ret.setUrl(db.getUrl());
+        ret.setRead_id(db.getRead_id());
+        ret.setScheme(db.getScheme());
+        return ret;
+    }
+    
+    public static com.openexchange.admin.rmi.dataobjects.Filestore soapFilestore2Filestore(Filestore fs) {
+        com.openexchange.admin.rmi.dataobjects.Filestore ret = new com.openexchange.admin.rmi.dataobjects.Filestore();
+        ret.setId(fs.getId());
+        ret.setCurrentContexts(fs.getCurrentContexts());
+        ret.setMaxContexts(fs.getMaxContexts());
+        ret.setReserved(fs.getReserved());
+        ret.setSize(fs.getSize());
+        ret.setUrl(fs.getUrl());
+        ret.setUsed(fs.getUsed());
+        return ret;
+    }
+    
+    public static Database[] databases2SoapDatabases(com.openexchange.admin.rmi.dataobjects.Database []dbs) {
+        Database ret[] = new Database[dbs.length];
+        for(int i=0; i<dbs.length; i++) {
+            ret[i] = new Database(dbs[i]);
+        }
+        return ret;
+    }
+    
+    public static Filestore[] filestores2SoapFilestores(com.openexchange.admin.rmi.dataobjects.Filestore []fss) {
+        Filestore ret[] = new Filestore[fss.length];
+        for(int i=0; i<fss.length; i++) {
+            ret[i] = new Filestore(fss[i]);
+        }
+        return ret;
+    }
+    
+    public static Server[] servers2SoapServers(com.openexchange.admin.rmi.dataobjects.Server []srvs) {
+        Server ret[] = new Server[srvs.length];
+        for(int i=0; i<srvs.length; i++) {
+            ret[i] = new Server(srvs[i]);
+        }
+        return ret;
+    }
+    
+    public static com.openexchange.admin.rmi.dataobjects.Server soapServer2Server(Server s) {
+        com.openexchange.admin.rmi.dataobjects.Server ret = new com.openexchange.admin.rmi.dataobjects.Server();
+        ret.setId(s.getId());
+        ret.setName(s.getName());
         return ret;
     }
 }
