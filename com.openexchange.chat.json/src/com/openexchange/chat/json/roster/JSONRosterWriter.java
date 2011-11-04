@@ -160,7 +160,7 @@ public final class JSONRosterWriter {
         jsonPresence.put("status", presence.getStatus());
         final Date timeStamp = presence.getTimeStamp();
         if (null != timeStamp) {
-            jsonPresence.put("timeStamp", addTimeZoneOffset(timeStamp.getTime(), timeZone));
+            jsonPresence.put("timestamp", addTimeZoneOffset(timeStamp.getTime(), timeZone));
         }
         return jsonPresence;
     }

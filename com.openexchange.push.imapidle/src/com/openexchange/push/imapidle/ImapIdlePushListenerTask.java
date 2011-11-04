@@ -51,7 +51,6 @@ package com.openexchange.push.imapidle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
 
 /**
  * Simple {@link Runnable} to trigger a listener's {@link ImapIdlePushListener#checkNewMail()} method.
@@ -73,8 +72,10 @@ public final class ImapIdlePushListenerTask implements Runnable {
             while (listener.checkNewMail()) {
                 // Nothing...
             }
-        } catch (final OXException e) {
+        } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
+        } finally {
+            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(listener.getContextId(), listener.getUserId());
         }
     }
 

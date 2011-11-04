@@ -162,7 +162,7 @@ public final class JSONConversationWriter {
                 jsonMessage.put("text", text);
             }
         }
-        jsonMessage.put("timeStamp", addTimeZoneOffset(message.getTimeStamp().getTime(), timeZone));
+        jsonMessage.put("timestamp", addTimeZoneOffset(message.getTimeStamp().getTime(), timeZone));
         return jsonMessage;
     }
 
@@ -200,7 +200,7 @@ public final class JSONConversationWriter {
         jsonPresence.put("status", presence.getStatus());
         final Date timeStamp = presence.getTimeStamp();
         if (null != timeStamp) {
-            jsonPresence.put("timeStamp", addTimeZoneOffset(timeStamp.getTime(), getTimeZone(timeZone)));
+            jsonPresence.put("timestamp", addTimeZoneOffset(timeStamp.getTime(), getTimeZone(timeZone)));
         }
         return jsonPresence;
     }

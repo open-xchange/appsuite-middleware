@@ -114,20 +114,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     private static final String HTTPS = "https";
 
-    private static final int STAGE_AWAIT = 1;
-
-    private static final int STAGE_PREPARE = 2;
-
-    private static final int STAGE_SERVICE = 4;
-
-    private static final int STAGE_KEEPALIVE = 8;
-
-    private static final int STAGE_ENDED = 16;
+    private static enum Stage {
+        STAGE_AWAIT, STAGE_PREPARE, STAGE_SERVICE, STAGE_ENDED;
+    }
 
     /**
      * The current processor stage.
      */
-    private volatile int stage;
+    private volatile Stage stage;
 
     /**
      * Required secret.
@@ -402,7 +396,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         certificates = MessageBytes.newInstance();
         mainLock = new ReentrantReadWriteLock();
         softLock = mainLock.readLock();
-        lastWriteAccess = Long.MAX_VALUE;
+        lastWriteAccess = 0L;
         this.listenerMonitor = listenerMonitor;
         this.number = Long.valueOf(NUMBER.incrementAndGet());
         servletId = new StringBuilder(16);
@@ -447,11 +441,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     public void startKeepAlivePing() {
         final TimerService timer = AJPv13ServiceRegistry.getInstance().getService(TimerService.class);
-        if (null != timer) {
-            final int max = AJPv13Config.getKeepAliveTime();
-            scheduledKeepAliveTask =
-                timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max, TimeUnit.MILLISECONDS);
+        if (null == timer) {
+            throw new IllegalStateException("Missing timer service!");
         }
+        final int max = AJPv13Config.getKeepAliveTime();
+        scheduledKeepAliveTask =
+            timer.scheduleWithFixedDelay(new KeepAliveRunnable(this, max), max, max, TimeUnit.MILLISECONDS);
     }
 
     public void stopKeepAlivePing() {
@@ -468,12 +463,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     @Override
     public boolean isWaitingOnAJPSocket() {
-        return STAGE_AWAIT == stage;
+        return Stage.STAGE_AWAIT == stage;
     }
 
     @Override
     public boolean isProcessing() {
-        return STAGE_SERVICE == stage;
+        return Stage.STAGE_SERVICE == stage;
     }
 
     @Override
@@ -567,7 +562,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Is a response expected?
          */
-        if (STAGE_AWAIT != stage && STAGE_KEEPALIVE != stage) {
+        if (Stage.STAGE_AWAIT != stage) {
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             action(ActionCode.CLIENT_FLUSH, null);
             action(ActionCode.CLOSE, Boolean.FALSE);
@@ -648,7 +643,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * @throws IOException If an error occurs during an I/O operation
      */
     public void process(final Socket socket) throws IOException {
-        stage = STAGE_AWAIT;
+        stage = Stage.STAGE_AWAIT;
         final long st = System.currentTimeMillis();
         // Setting up the socket
         this.socket = socket;
@@ -663,11 +658,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         error = false;
         final Thread thread = this.thread = Thread.currentThread();
+        final boolean logPropsEnabled = LogProperties.isEnabled();
         while (started && !error && !thread.isInterrupted()) {
             /*
              * Parsing the request header
              */
-            if (LogProperties.isEnabled()) {
+            if (logPropsEnabled) {
                 /*
                  * Gather logging info
                  */
@@ -677,7 +673,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
             }
             try {
-                stage = STAGE_AWAIT;
+                stage = Stage.STAGE_AWAIT;
                 listenerMonitor.incrementNumWaiting();
                 /*
                  * Set keep alive timeout if enabled
@@ -692,7 +688,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     /*
                      * This means a connection timeout
                      */
-                    stage = STAGE_ENDED;
+                    stage = Stage.STAGE_ENDED;
                     break;
                 }
                 /*
@@ -757,7 +753,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             /*
              * Setting up filters, and parse some request headers
              */
-            stage = STAGE_PREPARE;
+            stage = Stage.STAGE_PREPARE;
             try {
                 /*
                  * Parse AJP FORWARD-REQUEST package
@@ -788,10 +784,14 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             /*
              * Process the request in the servlet
              */
-            boolean longRunning = false;
+            boolean longRunningAccepted = false;
             if (!error) {
                 try {
-                    stage = STAGE_SERVICE;
+                    /*
+                     * Enter service stage...
+                     */
+                    stage = Stage.STAGE_SERVICE;
+                    lastWriteAccess = System.currentTimeMillis();
                     listenerMonitor.incrementNumProcessing();
                     /*
                      * Form data?
@@ -818,7 +818,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                          */
                         request.dumpToBuffer(bytes);
                     }
-                    if (isLongRunning() && !(longRunning = AjpLongRunningRegistry.getInstance().registerLongRunning(request))) {
+                    if (isLongRunning() && !(longRunningAccepted = AjpLongRunningRegistry.getInstance().registerLongRunning(request))) {
                         /*
                          * Only one per host/port!
                          */
@@ -844,7 +844,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     error = true;
                 } finally {
                     listenerMonitor.decrementNumProcessing();
-                    if (longRunning) {
+                    if (longRunningAccepted) {
                         AjpLongRunningRegistry.getInstance().deregisterLongRunning(request);
                     }
                 }
@@ -866,19 +866,19 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             if (error) {
                 response.setStatus(500);
             }
-            stage = STAGE_KEEPALIVE;
+            stage = Stage.STAGE_AWAIT;
             recycle();
             /*
              * Drop logging info
              */
-            if (LogProperties.isEnabled()) {
+            if (logPropsEnabled) {
                 LogProperties.removeLogProperties();
             }
         }
         /*
          * Terminate AJP connection
          */
-        stage = STAGE_ENDED;
+        stage = Stage.STAGE_ENDED;
         recycle();
         input = null;
         output = null;
@@ -889,7 +889,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         /*
          * Drop logging info
          */
-        if (LogProperties.isEnabled()) {
+        if (logPropsEnabled) {
             LogProperties.removeLogProperties();
         }
     }
@@ -1982,7 +1982,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         servlet = null;
         servletPath = null;
         servletId.setLength(0);
-        lastWriteAccess = Long.MAX_VALUE;
+        lastWriteAccess = 0L;
         request.recycle();
         response.recycle();
         certificates.recycle();

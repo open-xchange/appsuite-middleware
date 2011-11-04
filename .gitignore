@@ -145,4 +145,8 @@ com.openexchange.halo.json/build
 com.openexchange.halo.json/jars
 com.openexchange.rdiff/build
 com.openexchange.rdiff/jars
+com.openexchange.chat/jars
+com.openexchange.chat.db/jars
+com.openexchange.chat.json/jars
+com.openexchange.preview.thirdwing/jars
 oxscripts/tmp
