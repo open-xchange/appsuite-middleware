@@ -1,3 +1,7 @@
+* 2011-11-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20656: Sanitizing folder identifier if provided by event framework
+
 * 2011-11-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 20712: Setting proper last-accessed time stamp when entering AJP's service stage, thus keep-alive check works orderly

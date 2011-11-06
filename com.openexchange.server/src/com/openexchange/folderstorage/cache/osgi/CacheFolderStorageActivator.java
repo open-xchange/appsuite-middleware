@@ -55,6 +55,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
@@ -69,6 +71,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.lock.LockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -219,7 +222,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final String folderId = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
                     final Boolean contentRelated = (Boolean) event.getProperty(PushEventConstants.PROPERTY_CONTENT_RELATED);
                     try {
-                        tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                        tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                     } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -241,9 +244,9 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                     final Boolean contentRelated = (Boolean) event.getProperty(FolderEventConstants.PROPERTY_CONTENT_RELATED);
                     try {
                         if (null == session) {
-                            tmp.removeSingleFromCache(folderId, FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true);
+                            tmp.removeSingleFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null == userId ? -1 : userId.intValue(), contextId.intValue(), true);
                         } else {
-                            tmp.removeFromCache(folderId, FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
+                            tmp.removeFromCache(sanitizeFolderId(folderId), FolderStorage.REAL_TREE_ID, null != contentRelated && contentRelated.booleanValue(), session);
                         }
                     } catch (final OXException e) {
                         LOG.error(e.getMessage(), e);
@@ -282,6 +285,21 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
             dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
+    }
+
+    private static final String DEFAULT = MailFolder.DEFAULT_FOLDER_ID;
+
+    private static final Pattern PAT_FIX = Pattern.compile(Pattern.quote(DEFAULT) + "[0-9]+" + Pattern.quote(DEFAULT));
+
+    protected static String sanitizeFolderId(final String id) {
+        String fid = id;
+        if (fid.startsWith(DEFAULT)) {
+            final Matcher matcher = PAT_FIX.matcher(fid);
+            if (matcher.matches()) {
+                fid = DEFAULT + matcher.group(1);
+            }
+        }
+        return fid;
     }
 
     private void unregisterCacheFolderStorage() {
