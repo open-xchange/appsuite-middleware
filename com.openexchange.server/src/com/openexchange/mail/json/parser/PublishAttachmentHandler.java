@@ -394,7 +394,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
     private ComposedMailMessage generateInternalVersion(final ComposedMailMessage source, final Context ctx, final List<LinkAndNamePair> links, final boolean appendLinksAsAttachment, final Date elapsedDate, final Locale locale) throws OXException {
         final ComposedMailMessage internalVersion = copyOf(source, ctx);
         final TextBodyMailPart textPart = this.textPart.copy();
-        final StringHelper stringHelper = StringHelper.valueOf(locale);
+        final StringHelper stringHelper = new StringHelper(locale);
         if (appendLinksAsAttachment) {
             // Apply text part as it is
             internalVersion.setBodyPart(textPart);
@@ -433,7 +433,7 @@ public final class PublishAttachmentHandler extends AbstractAttachmentHandler {
             if (null == locale) {
                 locale = getSessionUserLocale();
             }
-            final StringHelper stringHelper = StringHelper.valueOf(locale);
+            final StringHelper stringHelper = new StringHelper(locale);
             if (appendLinksAsAttachment) {
                 // Apply text part as it is
                 externalVersion.setBodyPart(textPart);

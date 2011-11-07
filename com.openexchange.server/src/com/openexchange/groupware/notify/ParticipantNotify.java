@@ -840,7 +840,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private static MailMessage createParticipantMessage0(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
-        final StringHelper strings = StringHelper.valueOf(locale);
+        final StringHelper strings = new StringHelper(locale);
 
         b.setLength(0);
         actionRepl.setLocale(locale);

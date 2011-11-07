@@ -397,7 +397,7 @@ public final class SMTPTransport extends MailTransport {
              * Subject
              */
             final Locale locale = UserStorage.getStorageUser(session.getUserId(), ctx).getLocale();
-            final StringHelper strHelper = StringHelper.valueOf(locale);
+            final StringHelper strHelper = new StringHelper(locale);
             smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
             /*
              * Sent date in UTC time

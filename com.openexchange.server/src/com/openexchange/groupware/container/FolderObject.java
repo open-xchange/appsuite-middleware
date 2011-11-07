@@ -97,7 +97,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
      * @return The locale-specific folder name or <code>null</code> if no locale-specific folder name is available
      */
     public static String getFolderString(final int id, final Locale locale) {
-        final StringHelper strHelper = StringHelper.valueOf(locale);
+        final StringHelper strHelper = new StringHelper(locale);
         switch (id) {
         case SYSTEM_PRIVATE_FOLDER_ID:
             return strHelper.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME);

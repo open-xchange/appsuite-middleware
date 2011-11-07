@@ -98,9 +98,9 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
     protected final StringHelper getStringHelper() {
         if (stringHelper == null) {
             if (locale == null) {
-                stringHelper = StringHelper.valueOf(Locale.ENGLISH);
+                stringHelper = new StringHelper(Locale.ENGLISH);
             } else {
-                stringHelper = StringHelper.valueOf(locale);
+                stringHelper = new StringHelper(locale);
             }
         }
         return stringHelper;

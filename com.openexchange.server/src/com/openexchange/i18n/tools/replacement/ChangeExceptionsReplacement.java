@@ -108,12 +108,12 @@ public final class ChangeExceptionsReplacement extends AbstractFormatMultipleDat
         if (changeException) {
             // Event denotes a change exception
             format = Notifications.FORMAT_CHANGE_EXCEPTION_OF;
-            final String result = String.format(StringHelper.valueOf(locale == null ? Locale.ENGLISH : locale)
+            final String result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale)
                     .getString(format), recurrenceTitle, datesRepl);
             return new StringBuilder(1 + result.length()).append(result).append('\n').toString();
         }
         // Normal replacement
-        final String result = String.format(StringHelper.valueOf(locale == null ? Locale.ENGLISH : locale)
+        final String result = String.format(new StringHelper(locale == null ? Locale.ENGLISH : locale)
                 .getString(format), datesRepl);
         if (changed) {
             return new StringBuilder(PREFIX_MODIFIED.length() + result.length() + 1).append(PREFIX_MODIFIED).append(

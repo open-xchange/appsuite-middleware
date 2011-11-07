@@ -379,7 +379,7 @@ public final class MimeReply {
                     final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                    generateReplyText(originalMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
+                    generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), ltz, usm, mailSession, list);
                 }
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
