@@ -1887,7 +1887,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         while (read < n) {
             res = input.read(buf, read + pos, n - read);
             if (res <= 0) {
-                throw new IOException("ajpprotocol.failedread");
+                throw new IOException("Socket read failed");
             }
             read += res;
         }
