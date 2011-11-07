@@ -714,10 +714,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return mailAccess.getFolderStorage().getFolder(fullname);
     }
 
+    private static final int MAX_FORWARD_COUNT = 8;
+
     @Override
     public MailMessage getForwardMessageForDisplay(final String[] folders, final String[] fowardMsgUIDs, final UserSettingMail usm) throws OXException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
+        }
+        if (folders.length > MAX_FORWARD_COUNT) {
+            throw MailExceptionCode.TOO_MANY_FORWARD_MAILS.create(Integer.valueOf(MAX_FORWARD_COUNT));
         }
         final FullnameArgument[] arguments = new FullnameArgument[folders.length];
         for (int i = 0; i < folders.length; i++) {
@@ -725,7 +730,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         boolean sameAccount = true;
         final int accountId = arguments[0].getAccountId();
-        for (int i = 1; i < arguments.length && sameAccount; i++) {
+        for (int i = 1; sameAccount && i < arguments.length; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
         final TransportProperties transportProperties = TransportProperties.getInstance();
