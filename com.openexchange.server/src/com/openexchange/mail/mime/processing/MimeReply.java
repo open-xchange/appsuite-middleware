@@ -578,7 +578,9 @@ public final class MimeReply {
              */
             final String replyTextBody;
             if (isHtml) {
-                replyTextBody = "<div style=\"position:relative\">" + quoteHtml(textBuilder.toString()) + "</div>";
+                final String tmp = quoteHtml(textBuilder.toString());
+                textBuilder.setLength(0);
+                replyTextBody = textBuilder.append("<div style=\"position:relative\">").append(tmp).append("</div>").toString();
             } else {
                 replyTextBody = quoteText(textBuilder.toString());
             }
