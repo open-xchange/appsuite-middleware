@@ -243,8 +243,10 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
         if (readTimeout > 0) {
             ajpProcessor.setKeepAliveTimeout(readTimeout);
         }
-        final Future<Object> future = pool.submit(new CoyoteTask(client, ajpProcessor, listenerMonitor, watcher), behavior);
+        final CoyoteTask coyoteTask = new CoyoteTask(client, ajpProcessor, listenerMonitor, watcher);
+        final Future<Object> future = pool.submit(coyoteTask, behavior);
         ajpProcessor.setControl(future);
+        coyoteTask.open();
     }
 
 }
