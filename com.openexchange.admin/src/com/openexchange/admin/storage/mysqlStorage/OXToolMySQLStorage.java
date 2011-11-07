@@ -50,7 +50,6 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.sql.grammar.Constant.ASTERISK;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
@@ -72,7 +71,6 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -80,19 +78,15 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
-import com.openexchange.database.DBPoolingException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.impl.ContextException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.update.UpdateException;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
-import com.openexchange.sql.grammar.BitLSHIFT;
 import com.openexchange.sql.grammar.BitOR;
 import com.openexchange.sql.grammar.Column;
-import com.openexchange.sql.grammar.Constant;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INVERT;
 import com.openexchange.sql.grammar.Table;
@@ -1497,7 +1491,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 updater.startUpdate(contextId);
                 return true;
             }
-        } catch (UpdateException e) {
+        } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
         return false;
@@ -1528,8 +1522,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             // either with or without starting an update task, when we reach this point, we
             // must return true
             return true;
-        } catch (UpdateException e) {
-            if (e.getDetailNumber() == 102) {
+        } catch (OXException e) {
+            if (e.getCode() == 102) {
                 // NOTE: this situation should not happen!
                 // it can only happen, when a schema has not been initialized correctly!
                 log.debug("FATAL: this error must not happen",e);
@@ -2269,11 +2263,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     contextIdsForSchema.add(cid);
                 }
             }
-        } catch (DBPoolingException e) {
-            log.error("DBPool Error", e);
-            throw new StorageException(e);
-        } catch (ContextException e) {
-            log.error("Context Storage Error", e);
+        } catch (OXException e) {
+            log.error("Internal Error", e);
             throw new StorageException(e);
         }
         

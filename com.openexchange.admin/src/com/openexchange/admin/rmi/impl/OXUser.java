@@ -91,6 +91,7 @@ import com.openexchange.admin.tools.UnixCrypt;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
@@ -261,7 +262,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 	        	
 	        	cache = cacheService.getCache("UserSettingMail");
 	        	cache.remove(key);
-	        } catch (final CacheException e) {
+	        } catch (final OXException e) {
 	            log.error(e.getMessage(), e);
 	        } finally {
 	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
@@ -315,7 +316,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 //      JCS
         try {
             UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);
         }
         // END OF JCS
@@ -382,7 +383,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 //      JCS
         try {
             UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(), new ContextImpl(ctx.getId().intValue()));
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             log.error("Error removing user "+user.getId()+" in context "+ctx.getId()+" from configuration storage",e);
         }
         // END OF JCS
@@ -721,12 +722,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 					try {
 						UserConfigurationStorage.getInstance().removeUserConfiguration(user.getId().intValue(),
 								new ContextImpl(ctx.getId().intValue()));
-					} catch (final UserConfigurationException e) {
-						log.error("Error removing user " + user.getId() + " in context " + ctx.getId()
-								+ " from configuration storage", e);
+
+	                } catch (final OXException e) {
+	                    log.error("Error removing user " + user.getId() + " in context " + ctx.getId()
+	                                + " from configuration storage", e);
 					}
 				}
-			} catch (final CacheException e) {
+			} catch (final OXException e) {
 				log.error(e.getMessage(), e);
 			} finally {
 				AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);

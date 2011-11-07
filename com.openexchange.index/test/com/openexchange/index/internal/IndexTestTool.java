@@ -47,88 +47,30 @@
  *
  */
 
-package com.openexchange.index;
+package com.openexchange.index.internal;
+
+import java.sql.Connection;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link IndexServer}
+ * {@link IndexTestTool}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface IndexServer {
+public class IndexTestTool {
     
-    /**
-     * Gets the unique id of the index server.
-     * 
-     * @return The id.
-     */
-    int getId();
-    
-    /**
-     * Gets the index servers url.
-     * 
-     * @return The url
-     */
-    String getUrl();
-    
-    /**
-     * Gets the setting for SO_TIMEOUT. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>1000</code>.
-     * 
-     * @return The setting for SO_TIMEOUT
-     */
-    int getSoTimeout();
+    public static IndexServerImpl createIndexServer(Connection con) throws OXException {
+        IndexServerImpl indexServer = new IndexServerImpl();
+        indexServer.setUrl("http://1.2.3.4:8005");
+        indexServer.setConnectionTimeout(23);
+        indexServer.setMaxConnectionsPerHost(54);
+        indexServer.setMaxIndices(10);
+        indexServer.setSoTimeout(46);
+        int serverId = ConfigIndexMysql.getInstance().registerIndexServer(con, indexServer);
+        indexServer.setId(serverId);
+        
+        return indexServer;
+    }
 
-    /**
-     * Gets the connection timeout. 0 implies that the option is disabled (i.e., timeout of infinity).
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The connection timeout
-     */
-    int getConnectionTimeout();
-
-    /**
-     * Gets the max. number of connections allowed being established per host. 0 implies that there is no restriction.
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The max. number of connections per host
-     */
-    int getMaxConnectionsPerHost();
-    
-    /**
-     * Gets the max. number of indices that can be created on this server.
-     * <p>
-     * Default is <code>100</code>.
-     * 
-     * @return The max. number of indices
-     */
-    int getMaxIndices();
-    
-    /**
-     * <code>true</code> if url has been set. Otherwise <code>false</code>.
-     */
-    boolean hasUrl();
-    
-    /**
-     * <code>true</code> if socket timeout has been set. Otherwise <code>false</code>.
-     */
-    boolean hasSoTimeout();
-    
-    /**
-     * <code>true</code> if connection timeout has been set. Otherwise <code>false</code>.
-     */
-    boolean hasConnectionTimeout();
-    
-    /**
-     * <code>true</code> if max. connections per host has been set. Otherwise <code>false</code>.
-     */
-    boolean hasMaxConnectionsPerHost();
-    
-    /**
-     * <code>true</code> if max. indices has been set. Otherwise <code>false</code>.
-     */
-    boolean hasMaxIndices();
 }

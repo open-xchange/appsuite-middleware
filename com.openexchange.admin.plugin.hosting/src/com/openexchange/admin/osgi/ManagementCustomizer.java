@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.admin.monitoring.Monitor;
-import com.openexchange.management.ManagementException;
+import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 
 /**
@@ -86,7 +86,7 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer {
             LOG.error(e.getMessage(), e);
         } catch (NullPointerException e) {
             LOG.error(e.getMessage(), e);
-        } catch (ManagementException e) {
+        } catch (OXException e) {
             LOG.error(e.getMessage(), e);
         }
         return management;
@@ -101,7 +101,7 @@ public final class ManagementCustomizer implements ServiceTrackerCustomizer {
         if (null != objName) {
             try {
                 management.unregisterMBean(objName);
-            } catch (ManagementException e) {
+            } catch (OXException e) {
                 LOG.error(e.getMessage(), e);
             }
             objName = null;

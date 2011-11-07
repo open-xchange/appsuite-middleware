@@ -74,8 +74,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.server.ServiceException;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
@@ -259,7 +258,7 @@ public class OXContextMySQLStorageCommon {
         PipesAndFiltersService pnfService;
         try {
             pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
-        } catch (ServiceException e) {
+        } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
         DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache));
@@ -338,7 +337,7 @@ public class OXContextMySQLStorageCommon {
             // tell pool, that database has been removed
             try {
                 com.openexchange.databaseold.Database.reset(contextId);
-            } catch (DBPoolingException e) {
+            } catch (OXException e) {
                 log.error(e.getMessage(), e);
             }
 
