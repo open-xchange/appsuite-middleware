@@ -1,3 +1,7 @@
+* 2011-11-04 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 18862: Throw appropriate exception when uploading a too large contact image 
+
 * 2011-11-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 20712: Setting proper last-accessed time stamp when entering AJP's service stage, thus keep-alive check works orderly
