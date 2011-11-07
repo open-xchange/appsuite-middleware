@@ -1957,12 +1957,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     protected boolean readMessage(final AjpMessage message) throws IOException {
         final byte[] buf = message.getBuffer();
-
+        // Read initial bytes: 0x12 0x34 <data-length>
         read(buf, 0, message.getHeaderLength());
-
         message.processHeader();
+        // Read AJP payload
         read(buf, message.getHeaderLength(), message.getLen());
-
         return true;
     }
 
