@@ -480,6 +480,8 @@ public final class Contacts {
                 if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
                     try {
                         contact.setImage1(scaleContactImage(contact.getImage1(), contact.getImageContentType()));
+                    } catch (final OXException e) {
+                        throw e;
                     } catch (final Exception e) {
                         throw ContactExceptionCodes.NOT_VALID_IMAGE.create(e);
                     }

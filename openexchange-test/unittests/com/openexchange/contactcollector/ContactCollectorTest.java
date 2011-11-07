@@ -135,7 +135,7 @@ public class ContactCollectorTest extends TestCase {
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
         setFolderNULL();
         Connection con = DBPool.pickupWriteable(ctx);
-        new ContactCollectorFolderCreator().create(session, ctx, StringHelper.valueOf(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con);
+        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con);
         DBPool.closeWriterSilent(ctx, con);
         Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(ctx.getContextId(), userId);
         assertNotNull("Folder should not be NULL", folder);
@@ -145,7 +145,7 @@ public class ContactCollectorTest extends TestCase {
     public void testNewFeature() throws Throwable {
         removeUserEntry();
         Connection con = DBPool.pickupWriteable(ctx);
-        new ContactCollectorFolderCreator().create(session, ctx, StringHelper.valueOf(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con);
+        new ContactCollectorFolderCreator().create(session, ctx, new StringHelper(Locale.ENGLISH).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME), con);
         ServerUserSetting setting = ServerUserSetting.getInstance();
         assertNotNull("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId));
         assertTrue("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId) > 0);

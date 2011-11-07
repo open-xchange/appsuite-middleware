@@ -96,7 +96,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
          * Set proper name
          */
         if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-            name = StringHelper.valueOf(session.getUser().getLocale()).getString(UnifiedINBOXManagement.NAME_UNIFIED_INBOX);
+            name = new StringHelper(session.getUser().getLocale()).getString(UnifiedINBOXManagement.NAME_UNIFIED_INBOX);
         } else {
             name = mailAccount.getName();
         }

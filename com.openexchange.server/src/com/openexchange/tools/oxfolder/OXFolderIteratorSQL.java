@@ -1427,7 +1427,7 @@ public final class OXFolderIteratorSQL {
                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
                         throw e;
                     }
-                    final StringHelper strHelper = StringHelper.valueOf(locale);
+                    final StringHelper strHelper = new StringHelper(locale);
                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                 }
                 final FolderObject virtualOwnerFolder =
