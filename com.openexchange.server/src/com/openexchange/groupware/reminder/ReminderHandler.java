@@ -269,7 +269,7 @@ public class ReminderHandler implements ReminderService {
             ps.setInt(++a, reminder.getObjectId());
             final int deleted = ps.executeUpdate();
             if (deleted == 0) {
-                throw ReminderExceptionCode.NOT_FOUND.create(reminder, I(contextId));
+                throw ReminderExceptionCode.NOT_FOUND.create(I(reminder.getObjectId()), I(contextId));
             }
             TargetRegistry.getInstance().getService(reminder.getModule()).updateTargetObject(context, writeCon, reminder.getTargetId(), reminder.getUser());
         } catch (final SQLException exc) {
