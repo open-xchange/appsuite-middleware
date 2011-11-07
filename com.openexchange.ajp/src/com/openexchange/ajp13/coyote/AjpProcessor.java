@@ -743,7 +743,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 error = true;
                 break;
             } catch (final Throwable t) {
-                LOG.debug("ajpprocessor.header.error", t);
+                LOG.debug("Header message parsing failed", t);
                 // 400 - Bad Request
                 response.setStatus(400);
                 error = true;
@@ -771,7 +771,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 continue;
             } catch (final Throwable t) {
                 final StringBuilder sb = new StringBuilder(512);
-                sb.append("ajpprocessor.request.prepare: ").append(t.getClass().getName());
+                sb.append("Error preparing request: ").append(t.getClass().getName());
                 sb.append(" message=").append(t.getMessage()).append("\n");
                 appendStackTrace(t.getStackTrace(), sb);
                 LOG.debug(sb.toString());
@@ -836,7 +836,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // Ignore
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final StringBuilder tmp = new StringBuilder(128).append("ajpprocessor.request.process: ");
+                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
@@ -1887,7 +1887,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         while (read < n) {
             res = input.read(buf, read + pos, n - read);
             if (res <= 0) {
-                throw new IOException("ajpprotocol.failedread");
+                throw new IOException("Socket read failed");
             }
             read += res;
         }
@@ -1957,12 +1957,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     protected boolean readMessage(final AjpMessage message) throws IOException {
         final byte[] buf = message.getBuffer();
-
+        // Read initial bytes: 0x12 0x34 <data-length>
         read(buf, 0, message.getHeaderLength());
-
         message.processHeader();
+        // Read AJP payload
         read(buf, message.getHeaderLength(), message.getLen());
-
         return true;
     }
 
