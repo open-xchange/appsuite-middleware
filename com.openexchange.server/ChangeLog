@@ -1,3 +1,7 @@
+* 2011-11-07 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20698: Surrounding HTML with a <div> tag to bypass absolute positioning
+
 * 2011-11-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 20656: Sanitizing folder identifier if provided by event framework

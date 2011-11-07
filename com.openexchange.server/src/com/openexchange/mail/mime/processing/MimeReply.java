@@ -498,6 +498,8 @@ public final class MimeReply {
 
     private static final String TEXT_HTM = "text/htm";
 
+    // private static final Pattern PATTERN_BODY = Pattern.compile("<body[^>]*?>", Pattern.CASE_INSENSITIVE);
+
     /**
      * Gathers all text bodies and appends them to given text builder.
      *
@@ -576,7 +578,7 @@ public final class MimeReply {
              */
             final String replyTextBody;
             if (isHtml) {
-                replyTextBody = quoteHtml(textBuilder.toString());
+                replyTextBody = "<div style=\"position:relative\">" + quoteHtml(textBuilder.toString()) + "</div>";
             } else {
                 replyTextBody = quoteText(textBuilder.toString());
             }
