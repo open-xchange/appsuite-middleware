@@ -49,14 +49,14 @@
 
 package com.openexchange.admin.storage.sqlStorage;
 
-import com.openexchange.admin.rmi.exceptions.PoolException;
-import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.database.DBPoolingException;
-import com.openexchange.databaseold.Database;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.admin.rmi.exceptions.PoolException;
+import com.openexchange.admin.tools.PropertyHandler;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 
 public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
@@ -70,7 +70,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         final Connection con;
         try {
             con = Database.get(true);
-        } catch (DBPoolingException e) {
+        } catch (OXException e) {
             log.error("Error pickup configdb database write connection from pool!", e);
             throw new PoolException(e.getMessage());
         }
@@ -81,7 +81,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         final Connection con;
         try {
             con = Database.get(contextId, true);
-        } catch (DBPoolingException e) {
+        } catch (OXException e) {
             log.error("Error pickup context database write connection from pool!", e);
             throw new PoolException(e.getMessage());
         }
@@ -92,7 +92,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         final Connection con;
         try {
             con = Database.getNoTimeout(contextId, true);
-        } catch (DBPoolingException e) {
+        } catch (OXException e) {
             log.error("Error pickup context database write connection from pool!", e);
             throw new PoolException(e.getMessage());
         }
@@ -145,7 +145,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         final int serverId;
         try {
             serverId = Database.getServerId();
-        } catch (DBPoolingException e) {
+        } catch (OXException e) {
             log.error("Error getting the identifier of the server! This is normal until at least one server is configured.", e);
             throw new PoolException(e.getMessage());
         }

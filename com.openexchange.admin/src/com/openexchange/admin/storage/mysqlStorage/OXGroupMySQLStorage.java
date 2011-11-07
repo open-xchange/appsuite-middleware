@@ -71,9 +71,8 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -431,12 +430,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
             log.error("SQL Error", e);
             rollback(con);
             throw new StorageException(e.toString());
-        } catch (DeleteFailedException e) {
-            log.error("Delete Error", e);
-            rollback(con);
-            throw new StorageException(e.toString());
-        } catch (ContextException e) {
-            log.error("Context Error", e);
+        } catch (OXException e) {
+            log.error("Internal Error", e);
             rollback(con);
             throw new StorageException(e.toString());
         } finally {
