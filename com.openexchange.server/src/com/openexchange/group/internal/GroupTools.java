@@ -90,7 +90,7 @@ public final class GroupTools {
         retval.setMember(ustor.listAllUser(ctx));
         retval.setLastModified(new Date());
         final User admin = ustor.getUser(ctx.getMailadmin(), ctx);
-        final StringHelper helper = StringHelper.valueOf(LocaleTools.getLocale(admin.getPreferredLanguage()));
+        final StringHelper helper = new StringHelper(LocaleTools.getLocale(admin.getPreferredLanguage()));
         retval.setDisplayName(helper.getString(Groups.ALL_USERS));
         return retval;
     }

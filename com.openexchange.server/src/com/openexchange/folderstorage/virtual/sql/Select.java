@@ -375,7 +375,7 @@ public final class Select {
                 }
             } else {
                 final TreeMap<String, String> treeMap = new TreeMap<String, String>(new FolderNameComparator(locale));
-                final StringHelper stringHelper = StringHelper.valueOf(locale);
+                final StringHelper stringHelper = new StringHelper(locale);
                 while (rs.next()) {
                     treeMap.put(stringHelper.getString(rs.getString(2)), rs.getString(pos));
                 }

@@ -319,7 +319,7 @@ public final class MailReplyTest extends AbstractMailTest {
 				final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                 final Locale locale = user.getLocale();
                 final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-				final StringHelper strHelper = StringHelper.valueOf(locale);
+				final StringHelper strHelper = new StringHelper(locale);
 				String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
 				{
 					final Date date = sourceMail.getSentDate();
@@ -404,7 +404,7 @@ public final class MailReplyTest extends AbstractMailTest {
 				final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                 final Locale locale = user.getLocale();
                 final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-				final StringHelper strHelper = StringHelper.valueOf(locale);
+				final StringHelper strHelper = new StringHelper(locale);
 				String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
 				{
 					final Date date = sourceMail.getSentDate();
@@ -487,7 +487,7 @@ public final class MailReplyTest extends AbstractMailTest {
 				final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                 final Locale locale = user.getLocale();
                 final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-				final StringHelper strHelper = StringHelper.valueOf(locale);
+				final StringHelper strHelper = new StringHelper(locale);
 				String replyPrefix = strHelper.getString(MailStrings.REPLY_PREFIX);
 				{
 				    final Date date = sourceMail.getSentDate();

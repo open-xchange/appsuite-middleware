@@ -942,7 +942,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                      */
                     final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
                     if (gab.isVisible(userId, userConfiguration)) {
-                        gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                        gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
                 } catch (final SQLException e) {
@@ -962,17 +962,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         final int module = folderObject.getModule();
                         if (FolderObject.CALENDAR == module) {
                             if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                                stringHelper = new StringHelper(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                         } else if (FolderObject.CONTACT == module) {
                             if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                                stringHelper = new StringHelper(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                         } else if (FolderObject.TASK == module) {
                             if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                                stringHelper = new StringHelper(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                         }

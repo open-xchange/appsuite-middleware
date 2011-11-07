@@ -870,27 +870,27 @@ public final class MailFolderStorage implements FolderStorage {
                  */
                 for (final MailFolder child : children) {
                     if ("INBOX".equals(child.getFullname())) {
-                        child.setName(StringHelper.valueOf(locale).getString(MailStrings.INBOX));
+                        child.setName(new StringHelper(locale).getString(MailStrings.INBOX));
                     } else {
                         if (child.containsDefaultFolderType()) {
                             switch (child.getDefaultFolderType()) {
                             case TRASH:
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.TRASH));
+                                child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
                                 break;
                             case SENT:
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.SENT));
+                                child.setName(new StringHelper(locale).getString(MailStrings.SENT));
                                 break;
                             case SPAM:
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.SPAM));
+                                child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
                                 break;
                             case DRAFTS:
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.DRAFTS));
+                                child.setName(new StringHelper(locale).getString(MailStrings.DRAFTS));
                                 break;
                             case CONFIRMED_SPAM:
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_SPAM));
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_SPAM));
                                 break;
                             case CONFIRMED_HAM:
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM));
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_HAM));
                                 break;
                             default:
                                 // Nope
@@ -899,17 +899,17 @@ public final class MailFolderStorage implements FolderStorage {
                             final String fullName = child.getFullname();
                             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
                             if (fullName.equals(folderStorage.getDraftsFolder())) {
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.DRAFTS));
+                                child.setName(new StringHelper(locale).getString(MailStrings.DRAFTS));
                             } else if (fullName.equals(folderStorage.getSentFolder())) {
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.SENT));
+                                child.setName(new StringHelper(locale).getString(MailStrings.SENT));
                             } else if (fullName.equals(folderStorage.getSpamFolder())) {
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.SPAM));
+                                child.setName(new StringHelper(locale).getString(MailStrings.SPAM));
                             } else if (fullName.equals(folderStorage.getTrashFolder())) {
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.TRASH));
+                                child.setName(new StringHelper(locale).getString(MailStrings.TRASH));
                             } else if (fullName.equals(folderStorage.getConfirmedSpamFolder())) {
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_SPAM));
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_SPAM));
                             } else if (fullName.equals(folderStorage.getConfirmedHamFolder())) {
-                                child.setName(StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM));
+                                child.setName(new StringHelper(locale).getString(MailStrings.CONFIRMED_HAM));
                             }
                         }
                      }
