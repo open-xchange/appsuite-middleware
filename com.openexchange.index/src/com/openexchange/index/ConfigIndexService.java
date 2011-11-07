@@ -119,16 +119,17 @@ public interface ConfigIndexService {
     List<IndexServer> getAllIndexServers() throws OXException;
     
     /**
-     * Adds a new (Context, User, Module) to (Server, Index) mapping to the config db.
+     * Adds a new (Context, User, Module) to (Server, Index) mapping to the configuration database.
+     * A suitable index server will be chosen by the system. 
+     * Depending on the number of already existing and possible indices.
      * 
      * @param cid The context id
      * @param uid The user id
      * @param module The module. See {@link Types}
-     * @param server The server id
      * @param index Name of the index
      * @throws OXException If mapping could not be added
      */
-    void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException;
+    void addIndexMapping(int cid, int uid, int module, String index) throws OXException;
     
     /**
      * Removes an index mapping for a (Context, User, Module) relation.

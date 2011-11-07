@@ -63,7 +63,7 @@ public class IndexDatabaseStuff {
     
     public static final String SQL_SELECT_INDEX_URL = "SELECT " +
                                                           "s.id, s.serverUrl, s.maxIndices, s.socketTimeout, " +
-                                                          "s.connectionTimeout, s.maxConnections, u.index " +
+                                                          "s.connectionTimeout, s.maxConnections, u.indexName " +
                                                       "FROM " +
                                                           TBL_IDX_SERVER + " AS s " +
                                                       "JOIN " +
@@ -89,7 +89,7 @@ public class IndexDatabaseStuff {
                                                             "uid int(10) unsigned NOT NULL," +
                                                             "module int(10) unsigned NOT NULL," +
                                                             "server int(10) unsigned NOT NULL," +
-                                                            "index varchar(32) NOT NULL," +
+                                                            "indexName varchar(32) NOT NULL," +
                                                             "PRIMARY KEY  (cid,uid,module)," +
                                                             "KEY user_module (cid,uid,module)," +
                                                             "KEY server (server)" +
@@ -120,7 +120,7 @@ public class IndexDatabaseStuff {
     
     public static final String SQL_UPDATE_INDEX_MAPPING = "UPDATE " + TBL_IDX_MAPPING + " " +
                                                           "SET " +
-                                                              "server = ?, index = ? " +
+                                                              "server = ?, indexName = ? " +
                                                           "WHERE cid = ? AND uid = ? AND module = ?";
     
     public static final String SQL_SELECT_INDEX_SERVERS = "SELECT " +
@@ -129,8 +129,8 @@ public class IndexDatabaseStuff {
     		                                                  TBL_IDX_SERVER;
     
     public static final String SQL_INSERT_INDEX_MAPPING = "INSERT INTO " + TBL_IDX_MAPPING + " " +
-                                                    	      "(cid, uid, module, server, index) " +
-                                                    	  "VALUES" +
+                                                    	      "(cid, uid, module, server, indexName) " +
+                                                    	  "VALUES " +
                                                     	      "(?, ?, ?, ?, ?)";
     
     public static final String SQL_UPDATE_INDEX_SERVER = "UPDATE " + TBL_IDX_SERVER + " " +
@@ -142,5 +142,19 @@ public class IndexDatabaseStuff {
     public static final String SQL_DELETE_INDEX_MAPPING_BY_SERVER = "DELETE FROM " +
                                                                         TBL_IDX_MAPPING + " " +
                                                                     "WHERE server = ?";
+    
+    public static final String SQL_SELECT_SUITABLE_INDEX_SERVER = "SELECT " +
+    		                                                          "i.id, i.maxIndices, COUNT(m.server) AS count " +
+    		                                                      "FROM " +
+    		                                                          TBL_IDX_MAPPING + " AS m " +
+    		                                                      "RIGHT OUTER JOIN " +
+    		                                                          TBL_IDX_SERVER + " AS i " +
+    		                                                      "ON " +
+    		                                                          "m.server = i.id " +
+    		                                                      "GROUP BY " +
+    		                                                          "m.server " +
+    		                                                      "ORDER BY " +
+    		                                                          "COUNT(m.server)/i.maxIndices ASC " +
+    		                                                      "LIMIT 1";
 
 }
