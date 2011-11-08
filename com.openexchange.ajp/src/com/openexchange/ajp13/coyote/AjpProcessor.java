@@ -1579,13 +1579,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         return path;
     }
 
+    private static final String JSESSIONID_COOKIE = AJPv13RequestHandler.JSESSIONID_COOKIE;
+
     private void checkJSessionIDCookie() {
         final Cookie[] cookies = request.getCookies();
         Cookie jsessionIDCookie = null;
         if (cookies != null) {
             NextCookie: for (int i = 0; (i < cookies.length) && (jsessionIDCookie == null); i++) {
                 final Cookie current = cookies[i];
-                if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(current.getName())) {
+                if (JSESSIONID_COOKIE.equals(current.getName())) {
                     /*
                      * Check JVM route
                      */
@@ -1677,7 +1679,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
             jsessionIDVal.append('.').append(jvmRoute);
         }
-        final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIDVal.toString());
+        final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionIDVal.toString());
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = false;
@@ -1708,7 +1710,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             jsessionIdVal = jsessionIDVal.toString();
             join = false;
         }
-        final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
+        final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionIdVal);
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = join;
