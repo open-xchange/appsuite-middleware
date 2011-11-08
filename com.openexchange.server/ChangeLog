@@ -1,3 +1,7 @@
+* 2011-11-08 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20492: Recorder for last logins only touches 1 line in database.
+
 * 2011-11-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 20734: Allowing translation for English locales.
