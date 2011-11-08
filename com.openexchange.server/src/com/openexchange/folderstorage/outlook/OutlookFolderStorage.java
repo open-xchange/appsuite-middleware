@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -120,6 +121,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.messaging.MailMessagingService;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
@@ -127,6 +129,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingService;
@@ -2088,7 +2091,18 @@ public final class OutlookFolderStorage implements FolderStorage {
                  */
                 final SortableId[] mailIDs;
                 try {
-                    mailIDs = getSubfolders(fullname, realTreeId, realFolderStorage, storageParameters);
+                    if (MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                        final List<SortableId> tmp = new ArrayList<SortableId>(Arrays.asList(getSubfolders(fullname, realTreeId, realFolderStorage, storageParameters)));
+                        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(storageParameters.getSession());
+                        for (final Iterator<SortableId> it = tmp.iterator(); it.hasNext();) {
+                            if (pop3StorageFolders.contains(it.next().getId())) {
+                                it.remove();
+                            }
+                        }
+                        mailIDs = tmp.toArray(new SortableId[tmp.size()]);
+                    } else {
+                        mailIDs = getSubfolders(fullname, realTreeId, realFolderStorage, storageParameters);
+                    }
                 } catch (final OXException e) {
                     if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                         if (LOG.isDebugEnabled()) {

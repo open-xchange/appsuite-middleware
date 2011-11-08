@@ -419,6 +419,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(user), I(cid));
         }
+        dropPOP3StorageFolders(user, cid);
         final Connection con = Database.get(cid, true);
         try {
             con.setAutoCommit(false);
@@ -444,6 +445,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(user), I(cid));
         }
+        dropPOP3StorageFolders(user, cid);
         PreparedStatement stmt = null;
         try {
             // A POP3 account?
@@ -473,7 +475,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(3, user);
             stmt.executeUpdate();
             registry.triggerOnAfterDeletion(id, properties, user, cid, con);
-            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             final String className = e.getClass().getName();
             if ((null != className) && className.endsWith("MySQLIntegrityConstraintViolationException")) {
@@ -914,6 +915,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
+        dropPOP3StorageFolders(user, cid);
         final boolean rename;
         if (attributes.contains(Attribute.NAME_LITERAL)) {
             // Check name
@@ -1184,12 +1186,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
                 }
-                /*
-                 * Drop POP3 storage folders if a rename was performed
-                 */
-                if (rename) {
-                    dropPOP3StorageFolders(user, cid);
-                }
             } catch (final SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -1373,6 +1369,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!isValid(name)) {
             throw MailAccountExceptionCodes.INVALID_NAME.create(name);
         }
+        dropPOP3StorageFolders(user, cid);
         final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
@@ -1524,6 +1521,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!isValid(name)) {
             throw MailAccountExceptionCodes.INVALID_NAME.create(name);
         }
+        dropPOP3StorageFolders(user, cid);
         // Get ID
         final int id;
         if (mailAccount.isDefaultFlag()) {
@@ -1697,7 +1695,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), con);
                 }
             }
-            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
