@@ -82,6 +82,8 @@ public final class CreatePerformer extends AbstractPerformer {
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
+    private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
+
     /**
      * Initializes a new {@link CreatePerformer}.
      *
@@ -161,7 +163,7 @@ public final class CreatePerformer extends AbstractPerformer {
                     getUserInfo4Error(),
                     getContextInfo4Error());
             }
-            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && MailContentType.getInstance().toString().equals(
+            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && CONTENT_TYPE_MAIL.equals(
                 toCreate.getContentType().toString())) {
                 throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
             }
@@ -279,7 +281,7 @@ public final class CreatePerformer extends AbstractPerformer {
                 /*
                  * Special handling for mail folders on root level
                  */
-                if (FolderStorage.PRIVATE_ID.equals(parentId) && MailContentType.getInstance().toString().equals(folderContentType.toString())) {
+                if (FolderStorage.PRIVATE_ID.equals(parentId) && CONTENT_TYPE_MAIL.equals(folderContentType.toString())) {
                     final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
                     /*
                      * Check if create is allowed

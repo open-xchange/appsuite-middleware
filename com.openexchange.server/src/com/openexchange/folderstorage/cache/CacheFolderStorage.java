@@ -354,9 +354,12 @@ public final class CacheFolderStorage implements FolderStorage {
             if (null == storage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
-            final Folder createdFolder = loadFolder(treeId, folderId, StorageType.WORKING, true, storageParameters);
+            /*
+             * Load created folder from real tree
+             */
+            final Folder createdFolder = loadFolder(treeId, REAL_TREE_ID, StorageType.WORKING, true, storageParameters);
             if (createdFolder.isCacheable()) {
-                putFolder(createdFolder, treeId, storageParameters);
+                putFolder(createdFolder, REAL_TREE_ID, storageParameters);
             }
             /*
              * Remove parent from cache(s)
@@ -370,6 +373,13 @@ public final class CacheFolderStorage implements FolderStorage {
                 if (null != folderMap) {
                     folderMap.remove(folder.getParentID(), tid);
                 }
+            }
+            /*
+             * Load parent from real tree
+             */
+            final Folder parentFolder = loadFolder(REAL_TREE_ID, folder.getParentID(), StorageType.WORKING, true, storageParameters);
+            if (parentFolder.isCacheable()) {
+                putFolder(parentFolder, REAL_TREE_ID, storageParameters);
             }
         } finally {
             lock.unlock();
