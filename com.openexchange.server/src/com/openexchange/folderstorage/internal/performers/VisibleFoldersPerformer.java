@@ -220,11 +220,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 completionService = new CallerRunsCompletionService<Object>();
                 paramsProvider = new InstanceStorageParametersProvider(storageParameters);
             } else {
-                try {
-                    completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
                 paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
             }
             int taskCount = 0;

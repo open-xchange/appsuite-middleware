@@ -162,94 +162,81 @@ public final class MailAccountRequest {
 
     private JSONObject actionGet(final JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-        try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
-            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-
-            if (isUnifiedINBOXAccount(mailAccount)) {
-                // Treat as no hit
-                throw MailAccountExceptionCodes.NOT_FOUND.create(
-                    Integer.valueOf(id),
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
-            return jsonAccount;
-        } catch (final OXException exc) {
-            throw new OXException(exc);
+        if (isUnifiedINBOXAccount(mailAccount)) {
+            // Treat as no hit
+            throw MailAccountExceptionCodes.NOT_FOUND.create(
+                Integer.valueOf(id),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
         }
+
+        if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        }
+
+        final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
+        return jsonAccount;
     }
 
     private JSONObject actionGetTree(final JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
         final int id = DataParser.checkInt(jsonObject, AJAXServlet.PARAMETER_ID);
 
-        try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+        final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
 
-            if (isUnifiedINBOXAccount(mailAccount)) {
-                // Treat as no hit
-                throw MailAccountExceptionCodes.NOT_FOUND.create(
-                    Integer.valueOf(id),
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            // Create a mail access instance
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
-            return actionValidateTree0(mailAccess);
-        } catch (final OXException exc) {
-            throw new OXException(exc);
+        if (isUnifiedINBOXAccount(mailAccount)) {
+            // Treat as no hit
+            throw MailAccountExceptionCodes.NOT_FOUND.create(
+                Integer.valueOf(id),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
         }
+
+        if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        }
+
+        // Create a mail access instance
+        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, mailAccount.getId());
+        return actionValidateTree0(mailAccess);
     }
 
     private JSONArray actionDelete(final JSONObject jsonObject) throws JSONException, OXException, OXException, OXException {
         final int[] ids = DataParser.checkJSONIntArray(jsonObject, AJAXServlet.PARAMETER_DATA);
 
         final JSONArray jsonArray = new JSONArray();
-        try {
-            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                for (final int id : ids) {
-                    if (MailAccount.DEFAULT_ID != id) {
-                        throw MailAccountExceptionCodes.NOT_ENABLED.create(
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()));
-                    }
-                }
-            }
-
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
+        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
             for (final int id : ids) {
-                final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-
-                if (!isUnifiedINBOXAccount(mailAccount)) {
-                    storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
+                if (MailAccount.DEFAULT_ID != id) {
+                    throw MailAccountExceptionCodes.NOT_ENABLED.create(
+                        Integer.valueOf(session.getUserId()),
+                        Integer.valueOf(session.getContextId()));
                 }
-
-                jsonArray.put(id);
             }
-        } catch (final OXException exc) {
-            throw new OXException(exc);
+        }
+
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+        for (final int id : ids) {
+            final MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+
+            if (!isUnifiedINBOXAccount(mailAccount)) {
+                storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
+            }
+
+            jsonArray.put(id);
         }
         return jsonArray;
     }
@@ -257,37 +244,33 @@ public final class MailAccountRequest {
     private JSONObject actionNew(final JSONObject jsonObject) throws OXException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
-        try {
-            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            final MailAccountDescription accountDescription = new MailAccountDescription();
-            new MailAccountParser().parse(accountDescription, jData);
-
-            checkNeededFields(accountDescription);
-
-            // Check if account denotes a Unified INBOX account
-            if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-                // Deny creation of Unified INBOX account
-                throw MailAccountExceptionCodes.CREATION_FAILED.create();
-            }
-
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
-            final int id =
-                storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session));
-
-            final JSONObject jsonAccount =
-                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
-
-            return jsonAccount;
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
         }
+
+        final MailAccountDescription accountDescription = new MailAccountDescription();
+        new MailAccountParser().parse(accountDescription, jData);
+
+        checkNeededFields(accountDescription);
+
+        // Check if account denotes a Unified INBOX account
+        if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
+            // Deny creation of Unified INBOX account
+            throw MailAccountExceptionCodes.CREATION_FAILED.create();
+        }
+
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+        final int id =
+            storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session));
+
+        final JSONObject jsonAccount =
+            MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
+
+        return jsonAccount;
     }
 
     private String getSecret(final ServerSession session) {
@@ -331,12 +314,8 @@ public final class MailAccountRequest {
                 return actionValidateTree(accountDescription);
             }
             return actionValidateBoolean(accountDescription);
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final GeneralSecurityException e) {
-            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(
-                e,
-                e.getMessage());
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -399,22 +378,18 @@ public final class MailAccountRequest {
     }
 
     private Boolean actionValidateBoolean(final MailAccountDescription accountDescription) throws OXException {
-        try {
-            // Validate mail server
-            boolean validated = checkMailServerURL(accountDescription);
-            // Failed?
-            if (!validated) {
-                return Boolean.FALSE;
-            }
-            // Now check transport server URL, if a transport server is present
-            final String transportServer = accountDescription.getTransportServer();
-            if (null != transportServer && transportServer.length() > 0) {
-                validated = checkTransportServerURL(accountDescription);
-            }
-            return Boolean.valueOf(validated);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        // Validate mail server
+        boolean validated = checkMailServerURL(accountDescription);
+        // Failed?
+        if (!validated) {
+            return Boolean.FALSE;
         }
+        // Now check transport server URL, if a transport server is present
+        final String transportServer = accountDescription.getTransportServer();
+        if (null != transportServer && transportServer.length() > 0) {
+            validated = checkTransportServerURL(accountDescription);
+        }
+        return Boolean.valueOf(validated);
     }
 
     private MailAccess<?, ?> getMailAccess(final MailAccountDescription accountDescription) throws OXException, OXException {
@@ -559,100 +534,92 @@ public final class MailAccountRequest {
     private JSONObject actionUpate(final JSONObject jsonObject) throws OXException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
-        try {
-            final MailAccountDescription accountDescription = new MailAccountDescription();
-            final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
+        final MailAccountDescription accountDescription = new MailAccountDescription();
+        final Set<Attribute> fieldsToUpdate = new MailAccountParser().parse(accountDescription, jData);
 
-            if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
-            final int id = accountDescription.getId();
-            if (-1 == id) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.ID);
-            }
-
-            final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-            if (isUnifiedINBOXAccount(toUpdate)) {
-                // Treat as no hit
-                throw MailAccountExceptionCodes.NOT_FOUND.create(
-                    Integer.valueOf(id),
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            storageService.updateMailAccount(
-                accountDescription,
-                fieldsToUpdate,
-                session.getUserId(),
-                session.getContextId(),
-                getSecret(session));
-
-            if (fieldsToUpdate.removeAll(DEFAULT)) {
-                /*
-                 * Drop all session parameters related to default folders for this account
-                 */
-                MailSessionCache.getInstance(session).removeAccountParameters(id);
-                /*-
-                 *
-                session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
-                session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
-                 */
-                /*
-                 * Re-Init account's default folders
-                 */
-                try {
-                    final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, id);
-                    mailAccess.connect(false);
-                    try {
-                        mailAccess.getFolderStorage().checkDefaultFolders();
-                    } finally {
-                        mailAccess.close(true);
-                    }
-                } catch (final OXException e) {
-                    LOG.warn(e.getMessage(), e);
-                }
-            }
-
-            final JSONObject jsonAccount =
-                MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
-
-            return jsonAccount;
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (!session.getUserConfiguration().isMultipleMailAccounts() && !isDefaultMailAccount(accountDescription)) {
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
         }
+
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+        final int id = accountDescription.getId();
+        if (-1 == id) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create( MailAccountFields.ID);
+        }
+
+        final MailAccount toUpdate = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+        if (isUnifiedINBOXAccount(toUpdate)) {
+            // Treat as no hit
+            throw MailAccountExceptionCodes.NOT_FOUND.create(
+                Integer.valueOf(id),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        }
+
+        storageService.updateMailAccount(
+            accountDescription,
+            fieldsToUpdate,
+            session.getUserId(),
+            session.getContextId(),
+            getSecret(session));
+
+        if (fieldsToUpdate.removeAll(DEFAULT)) {
+            /*
+             * Drop all session parameters related to default folders for this account
+             */
+            MailSessionCache.getInstance(session).removeAccountParameters(id);
+            /*-
+             *
+            session.setParameter(MailSessionParameterNames.getParamDefaultFolderArray(id), null);
+            session.setParameter(MailSessionParameterNames.getParamDefaultFolderChecked(id), null);
+             */
+            /*
+             * Re-Init account's default folders
+             */
+            try {
+                final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, id);
+                mailAccess.connect(false);
+                try {
+                    mailAccess.getFolderStorage().checkDefaultFolders();
+                } finally {
+                    mailAccess.close(true);
+                }
+            } catch (final OXException e) {
+                LOG.warn(e.getMessage(), e);
+            }
+        }
+
+        final JSONObject jsonAccount =
+            MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
+
+        return jsonAccount;
     }
 
     private JSONArray actionAll(final JSONObject request) throws OXException {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
-        try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+        MailAccount[] userMailAccounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
 
-            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
-            final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
+        final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+        final List<MailAccount> tmp = new ArrayList<MailAccount>(userMailAccounts.length);
 
-            for (final MailAccount userMailAccount : userMailAccounts) {
-                final MailAccount mailAccount = userMailAccount;
-                if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
-                    tmp.add(mailAccount);
-                }
+        for (final MailAccount userMailAccount : userMailAccounts) {
+            final MailAccount mailAccount = userMailAccount;
+            if (!isUnifiedINBOXAccount(mailAccount) && (multipleEnabled || isDefaultMailAccount(mailAccount))) {
+                tmp.add(mailAccount);
             }
-            userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
-
-            return MailAccountWriter.writeArray(userMailAccounts, attributes);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
+        userMailAccounts = tmp.toArray(new MailAccount[tmp.size()]);
+
+        return MailAccountWriter.writeArray(userMailAccounts, attributes);
     }
 
     private List<Attribute> getColumns(final String colString) {
@@ -675,27 +642,23 @@ public final class MailAccountRequest {
         final String colString = request.optString(AJAXServlet.PARAMETER_COLUMNS);
 
         final List<Attribute> attributes = getColumns(colString);
-        try {
-            final MailAccountStorageService storageService =
-                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService storageService =
+            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
-            final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
+        final JSONArray ids = request.getJSONArray(AJAXServlet.PARAMETER_DATA);
 
-            final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
-            final List<MailAccount> accounts = new ArrayList<MailAccount>();
+        final boolean multipleEnabled = session.getUserConfiguration().isMultipleMailAccounts();
+        final List<MailAccount> accounts = new ArrayList<MailAccount>();
 
-            for (int i = 0, size = ids.length(); i < size; i++) {
-                final int id = ids.getInt(i);
-                final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
-                if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
-                    accounts.add(account);
-                }
+        for (int i = 0, size = ids.length(); i < size; i++) {
+            final int id = ids.getInt(i);
+            final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
+                accounts.add(account);
             }
-
-            return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
+
+        return MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes);
     }
 
     private static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {

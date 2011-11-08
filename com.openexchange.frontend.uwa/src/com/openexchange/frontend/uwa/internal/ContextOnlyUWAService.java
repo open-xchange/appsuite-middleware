@@ -85,8 +85,6 @@ public class ContextOnlyUWAService implements UWAWidgetService {
             return contextWidgets.load();
         } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -98,8 +96,6 @@ public class ContextOnlyUWAService implements UWAWidgetService {
             contextWidgets.create(widget);
         } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -109,8 +105,6 @@ public class ContextOnlyUWAService implements UWAWidgetService {
             contextWidgets.delete(id);
         } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -120,8 +114,6 @@ public class ContextOnlyUWAService implements UWAWidgetService {
             return contextWidgets.load(id);
         } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 
@@ -131,8 +123,6 @@ public class ContextOnlyUWAService implements UWAWidgetService {
             contextWidgets.update(widget, modified);
         } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

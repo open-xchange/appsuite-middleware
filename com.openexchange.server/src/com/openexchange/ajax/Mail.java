@@ -4747,7 +4747,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             return false;
         } catch (final JSONException e) {
-            throw new OXException(MailExceptionCode.JSON_ERROR.create(e, e.getMessage()));
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

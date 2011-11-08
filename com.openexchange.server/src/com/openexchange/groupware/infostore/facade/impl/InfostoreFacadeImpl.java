@@ -392,8 +392,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                 I(document.getId()),
                 I(ctx.getContextId()),
                 QUERIES.getNumberOfVersionsQueryForOneDocument());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

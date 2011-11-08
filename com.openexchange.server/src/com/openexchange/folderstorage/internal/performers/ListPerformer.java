@@ -281,11 +281,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                     completionService = new CallerRunsCompletionService<Object>();
                     paramsProvider = new InstanceStorageParametersProvider(storageParameters);
                 } else {
-                    try {
-                        completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-                    } catch (final OXException e) {
-                        throw new OXException(e);
-                    }
+                    completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
                     paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
                 }
                 int taskCount = 0;
@@ -457,13 +453,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             }
         } else {
             allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
-            final CompletionService<List<SortableId>> completionService;
-            try {
-                completionService =
+            final CompletionService<List<SortableId>> completionService =
                     new ThreadPoolCompletionService<List<SortableId>>(getInstance().getService(ThreadPoolService.class, true));
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
             /*
              * Get all visible subfolders from each storage
              */
@@ -567,11 +558,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             completionService = new CallerRunsCompletionService<Object>();
             paramsProvider = new InstanceStorageParametersProvider(storageParameters);
         } else {
-            try {
-                completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
+            completionService = new ThreadPoolCompletionService<Object>(getInstance().getService(ThreadPoolService.class, true));
             paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
         }
         int taskCount = 0;

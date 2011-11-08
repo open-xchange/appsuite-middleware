@@ -79,7 +79,6 @@ import java.util.zip.ZipOutputStream;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
@@ -1661,12 +1660,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private void checkPatternLength(final String[] patterns) throws OXException {
-        final int minimumSearchCharacters;
-        try {
-            minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (final ConfigurationException e) {
-            throw new OXException(e);
-        }
+        final int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (0 == minimumSearchCharacters || null == patterns) {
             return;
         }

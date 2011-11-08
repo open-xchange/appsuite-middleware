@@ -257,16 +257,12 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             ids[i] = tasks.get(i).getObjectID();
         }
         final AttachmentBase attachmentBase = Attachments.getInstance();
-        try {
-            final Map<Integer, Date> dates = attachmentBase.getNewestCreationDates(ctx, Types.TASK, ids);
-            for (final Task task : tasks) {
-                final Date newestCreationDate = dates.get(I(task.getObjectID()));
-                if (null != newestCreationDate) {
-                    task.setLastModifiedOfNewestAttachment(newestCreationDate);
-                }
+        final Map<Integer, Date> dates = attachmentBase.getNewestCreationDates(ctx, Types.TASK, ids);
+        for (final Task task : tasks) {
+            final Date newestCreationDate = dates.get(I(task.getObjectID()));
+            if (null != newestCreationDate) {
+                task.setLastModifiedOfNewestAttachment(newestCreationDate);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

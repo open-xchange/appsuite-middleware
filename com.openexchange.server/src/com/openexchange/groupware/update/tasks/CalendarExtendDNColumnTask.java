@@ -138,12 +138,7 @@ public class CalendarExtendDNColumnTask implements UpdateTask {
     }
 
     private boolean checkColumnInTable(final String tableName, final int contextId) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(contextId, true);
         ResultSet rs = null;
         try {
             final DatabaseMetaData metadata = writeCon.getMetaData();

@@ -169,12 +169,7 @@ public final class CalculatePermission {
      * @throws OXException If calculating the effective permission fails
      */
     public static Permission calculate(final Folder folder, final User user, final Context context, final java.util.List<ContentType> allowedContentTypes) throws OXException {
-        final UserConfiguration userConfiguration;
-        try {
-            userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), context);
         final Permission underlyingPermission;
         {
             final int bits = -1; // folder.getBits();

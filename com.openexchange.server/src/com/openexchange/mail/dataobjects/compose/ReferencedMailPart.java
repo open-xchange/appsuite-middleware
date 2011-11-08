@@ -343,8 +343,6 @@ public abstract class ReferencedMailPart extends MailPart implements ComposedMai
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             if (fis != null) {
                 try {

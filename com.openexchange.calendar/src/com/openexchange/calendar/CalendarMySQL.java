@@ -3752,8 +3752,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
             LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Integer.valueOf(changes[0]), ". Check prg_dates oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
             writecon.commit();
-        } catch (final OXException dbpe) {
-            throw new OXException(dbpe);
         } catch (final SQLException sqle) {
             if (writecon != null) {
                 try {

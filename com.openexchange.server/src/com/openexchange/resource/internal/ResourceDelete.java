@@ -139,12 +139,8 @@ public final class ResourceDelete {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
-        try {
-            if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
-            }
-        } catch (final OXException e1) {
-            throw new OXException(e1);
+        if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
+            throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
         }
         /*
          * TODO: Remove statements above and replace with commented call below
