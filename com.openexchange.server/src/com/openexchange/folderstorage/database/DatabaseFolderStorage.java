@@ -155,15 +155,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final ConnectionMode connection;
 
-        private final DatabaseService databaseService;
+        //private final DatabaseService databaseService;
 
-        private final int contextId;
+        //private final int contextId;
 
-        protected NonClosingConnectionProvider(final ConnectionMode connection, final DatabaseService databaseService, final int contextId) {
+        protected NonClosingConnectionProvider(final ConnectionMode connection/*, final DatabaseService databaseService, final int contextId*/) {
             super();
             this.connection = connection;
-            this.databaseService = databaseService;
-            this.contextId = contextId;
+            //this.databaseService = databaseService;
+            //this.contextId = contextId;
         }
 
         @Override
@@ -1654,7 +1654,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final Context context = storageParameters.getContext();
         ConnectionMode connection = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
         if (null != connection) {
-            return new NonClosingConnectionProvider(connection, databaseService, context.getContextId());
+            return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
         connection = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());
