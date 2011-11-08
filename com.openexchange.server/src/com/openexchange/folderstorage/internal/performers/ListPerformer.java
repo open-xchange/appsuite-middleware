@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,13 +73,20 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.config.MailProperties;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -94,6 +102,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ListPerformer.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    protected static final FolderType FOLDER_TYPE_MAIL = MailFolderType.getInstance();
 
     /**
      * Initializes a new {@link ListPerformer} from given session.
@@ -232,7 +242,18 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * The subfolders can be completely fetched from already opened parent's folder storage
                  */
-
+                if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
+                    final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
+                    if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
+                        final List<String> l = new ArrayList<String>(Arrays.asList(subfolderIds));
+                        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                        for (final Iterator<String> it = l.iterator(); it.hasNext();) {
+                            if (pop3StorageFolders.contains(it.next())) {
+                                it.remove();
+                            }
+                        }
+                    }
+                }
                 /*
                  * Collect by folder storage
                  */
@@ -454,7 +475,21 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                         final StorageParameters newParameters = newStorageParameters();
                         final boolean started = neededStorage.startTransaction(newParameters, false);
                         try {
-                            final List<SortableId> l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
+                            final List<SortableId> l;
+                            if (MailProperties.getInstance().isHidePOP3StorageFolders() && FOLDER_TYPE_MAIL.servesFolderId(parentId)) {
+                                l = new ArrayList<SortableId>(Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters)));
+                                final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(parentId);
+                                if (MailAccount.DEFAULT_ID == argument.getAccountId()) {
+                                    final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+                                    for (final Iterator<SortableId> it = l.iterator(); it.hasNext();) {
+                                        if (pop3StorageFolders.contains(it.next().getId())) {
+                                            it.remove();
+                                        }
+                                    }
+                                }
+                            } else {
+                                l = Arrays.asList(neededStorage.getSubfolders(treeId, parentId, newParameters));
+                            }
                             if (started) {
                                 neededStorage.commitTransaction(newParameters);
                             }
