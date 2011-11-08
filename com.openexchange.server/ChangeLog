@@ -1,3 +1,7 @@
+* 2011-11-08 - thorben.betten@open-xchange.com
+
+ - Fixed moving a mail folder to another account
+
 * 2011-11-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 20734: Allowing translation for English locales.
