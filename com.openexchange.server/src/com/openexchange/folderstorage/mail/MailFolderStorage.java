@@ -1179,6 +1179,18 @@ public final class MailFolderStorage implements FolderStorage {
                         // Perform other updates
                         otherAccess.getFolderStorage().updateFolder(destFullname, mfd);
                         postEvent4Subfolders(accountId, subfolders, storageParameters);
+                        // Reset identifier
+                        folder.setID(prepareFullname(parentAccountID, destFullname));
+                        /*
+                         * Handle update of permission or subscription
+                         */
+                        otherAccess.getFolderStorage().updateFolder(destFullname, mfd);
+                        addWarnings(otherAccess, storageParameters);
+                        postEvent(parentAccountID, destFullname, false, storageParameters);
+                        /*
+                         * Leave routine...
+                         */
+                        return;
                     } finally {
                         otherAccess.close(true);
                     }
