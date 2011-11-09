@@ -148,6 +148,9 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 	// Truncation error: Not using the standard one, because we cannot map between field name in .ics/.vcd/.csv file and OX field.
 	public static final String TRUNCATION = "Could not import an entry because one or more fields are too big for the database: %s";
 
+    // Pretty generic: Could not one element in an import
+	public static final String COULD_NOT_CREATE = "Could not create the following element: %s";
+
     private ImportExportExceptionMessages() {
         super();
     }
