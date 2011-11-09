@@ -1,3 +1,7 @@
+* 2011-11-09 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 20008: Added check for null
+
 * 2011-11-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 20692: Ignoring upload restrictions on forward if property "isPublishOnExceededQuota" is enabled
