@@ -55,6 +55,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
@@ -94,12 +95,19 @@ public final class TrackerActivator implements BundleActivator {
             context,
             ConfigurationService.class,
             new RegistryServiceTrackerCustomizer<ConfigurationService>(
-                context,
-                SubscriptionServiceRegistry.getInstance(),
-                ConfigurationService.class)));
-        for (final ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
+                    context,
+                    SubscriptionServiceRegistry.getInstance(),
+                    ConfigurationService.class)));
+           trackers.add(new ServiceTracker(
+                   context,
+                   ContactInterfaceDiscoveryService.class.getName(),
+                   new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
+                       context,
+                       SubscriptionServiceRegistry.getInstance(),
+                       ContactInterfaceDiscoveryService.class)));
+            for (final ServiceTracker tracker : trackers) {
+                tracker.open();
+            }
 
         SubscriptionServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();
