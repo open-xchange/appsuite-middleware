@@ -135,14 +135,20 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     public static final String FILE_NOT_EXISTS_MSG = "The file you selected does not exist.";
 
     // Could not load ContactInterface to write storage contacts.
-    public static final String CONTACT_INTERFACE_MISSING = "Could not load ContactInterface to write storage contacts.";
+    public static final String CONTACT_INTERFACE_MISSING_MSG = "Could not load ContactInterface to write storage contacts.";
 
-    public static final String COULD_NOT_WRITE = "Could not write entry into database.";
+    public static final String COULD_NOT_WRITE_MSG = "Could not write entry into database.";
 
     //  Ignoring invalid value for field "%1$s": %2$s
     public static final String IGNORE_FIELD_MSG = "Ignoring invalid value for field \"%1$s\": %2$s";
 
-	public static final String NO_FILE_UPLOADED = "No file was uploaded";
+	public static final String NO_FILE_UPLOADED_MSG = "No file was uploaded";
+	
+	// Truncation error: Not using the standard one, because we cannot map between field name in .ics/.vcd/.csv file and OX field.
+	public static final String TRUNCATION_MSG = "Could not import an entry because one or more fields are too big for the database: %s";
+
+    // Pretty generic: Could not one element in an import
+	public static final String COULD_NOT_CREATE_MSG = "Could not create the following element: %s";
 
     private ImportExportExceptionMessages() {
         super();
