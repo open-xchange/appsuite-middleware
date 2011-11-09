@@ -56,7 +56,7 @@ import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.groupware.contact.mappers.PropertyDrivenMapper;
+import com.openexchange.groupware.contact.mappers.PropertyDrivenContactFieldMapper;
 import com.openexchange.groupware.importexport.Importer;
 import com.openexchange.groupware.importexport.ImporterExporter;
 import com.openexchange.groupware.importexport.exporters.CSVContactExporter;
@@ -146,7 +146,7 @@ public abstract class ImportExport extends SessionServlet {
                 }
                 Properties props = new Properties();
                 props.load(new FileInputStream(file));
-                PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+                PropertyDrivenContactFieldMapper mapper = new PropertyDrivenContactFieldMapper(props);
                 outlook.addFieldMappers(mapper);
                 mapperAmount++;
             }
