@@ -1,3 +1,9 @@
+open-xchange-config-cascade-hostname (6.20.0.0-4) unstable; urgency=low
+
+  * build for PTF ID874
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Wed, 09 Nov 2011 08:14:16 +0000
+
 open-xchange-config-cascade-hostname (6.20.0.0-3) unstable; urgency=low
 
   * build for public ptf 2011-10-20
