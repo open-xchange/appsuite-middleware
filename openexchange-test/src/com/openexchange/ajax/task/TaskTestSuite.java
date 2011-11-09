@@ -85,6 +85,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(UpdatesTest.class);
         tests.addTestSuite(TaskRecurrenceTest.class);
         tests.addTestSuite(ConfirmTest.class);
+        tests.addTestSuite(TaskDurationAndCostsTest.class);
 
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);

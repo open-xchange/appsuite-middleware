@@ -47,39 +47,57 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.tasks.json.actions;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskRequest;
+
 
 /**
- * {@link TaskActivator}
+ * {@link CopyAction}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class TaskActivator extends AJAXModuleActivator {
+public class CopyAction extends TaskAction {
 
-    public TaskActivator() {
-        super();
+    public CopyAction(ServiceLookup services) {
+        super(services);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
+     */
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
+        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        final JSONObject jData = (JSONObject) req.getRequest().getData();
+        final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
 
-//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-//        registerService(ResultConverter.class, new TaskResultConverter());
+        final TasksSQLInterface taskInterface = new TasksSQLImpl(req.getSession());
+        final Task taskObj = taskInterface.getTaskById(id, inFolder);
+        taskObj.removeObjectID();
+        taskObj.setParentFolderID(folderId);
+        taskInterface.insertTaskObject(taskObj);
+
+        final Date timestamp = new Date(0);
+
+        final JSONObject jsonResponseObject = new JSONObject();
+        jsonResponseObject.put(TaskFields.ID, taskObj.getObjectID());
+
+        return new AJAXRequestResult(jsonResponseObject, timestamp, "json");
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
 }

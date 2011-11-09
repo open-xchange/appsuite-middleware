@@ -47,39 +47,62 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.tasks.json.actions;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.parser.TaskParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskRequest;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TaskActivator}
+ * {@link ConfirmAction}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class TaskActivator extends AJAXModuleActivator {
+public class ConfirmAction extends TaskAction {
 
-    public TaskActivator() {
-        super();
+    /**
+     * Initializes a new {@link ConfirmAction}.
+     * @param services
+     */
+    public ConfirmAction(ServiceLookup services) {
+        super(services);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
+     */
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        final JSONObject data = (JSONObject) req.getRequest().getData();
+        final Task task = new Task();
+        new TaskParser(req.getTimeZone()).parse(task, data);
+        final ServerSession session = req.getSession();
+        final TasksSQLInterface taskSql = new TasksSQLImpl(session);
+        final int taskIdFromParameter = req.optInt(AJAXServlet.PARAMETER_ID);
+        final int taskId;
+        if (TaskRequest.NOT_FOUND == taskIdFromParameter) {
+            if (!task.containsObjectID()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_ID);
+            }
+            taskId = task.getObjectID();
+        } else {
+            taskId = taskIdFromParameter;
+        }
+        final Date timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), task.getConfirm(), task.getConfirmMessage());
 
-//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-//        registerService(ResultConverter.class, new TaskResultConverter());
+        return new AJAXRequestResult(new JSONObject(), timestamp, "json");
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
 }

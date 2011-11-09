@@ -47,39 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.tasks.json.actions;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import java.util.Date;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskRequest;
+
 
 /**
- * {@link TaskActivator}
+ * {@link GetAction}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class TaskActivator extends AJAXModuleActivator {
+public class GetAction extends TaskAction {
 
-    public TaskActivator() {
-        super();
+    /**
+     * Initializes a new {@link GetAction}.
+     * @param services
+     */
+    public GetAction(ServiceLookup services) {
+        super(services);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
+     */
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
+        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_INFOLDER);
+        Date timestamp = new Date(0);
 
-//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-//        registerService(ResultConverter.class, new TaskResultConverter());
+        final TasksSQLInterface sqlinterface = new TasksSQLImpl(req.getSession());
+        final Task task = sqlinterface.getTaskById(id, inFolder);
+        timestamp = task.getLastModified();
+
+        return new AJAXRequestResult(task, timestamp, "task");
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
 }

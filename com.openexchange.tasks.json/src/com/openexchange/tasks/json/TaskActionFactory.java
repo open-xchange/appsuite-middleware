@@ -47,39 +47,56 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.tasks.json;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.actions.AllAction;
+import com.openexchange.tasks.json.actions.ConfirmAction;
+import com.openexchange.tasks.json.actions.CopyAction;
+import com.openexchange.tasks.json.actions.DeleteAction;
+import com.openexchange.tasks.json.actions.GetAction;
+import com.openexchange.tasks.json.actions.ListAction;
+import com.openexchange.tasks.json.actions.NewAction;
+import com.openexchange.tasks.json.actions.SearchAction;
+import com.openexchange.tasks.json.actions.TaskAction;
+import com.openexchange.tasks.json.actions.UpdateAction;
+import com.openexchange.tasks.json.actions.UpdatesAction;
+
 
 /**
- * {@link TaskActivator}
+ * {@link TaskActionFactory}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class TaskActivator extends AJAXModuleActivator {
+public class TaskActionFactory implements AJAXActionServiceFactory {
+    
+    private static final Map<String, TaskAction> ACTIONS = new ConcurrentHashMap<String, TaskAction>(10);
 
-    public TaskActivator() {
+    /**
+     * Initializes a new {@link TaskActionFactory}.
+     */
+    public TaskActionFactory(final ServiceLookup serviceLookup) {
         super();
+        ACTIONS.put("all", new AllAction(serviceLookup));
+        ACTIONS.put("confirm", new ConfirmAction(serviceLookup));
+        ACTIONS.put("copy", new CopyAction(serviceLookup));
+        ACTIONS.put("delete", new DeleteAction(serviceLookup));
+        ACTIONS.put("get", new GetAction(serviceLookup));
+        ACTIONS.put("list", new ListAction(serviceLookup));
+        ACTIONS.put("new", new NewAction(serviceLookup));
+        ACTIONS.put("search", new SearchAction(serviceLookup));
+        ACTIONS.put("update", new UpdateAction(serviceLookup));
+        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-
-//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-//        registerService(ResultConverter.class, new TaskResultConverter());
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return ACTIONS.get(action);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
 }

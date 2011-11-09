@@ -47,39 +47,61 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.tasks.json.converters;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import java.util.TimeZone;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link TaskActivator}
+ * {@link TaskJSONResultConverter}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class TaskActivator extends AJAXModuleActivator {
+public abstract class TaskJSONResultConverter implements ResultConverter {
+    
+    protected static final String OUTPUT_FORMAT = "json";
 
-    public TaskActivator() {
-        super();
+    private TimeZone timeZone;
+
+    @Override
+    public String getOutputFormat() {
+        return OUTPUT_FORMAT;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-
-//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-//        registerService(ResultConverter.class, new TaskResultConverter());
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (null != sTimeZone) {
+            timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
+        } else {
+            timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        }
+        convertTask(requestData, result, session, converter);
     }
+
+    protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
+
+    protected TimeZone getTimeZone() {
+        return timeZone;
+    }
+
+    @Override
+    public String getInputFormat() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

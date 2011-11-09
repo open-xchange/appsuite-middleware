@@ -47,39 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.tasks.osgi;
+package com.openexchange.tasks.json.osgi;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import com.openexchange.tasks.json.TaskActionFactory;
+import com.openexchange.tasks.json.converters.TaskResultConverter;
+import com.openexchange.user.UserService;
+
 
 /**
- * {@link TaskActivator}
+ * {@link TaskJSONActivator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class TaskActivator extends AJAXModuleActivator {
+public class TaskJSONActivator extends AJAXModuleActivator {
+    
+    private static final Class<?>[] NEEDED = new Class[] { UserService.class };
 
-    public TaskActivator() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-
-//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-//        registerService(ResultConverter.class, new TaskResultConverter());
+        registerModule(new TaskActionFactory(this), "tasks");
+        registerService(ResultConverter.class, new TaskResultConverter());
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
-    }
+    
+
 }
