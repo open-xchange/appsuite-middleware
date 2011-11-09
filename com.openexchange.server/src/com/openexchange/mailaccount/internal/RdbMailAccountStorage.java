@@ -86,7 +86,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.IMailAccessCache;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -530,31 +529,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (isEmpty(path)) {
             return;
         }
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = MailAccess.getInstance(user, cid);
-        if (defaultMailAccess.isConnected()) {
-            try {
-                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-            } catch (final OXException e) {
-                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
-                    // Ignore
-                    LOG.trace(e.getMessage(), e);
-                } else {
-                    throw e;
-                }
-            }
-        } else {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
+        try {
+            defaultMailAccess = MailAccess.getInstance(user, cid);
             defaultMailAccess.connect(false);
-            try {
-                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-            } catch (final OXException e) {
-                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
-                    // Ignore
-                    LOG.trace(e.getMessage(), e);
-                } else {
-                    throw e;
-                }
-            } finally {
-                defaultMailAccess.close(true);
+            defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+        } finally {
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(false);
             }
         }
     }
