@@ -1200,6 +1200,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             iCalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
             iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
             iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
+            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.INLINE);
             /*
              * Add the parts to parental multipart & return
              */

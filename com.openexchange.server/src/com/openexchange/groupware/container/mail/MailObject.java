@@ -100,6 +100,8 @@ public class MailObject {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailObject.class));
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     public static final int DONT_SET = -2;
 
     private String fromAddr;
@@ -477,6 +479,7 @@ public class MailObject {
              * X-Open-Xchange-Object
              */
             msg.setHeader(HEADER_X_OX_OBJECT, String.valueOf(objectId));
+            msg.saveChanges();
             /*
              * Finally transport mail
              */
@@ -485,6 +488,9 @@ public class MailObject {
                 final UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream();
                 msg.writeTo(bos);
                 transport.sendRawMessage(bos.toByteArray());
+                if (DEBUG) {
+                    LOG.debug("Sent mail:\n" + new String(bos.toByteArray()));
+                }
             } finally {
                 transport.close();
             }
