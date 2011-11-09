@@ -2308,6 +2308,20 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     /**
+     * Gets a value indicating whether the supplied notification {@link State} 
+     * reflects an update of the accept/decline status or not. 
+     * @param state The {@link State} to check
+     * @return <code>true</code>, if it is a status update, <code>false</code>, otherwise
+     */
+    private static boolean isStatusUpdate(final State state) {
+    	return null != state &&
+			State.Type.ACCEPTED.equals(state.getType()) ||  
+        	State.Type.DECLINED.equals(state.getType()) || 
+        	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType());
+
+    }
+    
+    /**
      * Gets the recurrence master's title of specified event.
      *
      * @param appointment The change exception
