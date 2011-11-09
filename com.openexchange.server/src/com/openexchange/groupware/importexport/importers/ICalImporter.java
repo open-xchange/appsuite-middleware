@@ -73,8 +73,10 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -433,7 +435,7 @@ public class ICalImporter extends AbstractImporter {
 										.create());
 					}
 				} catch (final OXException e) {
-					AbstractOXException ne = makeMoreInformative(e);
+					OXException ne = makeMoreInformative(e);
 					//LOG.error(ne.getMessage(), ne); //removed logging, because this would be a user error spamming our log.
 					importResult.setException(ne);
 				}
@@ -466,7 +468,7 @@ public class ICalImporter extends AbstractImporter {
 	}
 
 	private OXException makeMoreInformative(OXException e) {
-		if( e.getCategory() == Category.enum.TRUNCATED){
+		if( e.getCategory() == Category.CATEGORY_TRUNCATED){
 			ProblematicAttribute[] problematics = e.getProblematics();
 			StringBuilder bob = new StringBuilder();
 			for(ProblematicAttribute att: problematics){
