@@ -86,6 +86,7 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
 		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
 		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
+		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
 		return tests;
 	}
 }
