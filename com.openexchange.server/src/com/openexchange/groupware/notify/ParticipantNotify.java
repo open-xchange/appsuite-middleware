@@ -2318,6 +2318,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			State.Type.ACCEPTED.equals(state.getType()) ||  
         	State.Type.DECLINED.equals(state.getType()) || 
         	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType());
+
     }
     
     /**
