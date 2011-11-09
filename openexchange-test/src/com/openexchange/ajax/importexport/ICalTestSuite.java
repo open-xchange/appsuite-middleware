@@ -82,6 +82,7 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug17393Test.class);
 		tests.addTestSuite(Bug19915Test.class);
 		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
+		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
 		return tests;
 	}
 }
