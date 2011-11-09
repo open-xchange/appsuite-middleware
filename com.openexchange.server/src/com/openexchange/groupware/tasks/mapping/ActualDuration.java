@@ -60,6 +60,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Methods for iterated processing of the actual duration of task objects.
+ * 
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class ActualDuration implements Mapper<Long> {
@@ -107,6 +108,12 @@ public final class ActualDuration implements Mapper<Long> {
 
     @Override
     public boolean equals(Task task1, Task task2) {
+        if (task1.getActualDuration() == null) {
+            return (task2.getActualDuration() == null);
+        }
+        if (task2.getActualDuration() == null) {
+            return (task1.getActualDuration() == null);
+        }
         return task1.getActualDuration().equals(task2.getActualDuration());
     }
 
