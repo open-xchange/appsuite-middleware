@@ -306,8 +306,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }

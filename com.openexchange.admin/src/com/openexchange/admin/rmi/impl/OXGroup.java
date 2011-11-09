@@ -81,8 +81,8 @@ import com.openexchange.admin.storage.interfaces.OXGroupStorageInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheException;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 
 /**
  * Implementation for the RMI interface of group
@@ -187,9 +187,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	        	for (User user : members) {
 	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
 	            }
-	        } catch (final CacheException e) {
-	            log.error(e.getMessage(), e);
-	        } finally {
+	        } catch (final OXException e) {
+                log.error(e.getMessage(), e);
+            } finally {
 	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
 	        }
         }
@@ -272,7 +272,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), old_user_id));
                         }
                     }
-    	        } catch (final CacheException e) {
+    	        } catch (final OXException e) {
     	            log.error(e.getMessage(), e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
@@ -464,7 +464,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     	        	for (final Integer member_id : mems) {
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id));
                     }
-    	        } catch (final CacheException e) {
+    	        } catch (final OXException e) {
     	            log.error(e.getMessage(), e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
@@ -485,7 +485,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
     	        	for (final Integer member_id : mems) {
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), member_id));
                     }
-    	        } catch (final CacheException e) {
+    	        } catch (final OXException e) {
     	            log.error(e.getMessage(), e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
@@ -627,7 +627,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
                             cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
                         }                
                     }
-    	        } catch (final CacheException e) {
+    	        } catch (final OXException e) {
     	            log.error(e.getMessage(), e);
     	        } finally {
     	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
@@ -964,7 +964,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 	        	for (final User user : members) {
 	                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), user.getId()));
 	            }
-	        } catch (final CacheException e) {
+	        } catch (final OXException e) {
 	            log.error(e.getMessage(), e);
 	        } finally {
 	        	AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);

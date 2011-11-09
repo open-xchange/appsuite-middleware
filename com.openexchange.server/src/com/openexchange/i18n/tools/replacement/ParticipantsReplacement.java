@@ -222,7 +222,7 @@ public final class ParticipantsReplacement implements TemplateReplacement {
 
     private StringHelper getStringHelper() {
         if (stringHelper == null) {
-            stringHelper = StringHelper.valueOf(getLocale());
+            stringHelper = new StringHelper(getLocale());
         }
         return stringHelper;
     }

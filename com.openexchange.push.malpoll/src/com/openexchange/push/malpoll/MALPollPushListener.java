@@ -248,14 +248,10 @@ public final class MALPollPushListener implements PushListener {
             }
             return;
         }
-        try {
-            final ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
-            final Context context = contextService.getContext(contextId);
-            if (context.isReadOnly()) {
-                return;
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+        final Context context = contextService.getContext(contextId);
+        if (context.isReadOnly()) {
+            return;
         }
         try {
             final MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);

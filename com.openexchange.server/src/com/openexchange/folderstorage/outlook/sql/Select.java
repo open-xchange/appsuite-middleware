@@ -747,7 +747,7 @@ public final class Select {
                 }
             } else {
                 final TreeMap<String, List<String>> treeMap = new TreeMap<String, List<String>>(new FolderNameComparator(locale));
-                final StringHelper stringHelper = StringHelper.valueOf(locale);
+                final StringHelper stringHelper = new StringHelper(locale);
                 for (final String[] realSubfolderId : realSubfolderIds) {
                     final String localizedName = stringHelper.getString(realSubfolderId[1]);
                     List<String> list = treeMap.get(localizedName);

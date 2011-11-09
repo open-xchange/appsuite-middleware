@@ -126,12 +126,8 @@ public final class Create {
      * @throws OXException if the user is not allowed to create groups.
      */
     private void allowed() throws OXException {
-        try {
-            if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
-                throw GroupExceptionCodes.NO_CREATE_PERMISSION.create();
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
+            throw GroupExceptionCodes.NO_CREATE_PERMISSION.create();
         }
     }
 

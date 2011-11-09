@@ -789,7 +789,7 @@ public final class TNEF2ICal {
                 /*
                  * Reminder
                  */
-                vAlarm.getProperties().add(new Description(StringHelper.valueOf(locale).getString(Notifications.REMINDER)));
+                vAlarm.getProperties().add(new Description(new StringHelper(locale).getString(Notifications.REMINDER)));
                 event.getAlarms().add(vAlarm);
             }
             /*

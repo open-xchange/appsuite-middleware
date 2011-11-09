@@ -591,7 +591,7 @@ public class ContactRequest {
                 }
             }
         } catch (final JSONException e) {
-            throw new OXException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]);
         }
 
         return jsonResponseArray;

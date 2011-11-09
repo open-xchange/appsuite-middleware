@@ -212,7 +212,7 @@ public final class SystemInfostoreFolder {
                     }
                 }
             }
-            final StringHelper sh = StringHelper.valueOf(user.getLocale());
+            final StringHelper sh = new StringHelper(user.getLocale());
             final List<String[]> subfolderIds = new ArrayList<String[]>(size);
             final Iterator<FolderObject> iter = l.iterator();
             for (int i = 0; i < size; i++) {

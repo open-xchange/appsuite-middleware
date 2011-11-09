@@ -1,3 +1,7 @@
+* 2011-11-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20724: Corrected mail folder name properties for latvian.
+
 * 2011-10-28 - marcus.klein@open-xchange.com
 
  - Fix for bug 20673: listcontext CLT now also outputs information about context attributes.

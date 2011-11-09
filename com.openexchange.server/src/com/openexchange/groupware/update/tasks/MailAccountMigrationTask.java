@@ -454,12 +454,7 @@ public final class MailAccountMigrationTask extends UpdateTaskAdapter {
 
     private static void checkAndInsertMailAccountSequence(final Context ctx) throws OXException {
         final int cid = ctx.getContextId();
-        Connection con = null;
-        try {
-            con = Database.get(cid, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

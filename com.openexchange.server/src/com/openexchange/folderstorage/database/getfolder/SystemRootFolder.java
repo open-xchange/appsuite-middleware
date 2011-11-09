@@ -108,7 +108,7 @@ public final class SystemRootFolder {
         /*
          * The system root folder
          */
-        final StringHelper sh = StringHelper.valueOf(locale);
+        final StringHelper sh = new StringHelper(locale);
         final List<String[]> list = new ArrayList<String[]>(4);
         list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PRIVATE_FOLDER_NAME) });
         list.add(new String[] { String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID), sh.getString(FolderStrings.SYSTEM_PUBLIC_FOLDER_NAME) });

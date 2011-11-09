@@ -306,8 +306,6 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         try {
             wc = databaseService.getWritable(contextId);
             wc.setAutoCommit(false); // BEGIN
-        } catch (final OXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
@@ -353,7 +351,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             return genericConfId;
         } catch (final OXException e) {
             DBUtils.rollback(wc); // ROLL-BACK
-            throw new OXException(e);
+            throw e;
         } catch (final SQLException e) {
             DBUtils.rollback(wc); // ROLL-BACK
             throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());

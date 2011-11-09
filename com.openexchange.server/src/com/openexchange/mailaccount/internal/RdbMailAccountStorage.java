@@ -86,7 +86,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.IMailAccessCache;
-import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -419,6 +418,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(user), I(cid));
         }
+        dropPOP3StorageFolders(user, cid);
         final Connection con = Database.get(cid, true);
         try {
             con.setAutoCommit(false);
@@ -444,6 +444,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!deletePrimary && MailAccount.DEFAULT_ID == id) {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(user), I(cid));
         }
+        dropPOP3StorageFolders(user, cid);
         PreparedStatement stmt = null;
         try {
             // A POP3 account?
@@ -473,7 +474,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(3, user);
             stmt.executeUpdate();
             registry.triggerOnAfterDeletion(id, properties, user, cid, con);
-            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             final String className = e.getClass().getName();
             if ((null != className) && className.endsWith("MySQLIntegrityConstraintViolationException")) {
@@ -529,31 +529,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (isEmpty(path)) {
             return;
         }
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = MailAccess.getInstance(user, cid);
-        if (defaultMailAccess.isConnected()) {
-            try {
-                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-            } catch (final OXException e) {
-                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
-                    // Ignore
-                    LOG.trace(e.getMessage(), e);
-                } else {
-                    throw e;
-                }
-            }
-        } else {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> defaultMailAccess = null;
+        try {
+            defaultMailAccess = MailAccess.getInstance(user, cid);
             defaultMailAccess.connect(false);
-            try {
-                defaultMailAccess.getFolderStorage().deleteFolder(path, true);
-            } catch (final OXException e) {
-                if (MIMEMailExceptionCode.FOLDER_NOT_FOUND.equals(e)) {
-                    // Ignore
-                    LOG.trace(e.getMessage(), e);
-                } else {
-                    throw e;
-                }
-            } finally {
-                defaultMailAccess.close(true);
+            defaultMailAccess.getFolderStorage().deleteFolder(path, true);
+        } finally {
+            if (null != defaultMailAccess) {
+                defaultMailAccess.close(false);
             }
         }
     }
@@ -914,17 +897,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
-        final boolean rename;
+        dropPOP3StorageFolders(user, cid);
         if (attributes.contains(Attribute.NAME_LITERAL)) {
             // Check name
             final String name = mailAccount.getName();
             if (!isValid(name)) {
                 throw MailAccountExceptionCodes.INVALID_NAME.create(name);
             }
-            // Check for rename operation
-            rename = !name.equals(getMailAccount(mailAccount.getId(), user, cid, con).getName());
-        } else {
-            rename = false;
         }
         if (!changePrimary && (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId())) {
             final boolean containsUnifiedInbox = attributes.contains(Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
@@ -996,6 +975,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              * Perform common update
              */
             PreparedStatement stmt = null;
+            ResultSet rs = null;
             try {
                 MailAccount storageVersion = null;
                 if (prepareURL(attributes, Attribute.MAIL_URL_ATTRIBUTES, Attribute.MAIL_URL_LITERAL)) {
@@ -1113,59 +1093,127 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     if (orderedAttributes == null) {
                         orderedAttributes = new ArrayList<Attribute>(attributes);
                     }
-
-                    final UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
-                    for (final Attribute attribute : orderedAttributes) {
-                        attribute.doSwitch(sqlBuilder);
-                    }
-
-                    stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-
-                    final GetSwitch getter = new GetSwitch(mailAccount);
+                    /*
+                     * Check existence of transport entry
+                     */
+                    stmt = con.prepareStatement("SELECT id FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
                     int pos = 1;
-                    for (final Attribute attribute : orderedAttributes) {
-                        if (!sqlBuilder.handles(attribute)) {
-                            continue;
+                    stmt.setLong(pos++, cid);
+                    stmt.setLong(pos++, mailAccount.getId());
+                    stmt.setLong(pos++, user);
+                    rs = stmt.executeQuery();
+                    final boolean exists = rs.next();
+                    closeSQLStuff(rs, stmt);
+
+                    if (exists) {
+                        final UpdateTransportAccountBuilder sqlBuilder = new UpdateTransportAccountBuilder();
+                        for (final Attribute attribute : orderedAttributes) {
+                            attribute.doSwitch(sqlBuilder);
                         }
-                        final Object value = attribute.doSwitch(getter);
-                        if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
-                            if (encryptedPassword == null) {
+    
+                        stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
+    
+                        final GetSwitch getter = new GetSwitch(mailAccount);
+                        pos = 1;
+                        for (final Attribute attribute : orderedAttributes) {
+                            if (!sqlBuilder.handles(attribute)) {
+                                continue;
+                            }
+                            final Object value = attribute.doSwitch(getter);
+                            if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
+                                if (encryptedPassword == null) {
+                                    try {
+                                        encryptedPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                                    } catch (final GeneralSecurityException e) {
+                                        throw MailAccountExceptionCodes.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
+                                    }
+                                }
+                                setOptionalString(stmt, pos++, encryptedPassword);
+                            } else if (Attribute.TRANSPORT_LOGIN_LITERAL == attribute) {
+                                setOptionalString(stmt, pos++, (String) value);
+                            } else if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
+                                setOptionalString(stmt, pos++, (String) value);
+                            } else if (Attribute.PERSONAL_LITERAL == attribute) {
+                                final String personal = mailAccount.getPersonal();
+                                if (isEmpty(personal)) {
+                                    stmt.setNull(pos++, TYPE_VARCHAR);
+                                } else {
+                                    stmt.setString(pos++, personal);
+                                }
+                            } else if (Attribute.REPLY_TO_LITERAL == attribute) {
+                                final String replyTo = mailAccount.getReplyTo();
+                                if (isEmpty(replyTo)) {
+                                    stmt.setNull(pos++, TYPE_VARCHAR);
+                                } else {
+                                    stmt.setString(pos++, replyTo);
+                                }
+                            } else {
+                                stmt.setObject(pos++, value);
+                            }
+                        }
+    
+                        stmt.setLong(pos++, cid);
+                        stmt.setLong(pos++, mailAccount.getId());
+                        stmt.setLong(pos++, user);
+    
+                        if (LOG.isDebugEnabled()) {
+                            final String query = stmt.toString();
+                            LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
+                                orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
+                        }
+    
+                        stmt.executeUpdate();
+                        closeSQLStuff(stmt);
+                    } else {
+                        /*
+                         * Such an entry does not exist
+                         */
+                        final String transportURL = mailAccount.generateTransportServerURL();
+                        if (null != transportURL) {
+                            stmt.close();
+                            final String encryptedTransportPassword;
+                            if (sessionPassword == null) {
+                                encryptedTransportPassword = null;
+                            } else {
                                 try {
-                                    encryptedPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
+                                    encryptedTransportPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
                                 } catch (final GeneralSecurityException e) {
                                     throw MailAccountExceptionCodes.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
                                 }
                             }
-                            setOptionalString(stmt, pos++, encryptedPassword);
-                        } else if (Attribute.TRANSPORT_LOGIN_LITERAL == attribute) {
-                            setOptionalString(stmt, pos++, (String) value);
-                        } else if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
-                            setOptionalString(stmt, pos++, (String) value);
-                        } else if (Attribute.PERSONAL_LITERAL == attribute) {
+                            // cid, id, user, name, url, login, password, send_addr, default_flag
+                            stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);
+                            pos = 1;
+                            stmt.setLong(pos++, cid);
+                            stmt.setLong(pos++, mailAccount.getId());
+                            stmt.setLong(pos++, user);
+                            setOptionalString(stmt, pos++, mailAccount.getName());
+                            stmt.setString(pos++, transportURL);
+                            if (null == mailAccount.getTransportLogin()) {
+                                stmt.setString(pos++, "");
+                            } else {
+                                stmt.setString(pos++, mailAccount.getTransportLogin());
+                            }
+                            setOptionalString(stmt, pos++, encryptedTransportPassword);
+                            setOptionalString(stmt, pos++, mailAccount.getPrimaryAddress());
+                            stmt.setInt(pos++, 0); // default flag
                             final String personal = mailAccount.getPersonal();
                             if (isEmpty(personal)) {
                                 stmt.setNull(pos++, TYPE_VARCHAR);
                             } else {
                                 stmt.setString(pos++, personal);
                             }
-                        } else if (Attribute.REPLY_TO_LITERAL == attribute) {
-                            final String replyTo = mailAccount.getReplyTo();
-                            if (isEmpty(replyTo)) {
-                                stmt.setNull(pos++, TYPE_VARCHAR);
-                            } else {
-                                stmt.setString(pos++, replyTo);
+
+                            if (LOG.isDebugEnabled()) {
+                                final String query = stmt.toString();
+                                LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL insert query for attributes ").append(
+                                    orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
                             }
-                        } else {
-                            stmt.setObject(pos++, value);
+
+                            stmt.executeUpdate();
+                            closeSQLStuff(stmt);
                         }
                     }
-
-                    stmt.setLong(pos++, cid);
-                    stmt.setLong(pos++, mailAccount.getId());
-                    stmt.setLong(pos++, user);
-                    stmt.executeUpdate();
-                    closeSQLStuff(stmt);
-
                 }
 
                 final Map<String, String> properties = mailAccount.getProperties();
@@ -1184,16 +1232,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (attributes.contains(Attribute.POP3_PATH_LITERAL)) {
                     updateProperty(cid, user, mailAccount.getId(), "pop3.path", properties.get("pop3.path"), con);
                 }
-                /*
-                 * Drop POP3 storage folders if a rename was performed
-                 */
-                if (rename) {
-                    dropPOP3StorageFolders(user, cid);
-                }
             } catch (final SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                closeSQLStuff(null, stmt);
+                closeSQLStuff(rs, stmt);
             }
             /*
              * Automatically check Unified INBOX existence
@@ -1373,6 +1415,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!isValid(name)) {
             throw MailAccountExceptionCodes.INVALID_NAME.create(name);
         }
+        dropPOP3StorageFolders(user, cid);
         final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
@@ -1524,6 +1567,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (!isValid(name)) {
             throw MailAccountExceptionCodes.INVALID_NAME.create(name);
         }
+        dropPOP3StorageFolders(user, cid);
         // Get ID
         final int id;
         if (mailAccount.isDefaultFlag()) {
@@ -1697,7 +1741,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     updateProperty(cid, user, id, "pop3.path", properties.get("pop3.path"), con);
                 }
             }
-            dropPOP3StorageFolders(user, cid);
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

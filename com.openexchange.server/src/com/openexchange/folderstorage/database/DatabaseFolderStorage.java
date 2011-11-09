@@ -155,15 +155,15 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
         private final ConnectionMode connection;
 
-        private final DatabaseService databaseService;
+        //private final DatabaseService databaseService;
 
-        private final int contextId;
+        //private final int contextId;
 
-        protected NonClosingConnectionProvider(final ConnectionMode connection, final DatabaseService databaseService, final int contextId) {
+        protected NonClosingConnectionProvider(final ConnectionMode connection/*, final DatabaseService databaseService, final int contextId*/) {
             super();
             this.connection = connection;
-            this.databaseService = databaseService;
-            this.contextId = contextId;
+            //this.databaseService = databaseService;
+            //this.contextId = contextId;
         }
 
         @Override
@@ -942,7 +942,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                      */
                     final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
                     if (gab.isVisible(userId, userConfiguration)) {
-                        gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                        gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
                 } catch (final SQLException e) {
@@ -962,17 +962,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         final int module = folderObject.getModule();
                         if (FolderObject.CALENDAR == module) {
                             if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                                stringHelper = new StringHelper(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                         } else if (FolderObject.CONTACT == module) {
                             if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                                stringHelper = new StringHelper(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                         } else if (FolderObject.TASK == module) {
                             if (null == stringHelper) {
-                                stringHelper = StringHelper.valueOf(user.getLocale());
+                                stringHelper = new StringHelper(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                         }
@@ -1654,7 +1654,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final Context context = storageParameters.getContext();
         ConnectionMode connection = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
         if (null != connection) {
-            return new NonClosingConnectionProvider(connection, databaseService, context.getContextId());
+            return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
         connection = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
         return new ClosingConnectionProvider(connection, databaseService, context.getContextId());

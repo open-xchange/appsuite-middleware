@@ -60,6 +60,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import javax.naming.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleActivator;
@@ -145,8 +146,13 @@ public class I18nActivator implements BundleActivator {
      * @throws FileNotFoundException If directory referenced by <code>"i18n.language.path"</code> does not exist
      */
     protected static ServiceRegistration<?>[] initI18nServices(final BundleContext context, final ConfigurationService config) throws FileNotFoundException {
-
-        final File dir = new File(config.getProperty("i18n.language.path"));
+        final String value = config.getProperty("i18n.language.path");
+        if (null == value) {
+            final FileNotFoundException e = new FileNotFoundException("Configuration property 'i18n.language.path' is not defined.");
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+        final File dir = new File(value);
 
         final List<ResourceBundle> resourceBundles = new ResourceBundleDiscoverer(dir).getResourceBundles();
         final List<Translations> translations = new POTranslationsDiscoverer(dir).getTranslations();

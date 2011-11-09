@@ -79,7 +79,6 @@ import java.util.zip.ZipOutputStream;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
@@ -714,10 +713,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return mailAccess.getFolderStorage().getFolder(fullname);
     }
 
+    private static final int MAX_FORWARD_COUNT = 8;
+
     @Override
     public MailMessage getForwardMessageForDisplay(final String[] folders, final String[] fowardMsgUIDs, final UserSettingMail usm) throws OXException {
         if ((null == folders) || (null == fowardMsgUIDs) || (folders.length != fowardMsgUIDs.length)) {
             throw new IllegalArgumentException("Illegal arguments");
+        }
+        if (folders.length > MAX_FORWARD_COUNT) {
+            throw MailExceptionCode.TOO_MANY_FORWARD_MAILS.create(Integer.valueOf(MAX_FORWARD_COUNT));
         }
         final FullnameArgument[] arguments = new FullnameArgument[folders.length];
         for (int i = 0; i < folders.length; i++) {
@@ -725,7 +729,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         boolean sameAccount = true;
         final int accountId = arguments[0].getAccountId();
-        for (int i = 1; i < arguments.length && sameAccount; i++) {
+        for (int i = 1; sameAccount && i < arguments.length; i++) {
             sameAccount = accountId == arguments[i].getAccountId();
         }
         final TransportProperties transportProperties = TransportProperties.getInstance();
@@ -1656,12 +1660,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private void checkPatternLength(final String[] patterns) throws OXException {
-        final int minimumSearchCharacters;
-        try {
-            minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (final ConfigurationException e) {
-            throw new OXException(e);
-        }
+        final int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (0 == minimumSearchCharacters || null == patterns) {
             return;
         }
@@ -2057,7 +2056,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 String greeting = greetings.get(locale);
                 if (null == greeting) {
-                    greeting = StringHelper.valueOf(locale).getString(MailStrings.GREETING);
+                    greeting = new StringHelper(locale).getString(MailStrings.GREETING);
                     greetings.put(locale, greeting);
                 }
                 builder.setLength(0);

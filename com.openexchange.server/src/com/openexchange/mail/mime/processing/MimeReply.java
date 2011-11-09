@@ -379,7 +379,7 @@ public final class MimeReply {
                     final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                     final Locale locale = user.getLocale();
                     final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                    generateReplyText(originalMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, list);
+                    generateReplyText(originalMsg, retvalContentType, new StringHelper(locale), ltz, usm, mailSession, list);
                 }
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
@@ -498,6 +498,8 @@ public final class MimeReply {
 
     private static final String TEXT_HTM = "text/htm";
 
+    // private static final Pattern PATTERN_BODY = Pattern.compile("<body[^>]*?>", Pattern.CASE_INSENSITIVE);
+
     /**
      * Gathers all text bodies and appends them to given text builder.
      *
@@ -576,7 +578,9 @@ public final class MimeReply {
              */
             final String replyTextBody;
             if (isHtml) {
-                replyTextBody = quoteHtml(textBuilder.toString());
+                final String tmp = quoteHtml(textBuilder.toString());
+                textBuilder.setLength(0);
+                replyTextBody = textBuilder.append("<div style=\"position:relative\">").append(tmp).append("</div>").toString();
             } else {
                 replyTextBody = quoteText(textBuilder.toString());
             }

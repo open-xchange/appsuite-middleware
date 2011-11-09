@@ -169,8 +169,6 @@ public class CompositeUWAService implements UWAWidgetService {
 
         } catch (final SQLException x) {
             throw UWAWidgetExceptionCodes.SQLError.create(x.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

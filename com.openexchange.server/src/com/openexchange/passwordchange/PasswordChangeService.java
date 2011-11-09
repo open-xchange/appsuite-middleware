@@ -110,13 +110,9 @@ public abstract class PasswordChangeService {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
-        try {
-            final Context context = event.getContext();
-            if (!UserConfigurationStorage.getInstance().getUserConfiguration(event.getSession().getUserId(), context).isEditPassword()) {
-                throw UserExceptionCode.PERMISSION.create(Integer.valueOf(context.getContextId()));
-            }
-        } catch (final OXException e1) {
-            throw new OXException(e1);
+        final Context context = event.getContext();
+        if (!UserConfigurationStorage.getInstance().getUserConfiguration(event.getSession().getUserId(), context).isEditPassword()) {
+            throw UserExceptionCode.PERMISSION.create(Integer.valueOf(context.getContextId()));
         }
         /*
          * TODO: Remove statements above and replace with commented call below
@@ -137,7 +133,7 @@ public abstract class PasswordChangeService {
          */
         final AuthenticationService authenticationService = Authentication.getService();
         if (authenticationService == null) {
-            throw new OXException(ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName()));
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
         }
         try {
             /*

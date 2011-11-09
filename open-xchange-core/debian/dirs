@@ -3,3 +3,4 @@ opt/open-xchange/etc
 opt/open-xchange/importCSV
 opt/open-xchange/osgi
 opt/open-xchange/osgi/bundle.d
+opt/open-xchange/sbin

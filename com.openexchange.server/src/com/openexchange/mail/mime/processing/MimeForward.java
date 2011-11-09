@@ -529,7 +529,7 @@ public final class MimeForward {
      * @return The forward text
      */
     private static String generateForwardText(final String firstSeenText, final LocaleAndTimeZone ltz, final MailMessage msg, final boolean html) {
-        final StringHelper strHelper = StringHelper.valueOf(ltz.locale);
+        final StringHelper strHelper = new StringHelper(ltz.locale);
         String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
         {
             final InternetAddress[] from = msg.getFrom();
@@ -591,7 +591,9 @@ public final class MimeForward {
             } else {
                 replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
             }
+            replaceBuffer.append("<div style=\"position:relative\">");
             mr.appendTail(replaceBuffer);
+            replaceBuffer.append("</div>");
             return replaceBuffer.toString();
         }
         return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak).append(
