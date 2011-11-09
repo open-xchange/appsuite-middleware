@@ -47,76 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.tasks.json.osgi;
 
-import static com.openexchange.java.Autoboxing.F;
-import static com.openexchange.java.Autoboxing.f;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Task;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.tasks.json.TaskActionFactory;
+import com.openexchange.tasks.json.converters.TaskResultConverter;
+import com.openexchange.user.UserService;
 
-public final class ActualCosts implements Mapper<Float> {
 
-    public static final ActualCosts SINGLETON = new ActualCosts();
+/**
+ * {@link TaskJSONActivator}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class TaskJSONActivator extends AJAXModuleActivator {
+    
+    private static final Class<?>[] NEEDED = new Class[] { UserService.class };
 
-    protected ActualCosts() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED;
     }
 
     @Override
-    public int getId() {
-        return Task.ACTUAL_COSTS;
+    protected void startBundle() throws Exception {
+        registerModule(new TaskActionFactory(this), "tasks");
+        registerService(ResultConverter.class, new TaskResultConverter());
     }
 
-    @Override
-    public boolean isSet(Task task) {
-        return task.containsActualCosts();
-    }
+    
 
-    @Override
-    public String getDBColumnName() {
-        return "actual_costs";
-    }
-
-    @Override
-    public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getActualCosts()) {
-            stmt.setNull(pos, Types.FLOAT);
-        } else {
-            stmt.setDouble(pos, f(task.getActualCosts()));
-        }
-    }
-
-    @Override
-    public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        float actualCosts = result.getFloat(pos);
-        if (!result.wasNull()) {
-            task.setActualCosts(F(actualCosts));
-        }
-    }
-
-    @Override
-    public boolean equals(Task task1, Task task2) {
-        if (task1.getActualCosts() == null) {
-            return (task2.getActualCosts() == null);
-        }
-
-        if (task2.getActualCosts() == null) {
-            return (task1.getActualCosts() == null);
-        }
-        return task1.getActualCosts().equals(task2.getActualCosts());
-    }
-
-    @Override
-    public Float get(Task task) {
-        return task.getActualCosts();
-    }
-
-    @Override
-    public void set(Task task, Float value) {
-        task.setActualCosts(value);
-    }
 }

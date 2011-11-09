@@ -47,76 +47,61 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.tasks.json.converters;
 
-import static com.openexchange.java.Autoboxing.F;
-import static com.openexchange.java.Autoboxing.f;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Task;
+import java.util.TimeZone;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
 
-public final class ActualCosts implements Mapper<Float> {
 
-    public static final ActualCosts SINGLETON = new ActualCosts();
+/**
+ * {@link TaskJSONResultConverter}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public abstract class TaskJSONResultConverter implements ResultConverter {
+    
+    protected static final String OUTPUT_FORMAT = "json";
 
-    protected ActualCosts() {
-        super();
+    private TimeZone timeZone;
+
+    @Override
+    public String getOutputFormat() {
+        return OUTPUT_FORMAT;
     }
 
     @Override
-    public int getId() {
-        return Task.ACTUAL_COSTS;
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
     @Override
-    public boolean isSet(Task task) {
-        return task.containsActualCosts();
-    }
-
-    @Override
-    public String getDBColumnName() {
-        return "actual_costs";
-    }
-
-    @Override
-    public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getActualCosts()) {
-            stmt.setNull(pos, Types.FLOAT);
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (null != sTimeZone) {
+            timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
         } else {
-            stmt.setDouble(pos, f(task.getActualCosts()));
+            timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
         }
+        convertTask(requestData, result, session, converter);
+    }
+
+    protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
+
+    protected TimeZone getTimeZone() {
+        return timeZone;
     }
 
     @Override
-    public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        float actualCosts = result.getFloat(pos);
-        if (!result.wasNull()) {
-            task.setActualCosts(F(actualCosts));
-        }
+    public String getInputFormat() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    @Override
-    public boolean equals(Task task1, Task task2) {
-        if (task1.getActualCosts() == null) {
-            return (task2.getActualCosts() == null);
-        }
-
-        if (task2.getActualCosts() == null) {
-            return (task1.getActualCosts() == null);
-        }
-        return task1.getActualCosts().equals(task2.getActualCosts());
-    }
-
-    @Override
-    public Float get(Task task) {
-        return task.getActualCosts();
-    }
-
-    @Override
-    public void set(Task task, Float value) {
-        task.setActualCosts(value);
-    }
 }

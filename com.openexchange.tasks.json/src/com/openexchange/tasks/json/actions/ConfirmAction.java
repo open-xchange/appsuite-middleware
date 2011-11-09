@@ -47,76 +47,62 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.tasks.json.actions;
 
-import static com.openexchange.java.Autoboxing.F;
-import static com.openexchange.java.Autoboxing.f;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import com.openexchange.groupware.tasks.Mapper;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.parser.TaskParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskRequest;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
-public final class ActualCosts implements Mapper<Float> {
 
-    public static final ActualCosts SINGLETON = new ActualCosts();
+/**
+ * {@link ConfirmAction}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class ConfirmAction extends TaskAction {
 
-    protected ActualCosts() {
-        super();
+    /**
+     * Initializes a new {@link ConfirmAction}.
+     * @param services
+     */
+    public ConfirmAction(ServiceLookup services) {
+        super(services);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
+     */
     @Override
-    public int getId() {
-        return Task.ACTUAL_COSTS;
-    }
-
-    @Override
-    public boolean isSet(Task task) {
-        return task.containsActualCosts();
-    }
-
-    @Override
-    public String getDBColumnName() {
-        return "actual_costs";
-    }
-
-    @Override
-    public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getActualCosts()) {
-            stmt.setNull(pos, Types.FLOAT);
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        final JSONObject data = (JSONObject) req.getRequest().getData();
+        final Task task = new Task();
+        new TaskParser(req.getTimeZone()).parse(task, data);
+        final ServerSession session = req.getSession();
+        final TasksSQLInterface taskSql = new TasksSQLImpl(session);
+        final int taskIdFromParameter = req.optInt(AJAXServlet.PARAMETER_ID);
+        final int taskId;
+        if (TaskRequest.NOT_FOUND == taskIdFromParameter) {
+            if (!task.containsObjectID()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_ID);
+            }
+            taskId = task.getObjectID();
         } else {
-            stmt.setDouble(pos, f(task.getActualCosts()));
+            taskId = taskIdFromParameter;
         }
+        final Date timestamp = taskSql.setUserConfirmation(taskId, session.getUserId(), task.getConfirm(), task.getConfirmMessage());
+
+        return new AJAXRequestResult(new JSONObject(), timestamp, "json");
     }
 
-    @Override
-    public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        float actualCosts = result.getFloat(pos);
-        if (!result.wasNull()) {
-            task.setActualCosts(F(actualCosts));
-        }
-    }
-
-    @Override
-    public boolean equals(Task task1, Task task2) {
-        if (task1.getActualCosts() == null) {
-            return (task2.getActualCosts() == null);
-        }
-
-        if (task2.getActualCosts() == null) {
-            return (task1.getActualCosts() == null);
-        }
-        return task1.getActualCosts().equals(task2.getActualCosts());
-    }
-
-    @Override
-    public Float get(Task task) {
-        return task.getActualCosts();
-    }
-
-    @Override
-    public void set(Task task, Float value) {
-        task.setActualCosts(value);
-    }
 }

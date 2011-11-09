@@ -156,9 +156,12 @@ public class Bug13173Test extends AbstractAJAXSession {
             for (Task t : allTasks) {
                 boolean title = t.getTitle().equals(testTask.getTitle());
                 boolean creater = t.getCreatedBy() == testTask.getCreatedBy();
+                boolean startDate = t.getStartDate().equals(testTask.getStartDate());
+                boolean percentComplete = t.getPercentComplete() == testTask.getPercentComplete();
                 boolean oid = t.getObjectID() == testTask.getObjectID();
 
-                if (!oid && title && creater) {
+//                if (!oid && title && creater) {
+                if (!oid && title && creater && startDate && percentComplete) {
                     returnList.add(t);
                 }
             }

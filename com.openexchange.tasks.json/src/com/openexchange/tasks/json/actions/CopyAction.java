@@ -47,76 +47,57 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.tasks.json.actions;
 
-import static com.openexchange.java.Autoboxing.F;
-import static com.openexchange.java.Autoboxing.f;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import com.openexchange.groupware.tasks.Mapper;
+import java.util.Date;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.ajax.fields.TaskFields;
+import com.openexchange.ajax.parser.DataParser;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.TaskRequest;
 
-public final class ActualCosts implements Mapper<Float> {
 
-    public static final ActualCosts SINGLETON = new ActualCosts();
+/**
+ * {@link CopyAction}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class CopyAction extends TaskAction {
 
-    protected ActualCosts() {
-        super();
+    public CopyAction(ServiceLookup services) {
+        super(services);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.tasks.json.actions.TaskAction#perform(com.openexchange.tasks.json.TaskRequest)
+     */
     @Override
-    public int getId() {
-        return Task.ACTUAL_COSTS;
+    protected AJAXRequestResult perform(TaskRequest req) throws OXException, JSONException {
+        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
+        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
+        final JSONObject jData = (JSONObject) req.getRequest().getData();
+        final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
+
+        final TasksSQLInterface taskInterface = new TasksSQLImpl(req.getSession());
+        final Task taskObj = taskInterface.getTaskById(id, inFolder);
+        taskObj.removeObjectID();
+        taskObj.setParentFolderID(folderId);
+        taskInterface.insertTaskObject(taskObj);
+
+        final Date timestamp = new Date(0);
+
+        final JSONObject jsonResponseObject = new JSONObject();
+        jsonResponseObject.put(TaskFields.ID, taskObj.getObjectID());
+
+        return new AJAXRequestResult(jsonResponseObject, timestamp, "json");
     }
 
-    @Override
-    public boolean isSet(Task task) {
-        return task.containsActualCosts();
-    }
-
-    @Override
-    public String getDBColumnName() {
-        return "actual_costs";
-    }
-
-    @Override
-    public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getActualCosts()) {
-            stmt.setNull(pos, Types.FLOAT);
-        } else {
-            stmt.setDouble(pos, f(task.getActualCosts()));
-        }
-    }
-
-    @Override
-    public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        float actualCosts = result.getFloat(pos);
-        if (!result.wasNull()) {
-            task.setActualCosts(F(actualCosts));
-        }
-    }
-
-    @Override
-    public boolean equals(Task task1, Task task2) {
-        if (task1.getActualCosts() == null) {
-            return (task2.getActualCosts() == null);
-        }
-
-        if (task2.getActualCosts() == null) {
-            return (task1.getActualCosts() == null);
-        }
-        return task1.getActualCosts().equals(task2.getActualCosts());
-    }
-
-    @Override
-    public Float get(Task task) {
-        return task.getActualCosts();
-    }
-
-    @Override
-    public void set(Task task, Float value) {
-        task.setActualCosts(value);
-    }
 }

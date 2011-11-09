@@ -47,76 +47,56 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.tasks.json;
 
-import static com.openexchange.java.Autoboxing.F;
-import static com.openexchange.java.Autoboxing.f;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Task;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tasks.json.actions.AllAction;
+import com.openexchange.tasks.json.actions.ConfirmAction;
+import com.openexchange.tasks.json.actions.CopyAction;
+import com.openexchange.tasks.json.actions.DeleteAction;
+import com.openexchange.tasks.json.actions.GetAction;
+import com.openexchange.tasks.json.actions.ListAction;
+import com.openexchange.tasks.json.actions.NewAction;
+import com.openexchange.tasks.json.actions.SearchAction;
+import com.openexchange.tasks.json.actions.TaskAction;
+import com.openexchange.tasks.json.actions.UpdateAction;
+import com.openexchange.tasks.json.actions.UpdatesAction;
 
-public final class ActualCosts implements Mapper<Float> {
 
-    public static final ActualCosts SINGLETON = new ActualCosts();
+/**
+ * {@link TaskActionFactory}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ */
+public class TaskActionFactory implements AJAXActionServiceFactory {
+    
+    private static final Map<String, TaskAction> ACTIONS = new ConcurrentHashMap<String, TaskAction>(10);
 
-    protected ActualCosts() {
+    /**
+     * Initializes a new {@link TaskActionFactory}.
+     */
+    public TaskActionFactory(final ServiceLookup serviceLookup) {
         super();
+        ACTIONS.put("all", new AllAction(serviceLookup));
+        ACTIONS.put("confirm", new ConfirmAction(serviceLookup));
+        ACTIONS.put("copy", new CopyAction(serviceLookup));
+        ACTIONS.put("delete", new DeleteAction(serviceLookup));
+        ACTIONS.put("get", new GetAction(serviceLookup));
+        ACTIONS.put("list", new ListAction(serviceLookup));
+        ACTIONS.put("new", new NewAction(serviceLookup));
+        ACTIONS.put("search", new SearchAction(serviceLookup));
+        ACTIONS.put("update", new UpdateAction(serviceLookup));
+        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
     }
 
     @Override
-    public int getId() {
-        return Task.ACTUAL_COSTS;
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return ACTIONS.get(action);
     }
 
-    @Override
-    public boolean isSet(Task task) {
-        return task.containsActualCosts();
-    }
-
-    @Override
-    public String getDBColumnName() {
-        return "actual_costs";
-    }
-
-    @Override
-    public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getActualCosts()) {
-            stmt.setNull(pos, Types.FLOAT);
-        } else {
-            stmt.setDouble(pos, f(task.getActualCosts()));
-        }
-    }
-
-    @Override
-    public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        float actualCosts = result.getFloat(pos);
-        if (!result.wasNull()) {
-            task.setActualCosts(F(actualCosts));
-        }
-    }
-
-    @Override
-    public boolean equals(Task task1, Task task2) {
-        if (task1.getActualCosts() == null) {
-            return (task2.getActualCosts() == null);
-        }
-
-        if (task2.getActualCosts() == null) {
-            return (task1.getActualCosts() == null);
-        }
-        return task1.getActualCosts().equals(task2.getActualCosts());
-    }
-
-    @Override
-    public Float get(Task task) {
-        return task.getActualCosts();
-    }
-
-    @Override
-    public void set(Task task, Float value) {
-        task.setActualCosts(value);
-    }
 }

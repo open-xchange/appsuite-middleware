@@ -85,6 +85,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(UpdatesTest.class);
         tests.addTestSuite(TaskRecurrenceTest.class);
         tests.addTestSuite(ConfirmTest.class);
+        tests.addTestSuite(TaskDurationAndCostsTest.class);
 
         // Nodes
         tests.addTestSuite(LastModifiedUTCTest.class);
@@ -117,6 +118,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug16006Test.class);
         tests.addTestSuite(Bug13173Test.class);
         tests.addTestSuite(Bug18204Test.class);
+        tests.addTestSuite(Bug20008Test.class);
         return tests;
     }
 }

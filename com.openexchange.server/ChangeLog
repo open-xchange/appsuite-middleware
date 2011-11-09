@@ -1,3 +1,7 @@
+* 2011-11-09 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 20008: Added check for null
+
 * 2011-11-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 20694: Send notification to organizer when he's not participant

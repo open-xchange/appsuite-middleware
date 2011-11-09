@@ -47,83 +47,77 @@
  *
  */
 
-package com.openexchange.groupware.tasks.mapping;
+package com.openexchange.tasks.json;
 
-import static com.openexchange.java.Autoboxing.L;
-import static com.openexchange.java.Autoboxing.l;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import com.openexchange.groupware.tasks.Mapper;
-import com.openexchange.groupware.tasks.Task;
+import java.util.regex.Pattern;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+
 
 /**
- * Methods for iterated processing of the actual duration of task objects.
- * 
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link RequestTools}
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ActualDuration implements Mapper<Long> {
+public class RequestTools {
 
     /**
-     * Singleton instance.
+     * Split pattern for CSV.
      */
-    public static final ActualDuration SINGLETON = new ActualDuration();
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
 
-    protected ActualDuration() {
-        super();
-    }
-
-    @Override
-    public int getId() {
-        return Task.ACTUAL_DURATION;
-    }
-
-    @Override
-    public boolean isSet(Task task) {
-        return task.containsActualDuration();
-    }
-
-    @Override
-    public String getDBColumnName() {
-        return "actual_duration";
-    }
-
-    @Override
-    public void toDB(PreparedStatement stmt, int pos, Task task) throws SQLException {
-        if (null == task.getActualDuration()) {
-            stmt.setNull(pos, Types.BIGINT);
-        } else {
-            stmt.setLong(pos, l(task.getActualDuration()));
+    /**
+     * Checks for presence of comma-separated <code>int</code> list.
+     *
+     * @param name The parameter name
+     * @return The <code>int</code> array
+     * @throws OXException If an error occurs
+     */
+    public static int[] checkIntArray(final AJAXRequestData request, final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
-    }
-
-    @Override
-    public void fromDB(ResultSet result, int pos, Task task) throws SQLException {
-        long actualDuration = result.getLong(pos);
-        if (!result.wasNull()) {
-            task.setActualDuration(L(actualDuration));
+        final String[] sa = SPLIT.split(parameter, 0);
+        final int[] ret = new int[sa.length];
+        for (int i = 0; i < sa.length; i++) {
+            try {
+                ret[i] = Integer.parseInt(sa[i].trim());
+            } catch (final NumberFormatException e) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, parameter);
+            }
         }
+        return ret;
     }
 
-    @Override
-    public boolean equals(Task task1, Task task2) {
-        if (task1.getActualDuration() == null) {
-            return (task2.getActualDuration() == null);
+    /**
+     * Checks for presence of comma-separated <code>String</code> list.
+     *
+     * @param name The parameter name
+     * @return The <code>String</code> array
+     * @throws OXException If parameter is absdent
+     */
+    public String[] checkStringArray(final AJAXRequestData request, final String name) throws OXException {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
-        if (task2.getActualDuration() == null) {
-            return (task1.getActualDuration() == null);
+        return SPLIT.split(parameter, 0);
+    }
+
+    /**
+     * Checks for presence of comma-separated <code>String</code> list.
+     *
+     * @param name The parameter name
+     * @return The <code>String</code> array
+     */
+    public String[] optStringArray(final AJAXRequestData request, final String name) {
+        final String parameter = request.getParameter(name);
+        if (null == parameter) {
+            return null;
         }
-        return task1.getActualDuration().equals(task2.getActualDuration());
+        return SPLIT.split(parameter, 0);
     }
 
-    @Override
-    public Long get(Task task) {
-        return task.getActualDuration();
-    }
-
-    @Override
-    public void set(Task task, Long value) {
-        task.setActualDuration(value);
-    }
 }

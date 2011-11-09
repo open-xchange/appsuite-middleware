@@ -100,6 +100,12 @@ public final class TargetCosts implements Mapper<Float> {
 
     @Override
     public boolean equals(Task task1, Task task2) {
+        if (task1.getTargetCosts() == null) {
+            return (task2.getTargetCosts() == null);
+        }
+        if (task2.getTargetCosts() == null) {
+            return (task1.getTargetCosts() == null);
+        }
         return task1.getTargetCosts().equals(task2.getTargetCosts());
     }
 
