@@ -56,7 +56,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -659,8 +658,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
-                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(
-                        state.getType()) || p.email.equals(newObj.getOrganizer()));
+                    sendMail = sendMail && (!ParticipantNotify.isStatusUpdate(state) || p.email.equals(newObj.getOrganizer()));                    
+//                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(
+//                        state.getType()) || p.email.equals(newObj.getOrganizer()));
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
@@ -971,7 +971,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         strings,
                         b);
                 }
-            } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
+            } else if (ParticipantNotify.isStatusUpdate(state)) {
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
                     final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CONFIRMATION_MAIL_EXT : Notifications.TASK_CONFIRMATION_MAIL_EXT);
@@ -1315,7 +1315,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 receivers,
                 session,
                 all,
-                newObj.getOrganizer());
+                newObj.getOrganizer(),
+                state);
         }
         // Add task owner to receivers list to make him receive mails about changed participants states.
         if (newObj instanceof Task) {
@@ -1571,7 +1572,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer) {
+    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer, final State state) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
         sortOldExternalParticipantsAndResources(
             oldParticipants,
@@ -1582,10 +1583,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             all,
             session,
             newParticipants,
-            organizer);
+            organizer,
+            state);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer, final State state) {
         if (oldParticipants == null) {
             return;
         }
@@ -1623,7 +1625,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
 
-        if (isUpdate && organizer != null) {
+        if ((isUpdate || ParticipantNotify.isStatusUpdate(state)) && organizer != null) {
             addSingleParticipant(
                 getExternalParticipant(new ExternalUserParticipant(organizer), session),
                 participantSet,
@@ -2318,7 +2320,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 			State.Type.ACCEPTED.equals(state.getType()) ||  
         	State.Type.DECLINED.equals(state.getType()) || 
         	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType());
-
     }
     
     /**

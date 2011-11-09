@@ -1,3 +1,11 @@
+* 2011-11-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 20694: Send notification to organizer when he's not participant
+
+* 2011-11-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20714: Fixed updating transport settings for an external mail account
+
 * 2011-11-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 20714: Fixed updating transport settings for an external mail account

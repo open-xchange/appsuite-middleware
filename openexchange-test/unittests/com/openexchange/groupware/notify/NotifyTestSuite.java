@@ -82,6 +82,7 @@ public class NotifyTestSuite {
         tests.addTestSuite(IMipNewAppointmentTest.class);
         tests.addTestSuite(IMipDeleteAppointmentTest.class);
         tests.addTestSuite(IMipStatusChangeAppointmentTest.class);
+        tests.addTestSuite(Bug20694Test.class);
         return tests;
     }
 }
