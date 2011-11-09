@@ -96,6 +96,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -432,11 +433,11 @@ public class ICalImporter extends AbstractImporter {
 										.create());
 					}
 				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
-					importResult.setException(e);
+					AbstractOXException ne = makeMoreInformative(e);
+					//LOG.error(ne.getMessage(), ne); //removed logging, because this would be a user error spamming our log.
+					importResult.setException(ne);
 				}
-				final List<ConversionWarning> warningList = warningMap
-						.get(index);
+				final List<ConversionWarning> warningList = warningMap.get(index);
 				if (warningList != null) {
 					importResult.addWarnings(warningList);
 					importResult
@@ -462,6 +463,24 @@ public class ICalImporter extends AbstractImporter {
 				}
 			});
 		}
+	}
+
+	private OXException makeMoreInformative(OXException e) {
+		if( e.getCategory() == Category.enum.TRUNCATED){
+			ProblematicAttribute[] problematics = e.getProblematics();
+			StringBuilder bob = new StringBuilder();
+			for(ProblematicAttribute att: problematics){
+				if((att instanceof SimpleTruncatedAttribute) && ((SimpleTruncatedAttribute) att).getValue() != null){
+					SimpleTruncatedAttribute temp = (SimpleTruncatedAttribute) att;
+					bob.append(temp.getValue());
+					bob.append(" (>");
+					bob.append(temp.getMaxSize());
+					bob.append(")\n");
+				}
+			}
+			return ImportExportExceptionCodes.TRUNCATION.create(bob.toString());
+		}
+		return e;
 	}
 
 	private Date calculateRecurrenceDatePosition(final Date startDate) {
