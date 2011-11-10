@@ -316,7 +316,7 @@ public final class DBChatAccess implements ChatAccess {
 
     @Override
     public Chat getChat(final String chatId) throws OXException {
-        final DBChat dbChat = DBChat.getDBChat(Integer.parseInt(chatId), contextId);
+        final DBChat dbChat = DBChat.getDBChat(DBChatUtility.parseUnsignedInt(chatId), contextId);
         if (null == dbChat) {
             throw ChatExceptionCodes.CHAT_NOT_FOUND.create(chatId);
         }
@@ -351,7 +351,7 @@ public final class DBChatAccess implements ChatAccess {
         ResultSet rs = null;
         int pos;
         try {
-            final int chatId = Integer.parseInt(chatDescription.getChatId());
+            final int chatId = DBChatUtility.parseUnsignedInt(chatDescription.getChatId());
             /*
              * Update subject
              */
@@ -396,7 +396,7 @@ public final class DBChatAccess implements ChatAccess {
                     stmt.setInt(pos++, chatId);
                     stmt.setInt(pos++, 0);
                     for (final String user : newMembers) {
-                        final int userId = Integer.parseInt(user);
+                        final int userId = DBChatUtility.parseUnsignedInt(user);
                         if (!users.contains(userId)) {
                             stmt.setInt(pos, userId);
                             stmt.addBatch();
@@ -417,7 +417,7 @@ public final class DBChatAccess implements ChatAccess {
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
                     for (final String user : deleteMembers) {
-                        stmt.setInt(pos, Integer.parseInt(user));
+                        stmt.setInt(pos, DBChatUtility.parseUnsignedInt(user));
                         stmt.addBatch();
                     }
                     stmt.executeBatch();
@@ -465,7 +465,7 @@ public final class DBChatAccess implements ChatAccess {
         if (null == chatId) {
             chid = getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId);
         } else {
-            chid = Integer.parseInt(chatId);
+            chid = DBChatUtility.parseUnsignedInt(chatId);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -513,7 +513,7 @@ public final class DBChatAccess implements ChatAccess {
              * Others
              */
             for (final ChatUser chatUser : members) {
-                stmt.setInt(2, Integer.parseInt(chatUser.getId()));
+                stmt.setInt(2, DBChatUtility.parseUnsignedInt(chatUser.getId()));
                 stmt.addBatch();
             }
             stmt.executeBatch();

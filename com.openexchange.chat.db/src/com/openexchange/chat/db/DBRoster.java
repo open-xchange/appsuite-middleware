@@ -241,7 +241,7 @@ public final class DBRoster implements Roster {
             }
             stmt.setLong(pos++, System.currentTimeMillis());
             stmt.setInt(pos++, context.getContextId());
-            stmt.setInt(pos, Integer.parseInt(user.getId()));
+            stmt.setInt(pos, DBChatUtility.parseUnsignedInt(user.getId()));
             final int rowCount = stmt.executeUpdate();
             if (rowCount <= 0) {
                 try {
@@ -289,7 +289,7 @@ public final class DBRoster implements Roster {
             stmt = con.prepareStatement("INSERT INTO chatPresence (cid, user, statusMessage, mode, lastModified) VALUES (?, ?, ?, ?, ?)");
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
-            stmt.setInt(pos++, Integer.parseInt(user.getId()));
+            stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(user.getId()));
             stmt.setString(pos++, presence.getStatus());
             stmt.setInt(pos++, presence.getMode().ordinal());
             stmt.setLong(pos, System.currentTimeMillis());
@@ -316,7 +316,7 @@ public final class DBRoster implements Roster {
         final Connection con = databaseService.getReadOnly(context);
         try {
             stmt = con.prepareStatement("SELECT mode, statusMessage, type FROM chatPresence WHERE cid = ? AND user = ?");
-            final int userId = Integer.parseInt(user.getId());
+            final int userId = DBChatUtility.parseUnsignedInt(user.getId());
             int pos = 1;
             stmt.setInt(pos++, context.getContextId());
             stmt.setInt(pos++, userId);
