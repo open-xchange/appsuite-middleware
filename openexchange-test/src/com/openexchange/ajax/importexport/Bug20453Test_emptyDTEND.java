@@ -1,27 +1,25 @@
 package com.openexchange.ajax.importexport;
 
 import java.io.IOException;
-
 import org.json.JSONException;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.tools.servlet.AjaxException;
+import com.openexchange.exception.OXException;
 
 public class Bug20453Test_emptyDTEND extends ManagedAppointmentTest {
 
 
-	public Bug20453Test_emptyDTEND(String name) {
+	public Bug20453Test_emptyDTEND(final String name) {
 		super(name);
 	}
 	
-	public void testWhatever() throws AjaxException, IOException, JSONException{
-		ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical , false));
+	public void testWhatever() throws IOException, JSONException, OXException {
+		final ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical , false));
 		assertFalse("Should not stumble over an empty DTEND; fragment", response.hasError());
 	}
 
-	private String ical = 
+	private final String ical = 
 			"BEGIN:VCALENDAR\n" + 
 			"VERSION:2.0\n" + 
 			"PRODID:-//Minter Software//EdgeDesk 4.03 MIMEDIR//EN\n" + 
