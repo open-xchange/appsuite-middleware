@@ -51,8 +51,6 @@ package com.openexchange.admin.rmi.dataobjects;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 
 /**
@@ -69,8 +67,6 @@ public class UserModuleAccess implements Serializable {
      * For serialization
      */
     private static final long serialVersionUID = -5336341908204911967L;
-
-    private final Map<String, String> properties;
 
     // ALL ACCESS MODULES;
     // MAKE SURE YOU REWRITE THE "equals" METHOD
@@ -142,19 +138,6 @@ public class UserModuleAccess implements Serializable {
      */
     public UserModuleAccess() {
         super();
-        properties = new HashMap<String, String>();
-    }
-
-    public String getProperty(final Object key) {
-        return properties.get(key);
-    }
-
-    public String putProperty(final String key, final String value) {
-        return properties.put(key, value);
-    }
-
-    public Map<String, String> getProperties() {
-        return new HashMap<String, String>(properties);
     }
 
     /**

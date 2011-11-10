@@ -50,6 +50,8 @@
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i2I;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -881,9 +883,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
             // change rights for all users in context to specified one in access
-            access.putProperty("ignoreErrors", "true");
-            oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
-
+            if (access.isPublicFolderEditable()) {
+                // publicFolderEditable can only be applied to the context administrator.
+                Integer[] userIds = i2I(oxu.getAll(ctx));
+                final int adminId = tool.getAdminForContext(ctx);
+                userIds = com.openexchange.tools.arrays.Arrays.remove(userIds, I(adminId));
+                oxu.changeModuleAccess(ctx, adminId, access);
+                access.setPublicFolderEditable(false);
+                oxu.changeModuleAccess(ctx, I2i(userIds), access);
+            } else {
+                oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
+            }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -928,9 +938,17 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             final OXUserStorageInterface oxu = OXUserStorageInterface.getInstance();
 
             // change rights for all users in context to specified one in access combination name
-            access.putProperty("ignoreErrors", "true");
-            oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
-
+            if (access.isPublicFolderEditable()) {
+                // publicFolderEditable can only be applied to the context administrator.
+                Integer[] userIds = i2I(oxu.getAll(ctx));
+                final int adminId = tool.getAdminForContext(ctx);
+                userIds = com.openexchange.tools.arrays.Arrays.remove(userIds, I(adminId));
+                oxu.changeModuleAccess(ctx, adminId, access);
+                access.setPublicFolderEditable(false);
+                oxu.changeModuleAccess(ctx, I2i(userIds), access);
+            } else {
+                oxu.changeModuleAccess(ctx, oxu.getAll(ctx), access);
+            }
         } catch (final StorageException e) {
             log.error(e.getMessage(), e);
             throw e;
