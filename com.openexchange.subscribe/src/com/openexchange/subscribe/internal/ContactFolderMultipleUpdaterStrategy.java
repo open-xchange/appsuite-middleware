@@ -95,31 +95,8 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
     public int calculateSimilarityScore(final Contact original, final Contact candidate, final Object session) throws OXException {
         int score = 0;
         final int threshhold = getThreshold(session);
-        boolean contactsAreAbleToBeAssociated = false;
         final FinalContactInterface contactStore = (FinalContactInterface) getFromSession(SQL_INTERFACE, session);
 
-        if (false && candidate.getUserField20() != null && !candidate.getUserField20().equals("")){
-
-            final UUID uuid = UUID.fromString(candidate.getUserField20());
-
-            try{
-                final Contact contactfromUUID = contactStore.getContactByUUID(uuid);
-                if (contactfromUUID != null){
-                    contactsAreAbleToBeAssociated = true;
-                    final ContactUnificationState state = contactStore.getAssociationBetween(original, candidate);
-                    // if the two contacts are associated RED already a big negative score needs to be given
-                    if (state.equals(ContactUnificationState.RED)){
-                        score = -1000;
-                    }
-                    // if the contacts are associated GREEN already a big positive score needs to be given
-                    if (state.equals(ContactUnificationState.GREEN)){
-                        score = 1000;
-                    }
-                }
-            } catch (final OXException e) {
-                LOG.error(e);
-            }
-        }
         if ((isset(original.getGivenName()) || isset(candidate.getGivenName())) && eq(original.getGivenName(), candidate.getGivenName())) {
             score += 5;
         }
@@ -148,7 +125,7 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
         }
         //before returning the score the contacts need to be associated GREEN here if the score is high enough, they are not associated already, and they are both on the system
         try {
-            if (score >= threshhold && contactsAreAbleToBeAssociated){
+            if (score >= threshhold){
                 final List<UUID> idsOfAlreadyAssociatedContacts = contactStore.getAssociatedContacts(original);
                 //List<Contact> associatedContacts =
                 boolean alreadyAssociated = false;
@@ -166,28 +143,6 @@ public class ContactFolderMultipleUpdaterStrategy implements FolderUpdaterStrate
             LOG.error(e);
         }
         return score;
-    }
-
-    /**
-     * @param original
-     * @param candidate
-     * @return
-     */
-    private boolean hasEqualContent(final Contact original, final Contact candidate) {
-        for(final int fieldNumber: Contact.ALL_COLUMNS){
-            if(original.get(fieldNumber) == null){
-                if(candidate.get(fieldNumber) != null){
-                    return false;
-                }
-            } else {
-                if(candidate.get(fieldNumber) != null){
-                    if(! original.get(fieldNumber).equals(candidate.get(fieldNumber))) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return false;
     }
 
     private boolean isset(final String s) {

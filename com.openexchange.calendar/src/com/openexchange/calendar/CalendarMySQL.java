@@ -5032,7 +5032,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     public int resolveUid(final Session session, final String uid) throws OXException {
         final Context ctx = Tools.getContext(session);
 
-        final SELECT s = new SELECT("intfield01").
+        final SELECT s = new SELECT("intfield01,uid").
             FROM("prg_dates").
             WHERE(new EQUALS("uid", PLACEHOLDER).
                 AND(new EQUALS("cid", PLACEHOLDER)));
@@ -5049,8 +5049,10 @@ public class CalendarMySQL implements CalendarSqlImp {
             connection = DBPool.pickup(ctx);
             stmt = new StatementBuilder().prepareStatement(connection, s, params);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                return rs.getInt(1);
+            while (rs.next()) {
+            	String actualUID = rs.getString(2);
+            	if(uid.equals(actualUID))
+            		return rs.getInt(1);
             }
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);

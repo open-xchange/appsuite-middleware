@@ -147,6 +147,8 @@ public enum ImportExportExceptionCodes implements OXExceptionCode {
 
     CONTACT_INTERFACE_MISSING(ImportExportExceptionMessages.CONTACT_INTERFACE_MISSING, Category.CATEGORY_ERROR, 1307),
     COULD_NOT_WRITE(ImportExportExceptionMessages.COULD_NOT_WRITE, Category.CATEGORY_ERROR, 1308),
+    COULD_NOT_CREATE(ImportExportExceptionMessages.COULD_NOT_CREATE, Category.CATEGORY_ERROR, 1309),
+    TRUNCATION(ImportExportExceptionMessages.TRUNCATION, Category.CATEGORY_TRUNCATED, 1310),
     ;
 
     private String message;
