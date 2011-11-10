@@ -54,6 +54,8 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -346,6 +348,7 @@ public final class DBChatAccess implements ChatAccess {
 
     private void updateChat(final ChatDescription chatDescription, final Connection con) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         int pos;
         try {
             final int chatId = Integer.parseInt(chatDescription.getChatId());
@@ -370,14 +373,34 @@ public final class DBChatAccess implements ChatAccess {
                 final List<String> newMembers = chatDescription.getNewMembers();
                 if (null != newMembers && !newMembers.isEmpty()) {
                     closeSQLStuff(stmt);
+                    /*
+                     * Determine already existing users
+                     */
+                    stmt = con.prepareStatement("SELECT user FROM chatMember WHERE cid = ? AND chatId = ?");
+                    pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos, chatId);
+                    rs = stmt.executeQuery();
+                    final TIntSet users = new TIntHashSet(16);
+                    while (rs.next()) {
+                        users.add(rs.getInt(1));
+                    }
+                    closeSQLStuff(rs, stmt);
+                    rs = null;
+                    /*
+                     * Insert non-existent
+                     */
                     stmt = con.prepareStatement("INSERT INTO chatMember (cid,chatId,opMode,user) VALUES (?,?,?,?)");
                     pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
                     stmt.setInt(pos++, 0);
                     for (final String user : newMembers) {
-                        stmt.setInt(pos, Integer.parseInt(user));
-                        stmt.addBatch();
+                        final int userId = Integer.parseInt(user);
+                        if (!users.contains(userId)) {
+                            stmt.setInt(pos, userId);
+                            stmt.addBatch();
+                        }
                     }
                     stmt.executeBatch();
                 }
@@ -403,7 +426,7 @@ public final class DBChatAccess implements ChatAccess {
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(rs, stmt);
         }
     }
 
