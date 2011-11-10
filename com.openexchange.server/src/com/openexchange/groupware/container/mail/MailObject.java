@@ -132,6 +132,8 @@ public class MailObject {
 
     private Multipart multipart;
 
+    private boolean internalRecipient;
+
     /**
      * Initializes a new {@link MailObject}
      *
@@ -143,6 +145,7 @@ public class MailObject {
      */
     public MailObject(final Session session, final int objectId, final int folderId, final int module, final String type) {
         super();
+        internalRecipient = true;
         this.session = session;
         this.objectId = objectId;
         this.folderId = folderId;
@@ -162,6 +165,15 @@ public class MailObject {
         } else if (text == null) {
             throw MailExceptionCode.MISSING_FIELD.create("Text");
         }
+    }
+
+    /**
+     * Sets whether this mail is transported to an internal recipient or not.
+     * 
+     * @param internalRecipient <code>true</code> for internal recipient; otherwise <code>false</code>
+     */
+    public void setInternalRecipient(final boolean internalRecipient) {
+        this.internalRecipient = internalRecipient;
     }
 
     /**
@@ -341,6 +353,7 @@ public class MailObject {
              */
             InternetAddress[] internetAddrs = parseAddressList(fromAddr, false);
             msg.setFrom(internetAddrs[0]);
+            msg.setReplyTo(internetAddrs);
             /*
              * Set to
              */
@@ -452,7 +465,7 @@ public class MailObject {
             /*
              * Set ox reference
              */
-            if (folderId != DONT_SET) {
+            if (internalRecipient && folderId != DONT_SET) {
                 msg.setHeader(HEADER_XOXREMINDER, new StringBuilder().append(objectId).append(',').append(folderId).append(',').append(
                     module).toString());
             }
@@ -468,17 +481,21 @@ public class MailObject {
             /*
              * X-Open-Xchange-Module
              */
-            msg.setHeader(HEADER_X_OX_MODULE, Types.APPOINTMENT == module ? "Appointments" : "Tasks");
+            if (internalRecipient) {
+                msg.setHeader(HEADER_X_OX_MODULE, Types.APPOINTMENT == module ? "Appointments" : "Tasks");
+            }
             /*
              * X-Open-Xchange-Type
              */
-            if (type != null) {
+            if (internalRecipient && type != null) {
                 msg.setHeader(HEADER_X_OX_TYPE, type);
             }
             /*
              * X-Open-Xchange-Object
              */
-            msg.setHeader(HEADER_X_OX_OBJECT, String.valueOf(objectId));
+            if (internalRecipient) {
+                msg.setHeader(HEADER_X_OX_OBJECT, String.valueOf(objectId));
+            }
             msg.saveChanges();
             /*
              * Finally transport mail
