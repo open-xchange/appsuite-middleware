@@ -355,8 +355,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             	// throw error!
             	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
             }
-            if ("all".equalsIgnoreCase(access_combination_name.trim())) {
-                access.putProperty("ignoreErrors", "true");
+            if (access.isPublicFolderEditable() && user_id != tool.getAdminForContext(ctx)) {
+                // publicFolderEditable can only be applied to the context administrator.
+                access.setPublicFolderEditable(false);
             }
             oxu.changeModuleAccess(ctx, user_id, access);
         } catch (final StorageException e) {
@@ -433,6 +434,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         	throw new InvalidDataException("No such access combination name \""+access_combination_name.trim()+"\"");
         }
 
+        if (access.isPublicFolderEditable()) {
+            // publicFolderEditable can only be applied to the context administrator.
+            access.setPublicFolderEditable(false);
+        }
         // Call main create user method with resolved access rights
     	return createUserCommon(ctx, usrdata, access, auth);
     }

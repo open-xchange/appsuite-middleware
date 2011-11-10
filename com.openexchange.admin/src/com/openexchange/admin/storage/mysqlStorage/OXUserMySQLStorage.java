@@ -2462,13 +2462,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
-            try {
-                adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
-            } catch (final OXException e) {
-                if (!insert && !"true".equals(access.getProperty("ignoreErrors"))) { // update
-                    throw e;
-                }
-            }
+            adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert, writeCon);
             if (!insert) {

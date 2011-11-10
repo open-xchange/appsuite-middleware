@@ -192,7 +192,6 @@
 * 2011-09-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 20380: Fixed SQL error when inserting contact with image
- - Fix for bug 20369: Fixed context change operation
 
 * 2011-09-15 - marcus.klein@open-xchange.com
 
