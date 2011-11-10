@@ -740,7 +740,7 @@ public final class DBChat implements Chat {
             stmt = con.prepareStatement("INSERT INTO chatMember (cid, user, chatId, opMode) VALUES (?, ?, ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, Integer.parseInt(user));
+            stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(user));
             stmt.setInt(pos++, chatId);
             stmt.setInt(pos, 0);
             stmt.executeUpdate();
@@ -779,7 +779,7 @@ public final class DBChat implements Chat {
             stmt = con.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND user = ? AND chatId = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, Integer.parseInt(user));
+            stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(user));
             stmt.setInt(pos, chatId);
             stmt.executeUpdate();
             closeSQLStuff(stmt);
@@ -839,7 +839,7 @@ public final class DBChat implements Chat {
                 con.prepareStatement("INSERT INTO chatMessage (cid, user, chatId, messageId, message, createdAt) VALUES (?, ?, ?, " + DBChatUtility.getUnhexReplaceString() + ", ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, Integer.parseInt(message.getFrom().getId()));
+            stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(message.getFrom().getId()));
             stmt.setInt(pos++, chatId);
             stmt.setString(pos++, UUID.randomUUID().toString());
             stmt.setString(pos++, prepareInsert(message.getText()));
