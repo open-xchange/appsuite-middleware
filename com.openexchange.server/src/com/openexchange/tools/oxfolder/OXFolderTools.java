@@ -1494,12 +1494,7 @@ public class OXFolderTools {
      */
     public static boolean canDeleteAllObjectsInFolder(final FolderObject fo, final Session session, final Connection readCon) throws OXException {
         final int userId = session.getUserId();
-        final Context ctx;
-        try {
-            ctx = ContextStorage.getStorageContext(session.getContextId());
-        } catch (final OXException e1) {
-            throw new OXException(e1);
-        }
+        final Context ctx = ContextStorage.getStorageContext(session.getContextId());
         final UserConfiguration userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         try {
             /*

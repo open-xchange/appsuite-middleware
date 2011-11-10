@@ -47,27 +47,35 @@
  *
  */
 
-package com.openexchange.groupware.contact.mappers;
+package com.openexchange.tasks.json.osgi;
 
-import java.util.Properties;
-import java.util.Set;
-import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.tasks.json.TaskActionFactory;
+import com.openexchange.tasks.json.converters.TaskResultConverter;
+import com.openexchange.user.UserService;
 
 
 /**
- * {@link PropertyDrivenMapper}
+ * {@link TaskJSONActivator}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class PropertyDrivenMapper extends AbstractOutlookMapper {
+public class TaskJSONActivator extends AJAXModuleActivator {
+    
+    private static final Class<?>[] NEEDED = new Class[] { UserService.class };
 
-    public PropertyDrivenMapper(Properties props){
-        Set<Object> keys = props.keySet();
-        for(Object key: keys){
-            ContactField field = ContactField.getByAjaxName((String) key);
-            store(field, (String) props.get(key));
-        }
-
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return NEEDED;
     }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new TaskActionFactory(this), "tasks");
+        registerService(ResultConverter.class, new TaskResultConverter());
+    }
+
+    
 
 }

@@ -298,13 +298,13 @@ public class TaskTestManager implements TestManager{
             break;
         case Task.ACTUAL_COSTS:
         case Task.TARGET_COSTS:
-            retval = Float.valueOf(((Long) value).floatValue());
+            retval = Float.valueOf(((String) value));
             break;
 //        case Task.PERCENT_COMPLETED:
 //            retval = Integer.valueOf(((Long) value).intValue());
 //            break;
         case Task.BILLING_INFORMATION:
-            retval = String.valueOf(((Integer) value).intValue());
+            retval = (String) value;
             break;
         default:
             retval = value;

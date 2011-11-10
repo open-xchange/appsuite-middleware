@@ -141,7 +141,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
        final VAlarm alarm = getAlarm(index, component, warnings);
-
+       boolean useDuration = false;
         if(alarm == null) {
             return;
         }
@@ -152,18 +152,20 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         }
 
         Date remindOn = null;
-
+        int temp = 0;
+        
         if(null == icaldate) {
             final Dur duration = alarm.getTrigger().getDuration();
             if(!duration.isNegative()) {
                 return;
             }
-            remindOn = duration.getTime(cObj.getStartDate());
+            temp = ((((duration.getWeeks() * 7) * 24 + duration.getDays()) * 60 + duration.getMinutes()) * 60 + duration.getSeconds()) * 1000;  
+            useDuration = true;
         } else {
             remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);
         }
 
-        final int delta = (int) (cObj.getStartDate().getTime() - remindOn.getTime());
+        final int delta = useDuration ? temp  : (int) (cObj.getStartDate().getTime() - remindOn.getTime());
 
         if(Appointment.class.isAssignableFrom(cObj.getClass())) {
             final Appointment appObj = (Appointment) cObj;

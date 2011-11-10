@@ -1566,13 +1566,11 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     private SortableId[] getPrivateFolderSubfolders(final String parentId, final int tree, final StorageParameters parameters, final User user, final Locale locale, final int contextId) throws OXException {
         final CompletionService<TreeMap<String, List<String>>> completionService;
-        try {
+        {
             completionService =
                 new ThreadPoolCompletionService<TreeMap<String, List<String>>>(OutlookServiceRegistry.getServiceRegistry().getService(
                     ThreadPoolService.class,
                     true));
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         int taskCount = 0;
         final FolderNameComparator comparator = new FolderNameComparator(locale);

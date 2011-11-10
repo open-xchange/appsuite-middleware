@@ -56,39 +56,33 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public abstract class AbstractOutlookMapper implements ContactFieldMapper {
+public abstract class AbstractContactFieldMapper implements ContactFieldMapper {
 
-    protected final HashMap<String, ContactField> outlook2ox = new HashMap<String, ContactField>();
+    protected final HashMap<String, ContactField> something2ox = new HashMap<String, ContactField>();
 
-    protected final HashMap<ContactField, String> ox2outlook = new HashMap<ContactField, String>();
+    protected final HashMap<ContactField, String> ox2something = new HashMap<ContactField, String>();
 
-    @Override
     public ContactField getFieldByName(final String name) {
-        return outlook2ox.get(name);
+        return something2ox.get(name);
     }
 
-    @Override
     public String getNameOfField(final ContactField field) {
-        return ox2outlook.get(field);
+        return ox2something.get(field);
     }
 
-    @Override
     public Collection<String> getNamesOfFields() {
-        return ox2outlook.values();
+        return ox2something.values();
     }
 
-    @Override
     public Collection<ContactField> getSupportedFields() {
-        return outlook2ox.values();
+        return something2ox.values();
     }
-
-    public void store(ContactField oxField, String outlookField){
-        if(outlookField != null && ! "".equals(outlookField)) {
-            outlook2ox.put(outlookField, oxField);
-        }
-        if(oxField != null) {
-            ox2outlook.put(oxField, outlookField);
-        }
+    
+    public void store(ContactField oxField, String otherField){
+        if(otherField != null && ! "".equals(otherField))
+            something2ox.put(otherField, oxField);
+        if(oxField != null)
+            ox2something.put(oxField, otherField);
     }
 
 }

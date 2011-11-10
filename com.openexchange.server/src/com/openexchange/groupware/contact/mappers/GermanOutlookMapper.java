@@ -54,12 +54,11 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 /**
  * This class maps names of fields found Outlook's CSV files to names used by OX and vice versa. This class has been generated automatically
  * from i18n files.
- *
+ * 
  * @deprecated Use the PropertyDrivenMapper with .properties files instead.
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
-@Deprecated
-public class GermanOutlookMapper extends AbstractOutlookMapper {
+public class GermanOutlookMapper extends AbstractContactFieldMapper {
 
     public GermanOutlookMapper() {
         store(ContactField.TITLE, "Anrede");
@@ -125,14 +124,14 @@ public class GermanOutlookMapper extends AbstractOutlookMapper {
          * tolerant when importing these, because only one of the fields will be set (either the old one or the new one), but it does not
          * work in the other direction. TODO: Split the mapper between Outlook 2003 and 2007 because different fields need to be set.
          */
-        outlook2ox.put("Land/Region gesch\u00e4ftlich", ContactField.STATE_BUSINESS);
-        outlook2ox.put("E-Mail-Adresse", ContactField.EMAIL1); // this is the second asignment for EMAIL1. One should only occur in 2003,                                                               // the other only in 2007
-        outlook2ox.put("Position", ContactField.POSITION);
-        outlook2ox.put("B\u00fcro", ContactField.ROOM_NUMBER);
-        outlook2ox.put("Bundesland/Kanton privat", ContactField.STATE_HOME);
-        outlook2ox.put("Land/Region privat", ContactField.COUNTRY_HOME);
-        outlook2ox.put("Weiteres/r Bundesland/Kanton", ContactField.STATE_OTHER);
-        outlook2ox.put("Weiteres/e Land/Region", ContactField.COUNTRY_OTHER);
+        something2ox.put("Land/Region gesch\u00e4ftlich", ContactField.STATE_BUSINESS);
+        something2ox.put("E-Mail-Adresse", ContactField.EMAIL1); // this is the second asignment for EMAIL1. One should only occur in 2003,                                                               // the other only in 2007
+        something2ox.put("Position", ContactField.POSITION);
+        something2ox.put("B\u00fcro", ContactField.ROOM_NUMBER);
+        something2ox.put("Bundesland/Kanton privat", ContactField.STATE_HOME);
+        something2ox.put("Land/Region privat", ContactField.COUNTRY_HOME);
+        something2ox.put("Weiteres/r Bundesland/Kanton", ContactField.STATE_OTHER);
+        something2ox.put("Weiteres/e Land/Region", ContactField.COUNTRY_OTHER);
     }
 
 }

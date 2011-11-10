@@ -427,7 +427,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             if (ignore != null && "mailfolder".equalsIgnoreCase(ignore)) {
                 ignoreMailfolder = true;
             }
-            BulkAdditionalFolderFieldsList fieldList = new BulkAdditionalFolderFieldsList(FIELDS);
+            final BulkAdditionalFolderFieldsList fieldList = new BulkAdditionalFolderFieldsList(FIELDS);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, fieldList);
             int parentId = -1;
             if ((parentId = getUnsignedInteger(parentIdentifier)) >= 0) {
@@ -616,7 +616,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                 creatorDisplayName = us.getUser(sharedFolder.getCreatedBy(), ctx).getDisplayName();
                             } catch (final OXException e) {
                                 if (sharedFolder.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
-                                    throw new OXException(e);
+                                    throw e;
                                 }
                                 creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                             }
@@ -1367,7 +1367,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
             final Context ctx = session.getContext();
             final int[] columns = paramContainer.checkIntArrayParam(PARAMETER_COLUMNS);
             final String timeZoneId = paramContainer.getStringParam(PARAMETER_TIMEZONE);
-            BulkAdditionalFolderFieldsList fieldList = new BulkAdditionalFolderFieldsList(FIELDS);
+            final BulkAdditionalFolderFieldsList fieldList = new BulkAdditionalFolderFieldsList(FIELDS);
             final FolderWriter folderWriter = new FolderWriter(jsonWriter, session, ctx, timeZoneId, fieldList);
             final Date timestamp = paramContainer.checkDateParam(PARAMETER_TIMESTAMP);
             final boolean includeMailFolders = STRING_1.equals(paramContainer.getStringParam(PARAMETER_MAIL));
@@ -1407,7 +1407,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                     creatorDisplayName = us.getUser(fo.getCreatedBy(), ctx).getDisplayName();
                                 } catch (final OXException e) {
                                     if (fo.getCreatedBy() != OCLPermission.ALL_GROUPS_AND_USERS) {
-                                        throw new OXException(e);
+                                        throw e;
                                     }
                                     creatorDisplayName = strHelper.getString(Groups.ALL_USERS);
                                 }

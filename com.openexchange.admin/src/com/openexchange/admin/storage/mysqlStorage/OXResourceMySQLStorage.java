@@ -55,19 +55,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.OXResourceSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
 
@@ -315,12 +312,8 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             log.error("Pool Error", e);
             dorollback(con);
             throw new StorageException(e);
-        } catch (final ContextException e) {
-            log.error("Context Error", e);
-            dorollback(con);
-            throw new StorageException(e.toString());
-        } catch (final DeleteFailedException e) {
-            log.error("Delete Error", e);
+        } catch (final OXException e) {
+            log.error("Internal Error", e);
             dorollback(con);
             throw new StorageException(e.toString());
         } finally {
@@ -370,12 +363,8 @@ public class OXResourceMySQLStorage extends OXResourceSQLStorage implements OXMy
             log.error("Pool Error", e);
             dorollback(con);
             throw new StorageException(e);
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             log.error("Context Error", e);
-            dorollback(con);
-            throw new StorageException(e.toString());
-        } catch (final DeleteFailedException e) {
-            log.error("Delete Error", e);
             dorollback(con);
             throw new StorageException(e.toString());
         } finally {

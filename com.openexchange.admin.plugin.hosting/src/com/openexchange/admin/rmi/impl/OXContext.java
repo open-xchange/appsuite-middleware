@@ -101,6 +101,7 @@ import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.tools.pipesnfilters.Filter;
 
@@ -177,7 +178,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                     cs.invalidateLoginInfo(itr.next());
                 }
             }
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             log.error("Error invalidating cached infos of context "+ctx.getId()+" in context storage",e);
         }
     }
@@ -275,7 +276,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         try {
             ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
         }
     }
@@ -317,7 +318,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             try {
                 ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
                 log.info("Context " + ctx.getId() + " successfully invalidated");
-            } catch (final ContextException e) {
+            } catch (final OXException e) {
                 log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
             }
 
@@ -379,7 +380,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             try {
                 final Cache cache = cacheService.getCache("Context");
                 cache.clear();
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 log.error(e.getMessage(), e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
@@ -418,7 +419,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         try {
             ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
         }
     }
@@ -446,7 +447,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             try {
                 final Cache cache = cacheService.getCache("Context");
                 cache.clear();
-            } catch (final CacheException e) {
+            } catch (final OXException e) {
                 log.error(e.getMessage(), e);
             } finally {
                 AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
@@ -990,7 +991,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
         try {
             ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
         }
     }

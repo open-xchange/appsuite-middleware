@@ -100,6 +100,13 @@ public final class ActualCosts implements Mapper<Float> {
 
     @Override
     public boolean equals(Task task1, Task task2) {
+        if (task1.getActualCosts() == null) {
+            return (task2.getActualCosts() == null);
+        }
+
+        if (task2.getActualCosts() == null) {
+            return (task1.getActualCosts() == null);
+        }
         return task1.getActualCosts().equals(task2.getActualCosts());
     }
 

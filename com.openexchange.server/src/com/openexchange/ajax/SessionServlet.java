@@ -204,6 +204,8 @@ public abstract class SessionServlet extends AJAXServlet {
             properties.put("com.openexchange.session.sessionId", sessionId);
             properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
             properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+            final String client  = session.getClient();
+            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
             // properties.put("com.openexchange.session.session", session);
         }
         if (!sessionId.equals(session.getSessionID())) {
@@ -255,9 +257,11 @@ public abstract class SessionServlet extends AJAXServlet {
         } finally {
             ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
-                LogProperties.putLogProperty("com.openexchange.session.sessionId", null);
-                LogProperties.putLogProperty("com.openexchange.session.userId", null);
-                LogProperties.putLogProperty("com.openexchange.session.contextId", null);
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.session.sessionId", null);
+                properties.put("com.openexchange.session.userId", null);
+                properties.put("com.openexchange.session.contextId", null);
+                properties.put("com.openexchange.session.clientId", null);
             }
             if (null != counter) {
                 counter.getAndDecrement();

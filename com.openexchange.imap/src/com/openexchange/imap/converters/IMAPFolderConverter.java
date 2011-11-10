@@ -664,7 +664,7 @@ public final class IMAPFolderConverter {
                 mailFolder.addPermission(aclPerm);
             } catch (final OXException e) {
                 if (!isUnknownEntityError(e)) {
-                    throw new OXException(e);
+                    throw e;
                 }
                 if (DEBUG) {
                     debugBuilder.setLength(0);

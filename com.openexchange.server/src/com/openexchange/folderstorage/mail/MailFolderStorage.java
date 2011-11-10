@@ -51,6 +51,9 @@ package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -133,11 +136,21 @@ public final class MailFolderStorage implements FolderStorage {
 
     private static final String PRIVATE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
 
+    private final TObjectProcedure<MailAccess<?, ?>> procedure;
+
     /**
      * Initializes a new {@link MailFolderStorage}.
      */
     public MailFolderStorage() {
         super();
+        procedure = new TObjectProcedure<MailAccess<?, ?>>() {
+
+            @Override
+            public boolean execute(final MailAccess<?, ?> mailAccess) {
+                closeMailAccess(mailAccess);
+                return true;
+            }
+        };
     }
 
     @Override
@@ -548,11 +561,38 @@ public final class MailFolderStorage implements FolderStorage {
 
     @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
-        final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
-        for (final String folderId : folderIds) {
-            ret.add(getFolder(treeId, folderId, storageType, storageParameters));
+        if (StorageType.BACKUP.equals(storageType)) {
+            throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        return ret;
+        final TIntObjectMap<MailAccess<?, ?>> accesses = new TIntObjectHashMap<MailAccess<?, ?>>(2);
+        try {
+            final ServerSession session = getServerSession(storageParameters);
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
+            final TIntObjectMap<MailAccount> accounts = new TIntObjectHashMap<MailAccount>(2);
+            final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
+            for (final String folderId : folderIds) {
+                final FullnameArgument argument = prepareMailFolderParam(folderId);
+                final int accountId = argument.getAccountId();
+                MailAccess<?, ?> mailAccess = accesses.get(accountId);
+                if (null == mailAccess) {
+                    mailAccess = MailAccess.getInstance(session, accountId);
+                    accesses.put(accountId, mailAccess);
+                }
+                MailAccount mailAccount = accounts.get(argument.getAccountId());
+                if (null == mailAccount) {
+                    final MailAccountStorageService storageService =
+                        MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                    mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+                    accounts.put(accountId, mailAccount);
+                }
+                ret.add(getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount));
+            }
+            return ret;
+        } finally {
+            accesses.forEachValue(procedure);
+        }
     }
 
     @Override
@@ -568,100 +608,105 @@ public final class MailFolderStorage implements FolderStorage {
         MailAccess<?, ?> mailAccess = null;
         try {
             final FullnameArgument argument = prepareMailFolderParam(folderId);
-            final int accountId = argument.getAccountId();
-            final String fullname = argument.getFullname();
             final ServerSession session = getServerSession(storageParameters);
             if (null == session) {
                 throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
-
             final MailAccount mailAccount;
             {
                 final MailAccountStorageService storageService =
                     MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-                mailAccount = storageService.getMailAccount(accountId, storageParameters.getUserId(), storageParameters.getContextId());
+                mailAccount = storageService.getMailAccount(argument.getAccountId(), storageParameters.getUserId(), storageParameters.getContextId());
             }
+            mailAccess = MailAccess.getInstance(session, argument.getAccountId());
+            return getFolder(treeId, argument, storageParameters, mailAccess, session, mailAccount);
+        } finally {
+            closeMailAccess(mailAccess);
+        }
+    }
 
-            mailAccess = MailAccess.getInstance(session, accountId);
-            final Folder retval;
-            final boolean hasSubfolders;
-            if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
-                if (MailAccount.DEFAULT_ID == accountId) {
-                    final MailFolder rootFolder = mailAccess.getRootFolder();
-                    retval =
-                        new MailFolderImpl(
-                            rootFolder,
-                            accountId,
-                            mailAccess.getMailConfig(),
-                            storageParameters,
-                            null);
-                    addWarnings(mailAccess, storageParameters);
-                    hasSubfolders = rootFolder.hasSubfolders();
-                } else {
-                    /*
-                     * An external account folder
-                     */
-                    retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
-                    hasSubfolders = true;
-                }
+    private Folder getFolder(final String treeId, final FullnameArgument argument, final StorageParameters storageParameters, final MailAccess<?, ?> mailAccess, final ServerSession session, final MailAccount mailAccount) throws OXException {
+        final int accountId = argument.getAccountId();
+        final String fullname = argument.getFullname();
+        final Folder retval;
+        final boolean hasSubfolders;
+        if (MailFolder.DEFAULT_FOLDER_ID.equals(fullname)) {
+            if (MailAccount.DEFAULT_ID == accountId) {
+                final MailFolder rootFolder = mailAccess.getRootFolder();
+                retval =
+                    new MailFolderImpl(
+                        rootFolder,
+                        accountId,
+                        mailAccess.getMailConfig(),
+                        storageParameters,
+                        null);
+                addWarnings(mailAccess, storageParameters);
+                hasSubfolders = rootFolder.hasSubfolders();
+            } else {
+                /*
+                 * An external account folder
+                 */
+                retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                hasSubfolders = true;
+            }
+            /*
+             * This one needs sorting. Just pass null or an empty array.
+             */
+            retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
+        } else {
+            mailAccess.connect();
+            final MailFolder mailFolder = getMailFolder(treeId, accountId, fullname, true, session, mailAccess);
+            /*
+             * Generate mail folder from loaded one
+             */
+            retval =
+                new MailFolderImpl(
+                    mailFolder,
+                    accountId,
+                    mailAccess.getMailConfig(),
+                    storageParameters,
+                    new MailAccessFullnameProvider(mailAccess));
+            hasSubfolders = mailFolder.hasSubfolders();
+            /*
+             * Check if denoted parent can hold default folders like Trash, Sent, etc.
+             */
+            if ("INBOX".equals(fullname)) {
                 /*
                  * This one needs sorting. Just pass null or an empty array.
                  */
                 retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
             } else {
-                mailAccess.connect();
-                final MailFolder mailFolder = getMailFolder(treeId, accountId, fullname, true, session, mailAccess);
                 /*
-                 * Generate mail folder from loaded one
+                 * Denoted parent is not capable to hold default folders. Therefore output as it is.
                  */
-                retval =
-                    new MailFolderImpl(
-                        mailFolder,
-                        accountId,
-                        mailAccess.getMailConfig(),
-                        storageParameters,
-                        new MailAccessFullnameProvider(mailAccess));
-                hasSubfolders = mailFolder.hasSubfolders();
+                final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
                 /*
-                 * Check if denoted parent can hold default folders like Trash, Sent, etc.
+                 * Filter against possible POP3 storage folders
                  */
-                if ("INBOX".equals(fullname)) {
-                    /*
-                     * This one needs sorting. Just pass null or an empty array.
-                     */
-                    retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
-                } else {
-                    /*
-                     * Denoted parent is not capable to hold default folders. Therefore output as it is.
-                     */
-                    final List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
-                    /*
-                     * Filter against possible POP3 storage folders
-                     */
-                    if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
-                        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
-                        for (final Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
-                            final MailFolder mf = it.next();
-                            if (pop3StorageFolders.contains(mf.getFullname())) {
-                                it.remove();
-                            }
-                        }
-                    }
-                    Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
-                    final String[] subfolderIds = new String[children.size()];
-                    int i = 0;
-                    for (final MailFolder child : children) {
-                        subfolderIds[i++] = prepareFullname(accountId, child.getFullname());
-                    }
-                    retval.setSubfolderIDs(subfolderIds);
+                if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
+                    filterPOP3StorageFolders(children, session);
                 }
-                addWarnings(mailAccess, storageParameters);
+                Collections.sort(children, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
+                final String[] subfolderIds = new String[children.size()];
+                int i = 0;
+                for (final MailFolder child : children) {
+                    subfolderIds[i++] = prepareFullname(accountId, child.getFullname());
+                }
+                retval.setSubfolderIDs(subfolderIds);
             }
-            retval.setTreeID(treeId);
+            addWarnings(mailAccess, storageParameters);
+        }
+        retval.setTreeID(treeId);
+        return retval;
+    }
 
-            return retval;
-        } finally {
-            closeMailAccess(mailAccess);
+    private static void filterPOP3StorageFolders(final List<MailFolder> folders, final ServerSession session) throws OXException {
+        final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
+        for (final Iterator<MailFolder> it = folders.iterator(); it.hasNext();) {
+            final MailFolder mf = it.next();
+            if (pop3StorageFolders.contains(mf.getFullname())) {
+                it.remove();
+            }
         }
     }
 
@@ -808,13 +853,7 @@ public final class MailFolderStorage implements FolderStorage {
              * Filter against possible POP3 storage folders
              */
             if (MailAccount.DEFAULT_ID == accountId && MailProperties.getInstance().isHidePOP3StorageFolders()) {
-                final Set<String> pop3StorageFolders = RdbMailAccountStorage.getPOP3StorageFolders(session);
-                for (final Iterator<MailFolder> it = children.iterator(); it.hasNext();) {
-                    final MailFolder mailFolder = it.next();
-                    if (pop3StorageFolders.contains(mailFolder.getFullname())) {
-                        it.remove();
-                    }
-                }
+                filterPOP3StorageFolders(children, session);
             }
             addWarnings(mailAccess, storageParameters);
             /*
@@ -1140,6 +1179,18 @@ public final class MailFolderStorage implements FolderStorage {
                         // Perform other updates
                         otherAccess.getFolderStorage().updateFolder(destFullname, mfd);
                         postEvent4Subfolders(accountId, subfolders, storageParameters);
+                        // Reset identifier
+                        folder.setID(prepareFullname(parentAccountID, destFullname));
+                        /*
+                         * Handle update of permission or subscription
+                         */
+                        otherAccess.getFolderStorage().updateFolder(destFullname, mfd);
+                        addWarnings(otherAccess, storageParameters);
+                        postEvent(parentAccountID, destFullname, false, storageParameters);
+                        /*
+                         * Leave routine...
+                         */
+                        return;
                     } finally {
                         otherAccess.close(true);
                     }
@@ -1386,7 +1437,12 @@ public final class MailFolderStorage implements FolderStorage {
             new PooledEvent(params.getContextId(), params.getUserId(), accountId, prepareFullname(accountId, fullname), contentRelated, immediateDelivery, params.getSession()).setAsync(async));
     }
 
-    private static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
+    /**
+     * Closes specified {@link MailAccess} instance
+     * 
+     * @param mailAccess The mail access to close
+     */
+    protected static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
         if (null != mailAccess) {
             mailAccess.close(true);
         }

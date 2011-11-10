@@ -447,7 +447,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                         } else {
                             final int valueLength = Charsets.getBytes(value, Charsets.UTF_8).length;
                             final int maxLength = DBUtils.getColumnSize(writecon, "prg_dates", fields[a]);
-                            oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength));
+                            oxe.addProblematic(new SimpleTruncatedAttribute(id, maxLength, valueLength, value));
                         }
                     }
                     throw oxe;

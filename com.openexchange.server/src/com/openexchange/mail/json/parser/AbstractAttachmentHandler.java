@@ -86,32 +86,28 @@ public abstract class AbstractAttachmentHandler implements IAttachmentHandler {
     public AbstractAttachmentHandler(final Session session) throws OXException {
         super();
         attachments = new ArrayList<MailPart>(4);
-        try {
-            final UserSettingMail usm;
-            if (session instanceof ServerSession) {
-                usm = ((ServerSession) session).getUserSettingMail();
-            } else {
-                usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
-            }
-            if (usm.getUploadQuota() >= 0) {
-                this.uploadQuota = usm.getUploadQuota();
-            } else {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                }
-                long tmp;
-                try {
-                    tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);
-                } catch (final ConfigurationException e) {
-                    LOG.warn(e.getMessage() + " Using no upload restrictions as fallback.", e);
-                    tmp = 0;
-                }
-                this.uploadQuota = tmp;
-            }
-            this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
-            doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final UserSettingMail usm;
+        if (session instanceof ServerSession) {
+            usm = ((ServerSession) session).getUserSettingMail();
+        } else {
+            usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId());
         }
+        if (usm.getUploadQuota() >= 0) {
+            this.uploadQuota = usm.getUploadQuota();
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
+            }
+            long tmp;
+            try {
+                tmp = ServerConfig.getInt(ServerConfig.Property.MAX_UPLOAD_SIZE);
+            } catch (final ConfigurationException e) {
+                LOG.warn(e.getMessage() + " Using no upload restrictions as fallback.", e);
+                tmp = 0;
+            }
+            this.uploadQuota = tmp;
+        }
+        this.uploadQuotaPerFile = usm.getUploadQuotaPerFile();
+        doAction = ((uploadQuotaPerFile > 0) || (uploadQuota > 0));
     }
 }

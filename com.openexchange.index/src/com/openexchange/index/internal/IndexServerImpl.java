@@ -78,21 +78,22 @@ public class IndexServerImpl implements IndexServer {
     private int maxIndices;
     
     private boolean hasMaxIndices;
-    
 
-    public IndexServerImpl(int id, String url) {
-        super();
-        this.id = id;
-        this.url = url;
-        soTimeout = 1000;
-        connectionTimeout = 100;
-        maxConnectionsPerHost = 100;
-        maxIndices = 1000;
-        
-        hasSoTimeout = false;
-        hasConnectionTimeout = false;
-        hasMaxConnectionsPerHost = false;
-        hasMaxIndices = false;
+    private boolean hasUrl;
+    
+    
+    public IndexServerImpl() {
+      super();
+      soTimeout = 1000;
+      connectionTimeout = 100;
+      maxConnectionsPerHost = 100;
+      maxIndices = 1000;
+      
+      hasSoTimeout = false;
+      hasConnectionTimeout = false;
+      hasMaxConnectionsPerHost = false;
+      hasMaxIndices = false;
+      hasUrl = false;
     }
 
     @Override
@@ -123,6 +124,25 @@ public class IndexServerImpl implements IndexServer {
     @Override
     public int getMaxIndices() {
         return maxIndices;
+    }
+    
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public void setId(final int id) {
+        this.id = id;
+    }
+    
+    /**
+     * Sets the url
+     * 
+     * @param url The url to set
+     */
+    public void setUrl(String url) {
+        this.url = url;
+        hasUrl = true;
     }
     
     /**
@@ -184,6 +204,11 @@ public class IndexServerImpl implements IndexServer {
     public boolean hasMaxIndices() {
         return hasMaxIndices;
     }
+    
+    @Override
+    public boolean hasUrl() {
+        return hasUrl;
+    }
 
     @Override
     public int hashCode() {
@@ -212,5 +237,4 @@ public class IndexServerImpl implements IndexServer {
             return false;
         return true;
     }
-
 }

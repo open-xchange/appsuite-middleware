@@ -73,7 +73,9 @@ public final class StaticConfigIndexService implements ConfigIndexService {
      */
     public StaticConfigIndexService() {
         super();
-        final IndexServerImpl server = new IndexServerImpl(1, "http://10.20.31.1:8580");
+        final IndexServerImpl server = new IndexServerImpl();
+        server.setId(1);
+        server.setUrl("http://10.20.31.1:8580");
         server.setConnectionTimeout(1000);
         server.setMaxConnectionsPerHost(100);
         server.setSoTimeout(3000);
@@ -114,7 +116,7 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     }
 
     @Override
-    public void addIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
+    public void addIndexMapping(final int cid, final int uid, final int module, final String index) throws OXException {
         // TODO Auto-generated method stub
         
     }

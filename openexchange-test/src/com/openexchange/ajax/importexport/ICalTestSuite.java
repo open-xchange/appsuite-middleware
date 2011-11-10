@@ -82,6 +82,11 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug17393Test.class);
 		tests.addTestSuite(Bug19915Test.class);
 		tests.addTestSuite(Bug19681_TimezoneForUtcProperties.class);
+		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
+		tests.addTestSuite(Bug20132Test_WrongRecurrenceDatePosition.class);
+		tests.addTestSuite(Bug20405Test_TaskWithoutDueDate.class);
+		tests.addTestSuite(Bug20453Test_emptyDTEND.class);
+		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
 		return tests;
 	}
 }

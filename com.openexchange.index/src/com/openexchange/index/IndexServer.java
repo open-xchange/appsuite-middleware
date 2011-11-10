@@ -108,6 +108,11 @@ public interface IndexServer {
     int getMaxIndices();
     
     /**
+     * <code>true</code> if url has been set. Otherwise <code>false</code>.
+     */
+    boolean hasUrl();
+    
+    /**
      * <code>true</code> if socket timeout has been set. Otherwise <code>false</code>.
      */
     boolean hasSoTimeout();

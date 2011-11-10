@@ -376,8 +376,9 @@ public class ICal4JParser implements ICalParser {
             	workaroundFor16367(
             	workaroundFor17492(
             	workaroundFor17963(
+            	workaroundFor20453(
             	removeAnnoyingWhitespaces(chunk.toString()
-                )))))))
+                ))))))))
             ); // FIXME: Encoding?
             return builder.build(chunkedReader);
         } catch (final IOException e) {
@@ -401,6 +402,12 @@ public class ICal4JParser implements ICalParser {
 		return input
 			.replaceAll("TZOFFSETFROM:\\s*(\\d\\d\\d\\d)", "TZOFFSETFROM:+$1")
 			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
+			;
+	}
+	
+	private String workaroundFor20453(final String input) {
+		return input
+			.replaceAll("DTEND;\\s*\n", "")
 			;
 	}
 

@@ -50,13 +50,13 @@
 package com.openexchange.groupware.notify;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -248,7 +248,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         mail.setSubject(msg.title);
 
         if (Multipart.class.isInstance(msg.message)) {
-            mail.setContentType("multipart/alternative");
+            mail.setContentType(((Multipart) msg.message).getContentType());
+            mail.setInternalRecipient(false);
         } else {
             mail.setContentType("text/plain; charset=UTF-8");
         }
@@ -659,8 +660,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
-                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(
-                        state.getType()) || p.email.equals(newObj.getOrganizer()));
+                    sendMail = sendMail && (!ParticipantNotify.isStatusUpdate(state) || p.email.equals(newObj.getOrganizer()));                    
+//                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(
+//                        state.getType()) || p.email.equals(newObj.getOrganizer()));
                     if (p.timeZone != null) {
                         tz = p.timeZone;
                     }
@@ -971,7 +973,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         strings,
                         b);
                 }
-            } else if (EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(state.getType())) {
+            } else if (ParticipantNotify.isStatusUpdate(state)) {
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
                     final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CONFIRMATION_MAIL_EXT : Notifications.TASK_CONFIRMATION_MAIL_EXT);
@@ -1189,17 +1191,50 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             {
                 final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
                 emitter.writeSession(icalSession, byteArrayOutputStream);
-                icalFile = byteArrayOutputStream.toByteArray();
+                icalFile = trimICal(byteArrayOutputStream.toByteArray());
                 isAscii = isAscii(icalFile);
+                if (null == mixedMultipart) {
+                    mixedMultipart = new MimeMultipart("mixed");
+                }
+                final BodyPart iCalAttachmentPart = new MimeBodyPart();
+                /*
+                 * Select file name
+                 */
+                final String fileName;
+                switch (method) {
+                case REQUEST:
+                    fileName = "invite.ics";
+                    break;
+                case CANCEL:
+                    fileName = "cancel.ics";
+                    break;
+                default:
+                    fileName = "response.ics";
+                    break;
+                }
+                /*
+                 * Compose content type
+                 */
+                b.append("application/ics; name=\"").append(fileName).append('"');
+                final String ct = b.toString();
+                b.setLength(0);
+                iCalAttachmentPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, ct)));
+                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(ct));
+                b.append("attachment; filename=\"").append(fileName).append('"');
+                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, b.toString());
+                b.setLength(0);
+                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+                mixedMultipart.addBodyPart(iCalAttachmentPart, 0);
             }
 
             final BodyPart iCalPart = new MimeBodyPart();
 
-            final String contentType = b.append("text/calendar; ").append(method.getMethod()).append("; charset=\"utf-8\"").toString();
+            final String contentType = b.append("text/calendar; charset=UTF-8; ").append(method.getMethod()).toString();
             b.setLength(0);
             iCalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
             iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
             iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
+            // iCalPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.INLINE);
             /*
              * Add the parts to parental multipart & return
              */
@@ -1208,12 +1243,9 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Return appropriate multipart
              */
-            if (mixedMultipart == null) {
-                return alternativeMultipart;
-            }
-            final BodyPart bodyPart = new MimeBodyPart();
-            bodyPart.setContent(alternativeMultipart);
-            mixedMultipart.addBodyPart(bodyPart, 0);
+            final BodyPart altBodyPart = new MimeBodyPart();
+            altBodyPart.setContent(alternativeMultipart);
+            mixedMultipart.addBodyPart(altBodyPart, 0);
             return mixedMultipart;
         } catch (final MessagingException e) {
             LOG.error("Unable to compose message", e);
@@ -1226,6 +1258,17 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
          * Failed to create multipart
          */
         return text;
+    }
+
+    private static final Pattern P_TRIM = Pattern.compile("[a-zA-Z-_]+:\r?\n");
+
+    private static byte[] trimICal(final byte[] icalBytes) {
+        try {
+            return P_TRIM.matcher(new String(icalBytes, "UTF-8")).replaceAll("").getBytes("UTF-8");
+        } catch (final UnsupportedEncodingException e) {
+            // Cannot occur
+            return icalBytes;
+        }
     }
 
     private static boolean isAscii(final byte[] bytes) {
@@ -1315,7 +1358,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 receivers,
                 session,
                 all,
-                newObj.getOrganizer());
+                newObj.getOrganizer(),
+                state);
         }
         // Add task owner to receivers list to make him receive mails about changed participants states.
         if (newObj instanceof Task) {
@@ -1571,7 +1615,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
     }
 
-    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer) {
+    private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer, final State state) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
         sortOldExternalParticipantsAndResources(
             oldParticipants,
@@ -1582,10 +1626,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             all,
             session,
             newParticipants,
-            organizer);
+            organizer,
+            state);
     }
 
-    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer) {
+    private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer, final State state) {
         if (oldParticipants == null) {
             return;
         }
@@ -1623,7 +1668,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             }
         }
 
-        if (isUpdate && organizer != null) {
+        if ((isUpdate || ParticipantNotify.isStatusUpdate(state)) && organizer != null) {
             addSingleParticipant(
                 getExternalParticipant(new ExternalUserParticipant(organizer), session),
                 participantSet,
@@ -2307,6 +2352,19 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return appointment.containsObjectID() && appointment.containsRecurrenceID() && appointment.getRecurrenceID() > 0 && appointment.getObjectID() != appointment.getRecurrenceID();
     }
 
+    /**
+     * Gets a value indicating whether the supplied notification {@link State} 
+     * reflects an update of the accept/decline status or not. 
+     * @param state The {@link State} to check
+     * @return <code>true</code>, if it is a status update, <code>false</code>, otherwise
+     */
+    private static boolean isStatusUpdate(final State state) {
+    	return null != state &&
+			State.Type.ACCEPTED.equals(state.getType()) ||  
+        	State.Type.DECLINED.equals(state.getType()) || 
+        	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType());
+    }
+    
     /**
      * Gets the recurrence master's title of specified event.
      *

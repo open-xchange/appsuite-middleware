@@ -128,28 +128,6 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         return score;
     }
 
-    /**
-     * @param original
-     * @param candidate
-     * @return
-     */
-    private boolean hasEqualContent(final Contact original, final Contact candidate) {
-        for(final int fieldNumber: Contact.ALL_COLUMNS){
-            if(original.get(fieldNumber) == null){
-                if(candidate.get(fieldNumber) != null){
-                    return false;
-                }
-            } else {
-                if(candidate.get(fieldNumber) != null){
-                    if(! original.get(fieldNumber).equals(candidate.get(fieldNumber))) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     private boolean isset(final String s) {
         return s == null || s.length() > 0;
     }

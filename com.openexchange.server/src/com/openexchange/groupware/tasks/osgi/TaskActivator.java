@@ -52,15 +52,10 @@ package com.openexchange.groupware.tasks.osgi;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.groupware.tasks.ModifyThroughDependant;
-import com.openexchange.groupware.tasks.json.TaskActionFactory;
-import com.openexchange.groupware.tasks.json.converters.TaskResultConverter;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
  * {@link TaskActivator}
@@ -79,8 +74,8 @@ public class TaskActivator extends AJAXModuleActivator {
         props.put(TargetService.MODULE_PROPERTY, I(Types.TASK));
         registerService(TargetService.class, new ModifyThroughDependant(), props);
 
-        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
-        registerService(ResultConverter.class, new TaskResultConverter());
+//        registerModule(new TaskActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_TASK);
+//        registerService(ResultConverter.class, new TaskResultConverter());
     }
 
     @Override
