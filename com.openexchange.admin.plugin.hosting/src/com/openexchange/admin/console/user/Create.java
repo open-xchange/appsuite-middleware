@@ -64,39 +64,44 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Create extends CreateCore {
-	
+
     public static void main(final String[] args) {
         new Create(args);
     }
 
     public Create(final String[] args2) {
-        final AdminParser parser = new AdminParser("createuser");    
-        
+        final AdminParser parser = new AdminParser("createuser");
+
         commonfunctions(parser, args2);
-        
+
     }
 
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        
-    	final String accesscombinationname = parseAndSetAccessCombinationName(parser);
+
+        final String accesscombinationname = parseAndSetAccessCombinationName(parser);
         if (null != accesscombinationname) {
             // Create user with access rights combination name
-        	final Integer id = oxusr.create(ctx, usr,accesscombinationname, auth).getId();
-        	displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
+            final Integer id = oxusr.create(ctx, usr,accesscombinationname, auth).getId();
+            displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
         }else{
-        	
-        	// get the context-admins module access rights as baseline
-        	final UserModuleAccess access = oxusr.getContextAdminUserModuleAccess(ctx, auth);
-                       
+
+            // get the context-admins module access rights as baseline
+            final UserModuleAccess access = oxusr.getContextAdminUserModuleAccess(ctx, auth);
+
+            if (access.isPublicFolderEditable()) {
+                // publicFolderEditable can only be applied to the context administrator.
+                access.setPublicFolderEditable(false);
+            }
+
             // adjust module access rights according to parameters given on the command line
             setModuleAccessOptions(parser, access);
-            
+
             // create the user with the adjusted module access rights
-        	final Integer id = oxusr.create(ctx, usr, access, auth).getId();
-        	displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);            
+            final Integer id = oxusr.create(ctx, usr, access, auth).getId();
+            displayCreatedMessage(String.valueOf(id), ctx.getId(), parser);
         }
-        
+
     }
 
     @Override
