@@ -55,19 +55,16 @@ import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.converters.TaskResultConverter;
 import com.openexchange.user.UserService;
 
-
 /**
  * {@link TaskJSONActivator}
- *
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TaskJSONActivator extends AJAXModuleActivator {
-    
-    private static final Class<?>[] NEEDED = new Class[] { UserService.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED;
+        return new Class<?>[] { UserService.class };
     }
 
     @Override
@@ -75,7 +72,5 @@ public class TaskJSONActivator extends AJAXModuleActivator {
         registerModule(new TaskActionFactory(this), "tasks");
         registerService(ResultConverter.class, new TaskResultConverter());
     }
-
-    
 
 }

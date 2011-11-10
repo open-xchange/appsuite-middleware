@@ -27,6 +27,8 @@ Import-Package: com.openexchange.ajax.fields,
  gnu.trove,
  gnu.trove.list,
  gnu.trove.list.array,
+ gnu.trove.map,
+ gnu.trove.map.hash,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework
