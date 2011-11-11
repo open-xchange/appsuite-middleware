@@ -77,7 +77,7 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
 //        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
 //        registerService(TargetService.class, new ModifyThroughDependant(), props);
         registerModule(new AppointmentActionFactory(this), "calendar");
-        registerService(ResultConverter.class, new AppointmentResultConverter());
+        registerService(ResultConverter.class, new AppointmentResultConverter(this));
     }
 
 }

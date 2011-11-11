@@ -58,20 +58,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.writer.AppointmentWriter;
+import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.actions.AppointmentAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.results.CollectionDelta;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,11 +86,14 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
 
     private static final String INPUT_FORMAT = "appointment";
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link AppointmentListResultConverter}.
      */
-    public AppointmentResultConverter() {
+    public AppointmentResultConverter(final ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     protected void convertCalendar(final String action, final Collection<Appointment> appointmentList, final AppointmentAJAXRequest req, final AJAXRequestResult result, final TimeZone userTimeZone) throws OXException {
@@ -105,7 +108,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         final Date startUTC = req.optDate(AJAXServlet.PARAMETER_START);
         final Date endUTC = req.optDate(AJAXServlet.PARAMETER_END);
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentRequest.RECURRENCE_MASTER));
+        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentAction.RECURRENCE_MASTER));
 
         final TimeZone timeZone;
         {
@@ -207,7 +210,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
 
     private void convertCalendar(final Appointment appointmentobject, final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final TimeZone userTimeZone) throws OXException {
         final JSONObject jsonResponseObj = new JSONObject();
-        final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        final CalendarCollectionService recColl = services.getService(CalendarCollectionService.class);
         final int recurrencePosition = request.optInt(CalendarFields.RECURRENCE_POSITION);
 
         final TimeZone timeZone;

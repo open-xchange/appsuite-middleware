@@ -89,6 +89,8 @@ public abstract class AppointmentAction implements AJAXActionService {
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
+    public static final String RECURRENCE_MASTER = "recurrence_master";
+
     protected static final int DAY_MILLIS = 24 * 60 * 60 * 1000;
 
     protected final static int[] _appointmentFields = {

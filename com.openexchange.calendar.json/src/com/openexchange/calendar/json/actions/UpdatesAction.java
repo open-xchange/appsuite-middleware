@@ -54,7 +54,6 @@ import java.util.Date;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
@@ -101,7 +100,7 @@ public final class UpdatesAction extends AppointmentAction {
         final Date end = endUTC == null ? null : req.applyTimeZone2Date(endUTC.getTime());
         final String ignore = req.getParameter(AJAXServlet.PARAMETER_IGNORE);
 
-        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentRequest.RECURRENCE_MASTER));
+        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(RECURRENCE_MASTER));
         final boolean showPrivates = Boolean.parseBoolean(req.getParameter(AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS));
 
         final int folderId = req.getFolderId();

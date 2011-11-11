@@ -64,7 +64,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.parser.DataParser;
-import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
@@ -108,7 +107,7 @@ public final class ListAction extends AppointmentAction {
 
         final TIntObjectMap<TIntList> recurrencePositionMap = new TIntObjectHashMap<TIntList>();
         final JSONArray jData = req.getData();
-        final boolean bRecurrenceMaster = req.parseBoolean(AppointmentRequest.RECURRENCE_MASTER);
+        final boolean bRecurrenceMaster = req.parseBoolean(RECURRENCE_MASTER);
 
         final TIntIntMap objectIdMap = new TIntIntHashMap();
         for (int a = 0; a < jData.length(); a++) {

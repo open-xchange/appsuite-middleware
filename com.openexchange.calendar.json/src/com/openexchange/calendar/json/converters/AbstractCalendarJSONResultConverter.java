@@ -55,9 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.groupware.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 

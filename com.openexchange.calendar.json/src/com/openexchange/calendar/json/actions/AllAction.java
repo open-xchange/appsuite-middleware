@@ -60,7 +60,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.DateOrderObject;
 import com.openexchange.ajax.fields.OrderFields;
-import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
@@ -124,7 +123,7 @@ public final class AllAction extends AppointmentAction {
         final String orderDirString = req.getParameter(AJAXServlet.PARAMETER_ORDER);
         final Order orderDir = OrderFields.parse(orderDirString);
 
-        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentRequest.RECURRENCE_MASTER));
+        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(RECURRENCE_MASTER));
 
 //        final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
 //        final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
