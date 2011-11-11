@@ -97,7 +97,8 @@ public class LastLoginRecorder implements LoginHandlerService {
         final Set<String> value = new HashSet<String>();
         value.add(Long.toString(System.currentTimeMillis()));
         attributes.put(key, value);
-        final UserImpl newUser = new UserImpl(origUser);
+        final UserImpl newUser = new UserImpl();
+        newUser.setId(origUser.getId());
         newUser.setAttributes(attributes);
         UserService service;
         try {

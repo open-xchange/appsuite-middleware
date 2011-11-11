@@ -69,6 +69,11 @@ public interface Operation {
      * @return What the operation would look like in SQL
      */
     public String getSqlRepresentation();
+    
+    /**
+     * @return What the operation would look like in LDAP
+     */
+    public String getLdapRepresentation();
 
     /**
      * Checks if specified string equals this operation's string representation.
@@ -79,7 +84,8 @@ public interface Operation {
     public boolean equalsOperation(String other);
 
     /**
-     * tells you where the operator is positioned in relation to the operand(s)
+     * tells you where the operator is positioned in relation to the operand(s) in a SQL query
      */
-    public OperationPosition getPosition();
+    public OperationPosition getSqlPosition();
+
 }

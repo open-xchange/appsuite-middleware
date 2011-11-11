@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,27 @@
  *
  */
 
-package com.openexchange.ajp13.coyote;
+package com.openexchange.groupware.contact.mappers;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import javax.servlet.ServletInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import java.util.Properties;
+import java.util.Set;
+import com.openexchange.groupware.contact.helpers.ContactField;
+
 
 /**
- * {@link ByteArrayServletInputStream} - The {@link ServletInputStream} backed by a byte array.
+ * {@link PropertyDrivenContactFieldMapper}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class ByteArrayServletInputStream extends ServletInputStream {
+public class PropertyDrivenContactFieldMapper extends AbstractContactFieldMapper {
 
-    private final ByteArrayInputStream bais;
-
-    /**
-     * Initializes a new {@link ByteArrayServletInputStream}.
-     */
-    public ByteArrayServletInputStream(final byte[] bytes) {
-        super();
-        bais = new UnsynchronizedByteArrayInputStream(bytes);
-    }
-
-    @Override
-    public int read() throws IOException {
-        return bais.read();
-    }
-
-    @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException {
-        return bais.read(b, off, len);
+    public PropertyDrivenContactFieldMapper(Properties props){
+        Set<Object> keys = props.keySet();
+        for(Object key: keys){
+            ContactField field = ContactField.getByAjaxName((String) key);
+            store(field, (String) props.get(key));
+        }
+            
     }
 
 }

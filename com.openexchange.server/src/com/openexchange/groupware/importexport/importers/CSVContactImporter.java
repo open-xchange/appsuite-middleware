@@ -199,7 +199,7 @@ public class CSVContactImporter extends AbstractImporter {
         final TargetFolderDefinition target = new TargetFolderDefinition(folder, sessObj.getUserId(), sessObj.getContext());
 
         try {
-            final FolderUpdaterService folderUpdater = updaterRegistry.getFolderUpdater(target);
+            final FolderUpdaterService<Contact> folderUpdater = updaterRegistry.getFolderUpdater(target);
             if (folderUpdater == null) {
                 throw ImportExportExceptionCodes.CANNOT_IMPORT.create();
             }
@@ -214,7 +214,7 @@ public class CSVContactImporter extends AbstractImporter {
         final List<ImportResult> results = new LinkedList<ImportResult>();
 
         for(final ImportIntention intention : intentions) {
-            if (intention.contact != null) {
+            if (intention.contact != null && intention.contact.getObjectID() != 0) {
                 final ImportResult result = new ImportResult();
                 result.setFolder(folder);
                 result.setObjectId(Integer.toString(intention.contact.getObjectID()));
@@ -223,6 +223,10 @@ public class CSVContactImporter extends AbstractImporter {
                     result.setException(intention.result.getException());
                 }
                 results.add(result);
+            } else if (intention.contact != null && intention.contact.getObjectID() == 0) {
+            	ImportResult notCreated = new ImportResult();
+            	notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
+            	results.add(notCreated);
             } else if (intention.result != null) {
                 results.add(intention.result);
             }

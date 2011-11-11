@@ -73,8 +73,10 @@ import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -96,6 +98,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
@@ -404,7 +407,10 @@ public class ICalImporter extends AbstractImporter {
 					if(isChange){
 						appointmentObj.setRecurrenceID(masterID);
 						appointmentObj.removeUid();
-						appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+						if(appointmentObj.containsRecurrenceDatePosition())
+							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
+						else
+							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
 					}
 					final Appointment[] conflicts;
 					if(isChange){
@@ -429,11 +435,11 @@ public class ICalImporter extends AbstractImporter {
 										.create());
 					}
 				} catch (final OXException e) {
-					LOG.error(e.getMessage(), e);
-					importResult.setException(e);
+					OXException ne = makeMoreInformative(e);
+					//LOG.error(ne.getMessage(), ne); //removed logging, because this would be a user error spamming our log.
+					importResult.setException(ne);
 				}
-				final List<ConversionWarning> warningList = warningMap
-						.get(index);
+				final List<ConversionWarning> warningList = warningMap.get(index);
 				if (warningList != null) {
 					importResult.addWarnings(warningList);
 					importResult
@@ -459,6 +465,24 @@ public class ICalImporter extends AbstractImporter {
 				}
 			});
 		}
+	}
+
+	private OXException makeMoreInformative(OXException e) {
+		if( e.getCategory() == Category.CATEGORY_TRUNCATED){
+			ProblematicAttribute[] problematics = e.getProblematics();
+			StringBuilder bob = new StringBuilder();
+			for(ProblematicAttribute att: problematics){
+				if((att instanceof SimpleTruncatedAttribute) && ((SimpleTruncatedAttribute) att).getValue() != null){
+					SimpleTruncatedAttribute temp = (SimpleTruncatedAttribute) att;
+					bob.append(temp.getValue());
+					bob.append(" (>");
+					bob.append(temp.getMaxSize());
+					bob.append(")\n");
+				}
+			}
+			return ImportExportExceptionCodes.TRUNCATION.create(bob.toString());
+		}
+		return e;
 	}
 
 	private Date calculateRecurrenceDatePosition(final Date startDate) {

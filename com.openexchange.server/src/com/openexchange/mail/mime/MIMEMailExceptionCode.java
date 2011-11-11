@@ -2,7 +2,6 @@
 package com.openexchange.mail.mime;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -255,27 +254,22 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
 
     private final Category category;
 
-    private final boolean display;
-
     private MIMEMailExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     private MIMEMailExceptionCode(final MailExceptionCode code, final String message) {
         this.message = message;
         this.detailNumber = code.getNumber();
         this.category = code.getCategory();
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     private MIMEMailExceptionCode(final MailExceptionCode code) {
         this.message = code.getMessage();
         this.detailNumber = code.getNumber();
         this.category = code.getCategory();
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     @Override

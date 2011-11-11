@@ -49,25 +49,40 @@
 
 package com.openexchange.groupware.contact.mappers;
 
-import java.util.Properties;
-import java.util.Set;
+import java.util.Collection;
+import java.util.HashMap;
 import com.openexchange.groupware.contact.helpers.ContactField;
 
-
 /**
- * {@link PropertyDrivenMapper}
- *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public class PropertyDrivenMapper extends AbstractOutlookMapper {
+public abstract class AbstractContactFieldMapper implements ContactFieldMapper {
 
-    public PropertyDrivenMapper(Properties props){
-        Set<Object> keys = props.keySet();
-        for(Object key: keys){
-            ContactField field = ContactField.getByAjaxName((String) key);
-            store(field, (String) props.get(key));
-        }
+    protected final HashMap<String, ContactField> something2ox = new HashMap<String, ContactField>();
 
+    protected final HashMap<ContactField, String> ox2something = new HashMap<ContactField, String>();
+
+    public ContactField getFieldByName(final String name) {
+        return something2ox.get(name);
+    }
+
+    public String getNameOfField(final ContactField field) {
+        return ox2something.get(field);
+    }
+
+    public Collection<String> getNamesOfFields() {
+        return ox2something.values();
+    }
+
+    public Collection<ContactField> getSupportedFields() {
+        return something2ox.values();
+    }
+    
+    public void store(ContactField oxField, String otherField){
+        if(otherField != null && ! "".equals(otherField))
+            something2ox.put(otherField, oxField);
+        if(oxField != null)
+            ox2something.put(oxField, otherField);
     }
 
 }

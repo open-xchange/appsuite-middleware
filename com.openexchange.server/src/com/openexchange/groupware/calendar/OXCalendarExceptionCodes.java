@@ -1,7 +1,6 @@
 package com.openexchange.groupware.calendar;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -242,8 +241,6 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
      */
     private final int detailNumber;
 
-    private final boolean display;
-
     /**
      * Default constructor.
      * @param message message.
@@ -254,7 +251,6 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     @Override

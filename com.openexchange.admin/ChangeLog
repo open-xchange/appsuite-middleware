@@ -1,3 +1,8 @@
+* 2011-11-10 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20369: Removing publicFolderEditable permissions for non context administrator users.
+ - Fix for bug 20635: Fixed with new solution for bug 20369.
+
 * 2011-11-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 20724: Corrected mail folder name properties for latvian.
