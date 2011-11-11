@@ -49,27 +49,31 @@
 
 package com.openexchange.chat;
 
+import java.util.Date;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 
 /**
- * {@link ChatChunk} - Represents a certain chunk of a chat conversation associated with certain chat users/members.
+ * {@link ChatGroup} - Represents a group of chat members.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatChunk extends ChatGroup {
+public interface ChatGroup {
 
     /**
-     * Gets the chunk identifier.
+     * Gets the chat members.
      * 
-     * @return The chunk identifier.
+     * @return The identifiers of the chat members
+     * @throws OXException If chat members cannot be returned
      */
-    String getChunkId();
+    List<String> getMembers() throws OXException;
 
     /**
-     * Gets the chat identifier.
+     * Gets the time stamp for this chunk.
      * 
-     * @return The chat identifier.
+     * @return The time stamp
      */
-    String getChatId();
+    Date getTimeStamp();
 
 }
