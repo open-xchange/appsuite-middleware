@@ -1,3 +1,11 @@
+* 2011-11-11 - jan.bauerdick@open-xchange.com
+
+ - Added Bundle com.openexchange.calendar.json and tests
+
+* 2011-11-10 - jan.bauerdick@open-xchange.com
+
+ - Added Bundle com.openexchange.tasks.json and tests
+
 * 2011-11-09 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 20008: Added check for null

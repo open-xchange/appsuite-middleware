@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,61 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json.osgi;
+package com.openexchange.calendar.json.converters;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
-
+import java.util.TimeZone;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.groupware.calendar.json.AppointmentAJAXRequestFactory;
+import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AppointmentJSONActivator}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link AbstractCalendarJSONResultConverter}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class AppointmentJSONActivator extends AJAXModuleActivator {
+public abstract class AbstractCalendarJSONResultConverter implements ResultConverter {
 
-    /**
-     * Initializes a new {@link AppointmentJSONActivator}.
-     */
-    public AppointmentJSONActivator() {
-        super();
+    protected static final String OUTPUT_FORMAT = "json";
+    
+    private TimeZone timeZone;
+
+    @Override
+    public String getOutputFormat() {
+        return OUTPUT_FORMAT;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{AppointmentSqlFactoryService.class, CalendarCollectionService.class};
+    public Quality getQuality() {
+        return Quality.GOOD;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-//        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CALENDAR);
-//        registerService(ResultConverter.class, new AppointmentResultConverter());
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (null != sTimeZone) {
+            timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
+        } else {
+            timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        }
+        convertCalendar(
+            AppointmentAJAXRequestFactory.createAppointmentAJAXRequest(requestData, session),
+            result,
+            session,
+            converter,
+            timeZone);
+    }
+
+    protected abstract void convertCalendar(AppointmentAJAXRequest request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone userTimeZone) throws OXException;
+
+    protected TimeZone getTimeZone(final String timeZoneId) {
+        return TimeZoneUtils.getTimeZone(timeZoneId);
     }
 
 }
