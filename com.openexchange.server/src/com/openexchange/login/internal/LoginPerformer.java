@@ -188,12 +188,12 @@ public final class LoginPerformer {
             retval.setSession(session);
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
-        } catch (final OXException e) {
+            return retval;
+        } catch (final RuntimeException e) {
+            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+        } finally {
             logLoginRequest(request, retval);
-            throw e;
         }
-        logLoginRequest(request, retval);
-        return retval;
     }
 
     private void checkClient(final LoginRequest request, final User user, final Context ctx) throws OXException {
