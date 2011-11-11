@@ -208,12 +208,17 @@ public final class DBChatAccess implements ChatAccess {
         }
     }
 
+    private static final boolean DO_CLEAN_UP = false;
+
     /**
      * Clean up any remaining single-chats and user occurrences.
      * 
      * @throws OXException If an error occurs
      */
     private void cleanUp(final Connection con) throws OXException {
+        if (!DO_CLEAN_UP) {
+            return;
+        }
         final TIntList singleChatIds = new TIntLinkedList();
         PreparedStatement stmt = null;
         int pos;
