@@ -515,6 +515,8 @@ public final class DBChat implements Chat {
 
     private final boolean secureMessaging;
 
+    private volatile Date createdAt;
+
     /**
      * Initializes a new {@link DBChat}.
      */
@@ -643,6 +645,50 @@ public final class DBChat implements Chat {
     @Override
     public String getChatId() {
         return sChatId;
+    }
+
+    @Override
+    public Date getTimeStamp() {
+        // Lazy initialization
+        Date tmp = createdAt;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = createdAt;
+                if (null == createdAt) {
+                    tmp = getCreatedAt();
+                    createdAt = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    private Date getCreatedAt() {
+        try {
+            final DatabaseService databaseService = getDatabaseService();
+            final Connection con = databaseService.getReadOnly(contextId);
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT createdAt FROM chat WHERE cid = ? AND chatId = ?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, chatId);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    return null;
+                }
+                return new Date(rs.getLong(1));
+            } catch (final SQLException e) {
+                LOG.error("A SQL error occurred.", e);
+                return null;
+            } finally {
+                closeSQLStuff(rs, stmt);
+                databaseService.backReadOnly(contextId, con);
+            }
+        } catch (final OXException e) {
+            LOG.error("An OX error occurred.", e);
+            return null;
+        }
     }
 
     @Override

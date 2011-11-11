@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat {
+public interface Chat extends ChatGroup {
 
     /**
      * Gets the chat identifier.
@@ -74,14 +74,6 @@ public interface Chat {
      * @return The subject
      */
     String getSubject();
-
-    /**
-     * Gets the chat members.
-     * 
-     * @return The identifiers of the chat members
-     * @throws OXException If chat members cannot be returned
-     */
-    List<String> getMembers() throws OXException;
 
     /**
      * Joins specified chat member to this chat.
