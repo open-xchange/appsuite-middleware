@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.cifs;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -112,13 +111,10 @@ public enum CIFSExceptionCodes implements OXExceptionCode {
 
     private final String message;
 
-    private final boolean display;
-
     private CIFSExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.detailNumber = detailNumber;
         this.category = category;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     @Override

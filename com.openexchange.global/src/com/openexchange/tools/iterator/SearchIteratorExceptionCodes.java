@@ -1,14 +1,14 @@
 package com.openexchange.tools.iterator;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
  * The {@link SearchIterator} error code enumeration.
  */
-public enum SearchIteratorExceptionCodes {
+public enum SearchIteratorExceptionCodes implements OXExceptionCode {
 
     /**
      * A SQL error occurred: %1$s
@@ -50,25 +50,37 @@ public enum SearchIteratorExceptionCodes {
 
     private final Category category;
 
-    private final boolean display;
-
     private SearchIteratorExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
-        display = LogLevel.DEBUG.equals(category.getLogLevel());
     }
 
+    private static final String PREFIX = "FLD";
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
+    @Override
     public Category getCategory() {
         return category;
     }
 
-    public int getDetailNumber() {
+    @Override
+    public int getNumber() {
         return detailNumber;
     }
 
+    @Override
     public String getMessage() {
         return message;
+    }
+
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
     }
 
     /**
@@ -90,8 +102,6 @@ public enum SearchIteratorExceptionCodes {
         return create(null, logArguments);
     }
 
-    private static final String PREFIX = "FLD";
-
     /**
      * Creates an {@link OXException} instance using this error code.
      *
@@ -100,13 +110,6 @@ public enum SearchIteratorExceptionCodes {
      * @return The newly created {@link OXException} instance.
      */
     public OXException create(final Throwable cause, final Object... arguments) {
-        final OXException ret;
-        if (display) {
-            ret = new OXException(detailNumber, message, cause, arguments);
-        } else {
-            ret = new OXException(detailNumber, OXExceptionStrings.MESSAGE, cause);
-            ret.setLogMessage(message, arguments);
-        }
-        return ret.setPrefix(PREFIX).addCategory(category);
+        return OXExceptionFactory.getInstance().create(this, cause, arguments);
     }
 }
