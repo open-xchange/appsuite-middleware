@@ -1,6 +1,7 @@
 * 2011-11-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 20543 and bug 20613: Deep check for possible duplicates and reserved folder names
+ - Fix for bug 20768: Checking for valid password length according to configuration
 
 * 2011-11-11 - jan.bauerdick@open-xchange.com
 

@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.authentication.service.Authentication;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserExceptionCode;
@@ -147,6 +148,19 @@ public abstract class PasswordChangeService {
              * Verification of old password failed
              */
             throw e;
+        }
+        /*
+         * Check min/max length restrictions
+         */
+        final int len = event.getNewPassword().length();
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        int property = service.getIntProperty("com.openexchange.passwordchange.minLength", 4);
+        if (property > 0 && len < property) {
+            throw UserExceptionCode.INVALID_MIN_LENGTH.create(Integer.valueOf(property));
+        }
+        property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
+        if (property > 0 && len < property) {
+            throw UserExceptionCode.INVALID_MAX_LENGTH.create(Integer.valueOf(property));
         }
         /*
          * No validation of new password since admin daemon does no validation, too
