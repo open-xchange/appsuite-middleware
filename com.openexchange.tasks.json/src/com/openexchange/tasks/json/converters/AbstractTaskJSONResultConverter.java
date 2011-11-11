@@ -61,15 +61,13 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link TaskJSONResultConverter}
+ * {@link AbstractTaskJSONResultConverter}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public abstract class TaskJSONResultConverter implements ResultConverter {
+public abstract class AbstractTaskJSONResultConverter implements ResultConverter {
     
     protected static final String OUTPUT_FORMAT = "json";
-
-    private TimeZone timeZone;
 
     @Override
     public String getOutputFormat() {
@@ -82,26 +80,17 @@ public abstract class TaskJSONResultConverter implements ResultConverter {
     }
 
     @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final TimeZone timeZone;
         final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         if (null != sTimeZone) {
             timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
         } else {
             timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
         }
-        convertTask(requestData, result, session, converter);
+        convertTask(requestData, result, session, converter, timeZone);
     }
 
-    protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
-
-    protected TimeZone getTimeZone() {
-        return timeZone;
-    }
-
-    @Override
-    public String getInputFormat() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter, TimeZone timeZone) throws OXException;
 
 }

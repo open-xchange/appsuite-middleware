@@ -70,8 +70,6 @@ public abstract class AbstractCalendarJSONResultConverter implements ResultConve
 
     protected static final String OUTPUT_FORMAT = "json";
     
-    private TimeZone timeZone;
-
     @Override
     public String getOutputFormat() {
         return OUTPUT_FORMAT;
@@ -84,6 +82,7 @@ public abstract class AbstractCalendarJSONResultConverter implements ResultConve
 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final TimeZone timeZone;
         final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         if (null != sTimeZone) {
             timeZone = TimeZoneUtils.getTimeZone(sTimeZone);

@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 
-public class TaskResultConverter extends TaskJSONResultConverter {
+public class TaskResultConverter extends AbstractTaskJSONResultConverter {
 
     private static final String INPUT_FORMAT = "task";
 
@@ -87,28 +88,27 @@ public class TaskResultConverter extends TaskJSONResultConverter {
         super();
     }
 
-
     @Override
     public String getInputFormat() {
         return INPUT_FORMAT;
     }
 
-    protected void convertTask(final String action, final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
+    protected void convertTask(final String action, final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
         if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATES)) {
-            convertTasks4Updates(tasks, request, result);
+            convertTasks4Updates(tasks, request, result, timeZone);
         } else {
-            convertTasks(tasks, request, result);
+            convertTasks(tasks, request, result, timeZone);
         }
     }
 
-    protected void convertTasks(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
+    protected void convertTasks(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
         final int[] columns = RequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
         /*
          * Create JSON array
          */
         final JSONArray jsonResponseArray = new JSONArray();
 
-        final TaskWriter taskwriter = new TaskWriter(getTimeZone());
+        final TaskWriter taskwriter = new TaskWriter(timeZone);
         for (final Task task : tasks) {
             try {
                 taskwriter.writeArray(task, columns, jsonResponseArray);
@@ -120,7 +120,7 @@ public class TaskResultConverter extends TaskJSONResultConverter {
         result.setResultObject(jsonResponseArray, OUTPUT_FORMAT);
     }
 
-    protected void convertTasks4Updates(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result) throws OXException {
+    protected void convertTasks4Updates(final Collection<Task> tasks, final AJAXRequestData request, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
         final int[] columns = RequestTools.checkIntArray(request, AJAXServlet.PARAMETER_COLUMNS);
         /*
          * Create list with support for Iterator.remove()
@@ -142,7 +142,7 @@ public class TaskResultConverter extends TaskJSONResultConverter {
          */
         final JSONArray jsonResponseArray = new JSONArray();
 
-        final TaskWriter taskwriter = new TaskWriter(getTimeZone());
+        final TaskWriter taskwriter = new TaskWriter(timeZone);
         for (final Task task : taskList) {
             try {
                 taskwriter.writeArray(task, columns, jsonResponseArray);
@@ -176,19 +176,19 @@ public class TaskResultConverter extends TaskJSONResultConverter {
     }
 
     @Override
-    public void convertTask(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+    public void convertTask(final AJAXRequestData request, final AJAXRequestResult result, final ServerSession session, final Converter converter, final TimeZone timeZone) throws OXException {
         final Object resultObject = result.getResultObject();
         final String action = request.getParameter(AJAXServlet.PARAMETER_ACTION);
         if (resultObject instanceof Task) {
-            convertTask((Task) resultObject, result);
+            convertTask((Task) resultObject, result, timeZone);
         } else {
             @SuppressWarnings("unchecked") final Collection<Task> tasks = (Collection<Task>) resultObject;
-            convertTask(action, tasks, request, result);
+            convertTask(action, tasks, request, result, timeZone);
         }
     }
 
-    private void convertTask(final Task task, final AJAXRequestResult result) throws OXException {
-        final TaskWriter taskWriter = new TaskWriter(getTimeZone());
+    private void convertTask(final Task task, final AJAXRequestResult result, final TimeZone timeZone) throws OXException {
+        final TaskWriter taskWriter = new TaskWriter(timeZone);
 
         final JSONObject jsonResponseObject = new JSONObject();
         try {
