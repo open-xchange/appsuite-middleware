@@ -76,6 +76,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatExceptionCodes;
+import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Message;
 import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.MessageListener;
@@ -1021,7 +1022,7 @@ public final class DBChat implements Chat {
     }
 
     @Override
-    public List<Message> pollMessages(final Date since) throws OXException {
+    public List<Message> pollMessages(final Date since, final ChatUser chatUser) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;

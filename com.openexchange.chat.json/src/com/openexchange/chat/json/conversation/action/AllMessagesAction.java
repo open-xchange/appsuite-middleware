@@ -63,6 +63,7 @@ import com.openexchange.chat.Message;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
+import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
@@ -110,7 +111,7 @@ public final class AllMessagesAction extends AbstractChatConversationAction {
             /*
              * Get messages
              */
-            final List<Message> messages = chat.pollMessages(since);
+            final List<Message> messages = chat.pollMessages(since, new ChatUserImpl(String.valueOf(session.getUserId())));
             if (messages.isEmpty()) {
                 return new AJAXRequestResult(new JSONArray(), "json");
             }

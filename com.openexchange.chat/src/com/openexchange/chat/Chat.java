@@ -118,10 +118,11 @@ public interface Chat {
      * Polls all messages from this chat that were posted after specified date.
      * 
      * @param since The date or <code>null</code> to poll whole chat's time line
+     * @param user The chat user for whom the messages are requested
      * @return All messages
      * @throws OXException If messages cannot be polled
      */
-    List<Message> pollMessages(Date since) throws OXException;
+    List<Message> pollMessages(Date since, ChatUser user) throws OXException;
 
     /**
      * Updates an existing message according {@link MessageDescription}'s arguments.
