@@ -367,14 +367,23 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Remove parent from cache(s)
              */
+            final Cache cache = globalCache;
+            final String sContextId = String.valueOf(storageParameters.getContextId());
+            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             for (final String tid : new String[] { treeId, realTreeId }) {
-                final Cache cache = globalCache;
-                final String sContextId = String.valueOf(storageParameters.getContextId());
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
-                final FolderMap folderMap = FolderMapManagement.getInstance().optFor(storageParameters.getUserId(), storageParameters.getContextId());
+                final FolderMap folderMap = folderMapManagement.optFor(storageParameters.getUserId(), storageParameters.getContextId());
                 if (null != folderMap) {
                     folderMap.remove(folder.getParentID(), tid);
+                }
+            }
+            for (final String tid : new String[] { treeId, realTreeId }) {
+                final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
+                cache.removeFromGroup(cacheKey, sContextId);
+                final FolderMap folderMap = folderMapManagement.optFor(storageParameters.getUserId(), storageParameters.getContextId());
+                if (null != folderMap) {
+                    folderMap.remove(createdFolder.getParentID(), tid);
                 }
             }
             /*
@@ -1241,6 +1250,7 @@ public final class CacheFolderStorage implements FolderStorage {
                  * Reload folders
                  */
                 Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
+                removeSingleFromCache(f.getParentID(), treeId, userId, storageParameters.getSession(), false);
                 if (f.isCacheable()) {
                     putFolder(f, realTreeId, storageParameters);
                 }

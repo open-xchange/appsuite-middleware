@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,27 @@
  *
  */
 
-package com.openexchange.server.osgi;
+package com.openexchange.folderstorage;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
-import com.openexchange.i18n.I18nService;
-import com.openexchange.server.services.I18nServices;
+import java.util.Set;
+import com.openexchange.exception.OXException;
 
-public class I18nServiceListener implements ServiceTrackerCustomizer<I18nService,I18nService>{
+/**
+ * {@link FolderI18nNamesService} - Provides the localized folder names for specified folder modules.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public interface FolderI18nNamesService {
 
-    private final BundleContext context;
-    private final I18nServices services = I18nServices.getInstance();
+    /**
+     * Gets the localized folder names for specified folder modules.
+     * <p>
+     * If no module is specified, the localized names of all modules are returned.
+     * 
+     * @param modules The optional modules
+     * @return The localized folder names
+     * @throws OXException If name look-up fails
+     */
+    public Set<String> getI18nNamesFor(final int... modules) throws OXException;
 
-    public I18nServiceListener(final BundleContext context) {
-        super();
-        this.context = context;
-    }
-
-    @Override
-    public I18nService addingService(final ServiceReference<I18nService> reference) {
-        final I18nService i18n = context.getService(reference);
-        services.addService(i18n);
-        FolderI18nNamesServiceImpl.getInstance().addService(i18n);
-        return i18n;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
-        try {
-            services.removeService(service);
-            FolderI18nNamesServiceImpl.getInstance().removeService(service);
-        } finally {
-            context.ungetService(reference);
-        }
-    }
 }

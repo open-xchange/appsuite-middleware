@@ -157,6 +157,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // A tree with identifier "%1$s" already exists.
     public static final String DUPLICATE_TREE_MSG = "A tree with identifier \"%1$s\" already exists.";
 
+    // The folder name "%1$s" is reserved. Please choose another name.
+    public static final String RESERVED_NAME_MSG = "The folder name \"%1$s\" is reserved. Please choose another name.";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

@@ -153,11 +153,23 @@ public final class UpdatePerformer extends AbstractPerformer {
             {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
+                if (move) {
+                    /*
+                     * Check for duplicate
+                     */
+                    checkForDuplicate(storageFolder.getName(), treeId, newParentId, openedStorages);
+                }
             }
             final boolean rename;
             {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
+                if (rename) {
+                    /*
+                     * Check for duplicate
+                     */
+                    checkForDuplicate(newName, treeId, storageFolder.getParentID(), openedStorages);
+                }
             }
             final boolean changePermissions;
             {
