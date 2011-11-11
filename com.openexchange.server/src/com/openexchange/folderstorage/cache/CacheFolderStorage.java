@@ -82,7 +82,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.cache.lock.LockManagement;
+import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -411,7 +411,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * @throws OXException If removal fails
      */
     public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws OXException {
-        final Lock lock = LockManagement.getInstance().getFor(treeId, session).writeLock();
+        final Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
         lock.lock();
         try {
             if (singleOnly) {
@@ -500,7 +500,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param contextId The context identifier
      */
     public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final boolean deleted) {
-        final Lock lock = LockManagement.getInstance().getFor(treeId, userId, contextId).writeLock();
+        final Lock lock = TreeLockManagement.getInstance().getFor(treeId, userId, contextId).writeLock();
         lock.lock();
         try {
             final Cache cache = globalCache;
@@ -1553,7 +1553,7 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private static ReadWriteLock lockFor(final String treeId, final StorageParameters params) {
-        return LockManagement.getInstance().getFor(treeId, params.getUserId(), params.getContextId());
+        return TreeLockManagement.getInstance().getFor(treeId, params.getUserId(), params.getContextId());
     }
 
     private static FolderMap getFolderMapFor(final Session session) {
