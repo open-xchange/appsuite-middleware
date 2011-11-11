@@ -50,6 +50,7 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
@@ -84,14 +85,16 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
         Changes changes = new Changes();
         /**
-         * TODO: Fix test.
-         * It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal appointment
-         * and ignore the days value.
+         * TODO: Fix test. It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal
+         * appointment and ignore the days value.
          */
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXException(-1));
+        negativeAssertionOnUpdate.check(
+            app,
+            changes,
+            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
     public void testShouldChangeFromYearly2ToYearly1With127() throws Exception {
@@ -142,14 +145,16 @@ public class TestsForChangingAmongYearlyRecurrences extends ManagedAppointmentTe
 
         Changes changes = new Changes();
         /**
-         * TODO: Fix test.
-         * It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal appointment
-         * and ignore the days value.
+         * TODO: Fix test. It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal
+         * appointment and ignore the days value.
          */
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.YEARLY);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXException(-1));
+        negativeAssertionOnUpdate.check(
+            app,
+            changes,
+            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
 }

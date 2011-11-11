@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json.osgi;
+package com.openexchange.calendar.json;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AppointmentJSONActivator}
+ * {@link AppointmentAJAXRequestFactory}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class AppointmentJSONActivator extends AJAXModuleActivator {
+public class AppointmentAJAXRequestFactory {
 
-    /**
-     * Initializes a new {@link AppointmentJSONActivator}.
-     */
-    public AppointmentJSONActivator() {
-        super();
-    }
+    public static AppointmentAJAXRequest createAppointmentAJAXRequest(final AJAXRequestData request, final ServerSession session) {
+        final AppointmentAJAXRequest ar = new AppointmentAJAXRequest(request, session);
+        final String sTimeZone = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
+        if (null != sTimeZone) {
+            ar.setTimeZone(getTimeZone(sTimeZone));
+        }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-//        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CALENDAR);
-//        registerService(ResultConverter.class, new AppointmentResultConverter());
+        return ar;
     }
 
 }

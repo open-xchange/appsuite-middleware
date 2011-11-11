@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,57 @@
  *
  */
 
-package com.openexchange.groupware.calendar.json.osgi;
+package com.openexchange.calendar.json.actions;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.groupware.Types;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.groupware.tasks.ModifyThroughDependant;
+import java.sql.SQLException;
+import java.util.Date;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.calendar.json.AppointmentAJAXRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AppointmentJSONActivator}
+ * {@link GetAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class AppointmentJSONActivator extends AJAXModuleActivator {
+public final class GetAction extends AppointmentAction {
 
     /**
-     * Initializes a new {@link AppointmentJSONActivator}.
+     * Initializes a new {@link GetAction}.
+     * @param services
      */
-    public AppointmentJSONActivator() {
-        super();
+    public GetAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{AppointmentSqlFactoryService.class, CalendarCollectionService.class};
-    }
+    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException {
+        Date timestamp = null;
+        final int id = req.checkInt( AJAXServlet.PARAMETER_ID);
+        final int inFolder = req.checkInt( AJAXServlet.PARAMETER_FOLDERID);
 
-    @Override
-    protected void startBundle() throws Exception {
-        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
-        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        registerService(TargetService.class, new ModifyThroughDependant(), props);
-//        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CALENDAR);
-//        registerService(ResultConverter.class, new AppointmentResultConverter());
+        final ServerSession session = req.getSession();
+        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
+
+        try {
+            final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
+            if(appointmentobject.getPrivateFlag() && session.getUserId() != appointmentobject.getCreatedBy()) {
+                anonymize(appointmentobject);
+            }
+
+            timestamp = appointmentobject.getLastModified();
+
+            return new AJAXRequestResult(appointmentobject, timestamp, "appointment");
+        } catch (final SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+        }
     }
 
 }

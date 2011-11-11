@@ -50,6 +50,8 @@
 package com.openexchange.ajax.appointment.recurrence;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Changes;
 import com.openexchange.groupware.container.Expectations;
@@ -82,7 +84,6 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreateAndUpdate.check(app, changes, expectations);
     }
 
-
     public void testShouldChangeFromMonthly1ToMonthly2WhenUpdating() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
@@ -103,20 +104,21 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
         positiveAssertionOnCreate.check(app, changes, new Expectations(changes));
     }
 
-
     public void testShouldFailChangingFromMonthly1ToMonthly2UsingOnlyAdditionalData() throws Exception {
         Appointment app = generateMonthlyAppointment();
 
         Changes changes = new Changes();
         /**
-         * TODO: Fix test.
-         * It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal appointment
-         * and ignore the days value.
+         * TODO: Fix test. It's necessary to set the recurrence type. Otherwise the Appointmen writer will treat this as a normal
+         * appointment and ignore the days value.
          */
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.DAYS, Appointment.MONDAY);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXException(-1));
+        negativeAssertionOnUpdate.check(
+            app,
+            changes,
+            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
     public void testShouldChangeFromMonthly2ToMonthly1With127DuringCreation() throws Exception {
@@ -182,14 +184,16 @@ public class TestsForChangingAmongMonthlyRecurrences extends ManagedAppointmentT
 
         Changes changes = new Changes();
         /**
-         * TODO: Fix test.
-         * It's necessary to set the recurrence type. Otherwise the Appointment writer will treat this as a normal appointment
-         * and ignore the days value.
+         * TODO: Fix test. It's necessary to set the recurrence type. Otherwise the Appointment writer will treat this as a normal
+         * appointment and ignore the days value.
          */
         changes.put(Appointment.RECURRENCE_TYPE, Appointment.MONTHLY);
         changes.put(Appointment.DAYS, 127);
 
-        negativeAssertionOnUpdate.check(app, changes, new OXException(-1));
+        negativeAssertionOnUpdate.check(
+            app,
+            changes,
+            OXExceptionFactory.getInstance().create(OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL));
     }
 
 }
