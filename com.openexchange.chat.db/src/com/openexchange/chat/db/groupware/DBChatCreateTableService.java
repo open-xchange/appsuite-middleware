@@ -64,6 +64,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     private static final String TABLE_CHAT_MESSAGE = "chatMessage";
     private static final String TABLE_CHAT_MESSAGE_MAP = "chatMessageMap";
     private static final String TABLE_CHAT_PRESENCE = "chatPresence";
+    private static final String TABLE_CHAT_CHUNK = "chatChunk";
 
     private static final String CREATE_CHAT = "CREATE TABLE "+TABLE_CHAT+" (\n" + 
     		" cid INT4 unsigned NOT NULL,\n" + 
@@ -91,13 +92,15 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" cid INT4 unsigned NOT NULL,\n" + 
     		" user INT4 unsigned NOT NULL,\n" + 
     		" chatId INT4 unsigned NOT NULL,\n" + 
+    		" chunkId INT4 unsigned NOT NULL,\n" +
     		" messageId BINARY(16) NOT NULL,\n" + 
     		" message TEXT NOT NULL,\n" + 
     		" createdAt BIGINT(64) DEFAULT NULL,\n" + 
     		" PRIMARY KEY (cid, chatId, messageId),\n" + 
     		" INDEX `user` (cid, user),\n" + 
     		" INDEX `chat` (cid, chatId),\n" + 
-    		" INDEX `userMessage` (cid, user, chatId)\n" + 
+    		" -- INDEX `userMessage` (cid, user, chatId)\n" +
+    		" INDEX `userMessage` (cid, user, chatId, chunkId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
     private static final String CREATE_CHAT_MESSAGE_MAP = "CREATE TABLE "+TABLE_CHAT_MESSAGE_MAP+" (\n" + 
@@ -119,6 +122,17 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" PRIMARY KEY (cid, user),\n" + 
     		" INDEX `available` (cid, type)\n" + 
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    
+    private static final String CREATE_CHAT_CHUNK = "CREATE TABLE "+TABLE_CHAT_CHUNK+"(\n" +
+    		" cid INT4 unsigned NOT NULL,\n" +
+            " chatId INT4 unsigned NOT NULL,\n" +
+    		" chunkId INT4 unsigned NOT NULL,\n" +
+    		" user INT4 unsigned NOT NULL,\n" +
+    		" createdAt BIGINT(64) DEFAULT NULL,\n" +
+    		" PRIMARY KEY (cid, chatId, chunkId),\n" +
+    		" INDEX `chat` (cid, chatId),\n" +
+    		" INDEX `userMessage` (cid, user, chatId)\n" +
+    		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
      * Gets the table names.
@@ -126,7 +140,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
-        return new String[] { TABLE_CHAT, TABLE_CHAT_MEMBER, TABLE_CHAT_MESSAGE, TABLE_CHAT_MESSAGE_MAP, TABLE_CHAT_PRESENCE };
+        return new String[] { TABLE_CHAT, TABLE_CHAT_MEMBER, TABLE_CHAT_MESSAGE, TABLE_CHAT_MESSAGE_MAP, TABLE_CHAT_PRESENCE, TABLE_CHAT_CHUNK };
     }
 
     /**
@@ -135,7 +149,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {
-        return new String[] { CREATE_CHAT, CREATE_CHAT_MEMBER, CREATE_CHAT_MESSAGE, CREATE_CHAT_MESSAGE_MAP, CREATE_CHAT_PRESENCE};
+        return new String[] { CREATE_CHAT, CREATE_CHAT_MEMBER, CREATE_CHAT_MESSAGE, CREATE_CHAT_MESSAGE_MAP, CREATE_CHAT_PRESENCE, CREATE_CHAT_CHUNK};
     }
 
     /**
