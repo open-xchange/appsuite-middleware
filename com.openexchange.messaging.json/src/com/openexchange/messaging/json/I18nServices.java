@@ -88,10 +88,13 @@ public final class I18nServices {
         }
     }
 
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+
     public I18nService getService(final Locale locale) {
-        final I18nService retval = services.get(locale);
-        if (null == retval && !"en".equalsIgnoreCase(locale.getLanguage())) {
-            LOG.warn("No i18n service for locale " + locale + ".");
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        final I18nService retval = services.get(loc);
+        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
+            LOG.warn("No i18n service for locale " + loc + ".");
         }
         return retval;
     }
