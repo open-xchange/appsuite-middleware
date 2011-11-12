@@ -6,6 +6,7 @@
  - Fix for bug 20754: Improved error message if session is invalidated due to differing session secret
  - Fix for bug 20746: Allowing "dir" attribute within a <div> element
  - Fix for bug 20744: Using fall-back locale en_US if locale is missing
+ - Fix for bug 20600: Grant administer access if "al" rights are included AND "c" right OR "kx" rights
 
 * 2011-11-11 - thorben.betten@open-xchange.com
 
