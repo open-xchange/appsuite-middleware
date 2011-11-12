@@ -3,6 +3,7 @@
  - Fix for bug 20727: Fixed "filename" parameter if "User-Agent" header indicates IE browser
  - Fix for bug 20704: Improved error message to better determine what part of Facebook configuration is wrong/missing
  - Fix for bug 20771: Lowered log level to TRACE if servlet-config directory is missing
+ - Fix for bug 20754: Improved error message if session is invalidated due to differing session secret
 
 * 2011-11-11 - thorben.betten@open-xchange.com
 
