@@ -51,6 +51,8 @@ package com.openexchange.secret.recovery.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
@@ -63,6 +65,10 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDetector {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(DefaultSecretInconsistencyDetector.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final List<SecretConsistencyCheck> checks;
 
@@ -78,10 +84,12 @@ public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDe
 
     @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
-        final List<SecretConsistencyCheck> theChecks = getChecks();
-        for (final SecretConsistencyCheck secretConsistencyCheck : theChecks) {
+        for (final SecretConsistencyCheck secretConsistencyCheck : getChecks()) {
             final String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));
             if (reason != null) {
+                if (DEBUG) {
+                    LOG.debug(SecretConsistencyCheck.class.getSimpleName() + " \"" + secretConsistencyCheck.getClass().getName() + "\" indicates need for re-decryption: " + reason);
+                }
                 return reason;
             }
         }
