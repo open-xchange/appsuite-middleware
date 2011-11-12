@@ -57,23 +57,31 @@ import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link DefaultSecretInconsistencyDetector}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultSecretInconsistencyDetector implements SecretInconsistencyDetector {
 
-    private final List<SecretConsistencyCheck> checks = new ArrayList<SecretConsistencyCheck>();
+    private final List<SecretConsistencyCheck> checks;
+
     private SecretService secretService;
+
+    /**
+     * Initializes a new {@link DefaultSecretInconsistencyDetector}.
+     */
+    public DefaultSecretInconsistencyDetector() {
+        super();
+        checks = new ArrayList<SecretConsistencyCheck>();
+    }
 
     @Override
     public String isSecretWorking(final ServerSession session) throws OXException {
         final List<SecretConsistencyCheck> theChecks = getChecks();
         for (final SecretConsistencyCheck secretConsistencyCheck : theChecks) {
-            String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));
-            if(reason != null) {
+            final String reason = secretConsistencyCheck.checkSecretCanDecryptStrings(session, getSecretService().getSecret(session));
+            if (reason != null) {
                 return reason;
             }
         }
