@@ -424,7 +424,10 @@ public abstract class SessionServlet extends AJAXServlet {
         final String secret = extractSecret(hashSource, req, session.getHash(), session.getClient());
 
         if (secret == null || !session.getSecret().equals(secret)) {
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Session secret is different. Given "+secret+" differs from "+session.getSecret()+" in session.");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
         }
         final Context context;
         final User user;
