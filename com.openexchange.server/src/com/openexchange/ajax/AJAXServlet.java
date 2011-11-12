@@ -65,6 +65,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
@@ -85,6 +86,7 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
@@ -95,8 +97,10 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadFileImpl;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.monitoring.MonitoringInfo;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -401,6 +405,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     protected static final String RESPONSE_ERROR = "Error while writing response object.";
 
     /**
+     * Initializes a new {@link AJAXServlet}.
+     */
+    protected AJAXServlet() {
+        super();
+    }
+
+    /**
      * The service method of HttpServlet is extended to catch bad exceptions and keep the AJP socket alive. Otherwise Apache thinks in a
      * balancer environment this AJP container is temporarily dead and redirects requests to other AJP containers. This will kill the users
      * session.
@@ -447,6 +458,23 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return (req.getParameter(name) != null);
     }
 
+    private static final AtomicInteger MAX_BODY_SIZE = new AtomicInteger(-1);
+
+    private static int getMaxBodySize() {
+        int ret = MAX_BODY_SIZE.get();
+        if (ret < 0) {
+            synchronized (AJAXServlet.class) {
+                ret = MAX_BODY_SIZE.get();
+                if (ret < 0) {
+                    final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    ret = confService.getIntProperty("MAX_BODY_SIZE", 0);
+                    MAX_BODY_SIZE.set(ret < 0 ? 0 : ret);
+                }
+            }
+        }
+        return ret;
+    }
+
     private static final boolean BYTE_BASED_READING = true;
 
     /**
@@ -464,7 +492,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      *
      * @param req The HTTP servlet request to read from
      * @return A string with the complete body.
-     * @throws IOException If an error occurs while reading the body.
+     * @throws IOException If an error occurs while reading the body or body size exceeded configured max. size (see "MAX_BODY_SIZE" property)
      */
     public static String getBody(final HttpServletRequest req) throws IOException {
         return BYTE_BASED_READING ? byteBasedBodyReading(req) : decoderBasedBodyReading(req);
@@ -480,8 +508,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final int buflen = BUF_SIZE;
             final char[] cbuf = new char[buflen];
             final StringBuilder builder = new StringBuilder(SB_SIZE);
-            for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
-                builder.append(cbuf, 0, read);
+            final int maxBodySize = getMaxBodySize();
+            if (maxBodySize > 0) {
+                int count = 0;
+                for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+                    count += read;
+                    if (count > maxBodySize) {
+                        throw new IOException("Max. body size (" + UploadUtility.getSize(maxBodySize, 2, false, true) + ") exceeded.");
+                    }
+                    builder.append(cbuf, 0, read);
+                }
+            } else {
+                for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+                    builder.append(cbuf, 0, read);
+                }
             }
             return builder.toString();
         } catch (final UnsupportedEncodingException e) {
@@ -505,8 +545,20 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
             final int buflen = BUF_SIZE;
             final byte[] buf = new byte[buflen];
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(SB_SIZE);
-            for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
-                baos.write(buf, 0, read);
+            final int maxBodySize = getMaxBodySize();
+            if (maxBodySize > 0) {
+                int count = 0;
+                for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
+                    count += read;
+                    if (count > maxBodySize) {
+                        throw new IOException("Max. body size (" + UploadUtility.getSize(maxBodySize, 2, false, true) + ") exceeded.");
+                    }
+                    baos.write(buf, 0, read);
+                }
+            } else {
+                for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
+                    baos.write(buf, 0, read);
+                }
             }
             try {
                 String charEnc = req.getCharacterEncoding();
