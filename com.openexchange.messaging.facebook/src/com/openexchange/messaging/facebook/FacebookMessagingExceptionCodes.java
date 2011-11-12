@@ -132,7 +132,17 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
     /**
      * XML parse error: %1$s.
      */
-    XML_PARSE_ERROR(FacebookMessagingExceptionMessages.XML_PARSE_ERROR_MSG, CATEGORY_ERROR, 16);
+    XML_PARSE_ERROR(FacebookMessagingExceptionMessages.XML_PARSE_ERROR_MSG, CATEGORY_ERROR, 16),
+    /**
+     * Missing facebook configuration. Please re-create facebook account.
+     */
+    MISSING_CONFIG(FacebookMessagingExceptionMessages.MISSING_CONFIG_MSG, CATEGORY_ERROR, 17),
+    /**
+     * Missing facebook configuration parameter "%1$s". Please re-create facebook account.
+     */
+    MISSING_CONFIG_PARAM(FacebookMessagingExceptionMessages.MISSING_CONFIG_PARAM_MSG, CATEGORY_ERROR, 18),
+    
+    ;
 
 
     private final Category category;
