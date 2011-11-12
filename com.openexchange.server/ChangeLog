@@ -1,3 +1,7 @@
+* 2011-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20727: Fixed "filename" parameter if "User-Agent" header indicates IE browser
+
 * 2011-11-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 20543 and bug 20613: Deep check for possible duplicates and reserved folder names
