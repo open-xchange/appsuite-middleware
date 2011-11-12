@@ -389,7 +389,11 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Load parent from real tree
              */
-            final Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
+            Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
+            if (parentFolder.isCacheable()) {
+                putFolder(parentFolder, realTreeId, storageParameters);
+            }
+            parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, realTreeId, storageParameters);
             }
