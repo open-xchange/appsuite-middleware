@@ -84,7 +84,7 @@ public class StringHelper {
         final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
         StringHelper sh = CACHE.get(loc);
         if (null == sh) {
-            final StringHelper newHelper = StringHelper.valueOf(loc);
+            final StringHelper newHelper = new StringHelper(loc);
             sh = CACHE.putIfAbsent(loc, newHelper);
             if (null == sh) {
                 sh = newHelper;
