@@ -367,6 +367,8 @@ public enum MailExceptionCode implements OXExceptionCode {
 
     ;
 
+    private static final String PREFIX = "MSG";
+
     private final String message;
 
     private final int number;
@@ -387,7 +389,7 @@ public enum MailExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "MSG";
+        return PREFIX;
     }
 
     @Override
