@@ -185,7 +185,7 @@ public final class SharedPrefixFolder {
             if (sharedOwner != OCLPermission.ALL_GROUPS_AND_USERS) {
                 throw new OXException(e);
             }
-            creatorDisplayName = new StringHelper(user.getLocale()).getString(Groups.ALL_USERS);
+            creatorDisplayName = StringHelper.valueOf(user.getLocale()).getString(Groups.ALL_USERS);
         }
         final FolderObject virtualOwnerFolder = FolderObject.createVirtualSharedFolderObject(sharedOwner, creatorDisplayName);
         /*

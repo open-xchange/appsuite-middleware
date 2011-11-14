@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,8 +85,13 @@ public final class FolderWriter {
     /**
      * The logger constant.
      */
-    static final org.apache.commons.logging.Log LOG =
+    protected static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FolderWriter.class));
+
+    /**
+     * The default locale: en_US.
+     */
+    protected static final Locale DEFAULT_LOCALE = Locale.US;
 
     /**
      * Initializes a new {@link FolderWriter}.
@@ -263,7 +269,8 @@ public final class FolderWriter {
 
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-                final String name = folder.getLocalizedName(folder.getLocale());
+                final Locale locale  = folder.getLocale();
+                final String name = folder.getLocalizedName(locale == null ? DEFAULT_LOCALE : locale);
                 jsonPutter.put(FolderField.FOLDER_NAME.getName(), name);
             }
         });

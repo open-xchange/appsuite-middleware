@@ -529,7 +529,7 @@ public final class MimeForward {
      * @return The forward text
      */
     private static String generateForwardText(final String firstSeenText, final LocaleAndTimeZone ltz, final MailMessage msg, final boolean html) {
-        final StringHelper strHelper = new StringHelper(ltz.locale);
+        final StringHelper strHelper = StringHelper.valueOf(ltz.locale);
         String forwardPrefix = strHelper.getString(MailStrings.FORWARD_PREFIX);
         {
             final InternetAddress[] from = msg.getFrom();

@@ -1,3 +1,11 @@
+* 2011-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20774: Fixed possible NPE when retrieving RSS messages
+
+* 2011-11-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20762: Checking in database pool if null is returned instead of connection. Fixed returning null connection in TaskIterator.
+
 * 2011-11-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 20727: Fixed "filename" parameter if "User-Agent" header indicates IE browser

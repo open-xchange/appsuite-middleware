@@ -56,6 +56,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.i18n.LocaleTools;
 
 /**
  * {@link UserizedFolderImpl} - The {@link UserizedFolder} implementation.
@@ -186,7 +187,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     @Override
     public String getLocalizedName(final Locale locale) {
-        return folder.getLocalizedName(locale);
+        return folder.getLocalizedName(null == locale ? LocaleTools.DEFAULT_LOCALE : locale);
     }
 
     @Override

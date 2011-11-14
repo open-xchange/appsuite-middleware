@@ -51,6 +51,8 @@ package com.openexchange.i18n.tools;
 
 import java.util.Locale;
 import java.util.MissingResourceException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.i18n.I18nService;
@@ -68,6 +70,29 @@ public class StringHelper {
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
+    private static final ConcurrentMap<Locale, StringHelper> CACHE = new ConcurrentHashMap<Locale, StringHelper>();
+
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+
+    /**
+     * Gets the {@link StringHelper} instance for specified locale.
+     * 
+     * @param locale The locale
+     * @return The associated {@link StringHelper} instance
+     */
+    public static StringHelper valueOf(final Locale locale) {
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        StringHelper sh = CACHE.get(loc);
+        if (null == sh) {
+            final StringHelper newHelper = new StringHelper(loc);
+            sh = CACHE.putIfAbsent(loc, newHelper);
+            if (null == sh) {
+                sh = newHelper;
+            }
+        }
+        return sh;
+    }
+
     private final Locale locale;
 
     /**
@@ -76,7 +101,7 @@ public class StringHelper {
      * @param locale The locale to translate string to. If <code>null</code> is
      *            given, no replacement takes place.
      */
-    public StringHelper(final Locale locale) {
+    private StringHelper(final Locale locale) {
         super();
         this.locale = locale;
     }

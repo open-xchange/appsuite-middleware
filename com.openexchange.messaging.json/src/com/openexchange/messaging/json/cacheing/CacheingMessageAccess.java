@@ -170,7 +170,9 @@ public class CacheingMessageAccess implements MessagingMessageAccess {
                 return remember(messages);
             }
             for (final MessagingMessage messagingMessage : messages) {
-                allMessages.put(messagingMessage.getId(), messagingMessage);
+                if (null != messagingMessage) {
+                    allMessages.put(messagingMessage.getId(), messagingMessage);
+                }
             }
         }
 

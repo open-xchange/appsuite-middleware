@@ -176,7 +176,7 @@ public final class SystemSharedFolder {
             /*
              * Gather all display names
              */
-            final StringHelper strHelper = new StringHelper(user.getLocale());
+            final StringHelper strHelper = StringHelper.valueOf(user.getLocale());
             final int size = q.size();
             displayNames = new HashMap<String, Integer>(size);
             final UserStorage us = UserStorage.getInstance();

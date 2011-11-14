@@ -635,7 +635,7 @@ public final class IMAPFolderConverter {
                     userPermAdded = true;
                     final Rights aclRights = acl.getRights();
                     if (!ownRights.equals(aclRights)) {
-                        if (LOG.isWarnEnabled()) {
+                        if (DEBUG) {
                             final StringBuilder tmp = new StringBuilder(64);
                             tmp.append("Detected different rights for MYRIGHTS (");
                             tmp.append(ownRights);
@@ -646,7 +646,7 @@ public final class IMAPFolderConverter {
                             tmp.append(" in context ");
                             tmp.append(session.getContextId());
                             tmp.append(". Preferring GETACL rights as user's own-rights.");
-                            LOG.warn(tmp.toString());
+                            LOG.debug(tmp.toString());
                         }
                         final MailPermission ownPermission = mailFolder.getOwnPermission();
                         if (ownPermission instanceof ACLPermission) {

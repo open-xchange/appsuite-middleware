@@ -58,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingFormatArgumentException;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -755,12 +756,10 @@ public class OXException extends Exception implements OXExceptionConstants {
                 msg = String.format(lcl, msg, displayArgs);
             } catch (final NullPointerException e) {
                 msg = null;
+            } catch (final MissingFormatArgumentException e) {
+                LOG.debug("Missing format argument.", e);
             } catch (final IllegalFormatException e) {
-                LOG.error(e.getMessage(), e);
-                final Exception logMe = new Exception(super.getMessage());
-                logMe.setStackTrace(super.getStackTrace());
-                LOG.error("Illegal message format.", logMe);
-                msg = null;
+                LOG.error("Illegal message format.", e);
             }
         }
         return msg;

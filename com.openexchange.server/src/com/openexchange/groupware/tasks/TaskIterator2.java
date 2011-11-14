@@ -166,7 +166,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     }
 
     @Override
-    public boolean hasNext() throws OXException {
+    public boolean hasNext() {
         return !ready.isEmpty() || preread.hasNext() || null != exc;
     }
 
@@ -273,11 +273,17 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
 
     @Override
     public void run() {
-        Connection con = null;
+        final Connection con;
+        try {
+            con = DBPool.pickup(ctx);
+        } catch (final OXException e) {
+            preread.finished();
+            exc = e;
+            return;
+        }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            con = DBPool.pickup(ctx);
             stmt = con.prepareStatement(sql);
             setter.perform(stmt);
             result = stmt.executeQuery();
