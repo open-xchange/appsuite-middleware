@@ -53,13 +53,17 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -112,6 +116,19 @@ public final class NewAction extends AbstractMailAccountAction {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
+            // List for possible warnings
+            final List<OXException> warnings = new ArrayList<OXException>(2);
+            session.setParameter("mail-account.validate.type", "create");
+            try {
+                if (!ValidateAction.actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
+                    final OXException warning = MIMEMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                    warning.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(0, warning);
+                }
+            } finally {
+                session.setParameter("mail-account.validate.type", null);
+            }
+
             final int cid = session.getContextId();
             Connection con = null;
             try {
@@ -157,7 +174,7 @@ public final class NewAction extends AbstractMailAccountAction {
                     storageService,
                     session));
 
-            return new AJAXRequestResult(jsonAccount);
+            return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }

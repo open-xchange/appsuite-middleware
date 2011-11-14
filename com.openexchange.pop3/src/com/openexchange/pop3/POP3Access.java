@@ -399,7 +399,11 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
              */
             try {
                 if (!config.isSecure() && !pop3Store.capabilities().containsKey("STLS")) {
-                    warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
+                    if ("create".equals(session.getParameter("mail-account.validate.type"))) {
+                        warnings.add(MailExceptionCode.NON_SECURE_CREATION.create());
+                    } else {
+                        warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
+                    }
                 }
             } catch (final MessagingException e) {
                 // Ignore
