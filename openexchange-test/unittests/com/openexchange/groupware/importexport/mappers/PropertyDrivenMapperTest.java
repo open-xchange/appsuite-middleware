@@ -50,9 +50,9 @@
 package com.openexchange.groupware.importexport.mappers;
 
 import java.util.Properties;
-import com.openexchange.groupware.contact.helpers.ContactField;
-import com.openexchange.groupware.contact.mappers.PropertyDrivenMapper;
 import junit.framework.TestCase;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.importexport.formats.csv.PropertyDrivenMapper;
 
 
 /**
@@ -63,13 +63,13 @@ import junit.framework.TestCase;
 public class PropertyDrivenMapperTest extends TestCase {
 
     public void testReadingPropery(){
-        ContactField myField = ContactField.SUR_NAME;
-        ContactField notMyField = ContactField.GIVEN_NAME;
+        final ContactField myField = ContactField.SUR_NAME;
+        final ContactField notMyField = ContactField.GIVEN_NAME;
 
-        Properties props = new Properties();
+        final Properties props = new Properties();
         props.put(myField.getAjaxName(), "Surname");
 
-        PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
+        final PropertyDrivenMapper mapper = new PropertyDrivenMapper(props);
 
         assertTrue("Surname should be a supported field", mapper.getSupportedFields().contains(myField));
         assertFalse("Given name should not be a supported field", mapper.getSupportedFields().contains(notMyField));

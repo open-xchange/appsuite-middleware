@@ -69,7 +69,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.folderstorage.cache.lock.LockManagement;
+import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
+import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.push.PushEventConstants;
@@ -277,7 +278,8 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 private void handleDroppedSession(final Session session) {
                     if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
                         FolderMapManagement.getInstance().dropFor(session);
-                        LockManagement.getInstance().dropFor(session);
+                        TreeLockManagement.getInstance().dropFor(session);
+                        UserLockManagement.getInstance().dropFor(session);
                     }
                 }
             };

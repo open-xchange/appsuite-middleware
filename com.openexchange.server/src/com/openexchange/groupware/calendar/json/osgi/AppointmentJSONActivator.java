@@ -49,14 +49,15 @@
 
 package com.openexchange.groupware.calendar.json.osgi;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.ResultConverter;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.json.AppointmentActionFactory;
-import com.openexchange.groupware.calendar.json.converters.AppointmentResultConverter;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.groupware.tasks.ModifyThroughDependant;
 
 
 /**
@@ -80,8 +81,11 @@ public final class AppointmentJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CALENDAR);
-        registerService(ResultConverter.class, new AppointmentResultConverter());
+        final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
+        props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
+        registerService(TargetService.class, new ModifyThroughDependant(), props);
+//        registerModule(new AppointmentActionFactory(new ExceptionOnAbsenceServiceLookup(this)), AJAXServlet.MODULE_CALENDAR);
+//        registerService(ResultConverter.class, new AppointmentResultConverter());
     }
 
 }

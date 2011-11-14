@@ -47,38 +47,29 @@
  *
  */
 
-package com.openexchange.ajp13.coyote;
+package com.openexchange.chat;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import javax.servlet.ServletInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+
 
 /**
- * {@link ByteArrayServletInputStream} - The {@link ServletInputStream} backed by a byte array.
+ * {@link ChatChunk} - Represents a certain chunk of a chat conversation associated with certain chat users/members.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ByteArrayServletInputStream extends ServletInputStream {
-
-    private final ByteArrayInputStream bais;
+public interface ChatChunk extends ChatGroup {
 
     /**
-     * Initializes a new {@link ByteArrayServletInputStream}.
+     * Gets the chunk identifier.
+     * 
+     * @return The chunk identifier.
      */
-    public ByteArrayServletInputStream(final byte[] bytes) {
-        super();
-        bais = new UnsynchronizedByteArrayInputStream(bytes);
-    }
+    String getChunkId();
 
-    @Override
-    public int read() throws IOException {
-        return bais.read();
-    }
-
-    @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException {
-        return bais.read(b, off, len);
-    }
+    /**
+     * Gets the chat identifier.
+     * 
+     * @return The chat identifier.
+     */
+    String getChatId();
 
 }

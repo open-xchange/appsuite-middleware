@@ -49,23 +49,8 @@
 
 package com.openexchange.authentication;
 
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_LOCKED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT_READY_YET_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.CLASS_NOT_FOUND_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.DATABASE_DOWN_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.INSTANTIATION_FAILED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.MISSING_CAPABILITIES_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.MISSING_PROPERTY_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_HTTP_AUTHORIZATION_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.UNKNOWN_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_ACTIVE_MSG;
-import static com.openexchange.authentication.LoginExceptionMessages.USER_NOT_FOUND_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.*;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -117,13 +102,10 @@ public enum LoginExceptionCodes implements OXExceptionCode {
 
     private final int number;
 
-    private final boolean display;
-
     private LoginExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         number = detailNumber;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     @Override

@@ -328,9 +328,13 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
             final Object ufs = doc.getFieldValue(FIELD_USER_FLAGS);
             if (null != ufs) {
-                @SuppressWarnings("unchecked")
-                final List<String> ufl = (List<String>) ufs;
-                mail.addUserFlags(ufl.toArray(new String[ufl.size()]));
+                if (ufs instanceof String) {
+                    mail.addUserFlag(ufs.toString());
+                } else {
+                    @SuppressWarnings("unchecked")
+                    final List<String> ufl = (List<String>) ufs;
+                    mail.addUserFlags(ufl.toArray(new String[ufl.size()]));
+                }
             }
         }
     };

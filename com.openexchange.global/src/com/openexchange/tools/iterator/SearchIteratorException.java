@@ -50,7 +50,6 @@
 package com.openexchange.tools.iterator;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -110,13 +109,10 @@ public class SearchIteratorException extends OXException {
 
         private final Category category;
 
-        private final boolean display;
-
         private Code(final String message, final Category category, final int detailNumber) {
             this.message = message;
             this.category = category;
             this.detailNumber = detailNumber;
-            display = category.getLogLevel().implies(LogLevel.DEBUG);
         }
 
         @Override

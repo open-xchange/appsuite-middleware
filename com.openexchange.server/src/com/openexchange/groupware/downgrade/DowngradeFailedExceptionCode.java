@@ -1,7 +1,6 @@
 package com.openexchange.groupware.downgrade;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -26,13 +25,10 @@ public enum DowngradeFailedExceptionCode implements OXExceptionCode {
 
     private final int detailNumber;
 
-    private final boolean display;
-
     private DowngradeFailedExceptionCode(final String message, final Category category, final int detailNumber) {
         this.message = message;
         this.category = category;
         this.detailNumber = detailNumber;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     @Override

@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -59,9 +60,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderI18nNamesService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.internal.FolderStorageRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.groupware.contexts.Context;
@@ -146,6 +150,52 @@ public abstract class AbstractPerformer {
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
         warnings = new ConcurrentHashMap<OXException, Object>(2);
+    }
+
+    /**
+     * Checks for duplicate folder through a LIST request.
+     * 
+     * @param name The name to check for
+     * @param treeId The tree identifier
+     * @param parentId The parent identifier
+     * @param openedStorages A collection carrying opened storages
+     * @throws FolderException If name look-up fails
+     */
+    protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        /*
+         * Check for duplicate
+         */
+        final Locale locale = storageParameters.getUser().getLocale();
+        for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true)) {
+            final String localizedName = userizedFolder.getLocalizedName(locale);
+            if (localizedName.equals(name)) {
+                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+                checkOpenedStorage(realStorage, openedStorages);
+                throw FolderExceptionErrorMessage.EQUAL_NAME.create(
+                    name,
+                    realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale),
+                    treeId);
+            }
+        }
+        /*
+         * Check against possible i18n conflicts
+         */
+        final FolderI18nNamesService namesService = FolderI18nNamesServiceImpl.getInstance();
+        final Set<String> i18nNames = namesService.getI18nNamesFor();
+        if (i18nNames.contains(name)) {
+            throw FolderExceptionErrorMessage.RESERVED_NAME.create(name);
+        }
+    }
+
+    private void checkOpenedStorage(final FolderStorage storage, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        for (final FolderStorage openedStorage : openedStorages) {
+            if (openedStorage.equals(storage)) {
+                return;
+            }
+        }
+        if (storage.startTransaction(storageParameters, true)) {
+            openedStorages.add(storage);
+        }
     }
 
     /**

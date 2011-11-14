@@ -49,9 +49,9 @@
 
 package com.openexchange.contacts.json.converters;
 
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -73,16 +73,25 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class ContactParser {
 
-    private static final Map<Integer, String> specialColumns = new HashMap<Integer, String>();
+    private static final TIntObjectMap<String> specialColumns;
 
     static {
-        specialColumns.put(Contact.ANNIVERSARY, "date");
-        specialColumns.put(Contact.BIRTHDAY, "date");
-        specialColumns.put(Contact.DISTRIBUTIONLIST, "distributionlist");
-        specialColumns.put(Contact.LINKS, "links");
+        final TIntObjectMap<String> map = new TIntObjectHashMap<String>(4);
+        map.put(Contact.ANNIVERSARY, "date");
+        map.put(Contact.BIRTHDAY, "date");
+        map.put(Contact.DISTRIBUTIONLIST, "distributionlist");
+        map.put(Contact.LINKS, "links");
+        specialColumns = map;
     }
 
-    protected boolean isSpecial(final int column) {
+    /**
+     * Initializes a new {@link ContactParser}.
+     */
+    public ContactParser() {
+        super();
+    }
+
+    private boolean isSpecial(final int column) {
         return specialColumns.containsKey(column);
     }
 
@@ -180,9 +189,9 @@ public class ContactParser {
         return distributionList;
     }
 
-    private boolean hasAndNotEmptyOrNull(JSONObject json, String key) throws JSONException {
+    private boolean hasAndNotEmptyOrNull(final JSONObject json, final String key) throws JSONException {
         if (json.hasAndNotNull(key)) {
-            String str = json.getString(key);
+            final String str = json.getString(key);
             if (!str.isEmpty()) {
                 return true;
             }

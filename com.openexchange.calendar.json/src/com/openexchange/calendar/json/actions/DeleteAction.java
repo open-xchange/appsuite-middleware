@@ -47,61 +47,73 @@
  *
  */
 
-package com.openexchange.tasks.json.converters;
+package com.openexchange.calendar.json.actions;
 
-import java.util.TimeZone;
+import java.sql.SQLException;
+import java.util.Date;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.fields.CalendarFields;
+import com.openexchange.ajax.fields.DataFields;
+import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.TimeZoneUtils;
+import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link TaskJSONResultConverter}
- *
+ * {@link DeleteAction}
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public abstract class TaskJSONResultConverter implements ResultConverter {
-    
-    protected static final String OUTPUT_FORMAT = "json";
+public final class DeleteAction extends AppointmentAction {
 
-    private TimeZone timeZone;
-
-    @Override
-    public String getOutputFormat() {
-        return OUTPUT_FORMAT;
+    /**
+     * Initializes a new {@link DeleteAction}.
+     * 
+     * @param services
+     */
+    public DeleteAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
+    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
+        Date timestamp = req.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
+        final JSONObject jData = req.getData();
 
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        final String sTimeZone = requestData.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-        if (null != sTimeZone) {
-            timeZone = TimeZoneUtils.getTimeZone(sTimeZone);
-        } else {
-            timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
+        final CalendarDataObject appointmentObj = new CalendarDataObject();
+        appointmentObj.setObjectID(DataParser.checkInt(jData, DataFields.ID));
+        final int inFolder = DataParser.checkInt(jData, AJAXServlet.PARAMETER_INFOLDER);
+
+        if (jData.has(CalendarFields.RECURRENCE_POSITION)) {
+            appointmentObj.setRecurrencePosition(DataParser.checkInt(jData, CalendarFields.RECURRENCE_POSITION));
+        } else if (jData.has(CalendarFields.RECURRENCE_DATE_POSITION)) {
+            appointmentObj.setRecurrenceDatePosition(DataParser.checkDate(jData, CalendarFields.RECURRENCE_DATE_POSITION));
+
         }
-        convertTask(requestData, result, session, converter);
-    }
 
-    protected abstract void convertTask(AJAXRequestData request, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException;
+        final ServerSession session = req.getSession();
+        appointmentObj.setContext(session.getContext());
 
-    protected TimeZone getTimeZone() {
-        return timeZone;
-    }
+        final AppointmentSQLInterface appointmentsql = getService().createAppointmentSql(session);
 
-    @Override
-    public String getInputFormat() {
-        // TODO Auto-generated method stub
-        return null;
+        try {
+            appointmentsql.deleteAppointmentObject(appointmentObj, inFolder, timestamp);
+            if (appointmentObj.getLastModified() != null) {
+                timestamp = appointmentObj.getLastModified();
+            }
+        } catch (final SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+        }
+
+        return new AJAXRequestResult(new JSONArray(), timestamp, "json");
     }
 
 }

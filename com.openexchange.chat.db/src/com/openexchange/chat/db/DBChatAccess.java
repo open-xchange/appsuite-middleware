@@ -106,6 +106,8 @@ public final class DBChatAccess implements ChatAccess {
         removeDbChatAccess(session.getUserId(), session.getContextId());
     }
 
+    private static final boolean DO_CLEAN_UP = false;
+
     /**
      * Removes associated chat access.
      * 
@@ -115,7 +117,7 @@ public final class DBChatAccess implements ChatAccess {
      */
     public static void removeDbChatAccess(final int userId, final int contextId) throws OXException {
         final DBChatAccess access = ACCESS_MAP.remove(new Key(userId, contextId));
-        if (null != access) {
+        if (DO_CLEAN_UP && null != access) {
             access.cleanUp();
         }
     }

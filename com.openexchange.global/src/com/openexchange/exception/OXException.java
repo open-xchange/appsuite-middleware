@@ -733,7 +733,7 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The compound error code
      */
     public final String getErrorCode() {
-        return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", code)).toString();
+        return new StringBuilder(getPrefix()).append('-').append(String.format("%04d", Integer.valueOf(code))).toString();
     }
 
     /**
@@ -766,19 +766,27 @@ public class OXException extends Exception implements OXExceptionConstants {
         return msg;
     }
 
-    public final boolean similarTo(final OXExceptionCode other) {
-        if (other.getCategory() == this.getCategory() && other.getNumber() == this.getCode()) {
-            return true;
-        }
-        return false;
-
+    /**
+     * Checks if this exception is similar to specified exception code regarding category and code number.
+     * 
+     * @param exceptionCode The exception code to check against
+     * @return <code>true</code> if this exception is similar to specified exception code; otherwise <code>false</code>
+     */
+    public final boolean similarTo(final OXExceptionCode exceptionCode) {
+        return (exceptionCode.getCategory() == this.getCategory() && exceptionCode.getNumber() == this.getCode());
     }
 
+    /**
+     * Checks if this exception is similar to specified exception regarding category and code number.
+     * 
+     * @param other The exception to check against
+     * @return <code>true</code> if this exception is similar to specified exception; otherwise <code>false</code>
+     */
     public final boolean similarTo(final OXException other) {
         if (other == this) {
             return true;
         }
-        if (other == null || this == null) {
+        if (other == null) {
             return false;
         }
         if (other.getCategory() == this.getCategory() && other.getCode() == this.getCode()) {

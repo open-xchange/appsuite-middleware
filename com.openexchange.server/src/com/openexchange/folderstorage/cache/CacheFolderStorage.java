@@ -82,7 +82,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.cache.lock.LockManagement;
+import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
@@ -367,20 +367,33 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Remove parent from cache(s)
              */
+            final Cache cache = globalCache;
+            final String sContextId = String.valueOf(storageParameters.getContextId());
+            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             for (final String tid : new String[] { treeId, realTreeId }) {
-                final Cache cache = globalCache;
-                final String sContextId = String.valueOf(storageParameters.getContextId());
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
-                final FolderMap folderMap = FolderMapManagement.getInstance().optFor(storageParameters.getUserId(), storageParameters.getContextId());
+                final FolderMap folderMap = folderMapManagement.optFor(storageParameters.getUserId(), storageParameters.getContextId());
                 if (null != folderMap) {
                     folderMap.remove(folder.getParentID(), tid);
+                }
+            }
+            for (final String tid : new String[] { treeId, realTreeId }) {
+                final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
+                cache.removeFromGroup(cacheKey, sContextId);
+                final FolderMap folderMap = folderMapManagement.optFor(storageParameters.getUserId(), storageParameters.getContextId());
+                if (null != folderMap) {
+                    folderMap.remove(createdFolder.getParentID(), tid);
                 }
             }
             /*
              * Load parent from real tree
              */
-            final Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
+            Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
+            if (parentFolder.isCacheable()) {
+                putFolder(parentFolder, realTreeId, storageParameters);
+            }
+            parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, realTreeId, storageParameters);
             }
@@ -411,7 +424,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * @throws OXException If removal fails
      */
     public void removeFromCache(final String id, final String treeId, final boolean singleOnly, final Session session) throws OXException {
-        final Lock lock = LockManagement.getInstance().getFor(treeId, session).writeLock();
+        final Lock lock = TreeLockManagement.getInstance().getFor(treeId, session).writeLock();
         lock.lock();
         try {
             if (singleOnly) {
@@ -500,7 +513,7 @@ public final class CacheFolderStorage implements FolderStorage {
      * @param contextId The context identifier
      */
     public void removeSingleFromCache(final String id, final String treeId, final int userId, final int contextId, final boolean deleted) {
-        final Lock lock = LockManagement.getInstance().getFor(treeId, userId, contextId).writeLock();
+        final Lock lock = TreeLockManagement.getInstance().getFor(treeId, userId, contextId).writeLock();
         lock.lock();
         try {
             final Cache cache = globalCache;
@@ -1241,6 +1254,7 @@ public final class CacheFolderStorage implements FolderStorage {
                  * Reload folders
                  */
                 Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
+                removeSingleFromCache(f.getParentID(), treeId, userId, storageParameters.getSession(), false);
                 if (f.isCacheable()) {
                     putFolder(f, realTreeId, storageParameters);
                 }
@@ -1553,7 +1567,7 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private static ReadWriteLock lockFor(final String treeId, final StorageParameters params) {
-        return LockManagement.getInstance().getFor(treeId, params.getUserId(), params.getContextId());
+        return TreeLockManagement.getInstance().getFor(treeId, params.getUserId(), params.getContextId());
     }
 
     private static FolderMap getFolderMapFor(final Session session) {

@@ -66,7 +66,6 @@ import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_CLIENT_IP
 import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_MSG;
 import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_SECRET_MSG;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -127,7 +126,7 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      */
     WRONG_CLIENT_IP(WRONG_CLIENT_IP_MSG, Category.CATEGORY_PERMISSION_DENIED, 205),
     /**
-     * Session secret is different. Given %1$s differs from %2$s in session.
+     * Your session was invalidated. Please try again.
      */
     WRONG_SESSION_SECRET(WRONG_SESSION_SECRET_MSG, Category.CATEGORY_TRY_AGAIN, 206);
 
@@ -137,13 +136,10 @@ public enum SessionExceptionCodes implements OXExceptionCode {
 
     private final int number;
 
-    private final boolean display;
-
     private SessionExceptionCodes(final String message, final Category category, final int number) {
         this.message = message;
         this.category = category;
         this.number = number;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     @Override

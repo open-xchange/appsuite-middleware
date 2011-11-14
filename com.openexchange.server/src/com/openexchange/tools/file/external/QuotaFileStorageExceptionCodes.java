@@ -1,7 +1,6 @@
 package com.openexchange.tools.file.external;
 
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.exception.OXExceptionFactory;
@@ -40,8 +39,6 @@ public enum QuotaFileStorageExceptionCodes implements OXExceptionCode {
      */
     private final int number;
 
-    private final boolean display;
-
     /**
      * Default constructor.
      *
@@ -53,7 +50,6 @@ public enum QuotaFileStorageExceptionCodes implements OXExceptionCode {
         this.message = message;
         this.category = category;
         this.number = detailNumber;
-        display = category.getLogLevel().implies(LogLevel.DEBUG);
     }
 
     @Override

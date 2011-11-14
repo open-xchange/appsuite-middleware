@@ -2,6 +2,29 @@
 
  - Fix for bug 20762: Checking in database pool if null is returned instead of connection. Fixed returning null connection in TaskIterator.
 
+* 2011-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20727: Fixed "filename" parameter if "User-Agent" header indicates IE browser
+ - Fix for bug 20704: Improved error message to better determine what part of Facebook configuration is wrong/missing
+ - Fix for bug 20771: Lowered log level to TRACE if servlet-config directory is missing
+ - Fix for bug 20754: Improved error message if session is invalidated due to differing session secret
+ - Fix for bug 20746: Allowing "dir" attribute within a <div> element
+ - Fix for bug 20744: Using fall-back locale en_US if locale is missing
+ - Fix for bug 20600: Grant administer access if "al" rights are included AND "c" right OR "kx" rights
+
+* 2011-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20543 and bug 20613: Deep check for possible duplicates and reserved folder names
+ - Fix for bug 20768: Checking for valid password length according to configuration
+
+* 2011-11-11 - jan.bauerdick@open-xchange.com
+
+ - Added Bundle com.openexchange.calendar.json and tests
+
+* 2011-11-10 - jan.bauerdick@open-xchange.com
+
+ - Added Bundle com.openexchange.tasks.json and tests
+
 * 2011-11-09 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 20008: Added check for null

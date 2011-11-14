@@ -81,5 +81,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.2.200.v20110110.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.importexport"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
