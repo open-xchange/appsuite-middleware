@@ -96,7 +96,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private void back(final Connection con) {
         if (null == con) {
-            final DBPoolingException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
+            final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error(e.getMessage(), e);
             return;
         }
