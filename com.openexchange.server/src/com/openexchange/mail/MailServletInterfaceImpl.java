@@ -2056,7 +2056,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 String greeting = greetings.get(locale);
                 if (null == greeting) {
-                    greeting = new StringHelper(locale).getString(MailStrings.GREETING);
+                    greeting = StringHelper.valueOf(locale).getString(MailStrings.GREETING);
                     greetings.put(locale, greeting);
                 }
                 builder.setLength(0);

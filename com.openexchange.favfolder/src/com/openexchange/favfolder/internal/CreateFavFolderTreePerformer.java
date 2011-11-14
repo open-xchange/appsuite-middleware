@@ -122,7 +122,7 @@ public final class CreateFavFolderTreePerformer extends AbstractFavFolderPerform
             stmt.setString(pos++, FolderStorage.ROOT_ID); // folderId
             stmt.setString(pos++, ""); // parentId
             if (null == name) {
-                final String i18nName = new StringHelper(session.getUser().getLocale()).getString(FavFolderStrings.MY_FAV_FOLDERS);
+                final String i18nName = StringHelper.valueOf(session.getUser().getLocale()).getString(FavFolderStrings.MY_FAV_FOLDERS);
                 stmt.setString(pos++, PATTERN_NUM.matcher(i18nName).replaceFirst(String.valueOf(treeId))); // name
             } else {
                 stmt.setString(pos++, name); // name

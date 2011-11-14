@@ -201,7 +201,7 @@ public final class VirtualFolder implements Folder {
             return realFolder.getLocalizedName(locale);
         }
         if (null == localizedName) {
-            localizedName = new StringHelper(locale).getString(name);
+            localizedName = StringHelper.valueOf(locale).getString(name);
         }
         return localizedName;
     }
