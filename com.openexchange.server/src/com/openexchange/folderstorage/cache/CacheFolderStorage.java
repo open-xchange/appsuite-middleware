@@ -372,7 +372,8 @@ public final class CacheFolderStorage implements FolderStorage {
             final String sContextId = String.valueOf(contextId);
             final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
             final int userId = storageParameters.getUserId();
-            for (final String tid : new String[] { treeId, realTreeId }) {
+            final String[] trees = new String[] { treeId, realTreeId };
+            for (final String tid : trees) {
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
                 final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
@@ -380,7 +381,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     folderMap.remove(folder.getParentID(), tid);
                 }
             }
-            for (final String tid : new String[] { treeId, realTreeId }) {
+            for (final String tid : trees) {
                 final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
                 final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
