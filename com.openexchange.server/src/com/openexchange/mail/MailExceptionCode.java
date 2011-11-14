@@ -363,7 +363,7 @@ public enum MailExceptionCode implements OXExceptionCode {
     /**
      * Your account has been validated but will not use a secure connection.
      */
-    NON_SECURE_VALIDATION("Your account has been validated but will not use a secure connection.", Category.CATEGORY_WARNING, 79),
+    NON_SECURE_VALIDATION("Your account has been validated but will not use a secure connection.", Category.CATEGORY_WARNING, 81),
 
     ;
 
