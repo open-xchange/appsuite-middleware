@@ -61,6 +61,11 @@ import java.util.regex.Pattern;
  */
 public final class LocaleTools {
 
+    /**
+     * The default locale: <code>en_US</code>
+     */
+    public static final Locale DEFAULT_LOCALE = Locale.US;
+
     private static final String STR_EMPTY = "";
 
     private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");

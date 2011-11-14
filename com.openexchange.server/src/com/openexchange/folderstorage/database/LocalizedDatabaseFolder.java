@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
@@ -119,7 +120,8 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
     @Override
     public String getLocalizedName(final Locale locale) {
-        Future<String> future = localizedNames.get(locale);
+        final Locale loc = null == locale ? LocaleTools.DEFAULT_LOCALE : locale;
+        Future<String> future = localizedNames.get(loc);
         if (null == future) {
             final String fname = getName();
             if (null == fname) {
@@ -129,10 +131,10 @@ public class LocalizedDatabaseFolder extends DatabaseFolder {
 
                 @Override
                 public String call() throws Exception {
-                    return StringHelper.valueOf(locale).getString(fname);
+                    return StringHelper.valueOf(loc).getString(fname);
                 }
             });
-            future = localizedNames.putIfAbsent(locale, ft);
+            future = localizedNames.putIfAbsent(loc, ft);
             if (null == future) {
                 future = ft;
                 ft.run();
