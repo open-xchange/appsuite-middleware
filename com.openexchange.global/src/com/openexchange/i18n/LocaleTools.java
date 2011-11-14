@@ -78,6 +78,16 @@ public final class LocaleTools {
     }
 
     /**
+     * Gets the sane locale.
+     * 
+     * @param locale The locale to check for <code>null</code>
+     * @return The sane locale
+     */
+    public static Locale getSaneLocale(final Locale locale) {
+        return locale == null ? DEFAULT_LOCALE : locale;
+    }
+
+    /**
      * Splits the full locale identifier into its parts and creates the corresponding locale. Currently the fullIdentifier must match the
      * pattern <code>&lt;language&gt; + &quot;_&quot; + &lt;country&gt; + &quot;_&quot; + &lt;variant&gt;</code>.
      *

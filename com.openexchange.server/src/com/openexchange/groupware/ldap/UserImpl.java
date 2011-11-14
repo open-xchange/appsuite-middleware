@@ -418,7 +418,7 @@ public class UserImpl implements User, Cloneable {
      */
     public void setPreferredLanguage(final String preferredLanguage) {
         this.preferredLanguage = preferredLanguage;
-        this.locale = LocaleTools.getLocale(preferredLanguage);
+        this.locale = LocaleTools.getSaneLocale(LocaleTools.getLocale(preferredLanguage));
     }
 
     /**

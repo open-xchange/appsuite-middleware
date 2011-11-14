@@ -353,17 +353,13 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     ATTACHMENT_EXPIRED("Mail attachment expired or absent.", Category.CATEGORY_USER_INPUT, 78),
     /**
-     * Your account has been created but will not use a secure connection.
+     * Could not access your account using a secure connection.
      */
-    NON_SECURE_WARNING("Your account has been created but will not use a secure connection.", Category.CATEGORY_WARNING, 79),
+    NON_SECURE_WARNING("Could not access your account using a secure connection.", Category.CATEGORY_WARNING, 79),
     /**
      * Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.
      */
     TOO_MANY_FORWARD_MAILS("Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.", Category.CATEGORY_USER_INPUT, 80),
-    /**
-     * Your account has been validated but will not use a secure connection.
-     */
-    NON_SECURE_VALIDATION("Your account has been validated but will not use a secure connection.", Category.CATEGORY_WARNING, 81),
 
     ;
 
