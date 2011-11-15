@@ -1,3 +1,7 @@
+* 2011-11-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20791: More robust parsing of retrieved date value
+
 * 2011-11-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 20774: Fixed possible NPE when retrieving RSS messages
