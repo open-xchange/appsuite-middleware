@@ -1,6 +1,7 @@
 * 2011-11-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 20791: More robust parsing of retrieved date value
+ - Fix for bug 20790: Synchronizing access to MailfilterAction methods to avoid possible race conditions
 
 * 2011-11-14 - thorben.betten@open-xchange.com
 

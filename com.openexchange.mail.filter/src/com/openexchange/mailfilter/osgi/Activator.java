@@ -48,12 +48,19 @@
  */
 package com.openexchange.mailfilter.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.mailfilter.ajax.actions.MailfilterAction;
 import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.internal.MailFilterPreferencesItem;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
@@ -61,6 +68,8 @@ import com.openexchange.mailfilter.internal.MailFilterServletInit;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 
 public class Activator extends DeferredActivator {
@@ -70,6 +79,8 @@ public class Activator extends DeferredActivator {
     private final AtomicBoolean mstarted;
 
     private ServiceRegistration<PreferencesItemService> serviceRegistration;
+
+    private ServiceRegistration<EventHandler> handlerRegistration;
 
     /**
      * Initializes a new {@link MailFilterServletActivator}
@@ -135,6 +146,34 @@ public class Activator extends DeferredActivator {
             MailFilterServletInit.getInstance().start();
 
             checkConfigfile();
+
+            {
+                final EventHandler eventHandler = new EventHandler() {
+
+                    @Override
+                    public void handleEvent(final Event event) {
+                        final String topic = event.getTopic();
+                        if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
+                            handleDroppedSession((Session) event.getProperty(SessiondEventConstants.PROP_SESSION));
+                        } else if (SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic)) {
+                            @SuppressWarnings("unchecked")
+                            final Map<String, Session> map = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
+                            for (final Session session : map.values()) {
+                                handleDroppedSession(session);
+                            }
+                        }
+                    }
+
+                    private void handleDroppedSession(final Session session) {
+                        if (null == getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId())) {
+                            MailfilterAction.removeFor(session);
+                        }
+                    }
+                };
+                final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
+                dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+                handlerRegistration = context.registerService(EventHandler.class, eventHandler, dict);
+            }
 
             serviceRegistration = context.registerService(PreferencesItemService.class, new MailFilterPreferencesItem(), null);
         } catch (final Throwable t) {

@@ -148,7 +148,7 @@ public abstract class AJAXServlet extends HttpServlet {
             /*
              * A non-download action
              */
-            final AbstractAction action = createAction();
+            final AbstractAction action = createAction(session);
             response.setData(action.action(request));
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
@@ -205,7 +205,7 @@ public abstract class AJAXServlet extends HttpServlet {
                 }
             });
             request.setBody(com.openexchange.ajax.AJAXServlet.getBody(req));
-            final AbstractAction action = createAction();
+            final AbstractAction action = createAction(session);
             response.setData(action.action(request));
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
@@ -227,5 +227,5 @@ public abstract class AJAXServlet extends HttpServlet {
 
     protected abstract AbstractRequest createRequest();
 
-    protected abstract AbstractAction<?, ? extends AbstractRequest> createAction();
+    protected abstract AbstractAction<?, ? extends AbstractRequest> createAction(Session session);
 }
