@@ -167,9 +167,11 @@ public final class CreatePerformer extends AbstractPerformer {
                 throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
             }
             /*
-             * Check for duplicate
+             * Check for duplicates for OLOX-covered folders
              */
-            checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
+            if (!"infostore".equals(toCreate.getContentType().toString())) {
+                checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
+            }
             /*
              * Create folder dependent on folder is virtual or not
              */

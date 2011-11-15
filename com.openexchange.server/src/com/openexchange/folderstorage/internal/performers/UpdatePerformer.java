@@ -153,7 +153,7 @@ public final class UpdatePerformer extends AbstractPerformer {
             {
                 final String newParentId = folder.getParentID();
                 move = (null != newParentId && !newParentId.equals(oldParentId));
-                if (move) {
+                if (move && !"infostore".equals(storageFolder.getContentType().toString())) {
                     /*
                      * Check for duplicate
                      */
@@ -164,7 +164,7 @@ public final class UpdatePerformer extends AbstractPerformer {
             {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
-                if (rename) {
+                if (rename && !"infostore".equals(storageFolder.getContentType().toString())) {
                     /*
                      * Check for duplicate
                      */
