@@ -352,8 +352,7 @@ public final class DownloadUtility {
     }
 
     /**
-     * {@link CheckedDownload} - Represents a checked download as a result of
-     * {@link DownloadUtility#checkInlineDownload(InputStream, String, String, String)}.
+     * {@link CheckedDownload} - Represents a checked download as a result of <tt>DownloadUtility.checkInlineDownload()</tt>.
      */
     public static final class CheckedDownload {
 
