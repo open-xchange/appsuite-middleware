@@ -4,6 +4,7 @@
  - Fix for bug 20790: Synchronizing access to MailfilterAction methods to avoid possible race conditions
  - Fix for bug 20795: Omitting intensive duplicate/reserved identifier check for non-OLOX-relevant infostore folders
  - Fix for bug 20792: Dealing with empty multipart part
+ - Fix for bug 20781: Fixed "Content-Disposition" header
 
 * 2011-11-14 - thorben.betten@open-xchange.com
 
