@@ -78,10 +78,10 @@ public final class LocaleTools {
     }
 
     /**
-     * Gets the sane locale.
+     * Gets the sane (non-<code>null</code>) locale for specified locale.
      * 
      * @param locale The locale to check for <code>null</code>
-     * @return The sane locale
+     * @return The passed locale or <tt>en_US</tt> of passed locale is <code>null</code>
      */
     public static Locale getSaneLocale(final Locale locale) {
         return locale == null ? DEFAULT_LOCALE : locale;
