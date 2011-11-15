@@ -3,6 +3,7 @@
  - Fix for bug 20791: More robust parsing of retrieved date value
  - Fix for bug 20790: Synchronizing access to MailfilterAction methods to avoid possible race conditions
  - Fix for bug 20795: Omitting intensive duplicate/reserved identifier check for non-OLOX-relevant infostore folders
+ - Fix for bug 20792: Dealing with empty multipart part
 
 * 2011-11-14 - thorben.betten@open-xchange.com
 

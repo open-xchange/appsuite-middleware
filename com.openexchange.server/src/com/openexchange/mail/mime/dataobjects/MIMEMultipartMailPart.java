@@ -345,10 +345,12 @@ public final class MIMEMultipartMailPart extends MailPart {
                 final int endIndex = i >= positions.length ? dataAccess.length() : positions[i];
                 final int len = endIndex - startIndex;
                 if (len <= 0) {
-                    subArr = new byte[0];
-                } else {
-                    subArr = dataAccess.subarray(startIndex, len);
+                    /*
+                     * Empty (text) body
+                     */
+                    return createTextPart();
                 }
+                subArr = dataAccess.subarray(startIndex, len);
             }
             /*
              * Has headers?
@@ -358,7 +360,7 @@ public final class MIMEMultipartMailPart extends MailPart {
                     return createTextPart(subArr, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(subArr)));
                 } catch (final UnsupportedEncodingException e) {
                     try {
-                        return createTextPart(subArr, "US-ASCII");
+                        return createTextPart(subArr, "ISO-8859-1");
                     } catch (final UnsupportedEncodingException e1) {
                         // Cannot occur
                         LOG.error(e1.getMessage(), e1);
