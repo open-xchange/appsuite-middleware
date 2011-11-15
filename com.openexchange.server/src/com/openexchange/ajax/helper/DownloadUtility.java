@@ -78,6 +78,16 @@ public final class DownloadUtility {
         super();
     }
 
+    /**
+     * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
+     *
+     * @param inputStream The input stream
+     * @param fileName The file name
+     * @param contentTypeStr The content-type string
+     * @param userAgent The user agent
+     * @return The checked download providing input stream, content type, and content disposition to use
+     * @throws OXException If checking download fails
+     */
     public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws OXException {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
