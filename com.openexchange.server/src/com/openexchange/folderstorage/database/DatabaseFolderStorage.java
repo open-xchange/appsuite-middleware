@@ -133,6 +133,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
 
+    private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
+
     /**
      * Simple interface for providing and closing a connection.
      */
@@ -223,9 +225,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
+        final int contextId = storageParameters.getContextId();
+        Connection con = null;
         try {
-            final Connection con = provider.getConnection();
+            con = databaseService.getWritable(contextId);
             final ServerSession session;
             {
                 final Session s = storageParameters.getSession();
@@ -265,7 +269,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 nonExistingParents = tmp.toArray();
             } while (null != nonExistingParents && nonExistingParents.length > 0);
         } finally {
-            provider.close();
+            if (null != con) {
+                databaseService.backWritable(contextId, con);
+            }
         }
     }
 
@@ -285,7 +291,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void commitTransaction(final StorageParameters params) throws OXException {
         final ConnectionMode con;
         try {
-            con = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
             /*
              * Already committed
@@ -313,7 +319,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             final FolderType folderType = getFolderType();
-            params.putParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(folderType, PARAM_CONNECTION, null);
             params.markCommitted();
         }
     }
@@ -1231,7 +1237,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void rollback(final StorageParameters params) {
         final ConnectionMode con;
         try {
-            con = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;
@@ -1251,7 +1257,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con.connection);
                 }
             }
-            params.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(getFolderType(), PARAM_CONNECTION, null);
         }
     }
 
@@ -1261,7 +1267,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = parameters.getContext();
-            ConnectionMode con = parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION);
+            ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
             if (null != con) {
                 if (modify == con.readWrite) {
                     // Connection already present in proper access mode
@@ -1272,7 +1278,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  *
                  * commit, restore auto-commit & push to pool
                  */
-                parameters.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+                parameters.putParameter(getFolderType(), PARAM_CONNECTION, null);
                 try {
                     con.connection.commit();
                 } catch (final Exception e) {
@@ -1289,7 +1295,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             con = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
             con.connection.setAutoCommit(false);
             // Put to parameters
-            if (parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_CONNECTION, con)) {
+            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, con)) {
                 // Success
             } else {
                 // Fail
@@ -1652,7 +1658,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
         final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         final Context context = storageParameters.getContext();
-        ConnectionMode connection = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+        ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }
