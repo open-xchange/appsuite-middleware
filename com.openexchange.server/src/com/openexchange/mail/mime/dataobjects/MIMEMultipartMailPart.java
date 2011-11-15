@@ -319,29 +319,37 @@ public final class MIMEMultipartMailPart extends MailPart {
             throw new IndexOutOfBoundsException(String.valueOf(index));
         }
         try {
-            int i = index;
-            int startIndex = positions[i++];
-            if (startIndex >= dataAccess.length()) {
+            final byte[] subArr;
+            {
+                int i = index;
+                int startIndex = positions[i++];
+                if (startIndex >= dataAccess.length()) {
+                    /*
+                     * Empty (text) body
+                     */
+                    return createTextPart();
+                }
+                if ('\r' == dataAccess.read(startIndex)) {
+                    startIndex += (getBoundaryBytes().length + 1);
+                } else {
+                    startIndex += (getBoundaryBytes().length);
+                }
                 /*
-                 * Empty (text) body
+                 * Omit starting CR?LF
                  */
-                return createTextPart();
+                if ('\r' == dataAccess.read(startIndex) && '\n' == dataAccess.read(startIndex + 1)) {
+                    startIndex += 2;
+                } else if ('\n' == dataAccess.read(startIndex)) {
+                    startIndex++;
+                }
+                final int endIndex = i >= positions.length ? dataAccess.length() : positions[i];
+                final int len = endIndex - startIndex;
+                if (len <= 0) {
+                    subArr = new byte[0];
+                } else {
+                    subArr = dataAccess.subarray(startIndex, len);
+                }
             }
-            if ('\r' == dataAccess.read(startIndex)) {
-                startIndex += (getBoundaryBytes().length + 1);
-            } else {
-                startIndex += (getBoundaryBytes().length);
-            }
-            /*
-             * Omit starting CR?LF
-             */
-            if ('\r' == dataAccess.read(startIndex) && '\n' == dataAccess.read(startIndex + 1)) {
-                startIndex += 2;
-            } else if ('\n' == dataAccess.read(startIndex)) {
-                startIndex++;
-            }
-            final int endIndex = i >= positions.length ? dataAccess.length() : positions[i];
-            final byte[] subArr = dataAccess.subarray(startIndex, endIndex - startIndex);
             /*
              * Has headers?
              */
