@@ -101,6 +101,8 @@ public final class ServerConfig {
 
     private boolean cookieHttpOnly;
 
+    private int maxBodySize;
+
     private int defaultMaxConcurrentAJAXRequests;
 
     private ServerConfig() {
@@ -170,6 +172,8 @@ public final class ServerConfig {
         uiWebPath = getPropertyInternal(Property.UI_WEB_PATH);
         cookieTTL = (int) ConfigTools.parseTimespan(getPropertyInternal(Property.COOKIE_TTL));
         cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
+        // The max. body size
+        maxBodySize = Integer.parseInt(getPropertyInternal(Property.MAX_BODY_SIZE));
         // Default max. concurrent AJAX requests
         defaultMaxConcurrentAJAXRequests = Integer.parseInt(getPropertyInternal(Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS));
     }
@@ -228,6 +232,9 @@ public final class ServerConfig {
         case IP_CHECK:
             value = SINGLETON.checkIP.toString();
             break;
+        case MAX_BODY_SIZE:
+            value = String.valueOf(SINGLETON.maxBodySize);
+            break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
             value = String.valueOf(SINGLETON.defaultMaxConcurrentAJAXRequests);
             break;
@@ -273,6 +280,9 @@ public final class ServerConfig {
         case COOKIE_TTL:
             value = I(SINGLETON.cookieTTL);
             break;
+        case MAX_BODY_SIZE:
+            value = I(SINGLETON.maxBodySize);
+            break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
             value = I(SINGLETON.defaultMaxConcurrentAJAXRequests);
             break;
@@ -309,6 +319,9 @@ public final class ServerConfig {
             break;
         case COOKIE_TTL:
             value = SINGLETON.cookieTTL;
+            break;
+        case MAX_BODY_SIZE:
+            value = SINGLETON.maxBodySize;
             break;
         case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
             value = SINGLETON.defaultMaxConcurrentAJAXRequests;
@@ -402,6 +415,10 @@ public final class ServerConfig {
          * Whether to force HTTPS protocol.
          */
         FORCE_HTTPS("com.openexchange.forceHTTPS", Boolean.FALSE.toString()),
+        /**
+         * The max. allowed size of a HTTP request
+         */
+        MAX_BODY_SIZE("MAX_BODY_SIZE", "0"),
         /**
          * The default value for max. concurrent AJAX requests.
          */
