@@ -65,7 +65,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
@@ -86,7 +85,6 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
@@ -100,7 +98,6 @@ import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.monitoring.MonitoringInfo;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -458,21 +455,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
         return (req.getParameter(name) != null);
     }
 
-    private static final AtomicInteger MAX_BODY_SIZE = new AtomicInteger(-1);
-
     private static int getMaxBodySize() {
-        int ret = MAX_BODY_SIZE.get();
-        if (ret < 0) {
-            synchronized (AJAXServlet.class) {
-                ret = MAX_BODY_SIZE.get();
-                if (ret < 0) {
-                    final ConfigurationService confService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    ret = confService.getIntProperty("MAX_BODY_SIZE", 0);
-                    MAX_BODY_SIZE.set(ret < 0 ? 0 : ret);
-                }
-            }
+        try {
+            return ServerConfig.getInt(ServerConfig.Property.MAX_BODY_SIZE);
+        } catch (final OXException e) {
+            return Integer.parseInt(ServerConfig.Property.MAX_BODY_SIZE.getDefaultValue());
         }
-        return ret;
     }
 
     private static final boolean BYTE_BASED_READING = true;
