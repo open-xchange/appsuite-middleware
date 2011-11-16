@@ -76,6 +76,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatExceptionCodes;
+import com.openexchange.chat.ChatUser;
 import com.openexchange.chat.Message;
 import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.MessageListener;
@@ -514,6 +515,8 @@ public final class DBChat implements Chat {
 
     private final boolean secureMessaging;
 
+    private volatile Date createdAt;
+
     /**
      * Initializes a new {@link DBChat}.
      */
@@ -613,6 +616,8 @@ public final class DBChat implements Chat {
             return list;
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -645,6 +650,53 @@ public final class DBChat implements Chat {
     }
 
     @Override
+    public Date getTimeStamp() {
+        // Lazy initialization
+        Date tmp = createdAt;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = createdAt;
+                if (null == createdAt) {
+                    tmp = getCreatedAt();
+                    createdAt = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    private Date getCreatedAt() {
+        try {
+            final DatabaseService databaseService = getDatabaseService();
+            final Connection con = databaseService.getReadOnly(contextId);
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT createdAt FROM chat WHERE cid = ? AND chatId = ?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, chatId);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    return null;
+                }
+                return new Date(rs.getLong(1));
+            } catch (final SQLException e) {
+                LOG.error("A SQL error occurred.", e);
+                return null;
+            } finally {
+                closeSQLStuff(rs, stmt);
+                databaseService.backReadOnly(contextId, con);
+            }
+        } catch (final OXException e) {
+            LOG.error("An OX error occurred.", e);
+            return null;
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return null;
+        }
+    }
+
+    @Override
     public String getSubject() {
         try {
             final DatabaseService databaseService = getDatabaseService();
@@ -670,6 +722,9 @@ public final class DBChat implements Chat {
         } catch (final OXException e) {
             LOG.error("An OX error occurred.", e);
             return null;
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return null;
         }
     }
 
@@ -690,6 +745,8 @@ public final class DBChat implements Chat {
             }
             return ret;
         } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -740,7 +797,7 @@ public final class DBChat implements Chat {
             stmt = con.prepareStatement("INSERT INTO chatMember (cid, user, chatId, opMode) VALUES (?, ?, ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, Integer.parseInt(user));
+            stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(user));
             stmt.setInt(pos++, chatId);
             stmt.setInt(pos, 0);
             stmt.executeUpdate();
@@ -779,7 +836,7 @@ public final class DBChat implements Chat {
             stmt = con.prepareStatement("DELETE FROM chatMember WHERE cid = ? AND user = ? AND chatId = ?");
             pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, Integer.parseInt(user));
+            stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(user));
             stmt.setInt(pos, chatId);
             stmt.executeUpdate();
             closeSQLStuff(stmt);
@@ -839,7 +896,7 @@ public final class DBChat implements Chat {
                 con.prepareStatement("INSERT INTO chatMessage (cid, user, chatId, messageId, message, createdAt) VALUES (?, ?, ?, " + DBChatUtility.getUnhexReplaceString() + ", ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
-            stmt.setInt(pos++, Integer.parseInt(message.getFrom().getId()));
+            stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(message.getFrom().getId()));
             stmt.setInt(pos++, chatId);
             stmt.setString(pos++, UUID.randomUUID().toString());
             stmt.setString(pos++, prepareInsert(message.getText()));
@@ -1015,13 +1072,15 @@ public final class DBChat implements Chat {
             return messages;
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
     }
 
     @Override
-    public List<Message> pollMessages(final Date since) throws OXException {
+    public List<Message> pollMessages(final Date since, final ChatUser chatUser) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;
@@ -1060,6 +1119,8 @@ public final class DBChat implements Chat {
             } while (rs.next());
             return list;
         } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);

@@ -116,4 +116,60 @@ public final class DBChatUtility {
         return new UUID(msb, lsb);
     }
 
+    private static final int DEFAULT = -1;
+
+    private static final int RADIX = 10;
+
+    /**
+     * Parses as an unsigned <code>int</code>.
+     *
+     * @param s The string to parse
+     * @return An unsigned <code>int</code> or <code>-1</code>.
+     */
+    public static int parseUnsignedInt(final String s) {
+        if (s == null) {
+            return DEFAULT;
+        }
+        final int max = s.length();
+        if (max <= 0) {
+            return -1;
+        }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
+
+        int result = 0;
+        int i = 0;
+
+        final long limit = -Long.MAX_VALUE;
+        final long multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return DEFAULT;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return DEFAULT;
+            }
+            if (result < multmin) {
+                return DEFAULT;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return DEFAULT;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
+
 }

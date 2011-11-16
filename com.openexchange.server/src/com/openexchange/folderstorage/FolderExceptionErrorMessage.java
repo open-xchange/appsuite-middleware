@@ -197,6 +197,10 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      * A tree with identifier "%1$s" already exists.
      */
     DUPLICATE_TREE(FolderExceptionMessages.DUPLICATE_TREE_MSG, Category.CATEGORY_ERROR, 1032),
+    /**
+     * The folder name "%1$s" is reserved. Please choose another name.
+     */
+    RESERVED_NAME(FolderExceptionMessages.RESERVED_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1033),
     
     ;
 

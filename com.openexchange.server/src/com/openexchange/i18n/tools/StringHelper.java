@@ -68,7 +68,11 @@ public class StringHelper {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(StringHelper.class));
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final ConcurrentMap<Locale, StringHelper> CACHE = new ConcurrentHashMap<Locale, StringHelper>();
+
+    private static final Locale DEFAULT_LOCALE = Locale.US;
 
     /**
      * Gets the {@link StringHelper} instance for specified locale.
@@ -77,18 +81,17 @@ public class StringHelper {
      * @return The associated {@link StringHelper} instance
      */
     public static StringHelper valueOf(final Locale locale) {
-        StringHelper sh = CACHE.get(locale);
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        StringHelper sh = CACHE.get(loc);
         if (null == sh) {
-            final StringHelper newHelper = new StringHelper(locale);
-            sh = CACHE.putIfAbsent(locale, newHelper);
+            final StringHelper newHelper = new StringHelper(loc);
+            sh = CACHE.putIfAbsent(loc, newHelper);
             if (null == sh) {
                 sh = newHelper;
             }
         }
         return sh;
     }
-
-    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final Locale locale;
 
@@ -97,12 +100,10 @@ public class StringHelper {
      *
      * @param locale The locale to translate string to. If <code>null</code> is
      *            given, no replacement takes place.
-     * @deprecated Use {@link #valueOf(Locale)} instead of creating a new instance
      */
-    @Deprecated
-    public StringHelper(final Locale locale) {
+    private StringHelper(final Locale locale) {
         super();
-        this.locale = (null != locale && "en".equalsIgnoreCase(locale.getLanguage())) ? null : locale;
+        this.locale = locale;
     }
 
     /**

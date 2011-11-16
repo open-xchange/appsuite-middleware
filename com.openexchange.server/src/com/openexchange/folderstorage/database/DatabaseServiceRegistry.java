@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.database;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -67,6 +68,19 @@ public final class DatabaseServiceRegistry {
      */
     public static ServiceRegistry getServiceRegistry() {
         return REGISTRY;
+    }
+
+    /**
+     * Gets the service defined by given class
+     * 
+     * @param <S> The type of service's class
+     * @param clazz The service's class
+     * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>
+     * @return The service if found; otherwise <code>null</code> if <code>errorOnAbsence</code> is <code>false</code>
+     * @throws OXException If <code>errorOnAbsence</code> is <code>true</code> and service could not be found
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz, final boolean errorOnAbsence) throws OXException {
+        return REGISTRY.getService(clazz, errorOnAbsence);
     }
 
     /**

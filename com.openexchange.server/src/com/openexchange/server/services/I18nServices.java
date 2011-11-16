@@ -65,6 +65,7 @@ import com.openexchange.i18n.LocaleTools;
 public class I18nServices {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nServices.class));
+    private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final I18nServices SINGLETON = new I18nServices();
 
     private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
@@ -73,13 +74,13 @@ public class I18nServices {
         super();
     }
 
-    public void addService(I18nService service) {
+    public void addService(final I18nService service) {
         if (null != services.put(service.getLocale(), service)) {
             LOG.warn("Another i18n translation service found for " + service.getLocale());
         }
     }
 
-    public void removeService(I18nService service) {
+    public void removeService(final I18nService service) {
         if (null == services.remove(service.getLocale())) {
             LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
         }
@@ -89,35 +90,37 @@ public class I18nServices {
         return SINGLETON;
     }
 
-    public I18nService getService(Locale locale) {
-        return getService(locale, true);
+    public I18nService getService(final Locale locale) {
+        return getService(null == locale ? DEFAULT_LOCALE : locale, true);
     }
 
-    public I18nService getService(Locale locale, boolean warn) {
-        I18nService retval = services.get(locale);
-        if (warn && null == retval && !"en".equalsIgnoreCase(locale.getLanguage())) {
-            LOG.warn("No i18n service for locale " + locale + ".");
+    public I18nService getService(final Locale locale, final boolean warn) {
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        final I18nService retval = services.get(loc);
+        if (warn && null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
+            LOG.warn("No i18n service for locale " + loc + ".");
         }
         return retval;
     }
 
-    public String translate(Locale locale, String toTranslate) {
+    public String translate(final Locale locale, final String toTranslate) {
         return translate(locale, toTranslate, true);
     }
 
-    public String translate(Locale locale, String toTranslate, boolean warn) {
-        final I18nService service = getService(locale, warn);
+    public String translate(final Locale locale, final String toTranslate, final boolean warn) {
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        final I18nService service = getService(loc, warn);
         if (null == service) {
             return toTranslate;
         }
         if (warn && !service.hasKey(toTranslate)) {
-            LOG.warn("I18n service for locale " + locale + " has no translation for \"" + toTranslate + "\".");
+            LOG.warn("I18n service for locale " + loc + " has no translation for \"" + toTranslate + "\".");
             return toTranslate;
         }
         return service.getLocalized(toTranslate);
     }
 
-    public String translate(String localeId, String toTranslate) {
+    public String translate(final String localeId, final String toTranslate) {
         return translate(LocaleTools.getLocale(localeId), toTranslate);
     }
 

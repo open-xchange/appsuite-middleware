@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.internal.performers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -81,6 +80,8 @@ public final class CreatePerformer extends AbstractPerformer {
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CreatePerformer.class));
 
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
+
+    private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
 
     /**
      * Initializes a new {@link CreatePerformer}.
@@ -161,9 +162,15 @@ public final class CreatePerformer extends AbstractPerformer {
                     getUserInfo4Error(),
                     getContextInfo4Error());
             }
-            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && MailContentType.getInstance().toString().equals(
+            if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && CONTENT_TYPE_MAIL.equals(
                 toCreate.getContentType().toString())) {
                 throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
+            }
+            /*
+             * Check for duplicates for OLOX-covered folders
+             */
+            if (!"infostore".equals(toCreate.getContentType().toString())) {
+                checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
             }
             /*
              * Create folder dependent on folder is virtual or not
@@ -250,24 +257,6 @@ public final class CreatePerformer extends AbstractPerformer {
                 virtualStorage.createFolder(toCreate, storageParameters);
             } else {
                 /*
-                 * Check for possible duplicate folder name
-                 */
-                {
-                    final SortableId[] checkMe = virtualStorage.getSubfolders(treeId, toCreate.getParentID(), storageParameters);
-                    final Locale locale = storageParameters.getUser().getLocale();
-                    for (final SortableId sortableId : checkMe) {
-                        final String localizedName =
-                            virtualStorage.getFolder(treeId, sortableId.getId(), storageParameters).getLocalizedName(locale);
-                        if (localizedName.equals(toCreate.getName())) {
-                            checkOpenedStorage(realStorage, openedStorages);
-                            throw FolderExceptionErrorMessage.EQUAL_NAME.create(
-                                toCreate.getName(),
-                                realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale),
-                                treeId);
-                        }
-                    }
-                }
-                /*
                  * Find the real storage which is capable to create the folder
                  */
                 final FolderStorage capStorage =
@@ -279,7 +268,7 @@ public final class CreatePerformer extends AbstractPerformer {
                 /*
                  * Special handling for mail folders on root level
                  */
-                if (FolderStorage.PRIVATE_ID.equals(parentId) && MailContentType.getInstance().toString().equals(folderContentType.toString())) {
+                if (FolderStorage.PRIVATE_ID.equals(parentId) && CONTENT_TYPE_MAIL.equals(folderContentType.toString())) {
                     final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
                     /*
                      * Check if create is allowed

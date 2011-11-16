@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface Chat {
+public interface Chat extends ChatGroup {
 
     /**
      * Gets the chat identifier.
@@ -74,14 +74,6 @@ public interface Chat {
      * @return The subject
      */
     String getSubject();
-
-    /**
-     * Gets the chat members.
-     * 
-     * @return The identifiers of the chat members
-     * @throws OXException If chat members cannot be returned
-     */
-    List<String> getMembers() throws OXException;
 
     /**
      * Joins specified chat member to this chat.
@@ -118,10 +110,11 @@ public interface Chat {
      * Polls all messages from this chat that were posted after specified date.
      * 
      * @param since The date or <code>null</code> to poll whole chat's time line
+     * @param user The chat user for whom the messages are requested
      * @return All messages
      * @throws OXException If messages cannot be polled
      */
-    List<Message> pollMessages(Date since) throws OXException;
+    List<Message> pollMessages(Date since, ChatUser user) throws OXException;
 
     /**
      * Updates an existing message according {@link MessageDescription}'s arguments.

@@ -99,7 +99,7 @@ public final class SessionExceptionMessages implements LocalizableStrings {
 
     public static final String WRONG_CLIENT_IP_MSG = "Request to server was refused. Original client IP address changed. Please try again.";
 
-    public static final String WRONG_SESSION_SECRET_MSG = "Session secret is different. Given %1$s differs from %2$s in session.";
+    public static final String WRONG_SESSION_SECRET_MSG = "Your session was invalidated. Please try again.";
 
     private SessionExceptionMessages() {
         super();

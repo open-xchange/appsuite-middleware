@@ -81,6 +81,10 @@ public class MailStrings implements LocalizableStrings {
     public static final String SENT = "Sent objects"
         .intern();
 
+    // The alternative internationalized name for the sent mail folder
+    public static final String SENT_ALT = "Sent Items"
+        .intern();
+
     // The internationalized name for the spam mail folder
     public static final String SPAM = "Spam"
         .intern();
@@ -89,8 +93,16 @@ public class MailStrings implements LocalizableStrings {
     public static final String CONFIRMED_SPAM = "Confirmed spam"
         .intern();
 
+    // The alternative internationalized name for the confirmed-spam mail folder
+    public static final String CONFIRMED_SPAM_ALT = "confirmed-spam"
+        .intern();
+
     // The internationalized name for the confirmed-spam mail folder
     public static final String CONFIRMED_HAM = "Confirmed ham"
+        .intern();
+
+    // The alternative internationalized name for the confirmed-spam mail folder
+    public static final String CONFIRMED_HAM_ALT = "confirmed-ham"
         .intern();
 
 

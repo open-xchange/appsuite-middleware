@@ -322,8 +322,8 @@ public final class AJPv13Config implements Initialization {
                 servletConfigs = configurationService.getProperty("CONFIGPATH") + "/servletConfig";
             }
             final File servletConfigsFile = new File(servletConfigs);
-            if ((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isWarnEnabled()) {
-                LOG.warn(servletConfigsFile + " does not exist or is not a directory");
+            if ((!servletConfigsFile.exists() || !servletConfigsFile.isDirectory()) && LOG.isTraceEnabled()) {
+                LOG.trace(servletConfigsFile + " does not exist or is not a directory");
             }
             /*
              * AJP_BIND_ADDR

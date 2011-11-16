@@ -58,19 +58,19 @@ import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.impl.DefaultSecretInconsistencyDetector;
 
-
 /**
  * {@link WhiteboardSecretInconsistencyDetector}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardSecretInconsistencyDetector extends DefaultSecretInconsistencyDetector {
 
-    private final ServiceTracker tracker;
+    private final ServiceTracker<SecretConsistencyCheck, SecretConsistencyCheck> tracker;
+
     private final WhiteboardSecretService secretService;
 
     public WhiteboardSecretInconsistencyDetector(final BundleContext context) {
-        tracker = new ServiceTracker(context, SecretConsistencyCheck.class.getName(), null);
+        tracker = new ServiceTracker<SecretConsistencyCheck, SecretConsistencyCheck>(context, SecretConsistencyCheck.class, null);
         secretService = new WhiteboardSecretService(context);
     }
 

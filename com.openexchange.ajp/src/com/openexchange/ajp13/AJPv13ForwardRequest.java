@@ -677,6 +677,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                                 LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue NextCookie;
                         }
@@ -691,6 +692,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue NextCookie;
                         }
@@ -709,6 +711,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                                 LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue NextCookie;
                         }
@@ -723,6 +726,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || servletRequest.isSecure());
                             resp.addCookie(current);
                             continue NextCookie;
                         }

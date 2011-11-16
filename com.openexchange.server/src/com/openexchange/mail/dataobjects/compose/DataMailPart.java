@@ -150,8 +150,6 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
             cachedContent = readStream(fis, charset);
         } catch (final IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             if (fis != null) {
                 try {
@@ -359,7 +357,7 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
     }
 
     private void setHeaders(final Map<String, String> dataProperties) throws OXException {
-        String cts = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+        final String cts = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
         if (null != cts) {
             setContentType(cts);
         }

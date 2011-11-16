@@ -49,31 +49,11 @@
 
 package com.openexchange.index.internal;
 
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DELETE_INDEX_MAPPING;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DELETE_INDEX_MAPPING_BY_SERVER;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DELETE_INDEX_SERVER;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_INSERT_INDEX_MAPPING;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_INSERT_INDEX_SERVER;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_SELECT_INDEX_SERVERS;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_SELECT_INDEX_URL;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_UPDATE_INDEX_MAPPING;
-import static com.openexchange.index.internal.IndexDatabaseStuff.TBL_IDX_SERVER;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.database.DBPoolingExceptionCodes;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.index.ConfigIndexService;
-import com.openexchange.index.IndexExceptionCodes;
 import com.openexchange.index.IndexServer;
 import com.openexchange.index.IndexUrl;
-import com.openexchange.server.ServiceExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -89,302 +69,54 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
 
     @Override
     public IndexUrl getReadOnlyURL(final int cid, final int uid, final int module) throws OXException {
-        final DatabaseService dbService = getDbService();        
-        final Connection readCon = dbService.getReadOnly();  
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = readCon.prepareStatement(SQL_SELECT_INDEX_URL);
-            int i = 1;
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i, module);
-            rs = stmt.executeQuery();
-            
-            if (!rs.next()) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
-            }
-            
-            i = 1;
-            final int id = rs.getInt(i++);
-            final String serverUrl = rs.getString(i++);
-            final int maxIndices = rs.getInt(i++);
-            final int socketTimeout = rs.getInt(i++);
-            final int connectionTimeout = rs.getInt(i++);
-            final int maxConnections = rs.getInt(i++);
-            final String index = rs.getString(i);
-            
-            final IndexServerImpl server = new IndexServerImpl(id, serverUrl);
-            server.setMaxIndices(maxIndices);
-            server.setSoTimeout(socketTimeout);
-            server.setConnectionTimeout(connectionTimeout);
-            server.setMaxConnectionsPerHost(maxConnections);
-            
-            final IndexUrlImpl indexUrl = new IndexUrlImpl(server, index);            
-            return indexUrl;
-        } catch (final SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);            
-            dbService.backReadOnly(readCon);
-        }
+        return ConfigIndexMysql.getInstance().getIndexUrl(cid, uid, module);
     }
 
     @Override
     public IndexUrl getWriteURL(final int cid, final int uid, final int module) throws OXException {
-        return getWriteURL(cid, uid, module);
+        // TODO: Until now there is now difference between read and write connection.
+        // Change this here if it's going to be implemented.
+        return ConfigIndexMysql.getInstance().getIndexUrl(cid, uid, module);
     }
 
     @Override
     public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        PreparedStatement sstmt = null;
-        PreparedStatement mstmt = null;
-        try {
-            sstmt = con.prepareStatement(SQL_DELETE_INDEX_SERVER);
-            sstmt.setInt(1, serverId);
-            
-            int rows = sstmt.executeUpdate();            
-            if (rows == 0) {
-                throw IndexExceptionCodes.UNREGISTER_SERVER_ERROR.create(serverId);
-            }
-            
-            if (deleteMappings) {
-                mstmt = con.prepareStatement(SQL_DELETE_INDEX_MAPPING_BY_SERVER);
-                mstmt.setInt(1, serverId);
-                mstmt.executeUpdate();
-            }
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(sstmt);
-            DBUtils.closeSQLStuff(mstmt);
-            dbService.backWritable(con);
-        }        
+        ConfigIndexMysql.getInstance().unregisterIndexServer(serverId, deleteMappings);     
     }
 
     @Override
     public int registerIndexServer(IndexServer server) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        PreparedStatement stmt = null;
-        try {
-            final int id = IDGenerator.getId(con);
-            stmt = con.prepareStatement(SQL_INSERT_INDEX_SERVER);
-            int i = 1;
-            stmt.setInt(i++, id);
-            stmt.setString(i++, server.getUrl());
-            stmt.setInt(i++, server.getMaxIndices());
-            stmt.setInt(i++, server.getSoTimeout());
-            stmt.setInt(i++, server.getConnectionTimeout());
-            stmt.setInt(i++, server.getMaxConnectionsPerHost());
-            
-            int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.REGISTER_SERVER_ERROR.create(server.getUrl());
-            }
-            
-            return id;
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            dbService.backWritable(con);
-        }
+        return ConfigIndexMysql.getInstance().registerIndexServer(server);
     }
 
     @Override
     public List<IndexServer> getAllIndexServers() throws OXException {
-        List<IndexServer> servers = new ArrayList<IndexServer>();
-        
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getReadOnly();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(SQL_SELECT_INDEX_SERVERS);
-            rs = stmt.executeQuery();
-            
-            while (rs.next()) {
-                int i = 1;
-                final int id = rs.getInt(i++);
-                final String url = rs.getString(i++);
-                final int maxIndices = rs.getInt(i++);
-                final int socketTimeout = rs.getInt(i++);
-                final int connectionTimeout = rs.getInt(i++);
-                final int maxConnections = rs.getInt(i++);
-                
-                final IndexServerImpl server = new IndexServerImpl(id, url);
-                server.setMaxIndices(maxIndices);
-                server.setSoTimeout(socketTimeout);
-                server.setConnectionTimeout(connectionTimeout);
-                server.setMaxConnectionsPerHost(maxConnections);
-                
-                servers.add(server);
-            }
-            
-            return servers;
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            dbService.backReadOnly(con);
-        }
+        return ConfigIndexMysql.getInstance().getAllIndexServers();
     }
 
     @Override
     public void modifyIndexServer(IndexServer server) throws OXException {        
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(createServerUpdateSQL(server));
-            int i = 1;
-            if (server.hasSoTimeout()) {
-                stmt.setInt(i++, server.getSoTimeout());
-            }
-            if (server.hasConnectionTimeout()) {
-                stmt.setInt(i++, server.getConnectionTimeout());
-            }
-            if (server.hasMaxConnectionsPerHost()) {
-                stmt.setInt(i++, server.getMaxConnectionsPerHost());
-            }
-            if (server.hasMaxIndices()) {
-                stmt.setInt(i++, server.getMaxIndices());
-            }
-            stmt.setInt(i, server.getId());
-            
-            int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.SERVER_NOT_FOUND.create(server.getId());
-            }
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            dbService.backReadOnly(con);
-        }
+        ConfigIndexMysql.getInstance().modifyIndexServer(server);
     }
 
     @Override
-    public void addIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_INSERT_INDEX_MAPPING);
-            int i = 1;
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i++, module);
-            stmt.setInt(i++, server);
-            stmt.setString(i, index);
-            
-            int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.ADD_MAPPING_ERROR.create(uid, cid, module, server);
-            }
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            dbService.backWritable(con);
-        }        
+    public void addIndexMapping(int cid, int uid, int module, String index) throws OXException {
+        int serverId = ConfigIndexMysql.getInstance().createIndexMapping(cid, uid, module, index);
+        
+        // TODO: Create index / core here
     }
     
     @Override
     public void removeIndexMapping(int cid, int uid, int module) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_DELETE_INDEX_MAPPING);
-            int i = 1;
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i++, module);
-            
-            int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
-            }
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            dbService.backWritable(con);
-        }        
+        ConfigIndexMysql.getInstance().removeIndexMapping(cid, uid, module);
+        
+        // TODO: Remove index / core
     }
 
     @Override
     public void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
-        final DatabaseService dbService = getDbService();
-        final Connection con = dbService.getWritable();
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement(SQL_UPDATE_INDEX_MAPPING);
-            int i = 1;
-            stmt.setInt(i++, server);
-            stmt.setString(i++, index);
-            stmt.setInt(i++, cid);
-            stmt.setInt(i++, uid);
-            stmt.setInt(i++, module);
-            
-            int rows = stmt.executeUpdate();
-            if (rows == 0) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
-            }
-        } catch (SQLException e) {
-            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            dbService.backWritable(con);
-        }
-    }
-    
-    private DatabaseService getDbService() throws OXException {
-        DatabaseService dbService = IndexServiceLookup.getInstance().getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
+        ConfigIndexMysql.getInstance().modifiyIndexMapping(cid, uid, module, server, index);
         
-        return dbService;
-    }
-    
-    private String createServerUpdateSQL(IndexServer server) {
-        final StringBuilder sb = new StringBuilder("UPDATE " + TBL_IDX_SERVER + " SET ");
-        boolean first = true;
-        if (server.hasSoTimeout()) {
-            first = false;
-            sb.append("socketTimeout = ? ");
-        }
-        if (server.hasConnectionTimeout()) {
-            if (!first) {
-                sb.append(", ");
-            } else {
-                first = false;
-            }
-            sb.append("connectionTimeout = ? ");
-        }
-        if (server.hasMaxConnectionsPerHost()) {
-            if (!first) {
-                sb.append(", ");
-            } else {
-                first = false;
-            }
-            sb.append("maxConnections = ?");
-        }
-        if (server.hasMaxIndices()) {
-            if (!first) {
-                sb.append(", ");
-            } else {
-                first = false;
-            }
-            sb.append("maxIndices = ?");
-        }
-        sb.append("WHERE id = ?");
-        
-        return sb.toString();
+        // TODO: Apply any changes to the modified index / core
     }
 }

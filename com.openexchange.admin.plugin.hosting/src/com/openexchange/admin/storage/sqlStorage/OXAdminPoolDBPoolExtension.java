@@ -52,8 +52,8 @@ package com.openexchange.admin.storage.sqlStorage;
 import java.sql.Connection;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.tools.PropertyHandler;
-import com.openexchange.database.DBPoolingException;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
     
@@ -64,7 +64,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
     public int getDBPoolIdForContextId(final int context_id) throws PoolException {
         try{
             return Database.resolvePool(context_id,true);
-        }catch(final DBPoolingException db){
+        }catch(final OXException db){
             throw new PoolException(""+db.getMessage());
         }
     }
@@ -72,7 +72,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
     public Connection getWRITEConnectionForPoolId(final int db_pool_id,final String schema_name) throws PoolException {
         try{
             return Database.get(db_pool_id,schema_name);
-        }catch(final DBPoolingException db){
+        }catch(final OXException db){
             throw new PoolException(""+db.getMessage());
         }
     }
@@ -84,7 +84,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
     public Connection getWRITENoTimeoutConnectionForPoolId(final int db_pool_id,final String schema_name) throws PoolException {
         try{
             return Database.getNoTimeout(db_pool_id,schema_name);
-        }catch(final DBPoolingException db){
+        }catch(final OXException db){
             throw new PoolException(""+db.getMessage());
         }
     }
@@ -96,7 +96,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
     public void resetPoolMappingForContext(final int context_id) throws PoolException {
         try{
             Database.reset(context_id);
-        }catch(final DBPoolingException db){
+        }catch(final OXException db){
             throw new PoolException(""+db.getMessage());
         }
     }
@@ -104,7 +104,7 @@ public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXA
    public String getSchemeForContextId(final int context_id) throws PoolException{
        try{
             return Database.getSchema(context_id);
-        }catch(final DBPoolingException db){
+        }catch(final OXException db){
             throw new PoolException(""+db.getMessage());
         }
    }

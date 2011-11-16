@@ -121,12 +121,8 @@ public final class ResourceCreate {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
-        try {
-            if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
-            }
-        } catch (final OXException e1) {
-            throw new OXException(e1);
+        if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
+            throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
         }
         /*
          * TODO: Remove statements above and replace with commented call below
@@ -179,18 +175,11 @@ public final class ResourceCreate {
         if (!ResourceTools.validateResourceEmail(resource.getMail())) {
             throw ResourceExceptionCode.INVALID_RESOURCE_MAIL.create(resource.getMail());
         }
-        /*
-         * Check if another resource with the same textual identifier or email address exists in storage
-         */
-        try {
-            if (storage.searchResources(resource.getSimpleName(), ctx).length > 0) {
-                throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
-            }
-            if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
-                throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
+        if (storage.searchResources(resource.getSimpleName(), ctx).length > 0) {
+            throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
+        }
+        if (storage.searchResourcesByMail(resource.getMail(), ctx).length > 0) {
+            throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
         }
 
     }

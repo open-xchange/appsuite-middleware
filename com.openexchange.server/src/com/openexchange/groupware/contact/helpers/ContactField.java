@@ -333,6 +333,7 @@ public enum ContactField{
 		return null;
 	}
 	
+
 	public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
 		String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
 		for(final ContactField field: values()){
@@ -346,7 +347,6 @@ public enum ContactField{
 		}
 		return null;
 	}
-
 
 
 

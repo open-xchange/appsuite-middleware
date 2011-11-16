@@ -227,7 +227,7 @@ public final class FolderStorageActivator implements BundleActivator {
 			}
 
 			// Start other activators
-			activators = new ArrayList<BundleActivator>(4);
+			activators = new ArrayList<BundleActivator>(8);
 			activators.add(new DatabaseFolderStorageActivator()); // Database
 																	// impl
 			activators.add(new MailFolderStorageActivator()); // Mail impl

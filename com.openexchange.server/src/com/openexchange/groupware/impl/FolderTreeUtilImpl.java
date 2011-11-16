@@ -114,7 +114,10 @@ public class FolderTreeUtilImpl implements FolderTreeUtil {
                 Connection readCon = null;
                 try {
                     readCon = provider.getReadConnection(ctx);
-                    return FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
+                    if (FolderCacheManager.isEnabled()) {
+                        return FolderCacheManager.getInstance().loadFolderObject(folderid, ctx, readCon);
+                    }
+                    return FolderObject.loadFolderObjectFromDB(folderid, ctx, readCon);
                 } finally {
                     provider.releaseReadConnection(ctx, readCon);
                 }

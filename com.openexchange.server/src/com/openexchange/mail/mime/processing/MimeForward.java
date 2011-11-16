@@ -591,7 +591,9 @@ public final class MimeForward {
             } else {
                 replaceBuffer.append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak);
             }
+            replaceBuffer.append("<div style=\"position:relative\">");
             mr.appendTail(replaceBuffer);
+            replaceBuffer.append("</div>");
             return replaceBuffer.toString();
         }
         return new StringBuilder(firstSeenText.length() + 256).append(linebreak).append(forwardPrefix).append(linebreak).append(linebreak).append(

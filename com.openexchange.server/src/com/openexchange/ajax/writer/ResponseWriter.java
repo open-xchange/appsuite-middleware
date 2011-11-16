@@ -49,7 +49,17 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.*;
+import static com.openexchange.ajax.fields.ResponseFields.DATA;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
+import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
+import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
+import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
+import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -138,13 +148,26 @@ public final class ResponseWriter {
         if (null != response.getData()) {
             json.put(DATA, response.getData());
         }
+        
         if (null != response.getTimestamp()) {
             json.put(TIMESTAMP, response.getTimestamp().getTime());
         }
-        if (null != response.getException()) {
-            addException(json, response.getException(), locale);
+        final List<OXException> warnings = response.getWarnings();
+        final OXException exception = response.getException();
+        if (null == exception) {
+            /*
+             * Any warning available? Set first warning as "exception" for compatibility reasons
+             */
+            if (null != warnings && !warnings.isEmpty()) {
+                addException(json, warnings.get(0), locale);
+            }
+        } else {
+            addException(json, exception, locale);
         }
-        addWarnings(json, response.getWarnings(), locale);
+        /*
+         * Add warnings
+         */
+        addWarnings(json, warnings, locale);
     }
 
     /**
@@ -224,6 +247,22 @@ public final class ResponseWriter {
     public static void addException(final JSONObject json, final OXException exception, final Locale locale) throws JSONException {
         json.put(ERROR, exception.getDisplayMessage(locale));
         /*
+         * Put argument JSON array for compatibility reasons
+         */
+        {
+            final Object[] args = exception.getDisplayArgs();
+            // Enforce first condition; review later on
+            if (true || (null == args || 0 == args.length)) {
+                json.put(ERROR_PARAMS, new JSONArray());
+            } else {
+                final JSONArray jArray = new JSONArray();
+                for (final Object arg : args) {
+                    jArray.put(arg);
+                }
+                json.put(ERROR_PARAMS, jArray);
+            }
+        }
+        /*
          * Categories
          */
         {
@@ -231,11 +270,11 @@ public final class ResponseWriter {
             if (1 == categories.size()) {
                 json.put(ERROR_CATEGORIES, categories.get(0).toString());
             } else {
-                final JSONArray jsonArray = new JSONArray();
+                final JSONArray jArray = new JSONArray();
                 for (final Category category : categories) {
-                    jsonArray.put(category.toString());
+                    jArray.put(category.toString());
                 }
-                json.put(ERROR_CATEGORIES, jsonArray);
+                json.put(ERROR_CATEGORIES, jArray);
             }
         }
         json.put(ERROR_CODE, exception.getErrorCode());

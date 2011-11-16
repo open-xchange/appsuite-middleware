@@ -142,7 +142,7 @@ public final class Bug14074Test extends AbstractAJAXSession {
         appointment.setParentFolderID(folderId);
         Calendar calendar = TimeTools.createCalendar(tz, 2009, 0, 23, 13);
         appointment.setStartDate(calendar.getTime());
-        calendar.add(Calendar.DATE, 1);
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.setIgnoreConflicts(true);
         appointment.setRecurrenceType(Appointment.WEEKLY);

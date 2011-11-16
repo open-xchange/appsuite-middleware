@@ -288,7 +288,8 @@ public final class MIMEStructureHandler implements StructureHandler {
 
     @Override
     public boolean handleAttachment(final MailPart part, final String id) throws OXException {
-        if (isVCalendar(part.getContentType().getBaseType())) {
+        final ContentType contentType = part.getContentType();
+        if (isVCalendar(contentType.getBaseType()) && !contentType.containsParameter("method")) {
             /*
              * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
@@ -300,10 +301,7 @@ public final class MIMEStructureHandler implements StructureHandler {
                         /*
                          * Assume an iTIP response or request
                          */
-                        final ContentType contentType = part.getContentType();
-                        if (!contentType.containsParameter("method")) {
-                            contentType.setParameter("method", method.toUpperCase(Locale.US));
-                        }
+                        contentType.setParameter("method", method.toUpperCase(Locale.US));
                     }
                 } catch (final RuntimeException e) {
                     LOG.warn("A runtime error occurred.", e);

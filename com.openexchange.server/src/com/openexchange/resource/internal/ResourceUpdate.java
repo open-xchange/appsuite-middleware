@@ -136,12 +136,8 @@ public final class ResourceUpdate {
         /*
          * At the moment security service is not used for timing reasons but is ought to be used later on
          */
-        try {
-            if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
-                throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
-            }
-        } catch (final OXException e1) {
-            throw new OXException(e1);
+        if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditResource()) {
+            throw ResourceExceptionCode.PERMISSION.create(Integer.valueOf(ctx.getContextId()));
         }
         /*
          * TODO: Remove statements above and replace with commented call below
@@ -195,40 +191,33 @@ public final class ResourceUpdate {
         if (clientLastModified != null && clientLastModified.getTime() < getOrig().getLastModified().getTime()) {
             throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create();
         }
-        /*
-         * Check values to update
-         */
-        try {
-            if (resource.isSimpleNameSet()) {
-                if (isEmpty(resource.getSimpleName())) {
-                    throw ResourceExceptionCode.MANDATORY_FIELD.create();
-                }
-                if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
-                    throw ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER.create(resource.getSimpleName());
-                }
-                final Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
-                if (resources.length > 1) {
-                    throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
-                } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-                    throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
-                }
+        if (resource.isSimpleNameSet()) {
+            if (isEmpty(resource.getSimpleName())) {
+                throw ResourceExceptionCode.MANDATORY_FIELD.create();
             }
-            if (resource.isMailSet()) {
-                if (isEmpty(resource.getMail())) {
-                    throw ResourceExceptionCode.MANDATORY_FIELD.create();
-                }
-                if (!ResourceTools.validateResourceEmail(resource.getMail())) {
-                    throw ResourceExceptionCode.INVALID_RESOURCE_MAIL.create(resource.getMail());
-                }
-                final Resource[] resources = storage.searchResourcesByMail(resource.getMail(), ctx);
-                if (resources.length > 1) {
-                    throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
-                } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
-                    throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
-                }
+            if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
+                throw ResourceExceptionCode.INVALID_RESOURCE_IDENTIFIER.create(resource.getSimpleName());
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
+            final Resource[] resources = storage.searchResources(resource.getSimpleName(), ctx);
+            if (resources.length > 1) {
+                throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
+            } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
+                throw ResourceExceptionCode.RESOURCE_CONFLICT.create(resource.getSimpleName());
+            }
+        }
+        if (resource.isMailSet()) {
+            if (isEmpty(resource.getMail())) {
+                throw ResourceExceptionCode.MANDATORY_FIELD.create();
+            }
+            if (!ResourceTools.validateResourceEmail(resource.getMail())) {
+                throw ResourceExceptionCode.INVALID_RESOURCE_MAIL.create(resource.getMail());
+            }
+            final Resource[] resources = storage.searchResourcesByMail(resource.getMail(), ctx);
+            if (resources.length > 1) {
+                throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
+            } else if (resources.length == 1 && resources[0].getIdentifier() != resource.getIdentifier()) {
+                throw ResourceExceptionCode.RESOURCE_CONFLICT_MAIL.create(resource.getMail());
+            }
         }
     }
 

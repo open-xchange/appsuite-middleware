@@ -76,6 +76,11 @@ class RFC4314ACLExtension extends AbstractACLExtension {
      * {@link RFC4314Rights#DELETE_MAILBOX}.
      */
     private static final transient Rights RIGHTS_FOLDER_ADMIN = new Rights("aclkx");
+ 
+    /**
+     * "al": {@link Right#ADMINISTER} + {@link Right#LOOKUP}
+     */
+    private static final transient Rights RIGHTS_FOLDER_ADMIN_UNION = new Rights("al");
 
     /**
      * "l": {@link Right#LOOKUP}
@@ -97,7 +102,7 @@ class RFC4314ACLExtension extends AbstractACLExtension {
      * The "create" right is the union of the "k" and "x" rights.<br>
      * "kx": {@link RFC4314Rights#CREATE_MAILBOXES} + {@link RFC4314Rights#DELETE_MAILBOX}.
      */
-    private static final transient Rights RIGHTS_CREATE_UNION = new Rights("kx");
+    private static final transient Rights RIGHTS_CREATE_RFC4314 = new Rights("kx");
 
     /**
      * "rs": {@link Right#READ} + {@link Right#KEEP_SEEN}
@@ -182,7 +187,7 @@ class RFC4314ACLExtension extends AbstractACLExtension {
 
     @Override
     public boolean containsFolderAdminRights(final Rights rights) {
-        return rights.contains(RIGHTS_FOLDER_ADMIN);
+        return rights.contains(RIGHTS_FOLDER_ADMIN_UNION) && (rights.contains(Rights.Right.CREATE) || rights.contains(RIGHTS_CREATE_RFC4314));
     }
 
     @Override
@@ -237,7 +242,7 @@ class RFC4314ACLExtension extends AbstractACLExtension {
 
     @Override
     public boolean containsCreateSubfolders(final Rights rights) {
-        return rights.contains(RIGHTS_FOLDER_CREATE_OBJECTS) && (rights.contains(Rights.Right.CREATE) || rights.contains(RIGHTS_CREATE_UNION));
+        return rights.contains(RIGHTS_FOLDER_CREATE_OBJECTS) && (rights.contains(Rights.Right.CREATE) || rights.contains(RIGHTS_CREATE_RFC4314));
     }
 
     @Override

@@ -53,34 +53,36 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.session.Session;
 
 /**
- * {@link LockManagement} - The lock management.
+ * {@link TreeLockManagement} - The folder tree lock management.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LockManagement {
+public final class TreeLockManagement {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LockManagement.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(TreeLockManagement.class));
 
-    private static final LockManagement INSTANCE = new LockManagement();
+    private static final TreeLockManagement INSTANCE = new TreeLockManagement();
 
     /**
-     * Gets the {@link LockManagement management} instance.
+     * Gets the {@link TreeLockManagement management} instance.
      *
      * @return The management instance
      */
-    public static LockManagement getInstance() {
+    public static TreeLockManagement getInstance() {
         return INSTANCE;
     }
 
     private final ConcurrentMap<Key, ConcurrentMap<String, ReadWriteLock>> map;
 
     /**
-     * Initializes a new {@link LockManagement}.
+     * Initializes a new {@link TreeLockManagement}.
      */
-    private LockManagement() {
+    private TreeLockManagement() {
         super();
         map = new ConcurrentHashMap<Key, ConcurrentMap<String, ReadWriteLock>>();
     }

@@ -80,6 +80,7 @@ import java.util.concurrent.Future;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.ServiceException;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.exceptions.DatabaseContextMappingException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
@@ -103,30 +104,23 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.database.TableColumnObject;
 import com.openexchange.admin.tools.database.TableObject;
 import com.openexchange.admin.tools.database.TableRowObject;
-import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.contexts.impl.ContextException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteFailedException;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.downgrade.DowngradeEvent;
-import com.openexchange.groupware.downgrade.DowngradeFailedException;
 import com.openexchange.groupware.downgrade.DowngradeRegistry;
-import com.openexchange.groupware.filestore.FilestoreException;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.i18n.Groups;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationException;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.server.ServiceException;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.file.QuotaFileStorage;
-import com.openexchange.tools.file.external.FileStorageException;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -188,7 +182,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             final ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
             gwCtx = service.getContext(ctx.getId().intValue());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } catch (final ServiceException e) {
             LOG.error(e.getMessage(), e);
@@ -252,7 +246,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 if (!simpleDelete) {
                     QuotaFileStorage.getInstance(storageURI, gwCtx).remove();
                 }
-            } catch (final FileStorageException e) {
+            } catch (final OXException e) {
                 simpleDelete = true;
                 LOG.error("File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.", e);
             }
@@ -265,7 +259,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
             // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
             conForConfigDB.commit();
-        } catch (final FilestoreException e) {
+        } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             throw new StorageException(e);
         } catch (final IOException e) {
@@ -293,12 +287,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             try {
                 final DeleteEvent event = new DeleteEvent(this, ctx.getId().intValue(), DeleteEvent.TYPE_CONTEXT, ctx.getId().intValue());
                 DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
-            } catch (final DeleteFailedException e) {
+            } catch (final OXException e) {
                 LOG.error(
                     "Some implementation deleting context specific data failed. Continuing with hard delete from tables using cid column.",
                     e);
-            } catch (final ContextException e) {
-                LOG.error("Problem loading context data. Continuing with hard delete from tables using cid column.", e);
             }
             // now go through tables and delete the remainders
             for (int i = sorted_tables.size() - 1; i >= 0; i--) {
@@ -746,7 +738,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         ThreadPoolService threadPoolS;
         try {
             threadPoolS = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-        } catch (final ServiceException e) {
+        } catch (final OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
 
@@ -776,7 +768,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             PipesAndFiltersService pnfService;
             try {
                 pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
-            } catch (final ServiceException e) {
+            } catch (final OXException e) {
                 throw new StorageException(e.getMessage(), e);
             }
             DataSource<Integer> output = pnfService.create(cids);
@@ -2107,7 +2099,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         try {
             gCtx = cStor.getContext(ctx.getId().intValue());
             con = cache.getConnectionForContext(ctx.getId().intValue());
-        } catch (final ContextException e) {
+        } catch (final OXException e) {
             LOG.error("Can't get groupware context object.", e);
             throw new StorageException(e);
         } catch (final PoolException e) {
@@ -2122,23 +2114,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 registry.fireDowngradeEvent(event);
             }
             con.commit();
-        } catch (final UserConfigurationException e) {
+        } catch (final OXException e) {
             try {
                 con.rollback();
             } catch (final SQLException e1) {
                 LOG.error("Error in rollback of database connection.", e1);
                 throw new StorageException(e1);
             }
-            LOG.error("Can't get user configuration.", e);
-            throw new StorageException(e);
-        } catch (final DowngradeFailedException e) {
-            try {
-                con.rollback();
-            } catch (final SQLException e1) {
-                LOG.error("Error in rollback of database connection.", e1);
-                throw new StorageException(e1);
-            }
-            LOG.error("Deleting not viewable data failed.", e);
+            LOG.error("Internal Error.", e);
             throw new StorageException(e);
         } catch (final SQLException e) {
             try {

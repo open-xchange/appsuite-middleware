@@ -128,6 +128,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.html.HTMLService;
+import com.openexchange.java.Charsets;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -1272,7 +1273,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         contentType.setSubType("octet-stream");
                         final HttpServletResponse httpResponse = paramContainer.getHttpServletResponse();
                         httpResponse.setContentType(contentType.toString());
-                        httpResponse.setHeader("Content-disposition", getAttachmentDispositionValue(new StringBuilder(mail.getSubject()).append(".eml").toString(), null));
+                        httpResponse.setHeader("Content-disposition", getAttachmentDispositionValue(new StringBuilder(mail.getSubject()).append(".eml").toString(), null, paramContainer.getHeader("user-agent")));
                         Tools.removeCachingHeader(httpResponse);
                         // Write output stream in max. 8K chunks
                         final OutputStream out = httpResponse.getOutputStream();
@@ -1804,7 +1805,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 contentType.setPrimaryType("application");
                 contentType.setSubType("octet-stream");
                 resp.setContentType(contentType.toString());
-                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null));
+                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null, req.getHeader("user-agent")));
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -1881,7 +1882,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 contentType.setPrimaryType("application");
                 contentType.setSubType("octet-stream");
                 resp.setContentType(contentType.toString());
-                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null));
+                resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, null, req.getHeader("user-agent")));
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
                  * not allow header "Pragma"
@@ -2020,7 +2021,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     contentType.setPrimaryType("application");
                     contentType.setSubType("octet-stream");
                     resp.setContentType(contentType.toString());
-                    resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType()));
+                    resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType(), req.getHeader("user-agent")));
                 } else {
                     final CheckedDownload checkedDownload =
                         DownloadUtility.checkInlineDownload(
@@ -2150,7 +2151,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         return escapeBackslashAndQuote(tmp.toString());
     }
 
-    public static String getAttachmentDispositionValue(final String fileName, final String baseCT) {
+    public static String getAttachmentDispositionValue(final String fileName, final String baseCT, final String userAgent) {
         if (null == fileName) {
             return new StringBuilder("attachment; filename=\"").append(DEFAULT_FILENAME).append('"').toString();
         }
@@ -2171,13 +2172,17 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
         }
         fn = escapeBackslashAndQuote(fn);
+        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
+            // InternetExplorer
+            return new StringBuilder("attachment; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"').toString();
+        }
         /*-
          * On socket layer characters are casted to byte values.
          * 
          * See AJPv13Response.writeString():
          * sink.write((byte) chars[i]);
          * 
-         * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-5589-1
+         * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
         String foo;
         try {
@@ -4747,7 +4752,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             }
             return false;
         } catch (final JSONException e) {
-            throw new OXException(MailExceptionCode.JSON_ERROR.create(e, e.getMessage()));
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

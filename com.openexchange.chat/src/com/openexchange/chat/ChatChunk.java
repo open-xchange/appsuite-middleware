@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.contact.mappers;
+package com.openexchange.chat;
 
-import java.util.Properties;
-import java.util.Set;
-import com.openexchange.groupware.contact.helpers.ContactField;
 
 
 /**
- * {@link PropertyDrivenMapper}
+ * {@link ChatChunk} - Represents a certain chunk of a chat conversation associated with certain chat users/members.
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PropertyDrivenMapper extends AbstractOutlookMapper {
+public interface ChatChunk extends ChatGroup {
 
-    public PropertyDrivenMapper(Properties props){
-        Set<Object> keys = props.keySet();
-        for(Object key: keys){
-            ContactField field = ContactField.getByAjaxName((String) key);
-            store(field, (String) props.get(key));
-        }
+    /**
+     * Gets the chunk identifier.
+     * 
+     * @return The chunk identifier.
+     */
+    String getChunkId();
 
-    }
+    /**
+     * Gets the chat identifier.
+     * 
+     * @return The chat identifier.
+     */
+    String getChatId();
 
 }

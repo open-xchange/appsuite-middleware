@@ -118,7 +118,7 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
              * the "DTSTART" property.
              */
             calendar.setEndDate(start);
-        } else {
+        } else if (calendar instanceof Appointment) {
             // Only the date is specified. Then we have to set the end to at
             // least 1 day later. Will be overwritten if DTEND is specified.
             final Calendar calendarUTC = new GregorianCalendar();
@@ -127,10 +127,8 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
             calendarUTC.add(Calendar.DATE, 1);
             calendar.setEndDate(calendarUTC.getTime());
             // Special flag for appointments.
-            if (calendar instanceof Appointment) {
-                final Appointment appointment = (Appointment) calendar;
-                appointment.setFullTime(true);
-            }
+            final Appointment appointment = (Appointment) calendar;
+            appointment.setFullTime(true);
         }
     }
 }

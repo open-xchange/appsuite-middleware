@@ -76,14 +76,14 @@ public class FastSecretInconsistencyDetector implements
 
 	private static final String PROPERTY = "com.openexchange.secret.recovery.fast.token";
 
-	private SecretService secretService;
+	private final SecretService secretService;
 
-	private CryptoService cryptoService;
+	private final CryptoService cryptoService;
 
-	private UserService userService;
+	private final UserService userService;
 
-	public FastSecretInconsistencyDetector(SecretService secretService,
-			CryptoService cryptoService, UserService userService) {
+	public FastSecretInconsistencyDetector(final SecretService secretService,
+			final CryptoService cryptoService, final UserService userService) {
 		this.secretService = secretService;
 		this.cryptoService = cryptoService;
 		this.userService = userService;
@@ -91,26 +91,44 @@ public class FastSecretInconsistencyDetector implements
 
 	private static final String testString = "supercalifragilisticexplialidocious";
 
-	public String isSecretWorking(ServerSession session) throws OXException {
-		String secret = secretService.getSecret(session);
-		Set<String> token = session.getUser().getAttributes().get(PROPERTY);
-		if (token == null || token.isEmpty()) {
-			saveNewToken(session.getUser(), secret, session.getContext());
-			return null;
-		}
+	@Override
+    public String isSecretWorking(final ServerSession session) throws OXException {
+		final String secret = secretService.getSecret(session);
+		final Set<String> tokens = session.getUser().getAttributes().get(PROPERTY);
+        if (tokens == null || tokens.isEmpty()) {
+            saveNewToken(session.getUser(), secret, session.getContext());
+            return null;
+        }
+        final String token = tokens.iterator().next();
+        if (isEmpty(token)) {
+            saveNewToken(session.getUser(), secret, session.getContext());
+            return null;
+        }
 
-		if (canDecrypt(token.iterator().next(), secret)) {
+		if (canDecrypt(token, secret)) {
 			return null;
 		}
 
 		return "Could not decrypt token";
 	}
 
-	private boolean canDecrypt(String next, String secret) throws OXException {
+	private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+	private boolean canDecrypt(final String next, final String secret) throws OXException {
 		return cryptoService.decrypt(next, secret).equals(testString);
 	}
 
-	private void saveNewToken(User user, String secret, Context context) throws OXException {
+	private void saveNewToken(final User user, final String secret, final Context context) throws OXException {
 
 		userService.setAttribute(PROPERTY,
 				cryptoService.encrypt(testString, secret), user.getId(),
@@ -118,8 +136,9 @@ public class FastSecretInconsistencyDetector implements
 
 	}
 
-	public void migrate(String oldSecret, String newSecret,
-			ServerSession session) throws OXException {
+	@Override
+    public void migrate(final String oldSecret, final String newSecret,
+			final ServerSession session) throws OXException {
 		saveNewToken(session.getUser(), newSecret, session.getContext());
 	}
 

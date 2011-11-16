@@ -57,7 +57,7 @@ package com.openexchange.search;
 public interface SearchTerm<O> {
 
 	public enum OperationPosition{
-		BEFORE, BETWEEN, AFTER
+		BEFORE, BETWEEN, AFTER, PATTERN
 	}
     /**
      * Gets this search term's operation.

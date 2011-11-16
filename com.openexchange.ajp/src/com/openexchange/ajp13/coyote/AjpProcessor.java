@@ -743,7 +743,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 error = true;
                 break;
             } catch (final Throwable t) {
-                LOG.debug("ajpprocessor.header.error", t);
+                LOG.debug("Header message parsing failed", t);
                 // 400 - Bad Request
                 response.setStatus(400);
                 error = true;
@@ -771,7 +771,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 continue;
             } catch (final Throwable t) {
                 final StringBuilder sb = new StringBuilder(512);
-                sb.append("ajpprocessor.request.prepare: ").append(t.getClass().getName());
+                sb.append("Error preparing request: ").append(t.getClass().getName());
                 sb.append(" message=").append(t.getMessage()).append("\n");
                 appendStackTrace(t.getStackTrace(), sb);
                 LOG.debug(sb.toString());
@@ -836,7 +836,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // Ignore
                 } catch (final Throwable t) {
                     ExceptionUtils.handleThrowable(t);
-                    final StringBuilder tmp = new StringBuilder(128).append("ajpprocessor.request.process: ");
+                    final StringBuilder tmp = new StringBuilder(128).append("Error processing request: ");
                     appendRequestInfo(tmp);
                     LOG.error(tmp.toString(), t);
                     // 500 - Internal Server Error
@@ -1579,13 +1579,15 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         return path;
     }
 
+    private static final String JSESSIONID_COOKIE = AJPv13RequestHandler.JSESSIONID_COOKIE;
+
     private void checkJSessionIDCookie() {
         final Cookie[] cookies = request.getCookies();
         Cookie jsessionIDCookie = null;
         if (cookies != null) {
             NextCookie: for (int i = 0; (i < cookies.length) && (jsessionIDCookie == null); i++) {
                 final Cookie current = cookies[i];
-                if (AJPv13RequestHandler.JSESSIONID_COOKIE.equals(current.getName())) {
+                if (JSESSIONID_COOKIE.equals(current.getName())) {
                     /*
                      * Check JVM route
                      */
@@ -1601,6 +1603,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tDifferent JVM route detected. Removing JSESSIONID cookie: ").append(id));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
                             continue NextCookie;
                         }
@@ -1615,6 +1618,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
                             continue NextCookie;
                         }
@@ -1634,6 +1638,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tMissing JVM route in JESSIONID cookie").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
                             continue NextCookie;
                         }
@@ -1648,6 +1653,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                                 LOG.debug(new StringBuilder("\n\tExpired or invalid cookie -> Removing JSESSIONID cookie: ").append(current.getValue()));
                             }
                             current.setMaxAge(0); // delete
+                            current.setSecure(forceHttps || request.isSecure());
                             response.addCookie(current);
                             continue NextCookie;
                         }
@@ -1673,7 +1679,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
             jsessionIDVal.append('.').append(jvmRoute);
         }
-        final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIDVal.toString());
+        final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionIDVal.toString());
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = false;
@@ -1704,7 +1710,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             jsessionIdVal = jsessionIDVal.toString();
             join = false;
         }
-        final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
+        final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionIdVal);
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = join;
@@ -1887,7 +1893,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         while (read < n) {
             res = input.read(buf, read + pos, n - read);
             if (res <= 0) {
-                throw new IOException("ajpprotocol.failedread");
+                throw new IOException("Socket read failed");
             }
             read += res;
         }
@@ -1957,12 +1963,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      */
     protected boolean readMessage(final AjpMessage message) throws IOException {
         final byte[] buf = message.getBuffer();
-
+        // Read initial bytes: 0x12 0x34 <data-length>
         read(buf, 0, message.getHeaderLength());
-
         message.processHeader();
+        // Read AJP payload
         read(buf, message.getHeaderLength(), message.getLen());
-
         return true;
     }
 

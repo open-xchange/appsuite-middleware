@@ -2055,15 +2055,11 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     public void checkAndFillIfUserIsUser(final CalendarDataObject cdao, final Participant p) throws OXException {
         final Participant check[] = cdao.getParticipants();
         if (check != null && check.length > 0) {
-            try {
-                if (!containsParticipant(check, p, cdao.getContext())) {
-                    final Participant newp[] = new Participant[check.length+1];
-                    System.arraycopy(check, 0, newp, 0, check.length);
-                    newp[check.length] = p;
-                    cdao.setParticipants(newp);
-                }
-            } catch (final OXException e) {
-                throw new OXException(e);
+            if (!containsParticipant(check, p, cdao.getContext())) {
+                final Participant newp[] = new Participant[check.length+1];
+                System.arraycopy(check, 0, newp, 0, check.length);
+                newp[check.length] = p;
+                cdao.setParticipants(newp);
             }
         } else {
             final Participant newp[] = new Participant[1];

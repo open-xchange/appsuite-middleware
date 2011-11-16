@@ -147,20 +147,16 @@ final class Update {
     }
 
     private void allowed() throws OXException {
-        try {
-            if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
-                throw GroupExceptionCodes.NO_MODIFY_PERMISSION.create();
+        if (!UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx).isEditGroup()) {
+            throw GroupExceptionCodes.NO_MODIFY_PERMISSION.create();
+        }
+        if (changed.getIdentifier() == GroupTools.GROUP_ZERO.getIdentifier()) {
+            try {
+                throw GroupExceptionCodes.NO_GROUP_UPDATE.create(GroupTools.getGroupZero(ctx).getDisplayName());
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+                throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
             }
-            if (changed.getIdentifier() == GroupTools.GROUP_ZERO.getIdentifier()) {
-                try {
-                    throw GroupExceptionCodes.NO_GROUP_UPDATE.create(GroupTools.getGroupZero(ctx).getDisplayName());
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                    throw GroupExceptionCodes.NO_GROUP_UPDATE.create(I(GroupStorage.GROUP_ZERO_IDENTIFIER));
-                }
-            }
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
     }
 

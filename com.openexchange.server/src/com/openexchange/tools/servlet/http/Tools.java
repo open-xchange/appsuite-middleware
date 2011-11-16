@@ -61,6 +61,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -329,6 +330,14 @@ public final class Tools {
         }
 
         resp.setHeader("Content-Disposition", cd);
+    }
+
+    private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
+
+    private static final Pattern PAT_QUOTE = Pattern.compile("\"");
+
+    private static String escapeBackslashAndQuote(final String str) {
+        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
     static {

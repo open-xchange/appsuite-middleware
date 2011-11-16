@@ -85,7 +85,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public void perform(PerformParameters params) throws OXException {
+    public void perform(final PerformParameters params) throws OXException {
         createTable("sequenceIds", getCreate(), params.getContextId());
         if (LOG.isInfoEnabled()) {
             LOG.info("UpdateTask 'IDCreateTableTask' successfully performed!");
@@ -93,12 +93,7 @@ public class IDCreateTableTask extends UpdateTaskAdapter {
     }
 
     private static void createTable(final String tablename, final String sqlCreate, final int contextId) throws OXException {
-        final Connection writeCon;
-        try {
-            writeCon = Database.get(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        final Connection writeCon = Database.get(contextId, true);
         PreparedStatement stmt = null;
         try {
             try {

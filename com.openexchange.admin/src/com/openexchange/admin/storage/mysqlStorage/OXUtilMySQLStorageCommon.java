@@ -70,8 +70,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.sqlStorage.CreateTableRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.CreateTableService;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.update.SchemaException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.Updater;
@@ -232,7 +231,7 @@ public class OXUtilMySQLStorageCommon {
                 }
                 toCreate.remove(next);
             }
-        } catch (AbstractOXException e) {
+        } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
         if (!toCreate.isEmpty()) {
@@ -278,7 +277,7 @@ public class OXUtilMySQLStorageCommon {
             for (UpdateTask task : tasks) {
                 store.addExecutedTask(con, task.getClass().getName(), true, poolId, schema);
             }
-        } catch (SchemaException e) {
+        } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
     }

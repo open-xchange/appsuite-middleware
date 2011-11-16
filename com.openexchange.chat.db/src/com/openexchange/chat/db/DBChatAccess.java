@@ -54,6 +54,8 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -104,6 +106,8 @@ public final class DBChatAccess implements ChatAccess {
         removeDbChatAccess(session.getUserId(), session.getContextId());
     }
 
+    private static final boolean DO_CLEAN_UP = false;
+
     /**
      * Removes associated chat access.
      * 
@@ -113,7 +117,7 @@ public final class DBChatAccess implements ChatAccess {
      */
     public static void removeDbChatAccess(final int userId, final int contextId) throws OXException {
         final DBChatAccess access = ACCESS_MAP.remove(new Key(userId, contextId));
-        if (null != access) {
+        if (DO_CLEAN_UP && null != access) {
             access.cleanUp();
         }
     }
@@ -314,7 +318,7 @@ public final class DBChatAccess implements ChatAccess {
 
     @Override
     public Chat getChat(final String chatId) throws OXException {
-        final DBChat dbChat = DBChat.getDBChat(Integer.parseInt(chatId), contextId);
+        final DBChat dbChat = DBChat.getDBChat(DBChatUtility.parseUnsignedInt(chatId), contextId);
         if (null == dbChat) {
             throw ChatExceptionCodes.CHAT_NOT_FOUND.create(chatId);
         }
@@ -346,9 +350,10 @@ public final class DBChatAccess implements ChatAccess {
 
     private void updateChat(final ChatDescription chatDescription, final Connection con) throws OXException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         int pos;
         try {
-            final int chatId = Integer.parseInt(chatDescription.getChatId());
+            final int chatId = DBChatUtility.parseUnsignedInt(chatDescription.getChatId());
             /*
              * Update subject
              */
@@ -370,14 +375,34 @@ public final class DBChatAccess implements ChatAccess {
                 final List<String> newMembers = chatDescription.getNewMembers();
                 if (null != newMembers && !newMembers.isEmpty()) {
                     closeSQLStuff(stmt);
+                    /*
+                     * Determine already existing users
+                     */
+                    stmt = con.prepareStatement("SELECT user FROM chatMember WHERE cid = ? AND chatId = ?");
+                    pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos, chatId);
+                    rs = stmt.executeQuery();
+                    final TIntSet users = new TIntHashSet(16);
+                    while (rs.next()) {
+                        users.add(rs.getInt(1));
+                    }
+                    closeSQLStuff(rs, stmt);
+                    rs = null;
+                    /*
+                     * Insert non-existent
+                     */
                     stmt = con.prepareStatement("INSERT INTO chatMember (cid,chatId,opMode,user) VALUES (?,?,?,?)");
                     pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
                     stmt.setInt(pos++, 0);
                     for (final String user : newMembers) {
-                        stmt.setInt(pos, Integer.parseInt(user));
-                        stmt.addBatch();
+                        final int userId = DBChatUtility.parseUnsignedInt(user);
+                        if (!users.contains(userId)) {
+                            stmt.setInt(pos, userId);
+                            stmt.addBatch();
+                        }
                     }
                     stmt.executeBatch();
                 }
@@ -394,7 +419,7 @@ public final class DBChatAccess implements ChatAccess {
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
                     for (final String user : deleteMembers) {
-                        stmt.setInt(pos, Integer.parseInt(user));
+                        stmt.setInt(pos, DBChatUtility.parseUnsignedInt(user));
                         stmt.addBatch();
                     }
                     stmt.executeBatch();
@@ -403,7 +428,7 @@ public final class DBChatAccess implements ChatAccess {
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -442,7 +467,7 @@ public final class DBChatAccess implements ChatAccess {
         if (null == chatId) {
             chid = getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId);
         } else {
-            chid = Integer.parseInt(chatId);
+            chid = DBChatUtility.parseUnsignedInt(chatId);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -490,7 +515,7 @@ public final class DBChatAccess implements ChatAccess {
              * Others
              */
             for (final ChatUser chatUser : members) {
-                stmt.setInt(2, Integer.parseInt(chatUser.getId()));
+                stmt.setInt(2, DBChatUtility.parseUnsignedInt(chatUser.getId()));
                 stmt.addBatch();
             }
             stmt.executeBatch();

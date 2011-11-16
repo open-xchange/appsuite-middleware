@@ -1566,13 +1566,11 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     private SortableId[] getPrivateFolderSubfolders(final String parentId, final int tree, final StorageParameters parameters, final User user, final Locale locale, final int contextId) throws OXException {
         final CompletionService<TreeMap<String, List<String>>> completionService;
-        try {
+        {
             completionService =
                 new ThreadPoolCompletionService<TreeMap<String, List<String>>>(OutlookServiceRegistry.getServiceRegistry().getService(
                     ThreadPoolService.class,
                     true));
-        } catch (final OXException e) {
-            throw new OXException(e);
         }
         int taskCount = 0;
         final FolderNameComparator comparator = new FolderNameComparator(locale);
@@ -2063,7 +2061,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MailFolderCallable(final FolderNameComparator comparator, final Locale locale, final User user, final int contextId, final int tree, final StorageParameters parameters) {
             this.comparator = comparator;
-            this.locale = locale;
+            this.locale = locale == null ? Locale.US : locale;
             this.user = user;
             this.contextId = contextId;
             this.tree = tree;
@@ -2191,7 +2189,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MailAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
+            collator = Collator.getInstance(locale == null ? Locale.US : locale);
             collator.setStrength(Collator.SECONDARY);
         }
 
@@ -2224,7 +2222,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MessagingAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
+            collator = Collator.getInstance(locale == null ? Locale.US : locale);
             collator.setStrength(Collator.SECONDARY);
         }
 
@@ -2258,7 +2256,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public FolderNameComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
+            collator = Collator.getInstance(locale == null ? Locale.US : locale);
             collator.setStrength(Collator.SECONDARY);
         }
 

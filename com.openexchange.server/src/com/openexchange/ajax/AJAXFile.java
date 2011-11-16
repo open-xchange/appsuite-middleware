@@ -375,7 +375,6 @@ public final class AJAXFile extends PermissionServlet {
 
             }
         } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
             JSONObject responseObj = null;
             try {
                 final Response response = new Response(session);

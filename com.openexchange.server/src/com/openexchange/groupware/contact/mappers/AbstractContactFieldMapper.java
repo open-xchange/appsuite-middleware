@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,42 @@
  *
  */
 
-package com.openexchange.ajp13.coyote;
+package com.openexchange.groupware.contact.mappers;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import javax.servlet.ServletInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link ByteArrayServletInputStream} - The {@link ServletInputStream} backed by a byte array.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
-public final class ByteArrayServletInputStream extends ServletInputStream {
+public abstract class AbstractContactFieldMapper implements ContactFieldMapper {
 
-    private final ByteArrayInputStream bais;
+    protected final HashMap<String, ContactField> something2ox = new HashMap<String, ContactField>();
 
-    /**
-     * Initializes a new {@link ByteArrayServletInputStream}.
-     */
-    public ByteArrayServletInputStream(final byte[] bytes) {
-        super();
-        bais = new UnsynchronizedByteArrayInputStream(bytes);
+    protected final HashMap<ContactField, String> ox2something = new HashMap<ContactField, String>();
+
+    public ContactField getFieldByName(final String name) {
+        return something2ox.get(name);
     }
 
-    @Override
-    public int read() throws IOException {
-        return bais.read();
+    public String getNameOfField(final ContactField field) {
+        return ox2something.get(field);
     }
 
-    @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException {
-        return bais.read(b, off, len);
+    public Collection<String> getNamesOfFields() {
+        return ox2something.values();
+    }
+
+    public Collection<ContactField> getSupportedFields() {
+        return something2ox.values();
+    }
+    
+    public void store(ContactField oxField, String otherField){
+        if(otherField != null && ! "".equals(otherField))
+            something2ox.put(otherField, oxField);
+        if(oxField != null)
+            ox2something.put(oxField, otherField);
     }
 
 }

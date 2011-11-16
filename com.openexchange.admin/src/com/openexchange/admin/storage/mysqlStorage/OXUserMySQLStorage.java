@@ -88,6 +88,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXUserSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.Contacts;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -663,10 +664,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     final String value = entry.getValue();
                     if (null != key && null != value) {
                         try {
-                            final Setting setting = ConfigTree.getSettingByPath(key);
+                            final Setting setting = ConfigTree.getInstance().getSettingByPath(key);
                             setting.setSingleValue(value);
                             settStor.save(con, setting);
-                        } catch (final SettingException e) {
+                        } catch (final OXException e) {
                             log.error("Problem while storing GUI preferences.", e);
                         }
                     }
@@ -727,10 +728,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error("Error", e);
             rollback(con);
             throw new StorageException(e);
-        } catch (final AbstractOXException e) {
-            log.error(e.getMessage(), e);
-            rollback(con);
-            throw new StorageException(e.toString());
         } catch (final URISyntaxException e) {
             log.error(e.getMessage(), e);
             rollback(con);
@@ -764,7 +761,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void changePrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws ServiceException, StorageException {
+    private void changePrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws StorageException, OXException {
         // Loading a context is not possible if here the primary mail account for the admin is created.
         final int contextId = ctx.getId().intValue();
         final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
@@ -836,7 +833,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             if (!changed.isEmpty()) {
                 mass.updateMailAccount(account, changed, userId, contextId, null, con, true);
             }
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
@@ -1229,9 +1226,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final OXException e) {
             log.error("OX Error", e);
             throw new StorageException(e.toString());
-        } catch (final AbstractOXException e) {
-            log.error(e.getMessage(), e);
-            throw new StorageException(e.toString());
         } catch (final NoSuchAlgorithmException e) {
             // Here we throw without rollback, because at the point this
             // exception is thrown
@@ -1285,7 +1279,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void createPrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws ServiceException, StorageException {
+    private void createPrimaryMailAccount(final Context ctx, final Connection con, final User user, final int userId) throws StorageException, OXException {
         // Loading a context is not possible if here the primary mail account for the admin is created.
         final com.openexchange.groupware.contexts.Context context = new ContextImpl(ctx.getId().intValue());
         final MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
@@ -1330,7 +1324,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             mass.insertMailAccount(account, userId, context, null, con);
-        } catch (final MailAccountException e) {
+        } catch (final OXException e) {
             log.error("Problem storing the primary mail account.", e);
             throw new StorageException(e.toString());
         }
@@ -1347,10 +1341,10 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 final String value = entry.getValue();
                 if (null != key && null != value) {
                     try {
-                        final Setting setting = ConfigTree.getSettingByPath(key);
+                        final Setting setting = ConfigTree.getInstance().getSettingByPath(key);
                         setting.setSingleValue(value);
                         settStor.save(con, setting);
-                    } catch (final SettingException e) {
+                    } catch (final OXException e) {
                         log.error("Problem while storing GUI preferences.", e);
                     }
                 }
@@ -1358,7 +1352,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
     }
 
-    private void storeFolderTree(final Context ctx, final Connection con, final User user, final int userId) throws SettingException {
+    private void storeFolderTree(final Context ctx, final Connection con, final User user, final int userId) throws OXException {
         if (!user.isFolderTreeSet()) {
             return;
         }
@@ -1577,15 +1571,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
      * @param user
      * @param con
      * @return Map containing the GUI configuration, null if no settings found
+     * @throws OXException 
      * @throws SettingException
      */
-    private Map<String,String> readGUISettings(final Context ctx, final User user, final Connection con) throws SettingException {
+    private Map<String,String> readGUISettings(final Context ctx, final User user, final Connection con) throws OXException {
         Map<String, String> ret = null;
         final int id = user.getId();
         final SettingStorage settStor = SettingStorage.getInstance(ctx.getId().intValue(), id);
 
         for( final String p : new String[]{ "/gui", "/fastgui" }) {
-            final Setting s = ConfigTree.getSettingByPath(p);
+            final Setting s = ConfigTree.getInstance().getSettingByPath(p);
             if( s != null ) {
                 settStor.readValues(con, s);
                 if( ret == null ) {
@@ -1598,7 +1593,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
         }
         
-        final Setting[] modules = ConfigTree.getSettingByPath("modules").getElements();
+        final Setting[] modules = ConfigTree.getInstance().getSettingByPath("modules").getElements();
         for (int i = 0; i < modules.length; i++) {
             final Setting guiSetting = modules[i].getElement("gui");
             if( guiSetting != null ) {
@@ -1821,7 +1816,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final RuntimeException e) {
             log.error(e.getMessage(), e);
             throw e;
-        } catch (final SettingException e) {
+        } catch (final OXException e) {
             log.error("GUI setting Error", e);
             throw new StorageException(e.toString());
         } finally {
@@ -1957,12 +1952,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
             }
-        } catch (final DeleteFailedException dex) {
-            log.error("Delete Error", dex);
-            throw new StorageException(dex.toString());
-        } catch (final ContextException cte) {
-            log.error("Context Error", cte);
-            throw new StorageException(cte.toString());
         } catch (final SQLException sqle) {
             log.error("SQL Error", sqle);
             throw new StorageException(sqle.toString());
@@ -2138,9 +2127,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             acc.setGlobalAddressBookDisabled(adminHelper.isGlobalAddressBookDisabled(ctx.getId().intValue(), user_id, read_ox_con));
             acc.setPublicFolderEditable(adminHelper.isPublicFolderEditable(ctx.getId().intValue(), user_id, read_ox_con));
             return acc;
-        } catch (final DBPoolingException dbpol) {
-            log.error("DBPooling error", dbpol);
-            throw new StorageException(dbpol.toString());
         } catch (final PoolException polex) {
             log.error("Pool error", polex);
             throw new StorageException(polex);
@@ -2462,30 +2448,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Apply access.isGlobalAddressBook() to OXFolderAdminHelper.setGlobalAddressBookEnabled()
             final OXFolderAdminHelper adminHelper = new OXFolderAdminHelper();
             adminHelper.setGlobalAddressBookDisabled(ctx.getId().intValue(), userId, access.isGlobalAddressBookDisabled(), writeCon);
-            try {
-                adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
-            } catch (final OXException e) {
-                if (!insert && !"true".equals(access.getProperty("ignoreErrors"))) { // update
-                    throw e;
-                }
-            }
+            adminHelper.setPublicFolderEditable(access.isPublicFolderEditable(), ctx.getId().intValue(), userId, writeCon);
 
             RdbUserConfigurationStorage.saveUserConfiguration(user, insert, writeCon);
             if (!insert) {
                 final com.openexchange.groupware.contexts.Context gwCtx = ContextStorage.getInstance().getContext(ctx.getId().intValue());
                 UserConfigurationStorage.getInstance().removeUserConfiguration(user.getUserId(), gwCtx);
             }
-        } catch (final DBPoolingException e) {
-            log.error("DBPooling Error", e);
-            throw new StorageException(e.toString());
         } catch (final SQLException e) {
             log.error("SQL Error", e);
-            throw new StorageException(e.toString());
-        } catch (final ContextException e) {
-            log.error("Context Error", e);
-            throw new StorageException(e.toString());
-        } catch (final UserConfigurationException e) {
-            log.error("UserConfiguration Error", e);
             throw new StorageException(e.toString());
         } catch (final OXException e) {
             log.error("UserConfiguration Error", e);
