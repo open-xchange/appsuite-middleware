@@ -297,17 +297,23 @@ public final class ServerConfig {
      */
     public static int getInt(final Property property) throws OXException {
         final int value;
-        if (Property.MaxFileUploadSize == property) {
+        switch (property) {
+        case MaxFileUploadSize:
             value = SINGLETON.maxFileUploadSize;
-        } else if (Property.MaxUploadIdleTimeMillis == property) {
+            break;
+        case MaxUploadIdleTimeMillis:
             value = SINGLETON.maxUploadIdleTimeMillis;
-        } else if (Property.JMX_PORT == property) {
+            break;
+        case JMX_PORT:
             value = SINGLETON.jmxPort;
-        } else if (Property.COOKIE_TTL == property) {
+            break;
+        case COOKIE_TTL:
             value = SINGLETON.cookieTTL;
-        } else if (Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS == property) {
+            break;
+        case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
             value = SINGLETON.defaultMaxConcurrentAJAXRequests;
-        } else {
+            break;
+        default:
             try {
                 final String prop = getProperty(property.getPropertyName());
                 if (prop == null) {

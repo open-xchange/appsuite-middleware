@@ -233,7 +233,7 @@ public abstract class SessionServlet extends AJAXServlet {
             /*
              * Check max. concurrent AJAX requests
              */
-            final int maxConcurrentRequests = getMaxConcurrentRequests(session);
+            final int maxConcurrentRequests = getMaxConcurrentRequests(session, ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS));
             if (maxConcurrentRequests > 0) {
                 counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                 if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
@@ -269,15 +269,15 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static int getMaxConcurrentRequests(final ServerSession session) {
+    private static int getMaxConcurrentRequests(final ServerSession session, final int defaultValue) {
         final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
         if (null == set || set.isEmpty()) {
-            return -1;
+            return defaultValue;
         }
         try {
             return Integer.parseInt(set.iterator().next());
         } catch (final NumberFormatException e) {
-            return -1;
+            return defaultValue;
         }
     }
 
