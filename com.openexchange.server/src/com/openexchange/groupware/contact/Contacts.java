@@ -7025,7 +7025,10 @@ public final class Contacts {
                     } else {
                         synchronized (SQL_DATE_FORMAT) {
                             try {
-                                co.setBirthday(SQL_DATE_FORMAT.parse(val.toString()));
+                                final String string = val.toString();
+                                if (!"0000-00-00".equals(string)) {
+                                    co.setBirthday(SQL_DATE_FORMAT.parse(string));
+                                }
                             } catch (final ParseException e) {
                                 // Ignore
                             }
@@ -7092,7 +7095,10 @@ public final class Contacts {
                     } else {
                         synchronized (SQL_DATE_FORMAT) {
                             try {
-                                co.setAnniversary(SQL_DATE_FORMAT.parse(val.toString()));
+                                final String string = val.toString();
+                                if (!"0000-00-00".equals(string)) {
+                                    co.setAnniversary(SQL_DATE_FORMAT.parse(string));
+                                }
                             } catch (final ParseException e) {
                                 // Ignore
                             }
