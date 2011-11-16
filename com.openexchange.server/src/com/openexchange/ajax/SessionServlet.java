@@ -233,7 +233,7 @@ public abstract class SessionServlet extends AJAXServlet {
             /*
              * Check max. concurrent AJAX requests
              */
-            final int maxConcurrentRequests = getMaxConcurrentRequests(session, ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS));
+            final int maxConcurrentRequests = getMaxConcurrentRequests(session);
             if (maxConcurrentRequests > 0) {
                 counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                 if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
@@ -269,15 +269,38 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static int getMaxConcurrentRequests(final ServerSession session, final int defaultValue) {
+    private static volatile Integer maxConcurrentRequests;
+
+    private static int getMaxConcurrentRequests(final ServerSession session) {
+        Integer tmp = maxConcurrentRequests;
+        if (null == tmp) {
+            synchronized (SessionServlet.class) {
+                tmp = maxConcurrentRequests;
+                if (null == tmp) {
+                    tmp = maxConcurrentRequests = Integer.valueOf(getMaxConcurrentRequests0(session));
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static int getMaxConcurrentRequests0(final ServerSession session) {
         final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
         if (null == set || set.isEmpty()) {
-            return defaultValue;
+            try {
+                return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
+            } catch (final OXException e) {
+                return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
+            }
         }
         try {
             return Integer.parseInt(set.iterator().next());
         } catch (final NumberFormatException e) {
-            return defaultValue;
+            try {
+                return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
+            } catch (final OXException oxe) {
+                return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
+            }
         }
     }
 
