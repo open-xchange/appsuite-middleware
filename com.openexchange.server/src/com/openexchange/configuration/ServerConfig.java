@@ -101,6 +101,8 @@ public final class ServerConfig {
 
     private boolean cookieHttpOnly;
 
+    private int defaultMaxConcurrentAJAXRequests;
+
     private ServerConfig() {
         super();
     }
@@ -168,6 +170,8 @@ public final class ServerConfig {
         uiWebPath = getPropertyInternal(Property.UI_WEB_PATH);
         cookieTTL = (int) ConfigTools.parseTimespan(getPropertyInternal(Property.COOKIE_TTL));
         cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
+        // Default max. concurrent AJAX requests
+        defaultMaxConcurrentAJAXRequests = Integer.parseInt(getPropertyInternal(Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS));
     }
 
     private String getPropertyInternal(final Property property) {
@@ -224,6 +228,9 @@ public final class ServerConfig {
         case IP_CHECK:
             value = SINGLETON.checkIP.toString();
             break;
+        case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
+            value = String.valueOf(SINGLETON.defaultMaxConcurrentAJAXRequests);
+            break;
         default:
             value = getProperty(property.getPropertyName());
         }
@@ -266,6 +273,9 @@ public final class ServerConfig {
         case COOKIE_TTL:
             value = I(SINGLETON.cookieTTL);
             break;
+        case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
+            value = I(SINGLETON.defaultMaxConcurrentAJAXRequests);
+            break;
         default:
             try {
                 final String prop = getProperty(property.getPropertyName());
@@ -293,6 +303,10 @@ public final class ServerConfig {
             value = SINGLETON.maxUploadIdleTimeMillis;
         } else if (Property.JMX_PORT == property) {
             value = SINGLETON.jmxPort;
+        } else if (Property.COOKIE_TTL == property) {
+            value = SINGLETON.cookieTTL;
+        } else if (Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS == property) {
+            value = SINGLETON.defaultMaxConcurrentAJAXRequests;
         } else {
             try {
                 final String prop = getProperty(property.getPropertyName());
@@ -361,13 +375,33 @@ public final class ServerConfig {
          */
         COOKIE_TTL("com.openexchange.cookie.ttl", "1W"),
         /**
-         * The cookie HttpOnly flag
+         * The Cookie HttpOnly flag
          */
         COOKIE_HTTP_ONLY("com.openexchange.cookie.httpOnly", Boolean.TRUE.toString()),
+        /**
+         * The fields used to calculate the hash value which is part of Cookie name.
+         * <p>
+         * This option only has effect if "com.openexchange.cookie.hash" option is set to "calculate".
+         */
         COOKIE_HASH_FIELDS("com.openexchange.cookie.hash.fields", ""),
+        /**
+         * The method how to generate the hash value which is part of Cookie name
+         */
         COOKIE_HASH("com.openexchange.cookie.hash", "calculate"),
+        /**
+         * Whether to force secure flag for Cookies
+         */
         COOKIE_FORCE_HTTPS("com.openexchange.cookie.forceHTTPS", Boolean.FALSE.toString()),
-        FORCE_HTTPS("com.openexchange.forceHTTPS", Boolean.FALSE.toString());
+        /**
+         * Whether to force HTTPS protocol.
+         */
+        FORCE_HTTPS("com.openexchange.forceHTTPS", Boolean.FALSE.toString()),
+        /**
+         * The default value for max. concurrent AJAX requests.
+         */
+        DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS("com.openexchange.defaultMaxConcurrentAJAXRequests", "-1"),
+        
+        ;
 
         private final String propertyName;
 
