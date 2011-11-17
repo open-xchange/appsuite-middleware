@@ -58,6 +58,8 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.parser.ResponseParser;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 
 /**
  * Abstract implementation of an AJAX response parser. This parser also does
@@ -77,23 +79,28 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
      * @param failOnError <code>true</code> and this parser checks the server
      * response for containing error messages and lets the test fail.
      */
-    protected AbstractAJAXParser(boolean failOnError) {
+    protected AbstractAJAXParser(final boolean failOnError) {
         super();
         this.failOnError = failOnError;
     }
 
-    protected Response getResponse(String body) throws JSONException {
+    protected Response getResponse(final String body) throws JSONException {
         final Response response = ResponseParser.parse(body);
-        assertFalse(response.getErrorMessage(), failOnError && response.hasError());
+        if (failOnError && response.hasError()) {
+            final OXException exception = response.getException();
+            if (null != exception) {
+                assertFalse(exception.getMessage(), !Category.CATEGORY_WARNING.getType().equals(exception.getCategory().getType()));
+            }
+        }
         return response;
     }
 
-    public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+    public String checkResponse(final HttpResponse resp) throws ParseException, IOException {
         assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
         return EntityUtils.toString(resp.getEntity());
     }
 
-    public T parse(String body) throws JSONException {
+    public T parse(final String body) throws JSONException {
         final Response response = getResponse(body);
         return createResponse(response);
     }
