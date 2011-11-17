@@ -98,6 +98,8 @@ public abstract class AbstractPerformer {
 
     private final Map<OXException, Object> warnings;
 
+    protected boolean check4Duplicates;
+
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
      *
@@ -123,6 +125,7 @@ public abstract class AbstractPerformer {
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
         warnings = new ConcurrentHashMap<OXException, Object>(2);
+        check4Duplicates = true;
     }
 
     /**
@@ -150,6 +153,16 @@ public abstract class AbstractPerformer {
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
         warnings = new ConcurrentHashMap<OXException, Object>(2);
+        check4Duplicates = true;
+    }
+
+    /**
+     * Sets the check4Duplicates flag.
+     *
+     * @param check4Duplicates The check4Duplicates to set
+     */
+    public void setCheck4Duplicates(final boolean check4Duplicates) {
+        this.check4Duplicates = check4Duplicates;
     }
 
     /**
@@ -158,10 +171,12 @@ public abstract class AbstractPerformer {
      * @param name The name to check for
      * @param treeId The tree identifier
      * @param parentId The parent identifier
-     * @param openedStorages A collection carrying opened storages
      * @throws FolderException If name look-up fails
      */
-    protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+    protected void checkForDuplicate(final String name, final String treeId, final String parentId) throws OXException {
+        if (!check4Duplicates) {
+            return;
+        }
         /*
          * Check for duplicate
          */

@@ -157,7 +157,7 @@ public final class UpdatePerformer extends AbstractPerformer {
                     /*
                      * Check for duplicate
                      */
-                    checkForDuplicate(storageFolder.getName(), treeId, newParentId, openedStorages);
+                    checkForDuplicate(storageFolder.getName(), treeId, newParentId);
                 }
             }
             final boolean rename;
@@ -168,7 +168,7 @@ public final class UpdatePerformer extends AbstractPerformer {
                     /*
                      * Check for duplicate
                      */
-                    checkForDuplicate(newName, treeId, storageFolder.getParentID(), openedStorages);
+                    checkForDuplicate(newName, treeId, storageFolder.getParentID());
                 }
             }
             final boolean changePermissions;

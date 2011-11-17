@@ -342,13 +342,13 @@ public final class CacheFolderStorage implements FolderStorage {
              */
             final String folderId;
             if (null == session) {
-                folderId = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doCreate(folder);
+                final CreatePerformer perf = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                perf.setCheck4Duplicates(false);
+                folderId = perf.doCreate(folder);
             } else {
-                try {
-                    folderId = new CreatePerformer(new ServerSessionAdapter(session), registry).doCreate(folder);
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session), registry);
+                createPerformer.setCheck4Duplicates(false);
+                folderId = createPerformer.doCreate(folder);
             }
             /*
              * Get folder from appropriate storage
@@ -1217,15 +1217,13 @@ public final class CacheFolderStorage implements FolderStorage {
             final boolean isMove = null != folder.getParentID();
             final String oldParentId = isMove ? getFolder(treeId, oldFolderId, storageParameters).getParentID() : null;
             if (null == session) {
-                new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doUpdate(
-                    folder,
-                    storageParameters.getTimeStamp());
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                updatePerformer.setCheck4Duplicates(false);
+                updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             } else {
-                try {
-                    new UpdatePerformer(new ServerSessionAdapter(session), registry).doUpdate(folder, storageParameters.getTimeStamp());
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final UpdatePerformer updatePerformer = new UpdatePerformer(new ServerSessionAdapter(session), registry);
+                updatePerformer.setCheck4Duplicates(false);
+                updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             }
             /*
              * Get folder from appropriate storage
