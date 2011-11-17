@@ -69,9 +69,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -107,7 +105,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.sql.DBUtils;
@@ -2595,12 +2592,14 @@ public final class Contacts {
         return null == string ? null == other : null == other ? false : string.equals(other);
     }
 
-    protected static final DateFormat SQL_DATE_FORMAT;
-
-    static {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        sdf.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
-        SQL_DATE_FORMAT = sdf;
+    protected static java.util.Date getDate(final int pos, final ResultSet rs) {
+        try {
+            final Timestamp timestamp = rs.getTimestamp(pos);
+            return rs.wasNull() ? null : timestamp;
+        } catch (final SQLException e) {
+            LOG.warn("TIMESTAMP field could not be read: " + e.getMessage());
+            return null;
+        }
     }
 
     public static interface Mapper {
@@ -7018,24 +7017,7 @@ public final class Contacts {
 
             @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-                final Object val = rs.getObject(pos);
-                if (!rs.wasNull()) {
-                    if (val instanceof java.util.Date) {
-                        co.setBirthday((java.util.Date) val);
-                    } else {
-                        synchronized (SQL_DATE_FORMAT) {
-                            try {
-                                final String string = val.toString();
-                                if (!"0000-00-00".equals(string)) {
-                                    co.setBirthday(SQL_DATE_FORMAT.parse(string));
-                                }
-                            } catch (final ParseException e) {
-                                // Ignore
-                            }
-                        }
-                        
-                    }
-                }
+                co.setBirthday(getDate(pos, rs));
             }
 
             @Override
@@ -7088,24 +7070,7 @@ public final class Contacts {
 
             @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-                final Object val = rs.getObject(pos);
-                if (!rs.wasNull()) {
-                    if (val instanceof java.util.Date) {
-                        co.setAnniversary((java.util.Date) val);
-                    } else {
-                        synchronized (SQL_DATE_FORMAT) {
-                            try {
-                                final String string = val.toString();
-                                if (!"0000-00-00".equals(string)) {
-                                    co.setAnniversary(SQL_DATE_FORMAT.parse(string));
-                                }
-                            } catch (final ParseException e) {
-                                // Ignore
-                            }
-                        }
-                        
-                    }
-                }
+                co.setAnniversary(getDate(pos, rs));
             }
 
             @Override
