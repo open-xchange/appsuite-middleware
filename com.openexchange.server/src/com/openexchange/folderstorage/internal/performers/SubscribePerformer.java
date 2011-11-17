@@ -160,7 +160,8 @@ public final class SubscribePerformer extends AbstractPerformer {
                         targetTreeId,
                         targetParentId,
                         true,
-                        openedStorages);
+                        openedStorages,
+                        false);
                 for (final UserizedFolder userizedFolder : subfolders) {
                     if (userizedFolder.getName().equals(sourceFolder.getName())) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(sourceFolder.getName(), targetParentId, targetTreeId);

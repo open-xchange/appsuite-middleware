@@ -230,6 +230,24 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @throws OXException If a folder error occurs
      */
     protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        return getUserizedFolder(folder, ownPermission, treeId, all, nullIsPublicAccess, storageParameters, openedStorages, false);
+    }
+
+    /**
+     * Gets the user-sensitive folder for given folder.
+     *
+     * @param folder The folder
+     * @param ownPermission The user's permission on given folder
+     * @param treeId The tree identifier
+     * @param all <code>true</code> to add all subfolders; otherwise <code>false</code> to only add subscribed ones
+     * @param nullIsPublicAccess <code>true</code> if a <code>null</code> value obtained from {@link Folder#getSubfolderIDs()} hints to
+     *            publicly accessible folder; otherwise <code>false</code>
+     * @param storageParameters The storage parameters to use
+     * @param openedStorages The list of opened storages
+     * @return The user-sensitive folder for given folder
+     * @throws OXException If a folder error occurs
+     */
+    protected UserizedFolder getUserizedFolder(final Folder folder, final Permission ownPermission, final String treeId, final boolean all, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages, final boolean checkOnly) throws OXException {
         Folder f = folder;
         final UserizedFolder userizedFolder;
         /*-
@@ -302,21 +320,23 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 userizedFolder.setLastModifiedUTC(new Date(time));
             }
         }
-        if (isShared) {
-            /*
-             * Subfolders already calculated for user
-             */
-            final String[] visibleSubfolders = f.getSubfolderIDs();
-            if (null == visibleSubfolders) {
-                userizedFolder.setSubfolderIDs(nullIsPublicAccess ? new String[] { DUMMY_ID } : new String[0]);
+        if (!checkOnly) {
+            if (isShared) {
+                /*
+                 * Subfolders already calculated for user
+                 */
+                final String[] visibleSubfolders = f.getSubfolderIDs();
+                if (null == visibleSubfolders) {
+                    userizedFolder.setSubfolderIDs(nullIsPublicAccess ? new String[] { DUMMY_ID } : new String[0]);
+                } else {
+                    userizedFolder.setSubfolderIDs(visibleSubfolders);
+                }
             } else {
-                userizedFolder.setSubfolderIDs(visibleSubfolders);
+                /*
+                 * Compute user-visible subfolders
+                 */
+                hasVisibleSubfolderIDs(f, treeId, all, userizedFolder, nullIsPublicAccess, storageParameters, openedStorages);
             }
-        } else {
-            /*
-             * Compute user-visible subfolders
-             */
-            hasVisibleSubfolderIDs(f, treeId, all, userizedFolder, nullIsPublicAccess, storageParameters, openedStorages);
         }
         return userizedFolder;
     }

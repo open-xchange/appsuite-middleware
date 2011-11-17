@@ -168,7 +168,7 @@ public abstract class AbstractPerformer {
         final Locale locale = storageParameters.getUser().getLocale();
         final String lcName = name.toLowerCase(locale);
         if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
-            for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true)) {
+            for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
                 final String localizedName = userizedFolder.getLocalizedName(locale);
                 if (localizedName.toLowerCase(locale).equals(lcName)) {
                     throw FolderExceptionErrorMessage.EQUAL_NAME.create(name, localizedName, treeId);

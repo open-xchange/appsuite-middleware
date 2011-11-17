@@ -400,7 +400,7 @@ public final class UpdatePerformer extends AbstractPerformer {
             listPerformer = new ListPerformer(session, null);
         }
         listPerformer.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages);
+        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages, false);
         for (final UserizedFolder userizedFolder : subfolders) {
             if (name.equals(userizedFolder.getName())) {
                 return true;
@@ -417,7 +417,7 @@ public final class UpdatePerformer extends AbstractPerformer {
             listPerformer = new ListPerformer(session, null);
         }
         listPerformer.setStorageParameters(storageParameters);
-        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages);
+        final UserizedFolder[] subfolders = listPerformer.doList(treeId, parentId, true, openedStorages, false);
         final StringBuilder sb = new StringBuilder();
         String nonExistingName = name;
         int i = 0;
