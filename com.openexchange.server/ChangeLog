@@ -2,6 +2,7 @@
 
  - Fix for bug 20743: Ensure using active connection when loading folder attributes from database
  - Fix for bug 20810: Ignore field if not parseable as TIMESTAMP field
+ - Fix for bug 20785: Abort gathering report data on error and properly signaling that error to caller
 
 * 2011-11-15 - thorben.betten@open-xchange.com
 
