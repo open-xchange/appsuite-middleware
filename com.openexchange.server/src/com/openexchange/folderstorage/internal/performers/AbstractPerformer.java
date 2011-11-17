@@ -166,15 +166,13 @@ public abstract class AbstractPerformer {
          * Check for duplicate
          */
         final Locale locale = storageParameters.getUser().getLocale();
-        for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true)) {
-            final String localizedName = userizedFolder.getLocalizedName(locale);
-            if (localizedName.equals(name)) {
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-                checkOpenedStorage(realStorage, openedStorages);
-                throw FolderExceptionErrorMessage.EQUAL_NAME.create(
-                    name,
-                    realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale),
-                    treeId);
+        final String lcName = name.toLowerCase(locale);
+        if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
+            for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true)) {
+                final String localizedName = userizedFolder.getLocalizedName(locale);
+                if (localizedName.toLowerCase(locale).equals(lcName)) {
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(name, localizedName, treeId);
+                }
             }
         }
         /*
@@ -182,8 +180,10 @@ public abstract class AbstractPerformer {
          */
         final FolderI18nNamesService namesService = FolderI18nNamesServiceImpl.getInstance();
         final Set<String> i18nNames = namesService.getI18nNamesFor();
-        if (i18nNames.contains(name)) {
-            throw FolderExceptionErrorMessage.RESERVED_NAME.create(name);
+        for (final String reservedName : i18nNames) {
+            if (reservedName.toLowerCase(locale).equals(lcName)) {
+                throw FolderExceptionErrorMessage.RESERVED_NAME.create(name);
+            }
         }
     }
 
