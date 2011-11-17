@@ -185,6 +185,10 @@ public class Activator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            if (null != handlerRegistration) {
+                handlerRegistration.unregister();
+                handlerRegistration = null;
+            }
             if (null != serviceRegistration) {
                 serviceRegistration.unregister();
                 serviceRegistration = null;
