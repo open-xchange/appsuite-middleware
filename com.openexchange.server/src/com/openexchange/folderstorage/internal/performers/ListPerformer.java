@@ -253,6 +253,9 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                  */
                 ret = getSubfoldersFromStorages(treeId, parentId, all, checkOnly);
             } else {
+                if (0 == subfolderIds.length) {
+                    return new UserizedFolder[0];
+                }
                 /*
                  * The subfolders can be completely fetched from already opened parent's folder storage
                  */
