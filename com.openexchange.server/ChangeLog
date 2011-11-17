@@ -1,6 +1,7 @@
 * 2011-11-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 20743: Ensure using active connection when loading folder attributes from database
+ - Fix for bug 20810: Ignore field if not parseable as TIMESTAMP field
 
 * 2011-11-15 - thorben.betten@open-xchange.com
 
