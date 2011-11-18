@@ -115,6 +115,12 @@ public final class FacebookMessagingExceptionMessages implements LocalizableStri
     // XML parse error: %1$s.
     public static final String XML_PARSE_ERROR_MSG = "XML parse error: %1$s.";
 
+    // Missing facebook configuration. Please re-create facebook account.
+    public static final String MISSING_CONFIG_MSG = "Missing facebook configuration. Please re-create facebook account.";
+
+    // Missing facebook configuration parameter "%1$s". Please re-create facebook account.
+    public static final String MISSING_CONFIG_PARAM_MSG = "Missing facebook configuration parameter \"%1$s\". Please re-create facebook account.";
+
     /**
      * Initializes a new {@link FacebookMessagingExceptionMessages}.
      */

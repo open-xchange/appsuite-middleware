@@ -55,6 +55,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 
 /**
@@ -197,11 +198,12 @@ public final class VirtualFolder implements Folder {
 
     @Override
     public String getLocalizedName(final Locale locale) {
+        final Locale loc = null == locale ? LocaleTools.DEFAULT_LOCALE : locale;
         if (null == name) {
-            return realFolder.getLocalizedName(locale);
+            return realFolder.getLocalizedName(loc);
         }
         if (null == localizedName) {
-            localizedName = new StringHelper(locale).getString(name);
+            localizedName = StringHelper.valueOf(loc).getString(name);
         }
         return localizedName;
     }

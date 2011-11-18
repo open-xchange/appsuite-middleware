@@ -353,15 +353,25 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     ATTACHMENT_EXPIRED("Mail attachment expired or absent.", Category.CATEGORY_USER_INPUT, 78),
     /**
-     * Cannot establish a secure connection to mail server %1$s.
+     * Account has been checked successfully but with a non-secure connection.
      */
-    NON_SECURE_WARNING("Cannot establish a secure connection to mail server %1$s.", Category.CATEGORY_WARNING, 79),
+    NON_SECURE_WARNING("Account has been checked successfully but with a non-secure connection.", Category.CATEGORY_WARNING, 79),
     /**
      * Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.
      */
     TOO_MANY_FORWARD_MAILS("Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size.", Category.CATEGORY_USER_INPUT, 80),
+    /**
+     * Your account has been created but will not use a secure connection.
+     */
+    NON_SECURE_CREATION("Your account has been created but will not use a secure connection.", Category.CATEGORY_WARNING, 81),
+    /**
+     * Your mail has been successfully sent, but original mail could not flagged as replied and/or forwarded.
+     */
+    FLAG_FAIL("Your mail has been successfully sent, but original mail could not flagged as replied and/or forwarded.", Category.CATEGORY_WARNING, 82),
 
     ;
+
+    private static final String PREFIX = "MSG";
 
     private final String message;
 
@@ -383,7 +393,7 @@ public enum MailExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "MSG";
+        return PREFIX;
     }
 
     @Override

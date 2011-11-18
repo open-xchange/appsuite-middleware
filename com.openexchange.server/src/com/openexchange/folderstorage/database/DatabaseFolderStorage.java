@@ -133,6 +133,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DatabaseFolderStorage.class));
 
+    private static final String PARAM_CONNECTION = DatabaseParameterConstants.PARAM_CONNECTION;
+
     /**
      * Simple interface for providing and closing a connection.
      */
@@ -223,9 +225,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(true, storageParameters);
+        final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
+        final int contextId = storageParameters.getContextId();
+        Connection con = null;
         try {
-            final Connection con = provider.getConnection();
+            con = databaseService.getWritable(contextId);
             final ServerSession session;
             {
                 final Session s = storageParameters.getSession();
@@ -241,10 +245,11 @@ public final class DatabaseFolderStorage implements FolderStorage {
             /*
              * Determine folder with non-existing parents
              */
-            int[] nonExistingParents = OXFolderSQL.getNonExistingParents(session.getContext(), con);
+            final Context context = session.getContext();
+            int[] nonExistingParents = OXFolderSQL.getNonExistingParents(context, con);
             final TIntSet shared = new TIntHashSet();
             final OXFolderManager manager = OXFolderManager.getInstance(session, con, con);
-            final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
+            final OXFolderAccess folderAccess = getFolderAccess(context, con);
             final int userId = session.getUserId();
             final long now = System.currentTimeMillis();
             do {
@@ -257,7 +262,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         }
                     }
                 }
-                final TIntSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(session.getContext(), con));
+                final TIntSet tmp = new TIntHashSet(OXFolderSQL.getNonExistingParents(context, con));
                 tmp.removeAll(shared.toArray());
                 for (int i = 0; i < FolderObject.MIN_FOLDER_ID; i++) {
                     tmp.remove(i);
@@ -265,7 +270,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 nonExistingParents = tmp.toArray();
             } while (null != nonExistingParents && nonExistingParents.length > 0);
         } finally {
-            provider.close();
+            if (null != con) {
+                databaseService.backWritable(contextId, con);
+            }
         }
     }
 
@@ -285,7 +292,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void commitTransaction(final StorageParameters params) throws OXException {
         final ConnectionMode con;
         try {
-            con = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
             /*
              * Already committed
@@ -313,7 +320,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
             }
             final FolderType folderType = getFolderType();
-            params.putParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(folderType, PARAM_CONNECTION, null);
             params.markCommitted();
         }
     }
@@ -385,7 +392,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     /*
                      * Determine folder type by examining parent folder
                      */
-                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters));
+                    createMe.setType(getFolderType(createMe.getParentFolderID(), storageParameters.getContext(), con));
                 } else {
                     createMe.setType(getTypeByFolderType(t));
                 }
@@ -428,7 +435,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
 
-    private static int getFolderType(final int parentId, final StorageParameters storageParameters) throws OXException, OXException {
+    private static int getFolderType(final int parentId, final Context ctx, final Connection con) throws OXException, OXException {
         int type = -1;
         int pid = parentId;
         /*
@@ -444,7 +451,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
             type = FolderObject.PROJECT;
         } else {
-            type = getFolderAccess(storageParameters).getFolderType(pid);
+            type = getFolderAccess(ctx, con).getFolderType(pid);
         }
         return type;
     }
@@ -541,12 +548,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } else if (pid == FolderObject.SYSTEM_OX_PROJECT_FOLDER_ID) {
             return SystemType.getInstance();
         } else {
-            final FolderObject p = getFolderAccess(storageParameters).getFolderObject(pid);
-            final int parentType = p.getType();
-            if (FolderObject.PRIVATE == parentType) {
-                return p.getCreatedBy() == user.getId() ? PrivateType.getInstance() : SharedType.getInstance();
-            } else if (FolderObject.PUBLIC == parentType) {
-                return PublicType.getInstance();
+            final ConnectionProvider provider = getConnection(false, storageParameters);
+            try {
+                final FolderObject p = getFolderAccess(storageParameters.getContext(), provider.getConnection()).getFolderObject(pid);
+                final int parentType = p.getType();
+                if (FolderObject.PRIVATE == parentType) {
+                    return p.getCreatedBy() == user.getId() ? PrivateType.getInstance() : SharedType.getInstance();
+                } else if (FolderObject.PUBLIC == parentType) {
+                    return PublicType.getInstance();
+                }
+            } finally {
+                provider.close();
             }
         }
         return SystemType.getInstance();
@@ -563,7 +575,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final int folderId = getUnsignedInteger(folderIdentifier);
             if (folderId < 0) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
             }
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                 return false;
@@ -596,7 +608,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * A non-virtual database folder
                  */
-                final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
+                final OXFolderAccess folderAccess = getFolderAccess(ctx, con);
                 return folderAccess.containsForeignObjects(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
             }
         } finally {
@@ -615,7 +627,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             final int folderId = getUnsignedInteger(folderIdentifier);
             if (folderId < 0) {
-                throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, ctx.getContextId());
+                throw OXFolderExceptionCode.NOT_EXISTS.create(folderIdentifier, Integer.valueOf(ctx.getContextId()));
             }
             if (FolderObject.SYSTEM_ROOT_FOLDER_ID == folderId) {
                 return true;
@@ -648,7 +660,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 /*
                  * A non-virtual database folder
                  */
-                final OXFolderAccess folderAccess = getFolderAccess(storageParameters);
+                final OXFolderAccess folderAccess = getFolderAccess(ctx, con);
                 return folderAccess.isEmpty(getFolderObject(folderId, ctx, con), storageParameters.getSession(), ctx);
             }
         } finally {
@@ -663,7 +675,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Connection con = provider.getConnection();
             final Context ctx = storageParameters.getContext();
             final int folderId = getUnsignedInteger(folderIdentifier);
-            if (getFolderAccess(storageParameters).getFolderLastModified(folderId).after(new Date(lastModified))) {
+            if (getFolderAccess(ctx, con).getFolderLastModified(folderId).after(new Date(lastModified))) {
                 throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
             }
             OXFolderSQL.updateLastModified(folderId, lastModified, storageParameters.getUserId(), con, ctx);
@@ -942,7 +954,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                      */
                     final FolderObject gab = getFolderObject(FolderObject.SYSTEM_LDAP_FOLDER_ID, ctx, con);
                     if (gab.isVisible(userId, userConfiguration)) {
-                        gab.setFolderName(new StringHelper(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
+                        gab.setFolderName(StringHelper.valueOf(user.getLocale()).getString(FolderStrings.SYSTEM_LDAP_FOLDER_NAME));
                         list.add(gab);
                     }
                 } catch (final SQLException e) {
@@ -962,17 +974,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
                         final int module = folderObject.getModule();
                         if (FolderObject.CALENDAR == module) {
                             if (null == stringHelper) {
-                                stringHelper = new StringHelper(user.getLocale());
+                                stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                         } else if (FolderObject.CONTACT == module) {
                             if (null == stringHelper) {
-                                stringHelper = new StringHelper(user.getLocale());
+                                stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                         } else if (FolderObject.TASK == module) {
                             if (null == stringHelper) {
-                                stringHelper = new StringHelper(user.getLocale());
+                                stringHelper = StringHelper.valueOf(user.getLocale());
                             }
                             folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                         }
@@ -1231,7 +1243,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
     public void rollback(final StorageParameters params) {
         final ConnectionMode con;
         try {
-            con = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, params);
+            con = optParameter(ConnectionMode.class, PARAM_CONNECTION, params);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;
@@ -1251,7 +1263,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     databaseService.backReadOnly(params.getContext(), con.connection);
                 }
             }
-            params.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+            params.putParameter(getFolderType(), PARAM_CONNECTION, null);
         }
     }
 
@@ -1261,7 +1273,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
         try {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
             final Context context = parameters.getContext();
-            ConnectionMode con = parameters.getParameter(folderType, DatabaseParameterConstants.PARAM_CONNECTION);
+            ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
             if (null != con) {
                 if (modify == con.readWrite) {
                     // Connection already present in proper access mode
@@ -1272,7 +1284,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  *
                  * commit, restore auto-commit & push to pool
                  */
-                parameters.putParameter(getFolderType(), DatabaseParameterConstants.PARAM_CONNECTION, null);
+                parameters.putParameter(getFolderType(), PARAM_CONNECTION, null);
                 try {
                     con.connection.commit();
                 } catch (final Exception e) {
@@ -1289,7 +1301,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             con = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
             con.connection.setAutoCommit(false);
             // Put to parameters
-            if (parameters.putParameterIfAbsent(folderType, DatabaseParameterConstants.PARAM_CONNECTION, con)) {
+            if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, con)) {
                 // Success
             } else {
                 // Fail
@@ -1334,7 +1346,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
              */
             {
                 final Date clientLastModified = storageParameters.getTimeStamp();
-                if (null != clientLastModified && getFolderAccess(storageParameters).getFolderLastModified(folderId).after(
+                if (null != clientLastModified && getFolderAccess(context, con).getFolderLastModified(folderId).after(
                     clientLastModified)) {
                     throw FolderExceptionErrorMessage.CONCURRENT_MODIFICATION.create();
                 }
@@ -1623,36 +1635,14 @@ public final class DatabaseFolderStorage implements FolderStorage {
         return Arrays.asList(ret);
     }
 
-    private static OXFolderAccess getFolderAccess(final StorageParameters storageParameters) throws OXException {
-        OXFolderAccess ret =
-            (OXFolderAccess) storageParameters.getParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_ACCESS);
-        if (null == ret) {
-            final ConnectionProvider provider = getConnection(false, storageParameters);
-            try {
-                final Connection con = provider.getConnection();
-                do {
-                    ret = new OXFolderAccess(con, storageParameters.getContext());
-                    if (!storageParameters.putParameterIfAbsent(
-                        DatabaseFolderType.getInstance(),
-                        DatabaseParameterConstants.PARAM_ACCESS,
-                        ret)) {
-                        ret =
-                            (OXFolderAccess) storageParameters.getParameter(
-                                DatabaseFolderType.getInstance(),
-                                DatabaseParameterConstants.PARAM_ACCESS);
-                    }
-                } while (null == ret);
-            } finally {
-                provider.close();
-            }
-        }
-        return ret;
+    private static OXFolderAccess getFolderAccess(final Context ctx, final Connection con) {
+        return new OXFolderAccess(con, ctx);
     }
 
     private static ConnectionProvider getConnection(final boolean modify, final StorageParameters storageParameters) throws OXException {
         final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         final Context context = storageParameters.getContext();
-        ConnectionMode connection = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+        ConnectionMode connection = optParameter(ConnectionMode.class, PARAM_CONNECTION, storageParameters);
         if (null != connection) {
             return new NonClosingConnectionProvider(connection/*, databaseService, context.getContextId()*/);
         }

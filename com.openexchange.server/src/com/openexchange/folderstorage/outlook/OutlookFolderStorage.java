@@ -2061,7 +2061,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MailFolderCallable(final FolderNameComparator comparator, final Locale locale, final User user, final int contextId, final int tree, final StorageParameters parameters) {
             this.comparator = comparator;
-            this.locale = locale;
+            this.locale = locale == null ? Locale.US : locale;
             this.user = user;
             this.contextId = contextId;
             this.tree = tree;
@@ -2189,7 +2189,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MailAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
+            collator = Collator.getInstance(locale == null ? Locale.US : locale);
             collator.setStrength(Collator.SECONDARY);
         }
 
@@ -2222,7 +2222,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public MessagingAccountComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
+            collator = Collator.getInstance(locale == null ? Locale.US : locale);
             collator.setStrength(Collator.SECONDARY);
         }
 
@@ -2256,7 +2256,7 @@ public final class OutlookFolderStorage implements FolderStorage {
 
         public FolderNameComparator(final Locale locale) {
             super();
-            collator = Collator.getInstance(locale);
+            collator = Collator.getInstance(locale == null ? Locale.US : locale);
             collator.setStrength(Collator.SECONDARY);
         }
 

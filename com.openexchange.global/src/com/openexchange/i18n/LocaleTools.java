@@ -61,6 +61,11 @@ import java.util.regex.Pattern;
  */
 public final class LocaleTools {
 
+    /**
+     * The default locale: <code>en_US</code>
+     */
+    public static final Locale DEFAULT_LOCALE = Locale.US;
+
     private static final String STR_EMPTY = "";
 
     private static final Pattern identifierPattern = Pattern.compile("(\\p{Lower}{2})(?:_(\\p{Upper}{2}))?(?:_([a-zA-Z]{2}))?");
@@ -70,6 +75,16 @@ public final class LocaleTools {
      */
     private LocaleTools() {
         super();
+    }
+
+    /**
+     * Gets the sane (non-<code>null</code>) locale for specified locale.
+     * 
+     * @param locale The locale to check for <code>null</code>
+     * @return The passed locale or <tt>en_US</tt> if passed locale is <code>null</code>
+     */
+    public static Locale getSaneLocale(final Locale locale) {
+        return locale == null ? DEFAULT_LOCALE : locale;
     }
 
     /**

@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.facebook.session;
 
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
@@ -88,7 +89,7 @@ public final class FacebookOAuthAccess {
      */
     public static FacebookOAuthAccess accessFor(final MessagingAccount messagingAccount, final Session session) throws OXException {
         final FacebookOAuthAccessRegistry registry = FacebookOAuthAccessRegistry.getInstance();
-        String secret = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class).getSecret(session);
+        final String secret = FacebookMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class).getSecret(session);
         final int accountId = messagingAccount.getId();
         FacebookOAuthAccess facebookSession = registry.getSession(session.getContextId(), session.getUserId(), accountId);
         if (null == facebookSession) {
@@ -142,7 +143,18 @@ public final class FacebookOAuthAccess {
         /*
          * Get OAuth account identifier from messaging account's configuration
          */
-        final int oauthAccountId = ((Integer) messagingAccount.getConfiguration().get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT)).intValue();
+        final int oauthAccountId;
+        {
+            final Map<String, Object> configuration = messagingAccount.getConfiguration();
+            if (null == configuration) {
+                throw FacebookMessagingExceptionCodes.MISSING_CONFIG.create();
+            }
+            final Object accountId = configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
+            if (null == accountId) {
+                throw FacebookMessagingExceptionCodes.MISSING_CONFIG_PARAM.create(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
+            }
+            oauthAccountId = ((Integer) accountId).intValue();
+        }
         final OAuthService oAuthService = FacebookMessagingServiceRegistry.getServiceRegistry().getService(OAuthService.class);
         try {
             oauthAccount = oAuthService.getAccount(oauthAccountId, password, user, contextId);
@@ -174,16 +186,15 @@ public final class FacebookOAuthAccess {
         }
     }
 
-    private void checkForErrors(JSONObject object) throws OXException, JSONException{
+    private void checkForErrors(final JSONObject object) throws OXException, JSONException{
         if (object.has("error")) {
-            JSONObject error = object.getJSONObject("error");
+            final JSONObject error = object.getJSONObject("error");
             if ("OXException".equals(error.opt("type"))) {
                 throw new OXException(OAuthExceptionCodes.TOKEN_EXPIRED.create(oauthAccount.getDisplayName()));
             } else {
                 throw FacebookMessagingExceptionCodes.UNEXPECTED_ERROR.create(object.getString("message"));
             }
         }
-
     }
 
     /**

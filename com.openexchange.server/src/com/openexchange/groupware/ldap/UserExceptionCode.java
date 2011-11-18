@@ -94,7 +94,19 @@ public enum UserExceptionCode implements OXExceptionCode {
      /** Alias entries are missing for user %1$d in context %2$d. */
      ALIASES_MISSING("Alias entries are missing for user %1$d in context %2$d.", Category.CATEGORY_CONFIGURATION, 18),
      /** Updating attributes failed in context %1$d for user %2$d. */
-     UPDATE_ATTRIBUTES_FAILED("Updating attributes failed in context %1$d for user %2$d.", Category.CATEGORY_ERROR, 19);
+     UPDATE_ATTRIBUTES_FAILED("Updating attributes failed in context %1$d for user %2$d.", Category.CATEGORY_ERROR, 19),
+     /**
+      * Invalid password length. The password must be of minimum length %1$d.
+      */
+     INVALID_MIN_LENGTH("Invalid password length. The password must be of minimum length %1$d.", Category.CATEGORY_USER_INPUT, 20),
+     /**
+      * Invalid password length. The password must be of maximum length %1$d.
+      */
+     INVALID_MAX_LENGTH("Invalid password length. The password must be of maximum length %1$d.", Category.CATEGORY_USER_INPUT, 21),
+
+     ;
+
+    private static final String PREFIX = "USR";
 
     /**
      * Message of the exception.
@@ -141,7 +153,7 @@ public enum UserExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "USR";
+        return PREFIX;
     }
 
     @Override

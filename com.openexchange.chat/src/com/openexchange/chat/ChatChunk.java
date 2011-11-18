@@ -49,9 +49,6 @@
 
 package com.openexchange.chat;
 
-import java.util.Date;
-import java.util.List;
-import com.openexchange.exception.OXException;
 
 
 /**
@@ -59,7 +56,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ChatChunk {
+public interface ChatChunk extends ChatGroup {
 
     /**
      * Gets the chunk identifier.
@@ -74,20 +71,5 @@ public interface ChatChunk {
      * @return The chat identifier.
      */
     String getChatId();
-
-    /**
-     * Gets the chat members.
-     * 
-     * @return The identifiers of the chat members
-     * @throws OXException If chat members cannot be returned
-     */
-    List<String> getMembers() throws OXException;
-
-    /**
-     * Gets the time stamp for this chunk.
-     * 
-     * @return The time stamp
-     */
-    Date getTimeStamp();
 
 }

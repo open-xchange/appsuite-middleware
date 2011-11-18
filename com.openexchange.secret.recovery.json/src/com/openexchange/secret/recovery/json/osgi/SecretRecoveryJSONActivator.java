@@ -66,12 +66,10 @@ public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SecretRecoveryJSONActivator.class));
 
-    private static final Class<?>[] NEEDED_SERVICES = new Class<?>[] {
-        SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class };
-
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] {
+            SecretMigrator.class, SecretInconsistencyDetector.class, SecretService.class };
     }
 
     @Override

@@ -165,7 +165,16 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return actionValidateTree0(mailAccess, session);
     }
 
-    private static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    /**
+     * Validates specified account description.
+     * 
+     * @param accountDescription The account description
+     * @param session The associated session
+     * @param warnings The warnings list
+     * @return <code>true</code> for successful validation; otherwise <code>false</code>
+     * @throws OXException If an severe error occurs
+     */
+    public static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
         // Validate mail server
         boolean validated = checkMailServerURL(accountDescription, session, warnings);
         // Failed?

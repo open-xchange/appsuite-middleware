@@ -342,13 +342,13 @@ public final class CacheFolderStorage implements FolderStorage {
              */
             final String folderId;
             if (null == session) {
-                folderId = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doCreate(folder);
+                final CreatePerformer perf = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                perf.setCheck4Duplicates(false);
+                folderId = perf.doCreate(folder);
             } else {
-                try {
-                    folderId = new CreatePerformer(new ServerSessionAdapter(session), registry).doCreate(folder);
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session), registry);
+                createPerformer.setCheck4Duplicates(false);
+                folderId = createPerformer.doCreate(folder);
             }
             /*
              * Get folder from appropriate storage
@@ -367,20 +367,36 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Remove parent from cache(s)
              */
-            for (final String tid : new String[] { treeId, realTreeId }) {
-                final Cache cache = globalCache;
-                final String sContextId = String.valueOf(storageParameters.getContextId());
+            final Cache cache = globalCache;
+            final int contextId = storageParameters.getContextId();
+            final String sContextId = String.valueOf(contextId);
+            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+            final int userId = storageParameters.getUserId();
+            final String[] trees = new String[] { treeId, realTreeId };
+            for (final String tid : trees) {
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
                 cache.removeFromGroup(cacheKey, sContextId);
-                final FolderMap folderMap = FolderMapManagement.getInstance().optFor(storageParameters.getUserId(), storageParameters.getContextId());
+                final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
                 if (null != folderMap) {
                     folderMap.remove(folder.getParentID(), tid);
+                }
+            }
+            for (final String tid : trees) {
+                final CacheKey cacheKey = newCacheKey(createdFolder.getParentID(), tid);
+                cache.removeFromGroup(cacheKey, sContextId);
+                final FolderMap folderMap = folderMapManagement.optFor(userId, contextId);
+                if (null != folderMap) {
+                    folderMap.remove(createdFolder.getParentID(), tid);
                 }
             }
             /*
              * Load parent from real tree
              */
-            final Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
+            Folder parentFolder = loadFolder(realTreeId, folder.getParentID(), StorageType.WORKING, true, storageParameters);
+            if (parentFolder.isCacheable()) {
+                putFolder(parentFolder, realTreeId, storageParameters);
+            }
+            parentFolder = loadFolder(realTreeId, createdFolder.getParentID(), StorageType.WORKING, true, storageParameters);
             if (parentFolder.isCacheable()) {
                 putFolder(parentFolder, realTreeId, storageParameters);
             }
@@ -1201,15 +1217,13 @@ public final class CacheFolderStorage implements FolderStorage {
             final boolean isMove = null != folder.getParentID();
             final String oldParentId = isMove ? getFolder(treeId, oldFolderId, storageParameters).getParentID() : null;
             if (null == session) {
-                new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doUpdate(
-                    folder,
-                    storageParameters.getTimeStamp());
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                updatePerformer.setCheck4Duplicates(false);
+                updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             } else {
-                try {
-                    new UpdatePerformer(new ServerSessionAdapter(session), registry).doUpdate(folder, storageParameters.getTimeStamp());
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final UpdatePerformer updatePerformer = new UpdatePerformer(new ServerSessionAdapter(session), registry);
+                updatePerformer.setCheck4Duplicates(false);
+                updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             }
             /*
              * Get folder from appropriate storage
@@ -1241,6 +1255,7 @@ public final class CacheFolderStorage implements FolderStorage {
                  * Reload folders
                  */
                 Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
+                removeSingleFromCache(f.getParentID(), treeId, userId, storageParameters.getSession(), false);
                 if (f.isCacheable()) {
                     putFolder(f, realTreeId, storageParameters);
                 }

@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.internal.performers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
@@ -168,6 +167,12 @@ public final class CreatePerformer extends AbstractPerformer {
                 throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
             }
             /*
+             * Check for duplicates for OLOX-covered folders
+             */
+            if (!"infostore".equals(toCreate.getContentType().toString())) {
+                checkForDuplicate(toCreate.getName(), treeId, parentId);
+            }
+            /*
              * Create folder dependent on folder is virtual or not
              */
             final String newId;
@@ -251,24 +256,6 @@ public final class CreatePerformer extends AbstractPerformer {
                 // TODO: Pass this one? final Folder created = realStorage.getFolder(treeId, toCreate.getID(), storageParameters);
                 virtualStorage.createFolder(toCreate, storageParameters);
             } else {
-                /*
-                 * Check for possible duplicate folder name
-                 */
-                {
-                    final SortableId[] checkMe = virtualStorage.getSubfolders(treeId, toCreate.getParentID(), storageParameters);
-                    final Locale locale = storageParameters.getUser().getLocale();
-                    for (final SortableId sortableId : checkMe) {
-                        final String localizedName =
-                            virtualStorage.getFolder(treeId, sortableId.getId(), storageParameters).getLocalizedName(locale);
-                        if (localizedName.equals(toCreate.getName())) {
-                            checkOpenedStorage(realStorage, openedStorages);
-                            throw FolderExceptionErrorMessage.EQUAL_NAME.create(
-                                toCreate.getName(),
-                                realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale),
-                                treeId);
-                        }
-                    }
-                }
                 /*
                  * Find the real storage which is capable to create the folder
                  */

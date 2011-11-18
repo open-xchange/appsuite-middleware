@@ -81,7 +81,9 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -269,15 +271,38 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    private static volatile Integer maxConcurrentRequests;
+
     private static int getMaxConcurrentRequests(final ServerSession session) {
+        Integer tmp = maxConcurrentRequests;
+        if (null == tmp) {
+            synchronized (SessionServlet.class) {
+                tmp = maxConcurrentRequests;
+                if (null == tmp) {
+                    tmp = maxConcurrentRequests = Integer.valueOf(getMaxConcurrentRequests0(session));
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static int getMaxConcurrentRequests0(final ServerSession session) {
         final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
         if (null == set || set.isEmpty()) {
-            return -1;
+            try {
+                return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
+            } catch (final OXException e) {
+                return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
+            }
         }
         try {
             return Integer.parseInt(set.iterator().next());
         } catch (final NumberFormatException e) {
-            return -1;
+            try {
+                return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
+            } catch (final OXException oxe) {
+                return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
+            }
         }
     }
 
@@ -424,20 +449,40 @@ public abstract class SessionServlet extends AJAXServlet {
         final String secret = extractSecret(hashSource, req, session.getHash(), session.getClient());
 
         if (secret == null || !session.getSecret().equals(secret)) {
-            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Session secret is different. Given "+secret+" differs from "+session.getSecret()+" in session.");
+            }
+            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
         }
-        final Context context;
-        final User user;
         try {
-            context = ContextStorage.getInstance().getContext(session.getContextId());
-            user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
+            return new ServerSessionAdapter(session, context, user);
+        } catch (final OXException e) {
+            if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                /*
+                 * An outdated session; context absent
+                 */
+                sessiondService.removeSession(sessionId);
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            }
+            if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
+                final int code = e.getCode();
+                if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
+                    /*
+                     * An outdated session; user absent
+                     */
+                    sessiondService.removeSession(sessionId);
+                    throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                }
+            }
+            throw e;
         } catch (final UndeclaredThrowableException e) {
             throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
         }
-        return new ServerSessionAdapter(session, context, user);
     }
 
     /**

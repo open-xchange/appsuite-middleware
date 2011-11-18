@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,84 +47,33 @@
  *
  */
 
-package com.openexchange.file.storage.json;
+package com.openexchange.chat;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.i18n.I18nService;
+import java.util.Date;
+import java.util.List;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link I18nServices} - A registry for all found {@link I18nService} instances.
+ * {@link ChatGroup} - Represents a group of chat members.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public final class I18nServices {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nServices.class));
-
-    private static final I18nServices SINGLETON = new I18nServices();
+public interface ChatGroup {
 
     /**
-     * Gets the instance.
-     *
-     * @return The instance
+     * Gets the chat members.
+     * 
+     * @return The identifiers of the chat members
+     * @throws OXException If chat members cannot be returned
      */
-    public static I18nServices getInstance() {
-        return SINGLETON;
-    }
-
-    /*
-     * Member stuff
-     */
-
-    private final Map<Locale, I18nService> services;
-
-    private I18nServices() {
-        super();
-        services = new ConcurrentHashMap<Locale, I18nService>();
-    }
+    List<String> getMembers() throws OXException;
 
     /**
-     * Adds the i18n service to this registry.
-     *
-     * @param service The i18n service
+     * Gets the time stamp for this chunk.
+     * 
+     * @return The time stamp
      */
-    public void addService(final I18nService service) {
-        if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service discovered for " + service.getLocale());
-        }
-    }
-
-    /**
-     * Removes the i18n service from this registry.
-     *
-     * @param service The i18n service
-     */
-    public void removeService(final I18nService service) {
-        if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
-        }
-    }
-
-    private static final Locale DEFAULT_LOCALE = Locale.US;
-
-    /**
-     * Gets the i18n service for specified locale.
-     *
-     * @param locale The locale
-     * @return The i18n service for specified locale or <code>null</code> if missing
-     */
-    public I18nService getService(final Locale locale) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService retval = services.get(loc);
-        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale " + loc + ".");
-        }
-        return retval;
-    }
+    Date getTimeStamp();
 
 }

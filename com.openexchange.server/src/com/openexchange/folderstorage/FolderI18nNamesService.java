@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,84 +47,27 @@
  *
  */
 
-package com.openexchange.file.storage.json;
+package com.openexchange.folderstorage;
 
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.i18n.I18nService;
+import java.util.Set;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link I18nServices} - A registry for all found {@link I18nService} instances.
+ * {@link FolderI18nNamesService} - Provides the localized folder names for specified folder modules.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.18.2
  */
-public final class I18nServices {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nServices.class));
-
-    private static final I18nServices SINGLETON = new I18nServices();
+public interface FolderI18nNamesService {
 
     /**
-     * Gets the instance.
-     *
-     * @return The instance
+     * Gets the localized folder names for specified folder modules.
+     * <p>
+     * If no module is specified, the localized names of all modules are returned.
+     * 
+     * @param modules The optional modules
+     * @return The localized folder names
+     * @throws OXException If name look-up fails
      */
-    public static I18nServices getInstance() {
-        return SINGLETON;
-    }
-
-    /*
-     * Member stuff
-     */
-
-    private final Map<Locale, I18nService> services;
-
-    private I18nServices() {
-        super();
-        services = new ConcurrentHashMap<Locale, I18nService>();
-    }
-
-    /**
-     * Adds the i18n service to this registry.
-     *
-     * @param service The i18n service
-     */
-    public void addService(final I18nService service) {
-        if (null != services.put(service.getLocale(), service)) {
-            LOG.warn("Another i18n translation service discovered for " + service.getLocale());
-        }
-    }
-
-    /**
-     * Removes the i18n service from this registry.
-     *
-     * @param service The i18n service
-     */
-    public void removeService(final I18nService service) {
-        if (null == services.remove(service.getLocale())) {
-            LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
-        }
-    }
-
-    private static final Locale DEFAULT_LOCALE = Locale.US;
-
-    /**
-     * Gets the i18n service for specified locale.
-     *
-     * @param locale The locale
-     * @return The i18n service for specified locale or <code>null</code> if missing
-     */
-    public I18nService getService(final Locale locale) {
-        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
-        final I18nService retval = services.get(loc);
-        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
-            LOG.warn("No i18n service for locale " + loc + ".");
-        }
-        return retval;
-    }
+    public Set<String> getI18nNamesFor(final int... modules) throws OXException;
 
 }

@@ -449,7 +449,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                  */
                 try {
                     if (!config.isSecure() && !imapStore.hasCapability("STARTTLS")) {
-                        warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
+                        if ("create".equals(session.getParameter("mail-account.validate.type"))) {
+                            warnings.add(MailExceptionCode.NON_SECURE_CREATION.create());
+                        } else {
+                            warnings.add(MailExceptionCode.NON_SECURE_WARNING.create());
+                        }
                     }
                 } catch (final MessagingException e) {
                     // Ignore

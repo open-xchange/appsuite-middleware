@@ -519,7 +519,7 @@ public final class DBChat implements Chat {
 
     private final boolean secureMessaging;
 
-//    private final Queue<DBChatChunk> chunks;
+    private volatile Date createdAt;
 
     /**
      * Initializes a new {@link DBChat}.
@@ -637,6 +637,8 @@ public final class DBChat implements Chat {
             return list;
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -669,6 +671,53 @@ public final class DBChat implements Chat {
     }
 
     @Override
+    public Date getTimeStamp() {
+        // Lazy initialization
+        Date tmp = createdAt;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = createdAt;
+                if (null == createdAt) {
+                    tmp = getCreatedAt();
+                    createdAt = tmp;
+                }
+            }
+        }
+        return tmp;
+    }
+
+    private Date getCreatedAt() {
+        try {
+            final DatabaseService databaseService = getDatabaseService();
+            final Connection con = databaseService.getReadOnly(contextId);
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT createdAt FROM chat WHERE cid = ? AND chatId = ?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, chatId);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    return null;
+                }
+                return new Date(rs.getLong(1));
+            } catch (final SQLException e) {
+                LOG.error("A SQL error occurred.", e);
+                return null;
+            } finally {
+                closeSQLStuff(rs, stmt);
+                databaseService.backReadOnly(contextId, con);
+            }
+        } catch (final OXException e) {
+            LOG.error("An OX error occurred.", e);
+            return null;
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return null;
+        }
+    }
+
+    @Override
     public String getSubject() {
         try {
             final DatabaseService databaseService = getDatabaseService();
@@ -694,6 +743,9 @@ public final class DBChat implements Chat {
         } catch (final OXException e) {
             LOG.error("An OX error occurred.", e);
             return null;
+        } catch (final RuntimeException e) {
+            LOG.error("A runtime error occurred.", e);
+            return null;
         }
     }
 
@@ -714,6 +766,8 @@ public final class DBChat implements Chat {
             }
             return ret;
         } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1140,6 +1194,8 @@ public final class DBChat implements Chat {
             return messages;
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
@@ -1188,6 +1244,8 @@ public final class DBChat implements Chat {
             } while (rs.next());
             return list;
         } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);

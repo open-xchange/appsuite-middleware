@@ -2056,7 +2056,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  */
                 String greeting = greetings.get(locale);
                 if (null == greeting) {
-                    greeting = new StringHelper(locale).getString(MailStrings.GREETING);
+                    greeting = StringHelper.valueOf(locale).getString(MailStrings.GREETING);
                     greetings.put(locale, greeting);
                 }
                 builder.setLength(0);
@@ -2125,26 +2125,30 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Check for a reply/forward
              */
-            if (ComposeType.REPLY.equals(type)) {
-                setFlagReply(composedMail.getMsgref());
-            } else if (ComposeType.FORWARD.equals(type)) {
-                final MailPath supPath = composedMail.getMsgref();
-                if (null == supPath) {
-                    final int count = composedMail.getEnclosedCount();
-                    final List<MailPath> paths = new ArrayList<MailPath>(count);
-                    for (int i = 0; i < count; i++) {
-                        final MailPart part = composedMail.getEnclosedMailPart(i);
-                        final MailPath path = part.getMsgref();
-                        if ((path != null) && part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
-                            paths.add(path);
+            try {
+                if (ComposeType.REPLY.equals(type)) {
+                    setFlagReply(composedMail.getMsgref());
+                } else if (ComposeType.FORWARD.equals(type)) {
+                    final MailPath supPath = composedMail.getMsgref();
+                    if (null == supPath) {
+                        final int count = composedMail.getEnclosedCount();
+                        final List<MailPath> paths = new ArrayList<MailPath>(count);
+                        for (int i = 0; i < count; i++) {
+                            final MailPart part = composedMail.getEnclosedMailPart(i);
+                            final MailPath path = part.getMsgref();
+                            if ((path != null) && part.getContentType().isMimeType(MIMETypes.MIME_MESSAGE_RFC822)) {
+                                paths.add(path);
+                            }
                         }
+                        if (!paths.isEmpty()) {
+                            setFlagMultipleForward(paths);
+                        }
+                    } else {
+                        setFlagForward(supPath);
                     }
-                    if (!paths.isEmpty()) {
-                        setFlagMultipleForward(paths);
-                    }
-                } else {
-                    setFlagForward(supPath);
                 }
+            } catch (final OXException e) {
+                mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
             }
             if (UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isNoCopyIntoStandardSentFolder()) {
                 /*

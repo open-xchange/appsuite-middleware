@@ -134,17 +134,17 @@ public final class SystemPrivateFolder {
                     final int module = folderObject.getModule();
                     if (FolderObject.CALENDAR == module) {
                         if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                     } else if (FolderObject.CONTACT == module) {
                         if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                     } else if (FolderObject.TASK == module) {
                         if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                     }
@@ -197,17 +197,17 @@ public final class SystemPrivateFolder {
                     final int module = folderObject.getModule();
                     if (FolderObject.CALENDAR == module) {
                         if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
                     } else if (FolderObject.CONTACT == module) {
                         if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
                     } else if (FolderObject.TASK == module) {
                         if (null == stringHelper) {
-                            stringHelper = new StringHelper(user.getLocale());
+                            stringHelper = StringHelper.valueOf(user.getLocale());
                         }
                         folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
                     }

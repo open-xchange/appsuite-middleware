@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 
@@ -69,6 +70,7 @@ public class I18nServiceListener implements ServiceTrackerCustomizer<I18nService
     public I18nService addingService(final ServiceReference<I18nService> reference) {
         final I18nService i18n = context.getService(reference);
         services.addService(i18n);
+        FolderI18nNamesServiceImpl.getInstance().addService(i18n);
         return i18n;
     }
 
@@ -81,6 +83,7 @@ public class I18nServiceListener implements ServiceTrackerCustomizer<I18nService
     public void removedService(final ServiceReference<I18nService> reference, final I18nService service) {
         try {
             services.removeService(service);
+            FolderI18nNamesServiceImpl.getInstance().removeService(service);
         } finally {
             context.ungetService(reference);
         }

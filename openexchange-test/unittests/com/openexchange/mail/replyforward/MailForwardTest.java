@@ -127,7 +127,7 @@ public final class MailForwardTest extends AbstractMailTest {
                 final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                 final Locale locale = user.getLocale();
                 final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-                final StringHelper stringHelper = new StringHelper(locale);
+                final StringHelper stringHelper = StringHelper.valueOf(locale);
                 {
                     final String subjectPrefix = "Fwd: ";
                     final String subject = new StringBuilder(32).append(subjectPrefix).append(sourceMail.getSubject()).toString();
@@ -246,7 +246,7 @@ public final class MailForwardTest extends AbstractMailTest {
                 final User user = UserStorage.getStorageUser(session.getUserId(), ctx);
                 final Locale locale = user.getLocale();
                 final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-                final StringHelper stringHelper = new StringHelper(locale);
+                final StringHelper stringHelper = StringHelper.valueOf(locale);
                 {
                     final String subjectPrefix = "Fwd: ";
                     final String subject = new StringBuilder(32).append(subjectPrefix).append(sourceMail.getSubject()).toString();

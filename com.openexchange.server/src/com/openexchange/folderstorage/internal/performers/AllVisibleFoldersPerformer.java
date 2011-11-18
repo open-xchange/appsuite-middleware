@@ -200,7 +200,7 @@ public final class AllVisibleFoldersPerformer extends AbstractUserizedFolderPerf
     }
 
     private UserizedFolder[] getSubfolders(final String treeId, final String parentId, final ListPerformer listAction, final Collection<FolderStorage> openedStorages) throws OXException {
-        return listAction.doList(treeId, parentId, true, openedStorages);
+        return listAction.doList(treeId, parentId, true, openedStorages, false);
     }
 
 }

@@ -52,7 +52,7 @@ package com.openexchange.chat;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ChatStrings} - i18n string for chat bundle.
+ * {@link ChatStrings} - The localizable strings for chat bundle.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -65,8 +65,10 @@ public final class ChatStrings implements LocalizableStrings {
         super();
     }
 
+    // The chat system message when a user left a chat.
     public static final String CHAT_LEFT = "%1$s has left the chat";
 
+    // The chat system message when a user joined a chat.
     public static final String CHAT_JOIN = "%1$s has joined the chat";
 
 }

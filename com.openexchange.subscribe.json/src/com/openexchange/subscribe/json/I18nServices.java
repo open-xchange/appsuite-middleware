@@ -76,22 +76,25 @@ public final class I18nServices {
         return SINGLETON;
     }
 
-    public void addService(I18nService service) {
+    public void addService(final I18nService service) {
         if (null != services.put(service.getLocale(), service)) {
             LOG.warn("Another i18n translation service discovered for " + service.getLocale());
         }
     }
 
-    public void removeService(I18nService service) {
+    public void removeService(final I18nService service) {
         if (null == services.remove(service.getLocale())) {
             LOG.warn("Unknown i18n translation service shut down for " + service.getLocale());
         }
     }
 
-    public I18nService getService(Locale locale) {
-        I18nService retval = services.get(locale);
-        if (null == retval && !"en".equalsIgnoreCase(locale.getLanguage())) {
-            LOG.warn("No i18n service for locale " + locale + ".");
+    private static final Locale DEFAULT_LOCALE = Locale.US;
+
+    public I18nService getService(final Locale locale) {
+        final Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        final I18nService retval = services.get(loc);
+        if (null == retval && !"en".equalsIgnoreCase(loc.getLanguage())) {
+            LOG.warn("No i18n service for locale " + loc + ".");
         }
         return retval;
     }

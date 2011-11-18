@@ -381,7 +381,8 @@ public class Login extends AJAXServlet {
             }
         });
         map.put(ACTION_CHANGEIP, new JSONRequestHandler() {
-            public void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+            @Override
+            public void handleRequest(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
                 final Response response = new Response();
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
@@ -399,7 +400,10 @@ public class Login extends AJAXServlet {
                         SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
                         final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
-                            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create(secret, session.getSecret());
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Session secret is different. Given "+secret+" differs from "+session.getSecret()+" in session.");
+                            }
+                            throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {

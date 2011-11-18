@@ -2592,6 +2592,16 @@ public final class Contacts {
         return null == string ? null == other : null == other ? false : string.equals(other);
     }
 
+    protected static java.util.Date getDate(final int pos, final ResultSet rs) {
+        try {
+            final Timestamp timestamp = rs.getTimestamp(pos);
+            return rs.wasNull() ? null : timestamp;
+        } catch (final SQLException e) {
+            LOG.warn("TIMESTAMP field could not be read: " + e.getMessage());
+            return null;
+        }
+    }
+
     public static interface Mapper {
 
         boolean containsElement(Contact co);
@@ -7007,10 +7017,7 @@ public final class Contacts {
 
             @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-                final Timestamp t = rs.getTimestamp(pos);
-                if (!rs.wasNull()) {
-                    co.setBirthday(t);
-                }
+                co.setBirthday(getDate(pos, rs));
             }
 
             @Override
@@ -7063,10 +7070,7 @@ public final class Contacts {
 
             @Override
             public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
-                final Timestamp t = rs.getTimestamp(pos);
-                if (!rs.wasNull()) {
-                    co.setAnniversary(t);
-                }
+                co.setAnniversary(getDate(pos, rs));
             }
 
             @Override

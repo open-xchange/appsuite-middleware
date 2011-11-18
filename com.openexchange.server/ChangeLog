@@ -3,6 +3,48 @@
  - Added support for chatChunks
  - chatChunk tests
 
+* 2011-11-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20818: Dealing with possible MIME-encoding (RFC 2047, Section 6.1) in MIME type string
+ - Fix for bug 20815: Adding a warning if original mail cannot be flagged as replied/forwarded, but do not abort mail transport
+
+* 2011-11-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20743: Ensure using active connection when loading folder attributes from database
+ - Fix for bug 20810: Ignore field if not parseable as TIMESTAMP field
+ - Fix for bug 20785: Abort gathering report data on error and properly signaling that error to caller
+
+* 2011-11-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20791: More robust parsing of retrieved date value
+ - Fix for bug 20790: Synchronizing access to MailfilterAction methods to avoid possible race conditions
+ - Fix for bug 20795: Omitting intensive duplicate/reserved identifier check for non-OLOX-relevant infostore folders
+ - Fix for bug 20792: Dealing with empty multipart part
+ - Fix for bug 20781: Fixed "Content-Disposition" header
+
+* 2011-11-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20774: Fixed possible NPE when retrieving RSS messages
+
+* 2011-11-14 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20762: Checking in database pool if null is returned instead of connection. Fixed returning null connection in TaskIterator.
+
+* 2011-11-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20727: Fixed "filename" parameter if "User-Agent" header indicates IE browser
+ - Fix for bug 20704: Improved error message to better determine what part of Facebook configuration is wrong/missing
+ - Fix for bug 20771: Lowered log level to TRACE if servlet-config directory is missing
+ - Fix for bug 20754: Improved error message if session is invalidated due to differing session secret
+ - Fix for bug 20746: Allowing "dir" attribute within a <div> element
+ - Fix for bug 20744: Using fall-back locale en_US if locale is missing
+ - Fix for bug 20600: Grant administer access if "al" rights are included AND "c" right OR "kx" rights
+
+* 2011-11-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20543 and bug 20613: Deep check for possible duplicates and reserved folder names
+ - Fix for bug 20768: Checking for valid password length according to configuration
+
 * 2011-11-11 - jan.bauerdick@open-xchange.com
 
  - Added Bundle com.openexchange.calendar.json and tests

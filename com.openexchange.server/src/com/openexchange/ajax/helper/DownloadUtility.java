@@ -55,11 +55,14 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.encoding.URLCoder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -78,6 +81,16 @@ public final class DownloadUtility {
         super();
     }
 
+    /**
+     * Checks specified input stream intended for inline display for harmful data if its Content-Type indicates image content.
+     *
+     * @param inputStream The input stream
+     * @param fileName The file name
+     * @param contentTypeStr The content-type string
+     * @param userAgent The user agent
+     * @return The checked download providing input stream, content type, and content disposition to use
+     * @throws OXException If checking download fails
+     */
     public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String userAgent) throws OXException {
         return checkInlineDownload(inputStream, fileName, contentTypeStr, null, userAgent);
     }
@@ -93,7 +106,7 @@ public final class DownloadUtility {
      * @return The checked download providing input stream, content type, and content disposition to use
      * @throws OXException If checking download fails
      */
-    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, String overridingDisposition, final String userAgent) throws OXException {
+    public static CheckedDownload checkInlineDownload(final InputStream inputStream, final String fileName, final String contentTypeStr, final String overridingDisposition, final String userAgent) throws OXException {
         final BrowserDetector browserDetector = new BrowserDetector(userAgent);
         final boolean msieOnWindows = (browserDetector.isMSIE() && browserDetector.isWindows());
         /*
@@ -192,18 +205,68 @@ public final class DownloadUtility {
             in = new CombinedInputStream(sequence, in);
         }
 
-        if(overridingDisposition == null) {
-            overridingDisposition = "attachment";
+        if (overridingDisposition == null) {
+            final String baseType = contentType.getBaseType();
+            final StringBuilder builder = new StringBuilder(32).append("attachment");
+            appendFilenameParameter(fileName, baseType, userAgent, builder);
+            return new CheckedDownload(baseType, builder.toString(), in);
+        }
+        if (overridingDisposition.indexOf(';') < 0) {
+            final String baseType = contentType.getBaseType();
+            final StringBuilder builder = new StringBuilder(32).append(overridingDisposition);
+            appendFilenameParameter(fileName, baseType, userAgent, builder);
+            return new CheckedDownload(baseType, builder.toString(), in);
         }
 
-        if(!overridingDisposition.contains(";")) {
-            overridingDisposition = new StringBuilder(64).append(overridingDisposition).append("; filename=\"").append(preparedFileName).append('"').toString();
-        }
+        return new CheckedDownload(contentType.getBaseType(), overridingDisposition, in);
+    }
 
-        return new CheckedDownload(
-            contentType.getBaseType(),
-            overridingDisposition,
-            in);
+    private static void appendFilenameParameter(final String fileName, final String baseCT, final String userAgent, final StringBuilder appendTo) {
+        if (null == fileName) {
+            appendTo.append("; filename=\"").append(DEFAULT_FILENAME).append('"').toString();
+            return;
+        }
+        String fn = fileName;
+        if (null != baseCT) {
+            if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
+                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
+                    fn += ".txt";
+                }
+            } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
+                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
+                    fn += ".html";
+                }
+            }
+        }
+        fn = escapeBackslashAndQuote(fn);
+        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
+            // InternetExplorer
+            appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"').toString();
+            return;
+        }
+        /*-
+         * On socket layer characters are casted to byte values.
+         * 
+         * See AJPv13Response.writeString():
+         * sink.write((byte) chars[i]);
+         * 
+         * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
+         */
+        String foo;
+        try {
+            foo = new String(fn.getBytes("UTF-8"), "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            foo = null;
+        }
+        appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(null == foo ? fn : foo).append('"').toString();
+    }
+
+    private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
+
+    private static final Pattern PAT_QUOTE = Pattern.compile("\"");
+
+    private static String escapeBackslashAndQuote(final String str) {
+        return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
     }
 
     private static CheckedDownload asAttachment(final InputStream inputStream, final String preparedFileName) {
@@ -289,8 +352,7 @@ public final class DownloadUtility {
     }
 
     /**
-     * {@link CheckedDownload} - Represents a checked download as a result of
-     * {@link DownloadUtility#checkInlineDownload(InputStream, String, String, String)}.
+     * {@link CheckedDownload} - Represents a checked download as a result of <tt>DownloadUtility.checkInlineDownload()</tt>.
      */
     public static final class CheckedDownload {
 
