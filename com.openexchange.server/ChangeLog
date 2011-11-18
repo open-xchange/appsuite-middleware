@@ -1,6 +1,7 @@
 * 2011-11-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 20818: Dealing with possible MIME-encoding (RFC 2047, Section 6.1) in MIME type string
+ - Fix for bug 20815: Adding a warning if original mail cannot be flagged as replied/forwarded, but do not abort mail transport
 
 * 2011-11-17 - thorben.betten@open-xchange.com
 
