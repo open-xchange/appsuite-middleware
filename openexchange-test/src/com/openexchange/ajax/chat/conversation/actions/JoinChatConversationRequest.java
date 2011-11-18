@@ -47,69 +47,76 @@
  *
  */
 
-package com.openexchange.chat.db.groupware;
+package com.openexchange.ajax.chat.conversation.actions;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.tableExists;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.chat.db.DBChatServiceLookup;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCodes;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.chat.json.conversation.ConversationID;
+
 
 /**
- * {@link DBChatCreateTableTask}
+ * {@link JoinChatConversationRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class DBChatCreateTableTask extends UpdateTaskAdapter {
-
-    /**
-     * Initializes a new {@link DBChatCreateTableTask}.
-     *
-     * @param dbService
-     */
-    public DBChatCreateTableTask() {
+public final class JoinChatConversationRequest extends AbstractChatConversationRequest<JoinChatConversationResponse> {
+    
+    private ConversationID cid;
+    
+    public JoinChatConversationRequest() {
         super();
+        setFailOnError(true);
+        cid = null;
+    }
+    
+    public JoinChatConversationRequest(final boolean fail) {
+        super();
+        setFailOnError(fail);
+        cid = null;
+    }
+    
+    public void setConversationId(final ConversationID id) {
+        if (id == null) {
+            return;
+        }
+        cid = id;
     }
 
     @Override
-    public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = DBChatServiceLookup.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
-        PreparedStatement stmt = null;
-        try {
-            final String[] tableNames = DBChatCreateTableService.getTablesToCreate();
-            final String[] createStmts = DBChatCreateTableService.getCreateStmts();
-            for (int i = 0; i < tableNames.length; i++) {
-                try {
-                    if (tableExists(writeCon, tableNames[i])) {
-                        continue;
-                    }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-                }
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(1);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "join"));
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends JoinChatConversationResponse> getParser() {
+        return new AbstractAJAXParser<JoinChatConversationResponse>(isFailOnError()) {
+
+            @Override
+            protected JoinChatConversationResponse createResponse(final Response response) throws JSONException {
+                return new JoinChatConversationResponse(response);
             }
-        } finally {
-            closeSQLStuff(stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
-        }
+            
+        };
     }
 
     @Override
-    public String[] getDependencies() {
-        return new String[] {};
+    public Object getBody() throws IOException, JSONException {
+        final JSONArray jArray = new JSONArray();
+        jArray.put(cid.toString());
+        return jArray;
     }
 
 }

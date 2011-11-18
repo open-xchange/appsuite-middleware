@@ -47,69 +47,41 @@
  *
  */
 
-package com.openexchange.chat.db.groupware;
+package com.openexchange.chat.db;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.tableExists;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.chat.db.DBChatServiceLookup;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.chat.util.ChatUserImpl;
 
 /**
- * {@link DBChatCreateTableTask}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link DBChatUser}
+ * 
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class DBChatCreateTableTask extends UpdateTaskAdapter {
+public class DBChatUser extends ChatUserImpl {
 
     /**
-     * Initializes a new {@link DBChatCreateTableTask}.
-     *
-     * @param dbService
+     * Initializes a new {@link DBChatUser}.
      */
-    public DBChatCreateTableTask() {
+    public DBChatUser() {
         super();
     }
 
-    @Override
-    public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = DBChatServiceLookup.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
-        PreparedStatement stmt = null;
-        try {
-            final String[] tableNames = DBChatCreateTableService.getTablesToCreate();
-            final String[] createStmts = DBChatCreateTableService.getCreateStmts();
-            for (int i = 0; i < tableNames.length; i++) {
-                try {
-                    if (tableExists(writeCon, tableNames[i])) {
-                        continue;
-                    }
-                    stmt = writeCon.prepareStatement(createStmts[i]);
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-                }
-            }
-        } finally {
-            closeSQLStuff(stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
-        }
+    /**
+     * Initializes a new {@link DBChatUser}.
+     * 
+     * @param id
+     */
+    public DBChatUser(final String id) {
+        super(id);
     }
 
-    @Override
-    public String[] getDependencies() {
-        return new String[] {};
+    /**
+     * Initializes a new {@link DBChatUser}.
+     * 
+     * @param id
+     * @param name
+     */
+    public DBChatUser(final String id, final String name) {
+        super(id, name);
     }
 
 }

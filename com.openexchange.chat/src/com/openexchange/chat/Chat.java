@@ -138,7 +138,7 @@ public interface Chat {
      * @param messageId The message identifier
      * @return The associated message
      */
-    Message getMessage(String messageId) throws OXException;
+    Message getMessage(String messageId, int userId) throws OXException;
 
     /**
      * Gets messages by specified identifiers.
@@ -146,7 +146,7 @@ public interface Chat {
      * @param messageIds The message identifiers
      * @return The associated messages
      */
-    List<Message> getMessages(Collection<String> messageIds) throws OXException;
+    List<Message> getMessages(Collection<String> messageIds, int userId) throws OXException;
 
     /**
      * Adds given message listener that will be notified of any new messages in the chat.

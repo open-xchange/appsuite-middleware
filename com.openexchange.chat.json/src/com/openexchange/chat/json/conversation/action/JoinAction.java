@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.chat.json.conversation.action;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -56,78 +57,54 @@ import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
-import com.openexchange.chat.Message;
-import com.openexchange.chat.MessageDescription;
 import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
-import com.openexchange.chat.json.conversation.JSONConversationParser;
-import com.openexchange.chat.json.conversation.JSONConversationWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link UpdateMessageAction}
+ * {@link JoinAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class UpdateMessageAction extends AbstractChatConversationAction {
+public class JoinAction extends AbstractChatConversationAction {
 
     /**
-     * Initializes a new {@link UpdateMessageAction}.
-     *
+     * Initializes a new {@link JoinAction}.
      * @param services
      */
-    public UpdateMessageAction(final ServiceLookup services) {
+    public JoinAction(final ServiceLookup services) {
         super(services);
     }
 
+    /* (non-Javadoc)
+     * @see com.openexchange.chat.json.conversation.action.AbstractChatConversationAction#perform(com.openexchange.chat.json.conversation.ChatConversationAJAXRequest)
+     */
     @Override
     protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
         final ServerSession session = req.getSession();
-        /*
-         * Get service
-         */
         final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
-        final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
-        final String messageId = req.getParameter("messageId");
-        final JSONObject jsonMessage = req.getData();
-        final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
-        ChatAccess access = null;
-        try {
-            access = chatService.access(conversationID.getAccountId(), session);
-            access.login();
-            /*
-             * Get chat
-             */
-            final Chat chat = access.getChat(conversationID.getChatId());
-            /*
-             * Get message
-             */
-            final MessageDescription messageDescription = JSONConversationParser.parseMessageDescription(jsonMessage);
-            if (null == messageDescription.getMessageId()) {
-                if (null == messageId) {
-                    throw AjaxExceptionCodes.MISSING_PARAMETER.create("messageId");
+        final JSONArray json = req.getData();
+        final int length = json.length();
+        for (int i = 0; i < length; i++) {
+            final ConversationID cid = ConversationID.valueOf(json.getString(i));
+            final ChatService chatService = registry.getChatService(cid.getServiceId(), session.getUserId(), session.getContextId());
+            ChatAccess chatAccess = null;
+            try {
+                chatAccess = chatService.access(cid.getAccountId(), session);
+                chatAccess.login();
+                final Chat chat = chatAccess.getChat(cid.getChatId());
+                chat.join(chatAccess.getUser().getId());
+            } finally {
+                if (chatAccess != null) {
+                    chatAccess.disconnect();
                 }
-                messageDescription.setMessageId(messageId);
-            }
-            chat.updateMessage(messageDescription);
-            /*
-             * Create JSON
-             */
-            final Message message = chat.getMessage(messageDescription.getMessageId(), Integer.valueOf(access.getUser().getId()));
-            final JSONObject json = JSONConversationWriter.writeMessage(message, session.getUser().getTimeZone());
-            /*
-             * Return appropriate result
-             */
-            return new AJAXRequestResult(json, message.getTimeStamp(), "json");
-        } finally {
-            if (null != access) {
-                access.disconnect();
             }
         }
+        final JSONObject jsonChat = new JSONObject();
+        return new AJAXRequestResult(jsonChat, "json");
     }
 
 }
