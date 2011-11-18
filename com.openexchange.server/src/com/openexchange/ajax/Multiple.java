@@ -117,48 +117,51 @@ public class Multiple extends SessionServlet {
 
     @Override
     protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        JSONArray dataArray = null;
-        final String data = getBody(req);
-
-        try {
-            dataArray = new JSONArray(data);
-        } catch (final JSONException e) {
-            final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
-            LOG.error(exc.getMessage() + Tools.logHeaderForError(req), exc);
-            dataArray = new JSONArray();
+        JSONArray dataArray;
+        {
+            final String data = getBody(req);
+            try {
+                dataArray = new JSONArray(data);
+            } catch (final JSONException e) {
+                final OXException exc = OXJSONExceptionCodes.JSON_READ_ERROR.create(e, data);
+                LOG.warn(exc.getMessage() + Tools.logHeaderForError(req), exc);
+                dataArray = new JSONArray();
+            }
         }
-
         final JSONArray respArr = new JSONArray();
-        AJAXState state = null;
-        try {
-            final ServerSession session = getSessionObject(req);
-            for (int a = 0; a < dataArray.length(); a++) {
-                state = parseActionElement(respArr, dataArray, a, session, req, state);
-            }
-            /*
-             * Don't forget to write mail request
-             */
-            writeMailRequest(req);
-        } catch (final JSONException e) {
-            log(RESPONSE_ERROR, e);
-            sendError(resp);
-        } catch (final OXException e) {
-            log(RESPONSE_ERROR, e);
-            sendError(resp);
-        } catch (final RuntimeException e) {
-            log(RESPONSE_ERROR, e);
-            sendError(resp);
-        } finally {
-            final MailServletInterface mi = (MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
-            if (mi != null) {
-                try {
-                    mi.close(true);
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+        final int length = dataArray.length();
+        if (length > 0) {
+            AJAXState state = null;
+            try {
+                final ServerSession session = getSessionObject(req);
+                for (int a = 0; a < length; a++) {
+                    state = parseActionElement(respArr, dataArray, a, session, req, state);
                 }
-            }
-            if (state != null) {
-                getDispatcher().end(state);
+                /*
+                 * Don't forget to write mail request
+                 */
+                writeMailRequest(req);
+            } catch (final JSONException e) {
+                log(RESPONSE_ERROR, e);
+                sendError(resp);
+            } catch (final OXException e) {
+                log(RESPONSE_ERROR, e);
+                sendError(resp);
+            } catch (final RuntimeException e) {
+                log(RESPONSE_ERROR, e);
+                sendError(resp);
+            } finally {
+                final MailServletInterface mi = (MailServletInterface) req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
+                if (mi != null) {
+                    try {
+                        mi.close(true);
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
+                if (state != null) {
+                    getDispatcher().end(state);
+                }
             }
         }
         resp.setStatus(HttpServletResponse.SC_OK);
