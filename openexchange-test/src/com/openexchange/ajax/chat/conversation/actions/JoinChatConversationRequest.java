@@ -67,25 +67,40 @@ import com.openexchange.chat.json.conversation.ConversationID;
  */
 public final class JoinChatConversationRequest extends AbstractChatConversationRequest<JoinChatConversationResponse> {
     
-    private ConversationID cid;
+    private ConversationID conversationId;
+
+    private final List<String> userIds;
     
     public JoinChatConversationRequest() {
-        super();
-        setFailOnError(true);
-        cid = null;
+        this(true);
     }
     
     public JoinChatConversationRequest(final boolean fail) {
         super();
         setFailOnError(fail);
-        cid = null;
+        conversationId = null;
+        userIds = new ArrayList<String>(4);
     }
     
-    public void setConversationId(final ConversationID id) {
-        if (id == null) {
+    /**
+     * Sets the identifier of the conversation to which specified users shall be added.
+     * 
+     * @param conversationId The conversation identifier
+     */
+    public void setConversationId(final ConversationID conversationId) {
+        if (conversationId == null) {
             return;
         }
-        cid = id;
+        this.conversationId = conversationId;
+    }
+
+    /**
+     * Adds give chat user identifier.
+     * 
+     * @param userId The chat user identifier
+     */
+    public void addUserId(final String userId) {
+        userIds.add(userId);
     }
 
     @Override
@@ -97,6 +112,7 @@ public final class JoinChatConversationRequest extends AbstractChatConversationR
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> params = new ArrayList<Parameter>(1);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "join"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, conversationId.toString()));
         return params.toArray(new Parameter[params.size()]);
     }
 
@@ -115,7 +131,9 @@ public final class JoinChatConversationRequest extends AbstractChatConversationR
     @Override
     public Object getBody() throws IOException, JSONException {
         final JSONArray jArray = new JSONArray();
-        jArray.put(cid.toString());
+        for (final String userId : userIds) {
+            jArray.put(userId);
+        }
         return jArray;
     }
 
