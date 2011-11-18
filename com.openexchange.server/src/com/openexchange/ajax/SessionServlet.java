@@ -81,7 +81,9 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -452,18 +454,35 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
         }
-        final Context context;
-        final User user;
         try {
-            context = ContextStorage.getInstance().getContext(session.getContextId());
-            user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
+            return new ServerSessionAdapter(session, context, user);
+        } catch (final OXException e) {
+            if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                /*
+                 * An outdated session; context absent
+                 */
+                sessiondService.removeSession(sessionId);
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            }
+            if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
+                final int code = e.getCode();
+                if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
+                    /*
+                     * An outdated session; user absent
+                     */
+                    sessiondService.removeSession(sessionId);
+                    throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                }
+            }
+            throw e;
         } catch (final UndeclaredThrowableException e) {
             throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
         }
-        return new ServerSessionAdapter(session, context, user);
     }
 
     /**
