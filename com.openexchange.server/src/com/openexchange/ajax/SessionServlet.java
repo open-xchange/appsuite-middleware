@@ -467,7 +467,7 @@ public abstract class SessionServlet extends AJAXServlet {
                  * An outdated session; context absent
                  */
                 sessiondService.removeSession(sessionId);
-                LOG.info("The context associated session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
+                LOG.info("The context associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
@@ -477,7 +477,7 @@ public abstract class SessionServlet extends AJAXServlet {
                      * An outdated session; user absent
                      */
                     sessiondService.removeSession(sessionId);
-                    LOG.info("The user associated session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
+                    LOG.info("The user associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
                     throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                 }
             }
