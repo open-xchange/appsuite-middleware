@@ -116,6 +116,8 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     private volatile boolean enableInternalUsersEdit = false;
 
+    private boolean enableSharedFolderCaching = true;
+
     private OXFolderProperties() {
         super();
     }
@@ -188,6 +190,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
     }
 
     private void reset() {
+        enableSharedFolderCaching = true;
         propertyListener = null;
         enableDBGrouping = true;
         enableFolderCache = true;
@@ -202,13 +205,20 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             return;
         }
         /*
+         * ENABLE_SHARED_FOLDER_CACHING
+         */
+        String value = configurationService.getProperty("ENABLE_SHARED_FOLDER_CACHING");
+        if (null != value) {
+            enableSharedFolderCaching = Boolean.parseBoolean(value.trim());
+        }
+        /*
          * ENABLE_DB_GROUPING
          */
-        String value = configurationService.getProperty("ENABLE_DB_GROUPING");
+        value = configurationService.getProperty("ENABLE_DB_GROUPING");
         if (null == value) {
             LOG.warn("Missing property ENABLE_DB_GROUPING.");
         } else {
-            enableDBGrouping = Boolean.parseBoolean(value);
+            enableDBGrouping = Boolean.parseBoolean(value.trim());
         }
         /*
          * ENABLE_FOLDER_CACHE
@@ -217,7 +227,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         if (null == value) {
             LOG.warn("Missing property ENABLE_FOLDER_CACHE");
         } else {
-            enableFolderCache = Boolean.parseBoolean(value);
+            enableFolderCache = Boolean.parseBoolean(value.trim());
         }
         /*
          * IGNORE_SHARED_ADDRESSBOOK
@@ -226,7 +236,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         if (null == value) {
             LOG.warn("Missing property IGNORE_SHARED_ADDRESSBOOK");
         } else {
-            ignoreSharedAddressbook = Boolean.parseBoolean(value);
+            ignoreSharedAddressbook = Boolean.parseBoolean(value.trim());
         }
         /*
          * ENABLE_INTERNAL_USER_EDIT and add listener
@@ -369,7 +379,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         if (null == value) {
             LOG.warn("Missing property ENABLE_INTERNAL_USER_EDIT");
         } else {
-            enableInternalUsersEdit = Boolean.parseBoolean(value);
+            enableInternalUsersEdit = Boolean.parseBoolean(value.trim());
         }
         /*
          * Log info
@@ -381,6 +391,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         if (LOG.isInfoEnabled()) {
             final StringBuilder sb = new StringBuilder(512);
             sb.append("\nFolder Properties & Folder Cache Properties:\n");
+            sb.append("\tENABLE_SHARED_FOLDER_CACHING=").append(enableSharedFolderCaching).append('\n');
             sb.append("\tENABLE_DB_GROUPING=").append(enableDBGrouping).append('\n');
             sb.append("\tENABLE_FOLDER_CACHE=").append(enableFolderCache).append('\n');
             sb.append("\tENABLE_INTERNAL_USER_EDIT=").append(enableInternalUsersEdit).append('\n');
@@ -432,6 +443,18 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             LOG.error(WARN_FOLDER_PROPERTIES_INIT, new Throwable());
         }
         return instance.enableInternalUsersEdit;
+    }
+
+    /**
+     * Checks whether caching for shared folders is enabled or not.
+     * 
+     * @return <code>true</code> if caching for shared folder is enabled; otherwise <code>false</code>
+     */
+    public static boolean isEnableSharedFolderCaching() {
+        if (!instance.started.get()) {
+            LOG.error(WARN_FOLDER_PROPERTIES_INIT, new Throwable());
+        }
+        return instance.enableSharedFolderCaching;
     }
 
     /*-
