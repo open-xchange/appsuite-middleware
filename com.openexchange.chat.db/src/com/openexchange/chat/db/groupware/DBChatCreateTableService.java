@@ -84,8 +84,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" chunkId INT4 unsigned NOT NULL,\n" +
     		" opMode INT4 unsigned NOT NULL,\n" + 
     		" PRIMARY KEY (cid, user, chatId, chunkId),\n" + 
-    		" INDEX `user` (cid, user),\n" + 
-    		" INDEX `chat` (cid, chatId)\n" + 
+    		" INDEX `user` (cid, user, chatId),\n" + 
     		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" + 
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
@@ -101,7 +100,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" INDEX `user` (cid, user),\n" + 
     		" INDEX `chat` (cid, chatId),\n" + 
     		" INDEX `userMessage` (cid, user, chatId)\n" +
-    		" INDEX `chunkMessage` (cid, user, chatId, chunkId)\n" +
+    		" INDEX `chunkMessage` (cid, chatId, chunkId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     
     private static final String CREATE_CHAT_MESSAGE_MAP = "CREATE TABLE "+TABLE_CHAT_MESSAGE_MAP+" (\n" + 
