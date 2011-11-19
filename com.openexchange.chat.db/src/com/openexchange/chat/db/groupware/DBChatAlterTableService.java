@@ -67,7 +67,7 @@ public class DBChatAlterTableService extends AbstractCreateTableImpl {
             "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD PRIMARY KEY (cid, user, chatId, chunkId)";
     
     private static final String ALTER_CHAT_MESSAGE = "ALTER TABLE "+TABLE_CHAT_MESSAGE+" ADD chunkId INT4 UNSIGNED NOT NULL;" +
-            "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD INDEX `chunkMessage` (cid, user, chatId, chunkId)";
+            "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD INDEX `chunkMessage` (cid, chatId, chunkId)";
     
     public static String[] getTablesToAlter() {
         return new String[] { TABLE_CHAT_MEMBER, TABLE_CHAT_MESSAGE };
