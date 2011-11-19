@@ -813,7 +813,7 @@ public final class DBChat implements Chat {
             rs = stmt.executeQuery();
             if (rs.next()) {
                 final int currentUser = rs.getInt(1);
-                if (currentUser == Integer.valueOf(user)) {
+                if (currentUser == DBChatUtility.parseUnsignedInt(user)) {
                     throw ChatExceptionCodes.CHAT_MEMBER_ALREADY_EXISTS.create(user, Integer.valueOf(chatId));
                 }
             }
@@ -1198,25 +1198,25 @@ public final class DBChat implements Chat {
     public List<Message> pollMessages(final Date since, final ChatUser chatUser) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getReadOnly(contextId);
-        final int chatUserId = Integer.valueOf(chatUser.getId());
+        final int chatUserId = DBChatUtility.parseUnsignedInt(chatUser.getId());
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             int pos = 1;
             if (null == since) {
-                final String sql =
-                    "SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE user = ?) ORDER BY createdAt";
-                stmt = con.prepareStatement(sql);
+                stmt = con.prepareStatement("SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT cm.chunkId FROM chatMember AS cm WHERE cm.cid = ? AND cm.user = ? AND cm.chatId = ?) ORDER BY createdAt");
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, chatId);
-                stmt.setInt(pos, chatUserId);
-            } else {
-                final String sql =
-                    "SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE user = ?) AND createdAt > ? ORDER BY createdAt";
-                stmt = con.prepareStatement(sql);
                 stmt.setInt(pos++, contextId);
-                stmt.setInt(pos++, chatId);
                 stmt.setInt(pos++, chatUserId);
+                stmt.setInt(pos, chatId);
+            } else {
+                stmt = con.prepareStatement("SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT cm.chunkId FROM chatMember AS cm WHERE cm.cid = ? AND cm.user = ? AND cm.chatId = ?) AND createdAt > ? ORDER BY createdAt");
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, chatId);
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, chatUserId);
+                stmt.setInt(pos++, chatId);
                 stmt.setLong(pos, since.getTime());
             }
             rs = stmt.executeQuery();
