@@ -332,9 +332,8 @@ public final class DBChat implements Chat {
      * @param chatId The chat identifier
      * @param contextId The context identifier
      * @return The chat
-     * @throws OXException 
      */
-    public static DBChat getDBChat(final int chatId, final int contextId) throws OXException {
+    public static DBChat getDBChat(final int chatId, final int contextId) {
         ConcurrentTIntObjectHashMap<DBChat> map = CHAT_MAP.get(contextId);
         if (null == map) {
             final ConcurrentTIntObjectHashMap<DBChat> newMap = new ConcurrentTIntObjectHashMap<DBChat>();
@@ -505,8 +504,6 @@ public final class DBChat implements Chat {
 
     private final String sChatId;
 
-//    private int chunkId;
-
     protected final List<MessageListener> messageListeners;
 
     private final int contextId;
@@ -523,9 +520,8 @@ public final class DBChat implements Chat {
 
     /**
      * Initializes a new {@link DBChat}.
-     * @throws OXException 
      */
-    public DBChat(final int chatId, final int contextId) throws OXException {
+    private DBChat(final int chatId, final int contextId) {
         super();
         userNameCache = new ConcurrentTIntObjectHashMap<String>(128);
         this.chatId = chatId;
@@ -533,9 +529,6 @@ public final class DBChat implements Chat {
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
         secureMessaging = false;
-//        this.chunkId = 1;
-//        chunks = new ConcurrentLinkedQueue<DBChatChunk>();
-//        chunks.offer(new DBChatChunk(chunkId, chatId, contextId, null));
     }
 
     /**
@@ -597,7 +590,7 @@ public final class DBChat implements Chat {
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -806,7 +799,7 @@ public final class DBChat implements Chat {
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -819,7 +812,7 @@ public final class DBChat implements Chat {
             stmt.setInt(pos, chunkId);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                int currentUser = rs.getInt(1);
+                final int currentUser = rs.getInt(1);
                 if (currentUser == Integer.valueOf(user)) {
                     throw ChatExceptionCodes.CHAT_MEMBER_ALREADY_EXISTS.create(user, Integer.valueOf(chatId));
                 }
@@ -833,7 +826,7 @@ public final class DBChat implements Chat {
         }
         rs = null;
         
-        Message userJoined = createJoinMessage(user);
+        final Message userJoined = createJoinMessage(user);
         post(userJoined, con);
         
         try {
@@ -899,7 +892,7 @@ public final class DBChat implements Chat {
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -939,7 +932,7 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
 
-        Message userLeft = createLeftMessage(user);
+        final Message userLeft = createLeftMessage(user);
         post(userLeft, con);
         
         try {
@@ -993,7 +986,7 @@ public final class DBChat implements Chat {
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1159,7 +1152,7 @@ public final class DBChat implements Chat {
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1346,16 +1339,16 @@ public final class DBChat implements Chat {
     }
     
     private Message createJoinMessage(final String userJoined) {
-        MessageImpl m = new MessageImpl();
-        ChatUser user = new ChatUserImpl(String.valueOf(0));
+        final MessageImpl m = new MessageImpl();
+        final ChatUser user = new ChatUserImpl(String.valueOf(0));
         m.setFrom(user);
         m.setText(String.format(ChatStrings.CHAT_JOIN, userJoined));
         return m;
     }
     
     private Message createLeftMessage(final String userLeft) {
-        MessageImpl m = new MessageImpl();
-        ChatUser user = new ChatUserImpl(String.valueOf(0));
+        final MessageImpl m = new MessageImpl();
+        final ChatUser user = new ChatUserImpl(String.valueOf(0));
         m.setFrom(user);
         m.setText(String.format(ChatStrings.CHAT_LEFT, userLeft));
         return m;
