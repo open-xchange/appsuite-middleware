@@ -83,6 +83,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
@@ -273,15 +274,15 @@ public final class MailMessageParser {
                 final Map<String, Object> properties = LogProperties.getLogProperties();
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
-                    properties.put("com.openexchange.mail.accountId", Integer.valueOf(accountId));
+                    properties.put("com.openexchange.mail.accountId", new ForceLog(Integer.valueOf(accountId)));
                 }
                 final String mailId = mail.getMailId();
                 if (null != mailId) {
-                    properties.put("com.openexchange.mail.mailId", mailId);
+                    properties.put("com.openexchange.mail.mailId", new ForceLog(mailId));
                 }
                 final String folder = mail.getFolder();
                 if (null != folder) {
-                    properties.put("com.openexchange.mail.folder", folder);
+                    properties.put("com.openexchange.mail.folder", new ForceLog(folder));
                 }
             }
             /*
