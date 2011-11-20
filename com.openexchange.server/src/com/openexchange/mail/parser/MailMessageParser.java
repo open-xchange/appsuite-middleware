@@ -911,12 +911,16 @@ public final class MailMessageParser {
                 final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
                 if (!MessageUtility.isAscii(bytes)) {
                     try {
-                        return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+                        String cs = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                        return new String(bytes, cs);
                     } catch (final UnsupportedEncodingException e) {
                         if (WARN_ENABLED) {
                             LOG.warn("Unsupported encoding: " + e.getMessage(), e);
                         }
-                        return new String(bytes, "US-ASCII");
+                        return new String(bytes, "ISO-8859-1");
                     }
                 }
                 /*
@@ -931,6 +935,9 @@ public final class MailMessageParser {
                     }
                     charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
                     if (WARN_ENABLED && null != sb) {
+                        if ("US-ASCII".equalsIgnoreCase(charset)) {
+                            charset = "ISO-8859-1";
+                        }
                         sb.append(" Using auto-detected encoding: \"").append(charset).append('"');
                         LOG.warn(sb.toString());
                     }
@@ -954,7 +961,7 @@ public final class MailMessageParser {
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
-            final String fallback = "US-ASCII";
+            final String fallback = "ISO-8859-1";
             if (WARN_ENABLED) {
                 LOG.warn(
                     new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(
