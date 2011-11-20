@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import javax.activation.DataHandler;
@@ -82,6 +83,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -265,7 +267,23 @@ public final class MailMessageParser {
         if (null == handler) {
             throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
+        final boolean logPropsEnabled = LogProperties.isEnabled();
         try {
+            if (logPropsEnabled) {
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final int accountId = mail.getAccountId();
+                if (accountId >= 0) {
+                    properties.put("com.openexchange.mail.accountId", Integer.valueOf(accountId));
+                }
+                final String mailId = mail.getMailId();
+                if (null != mailId) {
+                    properties.put("com.openexchange.mail.mailId", mailId);
+                }
+                final String folder = mail.getFolder();
+                if (null != folder) {
+                    properties.put("com.openexchange.mail.folder", folder);
+                }
+            }
             /*
              * Parse mail's envelope
              */
@@ -282,6 +300,13 @@ public final class MailMessageParser {
                 e,
                 null == mailId ? "" : mailId,
                 null == folder ? "" : folder);
+        } finally {
+            if (logPropsEnabled) {
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.mail.accountId", null);
+                properties.put("com.openexchange.mail.mailId", null);
+                properties.put("com.openexchange.mail.folder", null);
+            }
         }
         handler.handleMessageEnd(mail);
     }
