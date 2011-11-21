@@ -1,3 +1,7 @@
+* 2011-11-21 - jan.bauerdick@open-xchange.com
+
+- Created UpdateTask DBChatAlterTableTask
+
 * 2011-11-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 20787: Smarter handling for charset encoding/decoding errors
