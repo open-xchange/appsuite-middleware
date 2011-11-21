@@ -50,7 +50,11 @@
 package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -59,6 +63,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -110,6 +115,10 @@ public final class SubscribePerformer extends AbstractPerformer {
         super(user, context, folderStorageDiscoverer);
     }
 
+    private static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+        FolderStorage.REAL_TREE_ID,
+        OutlookFolderStorage.OUTLOOK_TREE_ID)));
+
     /**
      * Performs the <code>SUBSCRIBE</code> action.
      *
@@ -120,7 +129,7 @@ public final class SubscribePerformer extends AbstractPerformer {
      * @throws OXException If a folder error occurs
      */
     public void doSubscribe(final String sourceTreeId, final String folderId, final String targetTreeId, final String targetParentId) throws OXException {
-        if (FolderStorage.REAL_TREE_ID.equals(targetTreeId)) {
+        if (KNOWN_TREES.contains(targetTreeId)) {
             throw FolderExceptionErrorMessage.NO_REAL_SUBSCRIBE.create(targetTreeId);
         }
         final FolderStorage sourceStorage = folderStorageDiscoverer.getFolderStorage(sourceTreeId, folderId);

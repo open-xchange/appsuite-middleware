@@ -49,7 +49,13 @@
 
 package com.openexchange.folderstorage.cache;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 
 /**
  * {@link CacheFolderType} - The folder type for cache folder storage.
@@ -82,10 +88,15 @@ public final class CacheFolderType implements FolderType {
         return true;
     }
 
+    private static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+        FolderStorage.REAL_TREE_ID,
+        OutlookFolderStorage.OUTLOOK_TREE_ID)));
+
     @Override
     public boolean servesTreeId(final String treeId) {
         // Cache folder storage serves every tree identifier
-        return true;
+        return KNOWN_TREES.contains(treeId);
+        // return true;
     }
 
     @Override

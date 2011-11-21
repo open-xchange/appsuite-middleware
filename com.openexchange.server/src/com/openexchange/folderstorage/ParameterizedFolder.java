@@ -47,91 +47,30 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.folderstorage;
 
-import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.database.DatabaseId;
+import java.util.Map;
 
 /**
- * {@link VirtualId} - A virtual ID which orders subfolder by name in a locale-sensitive way.
+ * {@link ParameterizedFolder} - A folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualId implements SortableId {
-
-    private final String folderId;
-
-    private final int ordinal;
-
-    private final String name;
+public interface ParameterizedFolder extends Folder {
 
     /**
-     * Initializes a new {@link DatabaseId}.
-     *
-     * @param folderId The folder identifier
-     * @param ordinal The ordinal
+     * Sets specified property
+     * 
+     * @param name The name
+     * @param value The associated value (<code>null</code> removes the property)
      */
-    public VirtualId(final String folderId, final int ordinal, final String name) {
-        super();
-        this.folderId = folderId;
-        this.ordinal = ordinal;
-        this.name = name;
-    }
+    void setProperty(FieldNamePair name, Object value);
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String getId() {
-        return folderId;
-    }
-
-    @Override
-    public Priority getPriority() {
-        return Priority.HIGH;
-    }
-
-    @Override
-    public int compareTo(final SortableId o) {
-        // Compare by ordinal
-        if (o instanceof VirtualId) {
-            final int thisVal = ordinal;
-            final int anotherVal = ((VirtualId) o).ordinal;
-            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
-        }
-        final int thisPrio = Priority.HIGH.ordinal();
-        final int anotherPrio = (o).getPriority().ordinal();
-        return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ordinal;
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof VirtualId)) {
-            return false;
-        }
-        final VirtualId other = (VirtualId) obj;
-        if (ordinal != other.ordinal) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder(32).append("{folderId=").append(folderId).append(", ordinal=").append(ordinal).append('}').toString();
-    }
+    /**
+     * Gets the properties
+     * 
+     * @return The properties
+     */
+    Map<FieldNamePair, Object> getProperties();
 
 }

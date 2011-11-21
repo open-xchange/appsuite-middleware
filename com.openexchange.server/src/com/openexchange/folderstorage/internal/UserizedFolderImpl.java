@@ -49,10 +49,14 @@
 
 package com.openexchange.folderstorage.internal;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FieldNamePair;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -90,6 +94,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
     private Date creationDate;
 
     private Date lastModified;
+
+    private volatile Map<FieldNamePair, Object> properties;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
@@ -413,6 +419,31 @@ public final class UserizedFolderImpl implements UserizedFolder {
     @Override
     public void setNewID(final String newId) {
         throw new UnsupportedOperationException("UserizedFolderImpl.setNewID()");
+    }
+
+    @Override
+    public void setProperty(final FieldNamePair name, final Object value) {
+        // Nope...
+    }
+
+    @Override
+    public Map<FieldNamePair, Object> getProperties() {
+        Map<FieldNamePair, Object> map = this.properties;
+        if (null == map) {
+            synchronized (this) {
+                map = this.properties;
+                if (null == map) {
+                    if (folder instanceof ParameterizedFolder) {
+                        final ParameterizedFolder parameterizedFolder = (ParameterizedFolder) folder;
+                        map = parameterizedFolder.getProperties();
+                    } else {
+                        map = Collections.emptyMap();
+                    }
+                    this.properties = map;
+                }
+            }
+        }
+        return map;
     }
 
 }
