@@ -55,24 +55,26 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.chat.ChatExceptionCodes;
-import com.openexchange.databaseold.Database;
+import com.openexchange.chat.db.DBChatServiceLookup;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 
 /**
- * {@link DBChatAlterTableService}
+ * {@link DBChatAlterTableTask}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class DBChatAlterTableService extends UpdateTaskAdapter {
+public class DBChatAlterTableTask extends UpdateTaskAdapter {
     
     private static final String TABLE_CHAT_MEMBER = "chatMember";
     private static final String TABLE_CHAT_MESSAGE = "chatMessage";
+    private static final String TABLE_CHAT_CHUNK = "chatChunk";
     
     private static final String ALTER_CHAT_MEMBER = "ALTER TABLE "+TABLE_CHAT_MEMBER +" ADD chunkId INT4 UNSIGNED NOT NULL;" +
             "ALTER TABLE "+TABLE_CHAT_MEMBER+" DROP PRIMARY KEY;" +
@@ -81,45 +83,41 @@ public class DBChatAlterTableService extends UpdateTaskAdapter {
     private static final String ALTER_CHAT_MESSAGE = "ALTER TABLE "+TABLE_CHAT_MESSAGE+" ADD chunkId INT4 UNSIGNED NOT NULL;" +
             "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD INDEX `chunkMessage` (cid, chatId, chunkId)";
     
-    public static String[] getTablesToAlter() {
-        return new String[] { TABLE_CHAT_MEMBER, TABLE_CHAT_MESSAGE };
-    }
-    
-    public static String[] getAlterStmts() {
-        return new String[] { ALTER_CHAT_MEMBER, ALTER_CHAT_MESSAGE };
-    }
+    private static final String CREATE_CHAT_CHUNK = "CREATE TABLE "+TABLE_CHAT_CHUNK+" (\n" +
+        " cid INT4 unsigned NOT NULL,\n" +
+        " chatId INT4 unsigned NOT NULL,\n" +
+        " chunkId INT4 unsigned NOT NULL,\n" +
+        " -- user INT4 unsigned NOT NULL,\n" +
+        " createdAt BIGINT(64) DEFAULT NULL,\n" +
+        " PRIMARY KEY (cid, chatId, chunkId),\n" +
+        " INDEX `chat` (cid, chatId)\n" +
+        " -- INDEX `userMessage` (cid, user, chatId)\n" +
+        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        final Connection con;
-        try {
-            con = Database.getNoTimeout(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
+        final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
+        if (databaseService == null) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
-        PreparedStatement stmt = null;
+        final int contextId = params.getContextId();
+        final Connection con = databaseService.getWritable(contextId);
         try {
-            if (!columnExists(con, "chatMember", "personal")) {
-                stmt =
-                    con.prepareStatement("ALTER TABLE user_mail_account ADD COLUMN personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
-                stmt.executeUpdate();
-                stmt.close();
-                stmt = null;
-            }
-            if (!Tools.columnExists(con, "user_transport_account", "personal")) {
-                stmt =
-                    con.prepareStatement("ALTER TABLE user_transport_account ADD COLUMN personal VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
-                stmt.executeUpdate();
-                stmt.close();
-                stmt = null;
-            }
+            con.setAutoCommit(false);
+            alterChatMember(con);
+            alterChatMessage(con);
+            alterChatChunk(con);
+            con.commit();
         } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(stmt);
-            Database.backNoTimeout(contextId, true, con);
-        }        
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
     }
 
     @Override
@@ -132,12 +130,17 @@ public class DBChatAlterTableService extends UpdateTaskAdapter {
         try {
             if (DBUtils.tableExists(con, TABLE_CHAT_MEMBER)) {
                 if (!columnExists(con, TABLE_CHAT_MEMBER, "chunkId")) {
-                    stmt = con.prepareStatement("ALTER TABLE "+TABLE_CHAT_MEMBER +" ADD chunkId INT4 UNSIGNED NOT NULL");
+                    stmt = con.prepareStatement(ALTER_CHAT_MEMBER);
                     stmt.execute();
-                    Tools.dropPrimaryKey(con, TABLE_CHAT_MEMBER);
+                    if (Tools.hasPrimaryKey(con, TABLE_CHAT_MEMBER)) {
+                        Tools.dropPrimaryKey(con, TABLE_CHAT_MEMBER);
+                    }
                     Tools.createPrimaryKey(con, TABLE_CHAT_MEMBER, new String[]{"cid", "user", "chatId", "chunkId"});
                 }
-            }            
+            } else {
+                stmt = con.prepareStatement(DBChatCreateTableService.getCreateStmts()[1]);
+                stmt.execute();
+            }
         } catch (SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -150,10 +153,34 @@ public class DBChatAlterTableService extends UpdateTaskAdapter {
         try {
             if (DBUtils.tableExists(con, TABLE_CHAT_MESSAGE)) {
                 if (!columnExists(con, TABLE_CHAT_MESSAGE, "chunkId")) {
-                    stmt = con.prepareStatement("ALTER TABLE "+TABLE_CHAT_MESSAGE+" ADD chunkId INT4 UNSIGNED NOT NULL");
+                    stmt = con.prepareStatement(ALTER_CHAT_MESSAGE);
                     stmt.execute();
-                    Tools.createIndex(con, TABLE_CHAT_MESSAGE, "chunkMessage", new String[]{"cid", "user", "chatId", "chunkId"}, true);
+                    if (Tools.existsIndex(con, TABLE_CHAT_MESSAGE, new String[]{"cid", "chatId", "chunkId"}) == null) {
+                        Tools.createIndex(con, TABLE_CHAT_MESSAGE, "chunkMessage", new String[]{"cid", "chatId", "chunkId"}, false);
+                    }
+                    if (Tools.existsIndex(con, TABLE_CHAT_MESSAGE, new String[] { "cid", "chatId", "user"}) == null) {
+                        Tools.createIndex(con, TABLE_CHAT_MESSAGE, "userMessage", new String[] {"cid", "chatId", "user"}, false);
+                    }
                 }
+            } else {
+                stmt = con.prepareStatement(DBChatCreateTableService.getCreateStmts()[2]);
+                stmt.execute();
+            }
+        } catch (SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+    
+    private void alterChatChunk(final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            if (DBUtils.tableExists(con, TABLE_CHAT_CHUNK)) {
+                return;
+            } else {
+                stmt = con.prepareStatement(CREATE_CHAT_CHUNK);
+                stmt.execute();
             }
         } catch (SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());

@@ -794,8 +794,9 @@ public final class DBChat implements Chat {
         int pos;
         int chunkId = 1;
         try {
-            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE chatId = ?");
-            stmt.setInt(1, chatId);
+            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE cid = ? AND chatId = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
@@ -887,8 +888,9 @@ public final class DBChat implements Chat {
         int pos;
         int chunkId = 1;
         try {
-            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE chatId = ?");
-            stmt.setInt(1, chatId);
+            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE cid = ? AND chatId = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
@@ -981,8 +983,9 @@ public final class DBChat implements Chat {
         int chunkId = 1;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE chatId = ?");
-            stmt.setInt(1, chatId);
+            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE cid = ? AND chatId = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
             rs.last();
             chunkId = rs.getInt(1);
@@ -1145,18 +1148,19 @@ public final class DBChat implements Chat {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 //        final int user = Integer.valueOf(userId);
-        int chunkId = 1;
-        try {
-            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE chatId = ?");
-            stmt.setInt(1, chatId);
-            rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
-        } catch (final SQLException e) {
-            ChatExceptionCodes.ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(rs, stmt);
-        }
+//        int chunkId = 1;
+//        try {
+//            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE cid = ? AND chatId = ?");
+//            stmt.setInt(1, contextId);
+//            stmt.setInt(2, chatId);
+//            rs = stmt.executeQuery();
+//            rs.last();
+//            chunkId = rs.getInt(1);
+//        } catch (final SQLException e) {
+//            ChatExceptionCodes.ERROR.create(e, e.getMessage());
+//        } finally {
+//            closeSQLStuff(rs, stmt);
+//        }
         try {
             int pos;
             final List<Message> messages = new ArrayList<Message>(messageIds.size());
@@ -1164,11 +1168,13 @@ public final class DBChat implements Chat {
                 pos = 1;
                 {
                     final String sql =
-                        "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE user = ?) AND messageId = " + DBChatUtility.getUnhexReplaceString();
+                        "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE cid = ? AND chatId = ? AND user = ?) AND messageId = " + DBChatUtility.getUnhexReplaceString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
-                    stmt.setInt(pos++, chunkId);
+                    stmt.setInt(pos++, contextId);
+                    stmt.setInt(pos++, chatId);
+//                    stmt.setInt(pos++, chunkId);
                     stmt.setInt(pos++, userId);
                     stmt.setString(pos, messageId);
                 }
