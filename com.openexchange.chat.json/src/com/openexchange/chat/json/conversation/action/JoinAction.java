@@ -49,6 +49,8 @@
 
 package com.openexchange.chat.json.conversation.action;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,32 +81,35 @@ public class JoinAction extends AbstractChatConversationAction {
         super(services);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.chat.json.conversation.action.AbstractChatConversationAction#perform(com.openexchange.chat.json.conversation.ChatConversationAJAXRequest)
-     */
     @Override
     protected AJAXRequestResult perform(final ChatConversationAJAXRequest req) throws OXException, JSONException {
         final ServerSession session = req.getSession();
-        final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
         final JSONArray json = req.getData();
         final int length = json.length();
-        for (int i = 0; i < length; i++) {
-            final ConversationID cid = ConversationID.valueOf(json.getString(i));
-            final ChatService chatService = registry.getChatService(cid.getServiceId(), session.getUserId(), session.getContextId());
+        if (length > 0) {
+            final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+            final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
+            final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
             ChatAccess chatAccess = null;
             try {
-                chatAccess = chatService.access(cid.getAccountId(), session);
+                chatAccess = chatService.access(conversationID.getAccountId(), session);
                 chatAccess.login();
-                final Chat chat = chatAccess.getChat(cid.getChatId());
-                chat.join(chatAccess.getUser().getId());
+                final Chat chat = chatAccess.getChat(conversationID.getChatId());
+                final Set<String> existing = new HashSet<String>(chat.getMembers());
+                for (int i = 0; i < length; i++) {
+                    final String userId = json.getString(i);
+                    if (!existing.contains(userId)) {
+                        chat.join(userId);
+                        existing.add(userId);
+                    }
+                }
             } finally {
                 if (chatAccess != null) {
                     chatAccess.disconnect();
                 }
             }
         }
-        final JSONObject jsonChat = new JSONObject();
-        return new AJAXRequestResult(jsonChat, "json");
+        return new AJAXRequestResult(new JSONObject(), "json");
     }
 
 }

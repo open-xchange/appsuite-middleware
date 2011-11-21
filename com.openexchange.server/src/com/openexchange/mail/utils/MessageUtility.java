@@ -53,7 +53,6 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -269,8 +268,6 @@ public final class MessageUtility {
 
     private static final int BUFSIZE = 8192; // 8K
 
-    private static final int STRBLD_SIZE = 32768; // 32K
-
     /**
      * The unknown character: <code>'&#65533;'</code>
      */
@@ -341,7 +338,7 @@ public final class MessageUtility {
         } catch (final Error error) {
             // Huh..?
             final Throwable cause = error.getCause();
-            if (cause.getClass().getName().equals("sun.io.ConversionBufferFullException")) {
+            if ((cause instanceof java.io.CharConversionException) || (cause instanceof java.nio.charset.CharacterCodingException)) {
                 /*
                  * Retry with auto-detected charset
                  */
@@ -352,25 +349,34 @@ public final class MessageUtility {
     }
 
     private static String readStream0(final InputStream inStream, final String charset) throws IOException {
-        final InputStreamReader isr;
-        try {
-            isr = new InputStreamReader(inStream, charset);
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
-            mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
+        if (null == inStream) {
             return STR_EMPTY;
         }
         try {
-            int count = 0;
-            final char[] cbuf = new char[BUFSIZE];
-            if ((count = isr.read(cbuf, 0, cbuf.length)) <= 0) {
-                return STR_EMPTY;
+            final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(BUFSIZE << 1);
+            final byte[] buf = new byte[BUFSIZE];
+            for (int read; (read = inStream.read(buf, 0, BUFSIZE)) > 0;) {
+                tmp.write(buf, 0, read);
             }
-            final StringBuilder sb = new StringBuilder(STRBLD_SIZE);
-            do {
-                sb.append(cbuf, 0, count);
-            } while ((count = isr.read(cbuf)) > 0);
-            return sb.toString();
+            if (null == charset) {
+                final byte[] bytes = tmp.toByteArray();
+                return new String(bytes, detectCharset(bytes));
+            }
+            try {
+                return new String(tmp.toByteArray(), charset);
+            } catch (final UnsupportedEncodingException e) {
+                LOG.error("Unsupported encoding in a message detected and monitored: \"" + charset + '"', e);
+                mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
+                final byte[] bytes = tmp.toByteArray();
+                return new String(bytes, detectCharset(bytes));
+            } catch (final Error error) {
+                final Throwable cause = error.getCause();
+                if ((cause instanceof java.io.CharConversionException) || (cause instanceof java.nio.charset.CharacterCodingException)) {
+                    final byte[] bytes = tmp.toByteArray();
+                    return new String(bytes, detectCharset(bytes));
+                }
+                throw error;
+            }
         } catch (final IOException e) {
             if ("No content".equals(e.getMessage())) {
                 /*-
@@ -382,11 +388,19 @@ public final class MessageUtility {
             throw e;
         } finally {
             try {
-                isr.close();
+                inStream.close();
             } catch (final IOException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
+    }
+
+    private static String detectCharset(final byte[] bytes) {
+        String charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+        if ("US-ASCII".equalsIgnoreCase(charset)) {
+            charset = "ISO-8859-1";
+        }
+        return charset;
     }
 
     private static final Pattern PATTERN_BIG5 = Pattern.compile("[-_]+");

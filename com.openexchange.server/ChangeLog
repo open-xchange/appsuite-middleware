@@ -1,3 +1,7 @@
+* 2011-11-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20787: Smarter handling for charset encoding/decoding errors
+
 * 2011-11-18 - jan.bauerdick@open-xchange.com
 
  - Added support for chatChunks
