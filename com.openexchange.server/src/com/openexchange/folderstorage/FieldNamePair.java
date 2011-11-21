@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,71 +47,62 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
-
-import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.database.DatabaseId;
+package com.openexchange.folderstorage;
 
 /**
- * {@link VirtualId} - A virtual ID which orders subfolder by name in a locale-sensitive way.
- *
+ * {@link FieldNamePair}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualId implements SortableId {
+public final class FieldNamePair {
 
-    private final String folderId;
+    /**
+     * Gets the instance for given field.
+     * 
+     * @param field The field
+     * @return The appropriate instance
+     */
+    public static FieldNamePair valueOf(final int field) {
+        return new FieldNamePair(field, null);
+    }
 
-    private final int ordinal;
+    private final int field;
 
     private final String name;
 
     /**
-     * Initializes a new {@link DatabaseId}.
-     *
-     * @param folderId The folder identifier
-     * @param ordinal The ordinal
+     * Initializes a new {@link FieldNamePair}.
+     * 
+     * @param field The field number
+     * @param name The field name
      */
-    public VirtualId(final String folderId, final int ordinal, final String name) {
+    public FieldNamePair(final int field, final String name) {
         super();
-        this.folderId = folderId;
-        this.ordinal = ordinal;
+        this.field = field;
         this.name = name;
     }
 
-    @Override
+    /**
+     * Gets the field.
+     * 
+     * @return The field
+     */
+    public int getField() {
+        return field;
+    }
+
+    /**
+     * Gets the name.
+     * 
+     * @return The name
+     */
     public String getName() {
         return name;
     }
 
     @Override
-    public String getId() {
-        return folderId;
-    }
-
-    @Override
-    public Priority getPriority() {
-        return Priority.HIGH;
-    }
-
-    @Override
-    public int compareTo(final SortableId o) {
-        // Compare by ordinal
-        if (o instanceof VirtualId) {
-            final int thisVal = ordinal;
-            final int anotherVal = ((VirtualId) o).ordinal;
-            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
-        }
-        final int thisPrio = Priority.HIGH.ordinal();
-        final int anotherPrio = (o).getPriority().ordinal();
-        return (thisPrio < anotherPrio ? 1 : (thisPrio == anotherPrio ? 0 : -1));
-    }
-
-    @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ordinal;
-        return result;
+        return field;
     }
 
     @Override
@@ -119,11 +110,11 @@ public final class VirtualId implements SortableId {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof VirtualId)) {
+        if (!(obj instanceof FieldNamePair)) {
             return false;
         }
-        final VirtualId other = (VirtualId) obj;
-        if (ordinal != other.ordinal) {
+        final FieldNamePair other = (FieldNamePair) obj;
+        if (field != other.field) {
             return false;
         }
         return true;
@@ -131,7 +122,13 @@ public final class VirtualId implements SortableId {
 
     @Override
     public String toString() {
-        return new StringBuilder(32).append("{folderId=").append(folderId).append(", ordinal=").append(ordinal).append('}').toString();
+        final StringBuilder builder = new StringBuilder(48);
+        builder.append("FieldNamePair [field=").append(field).append(", ");
+        if (name != null) {
+            builder.append("name=").append(name);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

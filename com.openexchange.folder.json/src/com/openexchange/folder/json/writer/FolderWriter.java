@@ -59,6 +59,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,6 +70,7 @@ import com.openexchange.ajax.customizer.folder.BulkFolderField;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FieldNamePair;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
@@ -475,10 +478,7 @@ public final class FolderWriter {
         for (int i = 0; i < ffws.length; i++) {
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
-                }
-                ffw = UNKNOWN_FIELD_FFW;
+                ffw = getPropertyByField(cols[i]);
             }
             ffws[i] = ffw;
         }
@@ -514,10 +514,7 @@ public final class FolderWriter {
                     aff.getValues(turnIntoFolderObjects(folders), serverSession);
                     ffw = new AdditionalFolderFieldWriter(serverSession, aff);
                 } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown field: " + curCol, new Throwable());
-                    }
-                    ffw = UNKNOWN_FIELD_FFW;
+                    ffw = getPropertyByField(curCol);
                 }
             }
             ffws[i] = ffw;
@@ -553,10 +550,7 @@ public final class FolderWriter {
         for (int i = 0; i < ffws.length; i++) {
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
-                }
-                ffw = UNKNOWN_FIELD_FFW;
+                ffw = getPropertyByField(cols[i]);
             }
             ffws[i] = ffw;
         }
@@ -596,10 +590,7 @@ public final class FolderWriter {
                     final AdditionalFolderField aff = additionalFolderFieldList.get(curCol);
                     ffw = new AdditionalFolderFieldWriter(serverSession, aff);
                 } else {
-                    if (LOG.isWarnEnabled()) {
-                        LOG.warn("Unknown field: " + curCol, new Throwable());
-                    }
-                    ffw = UNKNOWN_FIELD_FFW;
+                    ffw = getPropertyByField(curCol);
                 }
             }
             ffws[i] = ffw;
@@ -637,10 +628,7 @@ public final class FolderWriter {
         for (int i = 0; i < ffws.length; i++) {
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Unknown field: " + cols[i], new Throwable());
-                }
-                ffw = UNKNOWN_FIELD_FFW;
+                ffw = getPropertyByField(cols[i]);
             }
             ffws[i] = ffw;
         }
@@ -664,6 +652,42 @@ public final class FolderWriter {
     /*
      * Helper methods
      */
+
+    private static final class PropertyFieldWriter implements FolderFieldWriter {
+
+        private final int field;
+
+        protected PropertyFieldWriter(final int field) {
+            super();
+            this.field = field;
+        }
+
+        @Override
+        public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
+            final Set<Entry<FieldNamePair, Object>> entrySet = folder.getProperties().entrySet();
+            for (final Entry<FieldNamePair, Object> entry : entrySet) {
+                final FieldNamePair fieldNamePair = entry.getKey();
+                if (fieldNamePair.getField() == field) {
+                    jsonPutter.put(fieldNamePair.getName(), entry.getValue());
+                }
+            }
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Unknown field: " + field, new Throwable());
+            }
+            UNKNOWN_FIELD_FFW.writeField(jsonPutter, folder);
+        }
+        
+    }
+
+    private static FolderFieldWriter getPropertyByField(final int field) {
+        if (field >= 3040) {
+            return new PropertyFieldWriter(field);
+        }
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("Unknown field: " + field, new Throwable());
+        }
+        return UNKNOWN_FIELD_FFW;
+    }
 
     /**
      * The actual max permission that can be transfered in field 'bits' or JSON's permission object

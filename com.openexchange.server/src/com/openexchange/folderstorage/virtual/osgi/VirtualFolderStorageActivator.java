@@ -57,9 +57,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.VirtualFolderDeleteListener;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
-import com.openexchange.folderstorage.virtual.VirtualTreeCreateTableTask;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
@@ -125,7 +123,6 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
 
             // Register services
             registerService(DeleteListener.class, new VirtualFolderDeleteListener(), null);
-            registerService(UpdateTask.class, new VirtualTreeCreateTableTask(), null);
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", FolderStorage.ALL_TREE_ID);

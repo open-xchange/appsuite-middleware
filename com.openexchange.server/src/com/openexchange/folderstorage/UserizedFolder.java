@@ -57,7 +57,7 @@ import java.util.Locale;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface UserizedFolder extends Folder {
+public interface UserizedFolder extends ParameterizedFolder {
 
     /**
      * Gets the subfolder IDs.
