@@ -176,7 +176,7 @@ final class SessionData {
             longTermList.addFirst(new HashMap<String, SessionControl>());
             final List<SessionControl> retval = new ArrayList<SessionControl>();
             retval.addAll(longTermList.removeLast().values());
-            for (SessionControl sessionControl : retval) {
+            for (final SessionControl sessionControl : retval) {
                 longTermUserGuardian.remove(new UserKey(sessionControl.getSession().getUserId(), sessionControl.getSession().getContextId()));
             }
             return retval;
@@ -212,7 +212,7 @@ final class SessionData {
         }
     }
 
-    private final boolean hasLongTermSession(int userId, int contextId) {
+    private final boolean hasLongTermSession(final int userId, final int contextId) {
         return this.longTermUserGuardian.contains(new UserKey(userId, contextId));
     }
 
@@ -252,11 +252,11 @@ final class SessionData {
         return retval.toArray(new SessionControl[retval.size()]);
     }
     
-    public SessionControl getAnyActiveSessionForUser(int userId, int contextId) {
+    public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId) {
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
-                SessionControl control = container.getAnySessionByUser(userId, contextId);
+                final SessionControl control = container.getAnySessionByUser(userId, contextId);
                 if ( control != null ) {
                     return control;
                 }
@@ -283,11 +283,11 @@ final class SessionData {
         return null;
     }
     
-    public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+    public Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
-                SessionControl control = container.getAnySessionByUser(userId, contextId);
+                final SessionControl control = container.getAnySessionByUser(userId, contextId);
                 if ( control != null && matcher.accepts(control.getSession())) {
                     return control.getSession();
                 }
@@ -499,10 +499,12 @@ final class SessionData {
         if (!randomToken.equals(session.getRandomToken())) {
             final OXException e = SessionExceptionCodes.WRONG_BY_RANDOM.create(session.getSessionID(), session.getRandomToken(), randomToken, sessionId);
             LOG.error(e.getMessage(), e);
+            SessionHandler.clearSession(sessionId);
             return null;
         }
         session.removeRandomToken();
         if (sessionControl.getCreationTime() + randomTokenTimeout < System.currentTimeMillis()) {
+            SessionHandler.clearSession(sessionId);
             return null;
         }
         return sessionControl;
