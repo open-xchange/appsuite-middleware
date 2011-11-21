@@ -1,6 +1,8 @@
 * 2011-11-21 - jan.bauerdick@open-xchange.com
 
 - Created UpdateTask DBChatAlterTableTask
+- pollMessages returns only unread messages by default now
+- JSONArray contains number of unread messages
 
 * 2011-11-20 - thorben.betten@open-xchange.com
 

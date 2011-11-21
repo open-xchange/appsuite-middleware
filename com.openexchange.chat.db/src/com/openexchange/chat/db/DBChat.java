@@ -157,8 +157,7 @@ public final class DBChat implements Chat {
         protected abstract void process(int key, V value) throws Exception;
     }
 
-    protected static final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>> CHAT_MAP =
-        new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>>();
+    protected static final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>> CHAT_MAP = new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>>();
 
     protected static final List<MessageListener> GLOBAL_LISTENERS = new CopyOnWriteArrayList<MessageListener>();
 
@@ -241,30 +240,29 @@ public final class DBChat implements Chat {
         final TimerService timerService = DBChatServiceLookup.getService(TimerService.class);
         final Runnable task = new SafeRunnable() {
 
-            private final TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>> procedure =
-                new SafeTIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
+            private final TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>> procedure = new SafeTIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
 
-                    @Override
-                    public void process(final int contextId, final ConcurrentTIntObjectHashMap<DBChat> map) {
-                        if (map.isEmpty()) {
-                            return;
-                        }
-                        final Runnable subtask = new SafeRunnable() {
-
-                            @Override
-                            public void execute() throws OXException {
-                                final DatabaseService databaseService = getDatabaseService();
-                                final Connection con = databaseService.getReadOnly(contextId);
-                                try {
-                                    map.forEachEntry(new ChatProcedure(con));
-                                } finally {
-                                    databaseService.backReadOnly(contextId, con);
-                                }
-                            }
-                        };
-                        DBChatServiceLookup.getService(ThreadPoolService.class).submit(ThreadPools.task(subtask));
+                @Override
+                public void process(final int contextId, final ConcurrentTIntObjectHashMap<DBChat> map) {
+                    if (map.isEmpty()) {
+                        return;
                     }
-                };
+                    final Runnable subtask = new SafeRunnable() {
+
+                        @Override
+                        public void execute() throws OXException {
+                            final DatabaseService databaseService = getDatabaseService();
+                            final Connection con = databaseService.getReadOnly(contextId);
+                            try {
+                                map.forEachEntry(new ChatProcedure(con));
+                            } finally {
+                                databaseService.backReadOnly(contextId, con);
+                            }
+                        }
+                    };
+                    DBChatServiceLookup.getService(ThreadPoolService.class).submit(ThreadPools.task(subtask));
+                }
+            };
 
             @Override
             public void execute() {
@@ -285,8 +283,7 @@ public final class DBChat implements Chat {
             timerTask.cancel(false);
             TIMER_TASK.set(null);
         }
-        final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>> clone =
-            new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>>();
+        final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>> clone = new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<DBChat>>();
         CHAT_MAP.forEachEntry(new TIntObjectProcedure<ConcurrentTIntObjectHashMap<DBChat>>() {
 
             @Override
@@ -596,8 +593,7 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
         try {
-            stmt =
-                con.prepareStatement("SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId = ? AND createdAt > ? ORDER BY createdAt");
+            stmt = con.prepareStatement("SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId = ? AND createdAt > ? ORDER BY createdAt");
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, chatId);
@@ -826,39 +822,71 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
         rs = null;
-        
+
+        final long currentTime = System.currentTimeMillis();
         final Message userJoined = createJoinMessage(user);
         post(userJoined, con);
-        
+
         try {
             stmt = con.prepareStatement("INSERT INTO chatChunk (cid, chatId, chunkId, createdAt) VALUES (?, ?, ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, chatId);
             stmt.setInt(pos++, ++chunkId);
-            stmt.setLong(pos, System.currentTimeMillis());
+            stmt.setLong(pos, currentTime);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }
-        
-//        DBChatChunk newChunk = new DBChatChunk(chunkId, chatId, contextId, con);
-//        chunks.offer(newChunk);
         try {
-            stmt = con.prepareStatement("INSERT INTO chatMember (cid, user, chatId, chunkId, opMode) VALUES (?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO chatMember (cid, user, chatId, chunkId, opModem, lastPoll) VALUES (?, ?, ?, ?, ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(user));
             stmt.setInt(pos++, chatId);
             stmt.setInt(pos++, chunkId);
-            stmt.setInt(pos, 0);
+            stmt.setInt(pos++, 0);
+            stmt.setLong(pos, currentTime);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+        }
+
+        try {
+            stmt = con.prepareStatement("SELECT user, opMode, lastPoll FROM chatMember WHERE cid = ? AND chatId = ? AND chunkId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setInt(pos, chunkId - 1);
+            rs = stmt.executeQuery();
+            if (rs.next()) { // At least one result
+                PreparedStatement stmt2 = null;
+                try {
+                    stmt2 = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, user, lastPoll) VALUES (?, ?, ?, ?, ?, ?)");
+                    pos = 1;
+                    stmt2.setInt(pos++, contextId);
+                    stmt2.setInt(pos++, chatId);
+                    stmt2.setInt(pos, chunkId);
+                    do {
+                        pos = 4;
+                        stmt2.setInt(pos++, rs.getInt(2)); // opMode
+                        stmt2.setInt(pos++, rs.getInt(1)); // user
+                        stmt2.setLong(pos, rs.getLong(3)); // lastPoll
+                        stmt2.addBatch();
+                    } while (rs.next());
+                    stmt2.executeBatch();
+                } finally {
+                    closeSQLStuff(stmt2);
+                }
+            }
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 
@@ -887,6 +915,7 @@ public final class DBChat implements Chat {
         ResultSet rs = null;
         int pos;
         int chunkId = 1;
+        boolean dropChat = false;
         try {
             stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE cid = ? AND chatId = ?");
             stmt.setInt(1, contextId);
@@ -917,7 +946,7 @@ public final class DBChat implements Chat {
             rs.next();
             final int count = rs.getInt(1);
             if (count > 1) {
-                return;
+                dropChat = true;
             }
             closeSQLStuff(rs, stmt);
             rs = null;
@@ -934,9 +963,13 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
 
+        if (dropChat) {
+            return;
+        }
+
         final Message userLeft = createLeftMessage(user);
         post(userLeft, con);
-        
+
         try {
             stmt = con.prepareStatement("INSERT INTO chatChunk (cid, chatId, chunkId, createdAt) VALUES (?, ?, ?, ?)");
             pos = 1;
@@ -951,8 +984,38 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
 
-//        DBChatChunk newChunk = new DBChatChunk(chunkId, chatId, contextId, con);
-//        chunks.offer(newChunk);
+        try {
+            stmt = con.prepareStatement("SELECT user, opMode, lastPoll FROM chatMember WHERE cid = ? AND chatId = ? AND chunkId = ?");
+            pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setInt(pos, chunkId - 1);
+            rs = stmt.executeQuery();
+            if (rs.next()) { // At least one result
+                PreparedStatement stmt2 = null;
+                try {
+                    stmt2 = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, user, lastPoll) VALUES (?, ?, ?, ?, ?, ?)");
+                    pos = 1;
+                    stmt2.setInt(pos++, contextId);
+                    stmt2.setInt(pos++, chatId);
+                    stmt2.setInt(pos, chunkId);
+                    do {
+                        pos = 4;
+                        stmt2.setInt(pos++, rs.getInt(2)); // opMode
+                        stmt2.setInt(pos++, rs.getInt(1)); // user
+                        stmt2.setLong(pos, rs.getLong(3)); // lastPoll
+                        stmt2.addBatch();
+                    } while (rs.next());
+                    stmt2.executeBatch();
+                } finally {
+                    closeSQLStuff(stmt2);
+                }
+            }
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
     }
 
     @Override
@@ -995,8 +1058,7 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
         try {
-            stmt =
-                con.prepareStatement("INSERT INTO chatMessage (cid, user, chatId, chunkId, messageId, message, createdAt) VALUES (?, ?, ?, ?, " + DBChatUtility.getUnhexReplaceString() + ", ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO chatMessage (cid, user, chatId, chunkId, messageId, message, createdAt) VALUES (?, ?, ?, ?, " + DBChatUtility.getUnhexReplaceString() + ", ?, ?)");
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, DBChatUtility.parseUnsignedInt(message.getFrom().getId()));
@@ -1108,8 +1170,7 @@ public final class DBChat implements Chat {
         PreparedStatement stmt = null;
         int pos;
         try {
-            stmt =
-                con.prepareStatement("DELETE FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString());
+            stmt = con.prepareStatement("DELETE FROM chatMessage WHERE cid = ? AND chatId = ? AND messageId = " + DBChatUtility.getUnhexReplaceString());
             pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, chatId);
@@ -1147,34 +1208,18 @@ public final class DBChat implements Chat {
     private List<Message> getMessages(final Collection<String> messageIds, final int userId, final Context context, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-//        final int user = Integer.valueOf(userId);
-//        int chunkId = 1;
-//        try {
-//            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE cid = ? AND chatId = ?");
-//            stmt.setInt(1, contextId);
-//            stmt.setInt(2, chatId);
-//            rs = stmt.executeQuery();
-//            rs.last();
-//            chunkId = rs.getInt(1);
-//        } catch (final SQLException e) {
-//            ChatExceptionCodes.ERROR.create(e, e.getMessage());
-//        } finally {
-//            closeSQLStuff(rs, stmt);
-//        }
         try {
             int pos;
             final List<Message> messages = new ArrayList<Message>(messageIds.size());
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
-                    final String sql =
-                        "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE cid = ? AND chatId = ? AND user = ?) AND messageId = " + DBChatUtility.getUnhexReplaceString();
+                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE cid = ? AND chatId = ? AND user = ?) AND messageId = " + DBChatUtility.getUnhexReplaceString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
-//                    stmt.setInt(pos++, chunkId);
                     stmt.setInt(pos++, userId);
                     stmt.setString(pos, messageId);
                 }
@@ -1199,19 +1244,47 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
     }
-
+    
     @Override
     public List<Message> pollMessages(final Date since, final ChatUser chatUser) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
-        final Connection con = databaseService.getReadOnly(contextId);
+        final Connection con = databaseService.getWritable(contextId);
+        try {
+            con.setAutoCommit(false);
+            List<Message> messages = pollMessages(con, since, chatUser);
+            con.commit();
+            return messages;
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(contextId, con);
+        }
+    }
+
+    
+    private List<Message> pollMessages(final Connection con, final Date since, final ChatUser chatUser) throws OXException {
         final int chatUserId = DBChatUtility.parseUnsignedInt(chatUser.getId());
+        int chunkId = 1;
         PreparedStatement stmt = null;
         ResultSet rs = null;
+
+        /*
+         * Poll messages
+         */
+        final List<Message> list = new ArrayList<Message>();
         try {
             int pos = 1;
             if (null == since) {
-                stmt = con.prepareStatement("SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT cm.chunkId FROM chatMember AS cm WHERE cm.cid = ? AND cm.user = ? AND cm.chatId = ?) ORDER BY createdAt");
+                stmt = con.prepareStatement("SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT cm.chunkId FROM chatMember AS cm WHERE cm.cid = ? AND cm.user = ? AND cm.chatId = ?) AND createdAt > (SELECT MAX(lastPoll) FROM chatMember AS cm WHERE cm.cid = ? AND cm.user = ? AND cm.chatId = ?) ORDER BY createdAt");
                 stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, chatId);
+                stmt.setInt(pos++, contextId);
+                stmt.setInt(pos++, chatUserId);
                 stmt.setInt(pos++, chatId);
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, chatUserId);
@@ -1230,7 +1303,6 @@ public final class DBChat implements Chat {
                 return Collections.emptyList();
             }
             final Context context = getContext();
-            final List<Message> list = new ArrayList<Message>();
             do {
                 final MessageImpl message = new MessageImpl();
                 pos = 1;
@@ -1241,15 +1313,53 @@ public final class DBChat implements Chat {
                 message.setTimeStamp(new Date(rs.getLong(pos)));
                 list.add(message);
             } while (rs.next());
-            return list;
+            // return list;
         } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextId, con);
         }
+
+        /*
+         * Get actual chunkId
+         */
+        try {
+            int pos = 1;
+            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatMember WHERE cid = ? AND user = ? AND chatId = ?");
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatUserId);
+            stmt.setInt(pos, chatId);
+            rs = stmt.executeQuery();
+            rs.last();
+            if (rs.getRow() == 1) {
+                chunkId = rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+
+        /*
+         * Update lastPoll
+         */
+        try {
+            int pos = 1;
+            stmt = con.prepareStatement("UPDATE chatMember SET lastPoll = ? WHERE cid = ? AND chatId = ? AND chunkId = ? AND user = ?");
+            stmt.setLong(pos++, System.currentTimeMillis());
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setInt(pos++, chunkId);
+            stmt.setInt(pos, chatUserId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+        return list;
     }
 
     @Override
@@ -1343,7 +1453,7 @@ public final class DBChat implements Chat {
         }
         return databaseService;
     }
-    
+
     private Message createJoinMessage(final String userJoined) {
         final MessageImpl m = new MessageImpl();
         final ChatUser user = new ChatUserImpl(String.valueOf(0));
@@ -1351,7 +1461,7 @@ public final class DBChat implements Chat {
         m.setText(String.format(ChatStrings.CHAT_JOIN, userJoined));
         return m;
     }
-    
+
     private Message createLeftMessage(final String userLeft) {
         final MessageImpl m = new MessageImpl();
         final ChatUser user = new ChatUserImpl(String.valueOf(0));

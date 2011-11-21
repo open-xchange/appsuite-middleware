@@ -76,12 +76,11 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
     private static final String TABLE_CHAT_MESSAGE = "chatMessage";
     private static final String TABLE_CHAT_CHUNK = "chatChunk";
     
-    private static final String ALTER_CHAT_MEMBER = "ALTER TABLE "+TABLE_CHAT_MEMBER +" ADD chunkId INT4 UNSIGNED NOT NULL;" +
-            "ALTER TABLE "+TABLE_CHAT_MEMBER+" DROP PRIMARY KEY;" +
-            "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD PRIMARY KEY (cid, user, chatId, chunkId)";
+    private static final String ALTER_CHAT_MEMBER_1 = "ALTER TABLE "+TABLE_CHAT_MEMBER +" ADD chunkId INT4 UNSIGNED NOT NULL";
     
-    private static final String ALTER_CHAT_MESSAGE = "ALTER TABLE "+TABLE_CHAT_MESSAGE+" ADD chunkId INT4 UNSIGNED NOT NULL;" +
-            "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD INDEX `chunkMessage` (cid, chatId, chunkId)";
+    private static final String ALTER_CHAT_MEMBER_2 = "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD lastPoll BIGINT(64) DEFAULT NULL";
+    
+    private static final String ALTER_CHAT_MESSAGE = "ALTER TABLE "+TABLE_CHAT_MESSAGE+" ADD chunkId INT4 UNSIGNED NOT NULL";
     
     private static final String CREATE_CHAT_CHUNK = "CREATE TABLE "+TABLE_CHAT_CHUNK+" (\n" +
         " cid INT4 unsigned NOT NULL,\n" +
@@ -130,12 +129,20 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
         try {
             if (DBUtils.tableExists(con, TABLE_CHAT_MEMBER)) {
                 if (!columnExists(con, TABLE_CHAT_MEMBER, "chunkId")) {
-                    stmt = con.prepareStatement(ALTER_CHAT_MEMBER);
+                    stmt = con.prepareStatement(ALTER_CHAT_MEMBER_1);
                     stmt.execute();
+                    stmt.close();
                     if (Tools.hasPrimaryKey(con, TABLE_CHAT_MEMBER)) {
                         Tools.dropPrimaryKey(con, TABLE_CHAT_MEMBER);
                     }
                     Tools.createPrimaryKey(con, TABLE_CHAT_MEMBER, new String[]{"cid", "user", "chatId", "chunkId"});
+                }
+                if (!columnExists(con, TABLE_CHAT_MEMBER, "lastPoll")) {
+                    if (stmt != null) {
+                        closeSQLStuff(stmt);
+                    }
+                    stmt = con.prepareStatement(ALTER_CHAT_MEMBER_2);
+                    stmt.execute();
                 }
             } else {
                 stmt = con.prepareStatement(DBChatCreateTableService.getCreateStmts()[1]);

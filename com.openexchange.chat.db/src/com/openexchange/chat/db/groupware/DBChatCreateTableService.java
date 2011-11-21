@@ -82,7 +82,8 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" user INT4 unsigned NOT NULL,\n" + 
     		" chatId INT4 unsigned NOT NULL,\n" + 
     		" chunkId INT4 unsigned NOT NULL,\n" +
-    		" opMode INT4 unsigned NOT NULL,\n" + 
+    		" opMode INT4 unsigned NOT NULL,\n" +
+    		" lastPoll BIGINT(64) DEFAULT NULL,\n" +
     		" PRIMARY KEY (cid, user, chatId, chunkId),\n" + 
     		" INDEX `user` (cid, user, chatId),\n" + 
     		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" + 

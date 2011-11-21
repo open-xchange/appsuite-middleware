@@ -123,6 +123,9 @@ public final class JSONConversationWriter {
         for (final Message message : messages) {
             jsonMessages.put(writeMessage(message, timeZone));
         }
+        JSONObject unread = new JSONObject();
+        unread.put("unread", messages.size());
+        jsonMessages.put(unread);
         return jsonMessages;
     }
 
@@ -203,6 +206,16 @@ public final class JSONConversationWriter {
             jsonPresence.put("timestamp", addTimeZoneOffset(timeStamp.getTime(), getTimeZone(timeZone)));
         }
         return jsonPresence;
+    }
+    
+    public static JSONObject writeUnreadCount(final int count, final String timeZone) throws JSONException {
+        final JSONObject jsonCount = new JSONObject();
+        jsonCount.put("unread", count);
+        final Date timestamp = new Date(System.currentTimeMillis());
+        if (timestamp != null) {
+            jsonCount.put("timestamp", addTimeZoneOffset(timestamp.getTime(), getTimeZone(timeZone)));
+        }
+        return jsonCount;
     }
 
 }
