@@ -343,11 +343,9 @@ public abstract class AbstractPerformer {
      * @throws OXException If a folder error occurs
      */
     protected void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        for (final FolderStorage ps : openedStorages) {
-            if (checkMe.equals(ps)) {
-                // Passed storage is already opened
-                return;
-            }
+        if (openedStorages.contains(checkMe)) {
+            // Passed storage is already opened
+            return;
         }
         // Passed storage has not been opened before. Open now and add to collection
         if (checkMe.startTransaction(storageParameters, modify)) {
