@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.internal.FolderServiceImpl;
 import com.openexchange.folderstorage.mail.osgi.MailFolderStorageActivator;
 import com.openexchange.folderstorage.messaging.osgi.MessagingFolderStorageActivator;
 import com.openexchange.folderstorage.outlook.osgi.OutlookFolderStorageActivator;
+import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -189,9 +190,9 @@ public final class FolderStorageActivator implements BundleActivator {
 					.getLog(FolderStorageActivator.class));
 
 
-	private List<ServiceRegistration> serviceRegistrations;
+	private List<ServiceRegistration<?>> serviceRegistrations;
 
-	private List<ServiceTracker> serviceTrackers;
+	private List<ServiceTracker<?, ?>> serviceTrackers;
 
 	private List<BundleActivator> activators;
 
@@ -207,7 +208,7 @@ public final class FolderStorageActivator implements BundleActivator {
 		try {
 			// Register error component
 			// Register services
-			serviceRegistrations = new ArrayList<ServiceRegistration>(4);
+			serviceRegistrations = new ArrayList<ServiceRegistration<?>>(4);
 			// Register folder service
 			serviceRegistrations.add(context.registerService(
 					FolderService.class.getName(), new FolderServiceImpl(),
@@ -219,29 +220,22 @@ public final class FolderStorageActivator implements BundleActivator {
 					AdditionalFolderField.class.getName(),
 					new DisplayNameFolderField(), null));
 			// Register service trackers
-			serviceTrackers = new ArrayList<ServiceTracker>(4);
-			serviceTrackers.add(new ServiceTracker(context, FolderStorage.class
+			serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(4);
+			serviceTrackers.add(new ServiceTracker<FolderStorage,FolderStorage>(context, FolderStorage.class
 					.getName(), new FolderStorageTracker(context)));
-			for (final ServiceTracker serviceTracker : serviceTrackers) {
+			for (final ServiceTracker<?,?> serviceTracker : serviceTrackers) {
 				serviceTracker.open();
 			}
 
 			// Start other activators
 			activators = new ArrayList<BundleActivator>(8);
-			activators.add(new DatabaseFolderStorageActivator()); // Database
-																	// impl
+			activators.add(new DatabaseFolderStorageActivator()); // Database impl
 			activators.add(new MailFolderStorageActivator()); // Mail impl
-			activators.add(new MessagingFolderStorageActivator()); // Messaging
-																	// impl
-			activators.add(new FileStorageFolderStorageActivator()); // File
-																		// storage
-																		// impl
+			activators.add(new MessagingFolderStorageActivator()); // Messaging impl
+			activators.add(new FileStorageFolderStorageActivator()); // File storage impl
 			activators.add(new CacheFolderStorageActivator()); // Cache impl
-			activators.add(new OutlookFolderStorageActivator()); // MS Outlook
-																	// storage
-																	// activator
-			// activators.add(new VirtualFolderStorageActivator()); // Virtual
-			// storage activator
+			activators.add(new OutlookFolderStorageActivator()); // MS Outlook storage activator
+			activators.add(new VirtualFolderStorageActivator()); // Virtual storage activator
 			BundleActivator activator = null;
 			for (final Iterator<BundleActivator> iter = activators.iterator(); iter
 					.hasNext();) {

@@ -56,6 +56,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folder.json.Constants;
+import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folder.json.actions.FolderActionFactory;
 import com.openexchange.folder.json.preferences.Tree;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -77,6 +78,8 @@ public class FolderJSONActivator extends AJAXModuleActivator {
     private String module;
 
     private String servletPath;
+
+    private FolderFieldRegistry fieldRegistry;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -113,6 +116,8 @@ public class FolderJSONActivator extends AJAXModuleActivator {
              * Open trackers
              */
             openTrackers();
+            fieldRegistry = FolderFieldRegistry.getInstance();
+            fieldRegistry.startUp(context);
             /*
              * Register module
              */
@@ -131,6 +136,10 @@ public class FolderJSONActivator extends AJAXModuleActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            if (null != fieldRegistry) {
+                fieldRegistry.shutDown();
+                FolderFieldRegistry.releaseInstance();
+            }
             cleanUp();
             /*
              * Restore
