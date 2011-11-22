@@ -1022,23 +1022,13 @@ public class Login extends AJAXServlet {
     }
 
     private static String parseUserAgent(final HttpServletRequest req) {
-        final String userAgent;
-        if (null == req.getParameter(LoginFields.USER_AGENT)) {
-            userAgent = req.getHeader(Header.USER_AGENT);
-        } else {
-            userAgent = req.getParameter(LoginFields.USER_AGENT);
-        }
-        return userAgent;
+        final String parameter = req.getParameter(LoginFields.USER_AGENT);
+        return null == parameter ? req.getHeader(Header.USER_AGENT) : parameter;
     }
 
     private static String parseClientIP(final HttpServletRequest req) {
-        final String clientIP;
-        if (null == req.getParameter(LoginFields.CLIENT_IP_PARAM)) {
-            clientIP = req.getRemoteAddr();
-        } else {
-            clientIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
-        }
-        return clientIP;
+        final String parameter = req.getParameter(LoginFields.CLIENT_IP_PARAM);
+        return null == parameter ? req.getRemoteAddr() : parameter;
     }
 
     private String parseClient(final HttpServletRequest req, final boolean strict) throws OXException {
