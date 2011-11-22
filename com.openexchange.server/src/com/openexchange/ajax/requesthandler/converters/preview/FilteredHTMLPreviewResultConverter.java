@@ -123,6 +123,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             content = htmlService.filterExternalImages(content, modified);
             sanitizedHtml = content;
         }
+        // TODO: Replace CSS classes
         result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
     }
 
@@ -137,7 +138,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
 
         private final String sanitizedHtml;
 
-        private InputStream thumbnail;
+        private final InputStream thumbnail;
 
         /**
          * Initializes a new {@link SanitizedPreviewDocument}.
@@ -145,7 +146,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
          * @param metaData
          * @param sanitizedHtml
          */
-        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml, InputStream thumbnail) {
+        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml, final InputStream thumbnail) {
             this.metaData = metaData;
             this.sanitizedHtml = sanitizedHtml;
             this.thumbnail = thumbnail;
