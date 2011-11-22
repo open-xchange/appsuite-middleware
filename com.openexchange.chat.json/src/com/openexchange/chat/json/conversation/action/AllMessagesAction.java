@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
@@ -113,7 +114,7 @@ public final class AllMessagesAction extends AbstractChatConversationAction {
              */
             final List<Message> messages = chat.pollMessages(since, new ChatUserImpl(String.valueOf(session.getUserId())));
             if (messages.isEmpty()) {
-                return new AJAXRequestResult(new JSONArray(), "json");
+                return new AJAXRequestResult(new JSONArray().put(new JSONObject().put("unread", 0)), "json");
             }
             Date timestamp = messages.get(0).getTimeStamp();
             for (int i = 1, size = messages.size(); i < size; i++) {
