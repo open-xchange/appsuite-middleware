@@ -162,7 +162,8 @@ public final class VirtualFolderStorage implements FolderStorage {
                 FolderStorage realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, CalendarContentType.getInstance());
                 checkOpenedStorage(realStorage, params, true, openedStorages);
                 String folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, CalendarContentType.getInstance(), PrivateType.getInstance(), params);
-                if (!containsFolder(treeId, folderID, params)) {
+                final MemoryTree tree = MemoryTable.getMemoryTableFor(params.getSession()).getTree(unsignedInt(treeId), params.getSession());
+                if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
@@ -175,7 +176,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, ContactContentType.getInstance());
                 checkOpenedStorage(realStorage, params, true, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, ContactContentType.getInstance(), PrivateType.getInstance(), params);
-                if (!containsFolder(treeId, folderID, params)) {
+                if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
@@ -188,7 +189,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, TaskContentType.getInstance());
                 checkOpenedStorage(realStorage, params, true, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, TaskContentType.getInstance(), PrivateType.getInstance(), params);
-                if (!containsFolder(treeId, folderID, params)) {
+                if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
@@ -201,7 +202,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, MailContentType.getInstance());
                 checkOpenedStorage(realStorage, params, true, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, MailContentType.getInstance(), PrivateType.getInstance(), params);
-                if (!containsFolder(treeId, folderID, params)) {
+                if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);

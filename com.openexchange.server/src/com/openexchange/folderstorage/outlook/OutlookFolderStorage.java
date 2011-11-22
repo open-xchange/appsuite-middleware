@@ -564,7 +564,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         {
             final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
             if (null != memoryTable) {
-                final MemoryTree memoryTree = memoryTable.getTree(tree);
+                final MemoryTree memoryTree = memoryTable.optTree(tree);
                 if (null != memoryTree) {
                     memoryTree.getCrud().remove(folderId);
                 }
@@ -583,7 +583,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                     if (disposed.add(current.getSessionID())) { // Set did not already contain session ID
                         final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
                         if (null != memoryTable) {
-                            final MemoryTree memoryTree = memoryTable.getTree(tree);
+                            final MemoryTree memoryTree = memoryTable.optTree(tree);
                             if (null != memoryTree) {
                                 memoryTree.getCrud().remove(folderId);
                             }

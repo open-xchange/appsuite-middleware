@@ -87,7 +87,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
     }
 
     private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
+        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(12);
         tmp.put(RootAction.ACTION, new RootAction());
         tmp.put(ListAction.ACTION, new ListAction());
         tmp.put(GetAction.ACTION, new GetAction());
@@ -98,6 +98,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(ClearAction.ACTION, new ClearAction());
         tmp.put(UpdatesAction.ACTION, new UpdatesAction());
         tmp.put(VisibleFoldersAction.ACTION, new VisibleFoldersAction());
+        tmp.put(SubscribeAction.ACTION, new SubscribeAction());
         return Collections.unmodifiableMap(tmp);
     }
 
