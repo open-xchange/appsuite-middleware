@@ -54,6 +54,7 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.session.Session;
 
 /**
  * {@link FolderConsistencyLoginHandler}
@@ -72,8 +73,10 @@ public final class FolderConsistencyLoginHandler implements LoginHandlerService 
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
-        folderService.checkConsistency("1", login.getSession());
-        folderService.checkConsistency("0", login.getSession());
+        final Session session = login.getSession();
+        folderService.checkConsistency("1", session);
+        folderService.checkConsistency("0", session);
+        folderService.checkConsistency("20", session);
     }
 
     @Override

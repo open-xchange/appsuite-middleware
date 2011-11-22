@@ -56,6 +56,7 @@ import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FieldNamePair;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
@@ -95,7 +96,7 @@ public final class UserizedFolderImpl implements UserizedFolder {
 
     private Date lastModified;
 
-    private volatile Map<FieldNamePair, Object> properties;
+    private volatile Map<FieldNamePair, FolderProperty> properties;
 
     /**
      * Initializes a new {@link UserizedFolderImpl} from specified folder.
@@ -427,8 +428,8 @@ public final class UserizedFolderImpl implements UserizedFolder {
     }
 
     @Override
-    public Map<FieldNamePair, Object> getProperties() {
-        Map<FieldNamePair, Object> map = this.properties;
+    public Map<FieldNamePair, FolderProperty> getProperties() {
+        Map<FieldNamePair, FolderProperty> map = this.properties;
         if (null == map) {
             synchronized (this) {
                 map = this.properties;

@@ -50,7 +50,9 @@
 package com.openexchange.folderstorage;
 
 /**
- * {@link FieldNamePair}
+ * {@link FieldNamePair} - A pair of a field and its name.
+ * <p>
+ * Equality is only determined by field value, not its name.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

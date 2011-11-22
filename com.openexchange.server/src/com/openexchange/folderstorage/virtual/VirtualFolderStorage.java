@@ -65,6 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FieldNamePair;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -75,12 +76,17 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.internal.performers.InstanceStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.SessionStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.StorageParametersProvider;
+import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.OutlookId;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.virtual.sql.Delete;
 import com.openexchange.folderstorage.virtual.sql.Insert;
 import com.openexchange.folderstorage.virtual.sql.Select;
@@ -98,6 +104,16 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VirtualFolderStorage implements FolderStorage {
+
+    /**
+     * The folder tree identifier for EAS folder list.
+     */
+    public static final String FOLDER_TREE_EAS = "20".intern();
+
+    /**
+     * The property for "preDefined".
+     */
+    public static final FieldNamePair FIELD_NAME_PAIR_PREDEFINED = new FieldNamePair(3040, "preDefined");
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
@@ -137,7 +153,94 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters params) throws OXException {
-        // TODO: Implement it
+        if (FOLDER_TREE_EAS.equals(treeId)) {
+            final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+            try {
+                /*
+                 * Default calendar folder
+                 */
+                FolderStorage realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, CalendarContentType.getInstance());
+                checkOpenedStorage(realStorage, params, true, openedStorages);
+                String folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, CalendarContentType.getInstance(), PrivateType.getInstance(), params);
+                if (!containsFolder(treeId, folderID, params)) {
+                    final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
+                    folder.setTreeID(treeId);
+                    folder.setParentID(ROOT_ID);
+                    folder.setSubscribed(true);
+                    createFolder(folder, params);
+                }
+                /*
+                 * Default contact folder
+                 */
+                realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, ContactContentType.getInstance());
+                checkOpenedStorage(realStorage, params, true, openedStorages);
+                folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, ContactContentType.getInstance(), PrivateType.getInstance(), params);
+                if (!containsFolder(treeId, folderID, params)) {
+                    final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
+                    folder.setTreeID(treeId);
+                    folder.setParentID(ROOT_ID);
+                    folder.setSubscribed(true);
+                    createFolder(folder, params);
+                }
+                /*
+                 * Default task folder
+                 */
+                realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, TaskContentType.getInstance());
+                checkOpenedStorage(realStorage, params, true, openedStorages);
+                folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, TaskContentType.getInstance(), PrivateType.getInstance(), params);
+                if (!containsFolder(treeId, folderID, params)) {
+                    final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
+                    folder.setTreeID(treeId);
+                    folder.setParentID(ROOT_ID);
+                    folder.setSubscribed(true);
+                    createFolder(folder, params);
+                }
+                /*
+                 * Default mail folder
+                 */
+                realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(REAL_TREE_ID, MailContentType.getInstance());
+                checkOpenedStorage(realStorage, params, true, openedStorages);
+                folderID = realStorage.getDefaultFolderID(params.getUser(), REAL_TREE_ID, MailContentType.getInstance(), PrivateType.getInstance(), params);
+                if (!containsFolder(treeId, folderID, params)) {
+                    final Folder folder = realStorage.getFolder(REAL_TREE_ID, folderID, params);
+                    folder.setTreeID(treeId);
+                    folder.setParentID(ROOT_ID);
+                    folder.setSubscribed(true);
+                    createFolder(folder, params);
+                }
+                /*
+                 * Commit
+                 */
+                for (final FolderStorage folderStorage : openedStorages) {
+                    folderStorage.commitTransaction(params);
+                }
+            } catch (final OXException e) {
+                for (final FolderStorage folderStorage : openedStorages) {
+                    folderStorage.rollback(params);
+                }
+                throw e;
+            } catch (final RuntimeException e) {
+                for (final FolderStorage folderStorage : openedStorages) {
+                    folderStorage.rollback(params);
+                }
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Checks if given folder storage is already contained in collection of opened storages. If yes, this method terminates immediately.
+     * Otherwise the folder storage is opened according to specified modify flag and is added to specified collection of opened storages.
+     */
+    private void checkOpenedStorage(final FolderStorage checkMe, final StorageParameters params, final boolean modify, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        if (openedStorages.contains(checkMe)) {
+            // Passed storage is already opened
+            return;
+        }
+        // Passed storage has not been opened before. Open now and add to collection
+        if (checkMe.startTransaction(params, modify)) {
+            openedStorages.add(checkMe);
+        }
     }
 
     @Override
@@ -487,6 +590,9 @@ public final class VirtualFolderStorage implements FolderStorage {
             storageType);
          * 
          */
+        if (virtualFolder.isDefault()) {
+            virtualFolder.setProperty(FIELD_NAME_PAIR_PREDEFINED, Boolean.TRUE);
+        }
         return virtualFolder;
     }
 
