@@ -221,7 +221,7 @@ public final class MemoryTable {
      * @param treeId The memory tree identifier
      * @return The memory tree or <code>null</code> if absent
      */
-    public MemoryTree getTree(final int treeId) {
+    public MemoryTree optTree(final int treeId) {
         return treeMap.get(treeId);
     }
 
@@ -399,8 +399,8 @@ public final class MemoryTable {
             stmt.setInt(3, treeId);
             rs = stmt.executeQuery();
             final MemoryTree memoryTree = new MemoryTreeImpl(treeId);
-            treeMap.put(treeId, memoryTree);
             if (!rs.next()) {
+                treeMap.put(treeId, memoryTree);
                 return memoryTree;
             }
             do {
@@ -446,6 +446,7 @@ public final class MemoryTable {
             /*
              * Return newly initialized tree
              */
+            treeMap.put(treeId, memoryTree);
             return memoryTree;
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
@@ -492,6 +493,11 @@ public final class MemoryTable {
         if (null == con) {
             return initializeFolder(folderId, treeId, userId, contextId);
         }
+        MemoryTree memoryTree = optTree(treeId);
+        if (null == memoryTree) {
+            memoryTree = getTree(treeId, userId, contextId);
+            return memoryTree.getCrud().get(folderId);
+        }
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -504,7 +510,6 @@ public final class MemoryTable {
             if (!rs.next()) {
                 throw FolderExceptionErrorMessage.NOT_FOUND.create(folderId, Integer.valueOf(treeId));
             }
-            final MemoryTree memoryTree = treeMap.get(treeId);
             final MemoryFolderImpl memoryFolder = new MemoryFolderImpl();
             memoryFolder.setId(folderId);
             // Set optional modified-by
