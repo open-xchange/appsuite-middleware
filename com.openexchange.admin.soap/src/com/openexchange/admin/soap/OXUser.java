@@ -53,6 +53,7 @@ import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
@@ -446,5 +447,26 @@ public class OXUser extends OXSOAPRMIMapper {
         }
     }
 
+    /**
+     * Same as {@link OXUserInterface#getContextAdmin(Context, Credentials)}
+     * 
+     * @param ctx
+     * @param auth
+     * @return
+     * @throws RemoteException
+     * @throws InvalidCredentialsException
+     * @throws StorageException
+     * @throws InvalidDataException
+     * @throws DuplicateExtensionException
+     */
+    public User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException, DuplicateExtensionException {
+        reconnect();
+        try {
+            return new User(((OXUserInterface)rmistub).getContextAdmin(SOAPUtils.soapContext2Context(ctx), auth));
+        } catch (ConnectException e) {
+            reconnect(true);
+            return new User(((OXUserInterface)rmistub).getContextAdmin(SOAPUtils.soapContext2Context(ctx), auth));
+        }
+    }
 
 }
