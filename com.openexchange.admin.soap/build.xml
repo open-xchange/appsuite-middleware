@@ -6,7 +6,7 @@
     <property name="prefix" value="/opt/open-xchange"/>
 
     <!-- Constants -->
-    <property name="version" value="6.20.1"/>
+    <property name="version" value="6.20.1.0"/>
 	<property name="service.name"   value="open-xchange-admin-soap" />
 	<property name="composite.name" value="${service.name}-${version}" />
 
