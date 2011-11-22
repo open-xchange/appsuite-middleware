@@ -188,6 +188,26 @@ public class ChatChunkTest extends AbstractAJAXSession {
             assertNotNull("Response was null.", res);
             assertEquals("Third client can see messages from old chunk.", 0, res.size());
         }
+        
+        {
+            AllMessageChatConversationRequest allMsg = new AllMessageChatConversationRequest();
+            allMsg.setConversationId(cid);
+            allMsg.setSince(null, tz);
+            AllMessageChatConversationResponse allMsgRes = client.execute(allMsg);
+            List<JSONMessage> res = allMsgRes.getMessages(tz);
+            assertNotNull("Response was null.", res);
+            assertEquals("First client could not read all messages.", 2, res.size());
+        }
+        
+        {
+            AllMessageChatConversationRequest allMsg = new AllMessageChatConversationRequest();
+            allMsg.setConversationId(cid);
+            allMsg.setSince(null, tz);
+            AllMessageChatConversationResponse allMsgRes = client.execute(allMsg);
+            List<JSONMessage> res = allMsgRes.getMessages(tz);
+            assertNotNull("Response was null.", res);
+            assertEquals("First client got older messages than last poll.", 0, res.size());
+        }
     }
 
 }

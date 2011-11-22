@@ -384,7 +384,7 @@ public final class DBChatAccess implements ChatAccess {
                 stmt.setInt(pos, chatId);
                 rs = stmt.executeQuery();
                 if (rs.next()) {
-                    currentChunkId = rs.getInt(pos);
+                    currentChunkId = rs.getInt(1);
                 }
             } catch (final SQLException e) {
                 throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
@@ -459,7 +459,7 @@ public final class DBChatAccess implements ChatAccess {
              * Insert existing members into new chunk
              */
             try {
-                stmt = con.prepareStatement("SELECT user, opMode FROM chatMember WHERE cid = ? AND chatId = ? AND chunkId = ?");
+                stmt = con.prepareStatement("SELECT user, opMode, lastPoll FROM chatMember WHERE cid = ? AND chatId = ? AND chunkId = ?");
                 pos = 1;
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, chatId);
@@ -468,7 +468,7 @@ public final class DBChatAccess implements ChatAccess {
                 if (rs.next()) { // At least one result
                     PreparedStatement stmt2 = null;
                     try {
-                        stmt2 = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, user) VALUES (?, ?, ?, ?, ?)");
+                        stmt2 = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, user, lastPoll) VALUES (?, ?, ?, ?, ?, ?)");
                         pos = 1;
                         stmt2.setInt(pos++, contextId);
                         stmt2.setInt(pos++, chatId);
@@ -476,7 +476,8 @@ public final class DBChatAccess implements ChatAccess {
                         do {
                             pos = 4;
                             stmt2.setInt(pos++, rs.getInt(2)); // opMode
-                            stmt2.setInt(pos, rs.getInt(1)); // user
+                            stmt2.setInt(pos++, rs.getInt(1)); // user
+                            stmt2.setLong(pos, rs.getLong(3)); //lastPoll
                             stmt2.addBatch();
                         } while (rs.next());
                         stmt2.executeBatch();
@@ -494,12 +495,14 @@ public final class DBChatAccess implements ChatAccess {
              */
             try {
                 if (null != newMembers && !newMembers.isEmpty()) {
-                    stmt = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, user) VALUES (?, ?, ?, ?, ?)");
+                    final long now = System.currentTimeMillis();
+                    stmt = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, lastPoll, user) VALUES (?, ?, ?, ?, ?, ?)");
                     pos = 1;
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);
                     stmt.setInt(pos++, newChunkId);
                     stmt.setInt(pos++, 0);
+                    stmt.setLong(pos++, now);
                     for (final String user : newMembers) {
                         final int userId = DBChatUtility.parseUnsignedInt(user);
                         if (!users.contains(userId)) {
@@ -624,12 +627,13 @@ public final class DBChatAccess implements ChatAccess {
         }
         try {
             pos = 1;
-            stmt = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, user) VALUES (?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO chatMember (cid, chatId, chunkId, opMode, lastPoll, user) VALUES (?, ?, ?, ?, ?, ?)");
             stmt.setInt(pos++, contextId);
 
             stmt.setInt(pos++, chid);
             stmt.setInt(pos++, 1);
             stmt.setInt(pos++, 0);
+            stmt.setLong(pos++, now);
 
             /*
              * This user
