@@ -127,7 +127,9 @@ public class Login extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
+
+    protected static final boolean INFO = LOG.isInfoEnabled();
 
     private static interface JSONRequestHandler {
 
@@ -331,7 +333,7 @@ public class Login extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (LOG.isInfoEnabled()) {
+                    } else if (INFO) {
                         LOG.info("No session could be found for random token: " + randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -387,10 +389,20 @@ public class Login extends AJAXServlet {
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
                     if (null == sessionId) {
+                        if (INFO) {
+                            final StringBuilder sb = new StringBuilder(32);
+                            sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found for action ").append(ACTION_CHANGEIP);
+                            LOG.info(sb.toString());
+                        }
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                     }
                     final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
                     if (null == newIP) {
+                        if (INFO) {
+                            final StringBuilder sb = new StringBuilder(32);
+                            sb.append("Parameter \"").append(LoginFields.CLIENT_IP_PARAM).append("\" not found for action ").append(ACTION_CHANGEIP);
+                            LOG.info(sb.toString());
+                        }
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);                        
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
@@ -400,8 +412,8 @@ public class Login extends AJAXServlet {
                         SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
                         final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Session secret is different. Given "+secret+" differs from "+session.getSecret()+" in session.");
+                            if (INFO && null != secret) {
+                                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
@@ -412,6 +424,9 @@ public class Login extends AJAXServlet {
                         }
                         response.setData("1");
                     } else {
+                        if (INFO) {
+                            LOG.info("There is no session associated with session identifier: " + sessionId);
+                        }
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
                 } catch (final OXException e) {
@@ -473,7 +488,7 @@ public class Login extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (LOG.isInfoEnabled()) {
+                    } else if (INFO) {
                         LOG.info("No session could be found for random token: " + randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
