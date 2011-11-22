@@ -54,6 +54,7 @@ import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.mail.api.MailConfig;
 
 /**
  * {@link UserSettingMailDeleteListener}
@@ -69,14 +70,10 @@ public final class UserSettingMailDeleteListener implements DeleteListener {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.delete.DeleteListener#deletePerformed(com.openexchange.groupware.delete.DeleteEvent,
-     * java.sql.Connection, java.sql.Connection)
-     */
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+            MailConfig.clearLoginCache(deleteEvent.getContext().getContextId());
             try {
                 getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
             } catch (final OXException e) {

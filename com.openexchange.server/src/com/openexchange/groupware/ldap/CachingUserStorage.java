@@ -67,6 +67,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -296,6 +297,7 @@ public class CachingUserStorage extends UserStorage {
 
     @Override
     public void invalidateUser(final Context ctx, final int userId) throws OXException {
+        MailConfig.clearLoginCache(ctx.getContextId());
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (null != cacheService) {
             try {
