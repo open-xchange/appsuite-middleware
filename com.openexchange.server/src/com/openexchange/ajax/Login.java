@@ -1022,60 +1022,43 @@ public class Login extends AJAXServlet {
     }
 
     private static String parseUserAgent(final HttpServletRequest req) {
-        final String userAgent;
-        if (null == req.getParameter(LoginFields.USER_AGENT)) {
-            userAgent = req.getHeader(Header.USER_AGENT);
-        } else {
-            userAgent = req.getParameter(LoginFields.USER_AGENT);
-        }
-        return userAgent;
+        final String parameter = req.getParameter(LoginFields.USER_AGENT);
+        return null == parameter ? req.getHeader(Header.USER_AGENT) : parameter;
     }
 
     private static String parseClientIP(final HttpServletRequest req) {
-        final String clientIP;
-        if (null == req.getParameter(LoginFields.CLIENT_IP_PARAM)) {
-            clientIP = req.getRemoteAddr();
-        } else {
-            clientIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
-        }
-        return clientIP;
+        final String parameter = req.getParameter(LoginFields.CLIENT_IP_PARAM);
+        return null == parameter ? req.getRemoteAddr() : parameter;
     }
 
     private String parseClient(final HttpServletRequest req, final boolean strict) throws OXException {
-        final String client;
-        if (null == req.getParameter(LoginFields.CLIENT_PARAM)) {
+        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
+        if (null == parameter) {
             if (strict) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
             }
-            client = confReference.get().defaultClient;
-        } else {
-            client = req.getParameter(LoginFields.CLIENT_PARAM);
+            return confReference.get().defaultClient;
         }
-        return client;
+        return parameter;
     }
 
     private String parseClient(final HttpServletRequest req) {
-        String client;
         try {
-            client = parseClient(req, false);
+            return parseClient(req, false);
         } catch (final OXException e) {
-            client = confReference.get().defaultClient;
+            return confReference.get().defaultClient;
         }
-        return client;
     }
 
     private static String parseAuthId(final HttpServletRequest req, final boolean strict) throws OXException {
-        final String authId;
         final String authIdParam = req.getParameter(LoginFields.AUTHID_PARAM);
         if (null == authIdParam) {
             if (strict) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.AUTHID_PARAM);
             }
-            authId = UUIDs.getUnformattedString(UUID.randomUUID());
-        } else {
-            authId = authIdParam;
+            return UUIDs.getUnformattedString(UUID.randomUUID());
         }
-        return authId;
+        return authIdParam;
     }
 
     protected static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) {

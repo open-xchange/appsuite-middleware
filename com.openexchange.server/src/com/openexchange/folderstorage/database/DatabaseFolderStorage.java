@@ -228,8 +228,17 @@ public final class DatabaseFolderStorage implements FolderStorage {
         final DatabaseService databaseService = DatabaseServiceRegistry.getService(DatabaseService.class, true);
         final int contextId = storageParameters.getContextId();
         Connection con = null;
+        boolean close = true;
         try {
-            con = databaseService.getWritable(contextId);
+            {
+                final ConnectionMode conMode = optParameter(ConnectionMode.class, DatabaseParameterConstants.PARAM_CONNECTION, storageParameters);
+                if (null != conMode && conMode.readWrite) {
+                    con = conMode.connection;
+                    close = false;
+                } else {
+                    con = databaseService.getWritable(contextId);
+                }
+            }
             final ServerSession session;
             {
                 final Session s = storageParameters.getSession();
@@ -270,7 +279,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 nonExistingParents = tmp.toArray();
             } while (null != nonExistingParents && nonExistingParents.length > 0);
         } finally {
-            if (null != con) {
+            if (null != con && close) {
                 databaseService.backWritable(contextId, con);
             }
         }
