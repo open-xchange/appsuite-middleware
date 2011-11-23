@@ -70,6 +70,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class SubscribeAction extends AbstractFolderAction {
 
+    private static final String NAME_SUBSCRIBE = "subscribe".intern();
+
+    private static final String NAME_TREE = "tree".intern();
+
     private static final class SubscribeParams {
 
         protected final String sourceTree;
@@ -84,7 +88,7 @@ public final class SubscribeAction extends AbstractFolderAction {
         }
     }
 
-    public static final String ACTION = "subscribe";
+    public static final String ACTION = NAME_SUBSCRIBE;
 
     /**
      * Initializes a new {@link SubscribeAction}.
@@ -99,9 +103,9 @@ public final class SubscribeAction extends AbstractFolderAction {
             /*
              * Parse parameters
              */
-            final String targetTreeId = request.getParameter("tree");
+            final String targetTreeId = request.getParameter(NAME_TREE);
             if (null == targetTreeId) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create("tree");
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(NAME_TREE);
             }
             String parent = request.getParameter("parent");
             if (null == parent) {
@@ -123,14 +127,14 @@ public final class SubscribeAction extends AbstractFolderAction {
             final String defaultTreeIdentifier = getDefaultTreeIdentifier();
             for (int i = 0; i < len; i++) {
                 final JSONObject jObject = jArray.getJSONObject(i);
-                if (!jObject.hasAndNotNull("subscribe") || jObject.getBoolean("subscribe")) {
+                if (!jObject.hasAndNotNull(NAME_SUBSCRIBE) || jObject.getBoolean(NAME_SUBSCRIBE)) {
                     subscribeList.add(new SubscribeParams(
-                        jObject.hasAndNotNull("tree") ? jObject.getString("tree") : defaultTreeIdentifier,
+                        jObject.hasAndNotNull(NAME_TREE) ? jObject.getString(NAME_TREE) : defaultTreeIdentifier,
                         jObject.getString("id"),
                         true));
                 } else {
                     unsubscribeList.add(new SubscribeParams(
-                        jObject.hasAndNotNull("tree") ? jObject.getString("tree") : defaultTreeIdentifier,
+                        jObject.hasAndNotNull(NAME_TREE) ? jObject.getString(NAME_TREE) : defaultTreeIdentifier,
                         jObject.getString("id"),
                         false));
                 }

@@ -64,37 +64,37 @@ public interface FolderStorage {
     /**
      * The reserved tree identifier for real folder tree: <code>"0"</code>.
      */
-    public static final String REAL_TREE_ID = "0";
+    public static final String REAL_TREE_ID = "0".intern();
 
     /**
      * The reserved tree identifier for all folder trees: <code>"*"</code>.
      */
-    public static final String ALL_TREE_ID = "*";
+    public static final String ALL_TREE_ID = "*".intern();
 
     /**
      * The reserved identifier for root folder: <code>"0"</code>.
      */
-    public static final String ROOT_ID = "0";
+    public static final String ROOT_ID = "0".intern();
 
     /**
      * The reserved identifier for private folder: <code>"1"</code>.
      */
-    public static final String PRIVATE_ID = "1";
+    public static final String PRIVATE_ID = "1".intern();
 
     /**
      * The reserved identifier for public folder: <code>"2"</code>.
      */
-    public static final String PUBLIC_ID = "2";
+    public static final String PUBLIC_ID = "2".intern();
 
     /**
      * The reserved identifier for shared folder: <code>"3"</code>.
      */
-    public static final String SHARED_ID = "3";
+    public static final String SHARED_ID = "3".intern();
 
     /**
      * The reserved identifier for global address book folder: <code>"6"</code>.
      */
-    public static final String GLOBAL_ADDRESS_BOOK_ID = "6";
+    public static final String GLOBAL_ADDRESS_BOOK_ID = "6".intern();
 
     /**
      * Clears the cache with respect to specified user.
