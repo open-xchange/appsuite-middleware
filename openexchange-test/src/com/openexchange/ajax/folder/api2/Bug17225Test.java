@@ -51,7 +51,7 @@ package com.openexchange.ajax.folder.api2;
 
 import java.util.Iterator;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -87,7 +87,7 @@ public final class Bug17225Test extends AbstractAJAXSession {
 		userId1 = client.getValues().getUserId();
 		client2 = new AJAXClient(User.User2);
 		int folderId = client.getValues().getPrivateAppointmentFolder();
-		GetResponse getR = client.execute(new GetRequest(API.OUTLOOK, folderId));
+		GetResponse getR = client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
 		FolderObject oldFolder = getR.getFolder();
 		folder = new FolderObject();
 		folder.setObjectID(oldFolder.getObjectID());
@@ -103,9 +103,9 @@ public final class Bug17225Test extends AbstractAJAXSession {
 						OCLPermission.READ_ALL_OBJECTS,
 						OCLPermission.WRITE_ALL_OBJECTS,
 						OCLPermission.DELETE_ALL_OBJECTS) });
-		InsertResponse updateR = client.execute(new UpdateRequest(API.OUTLOOK, folder));
+		InsertResponse updateR = client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
 		folder.setLastModified(updateR.getTimestamp());
-//		client.execute(new GetRequest(API.OUTLOOK, folderId));
+//		client.execute(new GetRequest(EnumAPI.OUTLOOK, folderId));
 	}
 
 	@Override
@@ -114,12 +114,12 @@ public final class Bug17225Test extends AbstractAJAXSession {
 				false, true, OCLPermission.ADMIN_PERMISSION,
 				OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
 				OCLPermission.ADMIN_PERMISSION) });
-		client.execute(new UpdateRequest(API.OUTLOOK, folder));
+		client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
 		super.tearDown();
 	}
 
 	public void testSharedType() throws Throwable {
-		ListResponse response = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SHARED_PREFIX + userId1, new int[] { 1, 20, 2, 3, 300, 301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316 }, false));
+		ListResponse response = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1, new int[] { 1, 20, 2, 3, 300, 301, 302, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316 }, false));
 		Iterator<FolderObject> iter = response.getFolder();
 		while (iter.hasNext()) {
 			FolderObject testFolder = iter.next();

@@ -65,8 +65,8 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -116,7 +116,7 @@ public class Bug16211Test extends AbstractAJAXSession {
         sharedAppointmentFolder = Create.createPublicFolder(client2, "Bug16211PublicFolder", FolderObject.CALENDAR);
         FolderTools.shareFolder(
             client2,
-            API.OX_NEW,
+            EnumAPI.OX_NEW,
             sharedAppointmentFolder.getObjectID(),
             client.getValues().getUserId(),
             OCLPermission.ADMIN_PERMISSION,
@@ -134,7 +134,7 @@ public class Bug16211Test extends AbstractAJAXSession {
 
         personalAppointmentFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         final com.openexchange.ajax.folder.actions.InsertRequest insertFolderReq = new com.openexchange.ajax.folder.actions.InsertRequest(
-            API.OX_NEW,
+            EnumAPI.OX_NEW,
             personalAppointmentFolder,
             false);
         final InsertResponse insertFolderResp = client.execute(insertFolderReq);
@@ -205,8 +205,8 @@ public class Bug16211Test extends AbstractAJAXSession {
         client.execute(new com.openexchange.ajax.appointment.action.DeleteRequest(toDelete));
 
         // Delete folders
-        client.execute(new DeleteRequest(API.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
-        client2.execute(new DeleteRequest(API.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
+        client.execute(new DeleteRequest(EnumAPI.OX_NEW, personalAppointmentFolder.getObjectID(), new Date()));
+        client2.execute(new DeleteRequest(EnumAPI.OX_NEW, sharedAppointmentFolder.getObjectID(), new Date()));
 
         client2.logout();
 

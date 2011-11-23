@@ -64,7 +64,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.ajax.MailTest;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -173,7 +173,7 @@ public class AlwaysTest extends AbstractAJAXTest {
     public static Map<String, String> getIMAPRights(final AJAXClient client,
         final String parent) throws IOException,
         SAXException, JSONException, OXException {
-        final ListResponse listR = client.execute(new ListRequest(API.OX_OLD,
+        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD,
             parent, new int[] { FolderObject.OBJECT_ID, FolderObject.OWN_RIGHTS
             }, false));
         final Map<String, String> retval = new HashMap<String, String>();
@@ -185,7 +185,7 @@ public class AlwaysTest extends AbstractAJAXTest {
 
     public FolderObject getIMAPRootFolder() throws OXException, IOException,
         SAXException, JSONException, OXException {
-        final ListResponse listR = client.execute(new ListRequest(API.OX_OLD,
+        final ListResponse listR = client.execute(new ListRequest(EnumAPI.OX_OLD,
             String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID)));
         FolderObject defaultIMAPFolder = null;
         final Iterator<FolderObject> iter = listR.getFolder();

@@ -11,8 +11,8 @@ import com.openexchange.ajax.ContactTest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -112,7 +112,7 @@ public class MailTest extends AbstractMailTest {
     private FolderObject createContactFolder() throws OXException, IOException, SAXException, JSONException {
         final FolderObject folder = Create.createPrivateFolder("ContactCollectionFolder " + System.currentTimeMillis(), FolderObject.CONTACT, client.getValues().getUserId());
         folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-        final CommonInsertResponse response = Executor.execute(client, new InsertRequest(API.OX_OLD, folder));
+        final CommonInsertResponse response = Executor.execute(client, new InsertRequest(EnumAPI.OX_OLD, folder));
         folder.setObjectID(response.getId());
         folder.setLastModified(response.getTimestamp());
 
@@ -123,7 +123,7 @@ public class MailTest extends AbstractMailTest {
 
     private void deleteContactFolder(final FolderObject folder) throws OXException, IOException, SAXException, JSONException {
         Executor.execute(client, new SetRequest(Tree.ContactCollectEnabled, B(false)));
-        Executor.execute(client, new DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        Executor.execute(client, new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
     }
 
 }

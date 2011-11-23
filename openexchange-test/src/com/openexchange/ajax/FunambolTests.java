@@ -112,7 +112,7 @@ public class FunambolTests extends AbstractAJAXSession {
          * Request: http://192.168.0.76/ajax/tasks? action=all&session=0e7c0ac11129ae69ea4e6335ab7c3f67&folder=39&start=10000000&end=2524
          * 608000000&columns=1%2C4%2C5%2C20%2C209
          */
-        //start and end dates are not specified in the HTTP API.
+        //start and end dates are not specified in the HTTP EnumAPI.
         BasicManagedTaskTests test = new BasicManagedTaskTests("funambol: all tasks");
         try {
             test.setUp();

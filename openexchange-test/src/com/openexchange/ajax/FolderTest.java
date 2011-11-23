@@ -72,7 +72,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -1184,7 +1184,7 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInGet() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // Load an existing folder
-        final GetRequest getRequest = new GetRequest(API.OX_OLD,
+        final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD,
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC });
         final GetResponse response = Executor.execute(client, getRequest);
@@ -1196,7 +1196,7 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, OXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
-        final ListRequest listRequest = new ListRequest(API.OX_OLD,
+        final ListRequest listRequest = new ListRequest(EnumAPI.OX_OLD,
             "" + FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC },
             false);
@@ -1217,7 +1217,7 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInUpdates() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
-        final UpdatesRequest updatesRequest = new UpdatesRequest(API.OX_OLD,
+        final UpdatesRequest updatesRequest = new UpdatesRequest(EnumAPI.OX_OLD,
             FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC },
             -1,

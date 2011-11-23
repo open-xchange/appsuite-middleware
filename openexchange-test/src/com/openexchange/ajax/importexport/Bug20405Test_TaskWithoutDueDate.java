@@ -1,7 +1,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.util.TimeZone;
-
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 import com.openexchange.ajax.task.ManagedTaskTest;

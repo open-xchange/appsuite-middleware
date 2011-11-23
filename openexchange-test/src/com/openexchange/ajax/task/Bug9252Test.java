@@ -51,7 +51,7 @@ package com.openexchange.ajax.task;
 
 import java.util.Date;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -99,7 +99,7 @@ public class Bug9252Test extends AbstractTaskTest {
             .getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         final CommonInsertResponse fInsertR = client1.execute(
-            new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         folder.setObjectID(fInsertR.getId());
         try {
             // Create a task in there.
@@ -116,7 +116,7 @@ public class Bug9252Test extends AbstractTaskTest {
                 .getTimeZone());
             TaskTools.compareAttributes(task, reload);
         } finally {
-            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), new Date()));
+            client1.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), new Date()));
         }
     }
 }

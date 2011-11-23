@@ -1,9 +1,7 @@
 package com.openexchange.ajax.contact;
 
 import java.io.ByteArrayInputStream;
-
 import org.json.JSONArray;
-
 import com.openexchange.ajax.importexport.actions.CSVImportRequest;
 import com.openexchange.ajax.importexport.actions.CSVImportResponse;
 

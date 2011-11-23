@@ -51,7 +51,7 @@ package com.openexchange.ajax.folder;
 
 import java.util.Iterator;
 import java.util.List;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -89,7 +89,7 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
     }
 
     public void testGetSortedMailFolder() throws Throwable {
-        ListRequest request = new ListRequest(API.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        ListRequest request = new ListRequest(EnumAPI.OX_OLD, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject rootMailFolder = null;
@@ -103,7 +103,7 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
         }
         assertNotNull("Default email folder not found.", rootMailFolder);
         assertTrue("Default email folder has no subfolders.", rootMailFolder.hasSubfolders());
-        request = new ListRequest(API.OX_OLD, rootMailFolder.getFullName());
+        request = new ListRequest(EnumAPI.OX_OLD, rootMailFolder.getFullName());
         response = client.execute(request);
         List<FolderObject> l = FolderTools.convert(response.getFolder());
         assertTrue("No folders below virtual primary mail account folder found.", l.size() > 0);
@@ -111,11 +111,11 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
         final FolderObject inboxFolder = l.get(pos++);
         {
             assertTrue("Default inbox folder not found.", inboxFolder.getFullName().endsWith("INBOX"));
-            GetRequest request2 = new GetRequest(API.OX_OLD, inboxFolder.getFullName(), COLUMNS);
+            GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, inboxFolder.getFullName(), COLUMNS);
             GetResponse response2 = client.execute(request2);
             assertFalse("Getting folder information failed.", response2.hasError());
             if (l.size() == 1) {
-                request = new ListRequest(API.OX_OLD, inboxFolder.getFullName());
+                request = new ListRequest(EnumAPI.OX_OLD, inboxFolder.getFullName());
                 response = client.execute(request);
                 l = FolderTools.convert(response.getFolder());
                 pos = 0;
@@ -124,28 +124,28 @@ public class GetSortedMailFolderTest extends AbstractAJAXSession {
         {
             final FolderObject draftsFolder = l.get(pos++);
             assertTrue("Default drafts folder not found.", draftsFolder.isDefaultFolder());
-            GetRequest request2 = new GetRequest(API.OX_OLD, draftsFolder.getFullName(), COLUMNS);
+            GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, draftsFolder.getFullName(), COLUMNS);
             GetResponse response2 = client.execute(request2);
             assertFalse("Getting folder information failed.", response2.hasError());
         }
         {
             final FolderObject sentFolder = l.get(pos++);
             assertTrue("Default sent folder not found", sentFolder.isDefaultFolder());
-            GetRequest request2 = new GetRequest(API.OX_OLD, sentFolder.getFullName(), COLUMNS);
+            GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, sentFolder.getFullName(), COLUMNS);
             GetResponse response2 = client.execute(request2);
             assertFalse("Getting folder information failed.", response2.hasError());
         }
         {
             final FolderObject spamFolder = l.get(pos++);
             assertTrue("Default spam folder not found", spamFolder.isDefaultFolder());
-            GetRequest request2 = new GetRequest(API.OX_OLD, spamFolder.getFullName(), COLUMNS);
+            GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, spamFolder.getFullName(), COLUMNS);
             GetResponse response2 = client.execute(request2);
             assertFalse("Getting folder information failed.", response2.hasError());
         }
         {
             final FolderObject trashFolder = l.get(pos++);
             assertTrue("Default trash folder not found", trashFolder.isDefaultFolder());
-            GetRequest request2 = new GetRequest(API.OX_OLD, trashFolder.getFullName(), COLUMNS);
+            GetRequest request2 = new GetRequest(EnumAPI.OX_OLD, trashFolder.getFullName(), COLUMNS);
             GetResponse response2 = client.execute(request2);
             assertFalse("Getting folder information failed.", response2.hasError());
         }

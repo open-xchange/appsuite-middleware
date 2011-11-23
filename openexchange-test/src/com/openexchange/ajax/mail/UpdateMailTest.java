@@ -53,8 +53,8 @@ import java.io.IOException;
 import java.util.Date;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.UserValues;
@@ -148,7 +148,7 @@ public class UpdateMailTest extends AbstractMailTest {
                     OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
-                final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
+                final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
                 final InsertResponse response = client.execute(request);
 
                 newId = (String) response.getResponse().getData();
@@ -215,7 +215,7 @@ public class UpdateMailTest extends AbstractMailTest {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
+                    final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

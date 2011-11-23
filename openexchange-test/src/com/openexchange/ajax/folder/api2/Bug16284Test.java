@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.folder.api2;
 
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.PathRequest;
 import com.openexchange.ajax.folder.actions.PathResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -92,7 +92,7 @@ public class Bug16284Test extends AbstractAJAXSession {
     }
 
     public void testListWithoutInfoStore() throws Throwable {
-        PathRequest request = new PathRequest(API.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), COLUMNS, false);
+        PathRequest request = new PathRequest(EnumAPI.OUTLOOK, MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID), COLUMNS, false);
         PathResponse response = client.execute(request);
 
         if (!response.hasError()) {

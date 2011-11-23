@@ -66,24 +66,24 @@ public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
 
     private final String[] folderIds;
 
-    public ClearRequest(API api, String[] folderIds) {
+    public ClearRequest(final API api, final String[] folderIds) {
         super(api);
         this.folderIds = folderIds;
     }
 
-    public ClearRequest(API api, String folderId) {
+    public ClearRequest(final API api, final String folderId) {
         this(api, new String[] { folderId });
     }
 
-    public ClearRequest(API api, final int[] folderIds) {
+    public ClearRequest(final API api, final int[] folderIds) {
         this(api, i2s(folderIds));
     }
 
-    public ClearRequest(API api, final int folderId) {
+    public ClearRequest(final API api, final int folderId) {
         this(api, new int[] { folderId });
     }
 
-    public ClearRequest(API api, final FolderObject... folder) {
+    public ClearRequest(final API api, final FolderObject... folder) {
         super(api);
         folderIds = new String[folder.length];
         for (int i = 0; i < folder.length; i++) {
@@ -95,6 +95,7 @@ public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         }
     }
 
+    @Override
     public Object getBody() {
         final JSONArray array = new JSONArray();
         for (final String folderId : folderIds) {
@@ -103,15 +104,17 @@ public class ClearRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         return array;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
     @Override
-    protected void addParameters(List<Parameter> params) {
+    protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR));
     }
 
+    @Override
     public CommonDeleteParser getParser() {
         return new CommonDeleteParser(true);
     }

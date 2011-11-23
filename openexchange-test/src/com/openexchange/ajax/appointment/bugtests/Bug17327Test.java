@@ -61,7 +61,7 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -101,9 +101,9 @@ public class Bug17327Test extends AbstractAJAXSession {
         // Create shared folder
         sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
         sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OUTLOOK, sharedFolder, true));
+        InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OUTLOOK, sharedFolder, true));
         folderInsertResponse.fillObject(sharedFolder);
-        FolderTools.shareFolder(client, API.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(),
+        FolderTools.shareFolder(client, EnumAPI.OUTLOOK, sharedFolder.getObjectID(), client2.getValues().getUserId(),
             OCLPermission.CREATE_OBJECTS_IN_FOLDER,
             OCLPermission.READ_ALL_OBJECTS,
             OCLPermission.WRITE_ALL_OBJECTS,
@@ -153,7 +153,7 @@ public class Bug17327Test extends AbstractAJAXSession {
     @Override
     public void tearDown() throws Exception {
         client.execute(new DeleteRequest(appointment));
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, sharedFolder));
+        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
         client2.logout();
 
         super.tearDown();

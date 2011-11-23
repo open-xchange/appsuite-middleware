@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -106,19 +106,19 @@ public class UpdatesTest extends AbstractAJAXSession {
                     OCLPermission.ADMIN_PERMISSION,
                     OCLPermission.ADMIN_PERMISSION);
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP });
-                final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
+                final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
                 final InsertResponse response = client.execute(request);
                 String tmpId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", tmpId);
                 newId = Integer.parseInt(tmpId);
                 fo.setObjectID(newId);
-                timeStamp = client.execute(new GetRequest(API.OUTLOOK, fo.getObjectID())).getTimestamp();
+                timeStamp = client.execute(new GetRequest(EnumAPI.OUTLOOK, fo.getObjectID())).getTimestamp();
                 fo.setLastModified(timeStamp);
             }
 
             final FolderUpdatesResponse response;
             {
-                final UpdatesRequest request = new UpdatesRequest(API.OUTLOOK, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
+                final UpdatesRequest request = new UpdatesRequest(EnumAPI.OUTLOOK, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] {
                     FolderObject.LAST_MODIFIED_UTC, FolderObject.OBJECT_ID }, -1, null, new Date(timeStamp.getTime() - 1));
                 response = client.execute(request);
             }
@@ -136,7 +136,7 @@ public class UpdatesTest extends AbstractAJAXSession {
             if (newId > 0) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
+                    final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();
@@ -148,7 +148,7 @@ public class UpdatesTest extends AbstractAJAXSession {
 
     public void testUpdatesAll() throws Throwable {
         final UpdatesRequest request =
-            new UpdatesRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
+            new UpdatesRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID, new int[] { FolderObject.LAST_MODIFIED_UTC }, -1, null, new Date(0));
         final FolderUpdatesResponse response = client.execute(request);
 
         assertNotNull(response);

@@ -49,8 +49,8 @@
 
 package com.openexchange.ajax.task;
 
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -92,7 +92,7 @@ public class Bug11650Test extends AbstractTaskTest {
         folder.setParentFolderID(antonFID);
         // Share a folder.
         final CommonInsertResponse fResponse = anton.execute(
-            new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+            new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         fResponse.fillObject(folder);
         final Task task = Create.createWithDefaults();
         task.setTitle("Bug11650Test");
@@ -115,7 +115,7 @@ public class Bug11650Test extends AbstractTaskTest {
                     response.hasError());
             }
         } finally {
-            anton.execute(new DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+            anton.execute(new DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
         }
     }
 

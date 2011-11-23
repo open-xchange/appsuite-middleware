@@ -5,7 +5,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Date;
 import java.util.TimeZone;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -60,7 +60,7 @@ public class Bug15777Test extends AbstractAJAXSession {
         subFolder = Create.createPrivateFolder("bug15777movefolder", FolderObject.MAIL, values.getUserId());
         subFolder.setFullName(folder + "/bug15777movefolder");
 
-        final InsertRequest subFolderReq = new InsertRequest(API.OX_NEW, subFolder, false);
+        final InsertRequest subFolderReq = new InsertRequest(EnumAPI.OX_NEW, subFolder, false);
         client.execute(subFolderReq);
         subFolder.setLastModified(new Date(0));
 
@@ -85,7 +85,7 @@ public class Bug15777Test extends AbstractAJAXSession {
 
         // Delete MailFolder
         final com.openexchange.ajax.folder.actions.DeleteRequest fDel = new com.openexchange.ajax.folder.actions.DeleteRequest(
-            API.OX_NEW,
+            EnumAPI.OX_NEW,
             subFolder);
         client.execute(fDel);
 

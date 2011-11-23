@@ -51,8 +51,8 @@ package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.MultipleRequest;
@@ -103,7 +103,7 @@ public final class Bug12364Test extends AbstractAJAXSession {
                 request2
             }));
         } finally {
-            myClient.execute(new DeleteRequest(API.OX_OLD, folder1, folder2));
+            myClient.execute(new DeleteRequest(EnumAPI.OX_OLD, folder1, folder2));
         }
     }
 }

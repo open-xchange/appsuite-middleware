@@ -1,9 +1,5 @@
 package com.openexchange.ajax.importexport;
 
-import java.io.IOException;
-
-import org.json.JSONException;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;

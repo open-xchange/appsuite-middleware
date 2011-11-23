@@ -56,6 +56,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -91,7 +92,7 @@ public final class FolderTools {
     }
 
     public static List<FolderObject> getSubFolders(AJAXClient client, String parent, boolean ignoreMailFolder) throws OXException, IOException, SAXException, JSONException, OXException {
-        final ListRequest request = new ListRequest(API.OX_OLD, parent, ignoreMailFolder);
+        final ListRequest request = new ListRequest(EnumAPI.OX_OLD, parent, ignoreMailFolder);
         final ListResponse response = client.execute(request);
         final List<FolderObject> retval = new ArrayList<FolderObject>();
         final Iterator<FolderObject> iter = response.getFolder();

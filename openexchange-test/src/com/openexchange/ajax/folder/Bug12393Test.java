@@ -52,7 +52,7 @@ package com.openexchange.ajax.folder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -106,7 +106,7 @@ public class Bug12393Test extends AbstractAJAXSession {
         //create the parent folder
         parentFolderObject = Create.setupPublicFolder("Bug12393Test-parentFolder", FolderObject.INFOSTORE, myClient.getValues().getUserId());
         parentFolderObject.setParentFolderID(myClient.getValues().getPrivateInfostoreFolder());
-        InsertRequest request = new InsertRequest(API.OX_OLD, parentFolderObject);
+        InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, parentFolderObject);
         CommonInsertResponse response = myClient.execute(request);
         response.fillObject(parentFolderObject);
         parentFolderId = parentFolderObject.getObjectID();
@@ -140,7 +140,7 @@ public class Bug12393Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION);
         subFolderObject.setPermissionsAsArray(new OCLPermission[] { perm, perm2 });
         originalSubFolderPermissions = subFolderObject.getPermissions();
-        request = new InsertRequest(API.OX_OLD, subFolderObject);
+        request = new InsertRequest(EnumAPI.OX_OLD, subFolderObject);
         response = myClient.execute(request);
         response.fillObject(subFolderObject);
         subFolderId = subFolderObject.getObjectID();
@@ -150,13 +150,13 @@ public class Bug12393Test extends AbstractAJAXSession {
     public void tearDown() throws Exception {
         final AJAXClient myClient = getClient();
         // reload the parent folder (it has been changed since its creation by the modification of permissions)
-        final GetRequest getRequest = new GetRequest(API.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
+        final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
         final GetResponse getResponse = myClient.execute(getRequest);
         parentFolderObject = getResponse.getFolder();
         // lastModified has to be set separately
         parentFolderObject.setLastModified(getResponse.getTimestamp());
         //delete the parent folder and with it the subfolder
-        final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, parentFolderObject);
+        final com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, parentFolderObject);
         myClient.execute(folderDeleteRequest);
 
         super.tearDown();
@@ -165,7 +165,7 @@ public class Bug12393Test extends AbstractAJAXSession {
     public void testPermissionsOfSubfoldersRemainIntactAfterRemovalOfFolderGroupPermission() throws Exception{
         final AJAXClient myClient = getClient();
         // reload the parent folder (it has been changed since its creation by the addition of the subfolder)
-        GetRequest getRequest = new GetRequest(API.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
+        GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, Integer.toString(parentFolderId), FolderObject.ALL_COLUMNS, false);
         GetResponse getResponse = myClient.execute(getRequest);
         parentFolderObject = getResponse.getFolder();
         // lastModified has to be set separately
@@ -182,10 +182,10 @@ public class Bug12393Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION);
         parentFolderObject.setPermissionsAsArray(new OCLPermission[] { perm });
         // update the parent folder
-        final UpdateRequest updateRequest = new UpdateRequest(API.OX_OLD, parentFolderObject);
+        final UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_OLD, parentFolderObject);
         myClient.execute(updateRequest);
         // load the subfolder
-        getRequest = new GetRequest(API.OX_OLD, Integer.toString(subFolderId), false);
+        getRequest = new GetRequest(EnumAPI.OX_OLD, Integer.toString(subFolderId), false);
         getResponse = myClient.execute(getRequest);
         final FolderObject newSubFolderObject = getResponse.getFolder();
         // assert the permission there is still intact
