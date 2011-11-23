@@ -205,15 +205,6 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);
-        if (LogProperties.isEnabled()) {
-            final Map<String, Object> properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.session.sessionId", sessionId);
-            properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
-            properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
-            final String client  = session.getClient();
-            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            // properties.put("com.openexchange.session.session", session);
-        }
         if (!sessionId.equals(session.getSessionID())) {
             if (INFO) {
                 LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
@@ -257,17 +248,36 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             super.service(req, resp);
         } catch (final OXException e) {
-            e.log(LOG);
-            final Response response = new Response(getSessionObject(req));
-            response.setException(e);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, writer);
-                writer.flush();
-            } catch (final JSONException e1) {
-                log(RESPONSE_ERROR, e1);
-                sendError(resp);
+            if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
+                LOG.debug(e.getMessage(), e);
+                handleSessiondException(e, req, resp);
+                /*
+                 * Return JSON response
+                 */
+                final Response response = new Response();
+                response.setException(e);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final PrintWriter writer = resp.getWriter();
+                try {
+                    ResponseWriter.write(response, writer);
+                    writer.flush();
+                } catch (final JSONException e1) {
+                    log(RESPONSE_ERROR, e1);
+                    sendError(resp);
+                }
+            } else {
+                e.log(LOG);
+                final Response response = new Response(getSessionObject(req));
+                response.setException(e);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final PrintWriter writer = resp.getWriter();
+                try {
+                    ResponseWriter.write(response, writer);
+                    writer.flush();
+                } catch (final JSONException e1) {
+                    log(RESPONSE_ERROR, e1);
+                    sendError(resp);
+                }
             }
         } finally {
             ThreadLocalSessionHolder.getInstance().setSession(null);
@@ -350,6 +360,14 @@ public abstract class SessionServlet extends AJAXServlet {
                 sessiondService.removeSession(sessionId);
             } catch (final Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
+            } finally {
+                if (LogProperties.isEnabled()) {
+                    final Map<String, Object> properties = LogProperties.getLogProperties();
+                    properties.put("com.openexchange.session.sessionId", null);
+                    properties.put("com.openexchange.session.userId", null);
+                    properties.put("com.openexchange.session.contextId", null);
+                    properties.put("com.openexchange.session.clientId", null);
+                }
             }
         }
     }
@@ -475,8 +493,19 @@ public abstract class SessionServlet extends AJAXServlet {
             }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
+        if (LogProperties.isEnabled()) {
+            final Map<String, Object> properties = LogProperties.getLogProperties();
+            properties.put("com.openexchange.session.sessionId", sessionId);
+            properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
+            properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+            final String client  = session.getClient();
+            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
+            // properties.put("com.openexchange.session.session", session);
+        }
+        /*
+         * Get session secret
+         */
         final String secret = extractSecret(hashSource, req, session.getHash(), session.getClient());
-
         if (secret == null || !session.getSecret().equals(secret)) {
             if (INFO && null != secret) {
                 LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");

@@ -98,6 +98,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
@@ -122,7 +123,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-
 public class Login extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
@@ -809,19 +809,27 @@ public class Login extends AJAXServlet {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_SESSION);
         }
         final Session session = SessionServlet.getSession(conf.hashSource, req, sessionId, sessiond);
-        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
-        if (type == CookieType.SESSION) {
-            writeSessionCookie(resp, session, session.getHash(), req.isSecure());
-        } else {
-            writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+        try {
+            SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
+            if (type == CookieType.SESSION) {
+                writeSessionCookie(resp, session, session.getHash(), req.isSecure());
+            } else {
+                writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+            }
+            // Refresh HTTP session, too
+            req.getSession();
+            final Response response = new Response();
+            response.setData("1");
+            ResponseWriter.write(response, resp.getWriter());
+        } finally {
+            if (LogProperties.isEnabled()) {
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.session.sessionId", null);
+                properties.put("com.openexchange.session.userId", null);
+                properties.put("com.openexchange.session.contextId", null);
+                properties.put("com.openexchange.session.clientId", null);
+            }
         }
-        // Refresh HTTP session, too
-        req.getSession();
-
-        final Response response = new Response();
-        response.setData("1");
-
-        ResponseWriter.write(response, resp.getWriter());
     }
 
     protected void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
