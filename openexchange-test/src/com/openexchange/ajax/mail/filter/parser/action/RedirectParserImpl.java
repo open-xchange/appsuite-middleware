@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.action.Redirect;
  */
 public class RedirectParserImpl implements ActionParser {
 
-	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
 		final String mail = jsonObject.getString("mail");
 
 		return new Redirect(mail);

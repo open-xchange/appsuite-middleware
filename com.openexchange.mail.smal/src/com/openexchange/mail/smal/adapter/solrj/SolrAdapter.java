@@ -117,7 +117,7 @@ import com.openexchange.user.UserService;
  * {@link SolrAdapter}
  * <p>
  * http://wiki.apache.org/solr/Solrj
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SolrAdapter implements IndexAdapter, SolrConstants {
@@ -132,7 +132,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
         /**
          * Fills specified mail from given Solr document.
-         * 
+         *
          * @param mail The mail
          * @param doc The Solr document
          * @throws OXException If filling fails
@@ -1433,7 +1433,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         }
         /*-
          * Address fields
-         
+
             "From"
             "To"
             "Cc"
@@ -1447,7 +1447,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             "Resent-To"
             "Resent-Sender"
             "Disposition-Notification-To"
-            
+
          */
         {
             AddressesPreparation preparation = new AddressesPreparation(mail.getFrom());

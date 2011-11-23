@@ -66,7 +66,7 @@ import com.openexchange.test.fixtures.SimpleCredentials;
 
 public class AJAXContactFinder implements ContactFinder {
 
-	private AJAXClient client;
+	private final AJAXClient client;
 	private HashMap<Integer, Contact> globalAddressBook;
 
 	public AJAXContactFinder(AJAXClient client) {
@@ -100,7 +100,8 @@ public class AJAXContactFinder implements ContactFinder {
 		}
 	}
 
-	public Contact getContact(SimpleCredentials credentials) {
+	@Override
+    public Contact getContact(SimpleCredentials credentials) {
 		return getContact( credentials.getUserId() );
 	}
 

@@ -71,7 +71,7 @@ public class AlphanumComparator implements Comparator<String> {
 
     /**
      * Initializes a new {@link AlphanumComparator}.
-     * 
+     *
      * @param locale The locale
      */
     public AlphanumComparator(final Locale locale) {

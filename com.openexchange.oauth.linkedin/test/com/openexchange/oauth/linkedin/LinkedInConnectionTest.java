@@ -66,22 +66,13 @@ package com.openexchange.oauth.linkedin;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Scanner;
-
 import junit.framework.TestCase;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.LinkedInApi;
-import org.scribe.model.Token;
-import org.scribe.model.Verifier;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.DefaultOAuthToken;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.osgi.Activator;
 /**
  * {@link LinkedInConnectionTest}
@@ -92,11 +83,11 @@ public class LinkedInConnectionTest extends TestCase {
 
     private LinkedInServiceImpl linkedIn;
 
-    private String apiKey = "";
-    private String apiSecret = "";  
-    private String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
-    private String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
-    
+    private final String apiKey = "";
+    private final String apiSecret = "";
+    private final String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
+    private final String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
+
     @Override
     public void setUp(){
         Activator activator = new Activator();
@@ -112,7 +103,7 @@ public class LinkedInConnectionTest extends TestCase {
 
 //    public void testAccountCreation(){
 //    	//8cede13f-0881-4e05-99aa-81dfc0f1aa08(Token), 16fb16ca-7fff-4de0-9663-5dc0185e8488(Secret)
-//    	
+//
 //        // This is basically scribes example
 //        org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
 //
@@ -180,12 +171,12 @@ public class LinkedInConnectionTest extends TestCase {
         }
         assertTrue("Everyone at OX should know Marcus", found);
     }
-    
+
 
     public void testGetContacts() {
     	linkedIn.getContacts("password",1,1,1);
     }
-    
+
     public void testGetProfileForEMail() throws OXException, JSONException{
     	JSONObject fullProfile = linkedIn.getFullProfileByEMail(Arrays.asList("tobiasprinz@gmx.net"),"password",1,1,1);
     	assertEquals("Tobias", fullProfile.getString("firstName"));
@@ -207,18 +198,18 @@ public class LinkedInConnectionTest extends TestCase {
 		List<String> connectionIds = linkedIn.getUsersConnectionsIds("password",1,1,1);
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", connectionIds.contains(LI_ID_KAUSS) || connectionIds.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
 	}
-	
+
 	public void testGetRelationToViewer() throws Exception {
 		JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, "password",1,1,1);
 		assertTrue("Should know Martin", relations.getJSONObject("relationToViewer").getInt("distance") > 0);
 	}
-	
+
 	public void testNetworkUpdates() throws Exception {
 		JSONObject updateObj = linkedIn.getNetworkUpdates("password",1,1,1);
 		JSONArray updates = updateObj.getJSONArray("values");
 		assertTrue("Something should have happened lately", updates.length() > 0);
 	}
-	
+
 	public void testMessageInbox() throws Exception {
 		JSONObject inbox = linkedIn.getMessageInbox("password",1,1,1);
 		assertEquals("Should have zero messages.", 0, inbox.getInt("_total"));

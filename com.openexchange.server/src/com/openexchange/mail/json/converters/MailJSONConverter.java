@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link MailJSONConverter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

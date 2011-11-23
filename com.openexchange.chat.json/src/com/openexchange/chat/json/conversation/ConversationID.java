@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ConversationID} - Represents a conversation identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConversationID {
 
     /**
      * Gets the conversation UID from specified identifier.
-     * 
+     *
      * @param uid The conversation identifier
      * @return The conversation identifier
      * @throws OXException If parsing fails
@@ -120,7 +120,7 @@ public final class ConversationID {
 
     /**
      * Initializes a new {@link ConversationID}.
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      * @param chatId The chat identifier
@@ -144,7 +144,7 @@ public final class ConversationID {
 
     /**
      * Gets the service identifier
-     * 
+     *
      * @return The service identifier
      */
     public String getServiceId() {
@@ -153,7 +153,7 @@ public final class ConversationID {
 
     /**
      * Sets the service identifier
-     * 
+     *
      * @param serviceId The service identifier to set
      * @return This conversation identifier with given identifier applied
      */
@@ -165,7 +165,7 @@ public final class ConversationID {
 
     /**
      * Gets the account identifier
-     * 
+     *
      * @return The account identifier
      */
     public String getAccountId() {
@@ -174,7 +174,7 @@ public final class ConversationID {
 
     /**
      * Sets the account identifier
-     * 
+     *
      * @param accountId The account identifier to set
      * @return This conversation identifier with given identifier applied
      */
@@ -186,7 +186,7 @@ public final class ConversationID {
 
     /**
      * Gets the chat identifier
-     * 
+     *
      * @return The chat identifier
      */
     public String getChatId() {
@@ -195,7 +195,7 @@ public final class ConversationID {
 
     /**
      * Sets the chat identifier
-     * 
+     *
      * @param chatId The chat identifier to set
      * @return This conversation identifier with given identifier applied
      */

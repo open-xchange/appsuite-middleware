@@ -61,8 +61,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.fixtures.GroupResolver;
 
 public class AJAXGroupResolver implements GroupResolver {
-	private AJAXClient client;
-	private AJAXContactFinder contactFinder;
+	private final AJAXClient client;
+	private final AJAXContactFinder contactFinder;
 
 	public AJAXGroupResolver(AJAXClient client) {
 		super();
@@ -70,12 +70,14 @@ public class AJAXGroupResolver implements GroupResolver {
 		this.contactFinder = new AJAXContactFinder(client);
 	}
 
-	public Contact[] resolveGroup(String simpleName) {
+	@Override
+    public Contact[] resolveGroup(String simpleName) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public Contact[] resolveGroup(int groupId) {
+	@Override
+    public Contact[] resolveGroup(int groupId) {
 		GetRequest group = new GetRequest(groupId);
 		try {
 			AbstractAJAXResponse response = client.execute(group);

@@ -103,6 +103,7 @@ public class SimFolderField implements AdditionalFolderField {
         this.jsonValue = jsonValue;
     }
 
+    @Override
     public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
         return AdditionalFieldsUtils.bulk(this, folder, session);
     }

@@ -58,7 +58,7 @@ import com.openexchange.chat.json.rest.MethodHandler;
 
 /**
  * {@link ConversationRestServlet} - The REST Servlet for module "conversation".
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ConversationRestServlet extends AbstractRestServlet {

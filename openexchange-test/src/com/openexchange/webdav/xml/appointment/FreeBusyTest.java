@@ -82,7 +82,7 @@ public class FreeBusyTest extends ManagedAppointmentTest {
     private Date inAnHour;
     private UserValues values;
     private int contextId;
-    private DateFormat formatter = new SimpleDateFormat("yyyyMMdd"); //used by freebusy.java
+    private final DateFormat formatter = new SimpleDateFormat("yyyyMMdd"); //used by freebusy.java
 
     public FreeBusyTest(String name) {
         super(name);

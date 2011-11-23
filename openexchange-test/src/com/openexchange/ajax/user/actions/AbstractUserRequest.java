@@ -69,10 +69,12 @@ public abstract class AbstractUserRequest<T extends AbstractAJAXResponse> implem
         super();
     }
 
+    @Override
     public String getServletPath() {
         return URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

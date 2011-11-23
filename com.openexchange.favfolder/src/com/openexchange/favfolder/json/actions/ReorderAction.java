@@ -56,7 +56,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.favfolder.internal.ReorderFavFolderPerformer;
-import com.openexchange.favfolder.internal.UnsubscribeFavFolderPerformer;
 import com.openexchange.favfolder.json.FavFolderAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -72,7 +71,7 @@ public final class ReorderAction extends AbstractFavFolderAction {
 
     /**
      * Initializes a new {@link ReorderAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public ReorderAction(final ServiceLookup services) {

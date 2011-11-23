@@ -51,7 +51,7 @@ package com.openexchange.mail.smal.adapter.solrj;
 
 /**
  * {@link SolrConstants} - Provides constants.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SolrConstants {

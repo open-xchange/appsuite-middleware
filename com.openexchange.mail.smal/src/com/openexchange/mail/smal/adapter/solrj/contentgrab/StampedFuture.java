@@ -54,7 +54,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link StampedFuture}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class StampedFuture {
@@ -74,7 +74,7 @@ public final class StampedFuture {
 
     /**
      * Sets the start-up time stamp.
-     * 
+     *
      * @param stamp The stamp millis
      */
     public void setStamp(final long stamp) {
@@ -83,7 +83,7 @@ public final class StampedFuture {
 
     /**
      * Gets the stamp
-     * 
+     *
      * @return The stamp
      */
     public long getStamp() {
@@ -92,7 +92,7 @@ public final class StampedFuture {
 
     /**
      * Gets the future
-     * 
+     *
      * @return The future
      */
     public Future<Object> getFuture() {

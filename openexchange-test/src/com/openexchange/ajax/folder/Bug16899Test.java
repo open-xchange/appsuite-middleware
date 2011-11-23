@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -87,7 +87,7 @@ public class Bug16899Test extends AbstractAJAXSession {
     public void testBug16899() throws Exception {
         FolderObject folder = Create.createPrivateFolder("Bug 16899 Test", FolderObject.MAIL, client.getValues().getUserId());
         folder.setFullName("default0/INBOX/Bug 16899 Test");
-        InsertRequest insertFolder = new InsertRequest(API.OX_OLD, folder);
+        InsertRequest insertFolder = new InsertRequest(EnumAPI.OX_OLD, folder);
         InsertResponse execute = client.execute(insertFolder);
 
         execute.fillObject(folder);
@@ -106,7 +106,7 @@ public class Bug16899Test extends AbstractAJAXSession {
         assertTrue("Testfolder not found in inbox.", firstMatch);
         folders = null;
 
-        DeleteRequest deleteFolder = new DeleteRequest(API.OX_OLD, folder);
+        DeleteRequest deleteFolder = new DeleteRequest(EnumAPI.OX_OLD, folder);
         CommonDeleteResponse deleteResponse = client.execute(deleteFolder);
 
         assertNull("Error during folder deletion", deleteResponse.getException());
@@ -127,7 +127,7 @@ public class Bug16899Test extends AbstractAJAXSession {
     private ArrayList<FolderObject> performListRequest(String inFolder) throws Exception {
     	ArrayList<FolderObject> folderList = new ArrayList<FolderObject>();
 
-    	ListRequest request = new ListRequest(API.OUTLOOK, inFolder, FolderObject.ALL_COLUMNS, false, false);
+    	ListRequest request = new ListRequest(EnumAPI.OUTLOOK, inFolder, FolderObject.ALL_COLUMNS, false, false);
         ListResponse response = client.execute(request);
         assertNull("Error during ListRequest.", response.getException());
 

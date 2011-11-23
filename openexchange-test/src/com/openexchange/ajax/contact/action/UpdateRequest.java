@@ -63,9 +63,9 @@ import com.openexchange.groupware.container.Contact;
 public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
 
     private final Contact contactObj;
-    private boolean failOnError;
-    private int originFolder;
-    private boolean withImage;
+    private final boolean failOnError;
+    private final int originFolder;
+    private final boolean withImage;
     private String fieldContent;
 
     /**
@@ -101,6 +101,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return convert(contactObj);
     }
@@ -108,6 +109,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return withImage ? Method.UPLOAD : Method.PUT;
     }
@@ -115,6 +117,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         if (withImage) {
             return new Parameter[] {
@@ -138,6 +141,7 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public UpdateParser getParser() {
         return new UpdateParser(failOnError, withImage);
     }

@@ -92,7 +92,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DBChatActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBChatActivator extends HousekeepingActivator {
@@ -232,7 +232,7 @@ public final class DBChatActivator extends HousekeepingActivator {
                         }
                         /*-
                          * Last session gone: clean up
-                         * 
+                         *
                          * 1. Mark as unavailable in roster
                          * 2. Remove associated chat access
                          */

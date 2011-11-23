@@ -98,7 +98,7 @@ import com.openexchange.test.TaskTestManager;
  */
 public class TaskVerificationStep extends NeedExistingStep<Task> {
 
-    private Task entry;
+    private final Task entry;
     private TaskTestManager manager;
     private int expectedFolderId;
 
@@ -122,6 +122,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
         }
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new TaskTestManager(client);
@@ -347,6 +348,7 @@ public class TaskVerificationStep extends NeedExistingStep<Task> {
     }
 
 
+    @Override
     public void cleanUp() throws Exception {
 
     }

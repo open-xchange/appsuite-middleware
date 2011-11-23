@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
  */
 public class DownloadResponse extends AbstractAJAXResponse {
 
-    private byte[] downloaderBytes;
+    private final byte[] downloaderBytes;
 
     /**
      * Initializes a new {@link DownloadResponse}.

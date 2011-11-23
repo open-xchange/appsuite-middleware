@@ -70,7 +70,7 @@ import com.openexchange.tasks.json.TaskRequest;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class UpdateAction extends TaskAction {
-    
+
     private static final org.apache.commons.logging.Log LOG = Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UpdateAction.class));
 
     /**

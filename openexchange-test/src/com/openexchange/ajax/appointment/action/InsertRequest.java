@@ -104,6 +104,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
     /**
      * {@inheritDoc}
      */
+    @Override
     public JSONObject getBody() throws JSONException {
         return convert(appointmentObj, timeZone);
     }
@@ -111,6 +112,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -118,6 +120,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
@@ -128,6 +131,7 @@ public class InsertRequest extends AbstractAppointmentRequest<AppointmentInsertR
     /**
      * {@inheritDoc}
      */
+    @Override
     public AbstractAJAXParser<AppointmentInsertResponse> getParser() {
         return new InsertParser(failOnError);
     }

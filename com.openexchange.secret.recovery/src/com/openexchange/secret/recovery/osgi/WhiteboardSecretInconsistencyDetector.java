@@ -60,7 +60,7 @@ import com.openexchange.secret.recovery.impl.DefaultSecretInconsistencyDetector;
 
 /**
  * {@link WhiteboardSecretInconsistencyDetector}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardSecretInconsistencyDetector extends DefaultSecretInconsistencyDetector {

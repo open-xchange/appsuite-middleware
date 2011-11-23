@@ -65,7 +65,7 @@ import com.openexchange.tasks.json.TaskRequest;
 
 /**
  * {@link NewAction}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class NewAction extends TaskAction {
@@ -74,7 +74,7 @@ public class NewAction extends TaskAction {
 
     /**
      * Initializes a new {@link NewAction}.
-     * 
+     *
      * @param services
      */
     public NewAction(ServiceLookup services) {

@@ -81,7 +81,7 @@ import com.openexchange.server.ServiceLookup;
  */
 
 public abstract class TaskAction implements AJAXActionService {
-    
+
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     private final ServiceLookup services;

@@ -135,11 +135,11 @@ public final class GetAction implements ETagAwareAJAXActionService {
                 contentType.setPrimaryType(ct.substring(0, pos));
                 contentType.setSubType(ct.substring(pos + 1));
             }
-            
+
             if (fileName != null) {
                 contentType.setParameter("name", fileName);
             }
-            
+
             /*
              * Write from content's input stream to response output stream
              */

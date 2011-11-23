@@ -138,14 +138,14 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Gets the module identifier.
-     * 
+     *
      * @return The module identifier
      */
     protected abstract String getModule();
 
     /**
      * Parses by path info (extra path information follows the Servlet path but precedes the query string and will start with a "/" character)
-     * 
+     *
      * @param retval The AJAX request data
      * @param pathInfo The path info
      * @param req The HTTP request
@@ -154,7 +154,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Whether to apply body data.
-     * 
+     *
      * @return <code>true</code> to apply body data; else <code>false</code>
      */
     protected abstract boolean shouldApplyBody();
@@ -209,7 +209,7 @@ public abstract class AbstractMethodHandler implements MethodHandler {
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param string The string
      * @return <code>true</code> if empty; else <code>false</code>
      */

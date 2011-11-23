@@ -66,10 +66,11 @@ import com.openexchange.ajax.kata.Step;
  *
  */
 public abstract class AbstractFixtureTransformer<T> implements FixtureTransformer{
-    private Map<String, IdentitySource<T>> memory = new HashMap<String, IdentitySource<T>>();
+    private final Map<String, IdentitySource<T>> memory = new HashMap<String, IdentitySource<T>>();
 
-    private List<PendingResolve> pending = new ArrayList<PendingResolve>();
+    private final List<PendingResolve> pending = new ArrayList<PendingResolve>();
 
+    @Override
     public void resolveAll() {
         for (PendingResolve pendingResolve : new ArrayList<PendingResolve>(pending)) {
             pending.remove(pendingResolve);

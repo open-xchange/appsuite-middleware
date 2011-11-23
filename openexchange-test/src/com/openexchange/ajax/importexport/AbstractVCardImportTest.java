@@ -66,7 +66,7 @@ public abstract class AbstractVCardImportTest extends AbstractVCardTest {
 
     private FolderTestManager folderManager;
 
-    private AJAXClient client;
+    private final AJAXClient client;
 
     protected FolderObject testFolder;
 

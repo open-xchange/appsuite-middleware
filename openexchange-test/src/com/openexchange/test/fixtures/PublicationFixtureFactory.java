@@ -60,19 +60,20 @@ import com.openexchange.publish.Publication;
  */
 public class PublicationFixtureFactory implements FixtureFactory<Publication> {
 
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
 	public PublicationFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<Publication> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Publication> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
 		return new PublicationFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class PublicationFixtures  extends DefaultFixtures<Publication> implements Fixtures<Publication>{
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Publication>>  publications = new HashMap<String,Fixture<Publication>>();
 
         public PublicationFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
@@ -80,6 +81,7 @@ public class PublicationFixtureFactory implements FixtureFactory<Publication> {
             this.entries = entries;
         }
 
+        @Override
         public Fixture<Publication> getEntry(final String entryName) throws OXException {
             if (publications.containsKey(entryName)) {
                 return publications.get(entryName);

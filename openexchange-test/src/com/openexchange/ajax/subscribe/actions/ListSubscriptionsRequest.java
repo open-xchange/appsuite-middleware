@@ -108,15 +108,18 @@ public class ListSubscriptionsRequest extends AbstractSubscriptionRequest<ListSu
         setDynamicColumns(dynamicColumns);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return JSON.collection2jsonArray(getIDs());
     }
 
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         List<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
@@ -133,6 +136,7 @@ public class ListSubscriptionsRequest extends AbstractSubscriptionRequest<ListSu
         return params.toArray(new Parameter[] {});
     }
 
+    @Override
     public AbstractAJAXParser<ListSubscriptionsResponse> getParser() {
         return new AbstractAJAXParser<ListSubscriptionsResponse>(getFailOnError()) {
 

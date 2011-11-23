@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link PreviewImageResultConverter}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class PreviewImageResultConverter extends AbstractPreviewResultConverter {
@@ -103,11 +103,11 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
         dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
         dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
         dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileHolder.getLength()));
-        
+
         PreviewDocument previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
-        
+
         requestData.setFormat("file");
-        
+
         InputStream thumbnail = previewDocument.getThumbnail();
         String fileName = previewDocument.getMetaData().get("resourcename");
         FileHolder responseFileHolder = new FileHolder(thumbnail, -1, "image/jpeg", fileName); // TODO: file length

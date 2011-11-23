@@ -54,10 +54,11 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 /**
  * This class maps names of fields found Outlook's CSV files to names used by OX and vice versa. This class has been generated automatically
  * from i18n files.
- * 
+ *
  * @deprecated Use the PropertyDrivenMapper with .properties files instead.
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  */
+@Deprecated
 public class GermanOutlookMapper extends AbstractContactFieldMapper {
 
     public GermanOutlookMapper() {

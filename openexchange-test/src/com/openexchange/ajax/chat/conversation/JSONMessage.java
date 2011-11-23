@@ -57,14 +57,14 @@ import com.openexchange.ajax.chat.conversation.actions.AbstractChatConversationR
 
 /**
  * {@link JSONMessage} - Represents a chat message rendered with JSON.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONMessage {
 
     /**
      * Parses given JSON to a {@link JSONMessage}.
-     * 
+     *
      * @param jsonMessage The JSON message data
      * @return The {@link JSONMessage}
      * @throws JSONException If a JSON error occurs
@@ -106,7 +106,7 @@ public final class JSONMessage {
 
     /**
      * Gets the messageId
-     * 
+     *
      * @return The messageId
      */
     public String getMessageId() {
@@ -115,7 +115,7 @@ public final class JSONMessage {
 
     /**
      * Sets the messageId
-     * 
+     *
      * @param messageId The messageId to set
      */
     public void setMessageId(final String messageId) {
@@ -124,7 +124,7 @@ public final class JSONMessage {
 
     /**
      * Gets the from
-     * 
+     *
      * @return The from
      */
     public JSONChatUser getFrom() {
@@ -133,7 +133,7 @@ public final class JSONMessage {
 
     /**
      * Sets the from
-     * 
+     *
      * @param from The from to set
      */
     public void setFrom(final JSONChatUser from) {
@@ -142,7 +142,7 @@ public final class JSONMessage {
 
     /**
      * Gets the subject
-     * 
+     *
      * @return The subject
      */
     public String getSubject() {
@@ -151,7 +151,7 @@ public final class JSONMessage {
 
     /**
      * Sets the subject
-     * 
+     *
      * @param subject The subject to set
      */
     public void setSubject(final String subject) {
@@ -160,7 +160,7 @@ public final class JSONMessage {
 
     /**
      * Gets the text
-     * 
+     *
      * @return The text
      */
     public String getText() {
@@ -169,7 +169,7 @@ public final class JSONMessage {
 
     /**
      * Sets the text
-     * 
+     *
      * @param text The text to set
      */
     public void setText(final String text) {
@@ -178,7 +178,7 @@ public final class JSONMessage {
 
     /**
      * Gets the timeStamp
-     * 
+     *
      * @return The timeStamp
      */
     public Date getTimeStamp() {
@@ -187,7 +187,7 @@ public final class JSONMessage {
 
     /**
      * Sets the timeStamp
-     * 
+     *
      * @param timeStamp The timeStamp to set
      */
     public void setTimeStamp(final Date timeStamp) {

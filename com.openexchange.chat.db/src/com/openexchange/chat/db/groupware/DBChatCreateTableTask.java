@@ -85,12 +85,7 @@ public class DBChatCreateTableTask extends UpdateTaskAdapter {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
         final int contextId = params.getContextId();
-        final Connection writeCon;
-        try {
-            writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
         try {
             final String[] tableNames = DBChatCreateTableService.getTablesToCreate();
@@ -98,7 +93,7 @@ public class DBChatCreateTableTask extends UpdateTaskAdapter {
             for (int i = 0; i < tableNames.length; i++) {
                 try {
                     if (tableExists(writeCon, tableNames[i])) {
-                        return;
+                        continue;
                     }
                     stmt = writeCon.prepareStatement(createStmts[i]);
                     stmt.executeUpdate();

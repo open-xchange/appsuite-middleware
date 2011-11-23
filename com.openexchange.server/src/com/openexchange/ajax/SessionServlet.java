@@ -81,7 +81,9 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -110,6 +112,10 @@ public abstract class SessionServlet extends AJAXServlet {
     private static final long serialVersionUID = -8308340875362868795L;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionServlet.class));
+
+    private static final boolean INFO = LOG.isInfoEnabled();
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     public static final String SESSION_KEY = "sessionObject";
 
@@ -199,21 +205,18 @@ public abstract class SessionServlet extends AJAXServlet {
         }
         final String sessionId = getSessionId(req);
         final ServerSession session = getSession(req, sessionId, sessiondService);
-        if (LogProperties.isEnabled()) {
-            final Map<String, Object> properties = LogProperties.getLogProperties();
-            properties.put("com.openexchange.session.sessionId", sessionId);
-            properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
-            properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
-            final String client  = session.getClient();
-            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            // properties.put("com.openexchange.session.session", session);
-        }
         if (!sessionId.equals(session.getSessionID())) {
+            if (INFO) {
+                LOG.info("Request's session identifier \"" + sessionId + "\" differs from the one indicated by SessionD service \"" + session.getSessionID() + "\".");
+            }
             throw SessionExceptionCodes.WRONG_SESSION.create();
         }
         final Context ctx = session.getContext();
         if (!ctx.isEnabled()) {
             sessiondService.removeSession(sessionId);
+            if (INFO) {
+                LOG.info("The context " + ctx.getContextId() + " associated with session is locked.");
+            }
             throw SessionExceptionCodes.CONTEXT_LOCKED.create();
         }
         checkIP(session, req.getRemoteAddr());
@@ -237,22 +240,44 @@ public abstract class SessionServlet extends AJAXServlet {
             if (maxConcurrentRequests > 0) {
                 counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                 if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
+                    if (INFO) {
+                        LOG.info("User " + session.getUserId() + " in context " + session.getContextId() + " exceeded max. concurrent requests (" + maxConcurrentRequests + ").");
+                    }
                     throw AjaxExceptionCodes.TOO_MANY_REQUESTS.create();
                 }
             }
             super.service(req, resp);
         } catch (final OXException e) {
-            e.log(LOG);
-            final Response response = new Response(getSessionObject(req));
-            response.setException(e);
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            final PrintWriter writer = resp.getWriter();
-            try {
-                ResponseWriter.write(response, writer);
-                writer.flush();
-            } catch (final JSONException e1) {
-                log(RESPONSE_ERROR, e1);
-                sendError(resp);
+            if (SessionExceptionCodes.getErrorPrefix().equals(e.getPrefix())) {
+                LOG.debug(e.getMessage(), e);
+                handleSessiondException(e, req, resp);
+                /*
+                 * Return JSON response
+                 */
+                final Response response = new Response();
+                response.setException(e);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final PrintWriter writer = resp.getWriter();
+                try {
+                    ResponseWriter.write(response, writer);
+                    writer.flush();
+                } catch (final JSONException e1) {
+                    log(RESPONSE_ERROR, e1);
+                    sendError(resp);
+                }
+            } else {
+                e.log(LOG);
+                final Response response = new Response(getSessionObject(req));
+                response.setException(e);
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                final PrintWriter writer = resp.getWriter();
+                try {
+                    ResponseWriter.write(response, writer);
+                    writer.flush();
+                } catch (final JSONException e1) {
+                    log(RESPONSE_ERROR, e1);
+                    sendError(resp);
+                }
             }
         } finally {
             ThreadLocalSessionHolder.getInstance().setSession(null);
@@ -269,15 +294,38 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    private static volatile Integer maxConcurrentRequests;
+
     private static int getMaxConcurrentRequests(final ServerSession session) {
+        Integer tmp = maxConcurrentRequests;
+        if (null == tmp) {
+            synchronized (SessionServlet.class) {
+                tmp = maxConcurrentRequests;
+                if (null == tmp) {
+                    tmp = maxConcurrentRequests = Integer.valueOf(getMaxConcurrentRequests0(session));
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static int getMaxConcurrentRequests0(final ServerSession session) {
         final Set<String> set = session.getUser().getAttributes().get("ajax.maxCount");
         if (null == set || set.isEmpty()) {
-            return -1;
+            try {
+                return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
+            } catch (final OXException e) {
+                return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
+            }
         }
         try {
             return Integer.parseInt(set.iterator().next());
         } catch (final NumberFormatException e) {
-            return -1;
+            try {
+                return ServerConfig.getInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS);
+            } catch (final OXException oxe) {
+                return Integer.parseInt(ServerConfig.Property.DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS.getDefaultValue());
+            }
         }
     }
 
@@ -312,6 +360,14 @@ public abstract class SessionServlet extends AJAXServlet {
                 sessiondService.removeSession(sessionId);
             } catch (final Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
+            } finally {
+                if (LogProperties.isEnabled()) {
+                    final Map<String, Object> properties = LogProperties.getLogProperties();
+                    properties.put("com.openexchange.session.sessionId", null);
+                    properties.put("com.openexchange.session.userId", null);
+                    properties.put("com.openexchange.session.contextId", null);
+                    properties.put("com.openexchange.session.clientId", null);
+                }
             }
         }
     }
@@ -339,10 +395,20 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void checkIP(final boolean checkIP, final Queue<IPRange> ranges, final Session session, final String actual) throws OXException {
         if (null == actual || (!isWhitelistedFromIPCheck(actual, ranges) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
-                LOG.info("Request to server denied for session: " + session.getSessionID() + ". Client login IP changed from " + session.getLocalIp() + " to " + actual + ".");
+                if (INFO) {
+                    final StringBuilder sb = new StringBuilder(96);
+                    sb.append("Request to server denied (IP check activated) for session: ");
+                    sb.append(session.getSessionID());
+                    sb.append(". Client login IP changed from ");
+                    sb.append(session.getLocalIp());
+                    sb.append(" to ");
+                    sb.append((null == actual ? "<missing>" : actual));
+                    sb.append(" and is not covered by IP white-list.");
+                    LOG.info(sb.toString());
+                }
                 throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
             }
-            if (LOG.isDebugEnabled()) {
+            if (DEBUG) {
                 final StringBuilder sb = new StringBuilder(64);
                 sb.append("Session ");
                 sb.append(session.getSessionID());
@@ -377,18 +443,21 @@ public abstract class SessionServlet extends AJAXServlet {
             /*
              * Throw an error...
              */
-            if (LOG.isDebugEnabled()) {
-                final StringBuilder debug = new StringBuilder();
-                debug.append("Parameter session not found: ");
-                final Enumeration<?> enm = req.getParameterNames();
-                while (enm.hasMoreElements()) {
-                    debug.append(enm.nextElement());
-                    debug.append(',');
+            if (INFO) {
+                final StringBuilder sb = new StringBuilder(32);
+                sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found");
+                if (DEBUG) {
+                    sb.append(": ");
+                    final Enumeration<?> enm = req.getParameterNames();
+                    while (enm.hasMoreElements()) {
+                        sb.append(enm.nextElement());
+                        sb.append(',');
+                    }
+                    if (sb.length() > 0) {
+                        sb.setCharAt(sb.length() - 1, '.');
+                    }
                 }
-                if (debug.length() > 0) {
-                    debug.setCharAt(debug.length() - 1, '.');
-                }
-                LOG.debug(debug.toString());
+                LOG.info(sb.toString());
             }
             throw SessionExceptionCodes.SESSION_PARAMETER_MISSING.create();
         }
@@ -419,28 +488,68 @@ public abstract class SessionServlet extends AJAXServlet {
     public static ServerSession getSession(final CookieHashSource hashSource, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
         if (null == session) {
+            if (INFO) {
+                LOG.info("There is no session associated with session identifier: " + sessionId);
+            }
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
+        if (LogProperties.isEnabled()) {
+            final Map<String, Object> properties = LogProperties.getLogProperties();
+            properties.put("com.openexchange.session.sessionId", sessionId);
+            properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
+            properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
+            final String client  = session.getClient();
+            properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
+            // properties.put("com.openexchange.session.session", session);
+        }
+        /*
+         * Get session secret
+         */
         final String secret = extractSecret(hashSource, req, session.getHash(), session.getClient());
-
         if (secret == null || !session.getSecret().equals(secret)) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Session secret is different. Given "+secret+" differs from "+session.getSecret()+" in session.");
+            if (INFO && null != secret) {
+                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
             }
             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
         }
-        final Context context;
-        final User user;
         try {
-            context = ContextStorage.getInstance().getContext(session.getContextId());
-            user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            final Context context = ContextStorage.getInstance().getContext(session.getContextId());
+            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!user.isMailEnabled()) {
+                if (INFO) {
+                    LOG.info("User " + user.getId() + " in context " + context.getContextId() + " is not activated.");
+                }
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
+            return new ServerSessionAdapter(session, context, user);
+        } catch (final OXException e) {
+            if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                /*
+                 * An outdated session; context absent
+                 */
+                sessiondService.removeSession(sessionId);
+                if (INFO) {
+                    LOG.info("The context associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
+                }
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            }
+            if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
+                final int code = e.getCode();
+                if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
+                    /*
+                     * An outdated session; user absent
+                     */
+                    sessiondService.removeSession(sessionId);
+                    if (INFO) {
+                        LOG.info("The user associated with session \"" + sessionId + "\" cannot be found. Obviously an outdated session which is invalidated now.");
+                    }
+                    throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                }
+            }
+            throw e;
         } catch (final UndeclaredThrowableException e) {
             throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
         }
-        return new ServerSessionAdapter(session, context, user);
     }
 
     /**
@@ -460,6 +569,11 @@ public abstract class SessionServlet extends AJAXServlet {
                     return cookie.getValue();
                 }
             }
+            if (INFO) {
+                LOG.info("Didn't found an appropriate Cookie for name \"" + cookieName + "\" (CookieHashSource=" + cookieHash.toString() + ") which provides the session secret.");
+            }
+        } else if (INFO) {
+            LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
         }
         return null;
     }

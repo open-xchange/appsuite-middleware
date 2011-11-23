@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link BulkFolderField}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class BulkFolderField implements AdditionalFolderField {
@@ -72,7 +72,7 @@ public class BulkFolderField implements AdditionalFolderField {
 
     /**
      * Initializes a new {@link BulkFolderField}.
-     * 
+     *
      * @param delegate The delegate field
      */
     public BulkFolderField(final AdditionalFolderField delegate) {
@@ -132,7 +132,7 @@ public class BulkFolderField implements AdditionalFolderField {
 
     /**
      * Loads the values for specified folders and puts resulting values into cache.
-     * 
+     *
      * @param folders The folders
      * @param session The session
      */

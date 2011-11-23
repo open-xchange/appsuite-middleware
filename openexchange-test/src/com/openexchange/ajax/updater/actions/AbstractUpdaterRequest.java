@@ -73,6 +73,7 @@ public abstract class AbstractUpdaterRequest<T extends AbstractAJAXResponse> imp
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
      */
+    @Override
     public String getServletPath() {
         return servletPath;
     }
@@ -80,6 +81,7 @@ public abstract class AbstractUpdaterRequest<T extends AbstractAJAXResponse> imp
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
+    @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] {};
     }
@@ -87,6 +89,7 @@ public abstract class AbstractUpdaterRequest<T extends AbstractAJAXResponse> imp
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getHeaders()
      */
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

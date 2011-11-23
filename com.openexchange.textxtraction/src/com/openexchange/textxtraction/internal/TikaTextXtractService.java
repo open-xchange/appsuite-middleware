@@ -62,7 +62,7 @@ import com.openexchange.textxtraction.TextXtractService;
 
 /**
  * {@link TikaTextXtractService} - The text extraction service based on Apache Tika.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TikaTextXtractService implements TextXtractService {

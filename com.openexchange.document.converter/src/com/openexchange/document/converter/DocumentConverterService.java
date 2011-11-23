@@ -53,14 +53,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DocumentConverterService} - The service for document conversion.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DocumentConverterService {
 
     /**
      * Converts specified file to given extension type.
-     * 
+     *
      * @param inputContent The input content
      * @param extension The target extension; e.g <code>"pdf"</code>
      * @return The converted document content

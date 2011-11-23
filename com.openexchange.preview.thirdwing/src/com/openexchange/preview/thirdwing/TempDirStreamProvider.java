@@ -60,22 +60,20 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.concurrent.atomic.AtomicReference;
 import net.thirdwing.exception.XHTMLConversionException;
-import net.thirdwing.io.IStreamProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link TempDirStreamProvider}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class TempDirStreamProvider {
 
-    private AtomicReference<File> tmpDirReference;
+    private final AtomicReference<File> tmpDirReference;
 
     /**
      * Initializes a new {@link TempDirStreamProvider}.
@@ -119,9 +117,9 @@ public class TempDirStreamProvider {
         }
         return tmpDir;
     }
-    
+
     public String getDocumentContent() throws OXException {
-        
+
         BufferedReader reader = null;
         try {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(tmpDirReference.get(), "document.html")), "UTF-8"));
@@ -130,7 +128,7 @@ public class TempDirStreamProvider {
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-            
+
             return sb.toString();
         } catch (final FileNotFoundException e) {
             // TODO: throw proper exception

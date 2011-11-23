@@ -87,22 +87,27 @@ public abstract class AbstractUpdatesRequest<T extends AbstractColumnsResponse> 
         this.failOnError = failOnError;
     }
 
+    @Override
     public String getServletPath() {
         return servletPath;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES));

@@ -63,7 +63,7 @@ public class Bug19089Test extends ManagedAppointmentTest {
 
     private Appointment appointment;
 
-    private String tzid = "Europe/Berlin";
+    private final String tzid = "Europe/Berlin";
 
     public Bug19089Test(String name) {
         super(name);

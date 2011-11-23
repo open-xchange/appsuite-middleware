@@ -22,7 +22,7 @@ import org.junit.Test;
 
 /**
  * Verifies {@link JID#nodeprep(String)}.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
 public class NodePrepTest {

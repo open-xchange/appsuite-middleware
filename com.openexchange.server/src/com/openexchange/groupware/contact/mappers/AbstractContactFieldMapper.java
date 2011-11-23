@@ -62,22 +62,26 @@ public abstract class AbstractContactFieldMapper implements ContactFieldMapper {
 
     protected final HashMap<ContactField, String> ox2something = new HashMap<ContactField, String>();
 
+    @Override
     public ContactField getFieldByName(final String name) {
         return something2ox.get(name);
     }
 
+    @Override
     public String getNameOfField(final ContactField field) {
         return ox2something.get(field);
     }
 
+    @Override
     public Collection<String> getNamesOfFields() {
         return ox2something.values();
     }
 
+    @Override
     public Collection<ContactField> getSupportedFields() {
         return something2ox.values();
     }
-    
+
     public void store(ContactField oxField, String otherField){
         if(otherField != null && ! "".equals(otherField))
             something2ox.put(otherField, oxField);

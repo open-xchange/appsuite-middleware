@@ -97,6 +97,7 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
         set.add(name);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONArray json = new JSONArray();
         for (final int userId : userIds) {
@@ -105,10 +106,12 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> l = new ArrayList<Parameter>(6);
         l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
@@ -134,6 +137,7 @@ public class ListRequest extends AbstractUserRequest<ListResponse> {
         return "";
     }
 
+    @Override
     public ListParser getParser() {
         return new ListParser(true, columns);
     }

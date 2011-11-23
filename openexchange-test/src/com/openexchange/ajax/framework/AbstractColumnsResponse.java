@@ -76,6 +76,7 @@ public abstract class AbstractColumnsResponse extends AbstractAJAXResponse imple
         this.array = array;
     }
 
+    @Override
     public Iterator<Object[]> iterator() {
         return Collections.unmodifiableList(Arrays.asList(array)).iterator();
     }
@@ -88,12 +89,15 @@ public abstract class AbstractColumnsResponse extends AbstractAJAXResponse imple
         final int columnPos = getColumnPos(attributeId);
         return new Iterator<Object>() {
             int pos = 0;
+            @Override
             public boolean hasNext() {
                 return pos < getArray().length;
             }
+            @Override
             public Object next() {
                 return getArray()[pos++][columnPos];
             }
+            @Override
             public void remove() {
                 throw new UnsupportedOperationException();
             }

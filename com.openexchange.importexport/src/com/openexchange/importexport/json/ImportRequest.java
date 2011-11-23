@@ -14,7 +14,7 @@ public class ImportRequest {
 
 	private AJAXRequestData request;
 	private ServerSession session;
-	private List<String> folders;
+	private final List<String> folders;
 	private InputStream inputStream;
 
 	public AJAXRequestData getRequest() {

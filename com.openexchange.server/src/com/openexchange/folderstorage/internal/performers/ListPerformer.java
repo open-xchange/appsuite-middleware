@@ -160,6 +160,20 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
      * @throws OXException If a folder error occurs
      */
     public UserizedFolder[] doList(final String treeId, final String parentId, final boolean all) throws OXException {
+        return doList(treeId, parentId, all, false);
+    }
+
+    /**
+     * Performs the <code>LIST</code> request.
+     *
+     * @param treeId The tree identifier
+     * @param parentId The parent folder identifier
+     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
+     *            subscribed ones
+     * @return The user-sensitive subfolders
+     * @throws OXException If a folder error occurs
+     */
+    protected UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final boolean checkOnly) throws OXException {
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
@@ -170,7 +184,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             openedStorages.add(folderStorage);
         }
         try {
-            final UserizedFolder[] ret = doList(treeId, parentId, all, openedStorages);
+            final UserizedFolder[] ret = doList(treeId, parentId, all, openedStorages, checkOnly);
             /*
              * Commit
              */
@@ -207,7 +221,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
      * @return The user-sensitive subfolders
      * @throws OXException If a folder error occurs
      */
-    UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+    UserizedFolder[] doList(final String treeId, final String parentId, final boolean all, final java.util.Collection<FolderStorage> openedStorages, final boolean checkOnly) throws OXException {
         final FolderStorage folderStorage = getOpenedStorage(parentId, treeId, storageParameters, openedStorages);
         final UserizedFolder[] ret;
         try {
@@ -237,8 +251,11 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Need to get user-visible subfolders from appropriate storage
                  */
-                ret = getSubfoldersFromStorages(treeId, parentId, all);
+                ret = getSubfoldersFromStorages(treeId, parentId, all, checkOnly);
             } else {
+                if (0 == subfolderIds.length) {
+                    return new UserizedFolder[0];
+                }
                 /*
                  * The subfolders can be completely fetched from already opened parent's folder storage
                  */
@@ -355,7 +372,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                             }
                                             if (userPermission.isVisible()) {
                                                 subfolders[index] =
-                                                    getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
+                                                    getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
                                             }
                                         }
                                     }
@@ -381,7 +398,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                                 }
                                                 if (userPermission.isVisible()) {
                                                     subfolders[index] =
-                                                        getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
+                                                        getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
                                                 }
                                             }
                                         }
@@ -423,7 +440,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
         return ret;
     }
 
-    private UserizedFolder[] getSubfoldersFromStorages(final String treeId, final String parentId, final boolean all) throws OXException {
+    private UserizedFolder[] getSubfoldersFromStorages(final String treeId, final String parentId, final boolean all, final boolean checkOnly) throws OXException {
         /*
          * Determine needed storages for given parent
          */
@@ -629,7 +646,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                     }
                                     if (userPermission.isVisible()) {
                                         subfolders[index] =
-                                            getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
+                                            getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages, checkOnly);
                                     }
                                 }
                             }
@@ -664,7 +681,8 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                                                         all,
                                                         true,
                                                         newParameters,
-                                                        openedStorages);
+                                                        openedStorages,
+                                                        checkOnly);
                                             }
                                         }
                                     }

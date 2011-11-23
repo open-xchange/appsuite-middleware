@@ -87,7 +87,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
     private int userId;
     private Session session;
     private AttachmentBase attachments;
-    private List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
+    private final List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
     private User userObject;
     private UserConfiguration userConfig;
 

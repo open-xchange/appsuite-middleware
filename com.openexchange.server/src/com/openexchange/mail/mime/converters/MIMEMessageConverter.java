@@ -57,7 +57,6 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;

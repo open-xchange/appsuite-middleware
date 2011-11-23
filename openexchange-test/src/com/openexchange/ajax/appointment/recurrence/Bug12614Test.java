@@ -62,7 +62,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -143,7 +143,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         sharedFolder = new FolderObject(boss.getValues().getPrivateAppointmentFolder());
         sharedFolder.setModule(FolderObject.CALENDAR);
         final com.openexchange.ajax.folder.actions.GetRequest request =
-            new com.openexchange.ajax.folder.actions.GetRequest(API.OX_OLD, sharedFolder
+            new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_OLD, sharedFolder
             .getObjectID(), new int[] { FolderObject.LAST_MODIFIED });
         final com.openexchange.ajax.folder.actions.GetResponse response =
             boss.execute(request);
@@ -159,7 +159,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         sharedFolder.setPermissionsAsArray(new OCLPermission[] {
             perm1, perm2 });
         final com.openexchange.ajax.folder.actions.UpdateRequest request2 =
-            new com.openexchange.ajax.folder.actions.UpdateRequest(API.OX_OLD, sharedFolder);
+            new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder);
         final CommonInsertResponse response2 =
             boss.execute(request2);
         sharedFolder.setLastModified(response2.getTimestamp());
@@ -232,7 +232,7 @@ public final class Bug12614Test extends AbstractAJAXSession {
         sharedFolder.setPermissionsAsArray(new OCLPermission[] {
             perm1 });
         final com.openexchange.ajax.folder.actions.UpdateRequest request =
-            new com.openexchange.ajax.folder.actions.UpdateRequest(API.OX_OLD, sharedFolder);
+            new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_OLD, sharedFolder);
         final CommonInsertResponse response =
             boss.execute(request);
         sharedFolder.setLastModified(response.getTimestamp());

@@ -75,7 +75,7 @@ public class Database extends AbstractConfigSource {
 
     static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(Database.class);
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public Database(ServiceLookup services) {
         this.services = services;

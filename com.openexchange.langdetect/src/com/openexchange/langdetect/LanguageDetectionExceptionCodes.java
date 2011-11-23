@@ -61,7 +61,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public enum LanguageDetectionExceptionCodes implements OXExceptionCode {
-    
+
     /**
      * An unexpected error occurred: %1$s
      */
@@ -70,14 +70,14 @@ public enum LanguageDetectionExceptionCodes implements OXExceptionCode {
      * An I/O error occurred: %1$s
      */
     IO_ERROR(LanguageDetectionExceptionMessages.IO_ERROR_MSG, Category.CATEGORY_CONNECTIVITY, 2),
-    
+
     ;
-    
-    
+
+
     private String message;
-    
+
     private int number;
-    
+
     private Category category;
 
     private LanguageDetectionExceptionCodes(final String message, final Category category, final int detailNumber) {
@@ -85,7 +85,7 @@ public enum LanguageDetectionExceptionCodes implements OXExceptionCode {
         number = detailNumber;
         this.category = category;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

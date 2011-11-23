@@ -67,14 +67,14 @@ public final class DBChatService implements ChatService {
 
     /**
      * Gets a new service instance.
-     * 
+     *
      * @return A new service instance
      */
     public static DBChatService newDbChatService() {
         final DBChatService service = new DBChatService();
         final ChatAccountImpl defaultAccount = service.accountManager.getDefaultAccount();
         defaultAccount.setChatService(service);
-        return service;       
+        return service;
     }
 
     private static final String IDENTIFIER = ChatService.DEFAULT_SERVICE;

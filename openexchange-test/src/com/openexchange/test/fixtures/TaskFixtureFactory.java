@@ -69,8 +69,8 @@ import com.openexchange.test.fixtures.transformators.StatusTransformator;
  * @author Martin Braun <martin.braun@open-xchange.com>
  */
 public class TaskFixtureFactory implements FixtureFactory<Task> {
-    private FixtureLoader fixtureLoader;
-	private GroupResolver groupResolver;
+    private final FixtureLoader fixtureLoader;
+	private final GroupResolver groupResolver;
 
 	public TaskFixtureFactory(GroupResolver groupResolver , FixtureLoader fixtureLoader) {
 		super();
@@ -78,16 +78,17 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
 		this.groupResolver = groupResolver;
 	}
 
-	public Fixtures<Task> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Task> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new TaskFixtures(fixtureName, entries, fixtureLoader, groupResolver);
     }
 
     private class TaskFixtures extends DefaultFixtures<Task> implements Fixtures<Task> {
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
 
         private final Map<String, Fixture<Task>> tasks = new HashMap<String, Fixture<Task>>();
 
-		private GroupResolver groupResolver;
+		private final GroupResolver groupResolver;
 
         public TaskFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
             super(Task.class, entries, fixtureLoader);
@@ -102,6 +103,7 @@ public class TaskFixtureFactory implements FixtureFactory<Task> {
             addTransformator(new ParticipantTransformator(fixtureLoader), "participants");
         }
 
+        @Override
         public Fixture<Task> getEntry(final String entryName) throws OXException {
             if (tasks.containsKey(entryName)) {
                 return tasks.get(entryName);

@@ -22,7 +22,7 @@ import org.junit.Test;
 /**
  * Tests that verify the JID escape and unescape functionality of Tinder, as
  * specified by XEP-0106.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a
  *      href="http://xmpp.org/extensions/xep-0106.html">XEP-0106:&nbsp;JID&nbsp;Escaping</a>
@@ -137,7 +137,7 @@ public class JIDNodeEscapingTest {
 	 */
 	@Test
 	public void testEscapeNodeExample11() throws Exception {
-														
+
 		assertEquals(JID.escapeNode("c:\\cool stuff"), "c\\3a\\cool\\20stuff");
 	}
 
@@ -331,7 +331,7 @@ public class JIDNodeEscapingTest {
 	 * Verifies that the escaping code works if the characters that are
 	 * (potentially) involved are either the first or last character in a
 	 * string.
-	 * 
+	 *
 	 * This test verifies that the character '\' does not cause any problems
 	 * when used in either the start or at the end of a string that is being
 	 * processed. The '\' character is the character used to escape, making it a
@@ -348,7 +348,7 @@ public class JIDNodeEscapingTest {
 	 * Verifies that the escaping code works if the characters that are
 	 * (potentially) involved are either the first or last character in a
 	 * string.
-	 * 
+	 *
 	 * This test verifies that the character '>' does not cause any problems
 	 * when used in either the start or at the end of a string that is being
 	 * processed. The '>' character is one of the character that are to be

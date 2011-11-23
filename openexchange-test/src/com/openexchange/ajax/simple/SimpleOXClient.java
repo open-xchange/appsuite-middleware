@@ -78,7 +78,7 @@ public class SimpleOXClient {
 
     private boolean debug = System.getProperty("ebug") != null && System.getProperty("ebug").equals("true");
 
-    private HttpClient client = new HttpClient();
+    private final HttpClient client = new HttpClient();
     private String sessionID;
 
     public SimpleOXClient(String host, boolean secure) {

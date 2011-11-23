@@ -178,18 +178,22 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
         }
     }
 
+    @Override
     public AJAXRequest.Method getMethod() {
         return AJAXRequest.Method.PUT;
     }
 
+    @Override
     public AJAXRequest.Parameter[] getParameters() {
         return params.toArray(new AJAXRequest.Parameter[params.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<SearchResponse> getParser() {
         return searchParser;
     }
 
+    @Override
     public Object getBody() {
         return body;
     }

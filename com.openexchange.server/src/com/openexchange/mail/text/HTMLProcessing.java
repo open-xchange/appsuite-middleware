@@ -181,6 +181,7 @@ public final class HTMLProcessing {
                     if (mailPath != null && session != null) {
                         retval = filterInlineImages(retval, session, mailPath);
                     }
+                    // TODO: Replace CSS classes
                 }
             }
             // if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {

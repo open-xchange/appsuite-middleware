@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@link BoundedJobCompletionService} - A bounded completion service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BoundedJobCompletionService extends AbstractJobCompletionService {
@@ -80,7 +80,7 @@ public final class BoundedJobCompletionService extends AbstractJobCompletionServ
 
     /**
      * Initializes a new {@link BoundedJobCompletionService}.
-     * 
+     *
      * @param capacity The capacity
      * @throws IllegalArgumentException If <code>capacity</code> is not a positive integer
      */

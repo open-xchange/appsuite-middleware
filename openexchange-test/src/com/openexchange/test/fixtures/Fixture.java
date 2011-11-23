@@ -58,9 +58,9 @@ import com.openexchange.exception.OXException;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Fixture<T> {
-    private T entry;
-    private String[] fields;
-    private Map<String, String> attributes;
+    private final T entry;
+    private final String[] fields;
+    private final Map<String, String> attributes;
 
     public Fixture(final T entry, final String[] fields, Map attributes) {
         this.entry = entry;

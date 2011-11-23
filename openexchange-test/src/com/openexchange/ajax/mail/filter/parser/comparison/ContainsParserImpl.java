@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.comparison.ContainsComparison;
  */
 public class ContainsParserImpl implements ComparisonParser {
 
-	public AbstractComparison parseComparison(final String name, final JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractComparison parseComparison(final String name, final JSONObject jsonObject) throws JSONException {
 		return new ContainsComparison();
 	}
 }

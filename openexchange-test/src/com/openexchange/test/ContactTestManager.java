@@ -114,10 +114,12 @@ public class ContactTestManager implements TestManager {
 
     private int sleep = 500;
 
+    @Override
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
+    @Override
     public boolean getFailOnError() {
         return failOnError;
     }
@@ -313,6 +315,7 @@ public class ContactTestManager implements TestManager {
     /**
      * removes all contacts inserted or updated by this Manager
      */
+    @Override
     public void cleanUp() {
         for (Contact contact : new Vector<Contact>(getCreatedEntities())) {
             boolean old = getFailOnError();
@@ -376,7 +379,7 @@ public class ContactTestManager implements TestManager {
     }
 
     /**
-     * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
+     * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
      */
     public Contact[] searchAction(String pattern, int folderId) {
     	return searchAction(pattern, folderId, Contact.ALL_COLUMNS);
@@ -445,7 +448,7 @@ public class ContactTestManager implements TestManager {
     }
 
     /**
-     * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
+     * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
      */
     public Contact[] searchAction(String pattern, int folderId, boolean initialSearch) {
         List<Contact> allContacts = new LinkedList<Contact>();
@@ -566,18 +569,22 @@ public class ContactTestManager implements TestManager {
         return contacts;
     }
 
+    @Override
     public boolean doesFailOnError() {
         return getFailOnError();
     }
 
+    @Override
     public Throwable getLastException() {
         return this.lastException;
     }
 
+    @Override
     public AbstractAJAXResponse getLastResponse() {
         return this.lastResponse;
     }
 
+    @Override
     public boolean hasLastException() {
         return lastException != null;
     }

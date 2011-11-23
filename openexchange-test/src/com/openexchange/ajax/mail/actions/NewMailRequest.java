@@ -86,14 +86,17 @@ public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {
         return failOnError;
     }
 
+    @Override
     public Object getBody() {
         return rfc822;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> list = new LinkedList<Parameter>();
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_NEW));
@@ -107,6 +110,7 @@ public class NewMailRequest extends AbstractMailRequest<NewMailResponse> {
         return list.toArray(new Parameter[list.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<NewMailResponse> getParser() {
         return new AbstractAJAXParser<NewMailResponse>(failOnError) {
             @Override

@@ -16,33 +16,33 @@ public class PrivacyTest extends SmackTestCase {
     public PrivacyTest(String arg0) {
         super(arg0);
     }
-   
-    
+
+
     /**
      * Check when a client set a new active list.
      */
     public void testCreateActiveList() {
         try {
             String listName = "testCreateActiveList";
-            
+
             PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
             PrivacyClient client = new PrivacyClient(privacyManager);
             privacyManager.addListener(client);
-            
+
             // Add the list that will be set as the active
             ArrayList<PrivacyItem> items = new ArrayList<PrivacyItem>();
             PrivacyItem item = new PrivacyItem(PrivacyItem.Type.jid.name(), true, 1);
             item.setValue(getConnection(0).getUser());
             items.add(item);
             privacyManager.createPrivacyList(listName, items);
-            
+
             Thread.sleep(500);
-            
+
             // Set the active list
             privacyManager.setActiveListName(listName);
-            
+
             Thread.sleep(500);
-                        
+
             // Assert the list composition.
             assertEquals(listName, privacyManager.getActiveList().toString());
             List privacyItems = privacyManager.getPrivacyList(listName).getItems();
@@ -53,7 +53,7 @@ public class PrivacyTest extends SmackTestCase {
             assertEquals(1, receivedItem.getOrder());
             assertEquals(PrivacyItem.Type.jid, receivedItem.getType());
             assertEquals(true, receivedItem.isAllow());
-            
+
             privacyManager.deletePrivacyList(listName);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -69,20 +69,20 @@ public class PrivacyTest extends SmackTestCase {
             String listName1 = "1testCreateTwoLists";
             String listName2 = "2testCreateTwoLists";
             String groupName = "testCreateTwoListsGroup";
-            
+
             PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
             PrivacyClient client = new PrivacyClient(privacyManager);
             privacyManager.addListener(client);
-            
+
             // Add a list
             ArrayList<PrivacyItem> items = new ArrayList<PrivacyItem>();
             PrivacyItem item = new PrivacyItem(PrivacyItem.Type.jid.name(), true, 1);
             item.setValue(getConnection(0).getUser());
             items.add(item);
             privacyManager.createPrivacyList(listName1, items);
-            
+
             Thread.sleep(500);
-            
+
             // Add the another list
             ArrayList<PrivacyItem> itemsList2 = new ArrayList<PrivacyItem>();
             item = new PrivacyItem(PrivacyItem.Type.group.name(), false, 2);
@@ -90,9 +90,9 @@ public class PrivacyTest extends SmackTestCase {
             item.setFilterMessage(true);
             itemsList2.add(item);
             privacyManager.createPrivacyList(listName2, itemsList2);
-            
+
             Thread.sleep(500);
-                        
+
             // Assert the list composition.
             PrivacyList[] privacyLists = privacyManager.getPrivacyLists();
             PrivacyList receivedList1 = null;
@@ -105,8 +105,8 @@ public class PrivacyTest extends SmackTestCase {
                     receivedList2 = privacyList;
                 }
             }
-            
-            
+
+
             PrivacyItem receivedItem;
             // Assert on the list 1
             assertNotNull(receivedList1);
@@ -116,7 +116,7 @@ public class PrivacyTest extends SmackTestCase {
             assertEquals(PrivacyItem.Type.jid, receivedItem.getType());
             assertEquals(true, receivedItem.isAllow());
             assertEquals(getConnection(0).getUser(), receivedItem.getValue());
-            
+
             // Assert on the list 2
             assertNotNull(receivedList2);
             assertEquals(1, receivedList2.getItems().size());
@@ -130,7 +130,7 @@ public class PrivacyTest extends SmackTestCase {
             assertEquals(true, receivedItem.isFilterMessage());
             assertEquals(false, receivedItem.isFilterPresence_in());
             assertEquals(false, receivedItem.isFilterPresence_out());
-            
+
             privacyManager.deletePrivacyList(listName1);
             privacyManager.deletePrivacyList(listName2);
             } catch (Exception e) {
@@ -138,7 +138,7 @@ public class PrivacyTest extends SmackTestCase {
                 fail(e.getMessage());
             }
     }
-    
+
     /**
      * Check when a client set a new list and then update its content.
      */
@@ -146,20 +146,20 @@ public class PrivacyTest extends SmackTestCase {
         try {
             String listName = "testCreateAndUpdateList";
             String user = "tybalt@example.com";
-            
+
             PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
             PrivacyClient client = new PrivacyClient(privacyManager);
             privacyManager.addListener(client);
-            
+
             // Add the list that will be set as the active
             ArrayList<PrivacyItem> items = new ArrayList<PrivacyItem>();
             PrivacyItem item = new PrivacyItem(PrivacyItem.Type.jid.name(), true, 1);
             item.setValue(getConnection(0).getUser());
             items.add(item);
             privacyManager.createPrivacyList(listName, items);
-            
+
             Thread.sleep(500);
-            
+
             // Remove the existing item and add a new one.
             items.remove(item);
             item = new PrivacyItem(PrivacyItem.Type.jid.name(), false, 2);
@@ -168,12 +168,12 @@ public class PrivacyTest extends SmackTestCase {
             item.setFilterPresence_in(true);
             item.setFilterMessage(true);
             items.add(item);
-            
+
             // Update the list on server
             privacyManager.updatePrivacyList(listName, items);
-            
+
             Thread.sleep(500);
-                        
+
             // Assert the list composition.
             PrivacyList list = privacyManager.getPrivacyList(listName);
             assertEquals(1, list.getItems().size());
@@ -196,7 +196,7 @@ public class PrivacyTest extends SmackTestCase {
                 fail(e.getMessage());
             }
     }
-    
+
     /**
      * Check when a client denies the use of a default list.
      */
@@ -205,18 +205,18 @@ public class PrivacyTest extends SmackTestCase {
     		PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
     		PrivacyClient client = new PrivacyClient(privacyManager);
     		privacyManager.addListener(client);
-    		
+
     		privacyManager.declineDefaultList();
-    		
+
     		Thread.sleep(500);
-     	
+
             try {
                 // The list should not exist and an error will be raised
                 privacyManager.getDefaultList();
             } catch (XMPPException xmppException) {
                 assertEquals(404, xmppException.getXMPPError().getCode());
             }
-            
+
 	    	assertEquals(null, null);
 	        } catch (Exception e) {
 	            e.printStackTrace();
@@ -232,50 +232,50 @@ public class PrivacyTest extends SmackTestCase {
             PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
             PrivacyClient client = new PrivacyClient(privacyManager);
             privacyManager.addListener(client);
-            
+
             privacyManager.declineActiveList();
-            
+
             Thread.sleep(500);
-        
+
             try {
                 // The list should not exist and an error will be raised
                 privacyManager.getActiveList();
             } catch (XMPPException xmppException) {
                 assertEquals(404, xmppException.getXMPPError().getCode());
             }
-            
+
             assertEquals(null, null);
             } catch (Exception e) {
                 e.printStackTrace();
                 fail(e.getMessage());
             }
     }
-    
+
     /**
      * Check when a client set a new default list.
      */
     public void testCreateDefaultList() {
     	try {
     		String listName = "testCreateDefaultList";
-    		
+
     		PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
     		PrivacyClient client = new PrivacyClient(privacyManager);
     		privacyManager.addListener(client);
-    		
+
     		// Add the list that will be set as the Default
     		ArrayList<PrivacyItem> items = new ArrayList<PrivacyItem>();
     		PrivacyItem item = new PrivacyItem(PrivacyItem.Type.jid.name(), true, 1);
         	item.setValue(getConnection(0).getUser());
     		items.add(item);
     		privacyManager.createPrivacyList(listName, items);
-    		
+
     		Thread.sleep(500);
-    		
+
     		// Set the Default list
     		privacyManager.setDefaultListName(listName);
-	    	
+
 	    	Thread.sleep(500);
-	    		    	
+
 	    	// Assert the list composition.
 	    	assertEquals(listName, privacyManager.getDefaultList().toString());
 	    	List privacyItems = privacyManager.getPrivacyList(listName).getItems();
@@ -286,7 +286,7 @@ public class PrivacyTest extends SmackTestCase {
 	    	assertEquals(1, receivedItem.getOrder());
 	    	assertEquals(PrivacyItem.Type.jid, receivedItem.getType());
 	    	assertEquals(true, receivedItem.isAllow());
-            
+
             privacyManager.deletePrivacyList(listName);
 	        } catch (Exception e) {
 	            e.printStackTrace();
@@ -300,27 +300,27 @@ public class PrivacyTest extends SmackTestCase {
     public void testRemoveList() {
     	try {
     		String listName = "testRemoveList";
-    		
+
     		PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
     		PrivacyClient client = new PrivacyClient(privacyManager);
     		privacyManager.addListener(client);
-    		
+
     		// Add the list that will be set as the Default
     		ArrayList<PrivacyItem> items = new ArrayList<PrivacyItem>();
     		PrivacyItem item = new PrivacyItem(PrivacyItem.Type.jid.name(), true, 1);
         	item.setValue(getConnection(0).getUser());
     		items.add(item);
     		privacyManager.createPrivacyList(listName, items);
-    		
+
     		Thread.sleep(500);
-    		
+
     		// Set the Default list
     		privacyManager.setDefaultListName(listName);
-	    	
+
 	    	Thread.sleep(500);
 
 	    	privacyManager.deletePrivacyList(listName);
-	    	
+
 	    	Thread.sleep(500);
 
             try {
@@ -343,14 +343,14 @@ public class PrivacyTest extends SmackTestCase {
     		String listName = "testPrivacyItems";
     		String user = "tybalt@example.com";
     		String groupName = "enemies";
-    		
+
     		PrivacyListManager privacyManager = PrivacyListManager.getInstanceFor(getConnection(0));
     		PrivacyClient client = new PrivacyClient(privacyManager);
     		privacyManager.addListener(client);
-    		
+
     		PrivacyItem[] originalPrivacyItems = new PrivacyItem[12];
     		int i=0;
-    		
+
     		// Items to test JID
     		PrivacyItem item = new PrivacyItem(PrivacyItem.Type.jid.name(), true, i);
         	item.setValue(i + "_" + user);
@@ -382,38 +382,38 @@ public class PrivacyTest extends SmackTestCase {
         	item.setValue(PrivacyRule.SUBSCRIPTION_NONE);
         	originalPrivacyItems[i] = item;
         	i = i + 1;
-        	
+
         	// Items to test Group
         	item = new PrivacyItem(PrivacyItem.Type.group.name(), false, i);
         	item.setValue(groupName);
         	originalPrivacyItems[i] = item;
         	i = i + 1;
-        	
+
         	// Items to test messages
         	item = new PrivacyItem(PrivacyItem.Type.group.name(), false, i);
         	item.setValue(groupName);
         	item.setFilterMessage(true);
         	originalPrivacyItems[i] = item;
         	i = i + 1;
-        	
+
         	// Items to test presence notifications
         	item = new PrivacyItem(PrivacyItem.Type.group.name(), false, i);
         	item.setValue(groupName);
         	item.setFilterMessage(true);
         	originalPrivacyItems[i] = item;
         	i = i + 1;
-        	
+
         	item = new PrivacyItem(null, false, i);
         	item.setFilterPresence_in(true);
         	originalPrivacyItems[i] = item;
         	i = i + 1;
-        	
+
     		item = new PrivacyItem(PrivacyItem.Type.subscription.name(), false, i);
         	item.setValue(PrivacyRule.SUBSCRIPTION_TO);
         	item.setFilterPresence_out(true);
         	originalPrivacyItems[i] = item;
         	i = i + 1;
-        	
+
         	item = new PrivacyItem(PrivacyItem.Type.jid.name(), false, i);
         	item.setValue(i + "_" + user);
         	item.setFilterPresence_out(true);
@@ -438,12 +438,12 @@ public class PrivacyTest extends SmackTestCase {
 	    		// Look for the same server and original items
 	    		receivedItem = (PrivacyItem) privacyItems.get(j);
 	    		index = 0;
-	    		while ((index < originalPrivacyItems.length) 
+	    		while ((index < originalPrivacyItems.length)
 	    				&& (originalPrivacyItems[index].getOrder() != receivedItem.getOrder())) {
 	    			index++;
 				}
 	    		originalItem = originalPrivacyItems[index];
-	    		
+
 	    		// Assert the items
 	    		assertEquals(originalItem.getOrder(), receivedItem.getOrder());
 		    	assertEquals(originalItem.getType(), receivedItem.getType());
@@ -455,22 +455,23 @@ public class PrivacyTest extends SmackTestCase {
 		    	assertEquals(originalItem.isFilterPresence_in(), receivedItem.isFilterPresence_in());
 		    	assertEquals(originalItem.isFilterPresence_out(), receivedItem.isFilterPresence_out());
 		    	}
-            
+
             privacyManager.deletePrivacyList(listName);
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	            fail(e.getMessage());
 	        }
     }
-    
-	protected int getMaxConnections() {
+
+	@Override
+    protected int getMaxConnections() {
 		return 1;
 	}
 
     /**
      * This class supports automated tests about privacy communication from the
      * server to the client.
-     * 
+     *
      * @author Francisco Vives
      */
 
@@ -484,16 +485,18 @@ public class PrivacyTest extends SmackTestCase {
          * holds a privacy to hold server requests Clients should not use Privacy
          * class since it is private for the smack framework.
          */
-        private Privacy privacy = new Privacy();
+        private final Privacy privacy = new Privacy();
 
         public PrivacyClient(PrivacyListManager manager) {
             super();
         }
 
+        @Override
         public void setPrivacyList(String listName, List<PrivacyItem> listItem) {
             privacy.setPrivacyList(listName, listItem);
         }
 
+        @Override
         public void updatedPrivacyList(String listName) {
             this.wasModified = true;
         }

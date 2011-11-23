@@ -112,14 +112,17 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
         setTimestamp(timestamp);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return writeFolderAndIDList(getIds(), getFolders());
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Params(
             AJAXServlet.PARAMETER_ACTION,
@@ -128,6 +131,7 @@ public class DeleteInfostoreRequest extends AbstractInfostoreRequest<DeleteInfos
             String.valueOf(getTimestamp().getTime())).toArray();
     }
 
+    @Override
     public AbstractAJAXParser<? extends DeleteInfostoreResponse> getParser() {
         return new AbstractAJAXParser<DeleteInfostoreResponse>(getFailOnError()) {
 

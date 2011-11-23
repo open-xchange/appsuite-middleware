@@ -60,14 +60,14 @@ public interface ChatChunk extends ChatGroup {
 
     /**
      * Gets the chunk identifier.
-     * 
+     *
      * @return The chunk identifier.
      */
     String getChunkId();
 
     /**
      * Gets the chat identifier.
-     * 
+     *
      * @return The chat identifier.
      */
     String getChatId();

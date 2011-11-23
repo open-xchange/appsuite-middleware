@@ -58,6 +58,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import javax.activation.DataHandler;
@@ -82,6 +83,8 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.log.ForceLog;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -265,7 +268,23 @@ public final class MailMessageParser {
         if (null == handler) {
             throw MailExceptionCode.MISSING_PARAMETER.create("handler");
         }
+        final boolean logPropsEnabled = LogProperties.isEnabled();
         try {
+            if (logPropsEnabled) {
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final int accountId = mail.getAccountId();
+                if (accountId >= 0) {
+                    properties.put("com.openexchange.mail.accountId", new ForceLog(Integer.valueOf(accountId)));
+                }
+                final String mailId = mail.getMailId();
+                if (null != mailId) {
+                    properties.put("com.openexchange.mail.mailId", new ForceLog(mailId));
+                }
+                final String folder = mail.getFolder();
+                if (null != folder) {
+                    properties.put("com.openexchange.mail.folder", new ForceLog(folder));
+                }
+            }
             /*
              * Parse mail's envelope
              */
@@ -282,6 +301,13 @@ public final class MailMessageParser {
                 e,
                 null == mailId ? "" : mailId,
                 null == folder ? "" : folder);
+        } finally {
+            if (logPropsEnabled) {
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.mail.accountId", null);
+                properties.put("com.openexchange.mail.mailId", null);
+                properties.put("com.openexchange.mail.folder", null);
+            }
         }
         handler.handleMessageEnd(mail);
     }
@@ -911,12 +937,16 @@ public final class MailMessageParser {
                 final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
                 if (!MessageUtility.isAscii(bytes)) {
                     try {
-                        return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+                        String cs = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+                        if ("US-ASCII".equalsIgnoreCase(cs)) {
+                            cs = "ISO-8859-1";
+                        }
+                        return new String(bytes, cs);
                     } catch (final UnsupportedEncodingException e) {
                         if (WARN_ENABLED) {
                             LOG.warn("Unsupported encoding: " + e.getMessage(), e);
                         }
-                        return new String(bytes, "US-ASCII");
+                        return new String(bytes, "ISO-8859-1");
                     }
                 }
                 /*
@@ -931,6 +961,9 @@ public final class MailMessageParser {
                     }
                     charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
                     if (WARN_ENABLED && null != sb) {
+                        if ("US-ASCII".equalsIgnoreCase(charset)) {
+                            charset = "ISO-8859-1";
+                        }
                         sb.append(" Using auto-detected encoding: \"").append(charset).append('"');
                         LOG.warn(sb.toString());
                     }
@@ -954,7 +987,7 @@ public final class MailMessageParser {
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
-            final String fallback = "US-ASCII";
+            final String fallback = "ISO-8859-1";
             if (WARN_ENABLED) {
                 LOG.warn(
                     new StringBuilder("Character conversion exception while reading content with charset \"").append(charset).append(

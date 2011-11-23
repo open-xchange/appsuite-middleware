@@ -151,6 +151,7 @@ public class RosterExchangeTest extends SmackTestCase {
         assertTrue("Roster2 has no entries", getConnection(1).getRoster().getEntryCount() > 0);
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         try {
@@ -166,6 +167,7 @@ public class RosterExchangeTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected int getMaxConnections() {
         return 4;
     }

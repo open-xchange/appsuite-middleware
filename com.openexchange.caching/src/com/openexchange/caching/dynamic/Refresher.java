@@ -112,7 +112,7 @@ public abstract class Refresher<T extends Serializable> {
 
     /**
      * Checks if the object was removed from the cache and must be reloaded from the database.
-     * 
+     *
      * @throws OXException If refresh fails
      */
     protected T refresh() throws OXException {

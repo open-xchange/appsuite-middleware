@@ -73,10 +73,12 @@ public abstract class AbstractAppointmentRequest<T extends AbstractAJAXResponse>
         super();
     }
 
+    @Override
     public String getServletPath() {
         return URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

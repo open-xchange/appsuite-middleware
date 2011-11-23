@@ -69,6 +69,7 @@ public class DownloadRequest extends AbstractUpdaterRequest<DownloadResponse> {
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
+    @Override
     public DownloadParser getParser() {
         return new DownloadParser(true);
     }
@@ -76,6 +77,7 @@ public class DownloadRequest extends AbstractUpdaterRequest<DownloadResponse> {
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -83,6 +85,7 @@ public class DownloadRequest extends AbstractUpdaterRequest<DownloadResponse> {
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
+    @Override
     public Object getBody() throws IOException, JSONException {
         return null;
     }

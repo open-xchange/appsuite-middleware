@@ -65,7 +65,7 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link AbstractMailPreviewResultConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class AbstractMailPreviewResultConverter implements ResultConverter {

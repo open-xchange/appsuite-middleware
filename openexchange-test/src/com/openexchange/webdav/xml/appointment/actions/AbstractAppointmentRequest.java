@@ -70,6 +70,7 @@ public abstract class AbstractAppointmentRequest<T extends AbstractWebDAVRespons
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getServletPath() {
         return URL;
     }

@@ -66,7 +66,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link AbstractSMALStorage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractSMALStorage {
@@ -120,7 +120,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Gets the available index adapter.
-     * 
+     *
      * @return The index adapter
      */
     protected static IndexAdapter getIndexAdapter() {
@@ -130,7 +130,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Handles specified {@link RuntimeException} instance.
-     * 
+     *
      * @param e The runtime exception to handle
      * @return An appropriate {@link OXException}
      */
@@ -140,7 +140,7 @@ public abstract class AbstractSMALStorage {
 
     /**
      * Creates a new {@link ThreadPoolCompletionService completion service}.
-     * 
+     *
      * @return A new completion service.
      * @throws OXException If completion service cannot be created due to absent {@link ThreadPoolService service}
      */

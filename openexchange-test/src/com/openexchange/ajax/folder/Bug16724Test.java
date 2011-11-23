@@ -50,8 +50,8 @@
 package com.openexchange.ajax.folder;
 
 import java.util.Iterator;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -101,20 +101,20 @@ public final class Bug16724Test extends AbstractAJAXSession {
             OCLPermission.READ_OWN_OBJECTS,
             OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS));
-        InsertResponse response = client.execute(new InsertRequest(API.OUTLOOK, folder));
+        InsertResponse response = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
         response.fillObject(folder);
-        GetResponse response2 = client.execute(new GetRequest(API.OUTLOOK, folder.getObjectID()));
+        GetResponse response2 = client.execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
         folder.setLastModified(response2.getTimestamp());
     }
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(API.OUTLOOK, folder));
+        client.execute(new DeleteRequest(EnumAPI.OUTLOOK, folder));
         super.tearDown();
     }
 
     public void testCachedAccess() throws Throwable {
-        ListResponse listResponse1 = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
+        ListResponse listResponse1 = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
         Iterator<FolderObject> iter = listResponse1.getFolder();
         boolean found = false;
         while (iter.hasNext() && !found) {
@@ -123,7 +123,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
             }
         }
         assertTrue("Shared folder not found.", found);
-        GetResponse getResponse1 = client2.execute(new GetRequest(API.OUTLOOK, folder.getObjectID()));
+        GetResponse getResponse1 = client2.execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID()));
 
         folder.setLastModified(getResponse1.getTimestamp());
         folder.setPermissionsAsArray(new OCLPermission[] { Create.ocl(
@@ -134,7 +134,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION) });
-        InsertResponse updateResponse = client.execute(new UpdateRequest(API.OUTLOOK, folder));
+        InsertResponse updateResponse = client.execute(new UpdateRequest(EnumAPI.OUTLOOK, folder));
         folder.setLastModified(updateResponse.getTimestamp());
 
         TaskSearchObject search = new TaskSearchObject();
@@ -142,7 +142,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
         SearchResponse searchResponse = client2.execute(new SearchRequest(search, new int[] { Task.OBJECT_ID, Task.TITLE }, false));
         assertFalse("Search response should not have an error.", searchResponse.hasError());
 
-        ListResponse listResponse2 = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        ListResponse listResponse2 = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SYSTEM_SHARED_FOLDER_ID));
         iter = listResponse2.getFolder();
         found = false;
         while (iter.hasNext()) {
@@ -154,7 +154,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
             /*
              * Found a shared folder, check if it is not the unshared one
              */
-            listResponse2 = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
+            listResponse2 = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
             iter = listResponse2.getFolder();
             found = false;
             while (iter.hasNext()) {
@@ -164,7 +164,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
             }
             assertFalse("Parent user folder in shared folder should not be there.", found);
         }
-        ListResponse listResponse3 = client2.execute(new ListRequest(API.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
+        ListResponse listResponse3 = client2.execute(new ListRequest(EnumAPI.OUTLOOK, FolderObject.SHARED_PREFIX + userId1));
         iter = listResponse3.getFolder();
         found = false;
         while (iter.hasNext() && !found) {
@@ -173,7 +173,7 @@ public final class Bug16724Test extends AbstractAJAXSession {
             }
         }
         assertFalse("Shared folder should not be found.", found);
-        GetResponse getResponse2 = client2.execute(new GetRequest(API.OUTLOOK, folder.getObjectID(), false));
+        GetResponse getResponse2 = client2.execute(new GetRequest(EnumAPI.OUTLOOK, folder.getObjectID(), false));
         assertTrue("Getting that not shared folder should give a error.", getResponse2.hasError());
     }
 }

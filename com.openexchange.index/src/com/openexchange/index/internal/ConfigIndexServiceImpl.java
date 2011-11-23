@@ -61,7 +61,7 @@ import com.openexchange.index.IndexUrl;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ConfigIndexServiceImpl implements ConfigIndexService {    
+public class ConfigIndexServiceImpl implements ConfigIndexService {
 
     public ConfigIndexServiceImpl() {
         super();
@@ -81,7 +81,7 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
 
     @Override
     public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
-        ConfigIndexMysql.getInstance().unregisterIndexServer(serverId, deleteMappings);     
+        ConfigIndexMysql.getInstance().unregisterIndexServer(serverId, deleteMappings);
     }
 
     @Override
@@ -95,28 +95,28 @@ public class ConfigIndexServiceImpl implements ConfigIndexService {
     }
 
     @Override
-    public void modifyIndexServer(IndexServer server) throws OXException {        
+    public void modifyIndexServer(IndexServer server) throws OXException {
         ConfigIndexMysql.getInstance().modifyIndexServer(server);
     }
 
     @Override
     public void addIndexMapping(int cid, int uid, int module, String index) throws OXException {
         int serverId = ConfigIndexMysql.getInstance().createIndexMapping(cid, uid, module, index);
-        
+
         // TODO: Create index / core here
     }
-    
+
     @Override
     public void removeIndexMapping(int cid, int uid, int module) throws OXException {
         ConfigIndexMysql.getInstance().removeIndexMapping(cid, uid, module);
-        
+
         // TODO: Remove index / core
     }
 
     @Override
     public void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
         ConfigIndexMysql.getInstance().modifiyIndexMapping(cid, uid, module, server, index);
-        
+
         // TODO: Apply any changes to the modified index / core
     }
 }

@@ -65,8 +65,8 @@ public abstract class AbstractFolderNode implements FolderNode {
 
     private FolderObject folder;
     private FolderNode parent;
-    private AJAXClient client;
-    private FolderTestManager manager;
+    private final AJAXClient client;
+    private final FolderTestManager manager;
 
     public AbstractFolderNode(FolderObject underlyingObject, AJAXClient client) {
         this.folder = underlyingObject;
@@ -79,10 +79,12 @@ public abstract class AbstractFolderNode implements FolderNode {
         setFolder(getManager().getFolderFromServer(folderId));
     }
 
+    @Override
     public FolderObject getFolder() {
         return folder;
     }
 
+    @Override
     public FolderNode resolve(String... path) {
         return resolveRecursively(0, path);
     }
@@ -101,10 +103,12 @@ public abstract class AbstractFolderNode implements FolderNode {
         return null;
     }
 
+    @Override
     public FolderNode resolve(Collection<String> path) {
         return resolveRecursively(0, path.toArray(new String[path.size()]));
     }
 
+    @Override
     public FolderNode getParent() {
         if(parent != null) {
             return parent;
@@ -142,6 +146,7 @@ public abstract class AbstractFolderNode implements FolderNode {
 
     protected abstract FolderNode node(FolderObject folderObject, AJAXClient client);
 
+    @Override
     public void recurse(FolderNodeVisitor visitor) {
         recurse(0, visitor);
     }

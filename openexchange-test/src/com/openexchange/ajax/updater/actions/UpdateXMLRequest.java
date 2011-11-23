@@ -71,6 +71,7 @@ public class UpdateXMLRequest extends AbstractUpdaterRequest<UpdateXMLResponse> 
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -78,6 +79,7 @@ public class UpdateXMLRequest extends AbstractUpdaterRequest<UpdateXMLResponse> 
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
      */
+    @Override
     public UpdateXMLParser getParser() {
         return new UpdateXMLParser(true);
     }
@@ -85,6 +87,7 @@ public class UpdateXMLRequest extends AbstractUpdaterRequest<UpdateXMLResponse> 
     /**
      * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
      */
+    @Override
     public Object getBody() throws IOException, JSONException {
         return null;
     }

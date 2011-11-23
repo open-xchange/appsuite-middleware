@@ -61,11 +61,11 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> {
 
-    private int folderId;
-    private int[] columns;
-    private Date timestamp;
-    private boolean recurrenceMaster;
-    private boolean showPrivates;
+    private final int folderId;
+    private final int[] columns;
+    private final Date timestamp;
+    private final boolean recurrenceMaster;
+    private final boolean showPrivates;
 
     public UpdatesRequest(final int folderId, final int[] columns, final Date timestamp, final boolean recurrenceMaster) {
         this(folderId,columns,timestamp,recurrenceMaster,false);
@@ -78,14 +78,17 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
         this.showPrivates = showPrivates;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES));
@@ -98,6 +101,7 @@ public class UpdatesRequest extends AbstractAppointmentRequest<UpdatesResponse> 
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<UpdatesResponse> getParser() {
         return new UpdatesParser(columns);
     }

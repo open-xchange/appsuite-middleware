@@ -60,7 +60,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AutoconfigAction implements AJAXActionService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public AutoconfigAction(ServiceLookup services) {
         this.services = services;

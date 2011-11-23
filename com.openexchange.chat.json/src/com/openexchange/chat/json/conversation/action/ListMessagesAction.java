@@ -68,14 +68,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListMessagesAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListMessagesAction extends AbstractChatConversationAction {
 
     /**
      * Initializes a new {@link ListMessagesAction}.
-     * 
+     *
      * @param services
      */
     public ListMessagesAction(final ServiceLookup services) {
@@ -101,7 +101,7 @@ public final class ListMessagesAction extends AbstractChatConversationAction {
             for (int i = 0; i < length; i++) {
                 messageIds.add(ids.getString(i));
             }
-            final List<Message> messages = access.getChat(conversationID.getChatId()).getMessages(messageIds);
+            final List<Message> messages = access.getChat(conversationID.getChatId()).getMessages(messageIds, Integer.parseInt(access.getUser().getId()));
             if (messages.isEmpty()) {
                 return new AJAXRequestResult(new JSONArray(), "json");
             }

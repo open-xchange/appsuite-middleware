@@ -61,9 +61,9 @@ import com.openexchange.ajax.framework.Header;
  */
 public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse> {
 
-    private String columns;
-    private boolean failOnError;
-    private int[] cols;
+    private final String columns;
+    private final boolean failOnError;
+    private final int[] cols;
 
     public MailAccountAllRequest(boolean failOnError, int...cols) {
         StringBuilder bob = new StringBuilder();
@@ -80,18 +80,22 @@ public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse
         this(true, cols);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[]{
             new Parameter("action" , "all"),
@@ -99,10 +103,12 @@ public class MailAccountAllRequest implements AJAXRequest<MailAccountAllResponse
         };
     }
 
+    @Override
     public AbstractAJAXParser<MailAccountAllResponse> getParser() {
         return new MailAccountAllParser(failOnError, cols);
     }
 
+    @Override
     public String getServletPath() {
         return "/ajax/account";
     }

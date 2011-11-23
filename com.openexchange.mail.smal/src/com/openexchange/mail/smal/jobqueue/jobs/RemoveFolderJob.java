@@ -59,7 +59,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link RemoveFolderJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RemoveFolderJob extends AbstractMailSyncJob {
@@ -93,7 +93,7 @@ public final class RemoveFolderJob extends AbstractMailSyncJob {
      * Initializes a new {@link RemoveFolderJob} with default span.
      * <p>
      * This job is performed is span is exceeded and if able to exclusively set sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -112,7 +112,7 @@ public final class RemoveFolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ranking
-     * 
+     *
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */

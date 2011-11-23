@@ -148,7 +148,8 @@ public class IncrementalInt2IntMap {
 		 * @param o2 second {@link Object}.
 		 * @return the result of the comparison.
 		 */
-		public int compare( Object o1, Object o2 ) {
+		@Override
+        public int compare( Object o1, Object o2 ) {
 			if ( IncrementalInt2IntMap.this.m.get( ( (Integer)o2 ).intValue() ) < IncrementalInt2IntMap.this.m.get( ( (Integer)o1 ).intValue() ) ) return -1;
 			else if ( IncrementalInt2IntMap.this.m.get( ( (Integer)o2 ).intValue() ) > IncrementalInt2IntMap.this.m.get( ( (Integer)o1 ).intValue() ) ) return 1;
 			else return 0;

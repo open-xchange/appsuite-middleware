@@ -692,7 +692,7 @@ public final class SMTPTransport extends MailTransport {
                 smtpMessage.saveChanges();
             } catch (final javax.mail.internet.ParseException e) {
                 /*-
-                 * Probably parsing of a Content-Type header failed.
+                 * Probably parsing if a Content-Type header failed.
                  *
                  * Try to sanitize parameter list headers
                  */

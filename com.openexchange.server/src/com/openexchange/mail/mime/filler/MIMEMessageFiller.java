@@ -288,7 +288,7 @@ public class MIMEMessageFiller {
 
     /**
      * Add "X-Originating-IP" header.
-     * 
+     *
      * @param mimeMessage The MIME message
      * @param session The session
      * @throws MessagingException If an error occurs

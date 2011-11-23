@@ -90,7 +90,7 @@ public final class MemoryTreeImpl implements MemoryTree {
 
     /**
      * Initializes a new {@link MemoryTreeImpl}.
-     * @param treeId 
+     * @param treeId
      */
     public MemoryTreeImpl(final int treeId) {
         super();

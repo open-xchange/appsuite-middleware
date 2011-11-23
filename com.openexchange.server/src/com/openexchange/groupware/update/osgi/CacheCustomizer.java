@@ -69,16 +69,19 @@ public final class CacheCustomizer implements ServiceTrackerCustomizer<CacheServ
         this.context = context;
     }
 
+    @Override
     public CacheService addingService(ServiceReference<CacheService> reference) {
         final CacheService cacheService = context.getService(reference);
         SchemaStore.getInstance().setCacheService(cacheService);
         return cacheService;
     }
 
+    @Override
     public void modifiedService(ServiceReference<CacheService> reference, CacheService service) {
         // Nothing to do.
     }
 
+    @Override
     public void removedService(ServiceReference<CacheService> reference, CacheService service) {
         SchemaStore.getInstance().removeCacheService();
         context.ungetService(reference);

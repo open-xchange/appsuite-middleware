@@ -94,6 +94,7 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
         setFormDescription(formDescription);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         try {
             return new SubscriptionJSONWriter().write(getSubscription(), getFormDescription(), null);
@@ -102,14 +103,17 @@ public class NewSubscriptionRequest extends AbstractSubscriptionRequest<NewSubsc
         }
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[]{ new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)};
     }
 
+    @Override
     public AbstractAJAXParser<NewSubscriptionResponse> getParser() {
         return new AbstractAJAXParser<NewSubscriptionResponse>(getFailOnError()) {
 

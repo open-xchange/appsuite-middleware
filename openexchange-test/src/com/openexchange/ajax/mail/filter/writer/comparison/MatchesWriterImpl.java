@@ -61,7 +61,8 @@ import com.openexchange.ajax.mail.filter.comparison.AbstractComparison;
  */
 public class MatchesWriterImpl implements ComparisonWriter {
 
-	public JSONObject writeComparison(final String name, final AbstractComparison abstractComparison, final JSONObject jsonObj) throws JSONException {
+	@Override
+    public JSONObject writeComparison(final String name, final AbstractComparison abstractComparison, final JSONObject jsonObj) throws JSONException {
 		jsonObj.put("comparison", name);
 
 		return jsonObj;

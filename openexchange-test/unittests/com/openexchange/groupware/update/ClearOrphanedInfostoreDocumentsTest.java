@@ -67,7 +67,7 @@ import java.util.ArrayList;
  */
 public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
 
-    private List<String> paths = new ArrayList<String>();
+    private final List<String> paths = new ArrayList<String>();
 
     @Override
     public void setUp() throws Exception {

@@ -98,6 +98,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.log.LogProperties;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
@@ -122,12 +123,13 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-
 public class Login extends AJAXServlet {
 
     private static final long serialVersionUID = 7680745138705836499L;
 
-    static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Login.class));
+
+    protected static final boolean INFO = LOG.isInfoEnabled();
 
     private static interface JSONRequestHandler {
 
@@ -331,7 +333,7 @@ public class Login extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (LOG.isInfoEnabled()) {
+                    } else if (INFO) {
                         LOG.info("No session could be found for random token: " + randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -387,11 +389,21 @@ public class Login extends AJAXServlet {
                 try {
                     final String sessionId = req.getParameter(PARAMETER_SESSION);
                     if (null == sessionId) {
+                        if (INFO) {
+                            final StringBuilder sb = new StringBuilder(32);
+                            sb.append("Parameter \"").append(PARAMETER_SESSION).append("\" not found for action ").append(ACTION_CHANGEIP);
+                            LOG.info(sb.toString());
+                        }
                         throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
                     }
                     final String newIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
                     if (null == newIP) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);                        
+                        if (INFO) {
+                            final StringBuilder sb = new StringBuilder(32);
+                            sb.append("Parameter \"").append(LoginFields.CLIENT_IP_PARAM).append("\" not found for action ").append(ACTION_CHANGEIP);
+                            LOG.info(sb.toString());
+                        }
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
                     final Session session = sessiondService.getSession(sessionId);
@@ -400,8 +412,8 @@ public class Login extends AJAXServlet {
                         SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
                         final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Session secret is different. Given "+secret+" differs from "+session.getSecret()+" in session.");
+                            if (INFO && null != secret) {
+                                LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
@@ -412,6 +424,9 @@ public class Login extends AJAXServlet {
                         }
                         response.setData("1");
                     } else {
+                        if (INFO) {
+                            LOG.info("There is no session associated with session identifier: " + sessionId);
+                        }
                         throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
                     }
                 } catch (final OXException e) {
@@ -473,7 +488,7 @@ public class Login extends AJAXServlet {
                     // Unknown random token; throw error
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No session could be found for random token: " + randomToken, new Throwable());
-                    } else if (LOG.isInfoEnabled()) {
+                    } else if (INFO) {
                         LOG.info("No session could be found for random token: " + randomToken);
                     }
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -794,19 +809,27 @@ public class Login extends AJAXServlet {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( PARAMETER_SESSION);
         }
         final Session session = SessionServlet.getSession(conf.hashSource, req, sessionId, sessiond);
-        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
-        if (type == CookieType.SESSION) {
-            writeSessionCookie(resp, session, session.getHash(), req.isSecure());
-        } else {
-            writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+        try {
+            SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
+            if (type == CookieType.SESSION) {
+                writeSessionCookie(resp, session, session.getHash(), req.isSecure());
+            } else {
+                writeSecretCookie(resp, session, session.getHash(), req.isSecure());
+            }
+            // Refresh HTTP session, too
+            req.getSession();
+            final Response response = new Response();
+            response.setData("1");
+            ResponseWriter.write(response, resp.getWriter());
+        } finally {
+            if (LogProperties.isEnabled()) {
+                final Map<String, Object> properties = LogProperties.getLogProperties();
+                properties.put("com.openexchange.session.sessionId", null);
+                properties.put("com.openexchange.session.userId", null);
+                properties.put("com.openexchange.session.contextId", null);
+                properties.put("com.openexchange.session.clientId", null);
+            }
         }
-        // Refresh HTTP session, too
-        req.getSession();
-
-        final Response response = new Response();
-        response.setData("1");
-
-        ResponseWriter.write(response, resp.getWriter());
     }
 
     protected void doStore(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, JSONException, IOException {
@@ -1007,60 +1030,43 @@ public class Login extends AJAXServlet {
     }
 
     private static String parseUserAgent(final HttpServletRequest req) {
-        final String userAgent;
-        if (null == req.getParameter(LoginFields.USER_AGENT)) {
-            userAgent = req.getHeader(Header.USER_AGENT);
-        } else {
-            userAgent = req.getParameter(LoginFields.USER_AGENT);
-        }
-        return userAgent;
+        final String parameter = req.getParameter(LoginFields.USER_AGENT);
+        return null == parameter ? req.getHeader(Header.USER_AGENT) : parameter;
     }
 
     private static String parseClientIP(final HttpServletRequest req) {
-        final String clientIP;
-        if (null == req.getParameter(LoginFields.CLIENT_IP_PARAM)) {
-            clientIP = req.getRemoteAddr();
-        } else {
-            clientIP = req.getParameter(LoginFields.CLIENT_IP_PARAM);
-        }
-        return clientIP;
+        final String parameter = req.getParameter(LoginFields.CLIENT_IP_PARAM);
+        return null == parameter ? req.getRemoteAddr() : parameter;
     }
 
     private String parseClient(final HttpServletRequest req, final boolean strict) throws OXException {
-        final String client;
-        if (null == req.getParameter(LoginFields.CLIENT_PARAM)) {
+        final String parameter = req.getParameter(LoginFields.CLIENT_PARAM);
+        if (null == parameter) {
             if (strict) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_PARAM);
             }
-            client = confReference.get().defaultClient;
-        } else {
-            client = req.getParameter(LoginFields.CLIENT_PARAM);
+            return confReference.get().defaultClient;
         }
-        return client;
+        return parameter;
     }
 
     private String parseClient(final HttpServletRequest req) {
-        String client;
         try {
-            client = parseClient(req, false);
+            return parseClient(req, false);
         } catch (final OXException e) {
-            client = confReference.get().defaultClient;
+            return confReference.get().defaultClient;
         }
-        return client;
     }
 
     private static String parseAuthId(final HttpServletRequest req, final boolean strict) throws OXException {
-        final String authId;
         final String authIdParam = req.getParameter(LoginFields.AUTHID_PARAM);
         if (null == authIdParam) {
             if (strict) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.AUTHID_PARAM);
             }
-            authId = UUIDs.getUnformattedString(UUID.randomUUID());
-        } else {
-            authId = authIdParam;
+            return UUIDs.getUnformattedString(UUID.randomUUID());
         }
-        return authId;
+        return authIdParam;
     }
 
     protected static void appendModules(final Session session, final JSONObject json, final HttpServletRequest req) {
@@ -1113,11 +1119,10 @@ public class Login extends AJAXServlet {
     private void doAuthHeaderLogin(final HttpServletRequest req, final HttpServletResponse resp) throws OXException, IOException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         final Credentials creds;
-        if (Authorization.checkForBasicAuthorization(auth)) {
-            creds = Authorization.decode(auth);
-        } else {
+        if (!Authorization.checkForBasicAuthorization(auth)) {
             throw LoginExceptionCodes.UNKNOWN_HTTP_AUTHORIZATION.create();
         }
+        creds = Authorization.decode(auth);
         final String client = parseClient(req);
         final LoginConfiguration conf = confReference.get();
         final String version = conf.clientVersion;

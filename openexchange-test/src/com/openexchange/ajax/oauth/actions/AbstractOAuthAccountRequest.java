@@ -69,10 +69,12 @@ public abstract class AbstractOAuthAccountRequest<T extends AbstractAJAXResponse
         super();
     }
 
+    @Override
     public String getServletPath() {
         return OAUTH_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

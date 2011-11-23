@@ -62,7 +62,7 @@ import java.util.List;
  */
 public class EAVPath {
 
-    private List<String> components;
+    private final List<String> components;
 
     public EAVPath(String...components) {
         this.components = new ArrayList<String>(Arrays.asList(components));

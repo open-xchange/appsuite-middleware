@@ -33,7 +33,7 @@ import org.apache.tika.parser.chm.lzx.ChmBlockInfo;
 
 /**
  * Tests major functionality of ChmBlockInfo
- * 
+ *
  */
 public class TestChmBlockInfo extends TestCase {
     private byte[] data;
@@ -42,6 +42,7 @@ public class TestChmBlockInfo extends TestCase {
     private ChmLzxcResetTable clrt = null;
     private ChmLzxcControlData chmLzxcControlData = null;
 
+    @Override
     public void setUp() throws Exception {
         data = TestParameters.chmData;
         /* Creates and parses itsf header */
@@ -115,6 +116,7 @@ public class TestChmBlockInfo extends TestCase {
         }
     }
 
+    @Override
     public void tearDown() throws Exception {
         data = null;
         chmBlockInfo = null;

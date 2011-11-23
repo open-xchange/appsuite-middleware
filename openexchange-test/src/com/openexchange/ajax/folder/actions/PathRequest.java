@@ -71,44 +71,47 @@ public class PathRequest extends AbstractFolderRequest<PathResponse> {
     private final int[] columns;
     private final boolean failOnError;
 
-    public PathRequest(API api, String folderId, int[] columns, boolean failOnError) {
+    public PathRequest(final API api, final String folderId, final int[] columns, final boolean failOnError) {
         super(api);
         this.folder = folderId;
         this.columns = columns;
         this.failOnError = failOnError;
     }
 
-    public PathRequest(API api, String folderId, int[] columns) {
+    public PathRequest(final API api, final String folderId, final int[] columns) {
         this(api, folderId, columns, true);
     }
 
-    public PathRequest(API api, String folderId) {
+    public PathRequest(final API api, final String folderId) {
         this(api, folderId, DEFAULT_COLUMNS, true);
     }
 
-    public PathRequest(API api, int folderId, int[] columns, boolean failOnError) {
+    public PathRequest(final API api, final int folderId, final int[] columns, final boolean failOnError) {
         this(api, Integer.toString(folderId), columns, failOnError);
     }
 
-    public PathRequest(API api, int folderId, int[] columns) {
+    public PathRequest(final API api, final int folderId, final int[] columns) {
         this(api, Integer.toString(folderId), columns, true);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
     @Override
-    protected void addParameters(List<Parameter> params) {
+    protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_PATH));
         params.add(new Parameter(Folder.PARAMETER_ID, folder));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
     }
 
+    @Override
     public PathParser getParser() {
         return new PathParser(columns, failOnError);
     }

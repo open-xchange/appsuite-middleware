@@ -187,6 +187,7 @@ public class CalendarPerformanceTests extends TestCase {
     	}
 
         boolean run = true;
+        @Override
         public void run() {
             while (run) {
             	final File f = new File(testfile);

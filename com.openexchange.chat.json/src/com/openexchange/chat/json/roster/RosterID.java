@@ -55,14 +55,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link RosterID} - Represents a roster identifier.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RosterID {
 
     /**
      * Gets the conversation UID from specified identifier.
-     * 
+     *
      * @param uid The conversation identifier
      * @return The conversation identifier
      * @throws OXException If parsing fails
@@ -112,7 +112,7 @@ public final class RosterID {
 
     /**
      * Initializes a new {@link RosterID}.
-     * 
+     *
      * @param serviceId The service identifier
      * @param accountId The account identifier
      */
@@ -133,7 +133,7 @@ public final class RosterID {
 
     /**
      * Gets the service identifier
-     * 
+     *
      * @return The service identifier
      */
     public String getServiceId() {
@@ -142,7 +142,7 @@ public final class RosterID {
 
     /**
      * Sets the service identifier
-     * 
+     *
      * @param serviceId The service identifier to set
      * @return This conversation identifier with given identifier applied
      */
@@ -154,7 +154,7 @@ public final class RosterID {
 
     /**
      * Gets the account identifier
-     * 
+     *
      * @return The account identifier
      */
     public String getAccountId() {
@@ -163,7 +163,7 @@ public final class RosterID {
 
     /**
      * Sets the account identifier
-     * 
+     *
      * @param accountId The account identifier to set
      * @return This conversation identifier with given identifier applied
      */

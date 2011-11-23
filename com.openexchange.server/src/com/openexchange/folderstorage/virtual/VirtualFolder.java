@@ -49,10 +49,16 @@
 
 package com.openexchange.folderstorage.virtual;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FieldNamePair;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.i18n.LocaleTools;
@@ -63,7 +69,7 @@ import com.openexchange.i18n.tools.StringHelper;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolder implements Folder {
+public final class VirtualFolder implements ParameterizedFolder {
 
     private static final long serialVersionUID = -7353105231203614064L;
 
@@ -92,6 +98,8 @@ public final class VirtualFolder implements Folder {
 
     private String newId;
 
+    private Map<FieldNamePair, FolderProperty> properties;
+
     /**
      * Initializes a {@link VirtualFolder} with specified real folder.
      *
@@ -101,6 +109,7 @@ public final class VirtualFolder implements Folder {
         super();
         realFolder = source;
         modifiedBy = -1;
+        properties = new HashMap<FieldNamePair, FolderProperty>(4);
     }
 
     @Override
@@ -129,6 +138,10 @@ public final class VirtualFolder implements Folder {
                     cloneSub[i] = thisSub[i];
                 }
                 clone.subfolders = cloneSub;
+            }
+            if (properties != null) {
+                final Map<FieldNamePair, FolderProperty> cloneProps = new HashMap<FieldNamePair, FolderProperty>(properties);
+                clone.properties = cloneProps;
             }
             return clone;
         } catch (final CloneNotSupportedException e) {
@@ -430,4 +443,19 @@ public final class VirtualFolder implements Folder {
         }
         return new Date(d.getTime());
     }
+
+    @Override
+    public void setProperty(final FieldNamePair name, final Object value) {
+        if (null == value) {
+            properties.remove(name);
+        } else {
+            properties.put(name, new FolderProperty(name.getName(), value));
+        }
+    }
+
+    @Override
+    public Map<FieldNamePair, FolderProperty> getProperties() {
+        return Collections.unmodifiableMap(properties);
+    }
+
 }

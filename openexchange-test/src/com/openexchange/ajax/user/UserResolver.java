@@ -69,7 +69,7 @@ import com.openexchange.groupware.search.ContactSearchObject;
  */
 public class UserResolver {
 
-    private AJAXClient client;
+    private final AJAXClient client;
 
     public UserResolver(AJAXClient client) {
         this.client = client;

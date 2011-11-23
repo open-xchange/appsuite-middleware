@@ -36,6 +36,7 @@ public class OfflineContentHandlerTest extends TestCase {
 
     private DefaultHandler offline;
 
+    @Override
     protected void setUp() throws Exception {
         parser = SAXParserFactory.newInstance().newSAXParser();
         offline = new OfflineContentHandler(new DefaultHandler());

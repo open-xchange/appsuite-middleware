@@ -60,14 +60,15 @@ import com.openexchange.test.fixtures.SimpleCredentials;
  */
 public class CredentialsTransformator implements Transformator {
 
-	private FixtureLoader fixtureLoader;
+	private final FixtureLoader fixtureLoader;
 
 	public CredentialsTransformator(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Object transform(final String value) throws OXException {
+	@Override
+    public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length() || false == value.contains(":")) {
 			throw OXException.general("Unable to transform '" + value + "' into simple credentials");
 		}

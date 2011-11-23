@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexTestTool {
-    
+
     public static IndexServerImpl createIndexServer(Connection con) throws OXException {
         IndexServerImpl indexServer = new IndexServerImpl();
         indexServer.setUrl("http://1.2.3.4:8005");
@@ -69,7 +69,7 @@ public class IndexTestTool {
         indexServer.setSoTimeout(46);
         int serverId = ConfigIndexMysql.getInstance().registerIndexServer(con, indexServer);
         indexServer.setId(serverId);
-        
+
         return indexServer;
     }
 

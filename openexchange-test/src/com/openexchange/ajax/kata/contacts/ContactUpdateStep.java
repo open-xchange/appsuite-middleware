@@ -62,16 +62,18 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ContactUpdateStep extends NeedExistingStep<Contact>{
 
-    private Contact entry;
+    private final Contact entry;
 
     public ContactUpdateStep(Contact entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         assumeIdentity(entry);

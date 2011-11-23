@@ -78,18 +78,22 @@ public final class VirtualId implements SortableId {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getId() {
         return folderId;
     }
 
+    @Override
     public Priority getPriority() {
         return Priority.HIGH;
     }
 
+    @Override
     public int compareTo(final SortableId o) {
         // Compare by ordinal
         if (o instanceof VirtualId) {

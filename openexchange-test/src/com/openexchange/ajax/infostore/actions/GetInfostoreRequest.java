@@ -79,14 +79,17 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
         setId(id);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Params(
             AJAXServlet.PARAMETER_ACTION,
@@ -95,6 +98,7 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
             String.valueOf(getId())).toArray();
     }
 
+    @Override
     public AbstractAJAXParser<GetInfostoreResponse> getParser() {
         return new AbstractAJAXParser<GetInfostoreResponse>(getFailOnError()) {
 

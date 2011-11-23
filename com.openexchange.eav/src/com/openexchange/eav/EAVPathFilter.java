@@ -60,7 +60,7 @@ import java.util.Set;
  */
 public class EAVPathFilter implements EAVNodeFilter {
 
-    private Set<EAVPath> paths;
+    private final Set<EAVPath> paths;
     private EAVPath relativeRoot = null;
 
     public EAVPathFilter(Set<EAVPath> paths, EAVPath relativeRoot) {

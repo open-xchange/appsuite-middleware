@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import java.util.Date;
 import org.json.JSONArray;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.PathRequest;
@@ -89,7 +89,7 @@ public class PathTest extends AbstractAJAXSession {
     }
 
     public void testPath1() throws Throwable {
-        final PathRequest pathRequest = new PathRequest(API.OUTLOOK, String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
+        final PathRequest pathRequest = new PathRequest(EnumAPI.OUTLOOK, String.valueOf(FolderObject.SYSTEM_ROOT_FOLDER_ID));
         final PathResponse pathResponse = client.execute(pathRequest);
 
         final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
@@ -99,7 +99,7 @@ public class PathTest extends AbstractAJAXSession {
     }
 
     public void testPath2() throws Throwable {
-        final PathRequest pathRequest = new PathRequest(API.OUTLOOK, PRIVATE_FOLDER_ID);
+        final PathRequest pathRequest = new PathRequest(EnumAPI.OUTLOOK, PRIVATE_FOLDER_ID);
         final PathResponse pathResponse = client.execute(pathRequest);
 
         final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
@@ -130,13 +130,13 @@ public class PathTest extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
-            final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
+            final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
             final InsertResponse response = client.execute(request);
 
             newId = (String) response.getResponse().getData();
             assertNotNull("New ID must not be null!", newId);
 
-            final PathRequest pathRequest = new PathRequest(API.OUTLOOK, newId);
+            final PathRequest pathRequest = new PathRequest(EnumAPI.OUTLOOK, newId);
             final PathResponse pathResponse = client.execute(pathRequest);
 
             final JSONArray jsonArray = (JSONArray) pathResponse.getResponse().getData();
@@ -152,7 +152,7 @@ public class PathTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
+                    final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

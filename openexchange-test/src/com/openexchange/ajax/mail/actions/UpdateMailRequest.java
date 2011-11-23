@@ -156,6 +156,7 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         this.mailID = mailID;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         json.put("color_label", color);
@@ -164,10 +165,12 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         final List<Parameter> list = new LinkedList<Parameter>();
 
@@ -179,6 +182,7 @@ public class UpdateMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return list.toArray(new Parameter[list.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<? extends UpdateMailResponse> getParser() {
         return new AbstractAJAXParser<UpdateMailResponse>(failOnError) {
 

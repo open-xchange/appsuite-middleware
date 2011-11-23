@@ -60,7 +60,7 @@ public interface JobCompletionService {
 
     /**
      * Adds specified job to this completion service, waiting if necessary for other jobs to complete if capacity restriction is reached.
-     * 
+     *
      * @param job The job to add
      * @return <code>true</code> if job could be added; otherwise <code>false</code>
      * @throws InterruptedException If thread is interrupted while waiting for a job to completed in case capacity is exceeded
@@ -69,7 +69,7 @@ public interface JobCompletionService {
 
     /**
      * Adds specified job to this completion service if immediately able to do so.
-     * 
+     *
      * @param job The job to add
      * @return <code>true</code> if job could be added; otherwise <code>false</code>
      */
@@ -77,7 +77,7 @@ public interface JobCompletionService {
 
     /**
      * Retrieves and removes the next completed job, waiting if none are yet present.
-     * 
+     *
      * @return The next completed job
      * @throws InterruptedException If interrupted while waiting
      */
@@ -85,14 +85,14 @@ public interface JobCompletionService {
 
     /**
      * Retrieves and removes the next completed job or <tt>null</tt> if none are present.
-     * 
+     *
      * @return The the next completed job, or <tt>null</tt> if none are present
      */
     public Job poll();
 
     /**
      * Retrieves and removes the next completed job, waiting if necessary up to the specified wait time if none are yet present.
-     * 
+     *
      * @param timeout How long to wait before giving up, in units of <tt>unit</tt>
      * @param unit A <tt>TimeUnit</tt> determining how to interpret the <tt>timeout</tt> parameter
      * @return The the next completed job or <tt>null</tt> if the specified waiting time elapses before one is present

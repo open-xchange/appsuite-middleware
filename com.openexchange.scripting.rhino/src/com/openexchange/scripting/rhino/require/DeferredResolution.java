@@ -11,12 +11,12 @@ import org.mozilla.javascript.Scriptable;
 
 
 public class DeferredResolution {
-	
+
 	private static final LinkedList<DeferredResolution> outstanding = new LinkedList<DeferredResolution>();
 	private static final Lock LOCK = new ReentrantLock();
-	
+
 	public static void resolve(JSBundle bundle, DependencyResolver resolver) {
-		
+
 		try {
 			LOCK.lock();
 			Context cx = Context.enter();
@@ -30,14 +30,14 @@ public class DeferredResolution {
 		} finally {
 			Context.exit();
 			LOCK.unlock();
-			
+
 		}
 	}
-	
 
 
-	private String id;
-	private Scriptable scope;
+
+	private final String id;
+	private final Scriptable scope;
 	private Callback callback;
 
 	public DeferredResolution(String id, Scriptable scope) {
@@ -57,13 +57,13 @@ public class DeferredResolution {
 				final int index = i;
 				DeferredResolution resolution = (DeferredResolution) o;
 				resolution.done(new Callback() {
-	
+
 					@Override
 					public void handle(Object o) {
 						args[index] = o;
 						awaitResolution(cx, scope, thisObj, args, function, cb);
 					}
-					
+
 				});
 				return;
 			}
@@ -74,5 +74,5 @@ public class DeferredResolution {
 		}
 	}
 
-	
+
 }

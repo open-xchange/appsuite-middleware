@@ -94,7 +94,7 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
 
-    private Appointment entry;
+    private final Appointment entry;
 
     private CalendarTestManager manager;
 
@@ -110,6 +110,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
 
     }
@@ -124,6 +125,7 @@ public class AppointmentVerificationStep extends NeedExistingStep<Appointment> {
         }
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new CalendarTestManager(client);

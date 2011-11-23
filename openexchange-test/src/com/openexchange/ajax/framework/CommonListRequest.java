@@ -120,10 +120,12 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         this.failOnError = failOnError;
     }
 
+    @Override
     public String getServletPath() {
         return servletPath;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
         for (int i = 0; i < identifier.size(); i++) {
@@ -136,10 +138,12 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         return array;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
@@ -147,10 +151,12 @@ public class CommonListRequest implements AJAXRequest<CommonListResponse> {
         };
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public CommonListParser getParser() {
         return new CommonListParser(failOnError, columns);
     }

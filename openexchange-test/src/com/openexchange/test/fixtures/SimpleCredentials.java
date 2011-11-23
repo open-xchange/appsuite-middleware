@@ -67,7 +67,7 @@ public class SimpleCredentials implements Cloneable {
     private Contact contact;
     private TestUserConfig config;
     private TestUserConfigFactory userConfigFactory = null;
-    private ContactFinder contactFinder;
+    private final ContactFinder contactFinder;
     private Locale locale = null;
     private int userId = 0;
     private int contactId = 0;

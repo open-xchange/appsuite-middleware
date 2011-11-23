@@ -55,7 +55,7 @@ import org.json.JSONArray;
 import com.openexchange.ajax.contact.action.AllRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -76,9 +76,9 @@ public class Bug13931Test extends AbstractAJAXSession {
 
     private Contact AAA, aaa, BBB, bbb;
 
-    private int[] columns = new int[] { Contact.OBJECT_ID, Contact.SUR_NAME };
+    private final int[] columns = new int[] { Contact.OBJECT_ID, Contact.SUR_NAME };
 
-    public Bug13931Test(String name) {
+    public Bug13931Test(final String name) {
         super(name);
     }
 
@@ -88,7 +88,7 @@ public class Bug13931Test extends AbstractAJAXSession {
 
         userId = getClient().getValues().getUserId();
         privateFolderId = getClient().getValues().getPrivateContactFolder();
-        OCLPermission ocl = ocl(
+        final OCLPermission ocl = ocl(
             userId,
             false,
             true,
@@ -97,7 +97,7 @@ public class Bug13931Test extends AbstractAJAXSession {
             OCLPermission.ADMIN_PERMISSION,
             OCLPermission.ADMIN_PERMISSION);
         folder = Create.folder(privateFolderId, "Folder to test bug 13931 ("+new Date().getTime()+")", FolderObject.CONTACT, FolderObject.PRIVATE, ocl);
-        CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+        final CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
         folderId = folder.getObjectID();
 
@@ -123,9 +123,9 @@ public class Bug13931Test extends AbstractAJAXSession {
     }
 
     public void testBug13931() throws Exception {
-        AllRequest allRequest = new AllRequest(folderId, columns);
-        CommonAllResponse allResponse = client.execute(allRequest);
-        JSONArray jsonArray = (JSONArray) allResponse.getResponse().getData();
+        final AllRequest allRequest = new AllRequest(folderId, columns);
+        final CommonAllResponse allResponse = client.execute(allRequest);
+        final JSONArray jsonArray = (JSONArray) allResponse.getResponse().getData();
         assertNotNull("No result", jsonArray);
         assertEquals("Wrong amount of results", 4, jsonArray.length());
         assertEquals("Wrong order", AAA.getObjectID(), jsonArray.getJSONArray(0).getInt(0));
@@ -136,7 +136,7 @@ public class Bug13931Test extends AbstractAJAXSession {
 
     @Override
     public void tearDown() throws Exception {
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
 
         super.tearDown();
     }

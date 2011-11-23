@@ -53,7 +53,8 @@ import com.openexchange.groupware.container.Appointment;
 
 public class RecurrenceTypeTransformator implements Transformator {
 
-	public Object transform(final String value) throws OXException {
+	@Override
+    public Object transform(final String value) throws OXException {
         if ("NONE".equalsIgnoreCase(value) || "NO_RECURRENCE".equalsIgnoreCase(value)) {
         	return Appointment.NO_RECURRENCE;
         } else if ("DAILY".equalsIgnoreCase(value)) {

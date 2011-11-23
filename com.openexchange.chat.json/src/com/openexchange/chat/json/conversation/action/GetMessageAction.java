@@ -102,7 +102,7 @@ public final class GetMessageAction extends AbstractChatConversationAction {
             /*
              * Get message
              */
-            final Message message = chat.getMessage(messageId);
+            final Message message = chat.getMessage(messageId, session.getUser().getId());
             /*
              * Create JSON
              */

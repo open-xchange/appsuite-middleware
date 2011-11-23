@@ -30,7 +30,7 @@ import org.xmpp.packet.IQ.Type;
  * The {@link AbstractComponent} implementation follows the producer/consumer
  * design pattern. The tests in this class verifies that characteristics of this
  * pattern are recognizable in the AbstractComponent implementation.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.igniterealtime.org/issues/browse/TINDER-18">Tinder
  *      bugtracker: TINDER-18</a>
@@ -62,7 +62,7 @@ public class AbstractComponentIsConsumerTest {
 	 * The actual work being done by the component (the consumer) should be done
 	 * by a different thread than the thread that feeds the input (the
 	 * producer).
-	 * 
+	 *
 	 * This test uses an AbstractComponent implementation that reports the
 	 * thread name that was used during processing. This name is compared with
 	 * the name of the thread that feeds the component the request packet (the
@@ -91,7 +91,7 @@ public class AbstractComponentIsConsumerTest {
 	/**
 	 * The producer thread should be released as soon as it delivers work to the
 	 * consumer, regardless of how long the consumer takes to process a packet.
-	 * 
+	 *
 	 * This test uses an AbstractComponent implementation that takes a
 	 * significant time to process a packet. The test verifies that the producer
 	 * thread finishes work before the consumer threads finish. This verifies

@@ -89,7 +89,7 @@ public class SubscriptionTestManager {
 
     private AbstractSubscriptionResponse lastResponse;
 
-    private Set<Integer> createdItems;
+    private final Set<Integer> createdItems;
 
     private boolean failOnError;
 

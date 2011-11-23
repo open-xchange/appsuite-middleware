@@ -53,6 +53,8 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,6 +78,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -105,7 +108,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CacheFolderStorage} - The cache folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheFolderStorage implements FolderStorage {
@@ -154,7 +157,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Clears this cache with respect to specified session.
-     * 
+     *
      * @param session The session
      */
     public void clear(final Session session) {
@@ -163,7 +166,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Initializes this folder cache on available cache service.
-     * 
+     *
      * @throws OXException If initialization of this folder cache fails
      */
     public void onCacheAvailable() throws OXException {
@@ -174,7 +177,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Disposes this folder cache on absent cache service.
-     * 
+     *
      * @throws OXException If disposal of this folder cache fails
      */
     public void onCacheAbsent() throws OXException {
@@ -342,13 +345,13 @@ public final class CacheFolderStorage implements FolderStorage {
              */
             final String folderId;
             if (null == session) {
-                folderId = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doCreate(folder);
+                final CreatePerformer perf = new CreatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                perf.setCheck4Duplicates(false);
+                folderId = perf.doCreate(folder);
             } else {
-                try {
-                    folderId = new CreatePerformer(new ServerSessionAdapter(session), registry).doCreate(folder);
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session), registry);
+                createPerformer.setCheck4Duplicates(false);
+                folderId = createPerformer.doCreate(folder);
             }
             /*
              * Get folder from appropriate storage
@@ -361,6 +364,25 @@ public final class CacheFolderStorage implements FolderStorage {
              * Load created folder from real tree
              */
             final Folder createdFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, true, storageParameters);
+            final int contextId = storageParameters.getContextId();
+            final int userId = storageParameters.getUserId();
+            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+            {
+                for (final Permission permission : createdFolder.getPermissions()) {
+                    if (!permission.isGroup()) {
+                        final int entity = permission.getEntity();
+                        if (entity != userId) {
+                            final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
+                            if (folderMap != null) {
+                                folderMap.remove(folder.getParentID(), treeId);
+                                if (!realTreeId.equals(treeId)) {
+                                    folderMap.remove(folder.getParentID(), realTreeId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (createdFolder.isCacheable()) {
                 putFolder(createdFolder, realTreeId, storageParameters);
             }
@@ -368,10 +390,7 @@ public final class CacheFolderStorage implements FolderStorage {
              * Remove parent from cache(s)
              */
             final Cache cache = globalCache;
-            final int contextId = storageParameters.getContextId();
             final String sContextId = String.valueOf(contextId);
-            final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            final int userId = storageParameters.getUserId();
             final String[] trees = new String[] { treeId, realTreeId };
             for (final String tid : trees) {
                 final CacheKey cacheKey = newCacheKey(folder.getParentID(), tid);
@@ -418,7 +437,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes specified folder and all of its predecessor folders from cache.
-     * 
+     *
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
@@ -499,7 +518,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes a single folder from cache.
-     * 
+     *
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param session The session
@@ -510,7 +529,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes a single folder from cache.
-     * 
+     *
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param contextId The context identifier
@@ -642,6 +661,29 @@ public final class CacheFolderStorage implements FolderStorage {
                         folderMap.remove(folderId, treeId);
                     }
                     return;
+                }
+                {
+                    final int contextId = storageParameters.getContextId();
+                    final int userId = storageParameters.getUserId();
+                    final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+                    for (final Permission permission : deleteMe.getPermissions()) {
+                        if (!permission.isGroup()) {
+                            final int entity = permission.getEntity();
+                            if (entity != userId) {
+                                final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
+                                if (folderMap != null) {
+                                    folderMap.remove(folderId, treeId);
+                                    if (!realTreeId.equals(treeId)) {
+                                        folderMap.remove(folderId, realTreeId);
+                                    }
+                                    folderMap.remove(deleteMe.getParentID(), treeId);
+                                    if (!realTreeId.equals(treeId)) {
+                                        folderMap.remove(deleteMe.getParentID(), realTreeId);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 cacheable = deleteMe.isCacheable();
                 global = deleteMe.isGlobalID();
@@ -1214,18 +1256,20 @@ public final class CacheFolderStorage implements FolderStorage {
              * Perform update operation via non-cache storage
              */
             final String oldFolderId = folder.getID();
+            Folder storageVersion = getCloneFromCache(treeId, oldFolderId, storageParameters);
+            if (null == storageVersion) {
+                storageVersion = getFolder(treeId, oldFolderId, storageParameters);
+            }
             final boolean isMove = null != folder.getParentID();
             final String oldParentId = isMove ? getFolder(treeId, oldFolderId, storageParameters).getParentID() : null;
             if (null == session) {
-                new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doUpdate(
-                    folder,
-                    storageParameters.getTimeStamp());
+                final UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters.getUser(), storageParameters.getContext(), registry);
+                updatePerformer.setCheck4Duplicates(false);
+                updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             } else {
-                try {
-                    new UpdatePerformer(new ServerSessionAdapter(session), registry).doUpdate(folder, storageParameters.getTimeStamp());
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final UpdatePerformer updatePerformer = new UpdatePerformer(new ServerSessionAdapter(session), registry);
+                updatePerformer.setCheck4Duplicates(false);
+                updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             }
             /*
              * Get folder from appropriate storage
@@ -1245,6 +1289,48 @@ public final class CacheFolderStorage implements FolderStorage {
              * Put updated folder
              */
             final Folder updatedFolder = loadFolder(treeId, newFolderId, StorageType.WORKING, true, storageParameters);
+            {
+                final int contextId = storageParameters.getContextId();
+                final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
+                final TIntSet done = new TIntHashSet(16);
+                for (final Permission permission : updatedFolder.getPermissions()) {
+                    if (!permission.isGroup()) {
+                        final int entity = permission.getEntity();
+                        if (entity != userId) {
+                            final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
+                            if (folderMap != null) {
+                                folderMap.remove(newFolderId, treeId);
+                                if (!realTreeId.equals(treeId)) {
+                                    folderMap.remove(newFolderId, realTreeId);
+                                }
+                                folderMap.remove(updatedFolder.getParentID(), treeId);
+                                if (!realTreeId.equals(treeId)) {
+                                    folderMap.remove(updatedFolder.getParentID(), realTreeId);
+                                }
+                            }
+                            done.add(entity);
+                        }
+                    }
+                }
+                for (final Permission permission : storageVersion.getPermissions()) {
+                    if (!permission.isGroup()) {
+                        final int entity = permission.getEntity();
+                        if (entity != userId && !done.contains(entity)) {
+                            final FolderMap folderMap = folderMapManagement.optFor(entity, contextId);
+                            if (folderMap != null) {
+                                folderMap.remove(oldFolderId, treeId);
+                                if (!realTreeId.equals(treeId)) {
+                                    folderMap.remove(oldFolderId, realTreeId);
+                                }
+                                folderMap.remove(storageVersion.getParentID(), treeId);
+                                if (!realTreeId.equals(treeId)) {
+                                    folderMap.remove(storageVersion.getParentID(), realTreeId);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             if (isMove) {
                 /*
                  * Invalidate new parent folder
@@ -1378,7 +1464,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Creates the cache key for specified folder ID and tree ID pair.
-     * 
+     *
      * @param folderId The folder ID
      * @param treeId The tree ID
      * @return The cache key
@@ -1550,7 +1636,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Creates a new storage parameter instance.
-     * 
+     *
      * @return A new storage parameter instance.
      */
     static StorageParameters newStorageParameters(final StorageParameters source) {
@@ -1583,7 +1669,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Drops entries associated with specified user in given context.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */

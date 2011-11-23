@@ -72,9 +72,9 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskUpdatesParser extends AbstractColumnsParser<TaskUpdatesResponse> {
 
-    private int[] columns;
+    private final int[] columns;
 
-    private TimeZone timeZone;
+    private final TimeZone timeZone;
 
     protected TaskUpdatesParser(boolean failOnError, int[] columns, TimeZone timeZone) {
         super(failOnError, columns);

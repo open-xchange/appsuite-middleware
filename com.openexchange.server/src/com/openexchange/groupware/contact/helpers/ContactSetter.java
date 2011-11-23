@@ -1726,7 +1726,7 @@ public class ContactSetter implements ContactSwitcher {
         conObj.setYomiCompany(value);
         return conObj;
     }
-    
+
     @Override
     public Object image1contenttype(Object[] objects) throws OXException {
         if (objects.length < 2) {
@@ -1752,5 +1752,5 @@ public class ContactSetter implements ContactSwitcher {
         }
 
         return false;
-    }    
+    }
 }

@@ -61,7 +61,7 @@ public class IncomingServer extends Server {
     public enum IncomingType {
         POP3(Server.POP3), IMAP(Server.IMAP);
 
-        private String keyword;
+        private final String keyword;
 
         private IncomingType(String keyword) {
             this.keyword = keyword;

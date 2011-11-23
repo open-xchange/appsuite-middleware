@@ -64,22 +64,25 @@ import com.openexchange.groupware.container.Contact;
  */
 public class GetAssociationRequest extends AbstractContactRequest<GetAssociationResponse> {
 
-    private Contact aggregator;
-    private Contact contributor;
+    private final Contact aggregator;
+    private final Contact contributor;
 
     public GetAssociationRequest(Contact contributor, Contact aggregator){
         this.contributor = contributor;
         this.aggregator = aggregator;
     }
 
+    @Override
     public Object getBody(){
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters(){
         Params params = new Params(
             AJAXServlet.PARAMETER_ACTION,
@@ -108,6 +111,7 @@ public class GetAssociationRequest extends AbstractContactRequest<GetAssociation
         return params.toArray();
     }
 
+    @Override
     public AbstractAJAXParser<? extends GetAssociationResponse> getParser() {
         return new AbstractAJAXParser<GetAssociationResponse>(false){
             @Override

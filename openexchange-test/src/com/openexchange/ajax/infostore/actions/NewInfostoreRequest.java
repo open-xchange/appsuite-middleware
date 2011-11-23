@@ -68,7 +68,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
 
     private DocumentMetadata metadata;
 
-    private File upload;
+    private final File upload;
 
     public NewInfostoreRequest() {
         this(null, null);
@@ -92,6 +92,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
         return metadata;
     }
 
+    @Override
     public String getBody() throws JSONException {
         final JSONObject originalObject = new JSONObject(writeJSON(getMetadata()));
         final JSONObject retVal = new JSONObject();
@@ -113,10 +114,12 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
         return retVal.toString();
     }
 
+    @Override
     public Method getMethod() {
         return null == upload ? Method.PUT : Method.UPLOAD;
     }
 
+    @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> tmp = new ArrayList<Parameter>(3);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
@@ -127,6 +130,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
         return tmp.toArray(new Parameter[tmp.size()]);
     }
 
+    @Override
     public NewInfostoreParser getParser() {
         return new NewInfostoreParser(getFailOnError(), null != upload);
     }

@@ -147,7 +147,7 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
             }
             /*-
              * Remaining size lower than len
-             * 
+             *
              * Flush fitting chunk
              */
             byteChunk.append(b, off, rem);

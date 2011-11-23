@@ -77,7 +77,7 @@ import com.openexchange.langdetect.LanguageDetectionService;
 /**
  * {@link Lc4jLanguageDetectionService} - The {@link LanguageDetectionService language detection service} based on <a
  * href="http://olivo.net/software/lc4j/">lc4j</a>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Lc4jLanguageDetectionService implements LanguageDetectionService {
@@ -92,7 +92,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     /**
      * Gets the instance
-     * 
+     *
      * @return The instance
      */
     public static Lc4jLanguageDetectionService getInstance() {
@@ -138,7 +138,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     /**
      * Loads specified language code file.
-     * 
+     *
      * @param languageCodesFile The file name
      * @throws OXException If loading file fails
      */
@@ -163,7 +163,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
 
     /**
      * Sets the directory path containing the language models.
-     * 
+     *
      * @param languageModelsDir The directory path
      */
     public void setLanguageModelsDir(final String languageModelsDir) {

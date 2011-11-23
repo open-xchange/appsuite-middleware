@@ -57,19 +57,20 @@ import com.openexchange.group.Group;
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class GroupFixtureFactory implements FixtureFactory<Group> {
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
 	public GroupFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<Group> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Group> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new GroupFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class GroupFixtures extends DefaultFixtures<Group> implements Fixtures<Group> {
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
 
         private final Map<String, Fixture<Group>> groupMap = new HashMap<String, Fixture<Group>>();
 
@@ -78,6 +79,7 @@ public class GroupFixtureFactory implements FixtureFactory<Group> {
             this.entries = values;
         }
 
+        @Override
         public Fixture<Group> getEntry(final String entryName) throws OXException {
             if (groupMap.containsKey(entryName)) {
                 return groupMap.get(entryName);

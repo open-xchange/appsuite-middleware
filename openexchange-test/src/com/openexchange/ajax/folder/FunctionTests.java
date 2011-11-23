@@ -56,6 +56,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -97,7 +98,7 @@ public class FunctionTests extends AbstractAJAXSession {
     }
 
     public void testUnknownAction() throws IOException, JSONException, OXException {
-        GetResponse response = client.execute(new UnknownActionRequest(API.OX_OLD, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, false));
+        GetResponse response = client.execute(new UnknownActionRequest(EnumAPI.OX_OLD, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, false));
         assertTrue("JSON response should contain an error message.", response.hasError());
         OXException exception = response.getException();
         String error = exception.getMessage(); //was: getOrigMessage, maybe it should be .getCause().getMessage()?
@@ -127,8 +128,8 @@ public class FunctionTests extends AbstractAJAXSession {
         try {
             FolderObject folder = Create.createPrivateFolder("ChangeMyPermissions" + System.currentTimeMillis(), FolderObject.CALENDAR, userId1);
             folder.setParentFolderID(FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
-            InsertResponse insertR = client.execute(new InsertRequest(API.OX_OLD, folder));
-            GetResponse getR = client.execute(new GetRequest(API.OX_OLD, insertR.getId()));
+            InsertResponse insertR = client.execute(new InsertRequest(EnumAPI.OX_OLD, folder));
+            GetResponse getR = client.execute(new GetRequest(EnumAPI.OX_OLD, insertR.getId()));
             toDelete = getR.getFolder();
             toDelete.setLastModified(getR.getTimestamp());
             FolderObject inserted = getR.getFolder();
@@ -138,12 +139,12 @@ public class FunctionTests extends AbstractAJAXSession {
             update.setLastModified(insertR.getTimestamp());
             update.addPermission(Create.ocl(userId1, false, true, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION));
             update.addPermission(Create.ocl(userId2, false, false, OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS));
-            client.execute(new UpdateRequest(API.OX_OLD, update));
-            getR = client.execute(new GetRequest(API.OX_OLD, insertR.getId()));
+            client.execute(new UpdateRequest(EnumAPI.OX_OLD, update));
+            getR = client.execute(new GetRequest(EnumAPI.OX_OLD, insertR.getId()));
             toDelete = getR.getFolder();
             toDelete.setLastModified(getR.getTimestamp());
         } finally {
-            client.execute(new DeleteRequest(API.OX_OLD, toDelete));
+            client.execute(new DeleteRequest(EnumAPI.OX_OLD, toDelete));
         }
     }
 
@@ -161,22 +162,22 @@ public class FunctionTests extends AbstractAJAXSession {
             };
             {
                 FolderObject folder = Create.folder(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, "DeleteMeImmediately", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
-                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
-                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                InsertResponse response = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(EnumAPI.OX_NEW, response.getId()));
                 parent = response2.getFolder();
                 parent.setLastModified(response2.getTimestamp());
             }
             {
                 FolderObject folder = Create.folder(parent.getObjectID(), "DeleteMeImmediatelyChild01", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
-                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
-                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                InsertResponse response = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(EnumAPI.OX_NEW, response.getId()));
                 child01 = response2.getFolder();
                 child01.setLastModified(response2.getTimestamp());
             }
             {
                 FolderObject folder = Create.folder(parent.getObjectID(), "DeleteMeImmediatelyChild02", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
-                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
-                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                InsertResponse response = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(EnumAPI.OX_NEW, response.getId()));
                 child02 = response2.getFolder();
                 child02.setLastModified(response2.getTimestamp());
             }
@@ -186,41 +187,41 @@ public class FunctionTests extends AbstractAJAXSession {
             };
             {
                 FolderObject folder = Create.folder(child01.getObjectID(), "NonDeleteableSubChild01", FolderObject.CALENDAR, FolderObject.PUBLIC, perms);
-                InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, folder));
-                GetResponse response2 = client.execute(new GetRequest(API.OX_NEW, response.getId()));
+                InsertResponse response = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
+                GetResponse response2 = client.execute(new GetRequest(EnumAPI.OX_NEW, response.getId()));
                 subChild01 = response2.getFolder();
                 subChild01.setLastModified(response2.getTimestamp());
             }
             // And finally the test
-            CommonDeleteResponse response = client.execute(new DeleteRequest(API.OX_NEW, false, parent));
+            CommonDeleteResponse response = client.execute(new DeleteRequest(EnumAPI.OX_NEW, false, parent));
             JSONArray notDeleted = (JSONArray) response.getData();
             assertEquals("Expected identifier of not deletable folder.", 1, notDeleted.length());
             assertEquals("Wrong folder identifier", parent.getObjectID(), notDeleted.getInt(0));
         } finally {
             if (null != subChild01) {
                 try {
-                    client2.execute(new DeleteRequest(API.OX_NEW, subChild01));
+                    client2.execute(new DeleteRequest(EnumAPI.OX_NEW, subChild01));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             if (null != child02) {
                 try {
-                    client.execute(new DeleteRequest(API.OX_NEW, child02));
+                    client.execute(new DeleteRequest(EnumAPI.OX_NEW, child02));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             if (null != child01) {
                 try {
-                    client.execute(new DeleteRequest(API.OX_NEW, child01));
+                    client.execute(new DeleteRequest(EnumAPI.OX_NEW, child01));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             if (null != parent) {
                 try {
-                    client.execute(new DeleteRequest(API.OX_NEW, parent));
+                    client.execute(new DeleteRequest(EnumAPI.OX_NEW, parent));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

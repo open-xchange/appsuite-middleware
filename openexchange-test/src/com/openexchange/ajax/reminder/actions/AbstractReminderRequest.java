@@ -78,10 +78,12 @@ public abstract class AbstractReminderRequest<T extends AbstractAJAXResponse> im
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getServletPath() {
         return REMINDER_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

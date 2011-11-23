@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -108,13 +108,13 @@ public class UpdateTest extends AbstractAJAXSession {
             }
             final String newId;
             {
-                final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
+                final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
                 final InsertResponse response = client.execute(request);
                 newId = (String) response.getResponse().getData();
                 assertNotNull("New ID must not be null!", newId);
             }
             {
-                fo.setLastModified(client.execute(new GetRequest(API.OUTLOOK, newId)).getTimestamp());
+                fo.setLastModified(client.execute(new GetRequest(EnumAPI.OUTLOOK, newId)).getTimestamp());
             }
             fo.setFolderName("testCalendarFolderRename" + System.currentTimeMillis());
             fo.setObjectID(Integer.parseInt(newId));
@@ -140,11 +140,11 @@ public class UpdateTest extends AbstractAJAXSession {
                 fo.setPermissionsAsArray(new OCLPermission[] { oclP, oclP2 });
             }
             {
-                final UpdateRequest updateRequest = new UpdateRequest(API.OUTLOOK, fo);
+                final UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OUTLOOK, fo);
                 client.execute(updateRequest).getResponse();
             }
             {
-                final GetRequest request = new GetRequest(API.OUTLOOK, newId);
+                final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, newId);
                 final GetResponse response = client.execute(request);
                 fo.setLastModified(response.getTimestamp());
                 final JSONObject jsonObject = (JSONObject) response.getResponse().getData();
@@ -161,7 +161,7 @@ public class UpdateTest extends AbstractAJAXSession {
             if (null != fo) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, fo);
+                    final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, fo);
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

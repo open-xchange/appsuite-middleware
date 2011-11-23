@@ -60,7 +60,8 @@ public class DayOnlyDateComparator implements Comparator<Date>, Serializable {
 
 	private static final long serialVersionUID = 5478489828627817393L;
 
-	public int compare(final Date d1, final Date d2) {
+	@Override
+    public int compare(final Date d1, final Date d2) {
 		final Calendar cal1 = Calendar.getInstance();
 		cal1.setTime(d1);
 

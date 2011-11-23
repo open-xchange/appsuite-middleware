@@ -153,13 +153,13 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         Date remindOn = null;
         int temp = 0;
-        
+
         if(null == icaldate) {
             final Dur duration = alarm.getTrigger().getDuration();
             if(!duration.isNegative()) {
                 return;
             }
-            temp = ((((duration.getWeeks() * 7) * 24 + duration.getDays()) * 60 + duration.getMinutes()) * 60 + duration.getSeconds()) * 1000;  
+            temp = ((((duration.getWeeks() * 7) * 24 + duration.getDays()) * 60 + duration.getMinutes()) * 60 + duration.getSeconds()) * 1000;
             useDuration = true;
         } else {
             remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);

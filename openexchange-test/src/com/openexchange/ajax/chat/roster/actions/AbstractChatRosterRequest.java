@@ -92,7 +92,7 @@ public abstract class AbstractChatRosterRequest<T extends AbstractAJAXResponse> 
 
     /**
      * Gets optional date parameter.
-     * 
+     *
      * @param request The JSON object
      * @param name The name
      * @param timeZone The time zone

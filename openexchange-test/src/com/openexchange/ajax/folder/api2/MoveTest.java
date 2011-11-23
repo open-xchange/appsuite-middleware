@@ -51,7 +51,7 @@ package com.openexchange.ajax.folder.api2;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GenJSONRequest;
 import com.openexchange.ajax.folder.actions.GenJSONResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -91,7 +91,7 @@ public class MoveTest extends AbstractAJAXSession {
                 JSONObject newFolder =
                     new JSONObject(
                         "{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
@@ -102,7 +102,7 @@ public class MoveTest extends AbstractAJAXSession {
                 newFolder =
                     new JSONObject(
                         "{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                request = new GenJSONRequest(API.OUTLOOK, true);
+                request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
@@ -115,7 +115,7 @@ public class MoveTest extends AbstractAJAXSession {
                 /*
                  * Move calendar folder below mail folder without timestamp parameter
                  */
-                final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(new JSONObject("{\"folder_id\":\"" + newMailId + "\"}"));
                 request.setParameter("action", "update");
                 request.setParameter("id", newCalId);
@@ -127,7 +127,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newCalId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete");
                     client.execute(request);
@@ -138,7 +138,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newMailId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete");
                     client.execute(request);
@@ -159,7 +159,7 @@ public class MoveTest extends AbstractAJAXSession {
                 JSONObject newFolder =
                     new JSONObject(
                         "{\"title\":\"newCalFolder" + System.currentTimeMillis() + "\",\"module\":\"calendar\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
@@ -170,7 +170,7 @@ public class MoveTest extends AbstractAJAXSession {
                 newFolder =
                     new JSONObject(
                         "{\"title\":\"newMailFolder" + System.currentTimeMillis() + "\",\"module\":\"mail\",\"permissions\":[{\"group\":false,\"bits\":403710016,\"entity\":" + userId + "}],\"subscribed\":1}");
-                request = new GenJSONRequest(API.OUTLOOK, true);
+                request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(newFolder);
                 request.setParameter("action", "new");
                 request.setParameter("folder_id", "1");
@@ -183,7 +183,7 @@ public class MoveTest extends AbstractAJAXSession {
                 /*
                  * Move mail folder below calendar folder without timestamp parameter
                  */
-                final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                 request.setJSONValue(new JSONObject("{\"folder_id\":\"" + newCalId + "\"}"));
                 request.setParameter("action", "update");
                 request.setParameter("id", newMailId);
@@ -196,7 +196,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newCalId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newCalId + "\"]"));
                     request.setParameter("action", "delete");
                     client.execute(request);
@@ -207,7 +207,7 @@ public class MoveTest extends AbstractAJAXSession {
             if (null != newMailId) {
                 // Delete folder
                 try {
-                    final GenJSONRequest request = new GenJSONRequest(API.OUTLOOK, true);
+                    final GenJSONRequest request = new GenJSONRequest(EnumAPI.OUTLOOK, true);
                     request.setJSONValue(new JSONArray("[\"" + newMailId + "\"]"));
                     request.setParameter("action", "delete");
                     client.execute(request);

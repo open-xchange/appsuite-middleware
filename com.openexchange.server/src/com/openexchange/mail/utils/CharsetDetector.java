@@ -84,7 +84,7 @@ public final class CharsetDetector {
 
     /**
      * Gets the fall-back charset name.
-     * 
+     *
      * @return The fall-back charset name
      */
     public static String getFallback() {

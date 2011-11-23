@@ -64,6 +64,7 @@ public class VersionTest extends SmackTestCase {
         assertNotNull("No version specified in the result", ((Version)result).getVersion());
     }
 
+    @Override
     protected int getMaxConnections() {
         return 1;
     }

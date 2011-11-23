@@ -52,21 +52,21 @@ package com.openexchange.rdiff;
 /**
  * {@link Delta} - A Delta is, in the Rsync algorithm, one of two things: (1) a block of bytes and an offset, or (2) a pair of offsets, one
  * old and one new.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Delta {
 
     /**
      * Gets the size of the block of data this class represents.
-     * 
+     *
      * @return The size of the block of data this class represents.
      */
     public int getBlockLength();
 
     /**
      * Gets the offset at which this delta should be written.
-     * 
+     *
      * @return The write offset.
      */
     public long getWriteOffset();

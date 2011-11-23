@@ -48,7 +48,7 @@ public class AbstractTimedResultTest extends TestCase{
     }
 
     private static final class Thing {
-        private long sequenceNumber;
+        private final long sequenceNumber;
 
         public Thing(long sequenceNumber) {
             this.sequenceNumber = sequenceNumber;

@@ -441,6 +441,7 @@ public abstract class MailMessage extends MailPart {
         super();
         priority = PRIORITY_NORMAL;
         colorLabel = COLOR_LABEL_NONE;
+        accountId = -1;
     }
 
     /**

@@ -1,3 +1,33 @@
+* 2011-11-23 - marcus.klein@open-xchange.com
+
+ - Partly fix for bug 20813: Caching information for resolving IMAP ACLs to users on a low level storage layer to reduce load on database.
+
+* 2011-11-21 - jan.bauerdick@open-xchange.com
+
+ - Created UpdateTask DBChatAlterTableTask
+ - pollMessages returns only unread messages by default now
+ - JSONArray contains number of unread messages
+
+* 2011-11-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20787: Smarter handling for charset encoding/decoding errors
+
+* 2011-11-18 - jan.bauerdick@open-xchange.com
+
+ - Added support for chatChunks
+ - chatChunk tests
+
+* 2011-11-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20818: Dealing with possible MIME-encoding (RFC 2047, Section 6.1) in MIME type string
+ - Fix for bug 20815: Adding a warning if original mail cannot be flagged as replied/forwarded, but do not abort mail transport
+
+* 2011-11-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20743: Ensure using active connection when loading folder attributes from database
+ - Fix for bug 20810: Ignore field if not parseable as TIMESTAMP field
+ - Fix for bug 20785: Abort gathering report data on error and properly signaling that error to caller
+
 * 2011-11-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 20791: More robust parsing of retrieved date value

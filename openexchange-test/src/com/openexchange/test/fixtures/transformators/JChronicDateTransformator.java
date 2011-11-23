@@ -64,14 +64,15 @@ public class JChronicDateTransformator implements Transformator{
 
 	private static final Pattern parenthesesRegex = Pattern.compile("(\\{|\\[|\\(.+\\)|\\]|\\})");
 	private static final String fallbackPattern = "dd.MM.yy HH:mm";
-	private FixtureLoader fixtureLoader;
+	private final FixtureLoader fixtureLoader;
 
     public JChronicDateTransformator(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Object transform(String value) throws OXException {
+	@Override
+    public Object transform(String value) throws OXException {
     	if (null == value) {
     		return null;
     	}

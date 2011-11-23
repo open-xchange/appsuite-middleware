@@ -124,7 +124,9 @@ public class ListAction extends AbstractMessagingAction {
 
         final JSONArray list = new JSONArray();
         for (final MessagingMessage messagingMessage : messages) {
-            list.put(writer.writeFields(messagingMessage, fields, folder.getAccountAddress(), session, DISPLAY_MODE));
+            if (null != messagingMessage) {
+                list.put(writer.writeFields(messagingMessage, fields, folder.getAccountAddress(), session, DISPLAY_MODE));
+            }
         }
 
         return new AJAXRequestResult(list);

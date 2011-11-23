@@ -49,22 +49,7 @@
 
 package com.openexchange.sessiond;
 
-import static com.openexchange.sessiond.SessionExceptionMessages.CONTEXT_LOCKED_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.DUPLICATE_AUTHID_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.MAX_SESSION_PER_USER_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.MISSING_PROPERTY_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.PASSWORD_UPDATE_FAILED_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSIOND_CONFIG_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSIOND_EXCEPTION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSIONID_COLLISION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_EXPIRED_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.SESSION_PARAMETER_MISSING_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.UNKNOWN_EVENT_TOPIC_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_BY_RANDOM_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_CLIENT_IP_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_MSG;
-import static com.openexchange.sessiond.SessionExceptionMessages.WRONG_SESSION_SECRET_MSG;
+import static com.openexchange.sessiond.SessionExceptionMessages.*;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -130,6 +115,17 @@ public enum SessionExceptionCodes implements OXExceptionCode {
      */
     WRONG_SESSION_SECRET(WRONG_SESSION_SECRET_MSG, Category.CATEGORY_TRY_AGAIN, 206);
 
+    private static final String PREFIX = "SES";
+
+    /**
+     * Gets the error prefix for these error codes.
+     *
+     * @return The error prefix
+     */
+    public static String getErrorPrefix() {
+        return PREFIX;
+    }
+
     private final String message;
 
     private final Category category;
@@ -154,7 +150,7 @@ public enum SessionExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "SES";
+        return PREFIX;
     }
 
     @Override

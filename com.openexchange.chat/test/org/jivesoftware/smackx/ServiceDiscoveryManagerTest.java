@@ -61,7 +61,7 @@ import org.jivesoftware.smackx.packet.DiscoverInfo;
 
 /**
  * Tests the service discovery functionality.
- * 
+ *
  * @author Gaston Dombiak
  */
 public class ServiceDiscoveryManagerTest extends SmackTestCase {
@@ -71,7 +71,7 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
     }
 
     /**
-     * Tests info discovery of a Smack client. 
+     * Tests info discovery of a Smack client.
      */
     public void testSmackInfo() {
 
@@ -120,7 +120,7 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
     }
 
     /**
-     * Tests service discovery of XHTML support. 
+     * Tests service discovery of XHTML support.
      */
     public void testXHTMLFeature() {
         // Check for local XHTML service support
@@ -128,17 +128,17 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
         assertTrue(XHTMLManager.isServiceEnabled(getConnection(0)));
         assertTrue(XHTMLManager.isServiceEnabled(getConnection(1)));
         // Check for XHTML support in connection1 from connection2
-        // Must specify a full JID and not a bare JID. Ensure that the server is working ok. 
+        // Must specify a full JID and not a bare JID. Ensure that the server is working ok.
         assertFalse(XHTMLManager.isServiceEnabled(getConnection(1), getBareJID(0)));
-        // Using a full JID check that the other client supports XHTML. 
+        // Using a full JID check that the other client supports XHTML.
         assertTrue(XHTMLManager.isServiceEnabled(getConnection(1), getFullJID(0)));
 
         // Disable the XHTML Message support in connection1
         XHTMLManager.setServiceEnabled(getConnection(0), false);
-        // Check for local XHTML service support 
+        // Check for local XHTML service support
         assertFalse(XHTMLManager.isServiceEnabled(getConnection(0)));
         assertTrue(XHTMLManager.isServiceEnabled(getConnection(1)));
-        // Check for XHTML support in connection1 from connection2 
+        // Check for XHTML support in connection1 from connection2
         assertFalse(XHTMLManager.isServiceEnabled(getConnection(1), getFullJID(0)));
     }
 
@@ -167,7 +167,7 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
         itemToPublish.setNode("romeo/avatar");
         itemToPublish.setAction(DiscoverItems.Item.UPDATE_ACTION);
         itemsToPublish.addItem(itemToPublish);
-        
+
         try {
             ServiceDiscoveryManager.getInstanceFor(getConnection(0)).publishItems(getServiceName(),
                     itemsToPublish);
@@ -175,9 +175,10 @@ public class ServiceDiscoveryManagerTest extends SmackTestCase {
         catch (Exception e) {
             fail(e.getMessage());
         }
-        
+
     }*/
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

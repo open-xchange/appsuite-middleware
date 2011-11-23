@@ -5,7 +5,8 @@ public class MockAction extends AbstractAction {
 
 	private boolean activated;
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws OXException {
 		activated = true;
 	}

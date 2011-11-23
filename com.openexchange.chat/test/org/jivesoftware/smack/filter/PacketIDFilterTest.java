@@ -87,10 +87,11 @@ public class PacketIDFilterTest extends TestCase {
      * Wraps the MockPacket class to always give an expected packet ID field.
      */
     private class MockIDPacket extends MockPacket {
-        private String id;
+        private final String id;
         public MockIDPacket(String id) {
             this.id = id;
         }
+        @Override
         public String getPacketID() {
             return id;
         }

@@ -91,14 +91,17 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
     }
 
 
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         Params params = new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
         if (getFolderID() != null)
@@ -115,6 +118,7 @@ public class AllSubscriptionsRequest extends AbstractBulkSubscriptionRequest<All
         return params.toArray();
     }
 
+    @Override
     public AbstractAJAXParser<AllSubscriptionsResponse> getParser() {
         return new AbstractAJAXParser<AllSubscriptionsResponse>(getFailOnError()) {
 

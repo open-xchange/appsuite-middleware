@@ -54,12 +54,12 @@ import java.util.Locale;
 
 /**
  * {@link ChatMessage}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 /**
  * {@link Message}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Message extends Packet {
@@ -103,28 +103,28 @@ public interface Message extends Packet {
 
     /**
      * Gets this message's type.
-     * 
+     *
      * @return The type
      */
     Type getType();
 
     /**
      * Gets this message's subject.
-     * 
+     *
      * @return The subject or <code>null</code>
      */
     String getSubject();
 
     /**
      * Gets the message's text.
-     * 
+     *
      * @return The text
      */
     String getText();
 
     /**
      * Gets the attachments.
-     * 
+     *
      * @return The optional attachments
      */
     List<ChatAttachment> getAttachments();

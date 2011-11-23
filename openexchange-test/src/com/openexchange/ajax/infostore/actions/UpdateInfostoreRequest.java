@@ -67,9 +67,9 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
 
     private File upload;
 
-    private long folderId;
+    private final long folderId;
 
-    private int id;
+    private final int id;
 
     public UpdateInfostoreRequest() {
         this(null, null);
@@ -102,14 +102,17 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
         return metadata;
     }
 
+    @Override
     public String getBody() throws JSONException {
         return writeJSON(getMetadata());
     }
 
+    @Override
     public Method getMethod() {
         return null == upload ? Method.PUT : Method.UPLOAD;
     }
 
+    @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         List<Parameter> tmp = new ArrayList<Parameter>(3);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
@@ -122,6 +125,7 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
         return tmp.toArray(new Parameter[tmp.size()]);
     }
 
+    @Override
     public UpdateInfostoreParser getParser() {
         return new UpdateInfostoreParser(getFailOnError(), null != upload);
     }

@@ -10,8 +10,8 @@ public class CollectionDelta<T> {
 		public void deleted(T thing);
 	}
 
-	private List<T> newAndModified = new ArrayList<T>();
-	private List<T> deleted = new ArrayList<T>();
+	private final List<T> newAndModified = new ArrayList<T>();
+	private final List<T> deleted = new ArrayList<T>();
 
 	public void addNewOrModified(T thing) {
 		newAndModified.add(thing);

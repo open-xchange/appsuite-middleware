@@ -78,7 +78,7 @@ public class RosterExchangeManagerTest extends SmackTestCase {
 
     /**
      * High level API test.
-     * This is a simple test to use with a XMPP client and check if the client receives user1's 
+     * This is a simple test to use with a XMPP client and check if the client receives user1's
      * roster
      * 1. User_1 will send his/her roster to user_2
      */
@@ -97,7 +97,7 @@ public class RosterExchangeManagerTest extends SmackTestCase {
 
     /**
      * High level API test.
-     * This is a simple test to use with a XMPP client and check if the client receives user1's 
+     * This is a simple test to use with a XMPP client and check if the client receives user1's
      * roster groups
      * 1. User_1 will send his/her RosterGroups to user_2
      */
@@ -119,7 +119,7 @@ public class RosterExchangeManagerTest extends SmackTestCase {
      * High level API test.
      * 1. User_1 will send his/her roster to user_2
      * 2. User_2 will receive the entries and iterate over them to check if everything is fine
-     * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then 
+     * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then
      * something is wrong
      */
     public void testSendAndReceiveRoster() {
@@ -128,6 +128,7 @@ public class RosterExchangeManagerTest extends SmackTestCase {
 
         // Create a RosterExchangeListener that will iterate over the received roster entries
         RosterExchangeListener rosterExchangeListener = new RosterExchangeListener() {
+            @Override
             public void entriesReceived(String from, Iterator remoteRosterEntries) {
                 int received = 0;
                 assertNotNull("From is null", from);
@@ -167,9 +168,9 @@ public class RosterExchangeManagerTest extends SmackTestCase {
     /**
      * High level API test.
      * 1. User_1 will send his/her roster to user_2
-     * 2. User_2 will automatically add the entries that receives to his/her roster in the 
+     * 2. User_2 will automatically add the entries that receives to his/her roster in the
      * corresponding group
-     * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then 
+     * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then
      * something is wrong
      */
     public void testSendAndAcceptRoster() {
@@ -178,6 +179,7 @@ public class RosterExchangeManagerTest extends SmackTestCase {
 
         // Create a RosterExchangeListener that will accept all the received roster entries
         RosterExchangeListener rosterExchangeListener = new RosterExchangeListener() {
+            @Override
             public void entriesReceived(String from, Iterator remoteRosterEntries) {
                 int received = 0;
                 assertNotNull("From is null", from);
@@ -224,6 +226,7 @@ public class RosterExchangeManagerTest extends SmackTestCase {
         assertTrue("Roster2 has no entries", getConnection(1).getRoster().getEntryCount() > 0);
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         try {
@@ -240,6 +243,7 @@ public class RosterExchangeManagerTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected int getMaxConnections() {
         return 4;
     }

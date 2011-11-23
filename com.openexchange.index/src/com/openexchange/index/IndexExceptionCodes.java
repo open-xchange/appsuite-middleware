@@ -74,15 +74,15 @@ public enum IndexExceptionCodes implements OXExceptionCode {
     /**
      * Could not find search index for user %1$s and module %2$s in context %3$s.
      */
-    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),    
+    INDEX_NOT_FOUND(IndexExceptionMessages.INDEX_NOT_FOUND_MSG, Category.CATEGORY_CONFIGURATION, 3),
     /**
      * Could not register index search server with url %1$s.
      */
-    REGISTER_SERVER_ERROR(IndexExceptionMessages.REGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 4), 
+    REGISTER_SERVER_ERROR(IndexExceptionMessages.REGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 4),
     /**
      * Could not unregister index search server with id %1$s.
      */
-    UNREGISTER_SERVER_ERROR(IndexExceptionMessages.UNREGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 5), 
+    UNREGISTER_SERVER_ERROR(IndexExceptionMessages.UNREGISTER_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 5),
     /**
      * Could not create index mapping for user %1$s in context %2$s for module %3$s on server %4$s.
      */
@@ -92,16 +92,16 @@ public enum IndexExceptionCodes implements OXExceptionCode {
      */
     SERVER_NOT_FOUND(IndexExceptionMessages.SERVER_NOT_FOUND_MSG, CATEGORY_ERROR, 7),
     /**
-     * Could not find a server to add a new index to.    
+     * Could not find a server to add a new index to.
      */
     SERVER_FULL(IndexExceptionMessages.SERVER_FULL_MSG, CATEGORY_ERROR, 8)
-    
+
     ;
 
     private final String message;
-    
+
     private final int number;
-    
+
     private final Category category;
 
     private IndexExceptionCodes(final String message, final Category category, final int detailNumber) {
@@ -109,7 +109,7 @@ public enum IndexExceptionCodes implements OXExceptionCode {
         number = detailNumber;
         this.category = category;
     }
-    
+
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
      *

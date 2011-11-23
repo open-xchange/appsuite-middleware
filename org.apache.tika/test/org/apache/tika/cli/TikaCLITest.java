@@ -33,9 +33,10 @@ public class TikaCLITest extends TestCase{
     private File profile = null;
     private ByteArrayOutputStream outContent = null;
     private PrintStream stdout = null;
-    private URI testDataURI = new File("src/test/resources/test-data/").toURI();
-    private String resorcePrefix = testDataURI.toString();
+    private final URI testDataURI = new File("src/test/resources/test-data/").toURI();
+    private final String resorcePrefix = testDataURI.toString();
 
+    @Override
     public void setUp() throws Exception {
         profile = new File("welsh.ngp");
         outContent = new ByteArrayOutputStream();
@@ -45,7 +46,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Creates a welsh language profile
-     * 
+     *
      * @throws Exception
      */
     public void testCreateProfile() throws Exception {
@@ -56,7 +57,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests --list-parser-detail option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testListParserDetail() throws Exception{
@@ -67,7 +68,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests --list-parser option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testListParsers() throws Exception{
@@ -79,7 +80,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests -x option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testXMLOutput() throws Exception{
@@ -90,7 +91,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests a -h option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testHTMLOutput() throws Exception{
@@ -101,7 +102,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests -t option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testTextOutput() throws Exception{
@@ -122,7 +123,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests -l option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testLanguageOutput() throws Exception{
@@ -133,7 +134,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests -d option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testDetectOutput() throws Exception{
@@ -144,7 +145,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests --list-met-models option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testListMetModels() throws Exception{
@@ -155,7 +156,7 @@ public class TikaCLITest extends TestCase{
 
     /**
      * Tests --list-supported-types option of the cli
-     * 
+     *
      * @throws Exception
      */
     public void testListSupportedTypes() throws Exception{
@@ -167,6 +168,7 @@ public class TikaCLITest extends TestCase{
     /**
      * Tears down the test. Returns the System.out
      */
+    @Override
     public void tearDown() throws Exception {
         if(profile != null && profile.exists())
             profile.delete();

@@ -61,6 +61,7 @@ import com.openexchange.ajax.mail.filter.action.Move;
  */
 public class MoveParserImpl implements ActionParser {
 
+    @Override
     public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
         final String folder = jsonObject.getString("into");
         return new Move(folder);

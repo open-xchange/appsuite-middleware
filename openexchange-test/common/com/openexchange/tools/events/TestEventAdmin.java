@@ -13,11 +13,13 @@ public class TestEventAdmin implements EventAdmin {
 
     private final List<Event> events = new LinkedList<Event>();
 
+    @Override
     public void postEvent(final Event event) {
         events.add( event );
 	}
 
-	public void sendEvent(final Event event) {
+	@Override
+    public void sendEvent(final Event event) {
         Thread.dumpStack();
         events.add( event );
 	}

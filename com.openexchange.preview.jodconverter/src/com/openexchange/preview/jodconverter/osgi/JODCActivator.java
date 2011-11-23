@@ -8,16 +8,16 @@ import com.openexchange.preview.jodconverter.internal.JODCPreviewService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 public class JODCActivator extends HousekeepingActivator {
-	
+
 	private static final Class<?>[] NEEDED = new Class[] { DocumentConverterService.class };
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JODCActivator.class));
-    
-	
+
+
 	public JODCActivator() {
         super();
     }
-	
+
 	@Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;

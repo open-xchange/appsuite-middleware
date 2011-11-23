@@ -17,7 +17,6 @@
 
 package net.olivo.lc4j;
 
-import java.util.List;
 import java.util.Iterator;
 
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
@@ -38,13 +37,13 @@ import it.unimi.dsi.fastutil.ints.IntSet;
  */
 public class LanguageModel {
 	/** Map that, for a given n-gram, returns the corresponding index. */
-	private Int2IntMap indexMap;
+	private final Int2IntMap indexMap;
 	/** List that, for a given index, returns the corresponding n-gram. */
-	private IntList reverseIndexMap;
+	private final IntList reverseIndexMap;
 	/** Map that, given an index extracted from <code>indexMap</code>, returns
 	 * the n-gram's frequency.
 	 */
-	private IncrementalInt2IntMap frequencyMap;
+	private final IncrementalInt2IntMap frequencyMap;
 
 	/** The minimum frequency value seen up to now. Used for checking various
 	 * methods' arguments at run-time.
@@ -148,7 +147,7 @@ public class LanguageModel {
 	 * @return the set of keys.
 	 */
 	public IntSet keySet() {
-		return (IntSet)indexMap.keySet();
+		return indexMap.keySet();
 	}
 
 	/** Returns true if the given n-gram is contained in this language-model.

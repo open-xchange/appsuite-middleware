@@ -98,6 +98,8 @@ public abstract class AbstractPerformer {
 
     private final Map<OXException, Object> warnings;
 
+    protected boolean check4Duplicates;
+
     /**
      * Initializes a new {@link AbstractPerformer} from given session.
      *
@@ -123,6 +125,7 @@ public abstract class AbstractPerformer {
         context = session.getContext();
         storageParameters = new StorageParametersImpl(session);
         warnings = new ConcurrentHashMap<OXException, Object>(2);
+        check4Duplicates = true;
     }
 
     /**
@@ -150,31 +153,41 @@ public abstract class AbstractPerformer {
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
         warnings = new ConcurrentHashMap<OXException, Object>(2);
+        check4Duplicates = true;
+    }
+
+    /**
+     * Sets the check4Duplicates flag.
+     *
+     * @param check4Duplicates The check4Duplicates to set
+     */
+    public void setCheck4Duplicates(final boolean check4Duplicates) {
+        this.check4Duplicates = check4Duplicates;
     }
 
     /**
      * Checks for duplicate folder through a LIST request.
-     * 
+     *
      * @param name The name to check for
      * @param treeId The tree identifier
      * @param parentId The parent identifier
-     * @param openedStorages A collection carrying opened storages
      * @throws FolderException If name look-up fails
      */
-    protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+    protected void checkForDuplicate(final String name, final String treeId, final String parentId) throws OXException {
+        if (!check4Duplicates) {
+            return;
+        }
         /*
          * Check for duplicate
          */
         final Locale locale = storageParameters.getUser().getLocale();
-        for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true)) {
-            final String localizedName = userizedFolder.getLocalizedName(locale);
-            if (localizedName.equals(name)) {
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
-                checkOpenedStorage(realStorage, openedStorages);
-                throw FolderExceptionErrorMessage.EQUAL_NAME.create(
-                    name,
-                    realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale),
-                    treeId);
+        final String lcName = name.toLowerCase(locale);
+        if (!FolderStorage.REAL_TREE_ID.equals(treeId)) {
+            for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
+                final String localizedName = userizedFolder.getLocalizedName(locale);
+                if (localizedName.toLowerCase(locale).equals(lcName)) {
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(name, localizedName, treeId);
+                }
             }
         }
         /*
@@ -182,8 +195,10 @@ public abstract class AbstractPerformer {
          */
         final FolderI18nNamesService namesService = FolderI18nNamesServiceImpl.getInstance();
         final Set<String> i18nNames = namesService.getI18nNamesFor();
-        if (i18nNames.contains(name)) {
-            throw FolderExceptionErrorMessage.RESERVED_NAME.create(name);
+        for (final String reservedName : i18nNames) {
+            if (reservedName.toLowerCase(locale).equals(lcName)) {
+                throw FolderExceptionErrorMessage.RESERVED_NAME.create(name);
+            }
         }
     }
 
@@ -328,11 +343,9 @@ public abstract class AbstractPerformer {
      * @throws OXException If a folder error occurs
      */
     protected void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        for (final FolderStorage ps : openedStorages) {
-            if (checkMe.equals(ps)) {
-                // Passed storage is already opened
-                return;
-            }
+        if (openedStorages.contains(checkMe)) {
+            // Passed storage is already opened
+            return;
         }
         // Passed storage has not been opened before. Open now and add to collection
         if (checkMe.startTransaction(storageParameters, modify)) {

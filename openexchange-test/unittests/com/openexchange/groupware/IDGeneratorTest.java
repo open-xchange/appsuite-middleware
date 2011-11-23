@@ -172,6 +172,7 @@ public class IDGeneratorTest extends TestCase {
 
         boolean run = true;
 
+        @Override
         public void run() {
             while (run) {
                 Connection con = null;

@@ -73,6 +73,7 @@ public class StoreRequest extends AbstractRequest<StoreResponse> {
         this.failOnError = failOnError;
     }
 
+    @Override
     public AbstractAJAXParser<? extends StoreResponse> getParser() {
         return new StoreResponseParser(failOnError);
     }

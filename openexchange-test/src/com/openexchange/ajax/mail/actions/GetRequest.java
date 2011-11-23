@@ -110,14 +110,17 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         this.save = save;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> l = new ArrayList<Parameter>();
         l.add(new Parameter(AJAXServlet.PARAMETER_ACTION, structure ? AJAXServlet.ACTION_GET_STRUCTURE : AJAXServlet.ACTION_GET));
@@ -138,6 +141,7 @@ public final class GetRequest extends AbstractMailRequest<GetResponse> {
         return l.toArray(new Parameter[l.size()]);
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser(failOnError);
     }

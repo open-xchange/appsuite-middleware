@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CreateFavFolderTreePerformer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CreateFavFolderTreePerformer extends AbstractFavFolderPerformer {
@@ -84,7 +84,7 @@ public final class CreateFavFolderTreePerformer extends AbstractFavFolderPerform
 
     /**
      * Start a new favorite folder tree by inserting its root element.
-     * 
+     *
      * @param name The favorite folder list name or <code>null</code> to select default name {@link FavFolderStrings#MY_FAV_FOLDERS
      *            "My favorite folders #NUM#"}
      * @param id The tree/list identifier or <code>-1</code> to generate a new unique identifier

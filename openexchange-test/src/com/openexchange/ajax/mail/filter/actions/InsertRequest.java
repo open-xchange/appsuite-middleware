@@ -106,21 +106,24 @@ public class InsertRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return convert(rule);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		if (forUser != null) {
 			return new Parameter[] {
 					new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
@@ -134,7 +137,8 @@ public class InsertRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public AbstractAJAXParser getParser() {
+	@Override
+    public AbstractAJAXParser getParser() {
 		return new InsertParser(failOnError);
 	}
 }

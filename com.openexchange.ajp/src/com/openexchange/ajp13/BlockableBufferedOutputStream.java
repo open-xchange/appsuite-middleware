@@ -197,7 +197,7 @@ public class BlockableBufferedOutputStream extends BufferedOutputStream implemen
 
     /**
      * Sets the last-accessed time stamp.
-     * 
+     *
      * @param lastAccessed The time stamp to set
      */
     public void setLastAccessed(final long lastAccessed) {

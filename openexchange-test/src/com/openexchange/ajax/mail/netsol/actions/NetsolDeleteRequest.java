@@ -85,6 +85,7 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
         this.hardDelete = hardDelete;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
         for (int i = 0; i < mailPaths.length; i++) {
@@ -96,23 +97,28 @@ public final class NetsolDeleteRequest implements AJAXRequest<NetsolDeleteReques
         return array;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
                 new Parameter("harddelete", hardDelete ? "1" : "0") };
     }
 
+    @Override
     public DeleteParser getParser() {
         return new DeleteParser(true);
     }
 
+    @Override
     public String getServletPath() {
         return AbstractMailRequest.MAIL_URL;
     }

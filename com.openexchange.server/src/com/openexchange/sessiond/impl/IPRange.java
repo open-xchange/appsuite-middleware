@@ -97,7 +97,7 @@ public class IPRange {
 
     /**
      * Parses specified string to an IP range.
-     * 
+     *
      * @param string The string to parse
      * @return The resulting IP range or <code>null</code> if passed string is empty
      */

@@ -63,11 +63,11 @@ import com.openexchange.ajax.framework.Header;
  */
 public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
 
-    private List<Parameter> params;
+    private final List<Parameter> params;
 
     private JSONArray body;
 
-    private MailSearchParser searchParser;
+    private final MailSearchParser searchParser;
 
     /**
      * This constructor allows to set the parameters of the request.
@@ -103,6 +103,7 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
         setBody(body);
     }
 
+    @Override
     public Object getBody() {
         return body;
     }
@@ -112,22 +113,27 @@ public class MailSearchRequest implements AJAXRequest<MailSearchResponse> {
         param(AJAXServlet.PARAMETER_DATA, body.toString());
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public MailSearchParser getParser() {
         return searchParser;
     }
 
+    @Override
     public String getServletPath() {
         return "/ajax/mail";
     }

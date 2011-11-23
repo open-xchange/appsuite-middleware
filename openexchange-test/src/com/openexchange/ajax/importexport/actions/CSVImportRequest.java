@@ -72,6 +72,7 @@ public final class CSVImportRequest extends AbstractImportRequest<CSVImportRespo
         this.failOnError = failOnError;
     }
 
+    @Override
     public CSVImportParser getParser() {
         return new CSVImportParser(failOnError);
     }

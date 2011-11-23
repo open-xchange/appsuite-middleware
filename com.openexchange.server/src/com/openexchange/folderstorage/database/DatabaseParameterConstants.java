@@ -68,9 +68,4 @@ public final class DatabaseParameterConstants {
      */
     public static final String PARAM_CONNECTION = "DB.Con";
 
-    /**
-     * The parameter name for folder access instance.
-     */
-    public static final String PARAM_ACCESS = "DB.Access";
-
 }

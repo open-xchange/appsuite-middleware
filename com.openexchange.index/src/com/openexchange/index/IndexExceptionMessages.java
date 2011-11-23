@@ -74,7 +74,7 @@ public final class IndexExceptionMessages implements LocalizableStrings {
 
     // Could not find search index for user %1$s and module %2$s in context %3$s.
     public static final String INDEX_NOT_FOUND_MSG = "Could not find search index for user %1$s and module %2$s in context %3$s.";
-    
+
     // Could not register index search server with url %1$s.
     public static final String REGISTER_SERVER_ERROR_MSG = "Could not register index search server with url %1$s.";
 
@@ -86,8 +86,8 @@ public final class IndexExceptionMessages implements LocalizableStrings {
 
     // Could not find server with id %1$s.
     public static final String SERVER_NOT_FOUND_MSG = "Could not find server with id %1$s.";
-    
-    // Could not find a server to add a new index to. 
+
+    // Could not find a server to add a new index to.
     public static final String SERVER_FULL_MSG = "Could not find a server to add a new index to.";
 
 }

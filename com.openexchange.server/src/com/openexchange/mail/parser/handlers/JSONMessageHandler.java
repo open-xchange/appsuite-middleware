@@ -279,7 +279,7 @@ public final class JSONMessageHandler implements MailMessageHandler {
 
     /**
      * Sets whether the HTML part of a <i>multipart/alternative</i> content shall be attached.
-     * 
+     *
      * @param attachHTMLAlternativePart Whether the HTML part of a <i>multipart/alternative</i> content shall be attached
      * @return The {@link JSONMessageHandler} with new behavior applied
      */

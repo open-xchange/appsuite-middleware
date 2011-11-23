@@ -34,9 +34,9 @@ import org.xmpp.forms.FormField.Type;
  * the {@link FormField} implementation. Every test in this class works
  * according to the same principle: use the setter to set a particular value,
  * then use the getter to verify that this value is returned.
- * 
+ *
  * This test should identify problems such as TINDER-12
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.igniterealtime.org/issues/browse/TINDER-12">http://www.igniterealtime.org/issues/browse/TINDER-12</a>
  */

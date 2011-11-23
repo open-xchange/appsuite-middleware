@@ -65,7 +65,7 @@ import com.openexchange.publish.json.PublicationWriter;
  */
 public class NewPublicationRequest extends AbstractPublicationRequest<NewPublicationResponse> {
 
-    private Publication publication;
+    private final Publication publication;
 
     /**
      * Initializes a new {@link NewPublicationRequest}.
@@ -75,6 +75,7 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
         this.publication = publication;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         try {
             return new PublicationWriter().write(publication, null);
@@ -83,16 +84,19 @@ public class NewPublicationRequest extends AbstractPublicationRequest<NewPublica
         }
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "new"));
         return params.toArray(new Parameter[0]);
     }
 
+    @Override
     public AbstractAJAXParser<NewPublicationResponse> getParser() {
         return new AbstractAJAXParser<NewPublicationResponse>(isFailOnError()) {
 

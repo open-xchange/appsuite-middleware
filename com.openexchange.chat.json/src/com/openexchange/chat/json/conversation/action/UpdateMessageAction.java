@@ -117,7 +117,7 @@ public final class UpdateMessageAction extends AbstractChatConversationAction {
             /*
              * Create JSON
              */
-            final Message message = chat.getMessage(messageDescription.getMessageId());
+            final Message message = chat.getMessage(messageDescription.getMessageId(), Integer.parseInt(access.getUser().getId()));
             final JSONObject json = JSONConversationWriter.writeMessage(message, session.getUser().getTimeZone());
             /*
              * Return appropriate result

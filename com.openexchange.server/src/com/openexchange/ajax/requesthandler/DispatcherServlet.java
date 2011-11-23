@@ -119,7 +119,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Sets the dispatcher instance.
-     * 
+     *
      * @param dispatcher The dispatcher instance or <code>null</code> to remove
      */
     public static void setDispatcher(final Dispatcher dispatcher) {
@@ -128,7 +128,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Gets the dispatcher instance.
-     * 
+     *
      * @return The dispatcher instance or <code>null</code> if absent
      */
     public static Dispatcher getDispatcher() {
@@ -139,7 +139,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Sets the prefix.
-     * 
+     *
      * @param prefix The prefix or <code>null</code> to remove
      */
     public static void setPrefix(final String prefix) {
@@ -148,7 +148,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Gets the prefix.
-     * 
+     *
      * @return The prefix or <code>null</code> if absent
      */
     public static String getPrefix() {
@@ -263,7 +263,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Sends a proper response to requesting client after request has been orderly dispatched.
-     * 
+     *
      * @param requestData The AJAX request data
      * @param result The AJAX request result
      * @param httpRequest The associated HTTP Servlet request
@@ -286,7 +286,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
-     * 
+     *
      * @param req The HTTP Servlet request
      * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
      * @param isFileUpload Whether passed request is considered as a file upload
@@ -408,7 +408,7 @@ public class DispatcherServlet extends SessionServlet {
 
     /**
      * Parses host name, secure and AJP route.
-     * 
+     *
      * @param request The AJAX request data
      * @param req The HTTP Servlet request
      * @param session The associated session

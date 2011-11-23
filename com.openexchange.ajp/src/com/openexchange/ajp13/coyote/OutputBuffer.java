@@ -39,7 +39,7 @@ public interface OutputBuffer {
 
     /**
      * Gets the packet size.
-     * 
+     *
      * @return The packet size
      */
     public int getPacketSize();

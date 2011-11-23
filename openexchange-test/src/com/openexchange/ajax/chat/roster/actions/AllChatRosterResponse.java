@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link AllChatRosterResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AllChatRosterResponse extends AbstractAJAXResponse {
@@ -71,7 +71,7 @@ public final class AllChatRosterResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link AllChatRosterResponse}.
-     * 
+     *
      * @param response
      */
     public AllChatRosterResponse(final Response response) {
@@ -81,7 +81,7 @@ public final class AllChatRosterResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the rosters of all available chat accounts.
-     * 
+     *
      * @return The rosters
      * @throws JSONException If parsing JSON fails
      */
@@ -103,7 +103,7 @@ public final class AllChatRosterResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the single roster.
-     * 
+     *
      * @return The roster
      * @throws JSONException If parsing JSON fails
      */

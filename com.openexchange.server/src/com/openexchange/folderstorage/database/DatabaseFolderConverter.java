@@ -73,6 +73,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
+import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
  * {@link DatabaseFolderConverter}
@@ -230,7 +231,7 @@ public final class DatabaseFolderConverter {
                  */
                 retval.setType(SharedType.getInstance());
                 retval.setGlobal(false); // user-sensitive!
-                retval.setCacheable(false); // Not cacheable
+                retval.setCacheable(OXFolderProperties.isEnableSharedFolderCaching()); // cacheable
                 retval.setDefault(false);
                 /*
                  * Determine user-visible subfolders

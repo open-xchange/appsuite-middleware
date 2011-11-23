@@ -54,14 +54,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link UpdateChatRosterResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UpdateChatRosterResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link UpdateChatRosterResponse}.
-     * 
+     *
      * @param response
      */
     public UpdateChatRosterResponse(final Response response) {

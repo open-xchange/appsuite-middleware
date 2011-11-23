@@ -66,10 +66,12 @@ public abstract class AbstractAttachmentRequest<T extends AbstractAJAXResponse> 
         super();
     }
 
+    @Override
     public String getServletPath() {
         return ATTACHMENT_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

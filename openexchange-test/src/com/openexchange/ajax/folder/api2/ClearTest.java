@@ -52,9 +52,9 @@ package com.openexchange.ajax.folder.api2;
 import java.util.Date;
 import org.json.JSONArray;
 import com.openexchange.ajax.AppointmentTest;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.ClearRequest;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -113,7 +113,7 @@ public class ClearTest extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION);
             fo.setPermissionsAsArray(new OCLPermission[] { oclP });
 
-            final InsertRequest request = new InsertRequest(API.OUTLOOK, fo);
+            final InsertRequest request = new InsertRequest(EnumAPI.OUTLOOK, fo);
             final InsertResponse response = client.execute(request);
 
             newId = (String) response.getResponse().getData();
@@ -169,7 +169,7 @@ public class ClearTest extends AbstractAJAXSession {
 
             assertTrue("Appointments were not created.", null != appointments && appointments.length == 2);
 
-            final ClearRequest clearRequest = new ClearRequest(API.OUTLOOK, newId);
+            final ClearRequest clearRequest = new ClearRequest(EnumAPI.OUTLOOK, newId);
             final CommonDeleteResponse clearResponse = client.execute(clearRequest);
 
             final JSONArray nonClearedIDs = (JSONArray) clearResponse.getResponse().getData();
@@ -185,7 +185,7 @@ public class ClearTest extends AbstractAJAXSession {
             if (null != newId) {
                 // Delete folder
                 try {
-                    final DeleteRequest deleteRequest = new DeleteRequest(API.OUTLOOK, newId, new Date());
+                    final DeleteRequest deleteRequest = new DeleteRequest(EnumAPI.OUTLOOK, newId, new Date());
                     client.execute(deleteRequest);
                 } catch (final Exception e) {
                     e.printStackTrace();

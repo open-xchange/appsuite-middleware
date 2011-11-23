@@ -53,7 +53,7 @@ import com.openexchange.chat.Presence;
 
 /**
  * {@link PresenceImpl} - The basic {@link Presence presence} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PresenceImpl extends PacketImpl implements Presence {
@@ -75,7 +75,7 @@ public class PresenceImpl extends PacketImpl implements Presence {
 
     /**
      * Initializes a new {@link PresenceImpl}.
-     * 
+     *
      * @param type The presence type
      */
     public PresenceImpl(final Type type) {
@@ -101,7 +101,7 @@ public class PresenceImpl extends PacketImpl implements Presence {
 
     /**
      * Sets the type
-     * 
+     *
      * @param type The type to set
      */
     public void setType(final Type type) {
@@ -110,7 +110,7 @@ public class PresenceImpl extends PacketImpl implements Presence {
 
     /**
      * Sets the mode
-     * 
+     *
      * @param mode The mode to set
      */
     public void setMode(final Mode mode) {
@@ -119,7 +119,7 @@ public class PresenceImpl extends PacketImpl implements Presence {
 
     /**
      * Sets the status
-     * 
+     *
      * @param status The status to set
      */
     public void setStatus(final String status) {

@@ -90,7 +90,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
     public PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
-    
+
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         super.convert(requestData, result, session, converter);
@@ -123,6 +123,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             content = htmlService.filterExternalImages(content, modified);
             sanitizedHtml = content;
         }
+        // TODO: Replace CSS classes
         result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
     }
 
@@ -137,15 +138,15 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
 
         private final String sanitizedHtml;
 
-        private InputStream thumbnail;
+        private final InputStream thumbnail;
 
         /**
          * Initializes a new {@link SanitizedPreviewDocument}.
-         * 
+         *
          * @param metaData
          * @param sanitizedHtml
          */
-        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml, InputStream thumbnail) {
+        protected SanitizedPreviewDocument(final Map<String, String> metaData, final String sanitizedHtml, final InputStream thumbnail) {
             this.metaData = metaData;
             this.sanitizedHtml = sanitizedHtml;
             this.thumbnail = thumbnail;

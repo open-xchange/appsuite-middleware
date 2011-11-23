@@ -685,11 +685,11 @@ public final class ServerActivator extends DeferredActivator {
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
         registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
-        
+
         // Register SessionHolder
         registrationList.add(context.registerService(SessionHolder.class.getName(), ThreadLocalSessionHolder.getInstance(), null));
         ServerServiceRegistry.getInstance().addService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
-        
+
         // Fake bundle start
         activators.add(new FolderStorageActivator());
         for (final BundleActivator activator : activators) {

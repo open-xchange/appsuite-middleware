@@ -57,7 +57,7 @@ import com.openexchange.chat.ChatService;
 
 /**
  * {@link ChatAccountImpl} - The basic {@link ChatAccount} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ChatAccountImpl implements ChatAccount {
@@ -102,7 +102,7 @@ public class ChatAccountImpl implements ChatAccount {
 
     /**
      * Adds specified configuration property.
-     * 
+     *
      * @param name The property name
      * @param value The value; <code>null</code> means to remove associated value
      */
@@ -119,7 +119,7 @@ public class ChatAccountImpl implements ChatAccount {
 
     /**
      * Adds specified configuration properties.
-     * 
+     *
      * @param properties The properties to add
      */
     public void addConfigProperty(final Map<String, Object> properties) {
@@ -131,7 +131,7 @@ public class ChatAccountImpl implements ChatAccount {
 
     /**
      * Removes specified configuration property.
-     * 
+     *
      * @param name The property name
      */
     public void removeConfigProperty(final String name) {
@@ -143,7 +143,7 @@ public class ChatAccountImpl implements ChatAccount {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -152,7 +152,7 @@ public class ChatAccountImpl implements ChatAccount {
 
     /**
      * Sets the display name
-     * 
+     *
      * @param displayName The display name to set
      */
     public void setDisplayName(final String displayName) {
@@ -161,7 +161,7 @@ public class ChatAccountImpl implements ChatAccount {
 
     /**
      * Sets the chat service
-     * 
+     *
      * @param chatService The chats ervice to set
      */
     public void setChatService(final ChatService chatService) {

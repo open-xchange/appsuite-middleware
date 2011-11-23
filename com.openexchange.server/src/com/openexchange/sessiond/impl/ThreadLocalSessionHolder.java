@@ -57,38 +57,54 @@ import com.openexchange.tools.session.SessionHolder;
 
 
 /**
- * {@link ThreadLocalSessionHolder}
+ * {@link ThreadLocalSessionHolder} - The session holder usimg a {@link ThreadLocal} instance.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ThreadLocalSessionHolder implements SessionHolder {
 
     private static final ThreadLocalSessionHolder INSTANCE = new ThreadLocalSessionHolder();
-    
-    private ThreadLocal<ServerSession> session = new ThreadLocal<ServerSession>();
 
-    public void setSession(ServerSession serverSession) {
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static ThreadLocalSessionHolder getInstance() {
+        return INSTANCE;
+    }
+
+    private final ThreadLocal<ServerSession> session;
+
+    /**
+     * Initializes a new {@link ThreadLocalSessionHolder}.
+     */
+    private ThreadLocalSessionHolder() {
+        super();
+        session = new ThreadLocal<ServerSession>();
+    }
+
+    public void setSession(final ServerSession serverSession) {
         session.set(serverSession);
     }
-    
+
     public void clear() {
         session.remove();
     }
-    
+
+    @Override
     public Context getContext() {
         return session.get().getContext();
     }
 
+    @Override
     public Session getSessionObject() {
         return session.get();
     }
 
+    @Override
     public User getUser() {
         return session.get().getUser();
-    }
-
-    public static ThreadLocalSessionHolder getInstance() {
-        return INSTANCE;
     }
 
 }

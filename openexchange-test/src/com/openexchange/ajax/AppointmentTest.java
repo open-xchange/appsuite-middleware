@@ -156,7 +156,7 @@ public class AppointmentTest extends AbstractAJAXTest {
 
     private static final Log LOG = LogFactory.getLog(AppointmentTest.class);
 
-    private List<Appointment> clean = new ArrayList<Appointment>();
+    private final List<Appointment> clean = new ArrayList<Appointment>();
 
     @Override
     protected void setUp() throws Exception {

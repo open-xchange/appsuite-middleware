@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdatesAction}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public final class UpdatesAction extends AppointmentAction {
@@ -82,7 +82,7 @@ public final class UpdatesAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link UpdatesAction}.
-     * 
+     *
      * @param services
      */
     public UpdatesAction(final ServiceLookup services) {

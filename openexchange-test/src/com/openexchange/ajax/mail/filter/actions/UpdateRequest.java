@@ -63,7 +63,7 @@ public class UpdateRequest extends AbstractMailFilterRequest {
 
 	private final Rule rule;
 
-	private String forUser;
+	private final String forUser;
 
 	private boolean failOnError = true;
 
@@ -93,21 +93,24 @@ public class UpdateRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return convert(rule);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		return new Parameter[] {
 				new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
 				new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(rule.getId()))
@@ -117,7 +120,8 @@ public class UpdateRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public UpdateParser getParser() {
+	@Override
+    public UpdateParser getParser() {
 		return new UpdateParser(false);
 	}
 

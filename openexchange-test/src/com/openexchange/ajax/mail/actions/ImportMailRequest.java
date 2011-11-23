@@ -95,14 +95,17 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
         return failOnError;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.UPLOAD;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> list = new LinkedList<Parameter>();
         list.add(new URLParameter(Mail.PARAMETER_ACTION, Mail.ACTION_IMPORT));
@@ -118,6 +121,7 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
         return list.toArray(new Parameter[list.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<ImportMailResponse> getParser() {
         return new AbstractAJAXParser<ImportMailResponse>(failOnError) {
             @Override

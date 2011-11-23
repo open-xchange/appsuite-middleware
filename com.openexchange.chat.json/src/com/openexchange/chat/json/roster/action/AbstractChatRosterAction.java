@@ -124,7 +124,7 @@ public abstract class AbstractChatRosterAction implements AJAXActionService {
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param string The string
      * @return <code>true</code> if string is empty; otherwise <code>false</code>
      */
@@ -142,7 +142,7 @@ public abstract class AbstractChatRosterAction implements AJAXActionService {
 
     /**
      * Gets optional date parameter.
-     * 
+     *
      * @param request The request
      * @param name The name
      * @param timeZone The time zone
@@ -159,7 +159,7 @@ public abstract class AbstractChatRosterAction implements AJAXActionService {
 
     /**
      * Gets date parameter.
-     * 
+     *
      * @param request The request
      * @param name The name
      * @param timeZone The time zone
@@ -177,7 +177,7 @@ public abstract class AbstractChatRosterAction implements AJAXActionService {
 
     /**
      * Adds the time zone offset to specified date.
-     * 
+     *
      * @param date The date
      * @param timeZone The time zone identifier
      * @return The date with offset added
@@ -188,7 +188,7 @@ public abstract class AbstractChatRosterAction implements AJAXActionService {
 
     /**
      * Adds the time zone offset to specified date.
-     * 
+     *
      * @param date The date
      * @param timeZone The time zone
      * @return The date with offset added

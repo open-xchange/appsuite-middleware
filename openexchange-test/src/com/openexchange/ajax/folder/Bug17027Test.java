@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
@@ -91,7 +91,7 @@ public class Bug17027Test extends AbstractAJAXSession {
         client = getClient();
         createdFolder = Create.createPrivateFolder("Test for bug 17027", FolderObject.CALENDAR, client.getValues().getUserId());
         createdFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        InsertResponse response = client.execute(new InsertRequest(API.OX_NEW, createdFolder));
+        InsertResponse response = client.execute(new InsertRequest(EnumAPI.OX_NEW, createdFolder));
         response.fillObject(createdFolder);
         before = new Date(createdFolder.getLastModified().getTime() - 1);
     }
@@ -99,13 +99,13 @@ public class Bug17027Test extends AbstractAJAXSession {
     @Override
     protected void tearDown() throws Exception {
         if (!folderDeleted) {
-            client.execute(new DeleteRequest(API.OX_NEW, createdFolder));
+            client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
         }
         super.tearDown();
     }
 
     public void testUpdates() throws Throwable {
-        FolderUpdatesResponse response = client.execute(new UpdatesRequest(API.OX_NEW, -1, COLUMNS, -1, null, before, Ignore.NONE));
+        FolderUpdatesResponse response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, -1, COLUMNS, -1, null, before, Ignore.NONE));
         boolean found = false;
         for (FolderObject folder : response.getFolders()) {
             if (createdFolder.getObjectID() == folder.getObjectID()) {
@@ -116,9 +116,9 @@ public class Bug17027Test extends AbstractAJAXSession {
         assertFalse(
             "Newly created folder should not be contained in deleted list.",
             response.getDeleted().contains(I(createdFolder.getObjectID())));
-        client.execute(new DeleteRequest(API.OX_NEW, createdFolder));
+        client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolder));
         folderDeleted = true;
-        response = client.execute(new UpdatesRequest(API.OX_NEW, -1, COLUMNS, -1, null, before, Ignore.NONE));
+        response = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, -1, COLUMNS, -1, null, before, Ignore.NONE));
         for (FolderObject folder : response.getFolders()) {
             assertFalse("By other user newly created private folder is returned in updates response.", createdFolder.getObjectID() == folder.getObjectID());
         }

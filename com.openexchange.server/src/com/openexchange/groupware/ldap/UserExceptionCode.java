@@ -105,7 +105,8 @@ public enum UserExceptionCode implements OXExceptionCode {
      INVALID_MAX_LENGTH("Invalid password length. The password must be of maximum length %1$d.", Category.CATEGORY_USER_INPUT, 21),
 
      ;
-     
+
+    private static final String PREFIX = "USR";
 
     /**
      * Message of the exception.
@@ -152,7 +153,7 @@ public enum UserExceptionCode implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "USR";
+        return PREFIX;
     }
 
     @Override

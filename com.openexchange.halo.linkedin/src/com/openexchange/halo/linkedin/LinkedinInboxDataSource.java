@@ -73,11 +73,11 @@ public class LinkedinInboxDataSource extends AbstractLinkedinDataSource
 		String password = session.getPassword();
 		int uid = session.getUserId();
 		int cid = session.getContextId();
-		
+
 		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
 		if(accounts.size() == 0)
 			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
-		
+
 		OAuthAccount linkedinAccount = accounts.get(0);
 		JSONObject json = getLinkedinService().getMessageInbox(password, uid, cid, linkedinAccount.getId());
 		AJAXRequestResult result = new AJAXRequestResult();

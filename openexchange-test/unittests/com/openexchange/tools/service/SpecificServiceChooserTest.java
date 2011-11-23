@@ -173,12 +173,13 @@ public class SpecificServiceChooserTest extends TestCase {
 
     private static final class TestServiceImpl implements TestService {
 
-        private int id;
+        private final int id;
 
         public TestServiceImpl(int id) {
             this.id = id;
         }
 
+        @Override
         public int getId() {
             return id;
         }

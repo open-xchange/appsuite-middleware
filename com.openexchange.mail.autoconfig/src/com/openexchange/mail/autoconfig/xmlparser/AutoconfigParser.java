@@ -89,7 +89,7 @@ import com.openexchange.mail.autoconfig.AutoconfigException;
  */
 public class AutoconfigParser {
 
-    private InputStream is;
+    private final InputStream is;
 
     public AutoconfigParser(InputStream is) {
         this.is = is;

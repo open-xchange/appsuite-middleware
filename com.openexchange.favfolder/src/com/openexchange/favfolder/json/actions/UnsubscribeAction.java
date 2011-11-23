@@ -71,7 +71,7 @@ public final class UnsubscribeAction extends AbstractFavFolderAction {
 
     /**
      * Initializes a new {@link UnsubscribeAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public UnsubscribeAction(final ServiceLookup services) {

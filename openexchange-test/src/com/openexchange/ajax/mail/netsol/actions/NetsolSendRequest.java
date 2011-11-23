@@ -126,19 +126,23 @@ public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 		this.uploadFilename = uploadFilename;
 	}
 
-	public Object getBody() {
+	@Override
+    public Object getBody() {
 		return null;
 	}
 
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.UPLOAD;
 	}
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final Parameter[] retval = new Parameter[upload == null ? 2 : 3];
 		retval[0] = new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 		retval[1] = new FieldParameter("json_0", mailStr);
@@ -148,11 +152,13 @@ public class NetsolSendRequest implements AJAXRequest<NetsolSendResponse> {
 		return retval;
 	}
 
-	public String getServletPath() {
+	@Override
+    public String getServletPath() {
 		return MAIL_URL;
 	}
 
-	public SendParser getParser() {
+	@Override
+    public SendParser getParser() {
 		return new SendParser(true);
 	}
 

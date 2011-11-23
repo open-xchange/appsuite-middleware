@@ -56,19 +56,19 @@ public class DcXMLParserTest extends TestCase {
 
             String content = handler.toString();
             assertTrue(content.contains("Tika test document"));
-            
+
             assertEquals("2000-12-01T00:00:00.000Z", metadata.get(Metadata.DATE));
         } finally {
             input.close();
         }
     }
-    
+
     public void testXMLParserNonAsciiChars() throws Exception {
         InputStream input = DcXMLParserTest.class.getResourceAsStream("/test-documents/testXML.xml");
         try {
             Metadata metadata = new Metadata();
             new DcXMLParser().parse(input, new DefaultHandler(), metadata);
-            
+
             final String expected = "Archim\u00E8de et Lius \u00E0 Ch\u00E2teauneuf testing chars en \u00E9t\u00E9";
             assertEquals(expected,metadata.get(Metadata.RIGHTS));
         } finally {

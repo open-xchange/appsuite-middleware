@@ -143,7 +143,7 @@ public final class EffectivePermission implements Permission {
 
     /**
      * Sets the entity information.
-     * 
+     *
      * @param entityId The entity identifier
      * @param context The context
      * @return This effective permission with information applied

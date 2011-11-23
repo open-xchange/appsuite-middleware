@@ -61,7 +61,7 @@ import com.openexchange.chat.json.roster.RosterID;
 
 /**
  * {@link ListChatRosterRequest}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListChatRosterRequest extends AbstractChatRosterRequest<ListChatRosterResponse> {
@@ -80,7 +80,7 @@ public final class ListChatRosterRequest extends AbstractChatRosterRequest<ListC
 
     /**
      * Adds the user
-     * 
+     *
      * @param user The user to add
      */
     public void addUser(final String user) {
@@ -89,7 +89,7 @@ public final class ListChatRosterRequest extends AbstractChatRosterRequest<ListC
 
     /**
      * Sets the rosterId
-     * 
+     *
      * @param rosterId The rosterId to set
      */
     public void setRosterId(final RosterID rosterId) {

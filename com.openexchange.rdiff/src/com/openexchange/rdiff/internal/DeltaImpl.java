@@ -53,7 +53,7 @@ import org.metastatic.rsync.Delta;
 
 /**
  * {@link DeltaImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeltaImpl implements com.openexchange.rdiff.Delta {

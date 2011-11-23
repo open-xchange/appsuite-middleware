@@ -65,7 +65,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ElapsedFolderJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ElapsedFolderJob extends AbstractMailSyncJob {
@@ -83,7 +83,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link ElapsedFolderJob}.
-     * 
+     *
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -97,7 +97,7 @@ public final class ElapsedFolderJob extends AbstractMailSyncJob {
 
     /**
      * Checks if this job may already start.
-     * 
+     *
      * @param now The current time millis
      * @return <code>true</code> if job may start; otherwise <code>false</code>
      */

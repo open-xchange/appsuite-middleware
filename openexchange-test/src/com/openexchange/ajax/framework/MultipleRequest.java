@@ -71,22 +71,27 @@ public class MultipleRequest<T extends AbstractAJAXResponse> implements AJAXRequ
         return new MultipleRequest<T>(requests);
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[0];
     }
 
+    @Override
     public String getServletPath() {
         return "/ajax/multiple";
     }
 
+    @Override
     public Object getBody() throws JSONException, IOException {
         final JSONArray array = new JSONArray();
         for (final AJAXRequest<?> request : requests) {
@@ -106,6 +111,7 @@ public class MultipleRequest<T extends AbstractAJAXResponse> implements AJAXRequ
         return array.toString();
     }
 
+    @Override
     public MultipleParser<T> getParser() {
         return new MultipleParser<T>(requests);
     }

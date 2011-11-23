@@ -69,15 +69,18 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
         this.objectId = objectId;
     }
 
+    @Override
     public RequestEntity getEntity() throws OXException, IOException {
         // TODO Auto-generated method stub
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PROPFIND;
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser();
     }

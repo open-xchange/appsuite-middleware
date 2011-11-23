@@ -74,7 +74,7 @@ public final class PutMethodHandler extends AbstractMethodHandler {
     protected String getModule() {
         return "roster";
     }
-    
+
     @Override
     protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {

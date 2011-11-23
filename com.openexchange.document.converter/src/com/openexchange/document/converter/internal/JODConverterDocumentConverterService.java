@@ -80,7 +80,7 @@ import com.openexchange.server.ServiceLookup;
  * href="http://code.google.com/p/jodconverter/">JODConverter</a>.
  * <p>
  * <a href="http://shervinasgari.blogspot.com/2010/08/migrating-from-jodconverter-2-to.html">Example 1</a>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JODConverterDocumentConverterService implements DocumentConverterService {
@@ -125,7 +125,7 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
 
     /**
      * Gets the all-purpose converter
-     * 
+     *
      * @return The all-purpose converter
      */
     private OfficeDocumentConverter getConverter() {
@@ -143,7 +143,7 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
 
     /**
      * Gets the PDF converter
-     * 
+     *
      * @return The PDF converter
      */
     private OfficeDocumentConverter getPDFConverter() {
@@ -164,7 +164,7 @@ public class JODConverterDocumentConverterService implements DocumentConverterSe
 
     /**
      * Starts-up this {@link JODConverterDocumentConverterService} instance.
-     * 
+     *
      * @return This <i>started</i> {@link JODConverterDocumentConverterService}
      */
     public JODConverterDocumentConverterService startUp() {

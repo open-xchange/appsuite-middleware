@@ -81,6 +81,7 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
         setPublication(pub);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         try {
             return new PublicationWriter().write(getPublication(), null);
@@ -89,14 +90,17 @@ public class UpdatePublicationRequest extends AbstractPublicationRequest<UpdateP
         }
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[]{ new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE)};
     }
 
+    @Override
     public AbstractAJAXParser<? extends UpdatePublicationResponse> getParser() {
         return new AbstractAJAXParser<UpdatePublicationResponse>(isFailOnError()) {
 

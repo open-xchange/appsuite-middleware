@@ -459,13 +459,13 @@ public class RosterSmackTest extends SmackTestCase {
             fail(e.getMessage());
         }
         finally {
-            cleanUpRoster();    
+            cleanUpRoster();
         }
     }
 
     /**
      * Test presence management.<p>
-     * 
+     *
      * 1. Log in user0 from a client and user1 from 2 clients
      * 2. Create presence subscription of type BOTH between 2 users
      * 3. Check that presence is correctly delivered to both users
@@ -734,11 +734,13 @@ public class RosterSmackTest extends SmackTestCase {
         assertEquals("Presence should be online after a connection reconnection",
                 Presence.Type.available, presence.getType());
     }
-    
+
+    @Override
     protected int getMaxConnections() {
         return 3;
     }
 
+    @Override
     protected void setUp() throws Exception {
         //XMPPConnection.DEBUG_ENABLED = false;
 

@@ -90,7 +90,7 @@ public final class NewChatConversationRequest extends AbstractChatConversationRe
     public void setOptServiceId(final String optServiceId) {
         this.optServiceId = optServiceId;
     }
-    
+
     /**
      * Sets the optional accountId
      *

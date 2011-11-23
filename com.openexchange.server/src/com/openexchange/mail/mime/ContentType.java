@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
@@ -75,7 +76,7 @@ public class ContentType extends ParameterizedHeader {
      */
     public static final class UnmodifiableContentType extends ContentType {
 
-        private static final long serialVersionUID = 2473639344400699520L;
+        private static final long serialVersionUID = 2473639344400699522L;
 
         private final ContentType contentType;
 
@@ -245,6 +246,17 @@ public class ContentType extends ParameterizedHeader {
     private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?\"?)");
 
     /**
+     * The regular expression capturing whitespace characters.
+     */
+    private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
+
+    private static final String EMPTY = "";
+
+    private static String clearWhitespaces(final String str) {
+        return PATTERN_WHITESPACE.matcher(str).replaceAll(EMPTY);
+    }
+
+    /**
      * The MIME type delimiter
      *
      * @value /
@@ -350,33 +362,42 @@ public class ContentType extends ParameterizedHeader {
         parseContentType(contentType, true);
     }
 
-    private void parseContentType(final String contentTypeArg, final boolean paramList) throws OXException {
-        if ((null == contentTypeArg) || (contentTypeArg.length() == 0)) {
+    private void parseContentType(final String contentType, final boolean paramList) throws OXException {
+        if ((null == contentType) || (contentType.length() == 0)) {
             setContentType(DEFAULT_CONTENT_TYPE);
             return;
         }
-        final String contentType = prepareParameterizedHeader(contentTypeArg);
-        final int pos = contentType.indexOf(';');
-        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(pos < 0 ? contentType : contentType.substring(0, pos));
+        final String cts = prepareParameterizedHeader(contentType);
+        int pos = cts.indexOf(';');
+        final Matcher ctMatcher = PATTERN_CONTENT_TYPE.matcher(pos < 0 ? cts : cts.substring(0, pos));
         if (ctMatcher.find()) {
             if (ctMatcher.start() != 0) {
-                throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentTypeArg);
+                throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
             }
-            primaryType = ctMatcher.group(1);
-            subType = ctMatcher.group(2);
+            primaryType = clearWhitespaces(decodeMultiEncodedHeader(ctMatcher.group(1)));
+            pos = primaryType.indexOf(DELIMITER);
+            if (primaryType.indexOf(DELIMITER) >= 0) {
+                subType = primaryType.substring(pos + 1);
+                primaryType = primaryType.substring(0, pos);
+            } else {
+                subType = clearWhitespaces(decodeMultiEncodedHeader(ctMatcher.group(2)));
+                if ((subType == null) || (subType.length() == 0)) {
+                    subType = DEFAULT_SUBTYPE;
+                }
+            }
             if ((subType == null) || (subType.length() == 0)) {
                 subType = DEFAULT_SUBTYPE;
             }
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
             if (paramList) {
-                parameterList = new ParameterList(contentType.substring(ctMatcher.end()));
+                parameterList = new ParameterList(cts.substring(ctMatcher.end()));
             }
         } else {
             primaryType = "text";
             subType = "plain";
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
             if (paramList) {
-                parameterList = new ParameterList(pos < 0 ? contentType : contentType.substring(pos));
+                parameterList = new ParameterList(pos < 0 ? cts : cts.substring(pos));
                 final String name = parameterList.getParameter("name");
                 if (null != name) {
                     final String byName = MIMEType2ExtMap.getContentType(name);

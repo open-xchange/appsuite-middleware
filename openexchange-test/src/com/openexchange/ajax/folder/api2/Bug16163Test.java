@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -99,7 +99,7 @@ public class Bug16163Test extends AbstractAJAXSession {
         testFolder.setParentFolderID(appointmentFolder);
         testFolder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), "a/a", I(client2.getValues().getUserId()), "v"));
         testFolder.setFolderName("testFolder4Bug16163-" + System.currentTimeMillis());
-        final InsertRequest iReq = new InsertRequest(API.OUTLOOK, testFolder);
+        final InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, testFolder);
         final InsertResponse iResp = client.execute(iReq);
         iResp.fillObject(testFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
@@ -108,24 +108,24 @@ public class Bug16163Test extends AbstractAJAXSession {
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(API.OUTLOOK, testFolder));
+        client.execute(new DeleteRequest(EnumAPI.OUTLOOK, testFolder));
         super.tearDown();
     }
 
     public void testPathRequestWorks() throws Throwable {
         {
             // Fill cache with database folder.
-            final GetRequest request = new GetRequest(API.OX_NEW, testFolder.getObjectID());
+            final GetRequest request = new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID());
             client.execute(request);
         }
         {
             // Fill cache with outlook folder.
-            final GetRequest request = new GetRequest(API.OUTLOOK, testFolder.getObjectID());
+            final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, testFolder.getObjectID());
             client.execute(request);
         }
         {
             // Test with user seeing a shared folder.
-            final PathRequest request = new PathRequest(API.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
+            final PathRequest request = new PathRequest(EnumAPI.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
             final PathResponse response = client2.execute(request);
             final Object[][] data = response.getArray();
             assertFalse("Path request should work for that folder, but failed with: " + response.getErrorMessage(), response.hasError());
@@ -141,13 +141,13 @@ public class Bug16163Test extends AbstractAJAXSession {
         }
         {
             // Check cached folder.
-            final GetRequest request = new GetRequest(API.OUTLOOK, testFolder.getObjectID());
+            final GetRequest request = new GetRequest(EnumAPI.OUTLOOK, testFolder.getObjectID());
             final GetResponse response = client.execute(request);
             assertEquals("Identifier of cached folder is broken.", testFolder.getObjectID(), response.getFolder().getObjectID());
         }
         {
             // Test with sharing user if caching breaks his path.
-            final PathRequest request = new PathRequest(API.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
+            final PathRequest request = new PathRequest(EnumAPI.OUTLOOK, testFolder.getObjectID(), ATTRIBUTES, false);
             final PathResponse response = client.execute(request);
             final Object[][] data = response.getArray();
             assertFalse("Path request should work for that folder.", response.hasError());

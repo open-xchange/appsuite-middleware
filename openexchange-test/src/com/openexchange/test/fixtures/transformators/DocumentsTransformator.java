@@ -62,14 +62,15 @@ import com.openexchange.test.fixtures.FixtureLoader;
  */
 public class DocumentsTransformator implements Transformator {
 
-	private FixtureLoader fixtureLoader;
+	private final FixtureLoader fixtureLoader;
 
 	public DocumentsTransformator(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Document[] transform(final String value) throws OXException {
+	@Override
+    public Document[] transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) {
 			return null;
 		}

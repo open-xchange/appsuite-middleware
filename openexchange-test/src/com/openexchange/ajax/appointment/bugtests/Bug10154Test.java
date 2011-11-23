@@ -61,7 +61,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -111,7 +111,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION));
         {
             final CommonInsertResponse response = clientA.execute(
-                new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+                new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
             response.fillObject(folder);
         }
         try {
@@ -152,6 +152,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
                 final Participant[] participants = reload.getParticipants();
                 assertEquals("Participants should not be changed.", expected.length, participants.length);
                 final Comparator<Participant> comparator = new Comparator<Participant>() {
+                    @Override
                     public int compare(final Participant o1, final Participant o2) {
                         return o1.getIdentifier() - o2.getIdentifier();
                     }};
@@ -162,7 +163,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
                 }
             }
         } finally {
-            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD,
+            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD,
                     folder.getObjectID(), folder.getLastModified()));
         }
     }

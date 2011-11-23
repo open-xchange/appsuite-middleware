@@ -65,7 +65,7 @@ import com.openexchange.chat.Presence;
 
 /**
  * {@link JSONConversationWriter} - Provides write methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONConversationWriter {
@@ -79,7 +79,7 @@ public final class JSONConversationWriter {
 
     /**
      * Writes specified chat to its JSON representation.
-     * 
+     *
      * @param chat The chat
      * @param optPresence The optional presence
      * @return The JSON object
@@ -100,7 +100,7 @@ public final class JSONConversationWriter {
 
     /**
      * Writes specified messages to a JSON array.
-     * 
+     *
      * @param messages The messages
      * @param timeZone The user's time zone
      * @return The resulting JOSN array
@@ -112,7 +112,7 @@ public final class JSONConversationWriter {
 
     /**
      * Writes specified messages to a JSON array.
-     * 
+     *
      * @param messages The messages
      * @param timeZone The user's time zone
      * @return The resulting JOSN array
@@ -123,12 +123,15 @@ public final class JSONConversationWriter {
         for (final Message message : messages) {
             jsonMessages.put(writeMessage(message, timeZone));
         }
+        JSONObject unread = new JSONObject();
+        unread.put("unread", messages.size());
+        jsonMessages.put(unread);
         return jsonMessages;
     }
 
     /**
      * Writes specified message to a JSON object.
-     * 
+     *
      * @param message The message
      * @param timeZone The time zone identifier
      * @return The JSON object
@@ -140,7 +143,7 @@ public final class JSONConversationWriter {
 
     /**
      * Writes specified message to a JSON object.
-     * 
+     *
      * @param message The message
      * @param timeZone The time zone
      * @return The JSON object
@@ -168,7 +171,7 @@ public final class JSONConversationWriter {
 
     /**
      * Writes specified chat user to its JSON representation.
-     * 
+     *
      * @param chatUser The chat user
      * @param optPresence The optional presence
      * @param optTimeZone The user's time zone
@@ -188,7 +191,7 @@ public final class JSONConversationWriter {
 
     /**
      * Writes specified presence to its JSON representation.
-     * 
+     *
      * @param presence The presence
      * @return The JSON object
      * @throws JSONException If a JSON error occurs
@@ -203,6 +206,16 @@ public final class JSONConversationWriter {
             jsonPresence.put("timestamp", addTimeZoneOffset(timeStamp.getTime(), getTimeZone(timeZone)));
         }
         return jsonPresence;
+    }
+
+    public static JSONObject writeUnreadCount(final int count, final String timeZone) throws JSONException {
+        final JSONObject jsonCount = new JSONObject();
+        jsonCount.put("unread", count);
+        final Date timestamp = new Date(System.currentTimeMillis());
+        if (timestamp != null) {
+            jsonCount.put("timestamp", addTimeZoneOffset(timestamp.getTime(), getTimeZone(timeZone)));
+        }
+        return jsonCount;
     }
 
 }

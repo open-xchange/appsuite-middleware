@@ -80,7 +80,7 @@ public class AllAction extends TaskAction {
     public AllAction(ServiceLookup serviceLookup) {
         super(serviceLookup);
     }
-    
+
     @Override
     protected AJAXRequestResult perform(final TaskRequest req) throws OXException {
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);

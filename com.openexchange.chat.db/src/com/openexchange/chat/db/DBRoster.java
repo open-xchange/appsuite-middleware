@@ -81,7 +81,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DBRoster}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBRoster implements Roster {
@@ -90,7 +90,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Sets the {@link SessiondService} service instance.
-     * 
+     *
      * @param service The service
      */
     public static void set(final SessiondService service) {
@@ -99,7 +99,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Gets the service.
-     * 
+     *
      * @return The service
      */
     public static SessiondService get() {
@@ -118,7 +118,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Gets the roster for specified context.
-     * 
+     *
      * @param context The context
      * @return The roster or <code>null</code>
      */
@@ -128,7 +128,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Gets the roster for specified context.
-     * 
+     *
      * @param context The context
      * @return The roster
      * @throws OXException If initialization fails
@@ -139,7 +139,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Gets the roster for specified context.
-     * 
+     *
      * @param context The context
      * @return The roster
      * @throws OXException If initialization fails
@@ -165,7 +165,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Initializes a new {@link DBRoster}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     private DBRoster(final Context context) throws OXException {
@@ -205,7 +205,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Updates specified user's presence.
-     * 
+     *
      * @param presence The presence
      * @throws OXException If updating presence fails
      */
@@ -215,7 +215,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Updates specified user's presence.
-     * 
+     *
      * @param user The user
      * @param presence The presence
      * @throws OXException If updating presence fails
@@ -265,7 +265,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Inserts given presence.
-     * 
+     *
      * @param user The user
      * @param presence The presence
      * @throws OXException If updating presence fails
@@ -276,7 +276,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Inserts given presence.
-     * 
+     *
      * @param user The user
      * @param presence The presence
      * @throws OXException If updating presence fails
@@ -360,7 +360,7 @@ public final class DBRoster implements Roster {
 
     /**
      * Notifies listeners about changed presence.
-     * 
+     *
      * @param presence The changed presence
      */
     public void notifyRosterListeners(final Presence presence) {

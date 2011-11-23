@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
 
-    private Appointment entry;
+    private final Appointment entry;
 
     /**
      * Initializes a new {@link AppointmentUpdateStep}.
@@ -75,9 +75,11 @@ public class AppointmentUpdateStep extends NeedExistingStep<Appointment> {
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         assumeIdentity(entry);

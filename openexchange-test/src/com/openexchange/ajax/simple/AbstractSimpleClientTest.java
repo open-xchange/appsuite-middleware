@@ -81,7 +81,7 @@ public class AbstractSimpleClientTest extends TestCase {
     protected SimpleResponse lastResponse;
 
 
-    private Map<String, SimpleOXClient> authenticatedClients = new HashMap<String, SimpleOXClient>();
+    private final Map<String, SimpleOXClient> authenticatedClients = new HashMap<String, SimpleOXClient>();
     protected JSONObject rawResponse;
 
     public AbstractSimpleClientTest() {

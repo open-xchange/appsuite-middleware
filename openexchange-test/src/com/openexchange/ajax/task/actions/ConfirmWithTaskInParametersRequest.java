@@ -61,7 +61,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class ConfirmWithTaskInParametersRequest extends AbstractConfirmRequest {
 
-    private Task task;
+    private final Task task;
 
     public ConfirmWithTaskInParametersRequest(Task task, int confirmStatus, String confirmMessage) {
         this(task, confirmStatus, confirmMessage, true);

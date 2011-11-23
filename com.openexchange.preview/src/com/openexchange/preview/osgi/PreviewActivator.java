@@ -76,7 +76,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link PreviewActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PreviewActivator extends HousekeepingActivator {
@@ -103,33 +103,33 @@ public class PreviewActivator extends HousekeepingActivator {
      * else { com.sun.star.lang.XComponent xComp = (com.sun.star.lang.XComponent) UnoRuntime.queryInterface(
      * com.sun.star.lang.XComponent.class, oDocToStore ); xComp.dispose(); } System.out.println("document closed!"); System.exit(0);
      * ---------------------------------- Hope that helps, enjoy!
-     * 
+     *
      * http://www.artofsolving.com/opensource/jodconverter
-     * 
+     *
      * http://java.dzone.com/news/integrate-openoffice-java
-     * 
+     *
      * http://www.jopendocument.org/
      * http://www.jopendocument.org/tutorial_pdf.html
-     * 
+     *
      * http://jodconverter.svn.sourceforge.net/viewvc/jodconverter/branches/3.0.x-200801-commons-pool/
      * http://stackoverflow.com/questions/625241/how-can-i-use-openoffice-in-server-mode-as-a-multithreaded-service
-     * --> soffice -headless "-accept=socket,host=localhost,port=8100;urp;" 
-     * 
+     * --> soffice -headless "-accept=socket,host=localhost,port=8100;urp;"
+     *
      * http://user.services.openoffice.org/en/forum/viewtopic.php?f=20&t=16567
      * --> OO in OSGi
-     * 
+     *
      * http://shervinasgari.blogspot.com/2008/12/dynamically-generate-odt-and-pdf.html
-     * 
+     *
      * http://oodaemon.sourceforge.net/
-     * 
-     * 
+     *
+     *
      * http://code.google.com/p/java2word/
-     * 
+     *
      * http://www.tutego.de/blog/javainsel/2011/08/microsoft-office-dokumente-in-java-verarbeiten/
-     * 
+     *
      * http://blogs.reucon.com/srt/2007/02/25/using_openoffice_org_from_java_applications.html
-     * 
-     * 
+     *
+     *
      * -----
      * Generating PDF and Previewing it as an Image iText and PDF Renderer
      * http://technology.amis.nl/blog/4174/java-generating-pdf-and-previewing-it-as-an-image-itext-and-pdf-renderer
@@ -180,100 +180,100 @@ public class PreviewActivator extends HousekeepingActivator {
 //                    if (SessiondEventConstants.TOPIC_ADD_SESSION.equals(topic)) {
 //                        try {
 //                            final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-//                            
-//                            final byte[] bytes = ("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n" + 
-//                            		" <head>\n" + 
-//                            		"    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + 
-//                            		" </head>\n" + 
-//                            		" <body>\n" + 
-//                            		"  <p style=\"margin: 0pt;\">\n" + 
-//                            		"   <span>\n" + 
-//                            		"    <span></span>\n" + 
-//                            		"    Hallo,\n" + 
-//                            		"   </span>\n" + 
-//                            		"  </p>\n" + 
-//                            		"  <p style=\"margin: 0pt;\">\n" + 
-//                            		"   <span>&#160;</span>\n" + 
-//                            		"  </p>\n" + 
-//                            		"  <p style=\"margin: 0pt;\">\n" + 
-//                            		"   <span>minserver <b>sollte</b> eigentlich <i>nur</i> das c.o.server bundle und seine Abh&#228;ngigkeiten enthalten. c.o.subscribe ist nicht ben&#246;tigt f&#252;r c.o.server. Somit sollten wir lieber c.o.subscribe aus minserver entfernen und in servergui oder full unterbringen.</span>\n" + 
-//                            		"  </p>\n" + 
-//                            		"  <p style=\"margin: 0pt;\">\n" + 
-//                            		"   <span>&#160;</span>\n" + 
-//                            		"  </p>\n" + 
-//                            		"  <p style=\"margin: 0pt;\">\n" + 
-//                            		"   <span>Gru&#223;</span>\n" + 
-//                            		"  </p>\n" + 
-//                            		"  <p style=\"margin: 0pt;\">\n" + 
-//                            		"   <span>Marcus&#160;</span>\n" + 
-//                            		"  </p>\n" + 
-//                            		"  <p style=\"margin: 0px; \"></p>\n" + 
-//                            		"  <div style=\"margin: 5px 0px;\">\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   Dennis Sieben &#60;dennis.sieben@open-xchange.com&#62; hat am 21. September 2011 um 16:49 geschrieben:\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Hallo zusammen,\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; ich hatte gerade gesehen, dass das subscribe Bundle was nun ja im minserver\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; ProjectSet liegt noch zwei weitere Bundles braucht um gl&#252;cklich zu sein:\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; com.openexchange.datatypes.genericonf.storage\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; com.openexchange.secret.recovery\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Angeh&#228;ngter Patch f&#252;gt diese zum minserver hinzu. Kann ich das so &#228;ndern?\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Gru&#223;,\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;&#160; &#160; &#160; &#160; &#160;D7\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; --\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Dennis Sieben\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Professional Services\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Open-Xchange GmbH\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Phone&#160; &#160;+49 2761 8385 0\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Fax&#160; &#160; &#160;+49 911 180 1419\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; -------------------------------------------------------------------------------\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Open-Xchange AG,&#160; Maxfeldstr. 9, 90409 N&#252;rnberg, Amtsgericht N&#252;rnberg HRB\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; 24738\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Vorstand: Rafael Laguna de la Vera, Aufsichtsratsvorsitzender: Richard Seibt\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; European Office: Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe, Germany\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; Amtsgericht Siegen, HRB 8718, Gesch&#228;ftsf&#252;hrer: Frank Hoberg, Martin Kauss\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62;\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; US Office: Open-Xchange, Inc., 303 South Broadway, Tarrytown, New York 10591\n" + 
-//                            		"   <br/>\n" + 
-//                            		"   &#62; -------------------------------------------------------------------------------\n" + 
-//                            		"  </div>\n" + 
-//                            		" </body>\n" + 
+//
+//                            final byte[] bytes = ("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">\n" +
+//                            		" <head>\n" +
+//                            		"    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" +
+//                            		" </head>\n" +
+//                            		" <body>\n" +
+//                            		"  <p style=\"margin: 0pt;\">\n" +
+//                            		"   <span>\n" +
+//                            		"    <span></span>\n" +
+//                            		"    Hallo,\n" +
+//                            		"   </span>\n" +
+//                            		"  </p>\n" +
+//                            		"  <p style=\"margin: 0pt;\">\n" +
+//                            		"   <span>&#160;</span>\n" +
+//                            		"  </p>\n" +
+//                            		"  <p style=\"margin: 0pt;\">\n" +
+//                            		"   <span>minserver <b>sollte</b> eigentlich <i>nur</i> das c.o.server bundle und seine Abh&#228;ngigkeiten enthalten. c.o.subscribe ist nicht ben&#246;tigt f&#252;r c.o.server. Somit sollten wir lieber c.o.subscribe aus minserver entfernen und in servergui oder full unterbringen.</span>\n" +
+//                            		"  </p>\n" +
+//                            		"  <p style=\"margin: 0pt;\">\n" +
+//                            		"   <span>&#160;</span>\n" +
+//                            		"  </p>\n" +
+//                            		"  <p style=\"margin: 0pt;\">\n" +
+//                            		"   <span>Gru&#223;</span>\n" +
+//                            		"  </p>\n" +
+//                            		"  <p style=\"margin: 0pt;\">\n" +
+//                            		"   <span>Marcus&#160;</span>\n" +
+//                            		"  </p>\n" +
+//                            		"  <p style=\"margin: 0px; \"></p>\n" +
+//                            		"  <div style=\"margin: 5px 0px;\">\n" +
+//                            		"   <br/>\n" +
+//                            		"   Dennis Sieben &#60;dennis.sieben@open-xchange.com&#62; hat am 21. September 2011 um 16:49 geschrieben:\n" +
+//                            		"   <br/>\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Hallo zusammen,\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; ich hatte gerade gesehen, dass das subscribe Bundle was nun ja im minserver\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; ProjectSet liegt noch zwei weitere Bundles braucht um gl&#252;cklich zu sein:\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; com.openexchange.datatypes.genericonf.storage\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; com.openexchange.secret.recovery\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Angeh&#228;ngter Patch f&#252;gt diese zum minserver hinzu. Kann ich das so &#228;ndern?\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Gru&#223;,\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;&#160; &#160; &#160; &#160; &#160;D7\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; --\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Dennis Sieben\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Professional Services\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Open-Xchange GmbH\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Phone&#160; &#160;+49 2761 8385 0\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Fax&#160; &#160; &#160;+49 911 180 1419\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; -------------------------------------------------------------------------------\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Open-Xchange AG,&#160; Maxfeldstr. 9, 90409 N&#252;rnberg, Amtsgericht N&#252;rnberg HRB\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; 24738\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Vorstand: Rafael Laguna de la Vera, Aufsichtsratsvorsitzender: Richard Seibt\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; European Office: Open-Xchange GmbH, Martinstr. 41, D-57462 Olpe, Germany\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; Amtsgericht Siegen, HRB 8718, Gesch&#228;ftsf&#252;hrer: Frank Hoberg, Martin Kauss\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62;\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; US Office: Open-Xchange, Inc., 303 South Broadway, Tarrytown, New York 10591\n" +
+//                            		"   <br/>\n" +
+//                            		"   &#62; -------------------------------------------------------------------------------\n" +
+//                            		"  </div>\n" +
+//                            		" </body>\n" +
 //                            		"</html>").replaceAll("(\r?\n)+", "").replaceAll("(  )+", "").getBytes();
-//                            
+//
 //
 //                            final String content =
 //                                tikaPreviewService.getPreviewFor(
@@ -314,13 +314,13 @@ public class PreviewActivator extends HousekeepingActivator {
         .setOfficeHome("/usr/lib/openoffice")
         .setPortNumbers(8100, 8101, 8102, 8103)
         .buildOfficeManager();
-        
+
         final OfficeManager officeManager = new DefaultOfficeManagerConfiguration().buildOfficeManager();
         officeManager.start();
 
         final OfficeDocumentConverter converter = new OfficeDocumentConverter(officeManager);
         converter.convert(new File("/Users/thorben/git/backend/org.apache.tika/test-documents/testWORD_embeded.doc"), new File("/Users/thorben/git/backend/org.apache.tika/test-documents/mytest.pdf"));
-            
+
         officeManager.stop();
     }
 
@@ -343,7 +343,7 @@ public class PreviewActivator extends HousekeepingActivator {
 
         document.open();
 
-        // Create a template and a Graphics2D object 
+        // Create a template and a Graphics2D object
         final Rectangle pageSize = document.getPageSize();
         final int w = (int) (pageSize.getWidth() * 0.9);
         final int h = (int) (pageSize.getHeight() * 0.95);
@@ -353,7 +353,7 @@ public class PreviewActivator extends HousekeepingActivator {
         final Graphics2D g2 = tp.createPrinterGraphics(w, h, null);
         // If you want to prevent copy/paste, you can use
         // g2 = tp.createGraphicsShapes(w, h, true, 0.9f);
-                   
+
         tp.setWidth(w);
         tp.setHeight(h);
 
@@ -361,7 +361,7 @@ public class PreviewActivator extends HousekeepingActivator {
         final ODTRenderer renderer = new ODTRenderer(doc);
         renderer.setIgnoreMargins(true);
         renderer.setPaintMaxResolution(true);
-                   
+
         // Scale the renderer to fit width
         renderer.setResizeFactor(renderer.getPrintWidth() / w);
         // Render

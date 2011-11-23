@@ -60,14 +60,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link AllMessageChatConversationResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AllMessageChatConversationResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link AllMessageChatConversationResponse}.
-     * 
+     *
      * @param response
      */
     public AllMessageChatConversationResponse(final Response response) {
@@ -76,7 +76,7 @@ public final class AllMessageChatConversationResponse extends AbstractAJAXRespon
 
     /**
      * Gets requested JSON messages.
-     * 
+     *
      * @return The JSON messages
      * @throws JSONException If parsing JSON data fails
      */
@@ -84,7 +84,7 @@ public final class AllMessageChatConversationResponse extends AbstractAJAXRespon
         final JSONArray jsonArray = (JSONArray) getData();
         final int length = jsonArray.length();
         final List<JSONMessage> list = new ArrayList<JSONMessage>(length);
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length - 1; i++) {
             list.add(JSONMessage.valueOf(jsonArray.getJSONObject(i), timeZone));
         }
         return list;

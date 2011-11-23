@@ -71,7 +71,7 @@ public final class SubscribeAction extends AbstractFavFolderAction {
 
     /**
      * Initializes a new {@link SubscribeAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public SubscribeAction(final ServiceLookup services) {

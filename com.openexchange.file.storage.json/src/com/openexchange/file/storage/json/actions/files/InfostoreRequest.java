@@ -124,7 +124,7 @@ public interface InfostoreRequest {
 
     /**
      * Gets the upload stream. Retrieves the body of the request as binary data as an {@link InputStream}.
-     * 
+     *
      * @return The upload stream or <code>null</code> if not available
      * @throws OXException If an I/O error occurs
      */
