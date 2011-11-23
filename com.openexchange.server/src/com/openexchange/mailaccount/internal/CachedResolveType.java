@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,17 @@
  *
  */
 
-package com.openexchange.mail.usersetting;
-
-import static com.openexchange.mail.usersetting.UserSettingMailStorage.getInstance;
-import java.sql.Connection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
+package com.openexchange.mailaccount.internal;
 
 /**
- * {@link UserSettingMailDeleteListener}
+ * {@link CachedResolveType}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class UserSettingMailDeleteListener implements DeleteListener {
+public enum CachedResolveType {
 
-    /**
-     * Initializes a new {@link UserSettingMailDeleteListener}
-     */
-    public UserSettingMailDeleteListener() {
-        super();
-    }
+    LOGIN,
 
-    @Override
-    public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
-        if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
-            try {
-                getInstance().deleteUserSettingMail(deleteEvent.getId(), deleteEvent.getContext(), writeCon);
-            } catch (final OXException e) {
-                throw new OXException(e);
-            }
-        }
-    }
+    PRIMARY_ADDRESS
 
 }

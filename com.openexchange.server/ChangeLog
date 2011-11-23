@@ -1,8 +1,12 @@
+* 2011-11-23 - marcus.klein@open-xchange.com
+
+ - Partly fix for bug 20813: Caching information for resolving IMAP ACLs to users on a low level storage layer to reduce load on database.
+
 * 2011-11-21 - jan.bauerdick@open-xchange.com
 
-- Created UpdateTask DBChatAlterTableTask
-- pollMessages returns only unread messages by default now
-- JSONArray contains number of unread messages
+ - Created UpdateTask DBChatAlterTableTask
+ - pollMessages returns only unread messages by default now
+ - JSONArray contains number of unread messages
 
 * 2011-11-20 - thorben.betten@open-xchange.com
 

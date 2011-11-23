@@ -53,17 +53,12 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
-import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.net.InetSocketAddress;
 import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.AddressException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -89,74 +84,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class MailConfig {
-
-    private static final class Key {
-
-        private final String pattern;
-        private final String server;
-        private final boolean defaultAccount;
-        private final int hash;
-
-        protected Key(final String pattern, final boolean defaultAccount, final InetSocketAddress server) {
-            super();
-            this.pattern = pattern;
-            this.server = server.toString();
-            this.defaultAccount = defaultAccount;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
-            result = prime * result + ((this.server == null) ? 0 : this.server.hashCode());
-            result = prime * result + (defaultAccount ? 0 : 1);
-            hash = result;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(final Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Key)) {
-                return false;
-            }
-            final Key other = (Key) obj;
-            if (pattern == null) {
-                if (other.pattern != null) {
-                    return false;
-                }
-            } else if (!pattern.equals(other.pattern)) {
-                return false;
-            }
-            if (server == null) {
-                if (other.server != null) {
-                    return false;
-                }
-            } else if (!server.equals(other.server)) {
-                return false;
-            }
-            if (defaultAccount != other.defaultAccount) {
-                return false;
-            }
-            return true;
-        }
-        
-        
-    }
-
-    private static final class StampedValue<T> {
-        protected final long stamp;
-        protected final T value;
-
-        protected StampedValue(final T value) {
-            super();
-            stamp = System.currentTimeMillis();
-            this.value = value;
-        }
-    }
 
     public static enum BoolCapVal {
 
@@ -450,19 +377,6 @@ public abstract class MailConfig {
         return PartModifier.getInstance();
     }
 
-    private static final ConcurrentTIntObjectHashMap<ConcurrentMap<Key, StampedValue<TIntList>>> LOGIN_CACHE = new ConcurrentTIntObjectHashMap<ConcurrentMap<Key, StampedValue<TIntList>>>();
-
-    private static final long MILLIS = 300000;
-
-    /**
-     * Clears the login cache for specified context.
-     * 
-     * @param contextId The context identifier
-     */
-    public static void clearLoginCache(final int contextId) {
-        LOGIN_CACHE.remove(contextId);
-    }
-
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source.
      *
@@ -473,28 +387,6 @@ public abstract class MailConfig {
      * @throws OXException If resolving user by specified pattern fails
      */
     public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws OXException {
-        ConcurrentMap<Key, StampedValue<TIntList>> map = LOGIN_CACHE.get(ctx.getContextId());
-        if (null == map) {
-            final ConcurrentMap<Key, StampedValue<TIntList>> numap = new ConcurrentHashMap<MailConfig.Key, MailConfig.StampedValue<TIntList>>();
-            map = LOGIN_CACHE.putIfAbsent(ctx.getContextId(), numap);
-            if (null == map) {
-                map = numap;
-            }
-        }
-        final Key key = new Key(pattern, isDefaultAccount, server);
-        StampedValue<TIntList> list = map.get(key);
-        if (null == list || (list.stamp + MILLIS < System.currentTimeMillis())) {
-            map.remove(key);
-            final StampedValue<TIntList> nlist = new StampedValue<TIntList>(new TIntArrayList(getUserIDsByMailLogin0(pattern, isDefaultAccount, server, ctx)));
-            list = map.putIfAbsent(key, nlist);
-            if (null == list) {
-                list = nlist;
-            }
-        }
-        return list.value.toArray();
-    }
-
-    private static int[] getUserIDsByMailLogin0(final String pattern, final boolean isDefaultAccount, final InetSocketAddress server, final Context ctx) throws OXException {
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
