@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.folder;
 
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -82,7 +82,7 @@ public class GetVirtualTest extends AbstractAJAXSession {
     }
 
     public void testGetVirtual() throws Throwable {
-        final GetRequest getRequest = new GetRequest(API.OX_OLD, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, new int[] {
+        final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD, FolderObject.VIRTUAL_LIST_CALENDAR_FOLDER_ID, new int[] {
             FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
         final GetResponse getResponse = client.execute(getRequest);
         assertFalse("GET request failed.", getResponse.hasError());

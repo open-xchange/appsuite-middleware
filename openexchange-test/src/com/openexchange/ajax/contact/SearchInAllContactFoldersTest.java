@@ -56,7 +56,7 @@ import com.openexchange.ajax.contact.action.InsertResponse;
 import com.openexchange.ajax.contact.action.SearchRequest;
 import com.openexchange.ajax.contact.action.SearchResponse;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Contact;
@@ -111,7 +111,7 @@ public class SearchInAllContactFoldersTest extends AbstractAJAXSession {
         contactDeleteRequest = new DeleteRequest(contact2);
         client.execute(contactDeleteRequest);
         //delete the new folder
-        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, newFolder);
+        com.openexchange.ajax.folder.actions.DeleteRequest folderDeleteRequest  = new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, newFolder);
         client.execute(folderDeleteRequest);
         super.tearDown();
     }

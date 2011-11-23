@@ -1,7 +1,6 @@
 package com.openexchange.ajax.importexport;
 
 import java.util.TimeZone;
-
 import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;

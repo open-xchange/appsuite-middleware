@@ -51,7 +51,7 @@ package com.openexchange.ajax.folder.api2;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -94,7 +94,7 @@ public class Bug15752Test extends AbstractAJAXSession {
         testFolder.setModule(FolderObject.MAIL);
         testFolder.setFullName(inboxFolder + "/testFolder4Bug15752-2");
         testFolder.setFolderName("testFolder4Bug15752-2");
-        InsertRequest iReq = new InsertRequest(API.OUTLOOK, testFolder);
+        InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, testFolder);
         InsertResponse iResp = client.execute(iReq);
         iResp.fillObject(testFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
@@ -109,7 +109,7 @@ public class Bug15752Test extends AbstractAJAXSession {
             client.execute(new DeleteRequest(mailIds, true));
         }
         if (null != testFolder) {
-            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, testFolder));
+            client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, testFolder));
         }
         super.tearDown();
     }

@@ -62,8 +62,8 @@ import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -125,7 +125,7 @@ public class Bug16194Test extends AbstractAJAXSession {
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         folder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), PermissionTools.ADMIN, I(userId2), PermissionTools.ADMIN));
         folder.setFolderName("testFolder4Bug16194");
-        com.openexchange.ajax.folder.actions.InsertRequest iReq = new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_NEW, folder);
+        com.openexchange.ajax.folder.actions.InsertRequest iReq = new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_NEW, folder);
         com.openexchange.ajax.folder.actions.InsertResponse iResp = client.execute(iReq);
         iResp.fillObject(folder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
@@ -135,7 +135,7 @@ public class Bug16194Test extends AbstractAJAXSession {
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(API.OX_NEW, publicFolder));
+        client.execute(new DeleteRequest(EnumAPI.OX_NEW, publicFolder));
         super.tearDown();
     }
 

@@ -52,8 +52,8 @@ package com.openexchange.ajax.folder.api2;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
 import java.util.Iterator;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertRequest;
@@ -92,14 +92,14 @@ public class Bug16303Test extends AbstractAJAXSession {
         createdFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         createdFolder.setPermissions(PermissionTools.P(I(clientA.getValues().getUserId()), PermissionTools.ADMIN, I(clientB.getValues().getUserId()), "arawada"));
         createdFolder.setFolderName("testFolder4Bug16303");
-        InsertRequest iReq = new InsertRequest(API.OUTLOOK, createdFolder);
+        InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, createdFolder);
         InsertResponse iResp = client.execute(iReq);
         iResp.fillObject(createdFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
         createdFolder.setLastModified(new Date());
 
         // Init some caching with other user
-        ListRequest listRequest = new ListRequest(API.OUTLOOK, FolderStorage.SHARED_ID);
+        ListRequest listRequest = new ListRequest(EnumAPI.OUTLOOK, FolderStorage.SHARED_ID);
         ListResponse listResponse = clientB.execute(listRequest);
         String expectedId = FolderObject.SHARED_PREFIX + clientA.getValues().getUserId();
         Iterator<FolderObject> iter = listResponse.getFolder();
@@ -113,7 +113,7 @@ public class Bug16303Test extends AbstractAJAXSession {
         assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
         @SuppressWarnings("null")
-        ListRequest listRequest2 = new ListRequest(API.OUTLOOK, foundUserShared.getFullName());
+        ListRequest listRequest2 = new ListRequest(EnumAPI.OUTLOOK, foundUserShared.getFullName());
         listResponse = clientB.execute(listRequest2);
         iter = listResponse.getFolder();
         FolderObject foundShared = null;
@@ -128,12 +128,12 @@ public class Bug16303Test extends AbstractAJAXSession {
 
     @Override
     protected void tearDown() throws Exception {
-        clientA.execute(new DeleteRequest(API.OUTLOOK, createdFolder));
+        clientA.execute(new DeleteRequest(EnumAPI.OUTLOOK, createdFolder));
         super.tearDown();
     }
 
     public void testForDisappearingFolder() throws Throwable {
-        GetRequest request = new GetRequest(API.OUTLOOK, clientA.getValues().getPrivateAppointmentFolder());
+        GetRequest request = new GetRequest(EnumAPI.OUTLOOK, clientA.getValues().getPrivateAppointmentFolder());
         GetResponse response = clientA.execute(request);
         FolderObject testFolder = response.getFolder();
         assertTrue("Private appointment folder must have subfolder flag true.", testFolder.hasSubfolders());

@@ -54,7 +54,7 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
@@ -109,7 +109,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
     private void checkViaList(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
         int[] requestedFields = FolderObject.ALL_COLUMNS;//new int[]{FolderObject.OBJECT_ID, FolderObject.FOLDER_ID};
-        ListRequest listRequest = new ListRequest(API.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true );
+        ListRequest listRequest = new ListRequest(EnumAPI.OX_OLD, Integer.toString(folder.getParentFolderID()), requestedFields, true );
         ListResponse response = client.execute(listRequest);
 
         Object[][] rows = response.getArray();
@@ -118,7 +118,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
     }
 
     private void checkViaUpdates(FolderObject folder) throws OXException, IOException, SAXException, JSONException {
-        UpdatesRequest updates = new UpdatesRequest(API.OX_OLD,
+        UpdatesRequest updates = new UpdatesRequest(EnumAPI.OX_OLD,
             folder.getParentFolderID(),
             FolderObject.ALL_COLUMNS,
             -1,

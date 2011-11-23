@@ -58,7 +58,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -105,7 +105,7 @@ public class Bug13090Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION));
 
-        CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+        CommonInsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
 
         appointment = new Appointment();
@@ -154,7 +154,7 @@ public class Bug13090Test extends AbstractAJAXSession {
 
     @Override
     public void tearDown() throws Exception {
-        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder));
+        getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder));
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         getClient().execute(new DeleteRequest(appointment));
 

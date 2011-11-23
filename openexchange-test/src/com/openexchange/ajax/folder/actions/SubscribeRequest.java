@@ -53,6 +53,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.container.Response;
@@ -60,11 +62,11 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.folderstorage.FolderStorage;
 
 /**
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link SubscribeRequest}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
-
-    private final String tree;
 
     private final String parent;
     
@@ -72,13 +74,12 @@ public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
 
     private final Set<String> folderIds;
 
-    public SubscribeRequest(final API api, final String tree, final boolean failOnError) {
-        this(api, tree, FolderStorage.ROOT_ID, failOnError);
+    public SubscribeRequest(final API api, final boolean failOnError) {
+        this(api, FolderStorage.ROOT_ID, failOnError);
     }
 
-    public SubscribeRequest(final API api, final String tree, final String parent, final boolean failOnError) {
+    public SubscribeRequest(final API api, final String parent, final boolean failOnError) {
         super(api);
-        this.tree = tree;
         this.parent = parent;
         this.failOnError = failOnError;
         folderIds = new LinkedHashSet<String>(4);
@@ -95,14 +96,22 @@ public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
         return this;
     }
 
+    @Override
     public Object getBody() {
-        final JSONArray jArray = new JSONArray();
-        for (final String folderId : folderIds) {
-            jArray.put(folderId);
+        try {
+            final JSONArray jArray = new JSONArray();
+            for (final String folderId : folderIds) {
+                final JSONObject jObject = new JSONObject();
+                jObject.put("id", folderId);
+                jArray.put(jObject);
+            }
+            return jArray;
+        } catch (final JSONException e) {
+            return new JSONArray();
         }
-        return jArray;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -111,9 +120,9 @@ public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
     protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "subscribe"));
         params.add(new Parameter(Folder.PARAMETER_PARENT, parent));
-        params.add(new Parameter("tree", tree));
     }
 
+    @Override
     public AbstractAJAXParser<? extends SubscribeResponse> getParser() {
         return new AbstractAJAXParser<SubscribeResponse>(failOnError) {
 

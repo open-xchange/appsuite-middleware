@@ -53,7 +53,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.ListRequest;
@@ -97,7 +97,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListRoot() throws Throwable {
         // List root's subfolders
-        ListRequest request = new ListRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID);
+        ListRequest request = new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID);
         ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -120,7 +120,7 @@ public class ListTest extends AbstractAJAXSession {
             }
         }
 
-        request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();
         FolderObject defaultIMAPFolder = null;
@@ -136,7 +136,7 @@ public class ListTest extends AbstractAJAXSession {
         @SuppressWarnings("null")
         boolean subFolders = defaultIMAPFolder.hasSubfolders();
         assertTrue("Default email folder has no subfolders.", subFolders);
-        request = new ListRequest(API.OX_NEW, defaultIMAPFolder.getFullName());
+        request = new ListRequest(EnumAPI.OX_NEW, defaultIMAPFolder.getFullName());
         response = client.execute(request);
         iter = response.getFolder();
         FolderObject inboxFolder = null;
@@ -149,7 +149,7 @@ public class ListTest extends AbstractAJAXSession {
         }
         assertNotNull("Inbox folder for default mail account not found.", inboxFolder);
         @SuppressWarnings("null")
-        GetRequest request2 = new GetRequest(API.OX_NEW, inboxFolder.getFullName(), new int[] {
+        GetRequest request2 = new GetRequest(EnumAPI.OX_NEW, inboxFolder.getFullName(), new int[] {
             FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME, FolderObject.OWN_RIGHTS, FolderObject.PERMISSIONS_BITS });
         GetResponse response2 = client.execute(request2);
         assertFalse("Get failed.", response2.hasError());
@@ -157,7 +157,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPrivate() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
+        final ListRequest request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -167,7 +167,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPrivateWithModules() throws Throwable {
         // List root's subfolders by their type
-        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), new Modules[] { Modules.MAIL });
+        final ListRequest request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PRIVATE_FOLDER_ID), new Modules[] { Modules.MAIL });
         final ListResponse response = client.execute(request);
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
         final int length = jsonArray.length();
@@ -181,7 +181,7 @@ public class ListTest extends AbstractAJAXSession {
 
     public void testListPublic() throws Throwable {
         // List root's subfolders
-        final ListRequest request = new ListRequest(API.OX_NEW, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
+        final ListRequest request = new ListRequest(EnumAPI.OX_NEW, String.valueOf(FolderObject.SYSTEM_PUBLIC_FOLDER_ID));
         final ListResponse response = client.execute(request);
 
         final JSONArray jsonArray = (JSONArray) response.getResponse().getData();
@@ -190,13 +190,13 @@ public class ListTest extends AbstractAJAXSession {
     }
 
     public void testListShared() throws Throwable {
-        client.execute(new ListRequest(API.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID));
-        client.execute(new ListRequest(API.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID));
+        client.execute(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_ROOT_FOLDER_ID));
+        client.execute(new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID));
         int folderId = client2.getValues().getPrivateAppointmentFolder();
         int userId = client.getValues().getUserId();
         FolderTools.shareFolder(
             client2,
-            API.OX_NEW,
+            EnumAPI.OX_NEW,
             folderId,
             userId,
             OCLPermission.READ_FOLDER,
@@ -204,7 +204,7 @@ public class ListTest extends AbstractAJAXSession {
             OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS);
         // List root's subfolders
-        ListRequest request1 = new ListRequest(API.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID);
+        ListRequest request1 = new ListRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_SHARED_FOLDER_ID);
         ListResponse response = client.execute(request1);
 
         String expectedId = FolderObject.SHARED_PREFIX + client2.getValues().getUserId();
@@ -219,7 +219,7 @@ public class ListTest extends AbstractAJAXSession {
         assertNotNull("Expected user named shared folder below root shared folder.", foundUserShared);
 
         @SuppressWarnings("null")
-        ListRequest request2 = new ListRequest(API.OX_NEW, foundUserShared.getFullName());
+        ListRequest request2 = new ListRequest(EnumAPI.OX_NEW, foundUserShared.getFullName());
         response = client.execute(request2);
         iter = response.getFolder();
         FolderObject foundShared = null;
@@ -231,6 +231,6 @@ public class ListTest extends AbstractAJAXSession {
         }
         assertNotNull("Shared folder expected below shared parent folder.", foundShared);
 
-        FolderTools.unshareFolder(client2, API.OX_NEW, folderId, userId);
+        FolderTools.unshareFolder(client2, EnumAPI.OX_NEW, folderId, userId);
     }
 }

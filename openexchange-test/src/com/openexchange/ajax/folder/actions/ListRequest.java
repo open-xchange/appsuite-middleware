@@ -74,7 +74,7 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
 
     private final boolean failOnError;
 
-    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, Modules[] allowedModules, boolean failOnError) {
+    public ListRequest(final API api, final String parentFolder, final int[] columns, final boolean ignoreMail, final Modules[] allowedModules, final boolean failOnError) {
         super(api);
         this.parentFolder = parentFolder;
         this.columns = columns;
@@ -83,40 +83,42 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
         this.failOnError = failOnError;
     }
 
-    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail, boolean failOnError) {
+    public ListRequest(final API api, final String parentFolder, final int[] columns, final boolean ignoreMail, final boolean failOnError) {
         this(api, parentFolder, columns, ignoreMail, null, failOnError);
     }
 
-    public ListRequest(API api, String parentFolder, int[] columns, boolean ignoreMail) {
+    public ListRequest(final API api, final String parentFolder, final int[] columns, final boolean ignoreMail) {
         this(api, parentFolder, columns, ignoreMail, null, true);
     }
 
-    public ListRequest(API api, String parentFolder) {
+    public ListRequest(final API api, final String parentFolder) {
         this(api, parentFolder, DEFAULT_COLUMNS, false);
     }
 
-    public ListRequest(API api, int parentFolder) {
+    public ListRequest(final API api, final int parentFolder) {
         this(api, Integer.toString(parentFolder), false);
     }
 
-    public ListRequest(API api, String parentFolder, boolean ignoreMail) {
+    public ListRequest(final API api, final String parentFolder, final boolean ignoreMail) {
         this(api, parentFolder, DEFAULT_COLUMNS, ignoreMail);
     }
 
-    public ListRequest(API api, String parentFolder, Modules[] allowedModules) {
+    public ListRequest(final API api, final String parentFolder, final Modules[] allowedModules) {
         this(api, parentFolder, DEFAULT_COLUMNS, false, allowedModules, true);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
     @Override
-    protected void addParameters(List<Parameter> params) {
+    protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
         params.add(new Parameter(Folder.PARAMETER_PARENT, parentFolder));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
@@ -128,6 +130,7 @@ public class ListRequest extends AbstractFolderRequest<ListResponse> {
         }
     }
 
+    @Override
     public ListParser getParser() {
         return new ListParser(columns, failOnError);
     }

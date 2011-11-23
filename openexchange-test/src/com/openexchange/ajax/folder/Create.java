@@ -52,7 +52,7 @@ package com.openexchange.ajax.folder;
 import java.io.IOException;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -122,7 +122,7 @@ public final class Create {
         SAXException, JSONException {
         final FolderObject folder = setupPublicFolder(name, module, client.getValues().getUserId());
         folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
-        final InsertRequest request = new InsertRequest(API.OX_OLD, folder);
+        final InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder);
         final InsertResponse response = client.execute(request);
         response.fillObject(folder);
         return folder;

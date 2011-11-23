@@ -1,11 +1,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
-
 import junit.framework.AssertionFailedError;
-
-import net.fortuna.ical4j.util.TimeZones;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;

@@ -50,8 +50,8 @@
 package com.openexchange.ajax.task;
 
 import java.util.Date;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -87,7 +87,7 @@ public final class Bug11075Test extends AbstractTaskTest {
         final AJAXClient client = getClient();
         final InsertRequest[] inserts = new InsertRequest[2];
         for (int i = 0; i < inserts.length; i++) {
-            inserts[i] = new InsertRequest(API.OX_OLD, createFolder("Bug11075Test_" + i,
+            inserts[i] = new InsertRequest(EnumAPI.OX_OLD, createFolder("Bug11075Test_" + i,
                 client.getValues().getUserId()));
         }
         final MultipleResponse<InsertResponse> mInsert = client.execute(MultipleRequest.create(inserts));
@@ -108,7 +108,7 @@ public final class Bug11075Test extends AbstractTaskTest {
             final SearchResponse response = TaskTools.search(client, request);
             assertFalse("Searching over all folders failed.", response.hasError());
         } finally {
-            client.execute(new DeleteRequest(API.OX_OLD, folderIds, timestamp));
+            client.execute(new DeleteRequest(EnumAPI.OX_OLD, folderIds, timestamp));
         }
     }
 

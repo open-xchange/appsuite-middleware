@@ -47,7 +47,7 @@
 
 package com.openexchange.ajax.kata.folders;
 
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -73,7 +73,7 @@ public class FolderUpdateStep extends NeedExistingStep<FolderObject>{
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
         assumeIdentity(entry);
-        UpdateRequest updateRequest = new UpdateRequest(API.OX_OLD, entry, false);
+        UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_OLD, entry, false);
         CommonInsertResponse updateResponse = execute(updateRequest);
 
         if(!updateResponse.hasError()) {

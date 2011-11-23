@@ -60,7 +60,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -121,7 +121,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION));
-        CommonInsertResponse folderResponse = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, publicFolder));
+        CommonInsertResponse folderResponse = clientA.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, publicFolder));
         folderResponse.fillObject(publicFolder);
 
         List<Participant> participants = ParticipantTools.createParticipants(
@@ -155,7 +155,7 @@ public class UserStory2173Test extends AbstractAJAXSession {
             clientA.execute(new DeleteRequest(appointmentPublic));
         }
 
-        clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, publicFolder.getObjectID(), publicFolder.getLastModified()));
+        clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, publicFolder.getObjectID(), publicFolder.getLastModified()));
 
         SetRequest setRequest = new SetRequest(Tree.CalendarDefaultStatusPrivate, I(Appointment.NONE));
         clientB.execute(setRequest);

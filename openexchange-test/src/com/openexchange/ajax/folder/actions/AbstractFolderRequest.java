@@ -69,18 +69,20 @@ import com.openexchange.server.impl.OCLPermission;
  */
 abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    private API api;
+    private final API api;
     private AllowedModules[] allowedModules;
 
-    protected AbstractFolderRequest(API api) {
+    protected AbstractFolderRequest(final API api) {
         super();
         this.api = api;
     }
 
+    @Override
     public String getServletPath() {
         return api.getUrl();
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
@@ -138,18 +140,19 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
         return retval;
     }
 
-    public void setAllowedModules(AllowedModules... allowedModules) {
+    public void setAllowedModules(final AllowedModules... allowedModules) {
         this.allowedModules = allowedModules;
     }
 
+    @Override
     public final Parameter[] getParameters() {
-        List<Parameter> params = new ArrayList<Parameter>();
+        final List<Parameter> params = new ArrayList<Parameter>();
         addParameters(params);
         if (api.getTreeId() != -1) {
             params.add(new Parameter("tree", api.getTreeId()));
         }
         if (null != allowedModules) {
-            String[] tmp = new String[allowedModules.length];
+            final String[] tmp = new String[allowedModules.length];
             for (int i = 0; i < allowedModules.length; i++) {
                 tmp[i] = allowedModules[i].getJSONValue();
             }

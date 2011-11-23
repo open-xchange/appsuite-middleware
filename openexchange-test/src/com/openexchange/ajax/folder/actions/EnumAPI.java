@@ -1,4 +1,6 @@
-/*    OPEN-XCHANGE legal information
+/*
+ *
+ *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -45,68 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.kata.folders;
-
-import java.util.Date;
-import com.openexchange.ajax.folder.actions.EnumAPI;
-import com.openexchange.ajax.folder.actions.InsertRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.CommonInsertResponse;
-import com.openexchange.ajax.kata.AbstractStep;
-import com.openexchange.ajax.kata.IdentitySource;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.test.FolderTestManager;
+package com.openexchange.ajax.folder.actions;
 
 /**
- * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * Enumeration of possible folder APIs. There are now 2 implementations of the OX folder tree and 1 implementation of the Outlook-like
+ * folder tree.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class FolderCreateStep extends AbstractStep implements IdentitySource<FolderObject>{
+public enum EnumAPI implements API {
 
-    private FolderObject entry;
-    private boolean inserted;
-    private FolderTestManager manager;
+    OX_OLD("/ajax/folders", -1),
+    OX_NEW("/ajax/folders", 0),
+    OUTLOOK("/ajax/folders", 1);
 
-    public FolderCreateStep(FolderObject entry, String name, String expectedError) {
-        super(name, expectedError);
-        this.entry = entry;
+    private String url;
+    private int treeId;
+
+    private EnumAPI(final String url, final int treeId) {
+        this.url = url;
+        this.treeId = treeId;
     }
 
-    public void cleanUp() throws Exception {
-        if( inserted ){
-            entry.setLastModified(new Date(Long.MAX_VALUE));
-            manager.deleteFolderOnServer(entry);
-            inserted = false;
-        }
+    @Override
+    public String getUrl() {
+        return url;
     }
 
-    public void perform(AJAXClient myClient) throws Exception {
-        this.client = myClient;
-        this.manager = new FolderTestManager(myClient);
-
-        InsertRequest insertRequest = new InsertRequest(EnumAPI.OX_OLD, entry, false);
-        CommonInsertResponse insertResponse = execute(insertRequest);
-        insertResponse.fillObject(entry);
-        inserted = !insertResponse.hasError();
-        checkError(insertResponse);
+    @Override
+    public int getTreeId() {
+        return treeId;
     }
-
-    public void assumeIdentity(FolderObject folder) {
-        folder.setObjectID( entry.getObjectID() );
-        folder.setParentFolderID( entry.getParentFolderID());
-        folder.setLastModified( entry.getLastModified());
-        folder.setPermissions(entry.getPermissions());
-    }
-
-    public void rememberIdentityValues(FolderObject folder) {
-        folder.setLastModified( entry.getLastModified());
-    }
-
-    public void forgetIdentity(FolderObject myEntry) {
-        inserted = false;
-    }
-
-    public Class<FolderObject> getType() {
-        return FolderObject.class;
-    }
-
 }

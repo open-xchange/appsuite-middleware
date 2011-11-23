@@ -72,7 +72,7 @@ public class GenJSONRequest extends AbstractFolderRequest<GenJSONResponse> {
 
     private final Map<String, String> parameters;
 
-    public GenJSONRequest(API api) {
+    public GenJSONRequest(final API api) {
         this(api, true);
     }
 
@@ -81,7 +81,7 @@ public class GenJSONRequest extends AbstractFolderRequest<GenJSONResponse> {
      *
      * @param failOnError Whether to fail on error
      */
-    public GenJSONRequest(API api, final boolean failOnError) {
+    public GenJSONRequest(final API api, final boolean failOnError) {
         super(api);
         this.failOnError = failOnError;
         method = Method.PUT;
@@ -100,21 +100,24 @@ public class GenJSONRequest extends AbstractFolderRequest<GenJSONResponse> {
         parameters.put(name, value);
     }
 
+    @Override
     public Object getBody() {
         return null == jsonValue ? JSONObject.NULL : jsonValue;
     }
 
+    @Override
     public Method getMethod() {
         return method;
     }
 
     @Override
-    protected void addParameters(List<Parameter> params) {
+    protected void addParameters(final List<Parameter> params) {
         for (final Entry<String, String> entry : parameters.entrySet()) {
             params.add(new Parameter(entry.getKey(), entry.getValue()));
         }
     }
 
+    @Override
     public GenJSONParser getParser() {
         return new GenJSONParser(failOnError);
     }

@@ -376,7 +376,7 @@ public class ContactTestManager implements TestManager {
     }
 
     /**
-     * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
+     * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
      */
     public Contact[] searchAction(String pattern, int folderId) {
     	return searchAction(pattern, folderId, Contact.ALL_COLUMNS);
@@ -445,7 +445,7 @@ public class ContactTestManager implements TestManager {
     }
 
     /**
-     * Search for contacts in a folder via the HTTP-API. Use "-1" as folderId to search all available folders
+     * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
      */
     public Contact[] searchAction(String pattern, int folderId, boolean initialSearch) {
         List<Contact> allContacts = new LinkedList<Contact>();

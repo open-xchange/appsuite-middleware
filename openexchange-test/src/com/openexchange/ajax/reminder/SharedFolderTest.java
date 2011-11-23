@@ -61,7 +61,7 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -112,13 +112,13 @@ public class SharedFolderTest extends AbstractAJAXSession {
         sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
         sharedFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
         final InsertResponse folderInsertResponse = client.execute(new com.openexchange.ajax.folder.actions.InsertRequest(
-            API.OUTLOOK,
+            EnumAPI.OUTLOOK,
             sharedFolder,
             true));
         folderInsertResponse.fillObject(sharedFolder);
         FolderTools.shareFolder(
             client,
-            API.OUTLOOK,
+            EnumAPI.OUTLOOK,
             sharedFolder.getObjectID(),
             client2.getValues().getUserId(),
             OCLPermission.CREATE_OBJECTS_IN_FOLDER,
@@ -225,7 +225,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
     @Override
     public void tearDown() throws Exception {
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, sharedFolder));
+        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, sharedFolder));
         client2.logout();
 
         super.tearDown();

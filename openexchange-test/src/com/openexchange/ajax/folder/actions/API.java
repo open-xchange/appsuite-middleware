@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,30 +50,24 @@
 package com.openexchange.ajax.folder.actions;
 
 /**
- * Enumeration of possible folder APIs. There are now 2 implementations of the OX folder tree and 1 implementation of the Outlook-like
- * folder tree.
+ * {@link API}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum API {
+public interface API {
 
-    OX_OLD("/ajax/folders", -1),
-    OX_NEW("/ajax/folders", 0),
-    OUTLOOK("/ajax/folders", 1);
+    /**
+     * Gets the folder URL.
+     * 
+     * @return The URL
+     */
+    String getUrl();
 
-    private String url;
-    private int treeId;
+    /**
+     * Gets the tree identifier.
+     * 
+     * @return The tree identifier
+     */
+    int getTreeId();
 
-    private API(String url, int treeId) {
-        this.url = url;
-        this.treeId = treeId;
-    }
-
-    String getUrl() {
-        return url;
-    }
-
-    int getTreeId() {
-        return treeId;
-    }
 }

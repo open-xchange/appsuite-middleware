@@ -521,7 +521,7 @@ public class TestMail implements IdentitySource<TestMail> {
     }
 
     /**
-     * Transforms this mail into a JSONObject like used by the HTTP API.
+     * Transforms this mail into a JSONObject like used by the HTTP EnumAPI.
      *
      * @return
      * @throws JSONException
