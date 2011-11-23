@@ -1,3 +1,8 @@
+* 2011-11-23 - choeger@open-xchange.com
+
+ - SoftwareChange_Request-841/Bugfix #20308: axis2 generated wsdl expects talks
+   about Date but expects DateTime.
+
 * 2011-10-18 - choeger@open-xchange.com
 
  - SoftwareChange_Request-860: Stabilized SOAP API
