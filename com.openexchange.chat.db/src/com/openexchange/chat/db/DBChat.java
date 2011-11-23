@@ -585,8 +585,9 @@ public final class DBChat implements Chat {
             stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE chatId = ?");
             stmt.setInt(1, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.last()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -794,8 +795,9 @@ public final class DBChat implements Chat {
             stmt.setInt(1, contextId);
             stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.last()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -921,8 +923,9 @@ public final class DBChat implements Chat {
             stmt.setInt(1, contextId);
             stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.last()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -1050,8 +1053,9 @@ public final class DBChat implements Chat {
             stmt.setInt(1, contextId);
             stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.next()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -1251,7 +1255,7 @@ public final class DBChat implements Chat {
         final Connection con = databaseService.getWritable(contextId);
         try {
             con.setAutoCommit(false);
-            List<Message> messages = pollMessages(con, since, chatUser);
+            final List<Message> messages = pollMessages(con, since, chatUser);
             con.commit();
             return messages;
         } catch (final SQLException e) {
@@ -1332,11 +1336,10 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, chatUserId);
             stmt.setInt(pos, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            if (rs.getRow() == 1) {
+            if (rs.last()) {
                 chunkId = rs.getInt(1);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1354,7 +1357,7 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, chunkId);
             stmt.setInt(pos, chatUserId);
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
