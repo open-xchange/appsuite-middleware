@@ -89,6 +89,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchReasonException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
@@ -96,9 +97,11 @@ import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.mysqlStorage.OXToolMySQLStorage;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.FilestoreDataMover;
+import com.openexchange.admin.tools.PropertyHandlerExtended;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -113,9 +116,12 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     private final Log log = LogFactory.getLog(this.getClass());
 
+    private OXAdminPoolDBPoolExtension pool;
+
     public OXContext(final BundleContext context) throws StorageException {
         super();
         this.context = context;
+        this.pool = new OXAdminPoolDBPoolExtension(new PropertyHandlerExtended(System.getProperties()));
         if (log.isDebugEnabled()) {
             log.debug("Class loaded: " + this.getClass().getName());
         }
@@ -275,9 +281,24 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         try {
-            ContextStorage.getInstance().invalidateContext(ctx.getId().intValue());
+            final int contextID = ctx.getId().intValue();
+            ContextStorage.getInstance().invalidateContext(contextID);
+            final CacheService cacheService = AdminDaemon.getService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context, CacheService.class);
+            if (null != cacheService) {
+                try {
+                    final Cache cache = cacheService.getCache("MailAccount");
+                    cache.invalidateGroup(Integer.toString(contextID));
+                } catch (final OXException e) {
+                    log.error(e.getMessage(), e);
+                } finally {
+                    AdminDaemon.ungetService(SYMBOLIC_NAME_CACHE, NAME_OXCACHE, context);
+                }
+            }
+            pool.resetPoolMappingForContext(contextID);
         } catch (final OXException e) {
-            log.error("Error invalidating context "+ctx.getId()+" in ox context storage",e);
+            log.error("Error invalidating context " + ctx.getId() + " in ox context storage", e);
+        } catch (PoolException e) {
+            log.info("Could not reset PoolMapping for context " + ctx.getId() + " while deleting it. Should not have been mapped then.");
         }
     }
 

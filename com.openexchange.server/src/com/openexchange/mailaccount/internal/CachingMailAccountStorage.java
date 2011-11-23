@@ -102,6 +102,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         cacheLock = new ReentrantLock(true);
     }
 
+    RdbMailAccountStorage getDelegate() {
+        return delegate;
+    }
+
     static CacheKey newCacheKey(final CacheService cacheService, final int id, final int user, final int cid) {
         return cacheService.newCacheKey(cid, Integer.valueOf(id), Integer.valueOf(user));
     }
@@ -112,6 +116,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         if (null != cacheService) {
             final Cache cache = cacheService.getCache(REGION_NAME);
             cache.remove(newCacheKey(cacheService, id, user, cid));
+            cache.invalidateGroup(Integer.toString(cid));
         }
     }
 
@@ -265,7 +270,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public MailAccount[] resolveLogin(final String login, final int cid) throws OXException {
-        final int[][] idsAndUsers = delegate.resolveLogin2IDs(login, cid);
+        final int[][] idsAndUsers = resolveFromCache(login, cid, new FromDelegate() {
+            @Override
+            public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
+                return getDelegate().resolveLogin2IDs(pattern, contextId);
+            }
+        }, CachedResolveType.LOGIN);
         final MailAccount[] accounts = new MailAccount[idsAndUsers.length];
         for (int i = 0; i < accounts.length; i++) {
             final int[] idAndUser = idsAndUsers[i];
@@ -276,7 +286,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
-        final int[][] idsAndUsers = delegate.resolveLogin2IDs(login, cid);
+        final int[][] idsAndUsers = resolveFromCache(login, cid, new FromDelegate() {
+            @Override
+            public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
+                return getDelegate().resolveLogin2IDs(pattern, contextId);
+            }
+        }, CachedResolveType.LOGIN);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
             final MailAccount candidate = getMailAccount(idAndUser[0], idAndUser[1], cid);
@@ -307,22 +322,64 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
-        return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
+        final int id = delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
+        invalidateMailAccount(id, user, ctx.getContextId());
+        return id;
     }
 
     @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
-        return delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
+        final int id = delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
+        invalidateMailAccount(id, user, ctx.getContextId());
+        return id;
     }
 
     @Override
     public MailAccount[] resolvePrimaryAddr(final String primaryAddress, final int cid) throws OXException {
-        final int[][] idsAndUsers = delegate.resolvePrimaryAddr2IDs(primaryAddress, cid);
+        final int[][] idsAndUsers = resolveFromCache(primaryAddress, cid, new FromDelegate() {
+            @Override
+            public int[][] getFromDelegate(final String pattern, final int contextId) throws OXException {
+                return getDelegate().resolvePrimaryAddr2IDs(pattern, contextId);
+            }
+        }, CachedResolveType.PRIMARY_ADDRESS);
         final List<MailAccount> l = new ArrayList<MailAccount>(idsAndUsers.length);
         for (final int[] idAndUser : idsAndUsers) {
             l.add(getMailAccount(idAndUser[0], idAndUser[1], cid));
         }
         return l.toArray(new MailAccount[l.size()]);
+    }
+
+    private interface FromDelegate {
+        int[][] getFromDelegate(String pattern, int cid) throws OXException;
+    }
+
+    private static int[][] resolveFromCache(final String pattern, final int cid, final FromDelegate delegate, final CachedResolveType type) throws OXException {
+        final int[][] idsAndUsers;
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        Cache cache;
+        try {
+            cache = cacheService.getCache(REGION_NAME);
+        } catch (final OXException e) {
+            cache = null;
+        }
+        if (null == cacheService || null == cache) { // Warning here is wrong.
+            idsAndUsers = delegate.getFromDelegate(pattern, cid);
+        } else {
+            final CacheKey key = cacheService.newCacheKey(type.ordinal(), pattern);
+            int[][] tmp;
+            try {
+                tmp = (int[][]) cache.getFromGroup(key, Integer.toString(cid));
+            } catch (final ClassCastException e) {
+                tmp = null;
+            }
+            if (null == tmp) {
+                idsAndUsers = delegate.getFromDelegate(pattern, cid);
+                cache.putInGroup(key, Integer.toString(cid), idsAndUsers);
+            } else {
+                idsAndUsers = tmp;
+            }
+        }
+        return idsAndUsers;
     }
 
     @Override
