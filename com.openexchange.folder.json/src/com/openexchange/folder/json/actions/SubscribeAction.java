@@ -112,6 +112,12 @@ public final class SubscribeAction extends AbstractFolderAction {
              */
             final JSONArray jArray = (JSONArray) request.getData();
             final int len = jArray.length();
+            if (0 == len) {
+                return new AJAXRequestResult();
+            }
+            /*
+             * Iterate JSON array
+             */
             final List<SubscribeParams> subscribeList = new ArrayList<SubscribeParams>(len);
             final List<SubscribeParams> unsubscribeList = new ArrayList<SubscribeParams>(len);
             final String defaultTreeIdentifier = getDefaultTreeIdentifier();
