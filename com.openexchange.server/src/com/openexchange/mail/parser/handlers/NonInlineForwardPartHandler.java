@@ -73,7 +73,7 @@ import com.openexchange.mail.uuencode.UUEncodedPart;
 /**
  * {@link NonInlineForwardPartHandler} - Gathers all occuring non-inline parts in a mail and makes them accessible through
  * {@link #getNonInlineParts()}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class NonInlineForwardPartHandler implements MailMessageHandler {
@@ -93,7 +93,7 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
     /**
      * Initializes a new {@link NonInlineForwardPartHandler}
-     * 
+     *
      * @param nonInlineParts The container for non-inline parts
      */
     public NonInlineForwardPartHandler(final List<MailPart> nonInlineParts) {
@@ -111,7 +111,7 @@ public final class NonInlineForwardPartHandler implements MailMessageHandler {
 
     /**
      * Sets the image content IDs.
-     * 
+     *
      * @param imageContentIds The content IDs
      */
     public void setImageContentIds(final Collection<String> imageContentIds) {

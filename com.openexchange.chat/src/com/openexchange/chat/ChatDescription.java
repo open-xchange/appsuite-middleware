@@ -54,7 +54,7 @@ import java.util.List;
 
 /**
  * {@link ChatDescription} - Provides changeable attributes of a {@link Chat chat}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ChatDescription {
@@ -69,7 +69,7 @@ public class ChatDescription {
 
     /**
      * Initializes a new {@link ChatDescription}.
-     * 
+     *
      * @param chatId The chat identifier; <code>null</code> for a new chat
      */
     public ChatDescription(final String chatId) {
@@ -97,7 +97,7 @@ public class ChatDescription {
 
     /**
      * Checks if this chat description provides any changed attribute.
-     * 
+     *
      * @return <code>true</code> if this chat description provides any changed attribute; otherwise <code>false</code>
      */
     public boolean hasAnyAttribute() {
@@ -115,7 +115,7 @@ public class ChatDescription {
 
     /**
      * Gets the chat identifier
-     * 
+     *
      * @return The chat identifier
      */
     public String getChatId() {
@@ -124,7 +124,7 @@ public class ChatDescription {
 
     /**
      * Adds the identifier of the user who shall be added to denoted chat.
-     * 
+     *
      * @param user The user identifier
      */
     public void addNewMember(final String user) {
@@ -133,7 +133,7 @@ public class ChatDescription {
 
     /**
      * Gets the identifiers of the users who shall be added to denoted chat.
-     * 
+     *
      * @return The user identifiers
      */
     public List<String> getNewMembers() {
@@ -142,7 +142,7 @@ public class ChatDescription {
 
     /**
      * Adds the identifier of the user who shall be deleted from denoted chat.
-     * 
+     *
      * @param user The user identifier
      */
     public void addDeleteMember(final String user) {
@@ -151,7 +151,7 @@ public class ChatDescription {
 
     /**
      * Gets the identifiers of the users who shall be deleted from denoted chat.
-     * 
+     *
      * @return The user identifiers
      */
     public List<String> getDeletedMembers() {
@@ -160,7 +160,7 @@ public class ChatDescription {
 
     /**
      * Gets the subject
-     * 
+     *
      * @return The subject
      */
     public String getSubject() {
@@ -169,7 +169,7 @@ public class ChatDescription {
 
     /**
      * Sets the subject
-     * 
+     *
      * @param subject The subject to set
      */
     public void setSubject(final String subject) {

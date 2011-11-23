@@ -63,21 +63,21 @@ import com.openexchange.groupware.container.Participant;
  */
 public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> {
 
-    private int folderId;
+    private final int folderId;
 
-    private int objectId;
+    private final int objectId;
 
-    private int confirmStatus;
+    private final int confirmStatus;
 
-    private String confirmMessage;
+    private final String confirmMessage;
 
     private int user;
 
-    private boolean failOnError;
+    private final boolean failOnError;
 
     private String mail;
 
-    private int type;
+    private final int type;
 
     /**
      * For external users
@@ -127,6 +127,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         this(folderId, objectId, confirmStatus, confirmMessage, 0, failOnError);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         JSONObject json = new JSONObject();
         json.put(ParticipantsFields.CONFIRM_MESSAGE, confirmMessage);
@@ -141,10 +142,12 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIRM));
@@ -153,6 +156,7 @@ public class ConfirmRequest extends AbstractAppointmentRequest<ConfirmResponse> 
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<? extends ConfirmResponse> getParser() {
         return new ConfirmParser(failOnError);
     }

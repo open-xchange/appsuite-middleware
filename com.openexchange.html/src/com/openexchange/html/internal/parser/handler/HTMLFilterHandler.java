@@ -245,7 +245,7 @@ public final class HTMLFilterHandler implements HTMLHandler {
 
     /**
      * Gets a JSoup white-list according to <tt>whitelist.properties</tt> file.
-     * 
+     *
      * @return A JSoup white-list according to <tt>whitelist.properties</tt> file
      */
     public static Whitelist getJSoupWhitelist() {

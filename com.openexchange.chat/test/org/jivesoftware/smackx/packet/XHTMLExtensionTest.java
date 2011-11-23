@@ -174,7 +174,7 @@ public class XHTMLExtensionTest extends SmackTestCase {
 	final PacketCollector chat2 = getConnection(1).createPacketCollector(
 		new ThreadFilter(chat1.getThreadID()));
 
-	// Create a Listener that listens for Messages with the extension 
+	// Create a Listener that listens for Messages with the extension
 	//"http://jabber.org/protocol/xhtml-im"
 	// This listener will listen on the conn2 and answer an ACK if everything is ok
 	PacketFilter packetFilter =

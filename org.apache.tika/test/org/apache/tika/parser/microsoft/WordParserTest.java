@@ -79,7 +79,7 @@ public class WordParserTest extends TikaTest {
     private XMLResult getXML(String filePath) throws Exception {
         InputStream input = null;
         Metadata metadata = new Metadata();
-        
+
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
                  SAXTransformerFactory.newInstance();
@@ -133,7 +133,7 @@ public class WordParserTest extends TikaTest {
         assertTrue(xml.contains("<a href=\"http://tika.apache.org/\">Tika</a>"));
         // Paragraphs with other styles
         assertTrue(xml.contains("<p class=\"signature\">This one"));
-        
+
         // Try with a document that contains images
         xml = getXML("/test-documents/testWORD_3imgs.doc").xml;
 
@@ -141,7 +141,7 @@ public class WordParserTest extends TikaTest {
         assertTrue("Image not found in:\n"+xml, xml.contains("src=\"embedded:image1.png\""));
         assertTrue("Image not found in:\n"+xml, xml.contains("src=\"embedded:image2.jpg\""));
         assertTrue("Image not found in:\n"+xml, xml.contains("src=\"embedded:image3.png\""));
-            
+
         // Text too
         assertTrue(xml.contains("<p>The end!"));
 
@@ -157,7 +157,7 @@ public class WordParserTest extends TikaTest {
         // TIKA-692: test document containing multiple
         // character runs within a bold tag:
         xml = getXML("/test-documents/testWORD_bold_character_runs2.doc").xml;
-            
+
         // Make sure bold text arrived as single
         // contiguous string even though Word parser
         // handled this as 3 character runs

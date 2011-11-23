@@ -109,6 +109,7 @@ public class PacketReaderTest extends SmackTestCase {
         // Create a new type of IQ to send. The new IQ will include a
         // non-existant namespace to cause the "feature-not-implemented" answer
         IQ iqPacket = new IQ() {
+            @Override
             public String getChildElementXML() {
                 return "<query xmlns=\"my:ns:test\"/>";
             }
@@ -135,6 +136,7 @@ public class PacketReaderTest extends SmackTestCase {
     public void testRemoveListener() {
 
         PacketListener listener = new PacketListener() {
+            @Override
             public void processPacket(Packet packet) {
                 // Do nothing
             }
@@ -170,6 +172,7 @@ public class PacketReaderTest extends SmackTestCase {
 
         // User1 will always reply to user0 when a message is received
         getConnection(1).addPacketListener(new PacketListener() {
+            @Override
             public void processPacket(Packet packet) {
                 System.out.println(new Date() + " " + packet);
 
@@ -211,12 +214,14 @@ public class PacketReaderTest extends SmackTestCase {
         for (int j = 0; j < repeat; j++) {
 
             PacketListener listener0 = new PacketListener() {
+                @Override
                 public void processPacket(Packet packet) {
                     System.out.println("Packet Captured");
                     incCounter();
                 }
             };
             PacketFilter pf0 = new PacketFilter() {
+                @Override
                 public boolean accept(Packet packet) {
                     System.out.println("Packet Filtered");
                     incCounter();
@@ -225,12 +230,14 @@ public class PacketReaderTest extends SmackTestCase {
             };
 
             PacketListener listener1 = new PacketListener() {
+                @Override
                 public void processPacket(Packet packet) {
                     System.out.println("Packet Captured");
                     incCounter();
                 }
             };
             PacketFilter pf1 = new PacketFilter() {
+                @Override
                 public boolean accept(Packet packet) {
                     System.out.println("Packet Filtered");
                     incCounter();
@@ -286,6 +293,7 @@ public class PacketReaderTest extends SmackTestCase {
         assertEquals(valCounter(), repeat * 2 * 10);
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

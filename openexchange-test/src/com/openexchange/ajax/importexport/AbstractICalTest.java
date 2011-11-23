@@ -169,10 +169,12 @@ public class AbstractICalTest extends AbstractAJAXTest {
         // Remove somewhere ugly injected instances.
         Participants.userResolver = new UserResolver() {
 
+            @Override
             public List<User> findUsers(final List<String> mails, final Context ctx) {
                 return new ArrayList<User>();
             }
 
+            @Override
             public User loadUser(final int userId, final Context ctx) {
                 return null;
             }

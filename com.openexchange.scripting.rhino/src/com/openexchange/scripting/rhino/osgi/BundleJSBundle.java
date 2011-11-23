@@ -8,8 +8,8 @@ import com.openexchange.scripting.rhino.require.JSBundle;
 
 public class BundleJSBundle implements JSBundle {
 
-	private Bundle bundle;
-	
+	private final Bundle bundle;
+
 	public BundleJSBundle(Bundle bundle) {
 		super();
 		this.bundle = bundle;

@@ -55,7 +55,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link DBChatServiceLookup}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBChatServiceLookup {
@@ -71,7 +71,7 @@ public final class DBChatServiceLookup {
 
     /**
      * Gets the service look-up
-     * 
+     *
      * @return The service look-up or <code>null</code>
      */
     public static ServiceLookup get() {
@@ -95,7 +95,7 @@ public final class DBChatServiceLookup {
 
     /**
      * Sets the service look-up
-     * 
+     *
      * @param serviceLookup The service look-up or <code>null</code>
      */
     public static void set(final ServiceLookup serviceLookup) {

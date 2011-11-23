@@ -64,8 +64,8 @@ import com.openexchange.groupware.container.Contact;
  */
 public class DoSeparationRequest extends AbstractContactRequest<DoSeparationResponse>{
 
-    private Contact contributor;
-    private Contact aggregator;
+    private final Contact contributor;
+    private final Contact aggregator;
 
     public DoSeparationRequest(Contact contributor, Contact aggregator) {
         super();
@@ -73,6 +73,7 @@ public class DoSeparationRequest extends AbstractContactRequest<DoSeparationResp
         this.aggregator = aggregator;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         JSONArray arr = new JSONArray();
         arr.put(convert(contributor));
@@ -80,10 +81,12 @@ public class DoSeparationRequest extends AbstractContactRequest<DoSeparationResp
         return arr;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters()  {
         Params params = new Params(
             AJAXServlet.PARAMETER_ACTION,
@@ -113,6 +116,7 @@ public class DoSeparationRequest extends AbstractContactRequest<DoSeparationResp
         return params.toArray();
     }
 
+    @Override
     public AbstractAJAXParser<? extends DoSeparationResponse> getParser() {
         return new AbstractAJAXParser<DoSeparationResponse>(true){
             @Override

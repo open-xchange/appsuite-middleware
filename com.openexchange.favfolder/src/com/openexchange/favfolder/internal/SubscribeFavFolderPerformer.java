@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link SubscribeFavFolderPerformer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SubscribeFavFolderPerformer extends AbstractFavFolderPerformer {
@@ -81,7 +81,7 @@ public final class SubscribeFavFolderPerformer extends AbstractFavFolderPerforme
 
     /**
      * Subscribes specified folders
-     * 
+     *
      * @param sourceTreeId The source tree identifier to subscribe from; default is {@link FolderStorage#REAL_TREE_ID}
      * @param folderIds The identifiers of the folders to subscribe
      * @param targetTreeId The identifier of the tree to subscribe to

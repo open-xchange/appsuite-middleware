@@ -64,7 +64,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class GetAssociatedContactsResponse extends AbstractAJAXResponse {
 
-    private TimeZone timeZone;
+    private final TimeZone timeZone;
 
     protected GetAssociatedContactsResponse(Response response, TimeZone tz) {
         super(response);

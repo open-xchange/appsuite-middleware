@@ -58,14 +58,14 @@ import com.openexchange.config.PropertyListener;
 
 public class MockConfigurationService implements ConfigurationService {
 
-	private Map<String,String> props;
-	
+	private final Map<String,String> props;
+
 	public MockConfigurationService(String apiKey, String apiSecret){
 		props = new HashMap<String,String>();
 		props.put("com.openexchange.socialplugin.linkedin.apisecret", apiSecret);
 		props.put("com.openexchange.socialplugin.linkedin.apikey", apiKey);
 	}
-	
+
 	@Override
 	public String getProperty(String name) {
 		return props.get(name);

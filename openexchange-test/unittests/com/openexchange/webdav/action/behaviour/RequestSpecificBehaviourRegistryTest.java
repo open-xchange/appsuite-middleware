@@ -27,16 +27,19 @@ public class RequestSpecificBehaviourRegistryTest extends TestCase {
 			this.implementation = implementation;
 		}
 
-		public boolean matches(final WebdavRequest req) {
+		@Override
+        public boolean matches(final WebdavRequest req) {
 			return true;
 		}
 
-		public Set<Class<? extends Object>> provides() {
+		@Override
+        public Set<Class<? extends Object>> provides() {
 			return new HashSet<Class<? extends Object>>(Arrays.asList(TestInterface.class));
 
 		}
 
-		public <T> T get(final Class<T> clazz) {
+		@Override
+        public <T> T get(final Class<T> clazz) {
 			return (T) implementation;
 		}
 

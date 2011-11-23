@@ -89,6 +89,7 @@ public abstract class AbstractICalParserTest extends TestCase {
         parser = new ICal4JParser();
         oldUserResolver = Participants.userResolver;
         Participants.userResolver = new UserResolver(){
+            @Override
             public List<User> findUsers(final List<String> mails, final Context ctx) {
                 final List<User> found = new LinkedList<User>();
                 for(final String mail : mails) {
@@ -101,6 +102,7 @@ public abstract class AbstractICalParserTest extends TestCase {
                 return found;
             }
 
+            @Override
             public User loadUser(final int userId, final Context ctx) throws OXException {
                 return AbstractICalParserTest.this.users.getUser(userId);
             }
@@ -124,6 +126,7 @@ public abstract class AbstractICalParserTest extends TestCase {
                 add(subspaceAnomaly);
             }};
 
+            @Override
             public List<Resource> find(final List<String> names, final Context ctx)
                 throws OXException, OXException {
                 final List<Resource> retval = new ArrayList<Resource>();
@@ -136,6 +139,7 @@ public abstract class AbstractICalParserTest extends TestCase {
                 }
                 return retval;
             }
+            @Override
             public Resource load(final int resourceId, final Context ctx)
                 throws OXException, OXException {
                 return null;

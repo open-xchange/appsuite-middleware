@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.comparison.SizeComparison;
  */
 public class SizeComparisonWriterImpl implements ComparisonWriter {
 
-	public JSONObject writeComparison(final String name, final AbstractComparison abstractComparison, final JSONObject jsonObj) throws JSONException {
+	@Override
+    public JSONObject writeComparison(final String name, final AbstractComparison abstractComparison, final JSONObject jsonObj) throws JSONException {
 		final SizeComparison sizeComparison = (SizeComparison)abstractComparison;
 
 		jsonObj.put("comparison", name);

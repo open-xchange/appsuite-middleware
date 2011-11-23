@@ -223,7 +223,7 @@ public enum OXCalendarExceptionCodes implements OXExceptionCode {
      * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
      */
     DUPLICATE_EXTERNAL_PARTICIPANT("An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.", 106, Category.CATEGORY_USER_INPUT),
-    
+
     ;
 
     /**

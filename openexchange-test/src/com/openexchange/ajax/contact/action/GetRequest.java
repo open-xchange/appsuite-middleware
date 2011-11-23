@@ -65,7 +65,7 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
 
     private final int objectId;
 
-    private TimeZone timeZone;
+    private final TimeZone timeZone;
 
     private final boolean failOnError;
 
@@ -89,14 +89,17 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
         this(contact.getParentFolderID(), contact.getObjectID(), timeZone, true);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
@@ -105,6 +108,7 @@ public class GetRequest extends AbstractContactRequest<GetResponse> {
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser(failOnError, timeZone);
     }

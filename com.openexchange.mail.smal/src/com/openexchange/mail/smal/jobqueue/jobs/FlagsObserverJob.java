@@ -69,7 +69,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link FlagsObserverJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FlagsObserverJob extends AbstractMailSyncJob {
@@ -105,7 +105,7 @@ public final class FlagsObserverJob extends AbstractMailSyncJob {
      * Initializes a new {@link FlagsObserverJob} with default span.
      * <p>
      * This job is performed is span is exceeded and if able to exclusively set sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -124,7 +124,7 @@ public final class FlagsObserverJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ranking
-     * 
+     *
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
@@ -135,7 +135,7 @@ public final class FlagsObserverJob extends AbstractMailSyncJob {
 
     /**
      * Sets the storage mails
-     * 
+     *
      * @param storageMails The storage mails to set
      * @return This folder job with specified storage mails applied
      */

@@ -66,7 +66,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public class CsvDoesDifferentLanguages extends TestCase {
 
-    private String dutch =
+    private final String dutch =
         "Voornaam,Achternaam,Weergavenaam,Bijnaam," +
         "Eerste e-mail,Tweede e-mail,Telefoon werk,Telefoon thuis,Faxnummer,Piepernummer,Mobiel nummer," +
         "Adres,Adres 2,Woonplaats,Provincie,Postcode,Land," +

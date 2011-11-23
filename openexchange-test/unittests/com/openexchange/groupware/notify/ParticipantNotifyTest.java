@@ -522,18 +522,22 @@ public class ParticipantNotifyTest extends TestCase {
         public void setModule(final int module) {
             this.module = module;
 }
+        @Override
         public int getModule() {
             return module;
         }
 
+        @Override
         public void modifyInternal(final MailObject mail, final CalendarObject obj, final ServerSession sess) {
             //NOT IMPLEMENTED YET
         }
 
+        @Override
         public void modifyExternal(final MailObject mail, final CalendarObject obj, final ServerSession sess) {
             //To change body of implemented methods use File | Settings | File Templates.
         }
 
+        @Override
         public boolean sendMail(final UserSettingMail userSettingMail, int owner, int participant, int modificationUser) {
             // TODO Auto-generated method stub
             return false;
@@ -547,26 +551,32 @@ public class ParticipantNotifyTest extends TestCase {
         public void setTemplateString(final String template) {
             object_link_template = new StringTemplate(template);
         }
+        @Override
         public DateFormat getDateFormat(final Locale locale) {
             // TODO Auto-generated method stub
             return null;
         }
+        @Override
         public TemplateReplacement getAction() {
             // TODO Auto-generated method stub
             return null;
         }
+        @Override
         public TemplateReplacement getConfirmationAction() {
             // TODO Auto-generated method stub
             return null;
         }
+        @Override
         public Template getTemplate() {
             // TODO Auto-generated method stub
             return null;
         }
+        @Override
         public Type getType() {
             // TODO Auto-generated method stub
             return null;
         }
+        @Override
         public boolean onlyIrrelevantFieldsChanged(CalendarObject oldObj, CalendarObject newObj) {
             // TODO Auto-generated method stub
             return false;

@@ -29,7 +29,7 @@ import org.junit.Test;
 
 /**
  * Various tests that verify the serializability of JID instances.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see Based on <a
  *      href="http://www.ibm.com/developerworks/library/j-serialtest.html"
@@ -44,11 +44,11 @@ public class JIDSerializabilityTest {
 	 * serializable container such as an ArrayList contains a non-serializable
 	 * object such as a Socket, it throws a NotSerializableException when you
 	 * try to serialize it.
-	 * 
+	 *
 	 * Usually for this test, you just write the data onto a
 	 * ByteArrayOutputStream. If no exception is thrown, the test passes. If you
 	 * like, you can also test that some output has been written
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.ibm.com/developerworks/library/j-serialtest.html">Testing
 	 *      object serialization</a>
@@ -72,7 +72,7 @@ public class JIDSerializabilityTest {
 	 * You want to write a test that verifies not only that the output is
 	 * present, but that it's correct. Deserialize the object and compare it to
 	 * the original.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.ibm.com/developerworks/library/j-serialtest.html">Testing
 	 *      object serialization</a>

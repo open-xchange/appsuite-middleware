@@ -58,14 +58,14 @@ import com.openexchange.chat.Presence;
 
 /**
  * {@link JSONPresence} - Represents a presence message rendered with JSON.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONPresence {
 
     /**
      * Parses given JSON to a {@link JSONPresence}
-     * 
+     *
      * @param jsonPresence The JSON presence data
      * @return The parsed {@link JSONPresence}
      * @throws JSONException If a JSON error occurs
@@ -100,7 +100,7 @@ public final class JSONPresence {
 
     /**
      * Gets the type
-     * 
+     *
      * @return The type
      */
     public Presence.Type getType() {
@@ -109,7 +109,7 @@ public final class JSONPresence {
 
     /**
      * Sets the type
-     * 
+     *
      * @param type The type to set
      */
     public void setType(final Presence.Type type) {
@@ -118,7 +118,7 @@ public final class JSONPresence {
 
     /**
      * Gets the mode
-     * 
+     *
      * @return The mode
      */
     public Presence.Mode getMode() {
@@ -127,7 +127,7 @@ public final class JSONPresence {
 
     /**
      * Sets the mode
-     * 
+     *
      * @param mode The mode to set
      */
     public void setMode(final Presence.Mode mode) {
@@ -136,7 +136,7 @@ public final class JSONPresence {
 
     /**
      * Gets the status
-     * 
+     *
      * @return The status
      */
     public String getStatus() {
@@ -145,7 +145,7 @@ public final class JSONPresence {
 
     /**
      * Sets the status
-     * 
+     *
      * @param status The status to set
      */
     public void setStatus(final String status) {
@@ -154,7 +154,7 @@ public final class JSONPresence {
 
     /**
      * Gets the timeStamp
-     * 
+     *
      * @return The timeStamp
      */
     public Date getTimeStamp() {
@@ -163,7 +163,7 @@ public final class JSONPresence {
 
     /**
      * Sets the timeStamp
-     * 
+     *
      * @param timeStamp The timeStamp to set
      */
     public void setTimeStamp(final Date timeStamp) {

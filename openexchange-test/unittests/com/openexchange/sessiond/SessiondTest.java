@@ -149,30 +149,39 @@ public class SessiondTest extends TestCase {
         final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
                 SessiondService.class);
         sessiondCon.addSession(new AddSessionParameter() {
+            @Override
             public String getClientIP() {
                 return "localhost";
             }
+            @Override
             public Context getContext() {
                 return context;
             }
+            @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+            @Override
             public String getPassword() {
                 return "secret";
             }
+            @Override
             public int getUserId() {
                 return userId;
             }
+            @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+            @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+            @Override
             public String getHash() {
                 return "123";
             }
+            @Override
             public String getClient() {
                 return "test";
             }
@@ -186,30 +195,39 @@ public class SessiondTest extends TestCase {
         final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
                 SessiondService.class);
         final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
+            @Override
             public String getClientIP() {
                 return "localhost";
             }
+            @Override
             public Context getContext() {
                 return context;
             }
+            @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+            @Override
             public String getPassword() {
                 return "secret";
             }
+            @Override
             public int getUserId() {
                 return userId;
             }
+            @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+            @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+            @Override
             public String getHash() {
                 return "123";
             }
+            @Override
             public String getClient() {
                 return "test";
             }
@@ -224,30 +242,39 @@ public class SessiondTest extends TestCase {
         final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
                 SessiondService.class);
         final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
+            @Override
             public String getClientIP() {
                 return "localhost";
             }
+            @Override
             public Context getContext() {
                 return context;
             }
+            @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+            @Override
             public String getPassword() {
                 return "secret";
             }
+            @Override
             public int getUserId() {
                 return userId;
             }
+            @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+            @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+            @Override
             public String getHash() {
                 return "123";
             }
+            @Override
             public String getClient() {
                 return "test";
             }
@@ -262,30 +289,39 @@ public class SessiondTest extends TestCase {
         final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
                 SessiondService.class);
         final String sessionId = sessiondCon.addSession(new AddSessionParameter() {
+            @Override
             public String getClientIP() {
                 return "localhost";
             }
+            @Override
             public Context getContext() {
                 return context;
             }
+            @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+            @Override
             public String getPassword() {
                 return "secret";
             }
+            @Override
             public int getUserId() {
                 return userId;
             }
+            @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+            @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+            @Override
             public String getHash() {
                 return "123";
             }
+            @Override
             public String getClient() {
                 return "test";
             }

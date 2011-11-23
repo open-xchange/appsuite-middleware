@@ -29,13 +29,13 @@ import com.openexchange.user.UserService;
 
 public class ContactHaloImpl implements ContactHalo {
 
-	private UserService userService;
-	private ContactInterfaceDiscoveryService contactDiscoveryService;
-	private ContactSearchMultiplexer contactSearchMultiplexer;
+	private final UserService userService;
+	private final ContactInterfaceDiscoveryService contactDiscoveryService;
+	private final ContactSearchMultiplexer contactSearchMultiplexer;
 
-	private ConfigViewFactory configViews;
+	private final ConfigViewFactory configViews;
 
-	private Map<String, HaloContactDataSource> contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>();
+	private final Map<String, HaloContactDataSource> contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>();
 
 	public ContactHaloImpl(UserService userService,
 			ContactInterfaceDiscoveryService contactDiscoveryService,
@@ -78,7 +78,7 @@ public class ContactHaloImpl implements ContactHalo {
 				// Don't care. This is all best effort anyway.
 			}
 		}
-		
+
 		if (user == null) {
 			try {
 				user = userService.searchUser(contact.getEmail2(),

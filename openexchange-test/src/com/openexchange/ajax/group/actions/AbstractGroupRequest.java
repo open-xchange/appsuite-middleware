@@ -68,10 +68,12 @@ abstract class AbstractGroupRequest<T extends AbstractAJAXResponse> implements A
         super();
     }
 
+    @Override
     public final String getServletPath() {
         return GROUP_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

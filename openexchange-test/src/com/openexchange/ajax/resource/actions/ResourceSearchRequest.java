@@ -75,6 +75,7 @@ public class ResourceSearchRequest extends AbstractResourceRequest<ResourceSearc
         this.failOnError = failOnError;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject jo = new JSONObject();
         jo.put("pattern", getSearchPattern());
@@ -89,14 +90,17 @@ public class ResourceSearchRequest extends AbstractResourceRequest<ResourceSearc
         this.searchPattern = pattern;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH).toArray();
     }
 
+    @Override
     public AbstractAJAXParser<? extends ResourceSearchResponse> getParser() {
         return new AbstractAJAXParser<ResourceSearchResponse>(failOnError) {
 

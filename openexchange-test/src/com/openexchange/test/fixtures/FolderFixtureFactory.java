@@ -63,21 +63,22 @@ import com.openexchange.test.fixtures.transformators.FolderTypeTransformator;
  */
 public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
 
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
     public FolderFixtureFactory(FixtureLoader fixtureLoader) {
         this.fixtureLoader = fixtureLoader;
     }
 
+    @Override
     public Fixtures<FolderObject> createFixture(String fixtureName, Map<String, Map<String, String>> entries) {
         return new FolderFixtures(entries, fixtureLoader );
     }
 
     private class FolderFixtures extends DefaultFixtures<FolderObject> {
 
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
 
-        private Map<String, Fixture<FolderObject>> folders = new HashMap<String, Fixture<FolderObject>>();
+        private final Map<String, Fixture<FolderObject>> folders = new HashMap<String, Fixture<FolderObject>>();
 
         public FolderFixtures( Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
             super(FolderObject.class, values, fixtureLoader);
@@ -86,6 +87,7 @@ public class FolderFixtureFactory implements FixtureFactory<FolderObject> {
             this.entries = values;
         }
 
+        @Override
         public Fixture<FolderObject> getEntry(String entryName) throws OXException {
             if (folders.containsKey(entryName)) {
                 return folders.get(entryName);

@@ -10,7 +10,8 @@ public abstract class AbstractFacebookImportRequest extends
 		super(action, folderId, upload);
 	}
 
-	public FacebookFriendImportParser getParser() {
+	@Override
+    public FacebookFriendImportParser getParser() {
 		return new FacebookFriendImportParser(false);
 	}
 

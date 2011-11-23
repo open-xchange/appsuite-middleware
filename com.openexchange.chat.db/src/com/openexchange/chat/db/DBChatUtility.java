@@ -53,7 +53,7 @@ import java.util.UUID;
 
 /**
  * {@link DBChatUtility} - Utility class.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBChatUtility {
@@ -72,7 +72,7 @@ public final class DBChatUtility {
 
     /**
      * Appends the unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
-     * 
+     *
      * @param sb The string builder to append to
      * @return The string builder with unhex-replace string appended
      */
@@ -82,7 +82,7 @@ public final class DBChatUtility {
 
     /**
      * Gets the unhex-replace string: <code>UNHEX(REPLACE(?,'-',''))</code>
-     * 
+     *
      * @return The unhex-replace string
      */
     public static String getUnhexReplaceString() {
@@ -93,7 +93,7 @@ public final class DBChatUtility {
 
     /**
      * Generates a new {@link UUID} instance from specified byte array.
-     * 
+     *
      * @param bytes The byte array
      * @return A new {@link UUID} instance
      * @throws IllegalArgumentException If passed byte array is <code>null</code> or its length is not 16

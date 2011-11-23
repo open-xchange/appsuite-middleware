@@ -85,6 +85,7 @@ public final class AllRequest extends AbstractLinkRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
@@ -92,6 +93,7 @@ public final class AllRequest extends AbstractLinkRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -99,6 +101,7 @@ public final class AllRequest extends AbstractLinkRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL),
@@ -111,6 +114,7 @@ public final class AllRequest extends AbstractLinkRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public AllParser getParser() {
         return new AllParser(failOnError);
     }

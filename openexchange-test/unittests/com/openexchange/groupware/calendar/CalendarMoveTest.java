@@ -73,7 +73,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
     /**
      * Calendar fields.
      */
-    private int[] columns = new int[] { CalendarDataObject.OBJECT_ID, CalendarDataObject.PARTICIPANTS, CalendarDataObject.USERS };
+    private final int[] columns = new int[] { CalendarDataObject.OBJECT_ID, CalendarDataObject.PARTICIPANTS, CalendarDataObject.USERS };
 
     /**
      * Tests a move of an appointment from a private to another private folder.

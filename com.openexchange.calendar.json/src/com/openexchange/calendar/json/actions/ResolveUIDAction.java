@@ -60,14 +60,14 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ResolveUIDAction}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public final class ResolveUIDAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link ResolveUIDAction}.
-     * 
+     *
      * @param services
      */
     public ResolveUIDAction(final ServiceLookup services) {

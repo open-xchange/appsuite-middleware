@@ -181,6 +181,7 @@ public class VCardTest extends SmackTestCase {
     }
     */
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

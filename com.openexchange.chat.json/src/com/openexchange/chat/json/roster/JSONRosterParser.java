@@ -57,7 +57,7 @@ import com.openexchange.chat.util.PresenceImpl;
 
 /**
  * {@link JSONRosterParser} - Parses the JSON representation of chat roster objects.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONRosterParser {
@@ -71,7 +71,7 @@ public final class JSONRosterParser {
 
     /**
      * Parses specified JSON presence.
-     * 
+     *
      * @param jsonPresence The JSON presence
      * @param user The user identifier
      * @return The parsed presence

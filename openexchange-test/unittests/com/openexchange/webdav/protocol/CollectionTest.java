@@ -417,7 +417,8 @@ public class CollectionTest extends ResourceTest {
 
 	protected static final class DisplayNameCollector implements Injector<List<String>, WebdavResource> {
 
-		public List<String> inject(final List<String> list, final WebdavResource element) {
+		@Override
+        public List<String> inject(final List<String> list, final WebdavResource element) {
 			try {
 				list.add(element.getDisplayName());
 			} catch (final OXException e) {

@@ -53,14 +53,14 @@ package com.openexchange.folderstorage;
  * {@link FieldNamePair} - A pair of a field and its name.
  * <p>
  * Equality is only determined by field value, not its name.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FieldNamePair {
 
     /**
      * Gets the instance for given field.
-     * 
+     *
      * @param field The field
      * @return The appropriate instance
      */
@@ -74,7 +74,7 @@ public final class FieldNamePair {
 
     /**
      * Initializes a new {@link FieldNamePair}.
-     * 
+     *
      * @param field The field number
      * @param name The field name
      */
@@ -86,7 +86,7 @@ public final class FieldNamePair {
 
     /**
      * Gets the field.
-     * 
+     *
      * @return The field
      */
     public int getField() {
@@ -95,7 +95,7 @@ public final class FieldNamePair {
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     public String getName() {

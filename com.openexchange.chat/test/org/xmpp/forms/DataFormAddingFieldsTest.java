@@ -25,7 +25,7 @@ import org.junit.Test;
 
 /**
  * Tests adding valid fields to a Data Form provided by {@link DataForm}.
- * 
+ *
  * @author G&uuml;nther Nie&szlig;, guenther.niess@web.de
  * @see <a href="http://xmpp.org/extensions/xep-0004.html">XEP-0004: Data Forms</a>
  */
@@ -68,7 +68,7 @@ public class DataFormAddingFieldsTest {
 		String var = "empty-field";
 		FormField field = form.addField();
 		field.setVariable(var);
-		
+
 		// validate the field
 		field = form.getField(var);
 		if (field == null || !var.equals(field.getVariable())) {
@@ -85,15 +85,15 @@ public class DataFormAddingFieldsTest {
 		String var = "complete-field";
 		FormField field = form.addField(var, LABEL, FIELD_TYPE);
 		field.addValue(VALUE);
-		
+
 		// validate the field
 		field = form.getField(var);
 		if (field == null || !var.equals(field.getVariable())) {
 			fail("Can't add a complete field into a Data Form.");
 		}
-		if (!LABEL.equals(field.getLabel()) || 
-				!FIELD_TYPE.equals(field.getType()) || 
-				field.getValues().size() != 1 || 
+		if (!LABEL.equals(field.getLabel()) ||
+				!FIELD_TYPE.equals(field.getType()) ||
+				field.getValues().size() != 1 ||
 				!VALUE.equals(field.getFirstValue())) {
 			fail("Any paramameter wasn't applied correctly.");
 		}
@@ -108,7 +108,7 @@ public class DataFormAddingFieldsTest {
 		String value = "A field of type fixed.";
 		FormField field = form.addField(null, null, FormField.Type.fixed);
 		field.addValue(value);
-		
+
 		// validate the field
 		List<FormField> fields = form.getFields();
 		boolean found = false;

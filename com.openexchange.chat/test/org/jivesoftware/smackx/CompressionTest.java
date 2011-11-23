@@ -78,6 +78,7 @@ public class CompressionTest extends SmackTestCase {
         connection.disconnect();
     }
 
+    @Override
     protected int getMaxConnections() {
         return 0;
     }
@@ -85,6 +86,7 @@ public class CompressionTest extends SmackTestCase {
     /**
      * Just create an account.
      */
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         XMPPConnection setupConnection = new XMPPConnection(getServiceName());
@@ -106,6 +108,7 @@ public class CompressionTest extends SmackTestCase {
     /**
      * Deletes the created account for the test.
      */
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
         XMPPConnection setupConnection = createConnection();

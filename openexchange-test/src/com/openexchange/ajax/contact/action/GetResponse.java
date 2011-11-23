@@ -68,7 +68,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 public class GetResponse extends AbstractAJAXResponse {
 
     private Contact contactObj;
-    private TimeZone timeZone;
+    private final TimeZone timeZone;
     private String imageUrl;
 
     /**

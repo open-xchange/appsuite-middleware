@@ -25,12 +25,10 @@ import java.util.concurrent.Semaphore;
 
 import junit.framework.TestCase;
 
-import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class ForkParserTest extends TestCase {
@@ -80,6 +78,7 @@ public class ForkParserTest extends TestCase {
                 final ContentHandler o = new BodyContentHandler();
                 output[i] = o;
                 threads[i] = new Thread() {
+                    @Override
                     public void run() {
                         try {
                             InputStream stream =
@@ -122,6 +121,7 @@ public class ForkParserTest extends TestCase {
                 };
                 pipes[i] = new PipedOutputStream(input);
                 threads[i] = new Thread() {
+                    @Override
                     public void run() {
                         try {
                             ContentHandler o = new DefaultHandler();
@@ -139,6 +139,7 @@ public class ForkParserTest extends TestCase {
 
             final ContentHandler o = new BodyContentHandler();
             Thread blocked = new Thread() {
+                @Override
                 public void run() {
                     try {
                         barrier.release();

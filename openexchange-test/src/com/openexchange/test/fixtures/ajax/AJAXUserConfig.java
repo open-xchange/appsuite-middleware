@@ -13,13 +13,14 @@ import com.openexchange.test.fixtures.TestUserConfig;
 
 public class AJAXUserConfig implements TestUserConfig {
 
-	private AJAXClient client;
+	private final AJAXClient client;
 
 	public AJAXUserConfig(AJAXClient client) {
 		this.client = client;
 	}
 
-	public Object get(Tree tree) {
+	@Override
+    public Object get(Tree tree) {
 		try {
 			return ConfigTools.get(client,
 			        new GetRequest(tree)).getData();
@@ -35,23 +36,28 @@ public class AJAXUserConfig implements TestUserConfig {
 		return null;
 	}
 
-	public boolean getBool(Tree tree) {
+	@Override
+    public boolean getBool(Tree tree) {
 		return (Boolean) get(tree);
 	}
 
-	public int getInt(Tree tree) {
+	@Override
+    public int getInt(Tree tree) {
 		return (Integer) get(tree);
 	}
 
-	public long getLong(Tree tree) {
+	@Override
+    public long getLong(Tree tree) {
 		return (Long) get(tree);
 	}
 
-	public String getString(Tree tree) {
+	@Override
+    public String getString(Tree tree) {
 		return get(tree).toString();
 	}
 
-	public void set(Tree tree, Object value) {
+	@Override
+    public void set(Tree tree, Object value) {
 		try {
 			ConfigTools.set(client, new SetRequest(tree, value));
 		} catch (OXException e) {

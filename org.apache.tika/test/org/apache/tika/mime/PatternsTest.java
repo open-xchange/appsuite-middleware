@@ -21,12 +21,13 @@ import java.util.List;
 import junit.framework.TestCase;
 
 public class PatternsTest extends TestCase {
-    private MimeTypes fullTypes = MimeTypes.getDefaultMimeTypes();
+    private final MimeTypes fullTypes = MimeTypes.getDefaultMimeTypes();
 
     private Patterns patterns;
     private MimeTypes types;
     private MimeType text;
 
+    @Override
     protected void setUp() throws MimeTypeException {
         patterns = new Patterns(new MediaTypeRegistry());
         types = new MimeTypes();

@@ -32,7 +32,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	private WebdavResource res = null;
 	private WebdavResource dest;
 
-	private Map<String, Object> userInfo = new HashMap<String,Object>();
+	private final Map<String, Object> userInfo = new HashMap<String,Object>();
 
 	public MockWebdavRequest(final WebdavFactory factory, final String prefix) {
 		this.factory = factory;
@@ -44,6 +44,7 @@ public class MockWebdavRequest implements WebdavRequest {
         this.url = url;
     }
 
+    @Override
     public WebdavResource getResource() throws OXException {
 		if(res != null) {
 			return res;
@@ -51,7 +52,8 @@ public class MockWebdavRequest implements WebdavRequest {
 		return res = factory.resolveResource(url);
 	}
 
-	public WebdavResource getDestination() throws OXException {
+	@Override
+    public WebdavResource getDestination() throws OXException {
 		if(null == getHeader("destination")) {
 			return null;
 		}
@@ -61,18 +63,21 @@ public class MockWebdavRequest implements WebdavRequest {
 		return dest = factory.resolveResource(getHeader("destination"));
 	}
 
-	public WebdavCollection getCollection() throws OXException {
+	@Override
+    public WebdavCollection getCollection() throws OXException {
 		if(res != null) {
 			return (WebdavCollection) res;
 		}
 		return (WebdavCollection) (res = factory.resolveCollection(url));
 	}
 
-	public WebdavPath getDestinationUrl(){
+	@Override
+    public WebdavPath getDestinationUrl(){
 		return new WebdavPath(getHeader("destination"));
 	}
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		return url;
 	}
 
@@ -80,7 +85,8 @@ public class MockWebdavRequest implements WebdavRequest {
 		this.content = content;
 	}
 
-	public InputStream getBody(){
+	@Override
+    public InputStream getBody(){
 		try {
 			return new ByteArrayInputStream((content == null) ? new byte[0] : content.getBytes("UTF-8"));
 		} catch (final UnsupportedEncodingException e) {
@@ -93,23 +99,28 @@ public class MockWebdavRequest implements WebdavRequest {
 		headers .put(header.toLowerCase(), value);
 	}
 
-	public String getHeader(final String header) {
+	@Override
+    public String getHeader(final String header) {
 		return headers.get(header.toLowerCase());
 	}
 
-	public List<String> getHeaderNames() {
+	@Override
+    public List<String> getHeaderNames() {
 		return new LinkedList<String>(headers.keySet());
 	}
 
-	public Document getBodyAsDocument() throws JDOMException, IOException {
+	@Override
+    public Document getBodyAsDocument() throws JDOMException, IOException {
 		return new SAXBuilder().build(getBody());
 	}
 
-	public String getURLPrefix() {
+	@Override
+    public String getURLPrefix() {
 		return uriPrefix;
 	}
 
-	public IfHeader getIfHeader() throws OXException {
+	@Override
+    public IfHeader getIfHeader() throws OXException {
 		final String ifHeader = getHeader("If");
 		if(ifHeader == null) {
 			return null;
@@ -121,7 +132,8 @@ public class MockWebdavRequest implements WebdavRequest {
 		}
 	}
 
-	public int getDepth(final int def) {
+	@Override
+    public int getDepth(final int def) {
 		final String depth = getHeader("depth");
 		if(null == depth) {
 			return def;
@@ -129,20 +141,24 @@ public class MockWebdavRequest implements WebdavRequest {
 		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : new Integer(depth);
 	}
 
-	public WebdavFactory getFactory() throws OXException {
+	@Override
+    public WebdavFactory getFactory() throws OXException {
 		return factory;
 	}
 
 
-	public String getCharset() {
+	@Override
+    public String getCharset() {
 		return "UTF-8";
 	}
 
 
+    @Override
     public boolean hasBody() {
         return content != null;
     }
 
+    @Override
     public Map<String, Object> getUserInfo() {
         return userInfo;
     }

@@ -84,7 +84,7 @@ public class AllRequest extends CommonAllRequest {
 
     private String timeZoneId;
 
-    private boolean showPrivates;
+    private final boolean showPrivates;
 
 
     public AllRequest(final int folderId, final int[] columns, final Date start,

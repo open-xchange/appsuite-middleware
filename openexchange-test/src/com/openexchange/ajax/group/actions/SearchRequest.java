@@ -84,6 +84,7 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         json.put(AJAXServlet.PARAMETER_SEARCHPATTERN, pattern);
@@ -93,6 +94,7 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -100,6 +102,7 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
         		new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH),
@@ -109,6 +112,7 @@ public final class SearchRequest extends AbstractGroupRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public SearchParser getParser() {
         return new SearchParser(failOnError);
     }

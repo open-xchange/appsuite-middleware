@@ -142,7 +142,8 @@ public class Bug18094Test_VCardRoundtrip extends AbstractManagedContactTest {
 		}
 
 		java.util.Collections.sort(mismatches, new Comparator<ContactField>(){
-			public int compare(ContactField o1, ContactField o2) {
+			@Override
+            public int compare(ContactField o1, ContactField o2) {
 				return o1.toString().compareTo(o2.toString());
 			}});
 		String fields = Strings.join(mismatches," ");

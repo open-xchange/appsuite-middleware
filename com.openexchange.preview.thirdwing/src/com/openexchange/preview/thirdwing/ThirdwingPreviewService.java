@@ -66,11 +66,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import net.thirdwing.common.ConversionJobfactory;
 import net.thirdwing.common.IConversionJob;
-import net.thirdwing.exception.PreviewCreationException;
 import net.thirdwing.exception.XHTMLConversionException;
 import net.thirdwing.io.IOUnit;
-import net.thirdwing.io.IStreamProvider;
-import net.thirdwing.util.FileUtilities;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
@@ -93,11 +90,11 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ThirdwingPreviewService implements InternalPreviewService {
-    
+
     private final ServiceLookup serviceLookup;
-    
+
     private static final List<PreviewPolicy> POLICIES = new ArrayList<PreviewPolicy>();
-    
+
     static {
         POLICIES.add(new PreviewPolicy("application/msword", PreviewOutput.HTML, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/msword", PreviewOutput.IMAGE, Quality.GOOD));
@@ -141,7 +138,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         POLICIES.add(new PreviewPolicy("application/vnd.ms-powerpoint.slideshow.macroEnabled.12", PreviewOutput.IMAGE, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/pdf", PreviewOutput.HTML, Quality.GOOD));
         POLICIES.add(new PreviewPolicy("application/pdf", PreviewOutput.IMAGE, Quality.GOOD));
-    }  
+    }
 
     public ThirdwingPreviewService(final ServiceLookup serviceLookup) {
         super();
@@ -204,12 +201,12 @@ public class ThirdwingPreviewService implements InternalPreviewService {
     public boolean canDetectContentType() {
         return false;
     }
-    
+
     private PreviewDocument generatePreview(final File file, final Session session) throws OXException {
         final IConversionJob transformer = ConversionJobfactory.getTransformer(file);
-        final StreamProvider streamProvider = new StreamProvider(serviceLookup, session);        
+        final StreamProvider streamProvider = new StreamProvider(serviceLookup, session);
         final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
-        
+
         final ThreadPoolService poolService = serviceLookup.getService(ThreadPoolService.class);
         final Future<String> future = poolService.submit(observationTask);
         IOUnit unit;
@@ -219,17 +216,17 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             unit.setStreamProvider(streamProvider);
             transformer.addObserver(observationTask);
             transformer.transformDocument(unit, 80);
-            
+
             final String content = future.get();
             if (content == null) {
                 throw observationTask.getException();
             }
-            
+
             final Map<String, String> metaData = new HashMap<String, String>();
             metaData.put("content-type", "text/html");
             metaData.put("resourcename", "document.html");
             final ThirdwingPreviewDocument previewDocument = new ThirdwingPreviewDocument(metaData, content, streamProvider.getPreviewImage());
-            
+
             return previewDocument;
         } catch (final FileNotFoundException e) {
          // TODO: throw proper exception
@@ -247,7 +244,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             Streams.close(fis);
         }
     }
-    
+
     private File streamToFile(final InputStream is, final String name) throws OXException, IOException {
         FileOutputStream fos = null;
         try {
@@ -258,7 +255,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
             } else {
                 extension = name;
             }
-            
+
             final ManagedFileManagement fileManagement = serviceLookup.getService(ManagedFileManagement.class);
             final File file = fileManagement.newTempFile("open-xchange", extension);
             fos = new FileOutputStream(file);

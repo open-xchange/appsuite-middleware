@@ -271,6 +271,7 @@ public class PresenceTest extends SmackTestCase {
                 "Offline test".equals(presence.getStatus()));
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

@@ -62,10 +62,10 @@ import org.json.JSONObject;
  */
 public class CopyRequest extends AbstractContactRequest<CopyResponse> {
 
-    private int sourceFolderID;
-    private int destinationFolderID;
-    private int contactID;
-    private boolean failOnError;
+    private final int sourceFolderID;
+    private final int destinationFolderID;
+    private final int contactID;
+    private final boolean failOnError;
 
     public CopyRequest(int contactID, int sourceFolderID, int destinationFolderID, boolean failOnError) {
         super();
@@ -75,16 +75,19 @@ public class CopyRequest extends AbstractContactRequest<CopyResponse> {
         this.failOnError = failOnError;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         JSONObject jso = new JSONObject();
         jso.put("folder_id", destinationFolderID);
         return jso;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<Parameter>();
 
@@ -95,6 +98,7 @@ public class CopyRequest extends AbstractContactRequest<CopyResponse> {
         return list.toArray(new Parameter[list.size()]);
     }
 
+    @Override
     public CopyParser getParser() {
         return new CopyParser(failOnError);
     }

@@ -18,8 +18,8 @@ import com.openexchange.scripting.rhino.require.RequireSupport;
 
 public class LookForScriptsListener implements BundleListener {
 
-	
-	
+
+
 	@Override
 	public void bundleChanged(BundleEvent event) {
 		switch(event.getType()) {
@@ -42,15 +42,15 @@ public class LookForScriptsListener implements BundleListener {
 			Scriptable serviceScope = cx.newObject(SHARED_SCOPE);
 			serviceScope.setParentScope(null);
 			serviceScope.setPrototype(SHARED_SCOPE);
-			
+
 			HashMap<String, Object> additionalModules = new HashMap<String, Object>();
 			additionalModules.put("osgi", new OSGiSupport(bundle.getBundleContext(), SHARED_SCOPE));
-			
+
 			RequireSupport.initialize(serviceScope, cx, new BundleJSBundle(bundle), additionalModules);
 			Console.initialize(serviceScope, bundle.getSymbolicName());
-			
+
 			cx.evaluateReader(serviceScope, r, bundle.getSymbolicName()+"/main.js", 1, null);
-			
+
 		} catch (Throwable t) {
 			t.printStackTrace();
 		} finally {

@@ -68,7 +68,7 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class AppointmentCreateStep extends AbstractStep implements IdentitySource<Appointment> {
 
-    private Appointment entry;
+    private final Appointment entry;
     private CalendarTestManager manager;
     private boolean inserted;
 
@@ -82,6 +82,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         this.expectedError = expectedError;
     }
 
+    @Override
     public void cleanUp() throws Exception {
         if(!inserted) {
             return;
@@ -89,6 +90,7 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         manager.delete(entry, false);
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
 
         this.client = client;
@@ -110,21 +112,25 @@ public class AppointmentCreateStep extends AbstractStep implements IdentitySourc
         checkError(insertResponse);
     }
 
+    @Override
     public void assumeIdentity(Appointment newApp) {
         newApp.setObjectID( entry.getObjectID() );
         newApp.setParentFolderID( entry.getParentFolderID());
         newApp.setLastModified( entry.getLastModified());
     }
 
+    @Override
     public void rememberIdentityValues(Appointment appointment) {
         entry.setLastModified(appointment.getLastModified());
         entry.setParentFolderID(appointment.getParentFolderID());
     }
 
+    @Override
     public void forgetIdentity(Appointment entry) {
         inserted = false;
     }
 
+    @Override
     public Class<Appointment> getType() {
         return Appointment.class;
     }

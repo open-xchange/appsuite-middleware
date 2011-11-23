@@ -52,8 +52,6 @@
 
 package org.jivesoftware.smack.packet;
 
-import java.util.*;
-
 /**
  * A mock implementation of the Packet abstract class. Implements toXML() by returning null.
  */
@@ -63,6 +61,7 @@ public class MockPacket extends Packet {
      * Returns null always.
      * @return null
      */
+    @Override
     public String toXML() {
         return null;
     }

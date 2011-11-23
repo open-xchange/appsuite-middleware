@@ -59,7 +59,7 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class BracketedNicknameTest extends AbstractVCardUnitTest {
-    private String vcard = "BEGIN:VCARD\n" +
+    private final String vcard = "BEGIN:VCARD\n" +
     		"VERSION:3.0\n" +
     		"PRODID:OPEN-XCHANGE\n" +
     		"FN:Nachname, Vorname\n" +

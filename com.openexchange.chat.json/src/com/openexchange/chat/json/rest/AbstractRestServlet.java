@@ -58,7 +58,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractRestServlet} - The abstract Servlet to handle REST-like requests.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractRestServlet extends DispatcherServlet {
@@ -93,7 +93,7 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
 
     /**
      * Gets the method handler appropriate for specified method.
-     * 
+     *
      * @param method The HTTP method
      * @return The associated method handler or <code>null</code> if none appropriate
      */

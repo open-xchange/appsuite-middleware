@@ -71,22 +71,27 @@ public abstract class AbstractRequest<T extends AbstractAJAXResponse> implements
         this.parameters = parameters;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public String getServletPath() {
         return LOGIN_URL;
     }
 
+    @Override
     public Method getMethod() {
         return Method.POST;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return parameters.clone();
     }

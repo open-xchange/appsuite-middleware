@@ -85,14 +85,17 @@ public class ListPublicationsRequest extends AbstractPublicationRequest<ListPubl
         setDynamicColumns(dynamicColumns);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return new JSONArray(ids);
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         List<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
@@ -109,6 +112,7 @@ public class ListPublicationsRequest extends AbstractPublicationRequest<ListPubl
         return params.toArray(new Parameter[] {});
     }
 
+    @Override
     public AbstractAJAXParser<? extends ListPublicationsResponse> getParser() {
         return new AbstractAJAXParser<ListPublicationsResponse>(isFailOnError()) {
 

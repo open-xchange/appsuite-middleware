@@ -61,7 +61,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DeleteFavFolderTreePerformer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteFavFolderTreePerformer extends AbstractFavFolderPerformer {
@@ -75,7 +75,7 @@ public final class DeleteFavFolderTreePerformer extends AbstractFavFolderPerform
 
     /**
      * Deletes specified favorite folder tree.
-     * 
+     *
      * @param treeId The tree identifier
      * @param userId The user identifier
      * @param contextId The context identifier

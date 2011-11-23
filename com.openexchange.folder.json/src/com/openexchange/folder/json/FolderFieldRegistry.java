@@ -77,7 +77,7 @@ public final class FolderFieldRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static FolderFieldRegistry getInstance() {
@@ -102,11 +102,11 @@ public final class FolderFieldRegistry {
     }
 
     /*-
-     * 
+     *
      * ----------------------- MEMBER STUFF --------------------------
-     * 
+     *
      */
-    
+
     private final ConcurrentMap<FieldNamePair, Object> map;
 
     private final ConcurrentTIntHashSet numSet;
@@ -124,7 +124,7 @@ public final class FolderFieldRegistry {
 
     /**
      * Starts up this registry.
-     * 
+     *
      * @param context The bundle context
      */
     public void startUp(final BundleContext context) {
@@ -185,7 +185,7 @@ public final class FolderFieldRegistry {
 
     /**
      * Gets the registered pairs.
-     * 
+     *
      * @return The registered pairs
      */
     public Set<FieldNamePair> getPairs() {
@@ -194,7 +194,7 @@ public final class FolderFieldRegistry {
 
     /**
      * Gets the registered fields.
-     * 
+     *
      * @return The registered fields
      */
     public TIntSet getFields() {

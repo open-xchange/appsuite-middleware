@@ -83,7 +83,7 @@ public class ApplicationInstaller {
 
     private final Context context;
 
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
     public ApplicationInstaller(Context context, User user, ServiceLookup serviceLookup) {
         this.context = context;

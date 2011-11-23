@@ -62,10 +62,12 @@ public abstract class AbstractPublicationRequest<T extends AbstractAJAXResponse>
 
     private boolean failOnError;
 
+    @Override
     public String getServletPath() {
         return "/ajax/publications";
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

@@ -69,8 +69,8 @@ import com.openexchange.test.fixtures.transformators.ShowAsTransformator;
  * @author Markus Wagner <markus.wagner@open-xchange.com>
  */
 public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
-    private FixtureLoader fixtureLoader;
-	private GroupResolver groupResolver;
+    private final FixtureLoader fixtureLoader;
+	private final GroupResolver groupResolver;
 
 	public AppointmentFixtureFactory(GroupResolver groupResolver, FixtureLoader fixtureLoader) {
 		super();
@@ -78,16 +78,17 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
 		this.groupResolver = groupResolver;
 	}
 
-	public Fixtures<Appointment> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Appointment> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new AppointmentFixtures(fixtureName, entries, fixtureLoader, groupResolver);
     }
 
     private class AppointmentFixtures extends DefaultFixtures<Appointment> implements Fixtures<Appointment> {
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
 
         private final Map<String, Fixture<Appointment>> appointments = new HashMap<String, Fixture<Appointment>>();
 
-		private GroupResolver groupResolver;
+		private final GroupResolver groupResolver;
 
         public AppointmentFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader, GroupResolver groupResolver) {
             super(Appointment.class, entries, fixtureLoader);
@@ -102,6 +103,7 @@ public class AppointmentFixtureFactory implements FixtureFactory<Appointment>{
             addTransformator(new RecurrenceTypeTransformator(), "recurrence_type");
         }
 
+        @Override
         public Fixture<Appointment> getEntry(final String entryName) throws OXException {
             if (appointments.containsKey(entryName)) {
                 return appointments.get(entryName);

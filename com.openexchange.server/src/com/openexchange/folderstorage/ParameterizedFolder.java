@@ -60,7 +60,7 @@ public interface ParameterizedFolder extends Folder {
 
     /**
      * Sets specified property
-     * 
+     *
      * @param name The name
      * @param value The associated value (<code>null</code> removes the property)
      */
@@ -68,7 +68,7 @@ public interface ParameterizedFolder extends Folder {
 
     /**
      * Gets the properties
-     * 
+     *
      * @return The properties
      */
     Map<FieldNamePair, FolderProperty> getProperties();

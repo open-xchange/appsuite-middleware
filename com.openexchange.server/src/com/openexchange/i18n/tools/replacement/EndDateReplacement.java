@@ -105,7 +105,7 @@ public final class EndDateReplacement extends AbstractFormatDateReplacement {
     private static Date correctDayOfMonth(final Date endDate, final boolean fulltime) {
         /*-
          * Previous implementation:
-         * 
+         *
          * return fulltime && null != endDate ? new Date(endDate.getTime()-1) : endDate;
          */
         if (!fulltime || null == endDate) {

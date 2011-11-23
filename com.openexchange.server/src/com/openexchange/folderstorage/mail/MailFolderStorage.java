@@ -1439,7 +1439,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     /**
      * Closes specified {@link MailAccess} instance
-     * 
+     *
      * @param mailAccess The mail access to close
      */
     protected static void closeMailAccess(final MailAccess<?, ?> mailAccess) {

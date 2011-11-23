@@ -102,6 +102,7 @@ public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
         this.failOnError = failOnError;
     }
 
+    @Override
     public JSONObject getBody() throws JSONException {
         try {
             return TaskSearchJSONWriter.write(search);
@@ -110,10 +111,12 @@ public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
         }
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
@@ -131,6 +134,7 @@ public class SearchRequest extends AbstractTaskRequest<SearchResponse> {
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public SearchParser getParser() {
         return new SearchParser(failOnError, columns);
     }

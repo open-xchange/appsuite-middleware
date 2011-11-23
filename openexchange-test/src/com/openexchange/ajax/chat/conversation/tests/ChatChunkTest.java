@@ -74,7 +74,7 @@ import com.openexchange.chat.util.MessageImpl;
 
 /**
  * {@link ChatChunkTest}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class ChatChunkTest extends AbstractAJAXSession {
@@ -89,7 +89,7 @@ public class ChatChunkTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link ChatChunkTest}.
-     * 
+     *
      * @param name
      */
     public ChatChunkTest(final String name) {
@@ -157,7 +157,7 @@ public class ChatChunkTest extends AbstractAJAXSession {
         message.setType(Message.Type.CHAT);
         newMessage.setMessage(message);
         secondClient.execute(newMessage);
-        
+
         {
             AllMessageChatConversationRequest allMsg = new AllMessageChatConversationRequest();
             allMsg.setConversationId(cid);
@@ -167,7 +167,7 @@ public class ChatChunkTest extends AbstractAJAXSession {
             assertNotNull("Response was null.", res);
             assertEquals("Second client can see messages from old chunk or no messages from actual chunk.", 1, res.size());
         }
-        
+
 
         {
             thirdClient = new AJAXClient(User.User3);
@@ -188,7 +188,7 @@ public class ChatChunkTest extends AbstractAJAXSession {
             assertNotNull("Response was null.", res);
             assertEquals("Third client can see messages from old chunk.", 0, res.size());
         }
-        
+
         {
             AllMessageChatConversationRequest allMsg = new AllMessageChatConversationRequest();
             allMsg.setConversationId(cid);
@@ -198,7 +198,7 @@ public class ChatChunkTest extends AbstractAJAXSession {
             assertNotNull("Response was null.", res);
             assertEquals("First client could not read all messages.", 2, res.size());
         }
-        
+
         {
             AllMessageChatConversationRequest allMsg = new AllMessageChatConversationRequest();
             allMsg.setConversationId(cid);

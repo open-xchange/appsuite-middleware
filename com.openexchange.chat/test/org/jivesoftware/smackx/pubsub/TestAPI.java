@@ -2,7 +2,7 @@
  * Created on 2009-04-09
  */
 package org.jivesoftware.smackx.pubsub;
- 
+
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.pubsub.test.SingleUserTestCase;
 

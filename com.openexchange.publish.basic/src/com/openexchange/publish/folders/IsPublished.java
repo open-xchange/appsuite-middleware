@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link IsPublished}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  */
@@ -101,24 +101,29 @@ public class IsPublished implements AdditionalFolderField {
 		this.storage = storage;
 	}
 
-	public int getColumnID() {
+	@Override
+    public int getColumnID() {
 		return 3010;
 	}
 
-	public String getColumnName() {
+	@Override
+    public String getColumnName() {
 		return "com.openexchange.publish.publicationFlag";
 	}
 
-	public Object getValue(final FolderObject folder,
+	@Override
+    public Object getValue(final FolderObject folder,
 			final ServerSession session) {
 		return getValues(Arrays.asList(folder), session).get(0);
 	}
 
-	public Object renderJSON(final Object value) {
+	@Override
+    public Object renderJSON(final Object value) {
 		return value;
 	}
 
-	public List<Object> getValues(List<FolderObject> folder,
+	@Override
+    public List<Object> getValues(List<FolderObject> folder,
 			ServerSession session) {
 		if (!session.getUserConfiguration().isPublication()) {
 			return allFalse(folder.size());

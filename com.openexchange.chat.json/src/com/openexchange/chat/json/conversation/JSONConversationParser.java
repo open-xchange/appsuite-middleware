@@ -60,7 +60,7 @@ import com.openexchange.chat.util.MessageImpl;
 
 /**
  * {@link JSONConversationParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONConversationParser {
@@ -74,7 +74,7 @@ public final class JSONConversationParser {
 
     /**
      * Parses JSON to a message instance.
-     * 
+     *
      * @param jsonMessage The JSON message
      * @param from The chat user posting the message
      * @return The parsed message
@@ -99,7 +99,7 @@ public final class JSONConversationParser {
 
     /**
      * Parses JSON to a message description.
-     * 
+     *
      * @param jsonMessage The JSON data
      * @return The parsed message description
      * @throws JSONException If a JSON error occurs
@@ -126,7 +126,7 @@ public final class JSONConversationParser {
 
     /**
      * Parses JSON to a chat instance.
-     * 
+     *
      * @param jsonChat The JSON chat representation
      * @return The parsed chat instance
      * @throws JSONException If a JSON error occurs
@@ -160,7 +160,7 @@ public final class JSONConversationParser {
 
     /**
      * Parses JSON to a chat instance.
-     * 
+     *
      * @param jsonChat The JSON chat representation
      * @return The parsed chat instance
      * @throws JSONException If a JSON error occurs

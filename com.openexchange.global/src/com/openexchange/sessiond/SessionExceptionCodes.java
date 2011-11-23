@@ -119,7 +119,7 @@ public enum SessionExceptionCodes implements OXExceptionCode {
 
     /**
      * Gets the error prefix for these error codes.
-     * 
+     *
      * @return The error prefix
      */
     public static String getErrorPrefix() {

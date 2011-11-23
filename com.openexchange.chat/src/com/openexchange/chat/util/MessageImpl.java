@@ -58,7 +58,7 @@ import com.openexchange.chat.Message;
 
 /**
  * {@link MessageImpl} - The basic {@link Message message} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessageImpl extends PacketImpl implements Message {
@@ -101,7 +101,7 @@ public class MessageImpl extends PacketImpl implements Message {
 
     /**
      * Removes specified attachment.
-     * 
+     *
      * @param attachment The attachment
      */
     public void removeAttachments(final ChatAttachment attachment) {
@@ -113,7 +113,7 @@ public class MessageImpl extends PacketImpl implements Message {
 
     /**
      * Adds specified attachment.
-     * 
+     *
      * @param attachment The attachment
      */
     public void addAttachments(final ChatAttachment attachment) {
@@ -125,7 +125,7 @@ public class MessageImpl extends PacketImpl implements Message {
 
     /**
      * Adds specified attachments.
-     * 
+     *
      * @param attachments The attachments
      */
     public void addAttachments(final Collection<ChatAttachment> attachments) {
@@ -137,7 +137,7 @@ public class MessageImpl extends PacketImpl implements Message {
 
     /**
      * Sets the type
-     * 
+     *
      * @param type The type to set
      */
     public void setType(final Type type) {
@@ -146,7 +146,7 @@ public class MessageImpl extends PacketImpl implements Message {
 
     /**
      * Sets the subject
-     * 
+     *
      * @param subject The subject to set
      */
     public void setSubject(final String subject) {
@@ -155,7 +155,7 @@ public class MessageImpl extends PacketImpl implements Message {
 
     /**
      * Sets the text
-     * 
+     *
      * @param text The text to set
      */
     public void setText(final String text) {

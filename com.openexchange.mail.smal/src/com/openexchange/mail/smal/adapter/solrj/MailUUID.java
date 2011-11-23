@@ -53,7 +53,7 @@ import com.openexchange.mail.MailPath;
 
 /**
  * {@link MailUUID} - Represents a mail's UUID in index storage.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -63,7 +63,7 @@ public class MailUUID {
 
     /**
      * Initializes a new {@link MailUUID}.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier

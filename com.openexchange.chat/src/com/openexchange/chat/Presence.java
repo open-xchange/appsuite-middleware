@@ -54,7 +54,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link Presence}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Presence extends Packet {
@@ -186,21 +186,21 @@ public interface Presence extends Packet {
 
     /**
      * Gets the status message.
-     * 
+     *
      * @return The status message
      */
     String getStatus();
 
     /**
      * Gets the type of this presence packet.
-     * 
+     *
      * @return The type
      */
     Type getType();
 
     /**
      * Gets the mode of this presence packet.
-     * 
+     *
      * @return The mode
      */
     Mode getMode();

@@ -69,6 +69,7 @@ public abstract class AbstractGroupUserRequest<T extends AbstractWebDAVResponse>
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getServletPath() {
         return GroupUserTest.GROUPUSER_URL;
     }

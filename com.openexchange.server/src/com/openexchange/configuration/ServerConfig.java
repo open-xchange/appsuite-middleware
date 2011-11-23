@@ -423,7 +423,7 @@ public final class ServerConfig {
          * The default value for max. concurrent AJAX requests.
          */
         DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS("com.openexchange.defaultMaxConcurrentAJAXRequests", "-1"),
-        
+
         ;
 
         private final String propertyName;

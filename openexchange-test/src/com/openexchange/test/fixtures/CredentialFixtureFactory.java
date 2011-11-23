@@ -57,9 +57,9 @@ import com.openexchange.exception.OXException;
  */
 public class CredentialFixtureFactory implements FixtureFactory<SimpleCredentials>{
 
-	private TestUserConfigFactory userConfigFactory;
-	private ContactFinder contactFinder;
-	private FixtureLoader fixtureLoader;
+	private final TestUserConfigFactory userConfigFactory;
+	private final ContactFinder contactFinder;
+	private final FixtureLoader fixtureLoader;
 
     public CredentialFixtureFactory(TestUserConfigFactory userConfigFactory, ContactFinder contactFinder, FixtureLoader fixtureLoader) {
 		super();
@@ -68,15 +68,16 @@ public class CredentialFixtureFactory implements FixtureFactory<SimpleCredential
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<SimpleCredentials> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<SimpleCredentials> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new CredentialFixtures(fixtureName, entries, userConfigFactory, contactFinder, fixtureLoader);
     }
 
     private class CredentialFixtures extends DefaultFixtures<SimpleCredentials> implements Fixtures<SimpleCredentials> {
-        private Map<String, Map<String, String>> entries;
-        private Map<String, Fixture<SimpleCredentials>> credentialMap = new HashMap<String, Fixture<SimpleCredentials>>();
-		private TestUserConfigFactory userConfigFactory;
-		private ContactFinder contactFinder;
+        private final Map<String, Map<String, String>> entries;
+        private final Map<String, Fixture<SimpleCredentials>> credentialMap = new HashMap<String, Fixture<SimpleCredentials>>();
+		private final TestUserConfigFactory userConfigFactory;
+		private final ContactFinder contactFinder;
 
         public CredentialFixtures(final String fixtureName, final Map<String, Map<String, String>> values, TestUserConfigFactory userConfigFactory, ContactFinder contactFinder, FixtureLoader fixtureLoader) {
             super(SimpleCredentials.class, values, fixtureLoader);
@@ -85,6 +86,7 @@ public class CredentialFixtureFactory implements FixtureFactory<SimpleCredential
             this.contactFinder = contactFinder;
         }
 
+        @Override
         public Fixture<SimpleCredentials> getEntry(final String entryName) throws OXException {
             if(credentialMap.containsKey(entryName)) {
                 return credentialMap.get(entryName);

@@ -63,9 +63,9 @@ import com.openexchange.ajax.fields.ParticipantsFields;
  */
 public abstract class AbstractConfirmRequest extends AbstractTaskRequest<ConfirmResponse> {
 
-    private int confirmation;
-    private String confirmMessage;
-    private boolean failOnError;
+    private final int confirmation;
+    private final String confirmMessage;
+    private final boolean failOnError;
 
     protected AbstractConfirmRequest(int confirmStatus, String confirmMessage) {
         this(confirmStatus, confirmMessage, true);
@@ -77,6 +77,7 @@ public abstract class AbstractConfirmRequest extends AbstractTaskRequest<Confirm
         this.failOnError = failOnError;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         JSONObject json = new JSONObject();
         json.put(ParticipantsFields.CONFIRMATION, confirmation);
@@ -87,10 +88,12 @@ public abstract class AbstractConfirmRequest extends AbstractTaskRequest<Confirm
 
     protected abstract void addBodyParameter(JSONObject json) throws JSONException;
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "confirm"));
@@ -100,6 +103,7 @@ public abstract class AbstractConfirmRequest extends AbstractTaskRequest<Confirm
 
     protected abstract void addRequestParameter(List<Parameter> params);
 
+    @Override
     public ConfirmParser getParser() {
         return new ConfirmParser(failOnError);
     }

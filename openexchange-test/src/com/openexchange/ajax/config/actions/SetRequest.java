@@ -77,18 +77,22 @@ public final class SetRequest extends AbstractConfigRequest<SetResponse> {
         return super.getServletPath() + param.getPath();
     }
 
+    @Override
     public Object getBody() {
         return value;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[0];
     }
 
+    @Override
     public SetParser getParser() {
         return new SetParser(failOnError);
     }

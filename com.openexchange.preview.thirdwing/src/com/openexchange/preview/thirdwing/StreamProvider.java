@@ -74,21 +74,21 @@ import com.openexchange.session.Session;
 
 /**
  * {@link StreamProvider}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class StreamProvider implements IStreamProvider {
 
     private String document;
-    
+
     private String image;
 
     private final Map<String, ManagedFile> createdFiles = new HashMap<String, ManagedFile>();
 
     private final ServiceLookup serviceLookup;
 
-    private Session session;
+    private final Session session;
 
     public StreamProvider(final ServiceLookup serviceLookup, Session session) {
         super();
@@ -160,7 +160,7 @@ public class StreamProvider implements IStreamProvider {
 
         return managedFile.constructURL(session);
     }
-    
+
     public InputStream getPreviewImage() throws OXException {
         try {
             return new FileInputStream(createdFiles.get(image).getFile());

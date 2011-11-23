@@ -85,6 +85,7 @@ public final class ListResponse extends AbstractWebDAVResponse implements Iterab
         this.folders = folders;
     }
 
+    @Override
     public Iterator<FolderObject> iterator() {
         return Arrays.asList(folders).iterator();
     }

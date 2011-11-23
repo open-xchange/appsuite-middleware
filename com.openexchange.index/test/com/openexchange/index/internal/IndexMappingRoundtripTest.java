@@ -63,31 +63,31 @@ import com.openexchange.tools.sql.SQLTestCase;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexMappingRoundtripTest extends SQLTestCase {
-    
+
     private Connection con;
-    
+
     private DBProvider dbProvider;
-    
+
     private IndexServerImpl indexServer;
-    
+
     private int cid;
-    
+
     private int uid;
-    
+
     private int module;
-    
+
     private String index;
-    
+
     private int serverId;
-    
-    
+
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         dbProvider = getDBProvider();
         con = dbProvider.getWriteConnection(null);
         con.createStatement().executeUpdate("DELETE FROM index_servers");
-        con.createStatement().executeUpdate("DELETE FROM user_module2index");  
+        con.createStatement().executeUpdate("DELETE FROM user_module2index");
         indexServer = createIndexServer();
         cid = 1;
         uid = 2;
@@ -96,7 +96,7 @@ public class IndexMappingRoundtripTest extends SQLTestCase {
         serverId = ConfigIndexMysql.getInstance().createIndexMapping(con, cid, uid, module, index);
         assertEquals("Server ids were not equal.", indexServer.getId(), serverId);
     }
-    
+
     public void testIndexMappingModification() throws Exception {
         IndexServerImpl newServer = createIndexServer();
         String newIndex = "tset";
@@ -115,7 +115,7 @@ public class IndexMappingRoundtripTest extends SQLTestCase {
             rs.close();
         }
     }
-    
+
     public void testIndexMappingDeletion() throws Exception {
         ConfigIndexMysql.getInstance().removeIndexMapping(con, cid, uid, module);
         ResultSet rs = con.createStatement().executeQuery("SELECT server, indexName FROM user_module2index WHERE cid = " + cid + " AND uid = " + uid + " AND module = " + module);
@@ -127,20 +127,20 @@ public class IndexMappingRoundtripTest extends SQLTestCase {
             rs.close();
         }
     }
-    
+
     public void testGetIndexUrl() throws Exception {
         IndexUrl indexUrl = ConfigIndexMysql.getInstance().getIndexUrl(con, cid, uid, module);
         assertEquals("Server url was wrong.", indexServer.getUrl() + "/" + index, indexUrl.getUrl());
     }
-    
+
     @Override
-    protected void tearDown() throws Exception {   
+    protected void tearDown() throws Exception {
         con.createStatement().executeUpdate("DELETE FROM user_module2index");
         con.createStatement().executeUpdate("DELETE FROM index_servers");
         dbProvider.releaseWriteConnection(null, con);
-        super.tearDown();        
+        super.tearDown();
     }
-    
+
     private IndexServerImpl createIndexServer() throws OXException {
         return IndexTestTool.createIndexServer(con);
     }

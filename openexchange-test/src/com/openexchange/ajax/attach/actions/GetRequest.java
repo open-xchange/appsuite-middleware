@@ -78,14 +78,17 @@ public class GetRequest extends AbstractAttachmentRequest<GetResponse> {
         this.id = id;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
@@ -96,6 +99,7 @@ public class GetRequest extends AbstractAttachmentRequest<GetResponse> {
         };
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser(true);
     }

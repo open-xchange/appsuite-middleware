@@ -88,11 +88,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
     public static final CarddavProtocol PROTOCOL = new CarddavProtocol();
 
-    private FolderService folders;
+    private final FolderService folders;
 
-    private SessionHolder sessionHolder;
+    private final SessionHolder sessionHolder;
 
-    private ThreadLocal<State> stateHolder = new ThreadLocal<State>();
+    private final ThreadLocal<State> stateHolder = new ThreadLocal<State>();
 
     public GroupwareCarddavFactory(FolderService folders, SessionHolder sessionHolder) {
         super();
@@ -183,15 +183,15 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 
 
-        private GroupwareCarddavFactory factory;
+        private final GroupwareCarddavFactory factory;
 
         public State(GroupwareCarddavFactory factory) {
             this.factory = factory;
         }
 
-        private Map<Integer, Contact> contactCache = new HashMap<Integer, Contact>();
+        private final Map<Integer, Contact> contactCache = new HashMap<Integer, Contact>();
 
-        private Map<Integer, List<Contact>> folderCache = new HashMap<Integer, List<Contact>>();
+        private final Map<Integer, List<Contact>> folderCache = new HashMap<Integer, List<Contact>>();
 
         public void cacheFolder(int folderId) throws OXException {
             cacheFolderSlow(folderId);

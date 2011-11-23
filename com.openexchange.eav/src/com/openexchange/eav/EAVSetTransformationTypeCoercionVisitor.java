@@ -61,9 +61,9 @@ import com.openexchange.exception.OXException;
  */
 public class EAVSetTransformationTypeCoercionVisitor extends AbstractEAVExceptionHolder implements EAVSetTransformationVisitor {
 
-    private EAVTypeMetadataNode metadata;
+    private final EAVTypeMetadataNode metadata;
     private EAVTypeCoercion coercion = null;
-    private TimeZone defaultTZ;
+    private final TimeZone defaultTZ;
 
     public EAVSetTransformationTypeCoercionVisitor(EAVTypeMetadataNode metadata, TimeZone defaultTZ, EAVTypeCoercion.Mode mode) {
         this.metadata = metadata;

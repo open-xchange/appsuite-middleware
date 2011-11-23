@@ -96,22 +96,27 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         this.failOnError = failOnError;
     }
 
+    @Override
     public String getServletPath() {
         return servletPath;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
@@ -128,6 +133,7 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public abstract AbstractColumnsParser<T> getParser();
 
     public int[] getColumns() {

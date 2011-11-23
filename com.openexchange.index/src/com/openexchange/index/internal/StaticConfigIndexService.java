@@ -65,9 +65,9 @@ import com.openexchange.index.IndexUrl;
 public final class StaticConfigIndexService implements ConfigIndexService {
 
     private final IndexUrl indexUrl;
-    
+
     private final IndexServer server;
-    
+
     /**
      * Initializes a new {@link StaticConfigIndexService}.
      */
@@ -95,13 +95,13 @@ public final class StaticConfigIndexService implements ConfigIndexService {
 
     @Override
     public int registerIndexServer(final IndexServer server) throws OXException {
-        return 0;        
+        return 0;
     }
 
     @Override
     public void unregisterIndexServer(final int serverId, final boolean deleteMappings) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
@@ -112,25 +112,25 @@ public final class StaticConfigIndexService implements ConfigIndexService {
     @Override
     public void modifyIndexServer(final IndexServer server) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void addIndexMapping(final int cid, final int uid, final int module, final String index) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void removeIndexMapping(final int cid, final int uid, final int module) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void modifiyIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 }

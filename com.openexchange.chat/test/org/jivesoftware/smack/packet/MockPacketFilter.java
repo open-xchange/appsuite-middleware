@@ -60,12 +60,13 @@ import org.jivesoftware.smack.filter.PacketFilter;
  */
 public class MockPacketFilter implements PacketFilter {
 
-    private boolean acceptValue;
+    private final boolean acceptValue;
 
     public MockPacketFilter(boolean acceptValue) {
         this.acceptValue = acceptValue;
     }
 
+    @Override
     public boolean accept(Packet packet) {
         return acceptValue;
     }

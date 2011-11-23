@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UnsubscribeFavFolderPerformer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnsubscribeFavFolderPerformer extends AbstractFavFolderPerformer {
@@ -84,7 +84,7 @@ public final class UnsubscribeFavFolderPerformer extends AbstractFavFolderPerfor
 
     /**
      * Unsubscribes specified folders
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderIds The identifiers of the folders to unsubscribe
      * @param session The session providing user data

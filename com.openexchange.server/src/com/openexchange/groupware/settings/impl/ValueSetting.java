@@ -92,6 +92,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
     /**
      * @return the multi value.
      */
+    @Override
     public Object[] getMultiValue() {
         Object[] retval;
         synchronized (this) {
@@ -104,6 +105,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
         return retval;
     }
 
+    @Override
     public boolean isEmptyMultivalue() {
         return multiValue != null && multiValue.isEmpty();
     }
@@ -111,6 +113,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
     /**
      * @return the single value.
      */
+    @Override
     public Object getSingleValue() {
         return singleValue;
     }
@@ -118,6 +121,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
     /**
      * @param value The value to set.
      */
+    @Override
     public void setSingleValue(final Object value) {
         this.singleValue = value;
     }
@@ -125,6 +129,7 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
     /**
      * @param value Value to add.
      */
+    @Override
     public void addMultiValue(final Object value) {
         if (null != value) {
             synchronized (this) {
@@ -136,10 +141,12 @@ public class ValueSetting extends AbstractSetting<ValueSetting> {
         }
     }
 
+    @Override
     public void setEmptyMultiValue() {
         this.multiValue = new ArrayList<Object>();
     }
 
+    @Override
     public void removeElement(final Setting child) throws OXException {
         if (!(child instanceof ValueSetting)) {
             throw SettingExceptionCodes.NOT_ALLOWED.create();

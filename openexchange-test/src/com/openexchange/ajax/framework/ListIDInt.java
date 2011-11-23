@@ -71,6 +71,7 @@ public final class ListIDInt implements ListID {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFolder() {
         return String.valueOf(folder);
     }
@@ -78,6 +79,7 @@ public final class ListIDInt implements ListID {
     /**
      * @return the object
      */
+    @Override
     public String getObject() {
         return String.valueOf(object);
     }

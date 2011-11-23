@@ -63,13 +63,14 @@ import com.openexchange.test.fixtures.FixtureLoader;
  */
 public class FileToByteArrayTransformator implements Transformator {
 
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
     public FileToByteArrayTransformator(FixtureLoader fixtureLoader) {
         super();
         this.fixtureLoader = fixtureLoader;
     }
 
+    @Override
     public byte[] transform(final String value) throws OXException {
         if (null == value || 1 > value.length()) {
             return null;

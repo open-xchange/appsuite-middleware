@@ -11,7 +11,7 @@ import org.mozilla.javascript.Wrapper;
 import com.openexchange.scripting.rhino.JSON;
 
 public class Console {
-	
+
 	public static void initialize(Scriptable scope, String name) {
 		try {
 			Context.enter();
@@ -21,7 +21,7 @@ public class Console {
 		}
 
 	}
-	
+
 	private Log log = null;
 
 	public Console(String def) {

@@ -23,17 +23,20 @@ public class DummySessionHolder implements SessionHolder{
 		this.ctx = ctx;
 	}
 
-	public SessionObject getSessionObject() {
+	@Override
+    public SessionObject getSessionObject() {
 		return session;
 	}
 
-	public Context getContext() {
+	@Override
+    public Context getContext() {
 		return ctx;
 	}
 
     /* (non-Javadoc)
      * @see com.openexchange.sessiond.impl.SessionHolder#getUser()
      */
+    @Override
     public User getUser() {
         // TODO Auto-generated method stub
         return null;

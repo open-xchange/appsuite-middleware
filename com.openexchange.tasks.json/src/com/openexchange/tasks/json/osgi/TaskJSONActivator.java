@@ -57,7 +57,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link TaskJSONActivator}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TaskJSONActivator extends AJAXModuleActivator {

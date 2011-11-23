@@ -3,7 +3,6 @@ package com.openexchange.scripting.rhino.osgi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
-import com.openexchange.scripting.rhino.require.DeferredResolution;
 import com.openexchange.scripting.rhino.require.RequireSupport;
 import com.openexchange.scripting.rhino.require.ResolveEnhancement;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
@@ -26,7 +25,7 @@ public class Activator extends HousekeepingActivator {
 				listener.runStartScripts(bundle);
 			}
 		}
-		
+
 		context.addBundleListener(listener);
 		track(ResolveEnhancement.class, new SimpleRegistryListener<ResolveEnhancement>() {
 
@@ -44,9 +43,9 @@ public class Activator extends HousekeepingActivator {
 				// TODO
 			}
 		});
-		
+
 		openTrackers();
 	}
-	
+
 
 }

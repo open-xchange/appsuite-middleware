@@ -68,7 +68,7 @@ import com.openexchange.group.Group;
  *
  */
 public class GroupResolver {
-    private AJAXClient client;
+    private final AJAXClient client;
 
     public GroupResolver(AJAXClient client) {
         this.client = client;

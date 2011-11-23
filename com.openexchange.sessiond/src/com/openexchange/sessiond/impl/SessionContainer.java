@@ -152,7 +152,7 @@ final class SessionContainer {
         }
         return l.toArray(new SessionControl[sessionIds.size()]);
     }
-    
+
     public SessionControl getAnySessionByUser(int userId, int contextId) {
         final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
         if (sessionIds == null) {

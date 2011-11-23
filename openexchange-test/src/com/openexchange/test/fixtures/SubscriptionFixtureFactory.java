@@ -58,19 +58,20 @@ import com.openexchange.subscribe.Subscription;
  */
 public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> {
 
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
 	public SubscriptionFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<Subscription> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Subscription> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
 		return new SubscriptionFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class SubscriptionFixtures  extends DefaultFixtures<Subscription> implements Fixtures<Subscription>{
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Subscription>>  subscriptions = new HashMap<String,Fixture<Subscription>>();
 
         public SubscriptionFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
@@ -78,6 +79,7 @@ public class SubscriptionFixtureFactory implements FixtureFactory<Subscription> 
             this.entries = entries;
         }
 
+        @Override
         public Fixture<Subscription> getEntry(final String entryName) throws OXException {
             if (subscriptions.containsKey(entryName)) {
                 return subscriptions.get(entryName);

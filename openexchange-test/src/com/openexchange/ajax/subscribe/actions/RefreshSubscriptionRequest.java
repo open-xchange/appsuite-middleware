@@ -96,14 +96,17 @@ public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<Refr
         setFolderID(folderID);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         Params params = new Params(AJAXServlet.PARAMETER_ACTION, "refresh");
         if(folderID != null)
@@ -113,6 +116,7 @@ public class RefreshSubscriptionRequest extends AbstractSubscriptionRequest<Refr
         return params.toArray();
     }
 
+    @Override
     public AbstractAJAXParser<RefreshSubscriptionResponse> getParser() {
         return new AbstractAJAXParser<RefreshSubscriptionResponse>(getFailOnError()) {
 

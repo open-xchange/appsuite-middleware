@@ -11,8 +11,8 @@ import com.openexchange.groupware.reminder.ReminderObject;
 
 
 public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse> {
-    private ReminderObject reminder;
-    private boolean failOnError;
+    private final ReminderObject reminder;
+    private final boolean failOnError;
 
     public DeleteRequest(ReminderObject reminder, boolean failOnError) {
         super();
@@ -20,6 +20,7 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
         this.failOnError = failOnError;
     }
 
+    @Override
     public Object getBody() throws IOException, JSONException {
         JSONObject json = new JSONObject();
         json.put(CalendarFields.RECURRENCE_POSITION, reminder.getRecurrencePosition());
@@ -28,10 +29,12 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
@@ -40,6 +43,7 @@ public class DeleteRequest extends AbstractReminderRequest<CommonDeleteResponse>
         };
     }
 
+    @Override
     public DeleteParser getParser() {
         return new DeleteParser(failOnError);
     }

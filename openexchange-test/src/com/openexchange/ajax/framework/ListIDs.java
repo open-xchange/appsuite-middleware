@@ -96,6 +96,7 @@ public class ListIDs implements Iterable<ListID> {
         return identifiers.get(i);
     }
 
+    @Override
     public Iterator<ListID> iterator() {
         return identifiers.iterator();
     }

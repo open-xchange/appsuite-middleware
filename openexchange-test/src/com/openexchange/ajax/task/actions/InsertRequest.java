@@ -84,14 +84,17 @@ public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
         this(task, timeZone, false, true);
     }
 
+    @Override
     public JSONObject getBody() throws JSONException {
         return convert(task, timeZone);
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         List<Parameter> retval = new ArrayList<Parameter>(3);
         retval.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
@@ -102,6 +105,7 @@ public class InsertRequest extends AbstractTaskRequest<InsertResponse> {
         return retval.toArray(new Parameter[retval.size()]);
     }
 
+    @Override
     public InsertParser getParser() {
         return new InsertParser(failOnError, task.getParentFolderID());
     }

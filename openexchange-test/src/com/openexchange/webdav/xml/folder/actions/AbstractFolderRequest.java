@@ -70,6 +70,7 @@ public abstract class AbstractFolderRequest<T extends AbstractWebDAVResponse> im
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getServletPath() {
         return FOLDER_URL;
     }

@@ -109,7 +109,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     /**
      * Gets the {@link MailfilterAction} instance for specified session.
-     * 
+     *
      * @param session The session
      * @return The appropriate {@link MailfilterAction} instance
      */
@@ -128,7 +128,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
 
     /**
      * Removes the {@link MailfilterAction} instance associated with specified session.
-     * 
+     *
      * @param session The session
      */
     public static void removeFor(final Session session) {

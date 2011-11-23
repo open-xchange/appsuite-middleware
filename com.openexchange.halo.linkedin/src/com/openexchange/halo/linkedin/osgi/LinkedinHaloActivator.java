@@ -63,9 +63,9 @@ public class LinkedinHaloActivator extends HousekeepingActivator {
 	@Override
 	protected Class<?>[] getNeededServices() {
 		return new Class[]{
-			LinkedInService.class, 
-			OAuthService.class, 
-			ContactInterfaceDiscoveryService.class, 
+			LinkedInService.class,
+			OAuthService.class,
+			ContactInterfaceDiscoveryService.class,
 			UserService.class};
 	}
 

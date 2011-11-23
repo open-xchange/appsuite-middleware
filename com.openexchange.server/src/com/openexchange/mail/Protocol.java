@@ -192,7 +192,7 @@ public class Protocol implements Component, Serializable {
 
     /**
      * Gets the max. number of concurrent mail accesses for specified mail system host.
-     * 
+     *
      * @param host The mail system's host name
      * @param primary <code>true</code> if host denotes primary account; otherwise <code>false</code>
      * @return The max count or a value equal to or less than zero for no restrictions

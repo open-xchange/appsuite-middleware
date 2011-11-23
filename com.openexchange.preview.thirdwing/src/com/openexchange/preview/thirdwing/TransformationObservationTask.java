@@ -52,22 +52,20 @@ package com.openexchange.preview.thirdwing;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.thirdwing.common.UpdateMessages;
 import com.openexchange.exception.OXException;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
  * {@link TransformationObservationTask}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class TransformationObservationTask extends AbstractTask<String> implements Observer {
-    
+
     /*
      * TODO:
      * We have to recognize the following patterns:
@@ -90,13 +88,13 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
     private final StreamProvider streamProvider;
 
     private final Session session;
-    
+
     private final AtomicBoolean done;
-    
+
     private String content;
-    
+
     private OXException exception;
-    
+
 
     public TransformationObservationTask(final StreamProvider streamProvider, final Session session) {
         super();
@@ -104,16 +102,16 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
         this.session = session;
         done = new AtomicBoolean(false);
     }
-    
+
     @Override
     public String call() {
         while (!done.get()) {
             ;
         }
-        
+
         return content;
     }
-    
+
     public OXException getException() {
         return exception;
     }
@@ -171,7 +169,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
 //                    linkBuilder.setLength(0);
 //                    linkBuilder.append("src=").append('"').append(imageURL).append('"');
 //                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//                    
+//
 //                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
 //                    strBuffer.setLength(0);
 //                }
@@ -211,7 +209,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
 //                    linkBuilder.setLength(0);
 //                    linkBuilder.append("url(").append(imageURL).append(")");
 //                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//                    
+//
 //                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
 //                    strBuffer.setLength(0);
 //                }
@@ -251,7 +249,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
 //                    linkBuilder.setLength(0);
 //                    linkBuilder.append("href=").append('"').append(imageURL).append('"');
 //                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//                    
+//
 //                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
 //                    strBuffer.setLength(0);
 //                }
@@ -291,7 +289,7 @@ public class TransformationObservationTask extends AbstractTask<String> implemen
 //                    linkBuilder.setLength(0);
 //                    linkBuilder.append("rel=").append('"').append(imageURL).append('"');
 //                    mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
-//                    
+//
 //                    imgReplacer.appendLiteralReplacement(sb, strBuffer.toString());
 //                    strBuffer.setLength(0);
 //                }

@@ -55,14 +55,14 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ChatAccountManager} - Manages chat accounts.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatAccountManager {
 
     /**
      * Adds a new account.
-     * 
+     *
      * @param account The account to add
      * @param session The session providing needed user data
      * @return The identifier of the newly created account
@@ -72,7 +72,7 @@ public interface ChatAccountManager {
 
     /**
      * Updates an existing account.
-     * 
+     *
      * @param account The account providing the identifier and the data to update
      * @param session The session providing needed user data
      * @throws OXException If update fails
@@ -81,7 +81,7 @@ public interface ChatAccountManager {
 
     /**
      * Deletes an existing account.
-     * 
+     *
      * @param account The account to delete
      * @param session The session providing needed user data
      * @throws OXException If deletion fails
@@ -90,7 +90,7 @@ public interface ChatAccountManager {
 
     /**
      * Gets all accounts associated with session user.
-     * 
+     *
      * @param session The session providing needed user data
      * @return All accounts associated with session user.
      * @throws OXException If listing fails
@@ -99,7 +99,7 @@ public interface ChatAccountManager {
 
     /**
      * Gets an existing messaging account.
-     * 
+     *
      * @param id The identifier
      * @param session The session providing needed user data
      * @return The messaging account.
@@ -109,7 +109,7 @@ public interface ChatAccountManager {
 
     /**
      * Checks whether the given secret can be used to decrypt secret strings in this account.
-     * 
+     *
      * @param session The session providing needed user data
      * @param secret The secret to use for decrypting
      * @return true when all accounts could be decrypted, false otherwise
@@ -119,7 +119,7 @@ public interface ChatAccountManager {
 
     /**
      * Migrates all encrypted strings from an old secret to a new one.
-     * 
+     *
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
      * @param session The session providing needed user data

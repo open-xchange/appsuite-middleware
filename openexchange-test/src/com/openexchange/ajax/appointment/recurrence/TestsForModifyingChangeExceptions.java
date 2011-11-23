@@ -58,7 +58,7 @@ import com.openexchange.groupware.container.Changes;
  */
 public class TestsForModifyingChangeExceptions extends ManagedAppointmentTest {
 
-    private int exceptionPosition = 2;
+    private final int exceptionPosition = 2;
 
     private Changes changes;
 

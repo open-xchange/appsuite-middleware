@@ -104,7 +104,8 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return resourceJSON;
 	}
 
@@ -113,7 +114,8 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
@@ -122,7 +124,8 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
 		params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, clientLastModified));
@@ -134,7 +137,8 @@ public final class ResourceDeleteRequest extends AbstractResourceRequest<Resourc
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public ResourceDeleteParser getParser() {
+	@Override
+    public ResourceDeleteParser getParser() {
 		return new ResourceDeleteParser(failOnError);
 	}
 

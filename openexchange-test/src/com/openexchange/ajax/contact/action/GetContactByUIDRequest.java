@@ -71,14 +71,17 @@ public class GetContactByUIDRequest extends AbstractContactRequest<GetResponse> 
         this.tz = tz;
     }
 
+    @Override
     public Object getBody(){
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters(){
         return new Params(
             AJAXServlet.PARAMETER_ACTION,
@@ -88,6 +91,7 @@ public class GetContactByUIDRequest extends AbstractContactRequest<GetResponse> 
         ).toArray();
     }
 
+    @Override
     public AbstractAJAXParser<? extends GetResponse> getParser() {
         return new AbstractAJAXParser<GetResponse>(false){
             @Override

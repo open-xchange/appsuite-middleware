@@ -53,7 +53,7 @@ import com.openexchange.chat.util.ChatUserImpl;
 
 /**
  * {@link DBChatUser}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DBChatUser extends ChatUserImpl {
@@ -67,7 +67,7 @@ public class DBChatUser extends ChatUserImpl {
 
     /**
      * Initializes a new {@link DBChatUser}.
-     * 
+     *
      * @param id
      */
     public DBChatUser(final String id) {
@@ -76,7 +76,7 @@ public class DBChatUser extends ChatUserImpl {
 
     /**
      * Initializes a new {@link DBChatUser}.
-     * 
+     *
      * @param id
      * @param name
      */

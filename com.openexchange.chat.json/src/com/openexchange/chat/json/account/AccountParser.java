@@ -57,7 +57,7 @@ import org.json.JSONObject;
 
 /**
  * {@link AccountParser}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AccountParser {
@@ -71,7 +71,7 @@ public final class AccountParser {
 
     /**
      * Parses the account from specified JSON account.
-     * 
+     *
      * @param jsonAccount The JSON account
      * @return The parsed account
      * @throws JSONException If a JSON error occurs

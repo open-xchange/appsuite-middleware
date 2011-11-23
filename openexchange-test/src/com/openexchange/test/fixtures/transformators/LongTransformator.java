@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class LongTransformator implements Transformator{
+    @Override
     public Object transform(final String value) throws OXException {
         if(value == null) {
             return 0;

@@ -56,7 +56,7 @@ import com.openexchange.preview.PreviewDocument;
 
 /**
  * {@link ThirdwingPreviewDocument}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class ThirdwingPreviewDocument implements PreviewDocument {
@@ -65,17 +65,17 @@ public class ThirdwingPreviewDocument implements PreviewDocument {
 
     private final String content;
 
-    private InputStream thumbnail;
+    private final InputStream thumbnail;
 
     /**
      * Initializes a new {@link ThirdwingPreviewDocument}.
-     * 
+     *
      * @param metaData The meta data
      * @param content The textual content
      */
     public ThirdwingPreviewDocument(final Map<String, String> metaData, final String content, InputStream thumbnail) {
         super();
-        this.metaData = new HashMap<String, String>();        
+        this.metaData = new HashMap<String, String>();
         this.metaData.putAll(metaData);
         this.content = content;
         this.thumbnail = thumbnail;

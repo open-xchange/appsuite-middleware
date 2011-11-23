@@ -75,7 +75,7 @@ import com.openexchange.mail.smal.adapter.IndexAdapters;
 
 /**
  * {@link SearchTerm2Query} - Transforms a search term to a query.
- * 
+ *
  * @see http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Range Searches
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -90,7 +90,7 @@ public final class SearchTerm2Query implements SolrConstants {
 
     /**
      * Transforms specified search term to a query.
-     * 
+     *
      * @param searchTerm The search term
      * @return The resulting query
      */

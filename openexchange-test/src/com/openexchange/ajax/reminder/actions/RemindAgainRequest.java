@@ -82,6 +82,7 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return convert(reminder);
     }
@@ -89,6 +90,7 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -96,6 +98,7 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "remindAgain"),
@@ -106,6 +109,7 @@ public class RemindAgainRequest extends AbstractReminderRequest<RemindAgainRespo
     /**
      * {@inheritDoc}
      */
+    @Override
     public RemindAgainParser getParser() {
         return new RemindAgainParser();
     }

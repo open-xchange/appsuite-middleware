@@ -21,12 +21,14 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
 
         Set<Integer> detached = new HashSet<Integer>();
 
+        @Override
         public long attached(final AttachmentEvent e) throws Exception {
             attached.add(e.getAttachment());
             e.getWriteConnection();
             return System.currentTimeMillis();
         }
 
+        @Override
         public long detached(final AttachmentEvent e) throws Exception {
             for (final int id : e.getDetached()) {
                 detached.add(id);
@@ -61,12 +63,13 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
 
         private final StringBuffer log = new StringBuffer();
 
-        private DBProvider delegate;
+        private final DBProvider delegate;
 
         public MockDBProvider(DBProvider delegate) {
             this.delegate = delegate;
         }
 
+        @Override
         public Connection getReadConnection(final Context ctx) throws OXException {
             Connection con = delegate.getReadConnection(ctx);
             read.add(con);
@@ -75,6 +78,7 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
             return con;
         }
 
+        @Override
         public Connection getWriteConnection(final Context ctx) throws OXException {
             Connection con = delegate.getWriteConnection(ctx);
             write.add(con);
@@ -83,6 +87,7 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
             return con;
         }
 
+        @Override
         public void releaseReadConnection(final Context ctx, final Connection con) {
             ok(read.remove(con));
             log.append("Release ReadConnection: " + con.hashCode() + "\n");
@@ -90,6 +95,7 @@ public abstract class AbstractAttachmentEventActionTest extends AbstractAttachme
 
         }
 
+        @Override
         public void releaseWriteConnection(final Context ctx, final Connection con) {
             ok(write.remove(con));
             log.append("Release WriteConnection: " + con + "\n");

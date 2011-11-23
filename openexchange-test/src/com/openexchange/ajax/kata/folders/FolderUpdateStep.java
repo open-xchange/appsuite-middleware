@@ -59,17 +59,19 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderUpdateStep extends NeedExistingStep<FolderObject>{
 
-    private FolderObject entry;
+    private final FolderObject entry;
 
     public FolderUpdateStep(FolderObject entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
         // Nothing to clean up
     }
 
+    @Override
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
         assumeIdentity(entry);

@@ -93,10 +93,11 @@ public class FromContainsFilterTest extends TestCase {
      * Wraps the MockPacket class to always give an expected From field.
      */
     private class MockFromPacket extends MockPacket {
-        private String from;
+        private final String from;
         public MockFromPacket(String from) {
             this.from = from;
         }
+        @Override
         public String getFrom() {
             return from;
         }

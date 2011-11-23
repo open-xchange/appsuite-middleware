@@ -58,14 +58,14 @@ public interface API {
 
     /**
      * Gets the folder URL.
-     * 
+     *
      * @return The URL
      */
     String getUrl();
 
     /**
      * Gets the tree identifier.
-     * 
+     *
      * @return The tree identifier
      */
     int getTreeId();

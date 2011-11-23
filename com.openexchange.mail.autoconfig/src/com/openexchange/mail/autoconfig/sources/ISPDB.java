@@ -80,7 +80,7 @@ public class ISPDB extends AbstractConfigSource {
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.ispdb";
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public ISPDB(ServiceLookup services) {
         this.services = services;

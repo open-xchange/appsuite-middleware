@@ -52,6 +52,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 
 public class ShowAsTransformator implements Transformator {
+    @Override
     public Object transform(final String value) throws OXException {
         if("RESERVED".equalsIgnoreCase(value)) { return Appointment.RESERVED; }
         else if("TEMPORARY".equalsIgnoreCase(value)) { return Appointment.TEMPORARY; }

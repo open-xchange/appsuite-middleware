@@ -61,10 +61,12 @@ public abstract class AbstractSubscriptionRequest<T extends AbstractAJAXResponse
 
     private boolean failOnError;
 
+    @Override
     public String getServletPath() {
         return "/ajax/subscriptions";
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

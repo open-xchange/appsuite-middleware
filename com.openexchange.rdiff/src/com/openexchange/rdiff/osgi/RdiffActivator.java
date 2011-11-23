@@ -59,7 +59,7 @@ import com.openexchange.rdiff.internal.RdiffServiceImpl;
 
 /**
  * {@link RdiffActivator} - The activator for <code>"com.openexchange.rdiff"</code> bundle.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdiffActivator implements BundleActivator {

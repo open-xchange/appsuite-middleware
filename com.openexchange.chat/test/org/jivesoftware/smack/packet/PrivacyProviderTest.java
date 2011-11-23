@@ -8,9 +8,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.StringReader;
 
-/** 
+/**
  * Test the PrivacyProvider class with valids privacy xmls
- * 
+ *
  * @author Francisco Vives
  */
 public class PrivacyProviderTest extends SmackTestCase {
@@ -33,7 +33,7 @@ public class PrivacyProviderTest extends SmackTestCase {
 	}
 
     /**
-     * Check the parser with an xml with all kind of stanzas. 
+     * Check the parser with an xml with all kind of stanzas.
      * To create the xml string based from an xml file, replace:\n with:	"\n  + "
      */
     public void testFull() {
@@ -112,22 +112,22 @@ public class PrivacyProviderTest extends SmackTestCase {
         	XmlPullParser parser = getParserFromXML(xml);
         	// Create a packet from the xml
         	Privacy packet = (Privacy) (new PrivacyProvider()).parseIQ(parser);
-        	
+
         	// check if it exist
             assertNotNull(packet);
             // assertEquals(xml, packet.getChildElementXML());
-            
+
             // check the default and active names
             assertEquals("testFilter", packet.getActiveName());
             assertEquals("testSubscription", packet.getDefaultName());
-            
+
             // check the list
             assertEquals(2, packet.getPrivacyList("testFilter").size());
             assertEquals(5, packet.getPrivacyList("testSubscription").size());
             assertEquals(4, packet.getPrivacyList("testJID").size());
             assertEquals(2, packet.getPrivacyList("testGroup").size());
             assertEquals(0, packet.getPrivacyList("testEmpty").size());
-            
+
             // check each privacy item
             PrivacyItem item = packet.getItem("testGroup", 4);
             assertEquals("Enemies", item.getValue());
@@ -138,7 +138,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(false, item.isFilterEverything());
-            
+
             item = packet.getItem("testFilter", 1);
             assertEquals("tybalt@example.com", item.getValue());
             assertEquals(PrivacyItem.Type.jid, item.getType());
@@ -148,7 +148,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(true, item.isFilterEverything());
-            
+
             item = packet.getItem("testFilter", 2);
             assertEquals(null, item.getValue());
             assertEquals(null, item.getType());
@@ -179,7 +179,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(true, item.isFilterEverything());
-            
+
             item = packet.getItem("testSubscription", 12);
             assertEquals("from", item.getValue());
             assertEquals(PrivacyItem.Type.subscription, item.getType());
@@ -189,7 +189,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(true, item.isFilterEverything());
-            
+
             item = packet.getItem("testSubscription", 5);
             assertEquals("none", item.getValue());
             assertEquals(PrivacyItem.Type.subscription, item.getType());
@@ -199,7 +199,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(false, item.isFilterEverything());
-            
+
             item = packet.getItem("testSubscription", 15);
             assertEquals(null, item.getValue());
             assertEquals(null, item.getType());
@@ -211,7 +211,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(true, item.isFilterEverything());
 
             // TEST THE testJID LIST
-            
+
             item = packet.getItem("testJID", 6);
             assertEquals("juliet@example.com", item.getValue());
             assertEquals(PrivacyItem.Type.jid, item.getType());
@@ -221,7 +221,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(true, item.isFilterEverything());
-            
+
             item = packet.getItem("testJID", 7);
             assertEquals("benvolio@example.org/palm", item.getValue());
             assertEquals(PrivacyItem.Type.jid, item.getType());
@@ -231,7 +231,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(true, item.isFilterEverything());
-            
+
             item = packet.getItem("testJID", 42);
             assertEquals(null, item.getValue());
             assertEquals(PrivacyItem.Type.jid, item.getType());
@@ -241,7 +241,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(true, item.isFilterEverything());
-            
+
             item = packet.getItem("testJID", 666);
             assertEquals(null, item.getValue());
             assertEquals(null, item.getType());
@@ -251,9 +251,9 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(true, item.isFilterEverything());
-            
+
             // TEST THE testGroup LIST
-            
+
             item = packet.getItem("testGroup", 4);
             assertEquals("Enemies", item.getValue());
             assertEquals(PrivacyItem.Type.group, item.getType());
@@ -263,7 +263,7 @@ public class PrivacyProviderTest extends SmackTestCase {
             assertEquals(false, item.isFilterPresence_in());
             assertEquals(false, item.isFilterPresence_out());
             assertEquals(false, item.isFilterEverything());
-            
+
             item = packet.getItem("testGroup", 666);
             assertEquals(null, item.getValue());
             assertEquals(null, item.getType());
@@ -279,10 +279,10 @@ public class PrivacyProviderTest extends SmackTestCase {
             fail(e.getMessage());
         }
     }
-    
-    
+
+
     /**
-     * Check the parser with an xml with empty lists. It includes the active, 
+     * Check the parser with an xml with empty lists. It includes the active,
      * default and special list.
      * To create the xml string based from an xml file, replace:\n with:	"\n  + "
      */
@@ -304,13 +304,13 @@ public class PrivacyProviderTest extends SmackTestCase {
         	XmlPullParser parser = getParserFromXML(xml);
         	// Create a packet from the xml
         	Privacy packet = (Privacy) (new PrivacyProvider()).parseIQ(parser);
-        	
+
             assertNotNull(packet);
             assertNotNull(packet.getChildElementXML());
-            
+
             assertEquals("public", packet.getDefaultName());
             assertEquals(null, packet.getActiveName());
-            
+
             assertEquals(0, packet.getPrivacyList("public").size());
             assertEquals(0, packet.getPrivacyList("private").size());
             assertEquals(0, packet.getPrivacyList("special").size());
@@ -322,9 +322,9 @@ public class PrivacyProviderTest extends SmackTestCase {
             fail(e.getMessage());
         }
     }
- 
+
     /**
-     * Check the parser with an xml with empty lists. It includes the active, 
+     * Check the parser with an xml with empty lists. It includes the active,
      * default and special list.
      * To create the xml string based from an xml file, replace:\n with:	"\n  + "
      */
@@ -343,12 +343,12 @@ public class PrivacyProviderTest extends SmackTestCase {
         	XmlPullParser parser = getParserFromXML(xml);
         	// Create a packet from the xml
         	Privacy packet = (Privacy) (new PrivacyProvider()).parseIQ(parser);
-        	
+
             assertNotNull(packet);
-            
+
             assertEquals(null, packet.getDefaultName());
             assertEquals(null, packet.getActiveName());
-            
+
             assertEquals(true, packet.isDeclineActiveList());
             assertEquals(true, packet.isDeclineDefaultList());
         } catch (Exception e) {
@@ -356,14 +356,15 @@ public class PrivacyProviderTest extends SmackTestCase {
             fail(e.getMessage());
         }
     }
-    
+
     private XmlPullParser getParserFromXML(String xml) throws XmlPullParserException {
     	MXParser parser = new MXParser();
     	parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
     	parser.setInput(new StringReader(xml));
     	return parser;
     }
-    
+
+    @Override
     protected int getMaxConnections() {
         return 0;
     }

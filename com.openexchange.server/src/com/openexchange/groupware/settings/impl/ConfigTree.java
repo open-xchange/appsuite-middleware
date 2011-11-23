@@ -78,7 +78,7 @@ public final class ConfigTree {
     /**
      * Set of all identifiers for the database to check for duplicate ones.
      */
-    private Set<Integer> dbIdentifier = new HashSet<Integer>();
+    private final Set<Integer> dbIdentifier = new HashSet<Integer>();
 
     /**
      * Prevent instantiation

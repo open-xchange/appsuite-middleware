@@ -619,7 +619,8 @@ public class PublicationSQLStorage implements PublicationStorage {
 
         return retval;
     }
-    
+
+    @Override
     public Map<Entity, Boolean> isPublished(List<Entity> entities, Context ctx) throws OXException {
         Map<Entity, Boolean> retval = new HashMap<Entity, Boolean>();
         for (Entity entity : entities) {

@@ -148,7 +148,7 @@ public final class ResponseWriter {
         if (null != response.getData()) {
             json.put(DATA, response.getData());
         }
-        
+
         if (null != response.getTimestamp()) {
             json.put(TIMESTAMP, response.getTimestamp().getTime());
         }

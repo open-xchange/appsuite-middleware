@@ -53,35 +53,35 @@ import java.util.Date;
 
 /**
  * {@link Packet} - Represents any kind of package that can be delivered within a chat.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Packet {
 
     /**
      * Gets the packet identifier.
-     * 
+     *
      * @return The identifier or <code>null</code>
      */
     String getPacketId();
 
     /**
      * Gets the sender.
-     * 
+     *
      * @return The sender or <code>null</code>
      */
     ChatUser getFrom();
 
     /**
      * Gets the time stamp for this packet.
-     * 
+     *
      * @return The time stamp
      */
     Date getTimeStamp();
 
     /**
      * Gets the string representation of this packet.
-     * 
+     *
      * @return The string representation
      */
     @Override

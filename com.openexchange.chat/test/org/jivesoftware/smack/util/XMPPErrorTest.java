@@ -13,7 +13,7 @@ public class XMPPErrorTest extends SmackTestCase {
     public XMPPErrorTest(String arg0) {
         super(arg0);
     }
-	
+
     /**
      * Check the creation of a new xmppError locally.
     */
@@ -26,7 +26,7 @@ public class XMPPErrorTest extends SmackTestCase {
     	assertEquals(error.getType(), XMPPError.Type.CANCEL);
     	assertNull(error.getMessage());
     }
- 
+
     /**
      * Check the creation of a new xmppError locally.
     */
@@ -40,7 +40,7 @@ public class XMPPErrorTest extends SmackTestCase {
         assertEquals(error.getType(), XMPPError.Type.CANCEL);
         assertEquals(error.getMessage(), message);
     }
-    
+
     /**
      * Check the creation of a new xmppError locally where there is not a default defined.
     */
@@ -54,7 +54,7 @@ public class XMPPErrorTest extends SmackTestCase {
         assertNull(error.getType());
         assertEquals(error.getMessage(), message);
     }
-    
+
     /**
      * Check the parser with an xml with the 404 error.
     */
@@ -68,14 +68,14 @@ public class XMPPErrorTest extends SmackTestCase {
         	XmlPullParser parser = getParserFromXML(xml);
         	// Create a packet from the xml
         	XMPPError packet = parseError(parser);
-        	
+
             assertNotNull(packet);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
- 
+
     /**
      * Check the parser with an xml with the 404 error.
     */
@@ -89,14 +89,14 @@ public class XMPPErrorTest extends SmackTestCase {
         	XmlPullParser parser = getParserFromXML(xml);
         	// Create a packet from the xml
         	XMPPError error = parseError(parser);
-        	
+
             assertNotNull(error);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
-    
+
    public void testMessageAndApplicationDefinedError() {
 	   String xml = "<error type='modify' code='404'>" +
 	   		"<undefined-condition xmlns='urn:ietf:params:xml:ns:xmpp-stanzas'/>" +
@@ -110,9 +110,9 @@ public class XMPPErrorTest extends SmackTestCase {
        	XmlPullParser parser = getParserFromXML(xml);
        	// Create a packet from the xml
        	XMPPError error = parseError(parser);
-       	
+
        	String sendingXML = error.toXML();
-       	
+
        assertNotNull(error);
        assertNotNull(sendingXML);
        } catch (Exception e) {
@@ -136,14 +136,14 @@ public class XMPPErrorTest extends SmackTestCase {
         	XmlPullParser parser = getParserFromXML(xml);
         	// Create a packet from the xml
         	XMPPError error = parseError(parser);
-        	
+
             assertNotNull(error);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
- 
+
     /**
      * Check the parser with an xml with the 404 error.
     */
@@ -161,26 +161,27 @@ public class XMPPErrorTest extends SmackTestCase {
         	XmlPullParser parser = getParserFromXML(xml);
         	// Create a packet from the xml
         	XMPPError error = parseError(parser);
-        	
+
             assertNotNull(error);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
     }
-    
+
     private XMPPError parseError(XmlPullParser parser) throws Exception {
     	parser.next();
     	return PacketParserUtils.parseError(parser);
     }
-    
+
     private XmlPullParser getParserFromXML(String xml) throws XmlPullParserException {
     	MXParser parser = new MXParser();
     	parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
     	parser.setInput(new StringReader(xml));
     	return parser;
     }
-    
+
+    @Override
     protected int getMaxConnections() {
         return 0;
     }

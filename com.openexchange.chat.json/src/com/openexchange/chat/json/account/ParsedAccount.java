@@ -97,7 +97,7 @@ public class ParsedAccount implements ChatAccount {
 
     /**
      * Sets the configuration
-     * 
+     *
      * @param configuration The configuration to set
      */
     public void setConfiguration(final Map<String, Object> configuration) {
@@ -106,7 +106,7 @@ public class ParsedAccount implements ChatAccount {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -115,7 +115,7 @@ public class ParsedAccount implements ChatAccount {
 
     /**
      * Sets the display name
-     * 
+     *
      * @param displayName The display name to set
      */
     public void setDisplayName(final String displayName) {
@@ -124,7 +124,7 @@ public class ParsedAccount implements ChatAccount {
 
     /**
      * Sets the chat service
-     * 
+     *
      * @param chatService The chat service to set
      */
     public void setChatService(final ChatService chatService) {

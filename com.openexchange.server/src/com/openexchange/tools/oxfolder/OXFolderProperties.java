@@ -447,7 +447,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
 
     /**
      * Checks whether caching for shared folders is enabled or not.
-     * 
+     *
      * @return <code>true</code> if caching for shared folder is enabled; otherwise <code>false</code>
      */
     public static boolean isEnableSharedFolderCaching() {

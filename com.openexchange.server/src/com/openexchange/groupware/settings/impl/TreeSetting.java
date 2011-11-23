@@ -65,30 +65,37 @@ public class TreeSetting extends AbstractSetting<TreeSetting> {
         super(name, id, shared);
     }
 
+    @Override
     public Object[] getMultiValue() {
         return null;
     }
 
+    @Override
     public boolean isEmptyMultivalue() {
         return true;
     }
 
+    @Override
     public Object getSingleValue() {
         return null;
     }
 
+    @Override
     public void setSingleValue(Object value) throws OXException {
         throw SettingExceptionCodes.NOT_ALLOWED.create();
     }
 
+    @Override
     public void addMultiValue(Object value) throws OXException {
         throw SettingExceptionCodes.NOT_ALLOWED.create();
     }
 
+    @Override
     public void setEmptyMultiValue() throws OXException {
         throw SettingExceptionCodes.NOT_ALLOWED.create();
     }
 
+    @Override
     public void removeElement(final Setting child) throws OXException {
         if (!(child instanceof TreeSetting)) {
             throw SettingExceptionCodes.NOT_ALLOWED.create();

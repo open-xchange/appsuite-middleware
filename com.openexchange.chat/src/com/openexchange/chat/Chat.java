@@ -56,28 +56,28 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link Chat} - Represents a chat (room) or a user's private chat.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Chat extends ChatGroup {
 
     /**
      * Gets the chat identifier.
-     * 
+     *
      * @return The chat identifier.
      */
     String getChatId();
 
     /**
      * Gets the chat's subject.
-     * 
+     *
      * @return The subject
      */
     String getSubject();
 
     /**
      * Joins specified chat member to this chat.
-     * 
+     *
      * @param user The identifier of the member to join
      * @throws OXException If joining the chat member fails
      */
@@ -85,7 +85,7 @@ public interface Chat extends ChatGroup {
 
     /**
      * Parts specified chat member from this chat.
-     * 
+     *
      * @param user The identifier of the member to part
      * @throws OXException If member cannot be removed
      */
@@ -93,14 +93,14 @@ public interface Chat extends ChatGroup {
 
     /**
      * Deletes a message by specified identifier.
-     * 
+     *
      * @param messageId The message identifier
      */
     void deleteMessage(String messageId) throws OXException;
 
     /**
      * Posts specified packet to this chat.
-     * 
+     *
      * @param packet The packet to post
      * @throws OXException If posting the packet fails
      */
@@ -108,7 +108,7 @@ public interface Chat extends ChatGroup {
 
     /**
      * Polls all messages from this chat that were posted after specified date.
-     * 
+     *
      * @param since The date or <code>null</code> to poll whole chat's time line
      * @param user The chat user for whom the messages are requested
      * @return All messages
@@ -118,7 +118,7 @@ public interface Chat extends ChatGroup {
 
     /**
      * Updates an existing message according {@link MessageDescription}'s arguments.
-     * 
+     *
      * @param messageDesc The message description
      * @throws OXException If update operation fails
      */
@@ -126,7 +126,7 @@ public interface Chat extends ChatGroup {
 
     /**
      * Gets a message by specified identifier.
-     * 
+     *
      * @param messageId The message identifier
      * @return The associated message
      */
@@ -134,7 +134,7 @@ public interface Chat extends ChatGroup {
 
     /**
      * Gets messages by specified identifiers.
-     * 
+     *
      * @param messageIds The message identifiers
      * @return The associated messages
      */
@@ -147,7 +147,7 @@ public interface Chat extends ChatGroup {
      * packet's time stamp.
      * <p>
      * See also {@link ChatCaps#supportsNotifcation()}.
-     * 
+     *
      * @param listener A message listener.
      * @return <code>true</code> if listener could be registered; otherwise <code>false</code> if this chat does not support notifications
      * @see ChatCaps#supportsNotifcation()
@@ -156,14 +156,14 @@ public interface Chat extends ChatGroup {
 
     /**
      * Removes specified message listener
-     * 
+     *
      * @param listener The message listener to remove
      */
     void removeMessageListener(MessageListener listener);
 
     /**
      * Returns an unmodifiable collection of all of the listeners registered with this chat.
-     * 
+     *
      * @return An unmodifiable collection of all of the listeners registered with this chat.
      */
     Collection<MessageListener> getListeners();

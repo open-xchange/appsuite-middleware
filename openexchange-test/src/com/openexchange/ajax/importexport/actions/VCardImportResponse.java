@@ -69,6 +69,7 @@ public final class VCardImportResponse extends AbstractAJAXResponse implements I
         super(response);
     }
 
+    @Override
     public Iterator<Response> iterator() {
         return Arrays.asList(responses).iterator();
     }

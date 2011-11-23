@@ -84,7 +84,7 @@ public class RFC822ParserTest extends TestCase {
         } catch (Exception e) {
             fail("Exception thrown: " + e.getMessage());
         }
-        
+
         //repeat, this time looking at content
         parser = new RFC822Parser();
         metadata = new Metadata();
@@ -152,7 +152,7 @@ public class RFC822ParserTest extends TestCase {
             fail("Exception thrown: " + e.getMessage());
         }
     }
-    
+
     /**
      * The from isn't in the usual form.
      * See TIKA-618
@@ -200,7 +200,7 @@ public class RFC822ParserTest extends TestCase {
                 new ByteArrayInputStream(data), handler, metadata, context);
         assertEquals(name.trim(), metadata.get(Metadata.AUTHOR));
     }
-    
+
     /**
      * Test for TIKA-678 - not all headers may be present
      */

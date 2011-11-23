@@ -142,14 +142,17 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         return id;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
@@ -176,6 +179,7 @@ public class AllPublicationsRequest extends AbstractPublicationRequest<AllPublic
         return params.toArray(new Parameter[0]);
     }
 
+    @Override
     public AbstractAJAXParser<? extends AllPublicationsResponse> getParser() {
         return new AbstractAJAXParser<AllPublicationsResponse>(isFailOnError()) {
 

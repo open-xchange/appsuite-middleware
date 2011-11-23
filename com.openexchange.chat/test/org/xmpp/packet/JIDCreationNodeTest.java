@@ -23,7 +23,7 @@ import org.junit.Test;
 /**
  * Tests compliance of {@link JID} with the restrictions defined in RFC-3920 for
  * the node identifier.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.ietf.org/rfc/rfc3920.txt">RFC 3920 - Extensible
  *      Messaging and Presence Protocol (XMPP): Core</a>
@@ -93,9 +93,9 @@ public class JIDCreationNodeTest {
 	/**
 	 * UTF-8 characters use 1 to 4 bytes. The JID implementation should
 	 * correctly identify the length of all UTF-8 characters.
-	 * 
+	 *
 	 * This issue has been filed as TINDER-32
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-32">Tinder
 	 *      bugtracker: TINDER-32</am
@@ -120,9 +120,9 @@ public class JIDCreationNodeTest {
 	/**
 	 * This test verifies that strings longer than 1023 characters are not
 	 * accepted, if UTF-8 characters are used that are represented with 3 bytes.
-	 * 
+	 *
 	 * This test is related to issue TINDER-32
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-32">Tinder
 	 *      bugtracker: TINDER-32</am

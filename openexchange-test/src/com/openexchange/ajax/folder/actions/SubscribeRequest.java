@@ -68,7 +68,7 @@ import com.openexchange.folderstorage.FolderStorage;
 public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
 
     private final String parent;
-    
+
     private final boolean failOnError;
 
     private final List<String> folderIds;
@@ -89,7 +89,7 @@ public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
 
     /**
      * Adds specified folder identifier.
-     * 
+     *
      * @param folderId The folder identifier
      * @param subscribe <code>true</code> to subscribe denoted folder to tree; otherwise <code>false</code>
      * @return This request with folder identifier added

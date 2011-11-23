@@ -93,10 +93,11 @@ public class ToContainsFilterTest extends TestCase {
      * Wraps the MockPacket class to always give an expected To field.
      */
     private class MockToPacket extends MockPacket {
-        private String to;
+        private final String to;
         public MockToPacket(String to) {
             this.to = to;
         }
+        @Override
         public String getTo() {
             return to;
         }

@@ -75,7 +75,7 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     protected String getModule() {
         return "roster";
     }
-    
+
     // GET /roster (all) GET /roster/[identifier/email-adresse-denke-ich] ... UPDATE /roster/depp@horst.de etc.
 
     @Override

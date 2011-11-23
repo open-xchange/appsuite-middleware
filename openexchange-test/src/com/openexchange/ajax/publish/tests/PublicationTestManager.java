@@ -86,7 +86,7 @@ public class PublicationTestManager {
 
         private AbstractPublicationResponse lastResponse;
 
-        private Set<Integer> createdItems;
+        private final Set<Integer> createdItems;
 
         private boolean failOnError = true;
 

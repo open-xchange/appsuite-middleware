@@ -56,6 +56,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  * @deprecated Use the PropertyDrivenMapper with .properties files instead.
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
+@Deprecated
 public class DutchOutlookMapper extends AbstractContactFieldMapper {
 
     public DutchOutlookMapper() {
@@ -110,7 +111,7 @@ public class DutchOutlookMapper extends AbstractContactFieldMapper {
         store(ContactField.ANNIVERSARY, "");
         store(ContactField.CATEGORIES, "");
         store(ContactField.SPOUSE_NAME, "");
-        store(ContactField.PRIVATE_FLAG, ""); 
+        store(ContactField.PRIVATE_FLAG, "");
         store(ContactField.NUMBER_OF_CHILDREN, "");
         store(ContactField.ASSISTANT_NAME, "");
         store(ContactField.NOTE, "Aantekeningen");

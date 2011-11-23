@@ -88,7 +88,7 @@ import com.openexchange.threadpool.ThreadPools;
 /**
  * {@link SMALMessageStorage} - The message storage for SMAL which either delegates calls to delegating message storage or serves them from
  * index storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SMALMessageStorage extends AbstractSMALStorage implements IMailMessageStorage, IMailMessageStorageExt, IMailMessageStorageBatch {
@@ -124,7 +124,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Takes the next completed task from specified completion service.
-     * 
+     *
      * @param completionService The completion service to take from
      * @return The next completed task
      * @throws OXException If taking next completed task failsF
@@ -142,7 +142,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Polls the next completed task from specified completion service.
-     * 
+     *
      * @param completionService The completion service to take from
      * @return The next completed task or <code>null</code>
      * @throws OXException If taking next completed task failsF
@@ -164,7 +164,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Cancels all tasks of passed completion service.
-     * 
+     *
      * @param completionService The completion service to cancel
      */
     protected static <V> void cancelRemaining(final CancelableCompletionService<MailResult<V>> completionService) {
@@ -201,7 +201,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Initializes a new {@link SMALMessageStorage}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public SMALMessageStorage(final Session session, final int accountId, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> delegateMailAccess) throws OXException {
@@ -439,7 +439,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
 
     /**
      * Schedules a new folder job.
-     * 
+     *
      * @param fullName The folder full name
      * @param optStorageMails The optional storage mails
      * @param optIndexMails The optional index mails

@@ -57,19 +57,20 @@ import com.openexchange.resource.Resource;
  * @author Tobias Friedrich <tobias.friedrich@open-xchange.com>
  */
 public class ResourceFixtureFactory implements FixtureFactory<Resource> {
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
 	public ResourceFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<Resource> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Resource> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new ResourceFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class ResourceFixtures extends DefaultFixtures<Resource> implements Fixtures<Resource> {
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Resource>> resourceMap = new HashMap<String, Fixture<Resource>>();
 
         public ResourceFixtures(final String fixtureName, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
@@ -77,6 +78,7 @@ public class ResourceFixtureFactory implements FixtureFactory<Resource> {
             this.entries = values;
         }
 
+        @Override
         public Fixture<Resource> getEntry(final String entryName) throws OXException {
             if (resourceMap.containsKey(entryName)) {
                 return resourceMap.get(entryName);

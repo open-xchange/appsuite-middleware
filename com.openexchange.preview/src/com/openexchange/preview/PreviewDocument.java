@@ -54,7 +54,7 @@ import java.util.Map;
 
 /**
  * {@link PreviewDocument}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PreviewDocument {
@@ -71,28 +71,28 @@ public interface PreviewDocument {
      * <li><code>"author"</code></li>
      * <li>...</li>
      * </ul>
-     * 
+     *
      * @return The meta data as a {@link Map}
      */
     Map<String, String> getMetaData();
 
     /**
      * Checks if this preview document provides content via {@link #getContent()} method.
-     * 
+     *
      * @return <code>true</code> if content is provided; otherwise <code>false</code>
      */
     boolean hasContent();
 
     /**
      * Gets the document's content in its output format.
-     * 
+     *
      * @return The content (or <code>null</code> if output format does not imply a content; e.g. {@link PreviewOutput#METADATA})
      */
     String getContent();
-    
+
     /**
      * Gets the preview image (thumbnail).
-     * 
+     *
      * @return The input stream for the image or <code>null</code> if the image is not available.
      */
     InputStream getThumbnail();

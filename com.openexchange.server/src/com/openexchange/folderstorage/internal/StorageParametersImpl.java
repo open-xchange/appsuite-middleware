@@ -132,7 +132,7 @@ public final class StorageParametersImpl implements StorageParameters {
 
     /**
      * Initializes a new {@link StorageParametersImpl} from specified storage parameters.
-     * 
+     *
      * @param source The source parameters
      */
     public StorageParametersImpl(final StorageParameters source) {

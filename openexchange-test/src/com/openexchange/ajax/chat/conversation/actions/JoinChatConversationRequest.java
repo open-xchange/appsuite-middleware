@@ -66,25 +66,25 @@ import com.openexchange.chat.json.conversation.ConversationID;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public final class JoinChatConversationRequest extends AbstractChatConversationRequest<JoinChatConversationResponse> {
-    
+
     private ConversationID conversationId;
 
     private final List<String> userIds;
-    
+
     public JoinChatConversationRequest() {
         this(true);
     }
-    
+
     public JoinChatConversationRequest(final boolean fail) {
         super();
         setFailOnError(fail);
         conversationId = null;
         userIds = new ArrayList<String>(4);
     }
-    
+
     /**
      * Sets the identifier of the conversation to which specified users shall be added.
-     * 
+     *
      * @param conversationId The conversation identifier
      */
     public void setConversationId(final ConversationID conversationId) {
@@ -96,7 +96,7 @@ public final class JoinChatConversationRequest extends AbstractChatConversationR
 
     /**
      * Adds give chat user identifier.
-     * 
+     *
      * @param userId The chat user identifier
      */
     public void addUserId(final String userId) {
@@ -124,7 +124,7 @@ public final class JoinChatConversationRequest extends AbstractChatConversationR
             protected JoinChatConversationResponse createResponse(final Response response) throws JSONException {
                 return new JoinChatConversationResponse(response);
             }
-            
+
         };
     }
 

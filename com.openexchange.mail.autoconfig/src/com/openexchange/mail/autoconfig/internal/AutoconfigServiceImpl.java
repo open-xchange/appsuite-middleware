@@ -74,9 +74,9 @@ import com.openexchange.server.ServiceLookup;
  */
 public class AutoconfigServiceImpl implements AutoconfigService {
 
-    private List<ConfigSource> sources;
+    private final List<ConfigSource> sources;
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public AutoconfigServiceImpl(ServiceLookup services) {
         this.services = services;

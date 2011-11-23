@@ -64,7 +64,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class SubscriptionActionFactory implements AJAXActionServiceFactory {
 
-	private Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
+	private final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
 
 
 	public SubscriptionActionFactory(ServiceLookup services) {

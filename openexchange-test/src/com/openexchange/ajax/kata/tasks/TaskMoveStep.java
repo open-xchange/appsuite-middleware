@@ -65,7 +65,7 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class TaskMoveStep extends NeedExistingStep<Task> {
 
-    private int destinationFolder;
+    private final int destinationFolder;
 
     /**
      * Initializes a new {@link TaskMoveStep}.
@@ -80,12 +80,14 @@ public class TaskMoveStep extends NeedExistingStep<Task> {
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
+    @Override
     public void cleanUp() throws Exception {
     }
 
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
      */
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
 

@@ -62,7 +62,7 @@ import com.openexchange.test.FolderTestManager;
  */
 public class FolderCreateStep extends AbstractStep implements IdentitySource<FolderObject>{
 
-    private FolderObject entry;
+    private final FolderObject entry;
     private boolean inserted;
     private FolderTestManager manager;
 
@@ -71,6 +71,7 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
         if( inserted ){
             entry.setLastModified(new Date(Long.MAX_VALUE));
@@ -79,6 +80,7 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         }
     }
 
+    @Override
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
         this.manager = new FolderTestManager(myClient);
@@ -90,6 +92,7 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         checkError(insertResponse);
     }
 
+    @Override
     public void assumeIdentity(FolderObject folder) {
         folder.setObjectID( entry.getObjectID() );
         folder.setParentFolderID( entry.getParentFolderID());
@@ -97,14 +100,17 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         folder.setPermissions(entry.getPermissions());
     }
 
+    @Override
     public void rememberIdentityValues(FolderObject folder) {
         folder.setLastModified( entry.getLastModified());
     }
 
+    @Override
     public void forgetIdentity(FolderObject myEntry) {
         inserted = false;
     }
 
+    @Override
     public Class<FolderObject> getType() {
         return FolderObject.class;
     }

@@ -25,37 +25,37 @@ import org.xmpp.packet.IQ;
 /**
  * An {@link AbstractComponent} implementation that features debug
  * functionality, intended to be used by unit tests.
- * 
+ *
  * This component will respond to IQ-get requests containing a child element
  * escaped by the namespace <tt>tinder:debug</tt>. If the child element name is
  * <tt>threadname</tt>, a response will be generated that reports the name of
  * the thread used to process the stanza, as shown:
- * 
+ *
  * <pre>
  * &lt;iq type='get' id='debug_1'&gt;
  *   &lt;threadname xmlns='tinder:debug'/&gt;
  * &lt;/iq&gt;
  * </pre>
- * 
+ *
  * <pre>
  * &lt;iq type='result' id='debug_1'&gt;
  *   &lt;threadname xmlns='tinder:debug'&gt;consumer-thread-34&lt;/threadname&gt;
  * &lt;/iq&gt;
  * </pre>
- * 
+ *
  * If the element name is <tt>slowresponse</tt>, an empty response will be
  * generated 4000 milliseconds after the request was delivered to the component.
- * 
+ *
  * <pre>
  * &lt;iq type='get' id='debug_2'&gt;
  *   &lt;slowresponse xmlns='tinder:debug'/&gt;
  * &lt;/iq&gt;
  * </pre>
- * 
+ *
  * <pre>
  * &lt;iq type='result' id='debug_2'/&gt;
  * </pre>
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
 public class SlowRespondingThreadNameComponent extends DummyAbstractComponent {

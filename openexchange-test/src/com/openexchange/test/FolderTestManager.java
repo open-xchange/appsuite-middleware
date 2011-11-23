@@ -95,7 +95,7 @@ public class FolderTestManager implements TestManager{
 
     private List<FolderObject> createdItems;
 
-    private AJAXClient client;
+    private final AJAXClient client;
 
     private boolean failOnError = true;
 
@@ -103,10 +103,12 @@ public class FolderTestManager implements TestManager{
 
     private Throwable lastException;
 
+    @Override
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
+    @Override
     public boolean getFailOnError() {
         return failOnError;
     }
@@ -123,6 +125,7 @@ public class FolderTestManager implements TestManager{
         this.lastResponse = lastResponse;
     }
 
+    @Override
     public AbstractAJAXResponse getLastResponse() {
         return lastResponse;
     }
@@ -293,6 +296,7 @@ public class FolderTestManager implements TestManager{
     /**
      * removes all folders inserted or updated by this Manager
      */
+    @Override
     public void cleanUp() {
         Vector<FolderObject> deleteMe = new Vector<FolderObject>(createdItems);
         try {
@@ -538,14 +542,17 @@ public class FolderTestManager implements TestManager{
         return folder;
     }
 
+    @Override
     public boolean doesFailOnError() {
         return getFailOnError();
     }
 
+    @Override
     public Throwable getLastException() {
         return this.lastException;
     }
 
+    @Override
     public boolean hasLastException() {
         return this.lastException != null;
     }

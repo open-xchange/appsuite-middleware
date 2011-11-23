@@ -141,7 +141,7 @@ public enum FacebookMessagingExceptionCodes implements OXExceptionCode {
      * Missing facebook configuration parameter "%1$s". Please re-create facebook account.
      */
     MISSING_CONFIG_PARAM(FacebookMessagingExceptionMessages.MISSING_CONFIG_PARAM_MSG, CATEGORY_ERROR, 18),
-    
+
     ;
 
 

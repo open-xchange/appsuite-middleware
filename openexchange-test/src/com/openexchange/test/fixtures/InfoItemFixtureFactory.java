@@ -59,19 +59,20 @@ import com.openexchange.test.fixtures.transformators.UserIdTransformator;
  */
 public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
 
-	private FixtureLoader fixtureLoader;
+	private final FixtureLoader fixtureLoader;
 
 	public InfoItemFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<InfoItem> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<InfoItem> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new InfoItemFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class InfoItemFixtures extends DefaultFixtures<InfoItem> implements Fixtures<InfoItem> {
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<InfoItem>> knownInfoitems = new HashMap<String, Fixture<InfoItem>>();
 
         public InfoItemFixtures(final String fixtureName, final Map<String, Map<String, String>> values, FixtureLoader fixtureLoader) {
@@ -81,6 +82,7 @@ public class InfoItemFixtureFactory implements FixtureFactory<InfoItem> {
             super.addTransformator(new UserIdTransformator(fixtureLoader), "created_by");
         }
 
+        @Override
         public Fixture<InfoItem> getEntry(final String entryName) throws OXException {
             if (knownInfoitems.containsKey(entryName)) {
                 return knownInfoitems.get(entryName);

@@ -60,7 +60,7 @@ import com.openexchange.tools.net.URIDefaults;
 
 /**
  * {@link Guess}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Guess extends AbstractConfigSource {
@@ -112,10 +112,10 @@ public class Guess extends AbstractConfigSource {
         }
         return false;
     }
-    
+
     private String guessLogin(URIDefaults protocol, String host, boolean secure, String emailLocalPart, String emailDomain, String password) {
         List<String> logins = Arrays.asList(emailLocalPart, emailLocalPart+"@"+emailDomain);
-        
+
         for (String login : logins) {
             if (protocol == URIDefaults.IMAP) {
                 if (MailValidator.validateImap(host, secure ? protocol.getSSLPort() : protocol.getPort() , login, password))

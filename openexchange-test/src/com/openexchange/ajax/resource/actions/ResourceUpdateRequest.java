@@ -72,7 +72,7 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 
 	private final long clientLastModified;
 
-    private Resource resource;
+    private final Resource resource;
 
 	/**
 	 * Initializes a new {@link ResourceUpdateRequest}
@@ -102,7 +102,8 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return resourceJSON;
 	}
 
@@ -111,7 +112,8 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
@@ -120,7 +122,8 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 	    return new Params(
 	        AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE,
 	        AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(clientLastModified),
@@ -133,7 +136,8 @@ public final class ResourceUpdateRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public ResourceUpdateParser getParser() {
+	@Override
+    public ResourceUpdateParser getParser() {
 		return new ResourceUpdateParser(failOnError);
 	}
 

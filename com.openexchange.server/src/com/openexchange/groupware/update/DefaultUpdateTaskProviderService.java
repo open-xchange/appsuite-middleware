@@ -57,7 +57,7 @@ import java.util.List;
 
 /**
  * {@link DefaultUpdateTaskProviderService} - The default {@link UpdateTaskProviderService} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DefaultUpdateTaskProviderService implements UpdateTaskProviderService {
@@ -66,7 +66,7 @@ public class DefaultUpdateTaskProviderService implements UpdateTaskProviderServi
 
     /**
      * Initializes a new {@link DefaultUpdateTaskProviderService}.
-     * 
+     *
      * @param tasks The update tasks of this provider service
      */
     public DefaultUpdateTaskProviderService(final UpdateTaskV2... tasks) {

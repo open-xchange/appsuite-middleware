@@ -78,14 +78,17 @@ public class GetSubscriptionRequest extends AbstractSubscriptionRequest<GetSubsc
         setId(id);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
@@ -93,6 +96,7 @@ public class GetSubscriptionRequest extends AbstractSubscriptionRequest<GetSubsc
         };
     }
 
+    @Override
     public AbstractAJAXParser<? extends GetSubscriptionResponse> getParser() {
         return new AbstractAJAXParser<GetSubscriptionResponse>(getFailOnError()) {
 

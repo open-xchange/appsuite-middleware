@@ -60,8 +60,8 @@ import java.util.EnumSet;
  */
 public class EAVSelectiveFilter implements EAVNodeFilter {
 
-    private EnumSet<EAVType> types;
-    private EAVNodeFilter delegate;
+    private final EnumSet<EAVType> types;
+    private final EAVNodeFilter delegate;
 
 
 

@@ -77,6 +77,7 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         this.contact = contact;
     }
 
+    @Override
     public RequestEntity getEntity() throws OXException, IOException {
         final Document doc = RequestTools.createPropertyUpdate(createProp());
         final XMLOutputter xo = new XMLOutputter();
@@ -100,10 +101,12 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
         return eProp;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public InsertParser getParser() {
        return new InsertParser();
     }

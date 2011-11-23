@@ -101,7 +101,7 @@ public class IncrementalObject2IntMap {
 		List l = new ArrayList();
 		l.addAll( m.keySet() );
 		Collections.sort( l, new KeyComparator() );
-		return (Object[])l.toArray( new Object[0] );
+		return l.toArray( new Object[0] );
 	}
 
 	/** Gets the map keys.
@@ -145,7 +145,8 @@ public class IncrementalObject2IntMap {
 		 * @param o2 second {@link Object}.
 		 * @return the result of the comparison.
 		 */
-		public int compare( Object o1, Object o2 ) {
+		@Override
+        public int compare( Object o1, Object o2 ) {
 			if ( IncrementalObject2IntMap.this.m.getInt( o2 ) < IncrementalObject2IntMap.this.m.getInt( o1 ) ) return -1;
 			else if ( IncrementalObject2IntMap.this.m.getInt( o2 ) > IncrementalObject2IntMap.this.m.getInt( o1 ) ) return 1;
 			else return 0;

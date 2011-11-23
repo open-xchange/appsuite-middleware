@@ -53,6 +53,7 @@ import com.openexchange.exception.OXException;
  * @author Martin Braun <martin.braun@open-xchange.com>
  */
 public class FloatTransformator implements Transformator{
+    @Override
     public Object transform(final String value) throws OXException {
         if(value == null) {
             return 0;

@@ -58,7 +58,7 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link DocumentConverterActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DocumentConverterActivator extends HousekeepingActivator {

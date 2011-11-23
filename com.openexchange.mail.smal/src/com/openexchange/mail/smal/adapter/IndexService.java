@@ -59,7 +59,7 @@ public interface IndexService {
 
     /**
      * Gets the associated index adapter.
-     * 
+     *
      * @return The index adapter
      */
     IndexAdapter getAdapter();

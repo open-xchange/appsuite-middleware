@@ -166,6 +166,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
@@ -173,6 +174,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -180,6 +182,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>(8);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "all"));
@@ -200,6 +203,7 @@ public class AllRequest extends AbstractUserRequest<AllResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public AllParser getParser() {
         return new AllParser(true);
     }

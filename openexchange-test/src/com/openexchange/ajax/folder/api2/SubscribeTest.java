@@ -76,7 +76,7 @@ public class SubscribeTest extends AbstractAJAXSession {
 
     /**
      * Initializes a new {@link SubscribeTest}.
-     * 
+     *
      * @param name The name
      */
     public SubscribeTest(final String name) {

@@ -60,7 +60,7 @@ import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServer
 
 /**
  * {@link SolrUtils} - Utility methods for Solr.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SolrUtils {
@@ -76,7 +76,7 @@ public final class SolrUtils {
 
     /**
      * Performs a commit on specified Solr server.
-     * 
+     *
      * @param solrServer The Solr server
      * @throws SolrServerException If an index error occurs
      * @throws IOException If an I/O error occurs
@@ -95,7 +95,7 @@ public final class SolrUtils {
 
     /**
      * Performs a commit on specified Solr server.
-     * 
+     *
      * @param solrServer The Solr server
      * @throws SolrServerException If an index error occurs
      * @throws IOException If an I/O error occurs
@@ -110,7 +110,7 @@ public final class SolrUtils {
      * <p>
      * Set <tt>noTimeout</tt> to temporarily disable possible default socket timeout (if any <tt>SO_TIMEOUT</tt> set) and to restore it
      * afterwards.
-     * 
+     *
      * @param solrServer The Solr server
      * @param noTimeout <code>true</code> for no timeout; otherwise <code>false</code>
      * @throws SolrServerException If an index error occurs
@@ -129,7 +129,7 @@ public final class SolrUtils {
 
     /**
      * Performs a safe roll-back for specified Solr server.
-     * 
+     *
      * @param solrServer The Solr server
      */
     public static void rollback(final CommonsHttpSolrServer solrServer) {
@@ -156,7 +156,7 @@ public final class SolrUtils {
 
     /**
      * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
-     * 
+     *
      * @param t The <tt>Throwable</tt> to check
      */
     public static void handleThrowable(final Throwable t) {

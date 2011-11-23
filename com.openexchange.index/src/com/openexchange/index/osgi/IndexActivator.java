@@ -57,12 +57,12 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link IndexActivator} - The activator of the index bundle.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class IndexActivator extends HousekeepingActivator {
-    
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IndexActivator.class));
 
     @Override
@@ -76,12 +76,12 @@ public class IndexActivator extends HousekeepingActivator {
         // Only for testing purpose...
         // registerService(ConfigIndexService.class, new ConfigIndexServiceImpl(getService(DatabaseService.class)));
         registerService(ConfigIndexService.class, new StaticConfigIndexService());
-        
+
         /*
-         * Register UpdateTask and DeleteListener. Uncomment for production.        
+         * Register UpdateTask and DeleteListener. Uncomment for production.
          */
 //        registerService(UpdateTaskProviderService.class, new IndexUpdateTaskProviderService(new IndexCreateTablesTask()));
 //        registerService(DeleteListener.class, new IndexDeleteListener());
     }
-    
+
 }

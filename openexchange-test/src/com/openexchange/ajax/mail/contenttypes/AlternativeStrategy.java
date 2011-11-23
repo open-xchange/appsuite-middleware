@@ -60,6 +60,7 @@ import com.openexchange.ajax.mail.TestMail;
  */
 public class AlternativeStrategy implements MailTypeStrategy {
 
+    @Override
     public void sanitize(TestMail mail) throws JSONException {
         if (mail.getBody() == null && mail.getAttachment() != null) {
             String text = mail.getAttachment().get(0).getString("content");
@@ -74,6 +75,7 @@ public class AlternativeStrategy implements MailTypeStrategy {
         }
     }
 
+    @Override
     public boolean isResponsibleFor(TestMail mail) {
         return MailContentType.ALTERNATIVE.toString().equalsIgnoreCase(mail.getContentType());
     }

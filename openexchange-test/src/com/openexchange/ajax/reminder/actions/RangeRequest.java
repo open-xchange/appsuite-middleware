@@ -76,6 +76,7 @@ public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
@@ -83,6 +84,7 @@ public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -90,6 +92,7 @@ public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
@@ -102,6 +105,7 @@ public class RangeRequest extends AbstractReminderRequest<RangeResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public RangeParser getParser() {
         return new RangeParser();
     }

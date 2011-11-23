@@ -89,7 +89,7 @@ public interface Session {
 
     /**
      * The parameter for client capabilities.
-     * 
+     *
      * @type <code>java.util.List&lt;String&gt;</code>
      */
     public static final String PARAM_CAPABILITIES = "session.clientCapabilities";

@@ -79,16 +79,20 @@ public class AdHocCommandDiscoTest extends SmackTestCase {
             manager1.registerCommand("test", "test node", LocalCommand.class);
 
             manager1.registerCommand("test2", "test node", new LocalCommandFactory() {
+                @Override
                 public LocalCommand getInstance() throws InstantiationException, IllegalAccessException {
                     return new LocalCommand() {
+                        @Override
                         public boolean isLastStage() {
                             return true;
                         }
 
+                        @Override
                         public boolean hasPermission(String jid) {
                             return true;
                         }
 
+                        @Override
                         public void execute() throws XMPPException {
                             Form result = new Form(Form.TYPE_RESULT);
                             FormField resultField = new FormField("test2");
@@ -98,25 +102,29 @@ public class AdHocCommandDiscoTest extends SmackTestCase {
                             setForm(result);
                         }
 
+                        @Override
                         public void next(Form response) throws XMPPException {
                             //
                         }
 
+                        @Override
                         public void complete(Form response) throws XMPPException {
                             //
                         }
 
+                        @Override
                         public void prev() throws XMPPException {
                             //
                         }
 
+                        @Override
                         public void cancel() throws XMPPException {
                             //
                         }
                     };
                 }
             });
-            
+
             AdHocCommandManager manager2 = AdHocCommandManager.getAddHocCommandsManager(getConnection(1));
             DiscoverItems items = manager2.discoverCommands(getFullJID(0));
 
@@ -131,15 +139,18 @@ public class AdHocCommandDiscoTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
     }
 
+    @Override
     protected void tearDown() throws Exception {
         super.tearDown();
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

@@ -70,7 +70,7 @@ import com.openexchange.server.ServiceExceptionCode;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DBChatChunk implements ChatChunk {
-    
+
     private final int chunkId;
     private final int chatId;
     private final int contextId;
@@ -81,8 +81,8 @@ public class DBChatChunk implements ChatChunk {
 
     /**
      * Initializes a new {@link DBChatChunk}.
-     * @param con 
-     * @throws OXException 
+     * @param con
+     * @throws OXException
      */
     public DBChatChunk(final int chunkId, final int chatId, final int contextId, final Connection con) throws OXException {
         super();
@@ -110,7 +110,7 @@ public class DBChatChunk implements ChatChunk {
     public String getChatId() {
         return sChatId;
     }
-    
+
     public String getContextId() {
         return sContextId;
     }

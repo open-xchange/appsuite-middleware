@@ -32,6 +32,7 @@ import org.apache.tika.parser.chm.core.ChmConstants;
 public class TestChmLzxcResetTable extends TestCase {
     private ChmLzxcResetTable chmLzxcResetTable = null;
 
+    @Override
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
         /* Creates and parses itsf header */
@@ -141,6 +142,7 @@ public class TestChmLzxcResetTable extends TestCase {
 
     // TODO: add setters to be tested
 
+    @Override
     public void tearDown() throws Exception {
     }
 

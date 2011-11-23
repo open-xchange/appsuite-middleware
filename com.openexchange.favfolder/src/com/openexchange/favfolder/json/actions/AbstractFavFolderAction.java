@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractFavFolderAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractFavFolderAction implements AJAXActionService {
@@ -86,7 +86,7 @@ public abstract class AbstractFavFolderAction implements AJAXActionService {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> is absent
      */
@@ -96,7 +96,7 @@ public abstract class AbstractFavFolderAction implements AJAXActionService {
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.
-     * 
+     *
      * @return The result with JSON <code>NULL</code>.
      */
     protected static AJAXRequestResult getJSONNullResult() {
@@ -105,7 +105,7 @@ public abstract class AbstractFavFolderAction implements AJAXActionService {
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param string The string to check
      * @return <code>true</code> if empty; otherwise <code>false</code>
      */
@@ -133,7 +133,7 @@ public abstract class AbstractFavFolderAction implements AJAXActionService {
 
     /**
      * Performs specified AJAX request.
-     * 
+     *
      * @param request The AJAX request
      * @return The result
      * @throws OXException If an error occurs

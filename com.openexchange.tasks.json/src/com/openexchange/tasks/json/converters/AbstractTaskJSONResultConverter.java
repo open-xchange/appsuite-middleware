@@ -66,7 +66,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public abstract class AbstractTaskJSONResultConverter implements ResultConverter {
-    
+
     protected static final String OUTPUT_FORMAT = "json";
 
     @Override

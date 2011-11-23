@@ -57,7 +57,8 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class PriorityTransformator implements Transformator {
 
-	public Object transform(final String value) throws OXException {
+	@Override
+    public Object transform(final String value) throws OXException {
         if("low".equalsIgnoreCase(value)) {
             return Task.LOW;
         } else if ("normal".equalsIgnoreCase(value)) {

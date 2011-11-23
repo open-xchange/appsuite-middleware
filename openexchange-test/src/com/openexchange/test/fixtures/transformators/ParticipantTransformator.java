@@ -78,7 +78,8 @@ public class ParticipantTransformator implements Transformator {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Object transform(final String value) throws OXException {
+	@Override
+    public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { return null; }
 		String fixtureName = "users";
 		String fixtureEntry = "";

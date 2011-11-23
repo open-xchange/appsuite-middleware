@@ -50,13 +50,14 @@ public class RTFParserTest extends TikaTest {
         }
     }
 
+    @Override
     public void setUp() throws Exception {
         parser = new RTFParser();
     }
 
     public void testBasicExtraction() throws Exception {
         File file = getResourceAsFile("/test-documents/testRTF.rtf");
-        
+
         Metadata metadata = new Metadata();
         StringWriter writer = new StringWriter();
         parser.parse(
@@ -108,7 +109,7 @@ public class RTFParserTest extends TikaTest {
         assertTrue(content.contains("a b c d \u00E4 \u00EB \u00F6 \u00FC"));
         assertContains("a b c d \u00E4 \u00EB \u00F6 \u00FC", content);
     }
-    
+
     public void testTableCellSeparation2() throws Exception {
         String content = getText("testRTFTableCellSeparation2.rtf");
         // TODO: why do we insert extra whitespace...?
@@ -167,7 +168,7 @@ public class RTFParserTest extends TikaTest {
     	String content = getText("testRTFUnicodeGothic.rtf");
     	assertContains("\uD800\uDF32\uD800\uDF3f\uD800\uDF44\uD800\uDF39\uD800\uDF43\uD800\uDF3A", content);
     }
-    
+
     public void testJapaneseText() throws Exception {
         Result r = getResult("testRTFJapanese.rtf");
         String content = r.text;
@@ -180,10 +181,10 @@ public class RTFParserTest extends TikaTest {
         assertEquals("StarWriter", r.metadata.get(Metadata.COMMENT));
         assertContains("1.", content);
         assertContains("4.", content);
-       
+
         // Special version of (GHQ)
         assertContains("\uff08\uff27\uff28\uff31\uff09", content);
-       
+
         // 6 other characters
         assertContains("\u6771\u4eac\u90fd\u4e09\u9df9\u5e02", content);
     }
@@ -290,7 +291,7 @@ public class RTFParserTest extends TikaTest {
 
     private Result getResult(String filename) throws Exception {
         File file = getResourceAsFile("/test-documents/" + filename);
-       
+
         Metadata metadata = new Metadata();
         StringWriter writer = new StringWriter();
         parser.parse(
@@ -314,7 +315,7 @@ public class RTFParserTest extends TikaTest {
 
     private XMLResult getXML(String filename) throws Exception {
         Metadata metadata = new Metadata();
-        
+
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
                  SAXTransformerFactory.newInstance();

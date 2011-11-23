@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
 public class SubscriptionSourcesActionFactory implements
 		AJAXActionServiceFactory {
 
-	private Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
+	private final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
 
 	public SubscriptionSourcesActionFactory(ServiceLookup services){
 		//someone decided to describe this one way and implement it another ... This works for both

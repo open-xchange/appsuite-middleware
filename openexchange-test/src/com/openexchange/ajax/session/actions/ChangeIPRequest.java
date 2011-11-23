@@ -70,6 +70,7 @@ public class ChangeIPRequest extends AbstractRequest<ChangeIPResponse> {
         this.failOnError = failOnError;
     }
 
+    @Override
     public ChangeIPParser getParser() {
         return new ChangeIPParser(failOnError);
     }

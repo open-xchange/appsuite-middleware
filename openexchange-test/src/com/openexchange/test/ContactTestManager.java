@@ -114,10 +114,12 @@ public class ContactTestManager implements TestManager {
 
     private int sleep = 500;
 
+    @Override
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
+    @Override
     public boolean getFailOnError() {
         return failOnError;
     }
@@ -313,6 +315,7 @@ public class ContactTestManager implements TestManager {
     /**
      * removes all contacts inserted or updated by this Manager
      */
+    @Override
     public void cleanUp() {
         for (Contact contact : new Vector<Contact>(getCreatedEntities())) {
             boolean old = getFailOnError();
@@ -566,18 +569,22 @@ public class ContactTestManager implements TestManager {
         return contacts;
     }
 
+    @Override
     public boolean doesFailOnError() {
         return getFailOnError();
     }
 
+    @Override
     public Throwable getLastException() {
         return this.lastException;
     }
 
+    @Override
     public AbstractAJAXResponse getLastResponse() {
         return this.lastResponse;
     }
 
+    @Override
     public boolean hasLastException() {
         return lastException != null;
     }

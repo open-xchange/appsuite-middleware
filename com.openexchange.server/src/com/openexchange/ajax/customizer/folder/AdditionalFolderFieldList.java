@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.customizer.folder;
 
-import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.HashMap;
 import java.util.List;
@@ -169,22 +168,27 @@ public class AdditionalFolderFieldList {
             this.columnId = columnId;
         }
 
+        @Override
         public int getColumnID() {
             return columnId;
         }
 
+        @Override
         public String getColumnName() {
             return null;
         }
 
+        @Override
         public Object getValue(final FolderObject folder, final ServerSession session) {
             return null;
         }
 
+        @Override
         public Object renderJSON(final Object value) {
             return null;
         }
 
+        @Override
         public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
             return AdditionalFieldsUtils.bulk(this, folder, session);
         }

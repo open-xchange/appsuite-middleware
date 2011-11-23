@@ -64,7 +64,7 @@ import com.openexchange.tools.encoding.Base64;
 
 /**
  * {@link HashCalculator}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class HashCalculator {

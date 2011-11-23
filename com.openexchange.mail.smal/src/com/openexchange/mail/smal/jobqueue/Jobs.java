@@ -55,7 +55,7 @@ import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link Jobs} - Utility class for {@link Job}s.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Jobs {
@@ -69,7 +69,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with a unique identifier and {@link Job#DEFAULT_RANKING default ranking}.
-     * 
+     *
      * @param task The task to perform as a job
      * @return A new {@link Job job} for specified task
      */
@@ -79,7 +79,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with given identifier and {@link Job#DEFAULT_RANKING default ranking}.
-     * 
+     *
      * @param task The task to perform as a job
      * @param identifier The identifier
      * @return A new {@link Job job} for specified task
@@ -90,7 +90,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with a unique identifier and given ranking.
-     * 
+     *
      * @param task The task to perform as a job
      * @param ranking The ranking
      * @return A new {@link Job job} for specified task
@@ -102,7 +102,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with given identifier and ranking.
-     * 
+     *
      * @param task The task to perform as a job
      * @param identifier The identifier
      * @param ranking The ranking
@@ -114,7 +114,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with a unique identifier and {@link Job#DEFAULT_RANKING default ranking}.
-     * 
+     *
      * @param task The task to perform as a job
      * @return A new {@link Job job} for specified task
      */
@@ -124,7 +124,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with given identifier and {@link Job#DEFAULT_RANKING default ranking}.
-     * 
+     *
      * @param task The task to perform as a job
      * @param identifier The identifier
      * @return A new {@link Job job} for specified task
@@ -135,7 +135,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with a unique identifier and given ranking.
-     * 
+     *
      * @param task The task to perform as a job
      * @param ranking The ranking
      * @return A new {@link Job job} for specified task
@@ -147,7 +147,7 @@ public final class Jobs {
 
     /**
      * Generates a new {@link Job job} for specified task with given identifier and ranking.
-     * 
+     *
      * @param task The task to perform as a job
      * @param identifier The identifier
      * @param ranking The ranking

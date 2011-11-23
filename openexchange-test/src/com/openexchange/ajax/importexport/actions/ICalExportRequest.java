@@ -61,6 +61,7 @@ public final class ICalExportRequest extends AbstractExportRequest<ICalExportRes
         super(Action.ICal, folderId);
     }
 
+    @Override
     public ICalExportParser getParser() {
         return new ICalExportParser(true);
     }

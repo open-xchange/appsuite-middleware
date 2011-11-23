@@ -65,9 +65,9 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactFolderContactSource implements ContactSource {
 
-    private FolderObject folder;
-    private ContactSQLInterface contacts;
-    private Type type;
+    private final FolderObject folder;
+    private final ContactSQLInterface contacts;
+    private final Type type;
 
     public ContactFolderContactSource(FolderObject folder, ContactSQLInterface contacts, Type type) {
         this.folder = folder;

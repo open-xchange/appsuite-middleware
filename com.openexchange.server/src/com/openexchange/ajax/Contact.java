@@ -329,7 +329,7 @@ public class Contact extends DataServlet {
 
                     final int folderId = contactobject.getParentFolderID();
                     final ContactInterface targetContactInterface = discoveryService.newContactInterface(folderId, session);
-                    
+
                     boolean doUpdate = true;
                     {
                         final ContactInterface srcContactIface = discoveryService.newContactInterface(inFolder, session);
@@ -347,7 +347,7 @@ public class Contact extends DataServlet {
                                     timestamp);
                         }
                     }
-                    
+
                     if (doUpdate) {
                         //final ContactSQLInterface contactsql = new RdbContactSQLInterface(session);
                         targetContactInterface.updateContactObject(contactobject, inFolder, timestamp);

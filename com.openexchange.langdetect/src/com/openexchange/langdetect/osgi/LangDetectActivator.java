@@ -66,7 +66,7 @@ import com.openexchange.langdetect.internal.Lc4jLanguageDetectionService;
 
 /**
  * {@link LangDetectActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class LangDetectActivator implements BundleActivator {

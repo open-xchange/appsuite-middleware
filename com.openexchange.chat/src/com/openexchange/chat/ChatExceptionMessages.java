@@ -64,7 +64,7 @@ public final class ChatExceptionMessages implements LocalizableStrings {
 
     // An I/O error occurred: %1$s
     public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
-    
+
     // Method is not supported.
     public static final String UNSUPPORTED_OPERATION_MSG = "Method is not supported.";
 

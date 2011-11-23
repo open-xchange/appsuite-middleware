@@ -63,6 +63,7 @@ public class MockServiceRegistry implements ServicePublisher {
     private final Map<Class, List> removed = new HashMap<Class, List>();
 
 
+    @Override
     public void publishService(final Class clazz,final Object service) {
         if(!clazz.isAssignableFrom(service.getClass())) {
             throw new IllegalArgumentException("The service is not a "+clazz);
@@ -71,11 +72,13 @@ public class MockServiceRegistry implements ServicePublisher {
         getAdded(clazz).add(service);
     }
 
+    @Override
     public void removeService(final Class clazz, final Object service) {
         getAllServices(clazz).remove(service);
         getRemoved(clazz).add(service);
     }
 
+    @Override
     public void removeAllServices() {
         for(final Class clazz : services.keySet()) {
             final List serviceList = services.get(clazz);

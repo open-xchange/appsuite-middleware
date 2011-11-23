@@ -83,7 +83,7 @@ import com.openexchange.tools.tnef.TNEF2ICal;
 
 /**
  * {@link TextFinder} - Looks-up the primary text content of a message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TextFinder {
@@ -201,7 +201,7 @@ public final class TextFinder {
 
     /**
      * Handles specified TNEF stream.
-     * 
+     *
      * @param inputStream The TNEF stream
      * @return The extracted plain text
      * @throws OXException If an OX error occurs

@@ -67,7 +67,7 @@ public class I18nImpl implements I18nService {
 
     /**
      * Initializes a new {@link I18nImpl}.
-     * 
+     *
      * @param bundle The resource bundle
      */
     public I18nImpl(final ResourceBundle bundle) {

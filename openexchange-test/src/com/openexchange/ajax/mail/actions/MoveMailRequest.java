@@ -76,20 +76,23 @@ public class MoveMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         this(origin, destination, mailID, true);
     }
 
-    private String destination, origin, mailID;
+    private final String destination, origin, mailID;
 
-    private boolean failOnError;
+    private final boolean failOnError;
 
+    @Override
     public Object getBody() throws JSONException {
         JSONObject json = new JSONObject();
         json.put("folder_id", destination);
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<Parameter>();
 
@@ -103,6 +106,7 @@ public class MoveMailRequest extends AbstractMailRequest<UpdateMailResponse> {
         return list.toArray(new Parameter[list.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<? extends UpdateMailResponse> getParser() {
         return new AbstractAJAXParser<UpdateMailResponse>(failOnError) {
 

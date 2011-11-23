@@ -63,7 +63,7 @@ public interface FolderI18nNamesService {
      * Gets the localized folder names for specified folder modules.
      * <p>
      * If no module is specified, the localized names of all modules are returned.
-     * 
+     *
      * @param modules The optional modules
      * @return The localized folder names
      * @throws OXException If name look-up fails

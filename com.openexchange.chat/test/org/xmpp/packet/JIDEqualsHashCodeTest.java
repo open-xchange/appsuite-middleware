@@ -21,7 +21,7 @@ import junitx.extensions.EqualsHashCodeTestCase;
 /**
  * Tests functional compliance of {@link JID} with the equals and hashCode
  * contract.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
 public class JIDEqualsHashCodeTest extends EqualsHashCodeTestCase {

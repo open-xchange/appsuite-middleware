@@ -63,9 +63,9 @@ import com.openexchange.groupware.update.UpdateTaskV2;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexUpdateTaskProviderService implements UpdateTaskProviderService {
-    
+
     private List<UpdateTaskV2> updateTasks;
-    
+
     public IndexUpdateTaskProviderService(UpdateTaskV2... updateTasks) {
         super();
         if (updateTasks == null || updateTasks.length == 0) {

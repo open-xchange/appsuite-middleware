@@ -60,11 +60,13 @@ import com.openexchange.ajax.mail.TestMail;
  */
 public class PlainTextStrategy implements MailTypeStrategy {
 
+    @Override
     public boolean isResponsibleFor(TestMail mail) throws JSONException {
         return MailContentType.PLAIN.toString().equalsIgnoreCase(mail.getContentType());
 
     }
 
+    @Override
     public void sanitize(TestMail mail) throws JSONException {
         if(mail.getBody() != null){
             mail.setBody( mail.getBody().trim() );

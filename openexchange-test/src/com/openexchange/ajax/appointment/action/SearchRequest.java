@@ -119,18 +119,22 @@ public class SearchRequest extends AbstractAppointmentRequest<SearchResponse> {
         }
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public SearchParser getParser() {
         return searchParser;
     }
 
+    @Override
     public Object getBody() {
         return body;
     }

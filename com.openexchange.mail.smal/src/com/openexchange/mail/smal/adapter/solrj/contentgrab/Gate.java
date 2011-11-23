@@ -57,7 +57,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * {@link Gate} - A thread gate in either unbounded or bounded manner.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Gate {
@@ -139,7 +139,7 @@ public final class Gate {
 
     /**
      * Initializes a new closed {@link Gate}.
-     * 
+     *
      * @param maxParallelPasses A positive integer to restrict max. number of concurrent passers; otherwise zero or a negative integer for
      *            infinite passers
      */
@@ -156,7 +156,7 @@ public final class Gate {
      * <p>
      * It is recommended practice to <em>always</em> immediately follow a call to {@code pass} with a {@code try} block, most typically in a
      * before/after construction such as:
-     * 
+     *
      * <pre>
      *  public void m() {
      *      Gate gate = ...;
@@ -168,7 +168,7 @@ public final class Gate {
      *      }
      *  }
      * </pre>
-     * 
+     *
      * @throws InterruptedException If calling thread is interrupted while awaiting to pass this gate
      */
     public void pass() throws InterruptedException {
@@ -189,7 +189,7 @@ public final class Gate {
      * <p>
      * It is recommended practice to <em>always</em> immediately follow a call to {@code tryPass} with a {@code try} block, most typically
      * in a before/after construction such as:
-     * 
+     *
      * <pre>
      * public void m() {
      *  Gate gate = ...;
@@ -202,7 +202,7 @@ public final class Gate {
      *  }
      * }
      * </pre>
-     * 
+     *
      * @return <code>true</code> if calling thread can immediately pass the gate; otherwise <code>false</code>.
      */
     public boolean tryPass() {
@@ -222,7 +222,7 @@ public final class Gate {
     /**
      * Closes this gate. Threads which already passed the gate are allowed to terminate. Newly arriving threads are prevented from passing
      * this gate.
-     * 
+     *
      * @return <code>true</code> if caller closed the gate; otherwise <code>false</code> if already closed
      */
     public boolean close() {
@@ -239,7 +239,7 @@ public final class Gate {
 
     /**
      * Opens this gate. Possibly waiting threads are notified to pass this gate.
-     * 
+     *
      * @return <code>true</code> if caller opened the gate; otherwise <code>false</code> if already open
      */
     public boolean open() {

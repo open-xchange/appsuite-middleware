@@ -74,6 +74,7 @@ public class InvalidationListenerServiceTracker implements ServiceTrackerCustomi
         this.context = context;
     }
 
+    @Override
     public OAuthAccountInvalidationListener addingService(final ServiceReference<OAuthAccountInvalidationListener> reference) {
         final OAuthAccountInvalidationListener addedService = context.getService(reference);
         if (InvalidationListenerRegistry.getInstance().addInvalidationListener( addedService)) {
@@ -86,10 +87,12 @@ public class InvalidationListenerServiceTracker implements ServiceTrackerCustomi
         return null;
     }
 
+    @Override
     public void modifiedService(final ServiceReference<OAuthAccountInvalidationListener> reference, final OAuthAccountInvalidationListener service) {
         // Nothing to do
     }
 
+    @Override
     public void removedService(final ServiceReference<OAuthAccountInvalidationListener> reference, final OAuthAccountInvalidationListener service) {
         if (null != service) {
             try {

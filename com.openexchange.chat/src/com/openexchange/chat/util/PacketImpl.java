@@ -55,7 +55,7 @@ import com.openexchange.chat.Packet;
 
 /**
  * {@link PacketImpl} - The abstract {@link Packet packet} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class PacketImpl implements Packet {
@@ -90,7 +90,7 @@ public abstract class PacketImpl implements Packet {
 
     /**
      * Sets the packet identifier
-     * 
+     *
      * @param packetId The packet identifier to set
      */
     public void setPacketId(final String packetId) {
@@ -99,7 +99,7 @@ public abstract class PacketImpl implements Packet {
 
     /**
      * Sets the from
-     * 
+     *
      * @param from The from to set
      */
     public void setFrom(final ChatUser from) {
@@ -108,7 +108,7 @@ public abstract class PacketImpl implements Packet {
 
     /**
      * Sets the time stamp
-     * 
+     *
      * @param timeStamp The time stamp to set
      */
     public void setTimeStamp(final Date timeStamp) {

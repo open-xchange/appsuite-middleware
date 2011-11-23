@@ -56,7 +56,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * {@link AbstractJobCompletionService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 abstract class AbstractJobCompletionService implements JobCompletionService {

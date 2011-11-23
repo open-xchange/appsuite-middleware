@@ -81,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ContactJSONResultConverter} - The result converter for contact module.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

@@ -58,25 +58,25 @@ package com.openexchange.publish;
 public class Entity {
     private String entityType;
     private int id;
-    
+
     public Entity(String entityType, int id) {
         super();
         this.entityType = entityType;
         this.id = id;
     }
-    
+
     public String getEntityType() {
         return entityType;
     }
-    
+
     public void setEntityType(String entityType) {
         this.entityType = entityType;
     }
-    
+
     public int getId() {
         return id;
     }
-    
+
     public void setId(int id) {
         this.id = id;
     }
@@ -114,13 +114,13 @@ public class Entity {
         }
         return true;
     }
-    
+
     @Override
     public String toString() {
         return entityType+":"+id;
     }
-    
-    
-    
-    
+
+
+
+
 }

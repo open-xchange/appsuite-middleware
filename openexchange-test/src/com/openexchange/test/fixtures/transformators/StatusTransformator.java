@@ -53,6 +53,7 @@ import com.openexchange.groupware.tasks.Task;
 
 public class StatusTransformator implements Transformator {
 
+    @Override
     public Object transform(final String value) throws OXException {
         if("NOT_STARTED".equalsIgnoreCase(value)) { return Task.NOT_STARTED; }
         else if("IN_PROGRESS".equalsIgnoreCase(value) || "IN PROGRESS".equalsIgnoreCase(value)) { return Task.IN_PROGRESS; }

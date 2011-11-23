@@ -74,29 +74,35 @@ public final class ConvertRequest implements AJAXRequest {
 		this.failOnError = failOnError;
 	}
 
-	public String getServletPath() {
+	@Override
+    public String getServletPath() {
 		return "/ajax/conversion";
 	}
 
-	public Object getBody() {
+	@Override
+    public Object getBody() {
 		return jsonBody;
 	}
 
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "convert"));
 		return params.toArray(new Parameter[params.size()]);
 	}
 
-	public ConvertParser getParser() {
+	@Override
+    public ConvertParser getParser() {
 		return new ConvertParser(failOnError);
 	}
 

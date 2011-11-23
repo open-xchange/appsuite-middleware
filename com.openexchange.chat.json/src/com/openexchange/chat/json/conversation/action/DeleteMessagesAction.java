@@ -64,14 +64,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DeleteMessagesAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteMessagesAction extends AbstractChatConversationAction {
 
     /**
      * Initializes a new {@link DeleteMessagesAction}.
-     * 
+     *
      * @param services
      */
     public DeleteMessagesAction(final ServiceLookup services) {

@@ -51,7 +51,7 @@ package com.openexchange.chat;
 
 /**
  * {@link MessageDescription} - Provides changeable attributes of a {@link Message message}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MessageDescription {
@@ -64,7 +64,7 @@ public class MessageDescription {
 
     /**
      * Initializes a new {@link MessageDescription}.
-     * 
+     *
      * @param messageId The message identifier; <code>null</code> for new messages
      */
     public MessageDescription(final String messageId) {
@@ -90,7 +90,7 @@ public class MessageDescription {
 
     /**
      * Checks if this message description provides any changed attribute.
-     * 
+     *
      * @return <code>true</code> if this message description provides any changed attribute; otherwise <code>false</code>
      */
     public boolean hasAnyAttribute() {
@@ -105,7 +105,7 @@ public class MessageDescription {
 
     /**
      * Gets the message identifier (aka packet identifier).
-     * 
+     *
      * @return The message identifier
      */
     public String getMessageId() {
@@ -114,7 +114,7 @@ public class MessageDescription {
 
     /**
      * Gets the subject
-     * 
+     *
      * @return The subject
      */
     public String getSubject() {
@@ -123,7 +123,7 @@ public class MessageDescription {
 
     /**
      * Sets the subject
-     * 
+     *
      * @param subject The subject to set
      */
     public void setSubject(final String subject) {
@@ -132,7 +132,7 @@ public class MessageDescription {
 
     /**
      * Gets the text
-     * 
+     *
      * @return The text
      */
     public String getText() {
@@ -141,7 +141,7 @@ public class MessageDescription {
 
     /**
      * Sets the text
-     * 
+     *
      * @param text The text to set
      */
     public void setText(final String text) {

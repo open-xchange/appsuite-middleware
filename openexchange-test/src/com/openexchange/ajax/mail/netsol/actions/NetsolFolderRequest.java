@@ -126,7 +126,8 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return null;
 	}
 
@@ -135,7 +136,8 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.GET;
 	}
 
@@ -144,7 +146,8 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST),
 				new Parameter("parent", folderIdentifer), new Parameter("columns", columns) };
 	}
@@ -154,7 +157,8 @@ public final class NetsolFolderRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public AbstractAJAXParser<NetsolFolderResponse> getParser() {
+	@Override
+    public AbstractAJAXParser<NetsolFolderResponse> getParser() {
 		return new NetsolFolderParser(failOnError);
 	}
 

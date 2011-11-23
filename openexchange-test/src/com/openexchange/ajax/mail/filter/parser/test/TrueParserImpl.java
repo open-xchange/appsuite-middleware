@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.test.TrueTest;
  */
 public class TrueParserImpl implements TestParser {
 
-	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		if (jsonObject.has("test")) {
 			final JSONObject jsonTestObject = jsonObject.getJSONObject("test");
 			final String testname = jsonTestObject.getString("test");

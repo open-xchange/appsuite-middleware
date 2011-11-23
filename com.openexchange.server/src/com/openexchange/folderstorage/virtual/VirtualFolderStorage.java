@@ -100,7 +100,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link VirtualFolderStorage} - The virtual folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VirtualFolderStorage implements FolderStorage {
@@ -592,7 +592,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         virtualFolder.setSubfolderIDs(subfolderIds);
         virtualFolder.setSubscribedSubfolders(subfolderIds != null && subfolderIds.length > 0);
         /*-
-         * 
+         *
         Select.fillFolder(
             params.getContextId(),
             unsignedInt(treeId),
@@ -600,7 +600,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             user.getLocale(),
             virtualFolder,
             storageType);
-         * 
+         *
          */
         if (virtualFolder.isDefault()) {
             virtualFolder.setProperty(FIELD_NAME_PAIR_PREDEFINED, Boolean.TRUE);

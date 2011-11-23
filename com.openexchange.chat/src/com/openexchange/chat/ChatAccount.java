@@ -53,35 +53,35 @@ import java.util.Map;
 
 /**
  * {@link ChatAccount} - Represents a user account of a certain chat service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatAccount {
 
     /**
      * Gets this account's configuration.
-     * 
+     *
      * @return The configuration as a {@link Map}
      */
     Map<String, Object> getConfiguration();
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier
      */
     String getId();
 
     /**
      * Gets the display name.
-     * 
+     *
      * @return The display name
      */
     String getDisplayName();
 
     /**
      * Gets the associated messaging service.
-     * 
+     *
      * @return The associated messaging service
      */
     ChatService getChatService();

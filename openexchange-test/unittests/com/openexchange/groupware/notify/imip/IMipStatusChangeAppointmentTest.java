@@ -66,8 +66,8 @@ import com.openexchange.session.Session;
  */
 public class IMipStatusChangeAppointmentTest extends IMipTest {
 
-    private String external = "externalparticipant@example.com";
-    private String organizer = "123@example.invalid";
+    private final String external = "externalparticipant@example.com";
+    private final String organizer = "123@example.invalid";
 
     private Session so2;
 

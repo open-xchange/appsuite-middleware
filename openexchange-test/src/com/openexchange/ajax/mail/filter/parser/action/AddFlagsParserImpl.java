@@ -64,7 +64,8 @@ import com.openexchange.ajax.mail.filter.fields.RuleFields;
  */
 public class AddFlagsParserImpl implements ActionParser {
 
-	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
 		final JSONArray jsonArray = jsonObject.getJSONArray(RuleFields.FLAGS);
 		final String[] flags = new String[jsonArray.length()];
 		for (int a = 0; a < flags.length; a++) {

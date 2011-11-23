@@ -72,7 +72,7 @@ import com.openexchange.server.ServiceLookup;
  */
 public class AppStoreActionFactory implements AJAXActionServiceFactory {
 
-    private Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
+    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
 
     public AppStoreActionFactory(ServiceLookup services) {
         super();

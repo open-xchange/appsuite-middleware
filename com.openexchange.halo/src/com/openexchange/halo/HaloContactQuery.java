@@ -9,19 +9,19 @@ public class HaloContactQuery {
 	private Contact contact;
 	private User user;
 	private List<Contact> merged;
-	
+
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
+
 	public User getUser() {
 		return user;
 	}
-	
+
 	public void setContact(Contact contact) {
 		this.contact = contact;
 	}
-	
+
 	public Contact getContact() {
 		return contact;
 	}

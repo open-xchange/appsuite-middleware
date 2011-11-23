@@ -63,7 +63,8 @@ import com.openexchange.ajax.mail.filter.action.Vacation;
  */
 public class VacationParserImpl implements ActionParser {
 
-	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
 		final int days = jsonObject.getInt("days");
 		final JSONArray jsonAddressArray = jsonObject.getJSONArray("addresses");
 		final String[] addresses = new String[jsonAddressArray.length()];

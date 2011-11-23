@@ -19,12 +19,12 @@ import com.openexchange.tools.session.ServerSession;
 
 public class ScriptableActionFactory implements AJAXActionServiceFactory {
 
-	private Scriptable scriptable;
-	
+	private final Scriptable scriptable;
+
 	public ScriptableActionFactory(Scriptable scriptable) {
 		this.scriptable = scriptable;
 	}
-	
+
 	@Override
 	public AJAXActionService createActionService(String action)
 			throws OXException {
@@ -41,8 +41,8 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 		}
 		return null;
 	}
-	
-	
+
+
 	public static AJAXRequestResult adapt(Object object) throws OXException {
 		if (object == Undefined.instance) {
 			return new AJAXRequestResult(null, "null");
@@ -54,7 +54,7 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 			return (AJAXRequestResult) object;
 		}
 		if (object instanceof String) {
-			return new AJAXRequestResult((String)object, "string");
+			return new AJAXRequestResult(object, "string");
 		}
 		// Next try JSON Serialization
 		try {
@@ -66,7 +66,7 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 			String json = (String) cx.evaluateString(privateScope, "JSON.stringify(obj);", "<serialize>", 1, null);
 			Object jsonResult = new JSONObject("{a : "+json+"}").get("a");
 			return new AJAXRequestResult(jsonResult, "json");
-			
+
 		} catch (JSONException e) {
 			throw new OXException();
 		} catch (ClassCastException e) {
@@ -74,13 +74,13 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 		} finally {
 			Context.exit();
 		}
-		
+
 	}
 
 
 	private static final class StaticAction implements AJAXActionService{
 
-		private AJAXRequestResult retval;
+		private final AJAXRequestResult retval;
 
 		public StaticAction(AJAXRequestResult retval) {
 			this.retval = retval;
@@ -95,8 +95,8 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 
 	private static final class FunctionAction implements AJAXActionService{
 
-		private Function function;
-		private Scriptable scriptable;
+		private final Function function;
+		private final Scriptable scriptable;
 
 		public FunctionAction(Scriptable scriptable, Function function) {
 			this.scriptable = scriptable;

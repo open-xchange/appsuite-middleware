@@ -80,6 +80,7 @@ public final class InsertRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public JSONObject getBody() throws JSONException {
         return convert(link);
     }
@@ -87,6 +88,7 @@ public final class InsertRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -94,6 +96,7 @@ public final class InsertRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)
@@ -103,6 +106,7 @@ public final class InsertRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public InsertParser getParser() {
         return new InsertParser(failOnError);
     }

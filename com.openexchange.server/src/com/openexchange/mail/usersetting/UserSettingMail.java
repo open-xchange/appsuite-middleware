@@ -561,7 +561,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Whether to suppress HTML parts in text-only mode for <i>multipart/alternative</i>.
-     * 
+     *
      * @return <code>true</code> to suppress HTML parts in text-only mode for <i>multipart/alternative</i>; otherwise <code>false</code>
      */
     public boolean isSuppressHTMLAlternativePart() {
@@ -837,7 +837,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
 
     /**
      * Sets whether to suppress HTML parts in text-only mode for <i>multipart/alternative</i>.
-     * 
+     *
      * @param suppressHTMLAlternativePart <code>true</code> to suppress HTML parts in text-only mode for <i>multipart/alternative</i>; otherwise <code>false</code>
      */
     public void setSuppressHTMLAlternativePart(final boolean suppressHTMLAlternativePart) {

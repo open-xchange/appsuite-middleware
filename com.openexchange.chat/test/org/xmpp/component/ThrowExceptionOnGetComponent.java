@@ -23,7 +23,7 @@ import org.xmpp.packet.IQ;
  * <p>
  * This implementation supports the unit tests of Tinder and is not intended for
  * production use.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
 public class ThrowExceptionOnGetComponent extends DummyAbstractComponent {

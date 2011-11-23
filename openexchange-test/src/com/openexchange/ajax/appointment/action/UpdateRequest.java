@@ -69,7 +69,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
 
     private final boolean failOnError;
 
-    private int originFolder;
+    private final int originFolder;
 
     /**
      * Default constructor.
@@ -101,14 +101,17 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
         this.originFolder = originFolder;
     }
 
+    @Override
     public JSONObject getBody() throws JSONException {
         return convert(appointmentObj, timeZone);
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
@@ -117,6 +120,7 @@ public class UpdateRequest extends AbstractAppointmentRequest<UpdateResponse> {
             new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(appointmentObj.getLastModified().getTime())) };
     }
 
+    @Override
     public UpdateParser getParser() {
         return new UpdateParser(failOnError);
     }

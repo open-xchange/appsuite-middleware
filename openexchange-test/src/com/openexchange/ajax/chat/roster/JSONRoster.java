@@ -60,14 +60,14 @@ import com.openexchange.ajax.chat.conversation.JSONChatUser;
 
 /**
  * {@link JSONRoster} - Represents a chat roster rendered with JSON.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONRoster {
 
     /**
      * Parses given JSON to a {@link JSONRoster}
-     * 
+     *
      * @param jsonPresence The JSON roster data
      * @return The parsed {@link JSONRoster}
      * @throws JSONException If a JSON error occurs
@@ -99,7 +99,7 @@ public final class JSONRoster {
 
     /**
      * Gets the id
-     * 
+     *
      * @return The id
      */
     public String getId() {
@@ -108,7 +108,7 @@ public final class JSONRoster {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -117,7 +117,7 @@ public final class JSONRoster {
 
     /**
      * Gets the members
-     * 
+     *
      * @return The members
      */
     public List<JSONChatUser> getMembers() {
@@ -126,7 +126,7 @@ public final class JSONRoster {
 
     /**
      * Adds given member.
-     * 
+     *
      * @param user The member to add
      */
     public void addMember(final JSONChatUser user) {

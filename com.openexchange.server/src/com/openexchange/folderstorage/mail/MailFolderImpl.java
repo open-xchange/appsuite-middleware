@@ -391,7 +391,7 @@ public final class MailFolderImpl extends AbstractFolder {
     }
 
     /*-
-     * 
+     *
     private static final int[] mapping = { 0, -1, 1, -1, 2, -1, -1, -1, 4 };
 
     static int createPermissionBits(final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws FolderException {
@@ -428,7 +428,7 @@ public final class MailFolderImpl extends AbstractFolder {
         }
         return retval;
     }
-     * 
+     *
      */
 
     private static final MailField[] FIELDS_ID = new MailField[] { MailField.ID };

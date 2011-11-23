@@ -51,21 +51,21 @@ package com.openexchange.chat;
 
 /**
  * {@link ChatUser} - Represents a chat user.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatUser {
 
     /**
      * Gets the identifier.
-     * 
+     *
      * @return The identifier.
      */
     String getId();
 
     /**
      * Gets the name or nickname of the user.
-     * 
+     *
      * @return The name/nickname
      */
     String getName();
