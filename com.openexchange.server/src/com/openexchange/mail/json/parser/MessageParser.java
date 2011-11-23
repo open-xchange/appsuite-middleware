@@ -197,6 +197,7 @@ public final class MessageParser {
             final TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
             final Context ctx = ContextStorage.getStorageContext(session.getContextId());
             final ComposedMailMessage composedMail = provider.getNewComposedMailMessage(session, ctx);
+            composedMail.setAccountId(accountId);
             /*
              * Select appropriate handler
              */
@@ -291,7 +292,13 @@ public final class MessageParser {
             /*
              * Fill composed mail
              */
-            return attachmentHandler.generateComposedMails(composedMail);
+            final ComposedMailMessage[] ret = attachmentHandler.generateComposedMails(composedMail);
+            for (final ComposedMailMessage mail : ret) {
+                if (!mail.containsAccountId()) {
+                    mail.setAccountId(accountId);
+                }
+            }
+            return ret;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
