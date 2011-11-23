@@ -59,7 +59,8 @@ public enum EnumAPI implements API {
 
     OX_OLD("/ajax/folders", -1),
     OX_NEW("/ajax/folders", 0),
-    OUTLOOK("/ajax/folders", 1);
+    OUTLOOK("/ajax/folders", 1),
+    EAS_FOLDERS("/ajax/folders", 20);
 
     private String url;
     private int treeId;

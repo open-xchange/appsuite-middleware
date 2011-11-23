@@ -247,7 +247,7 @@ public final class FolderServiceImpl implements FolderService {
         if (!FolderStorage.REAL_TREE_ID.equals(sourceTreeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe only supported for real tree as source tree.");
         }
-        if (KNOWN_TREES.contains(targetParentId)) {
+        if (KNOWN_TREES.contains(targetTreeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Subscribe not supported for known trees.");
         }
         new SubscribePerformer(new ServerSessionAdapter(session)).doSubscribe(sourceTreeId, folderId, targetTreeId, targetParentId);
