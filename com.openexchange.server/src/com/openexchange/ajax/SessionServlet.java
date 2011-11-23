@@ -377,15 +377,17 @@ public abstract class SessionServlet extends AJAXServlet {
     public static void checkIP(final boolean checkIP, final Queue<IPRange> ranges, final Session session, final String actual) throws OXException {
         if (null == actual || (!isWhitelistedFromIPCheck(actual, ranges) && !actual.equals(session.getLocalIp()))) {
             if (checkIP) {
-                final StringBuilder sb = new StringBuilder(96);
-                sb.append("Request to server denied (IP check activated) for session: ");
-                sb.append(session.getSessionID());
-                sb.append(". Client login IP changed from ");
-                sb.append(session.getLocalIp());
-                sb.append(" to ");
-                sb.append((null == actual ? "<missing>" : actual));
-                sb.append(" and is not covered by IP white-list.");
-                LOG.info(sb.toString());
+                if (INFO) {
+                    final StringBuilder sb = new StringBuilder(96);
+                    sb.append("Request to server denied (IP check activated) for session: ");
+                    sb.append(session.getSessionID());
+                    sb.append(". Client login IP changed from ");
+                    sb.append(session.getLocalIp());
+                    sb.append(" to ");
+                    sb.append((null == actual ? "<missing>" : actual));
+                    sb.append(" and is not covered by IP white-list.");
+                    LOG.info(sb.toString());
+                }
                 throw SessionExceptionCodes.WRONG_CLIENT_IP.create();
             }
             if (DEBUG) {

@@ -352,7 +352,8 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
      */
     public FetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen, final boolean loadBody) throws MessagingException {
         super(imapFolder);
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
@@ -360,7 +361,7 @@ public final class FetchIMAPCommand extends AbstractIMAPCommand<Message[]> {
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
-        args = AbstractIMAPCommand.ARGS_ALL;
+        args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
         uid = false;
         length = fetchLen;
         command = getFetchCommand(isRev1, fp, loadBody);
