@@ -50,8 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 /**
- * Enumeration of possible folder APIs. There are now 2 implementations of the OX folder tree and 1 implementation of the Outlook-like
- * folder tree.
+ * Enumeration of possible folder APIs.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
