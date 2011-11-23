@@ -49,16 +49,7 @@
 
 package com.openexchange.index.internal;
 
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DELETE_INDEX_MAPPING;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DELETE_INDEX_MAPPING_BY_SERVER;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_DELETE_INDEX_SERVER;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_INSERT_INDEX_MAPPING;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_INSERT_INDEX_SERVER;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_SELECT_INDEX_SERVERS;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_SELECT_INDEX_URL;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_UPDATE_INDEX_MAPPING;
-import static com.openexchange.index.internal.IndexDatabaseStuff.SQL_SELECT_SUITABLE_INDEX_SERVER;
-import static com.openexchange.index.internal.IndexDatabaseStuff.TBL_IDX_SERVER;
+import static com.openexchange.index.internal.IndexDatabaseStuff.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -121,7 +112,7 @@ public class ConfigIndexMysql {
             rs = stmt.executeQuery();
 
             if (!rs.next()) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
+                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(Integer.valueOf(uid), Integer.valueOf(module), Integer.valueOf(cid));
             }
 
             i = 1;
@@ -141,8 +132,7 @@ public class ConfigIndexMysql {
             server.setConnectionTimeout(connectionTimeout);
             server.setMaxConnectionsPerHost(maxConnections);
 
-            final IndexUrlImpl indexUrl = new IndexUrlImpl(server, index);
-            return indexUrl;
+            return new IndexUrlImpl(server, index);
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -150,7 +140,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public int registerIndexServer(IndexServer server) throws OXException {
+    public int registerIndexServer(final IndexServer server) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
@@ -160,7 +150,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public int registerIndexServer(Connection con, IndexServer server) throws OXException {
+    public int registerIndexServer(final Connection con, final IndexServer server) throws OXException {
         PreparedStatement stmt = null;
         try {
             DBUtils.startTransaction(con);
@@ -174,14 +164,14 @@ public class ConfigIndexMysql {
             stmt.setInt(i++, server.getConnectionTimeout());
             stmt.setInt(i++, server.getMaxConnectionsPerHost());
 
-            int rows = stmt.executeUpdate();
+            final int rows = stmt.executeUpdate();
             if (rows == 0) {
                 throw IndexExceptionCodes.REGISTER_SERVER_ERROR.create(server.getUrl());
             }
 
             con.commit();
             return id;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             DBUtils.rollback(con);
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -190,7 +180,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void unregisterIndexServer(int serverId, boolean deleteMappings) throws OXException {
+    public void unregisterIndexServer(final int serverId, final boolean deleteMappings) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
@@ -200,7 +190,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void unregisterIndexServer(Connection con, int serverId, boolean deleteMappings) throws OXException {
+    public void unregisterIndexServer(final Connection con, final int serverId, final boolean deleteMappings) throws OXException {
         PreparedStatement sstmt = null;
         PreparedStatement mstmt = null;
         try {
@@ -208,9 +198,9 @@ public class ConfigIndexMysql {
             sstmt = con.prepareStatement(SQL_DELETE_INDEX_SERVER);
             sstmt.setInt(1, serverId);
 
-            int rows = sstmt.executeUpdate();
+            final int rows = sstmt.executeUpdate();
             if (rows == 0) {
-                throw IndexExceptionCodes.UNREGISTER_SERVER_ERROR.create(serverId);
+                throw IndexExceptionCodes.UNREGISTER_SERVER_ERROR.create(Integer.valueOf(serverId));
             }
 
             if (deleteMappings) {
@@ -219,7 +209,7 @@ public class ConfigIndexMysql {
                 mstmt.executeUpdate();
             }
             con.commit();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             DBUtils.rollback(con);
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -229,7 +219,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void modifyIndexServer(IndexServer server) throws OXException {
+    public void modifyIndexServer(final IndexServer server) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
@@ -239,7 +229,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void modifyIndexServer(Connection con, IndexServer server) throws OXException {
+    public void modifyIndexServer(final Connection con, final IndexServer server) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(createServerUpdateSQL(server));
@@ -261,11 +251,11 @@ public class ConfigIndexMysql {
             }
             stmt.setInt(i, server.getId());
 
-            int rows = stmt.executeUpdate();
+            final int rows = stmt.executeUpdate();
             if (rows == 0) {
-                throw IndexExceptionCodes.SERVER_NOT_FOUND.create(server.getId());
+                throw IndexExceptionCodes.SERVER_NOT_FOUND.create(Integer.valueOf(server.getId()));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -296,13 +286,13 @@ public class ConfigIndexMysql {
             stmt.setInt(i++, serverId);
             stmt.setString(i, index);
 
-            int rows = stmt.executeUpdate();
+            final int rows = stmt.executeUpdate();
             if (rows == 0) {
-                throw IndexExceptionCodes.ADD_MAPPING_ERROR.create(uid, cid, module, serverId);
+                throw IndexExceptionCodes.ADD_MAPPING_ERROR.create(Integer.valueOf(uid), Integer.valueOf(cid), Integer.valueOf(module), Integer.valueOf(serverId));
             }
 
             return serverId;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             LOCK.unlock();
@@ -310,7 +300,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void removeIndexMapping(int cid, int uid, int module) throws OXException {
+    public void removeIndexMapping(final int cid, final int uid, final int module) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
@@ -320,7 +310,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void removeIndexMapping(Connection con, int cid, int uid, int module) throws OXException {
+    public void removeIndexMapping(final Connection con, final int cid, final int uid, final int module) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_DELETE_INDEX_MAPPING);
@@ -329,11 +319,11 @@ public class ConfigIndexMysql {
             stmt.setInt(i++, uid);
             stmt.setInt(i++, module);
 
-            int rows = stmt.executeUpdate();
+            final int rows = stmt.executeUpdate();
             if (rows == 0) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
+                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(Integer.valueOf(uid), Integer.valueOf(module), Integer.valueOf(cid));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -350,8 +340,8 @@ public class ConfigIndexMysql {
         }
     }
 
-    public List<IndexServer> getAllIndexServers(Connection con) throws OXException {
-        List<IndexServer> servers = new ArrayList<IndexServer>();
+    public List<IndexServer> getAllIndexServers(final Connection con) throws OXException {
+        final List<IndexServer> servers = new ArrayList<IndexServer>();
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -380,14 +370,14 @@ public class ConfigIndexMysql {
             }
 
             return servers;
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
-    public void modifiyIndexMapping(int cid, int uid, int module, int server, String index) throws OXException {
+    public void modifiyIndexMapping(final int cid, final int uid, final int module, final int server, final String index) throws OXException {
         final DatabaseService dbService = getDbService();
         final Connection con = dbService.getWritable();
         try {
@@ -397,7 +387,7 @@ public class ConfigIndexMysql {
         }
     }
 
-    public void modifiyIndexMapping(Connection con, int cid, int uid, int module, int server, String index) throws OXException {
+    public void modifiyIndexMapping(final Connection con, final int cid, final int uid, final int module, final int server, final String index) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(SQL_UPDATE_INDEX_MAPPING);
@@ -408,11 +398,11 @@ public class ConfigIndexMysql {
             stmt.setInt(i++, uid);
             stmt.setInt(i++, module);
 
-            int rows = stmt.executeUpdate();
+            final int rows = stmt.executeUpdate();
             if (rows == 0) {
-                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(uid, module, cid);
+                throw IndexExceptionCodes.INDEX_NOT_FOUND.create(Integer.valueOf(uid), Integer.valueOf(module), Integer.valueOf(cid));
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -438,21 +428,20 @@ public class ConfigIndexMysql {
             } else {
                 throw IndexExceptionCodes.SERVER_FULL.create();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
 
-        if (count < maxIndices) {
-            return serverId;
-        } else {
+        if (count >= maxIndices) {
             throw IndexExceptionCodes.SERVER_FULL.create();
         }
+        return serverId;
     }
 
     private DatabaseService getDbService() throws OXException {
-        DatabaseService dbService = IndexServiceLookup.getInstance().getService(DatabaseService.class);
+        final DatabaseService dbService = IndexServiceLookup.getInstance().getService(DatabaseService.class);
         if (dbService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
@@ -460,8 +449,8 @@ public class ConfigIndexMysql {
         return dbService;
     }
 
-    private String createServerUpdateSQL(IndexServer server) {
-        final StringBuilder sb = new StringBuilder("UPDATE " + TBL_IDX_SERVER + " SET");
+    private String createServerUpdateSQL(final IndexServer server) {
+        final StringBuilder sb = new StringBuilder("UPDATE ").append(TBL_IDX_SERVER).append(" SET");
         boolean first = true;
         if (server.hasUrl()) {
             first = false;
