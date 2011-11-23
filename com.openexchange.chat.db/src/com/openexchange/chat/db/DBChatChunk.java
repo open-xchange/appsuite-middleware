@@ -81,10 +81,8 @@ public class DBChatChunk implements ChatChunk {
 
     /**
      * Initializes a new {@link DBChatChunk}.
-     * @param con
-     * @throws OXException
      */
-    public DBChatChunk(final int chunkId, final int chatId, final int contextId, final Connection con) throws OXException {
+    public DBChatChunk(final int chunkId, final int chatId, final int contextId) {
         super();
         this.chunkId = chunkId;
         this.chatId = chatId;
@@ -95,17 +93,11 @@ public class DBChatChunk implements ChatChunk {
         this.createdAt = System.currentTimeMillis();
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.chat.ChatChunk#getChunkId()
-     */
     @Override
     public String getChunkId() {
         return sChunkId;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.chat.ChatChunk#getChatId()
-     */
     @Override
     public String getChatId() {
         return sChatId;
@@ -115,9 +107,6 @@ public class DBChatChunk implements ChatChunk {
         return sContextId;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.chat.ChatChunk#getMembers()
-     */
     @Override
     public List<String> getMembers() throws OXException {
         final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
@@ -146,9 +135,6 @@ public class DBChatChunk implements ChatChunk {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.chat.ChatChunk#getTimeStamp()
-     */
     @Override
     public Date getTimeStamp() {
         return new Date(createdAt);
