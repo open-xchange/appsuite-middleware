@@ -119,30 +119,7 @@ public final class LogServiceImpl implements LogService {
         if (null == log) {
             return;
         }
-        final boolean doLogging;
-        switch (loggable.getLevel()) {
-        case FATAL:
-            doLogging = log.isFatalEnabled();
-            break;
-        case ERROR:
-            doLogging = log.isErrorEnabled();
-            break;
-        case WARNING:
-            doLogging = log.isWarnEnabled();
-            break;
-        case INFO:
-            doLogging = log.isInfoEnabled();
-            break;
-        case DEBUG:
-            doLogging = log.isDebugEnabled();
-            break;
-        case TRACE:
-            doLogging = log.isTraceEnabled();
-            break;
-        default:
-            doLogging = false;
-        }
-        if (doLogging && loggable.isLoggable()) {
+        if (loggable.isLoggable()) {
             try {
                 queue.offer(loggable); // Throw away Loggable if queue capacity is exceeded
             } catch (final Exception e) {
