@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
  * @author Markus Wagner <markus.wagner@open-xchange.com>
  */
 public class IntegerTransformator implements Transformator{
+    @Override
     public Object transform(final String value) throws OXException {
         if(null == value) {
         	return 0;

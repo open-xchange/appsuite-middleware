@@ -113,7 +113,7 @@ public abstract class Server {
     public enum SocketType {
         PLAIN(Server.PLAIN), STARTTLS(Server.STARTTLS), SSL(Server.SSL);
 
-        private String keyword;
+        private final String keyword;
 
         private SocketType(String keyword) {
             this.keyword = keyword;

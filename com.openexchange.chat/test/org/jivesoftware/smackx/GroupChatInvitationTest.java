@@ -59,8 +59,8 @@ import org.jivesoftware.smack.filter.PacketFilter;
 import org.jivesoftware.smack.filter.PacketExtensionFilter;
 
 /**
- * 
- * 
+ *
+ *
  * @author Matt Tucker
  */
 public class GroupChatInvitationTest extends SmackTestCase {
@@ -99,6 +99,7 @@ public class GroupChatInvitationTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         // Register listener for groupchat invitations.
@@ -106,6 +107,7 @@ public class GroupChatInvitationTest extends SmackTestCase {
         collector = getConnection(1).createPacketCollector(filter);
     }
 
+    @Override
     protected void tearDown() throws Exception {
         // Cancel the packet collector so that no more results are queued up
         collector.cancel();
@@ -113,6 +115,7 @@ public class GroupChatInvitationTest extends SmackTestCase {
         super.tearDown();
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

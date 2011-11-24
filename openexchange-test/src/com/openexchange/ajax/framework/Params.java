@@ -63,7 +63,7 @@ import com.openexchange.ajax.framework.AJAXRequest.Parameter;
  */
 public class Params {
 
-    private List<Parameter> parameters;
+    private final List<Parameter> parameters;
 
     /*********************** Constructors *************************/
 

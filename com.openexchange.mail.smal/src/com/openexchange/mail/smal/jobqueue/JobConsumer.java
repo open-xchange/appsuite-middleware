@@ -70,7 +70,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
  * {@link JobConsumer} - The job consumer which takes jobs from passed blocking queue.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class JobConsumer extends AbstractTask<Object> {
@@ -165,7 +165,7 @@ final class JobConsumer extends AbstractTask<Object> {
 
     /**
      * Gets the jobs currently being executed.
-     * 
+     *
      * @return The jobs currently being executed or an empty list if none is executed at the moment
      */
     protected List<Job> currentJobs() {
@@ -175,7 +175,7 @@ final class JobConsumer extends AbstractTask<Object> {
 
     /**
      * Checks if there is a job in queue with a higher ranking than specified ranking.
-     * 
+     *
      * @param ranking The ranking to check against
      * @return <code>true</code> if there is a higher-ranked job; otherwise <code>false</code>
      */

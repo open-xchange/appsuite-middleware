@@ -92,6 +92,7 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
         this(account, true);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         try {
             final JSONObject incrementalUpdate = new JSONObject();
@@ -109,23 +110,28 @@ public class MailAccountUpdateRequest implements AJAXRequest<MailAccountUpdateRe
         }
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[]{
             new Parameter("action", "update")
         };
     }
 
+    @Override
     public AbstractAJAXParser<MailAccountUpdateResponse> getParser() {
         return new MailAccountUpdateParser(failOnError);
     }
+    @Override
     public String getServletPath() {
         return "/ajax/account";
     }

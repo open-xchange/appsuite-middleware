@@ -141,6 +141,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         json.put(DataFields.ID, objectId);
@@ -156,6 +157,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -163,6 +165,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
@@ -175,6 +178,7 @@ public class DeleteRequest extends AbstractAppointmentRequest<CommonDeleteRespon
     /**
      * {@inheritDoc}
      */
+    @Override
     public DeleteParser getParser() {
         return new DeleteParser(failOnError);
     }

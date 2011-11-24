@@ -64,19 +64,20 @@ import com.openexchange.test.fixtures.transformators.FileToByteArrayTransformato
  */
 public class ContactFixtureFactory implements FixtureFactory<Contact> {
 
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
 	public ContactFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<Contact> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Contact> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
 		return new ContactFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class ContactFixtures  extends DefaultFixtures<Contact> implements Fixtures<Contact>{
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Contact>>  contacts = new HashMap<String,Fixture<Contact>>();
 
         public ContactFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
@@ -87,6 +88,7 @@ public class ContactFixtureFactory implements FixtureFactory<Contact> {
             addTransformator(new FileToByteArrayTransformator(fixtureLoader), "image1");
         }
 
+        @Override
         public Fixture<Contact> getEntry(final String entryName) throws OXException {
             if (contacts.containsKey(entryName)) {
                 return contacts.get(entryName);

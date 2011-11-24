@@ -105,7 +105,8 @@ public final class MultipleAttachmentRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return null;
 	}
 
@@ -114,7 +115,8 @@ public final class MultipleAttachmentRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.GET;
 	}
 
@@ -123,7 +125,8 @@ public final class MultipleAttachmentRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, Mail.ACTION_ZIP_MATTACH),
 				new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
 				new Parameter(AJAXServlet.PARAMETER_ID, id),
@@ -135,7 +138,8 @@ public final class MultipleAttachmentRequest extends AbstractMailRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public AbstractAJAXParser<?> getParser() {
+	@Override
+    public AbstractAJAXParser<?> getParser() {
 		return new MultipleAttachmentParser(failOnError);
 	}
 

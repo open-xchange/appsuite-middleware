@@ -71,9 +71,9 @@ import com.openexchange.resource.Resource;
  */
 public class ResourceTestManager implements TestManager {
 
-    private List<Resource> createdEntites = new LinkedList<Resource>();
+    private final List<Resource> createdEntites = new LinkedList<Resource>();
 
-    private AJAXClient client;
+    private final AJAXClient client;
 
     private boolean failOnError;
 
@@ -87,10 +87,12 @@ public class ResourceTestManager implements TestManager {
         return client;
     }
 
+    @Override
     public boolean doesFailOnError() {
         return getFailOnError();
     }
 
+    @Override
     public boolean getFailOnError() {
         return failOnError;
     }
@@ -99,18 +101,22 @@ public class ResourceTestManager implements TestManager {
         this.lastException = t;
     }
 
+    @Override
     public Throwable getLastException() {
         return this.lastException;
     }
 
+    @Override
     public AbstractAJAXResponse getLastResponse() {
         return this.lastResponse;
     }
 
+    @Override
     public boolean hasLastException() {
         return this.lastException != null;
     }
 
+    @Override
     public void setFailOnError(boolean doFail) {
         this.failOnError = doFail;
     }
@@ -131,6 +137,7 @@ public class ResourceTestManager implements TestManager {
         this.client = client;
     }
 
+    @Override
     public void cleanUp() {
         boolean old = failOnError;
         setFailOnError(false);

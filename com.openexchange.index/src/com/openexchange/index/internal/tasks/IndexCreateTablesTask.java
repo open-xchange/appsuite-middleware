@@ -71,8 +71,8 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class IndexCreateTablesTask extends UpdateTaskAdapter {    
-    
+public class IndexCreateTablesTask extends UpdateTaskAdapter {
+
     public IndexCreateTablesTask() {
         super();
     }
@@ -83,42 +83,42 @@ public class IndexCreateTablesTask extends UpdateTaskAdapter {
         if (dbService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DatabaseService.class.getSimpleName());
         }
-        
+
         final Connection writeCon = dbService.getWritable();
-        try {            
+        try {
             PreparedStatement stmt = null;
-            /* 
+            /*
              * Create table index_servers in configDb
              */
-            try {            
+            try {
                 if (DBUtils.tableExists(writeCon, TBL_IDX_SERVER)) {
                     return;
                 }
                 stmt = writeCon.prepareStatement(SQL_CREATE_SERVER_TBL);
-                stmt.executeUpdate();            
+                stmt.executeUpdate();
             } catch (SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
-            
-            /* 
+
+            /*
              * Create table user_module2index in configDb
              */
-            try {            
+            try {
                 if (DBUtils.tableExists(writeCon, TBL_IDX_MAPPING)) {
                     return;
                 }
                 stmt = writeCon.prepareStatement(SQL_CREATE_MAPPING_TBL);
-                stmt.executeUpdate();            
+                stmt.executeUpdate();
             } catch (SQLException e) {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
-            }   
+            }
         } finally {
             dbService.backWritable(writeCon);
-        }            
+        }
     }
 
     @Override

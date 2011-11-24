@@ -62,6 +62,7 @@ import com.openexchange.test.fixtures.TestUserConfigFactory;
 
 public class AJAXUserConfigFactory implements TestUserConfigFactory {
 
+    @Override
     public TestUserConfig create(SimpleCredentials credentials) {
         AJAXSession session = new AJAXSession();
         try {

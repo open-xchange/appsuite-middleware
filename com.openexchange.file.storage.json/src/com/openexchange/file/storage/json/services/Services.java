@@ -57,7 +57,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link Services}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Services {
@@ -66,7 +66,7 @@ public class Services {
 
     /**
      * Sets the service look-up instance.
-     * 
+     *
      * @param serviceLookup The service look-up instance
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {

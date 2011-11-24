@@ -75,7 +75,7 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     protected String getModule() {
         return "conversation";
     }
-    
+
     @Override
     protected void parseByPathInfo(final AJAXRequestData retval, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         if (isEmpty(pathInfo)) {

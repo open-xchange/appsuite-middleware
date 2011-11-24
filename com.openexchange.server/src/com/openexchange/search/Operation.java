@@ -69,7 +69,7 @@ public interface Operation {
      * @return What the operation would look like in SQL
      */
     public String getSqlRepresentation();
-    
+
     /**
      * @return What the operation would look like in LDAP
      */

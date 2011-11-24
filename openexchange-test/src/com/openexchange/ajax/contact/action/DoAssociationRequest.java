@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class DoAssociationRequest extends AbstractContactRequest<DoAssociationResponse> {
 
-    private Contact contributor, aggregator;
+    private final Contact contributor, aggregator;
 
     public DoAssociationRequest(Contact contributor, Contact aggregator) {
         super();
@@ -72,6 +72,7 @@ public class DoAssociationRequest extends AbstractContactRequest<DoAssociationRe
         this.aggregator = aggregator;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         JSONArray arr = new JSONArray();
         arr.put(convert(contributor));
@@ -79,10 +80,12 @@ public class DoAssociationRequest extends AbstractContactRequest<DoAssociationRe
         return arr;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters(){
         Params params = new Params(
             AJAXServlet.PARAMETER_ACTION,
@@ -112,6 +115,7 @@ public class DoAssociationRequest extends AbstractContactRequest<DoAssociationRe
         return params.toArray();
     }
 
+    @Override
     public AbstractAJAXParser<? extends DoAssociationResponse> getParser() {
         return new AbstractAJAXParser<DoAssociationResponse>(true){
             @Override

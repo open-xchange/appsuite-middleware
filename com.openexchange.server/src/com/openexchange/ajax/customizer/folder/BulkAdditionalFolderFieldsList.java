@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 public class BulkAdditionalFolderFieldsList extends AdditionalFolderFieldList {
 
     private final AdditionalFolderFieldList delegate;
-    
+
     private final TIntObjectMap<BulkFolderField> fieldMap = new TIntObjectHashMap<BulkFolderField>();
     private final Map<String, BulkFolderField> fieldMap2 = new HashMap<String, BulkFolderField>();
     private final Set<BulkFolderField> fields = new HashSet<BulkFolderField>();
@@ -114,7 +114,7 @@ public class BulkAdditionalFolderFieldsList extends AdditionalFolderFieldList {
         fields.add(bff);
         return bff;
     }
-    
+
     public void warmUp(final Collection<FolderObject> folders, final ServerSession session) {
         final List<FolderObject> folderObjects = new ArrayList<FolderObject>(folders);
         for(final BulkFolderField field : fields) {
@@ -151,7 +151,7 @@ public class BulkAdditionalFolderFieldsList extends AdditionalFolderFieldList {
     public String toString() {
         return delegate.toString();
     }
-    
-    
+
+
 
 }

@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link OSGiChatServiceRegistry}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OSGiChatServiceRegistry implements ChatServiceRegistry {
@@ -89,7 +89,7 @@ public class OSGiChatServiceRegistry implements ChatServiceRegistry {
 
     /**
      * Starts the tracker.
-     * 
+     *
      * @param context The bundle context
      */
     public void start(final BundleContext context) {

@@ -77,22 +77,23 @@ import com.openexchange.test.fixtures.transformators.JChronicDateTransformator;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
-	private File datapath;
-	private FixtureLoader fixtureLoader;
+	private final File datapath;
+	private final FixtureLoader fixtureLoader;
 
 	public EMailFixtureFactory(final File datapath, FixtureLoader fixtureLoader){
 		this.datapath = datapath;
 		this.fixtureLoader = fixtureLoader;
 	}
 
+    @Override
     public Fixtures<MailMessage> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
         return new EMailFixture(fixtureName, entries, datapath, fixtureLoader);
     }
 
     private class EMailFixture extends DefaultFixtures<MailMessage> implements Fixtures<MailMessage> {
-    	private File dataPath;
+    	private final File dataPath;
     	final Map<String, Fixture<MailMessage>> mails = new HashMap<String, Fixture<MailMessage>>();
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
 
         public EMailFixture(final String fixtureName, final Map<String, Map<String, String>> entries, File datapath, FixtureLoader fixtureLoader) {
             super(MailMessage.class, entries, fixtureLoader);
@@ -110,6 +111,7 @@ public class EMailFixtureFactory implements FixtureFactory<MailMessage> {
             addTransformator(new BooleanTransformator(), "prev_seen");
         }
 
+        @Override
         public Fixture<MailMessage> getEntry(final String entryName) throws OXException {
             if (mails.containsKey(entryName)) {
                 return mails.get(entryName);

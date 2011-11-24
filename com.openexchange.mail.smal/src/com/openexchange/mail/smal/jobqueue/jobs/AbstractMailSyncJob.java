@@ -63,7 +63,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AbstractMailSyncJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractMailSyncJob extends Job {
@@ -88,7 +88,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if a sync should be performed for specified full name with default span of 1 hour.
-     * 
+     *
      * @param fullName The full name
      * @param now The current time milliseconds
      * @return <code>true</code> if a sync should be performed for passed full name; otherwise <code>false</code>
@@ -100,7 +100,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if a sync should be performed because given span is exceeded for specified full name.
-     * 
+     *
      * @param fullName The full name
      * @param now The current time milliseconds
      * @param span The max. allowed span; if exceeded the folder is considered to be synchronized
@@ -174,7 +174,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Updates the time stamp and unsets the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param stamp The time stamp
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
@@ -207,7 +207,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Unsets the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>
      * @throws OXException If an error occurs
@@ -238,7 +238,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Drops the entry associated with specified full name.
-     * 
+     *
      * @param fullName The full name
      * @throws OXException If removal fails
      */
@@ -267,7 +267,7 @@ public abstract class AbstractMailSyncJob extends Job {
 
     /**
      * Checks if this call succeeds in setting the sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param now
      * @return <code>true</code> if operation was successful; otherwise <code>false</code>

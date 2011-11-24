@@ -51,7 +51,7 @@ package com.openexchange.exception;
 
 /**
  * {@link OXExceptionCode} - Provides identifying information for an {@link OXException}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OXExceptionCode extends OXExceptionConstants {
@@ -59,7 +59,7 @@ public interface OXExceptionCode extends OXExceptionConstants {
     /**
      * Checks if attributes of specified {@link OXException} instance or the ones from any of its causes (recursive check) matches this
      * code's ones.
-     * 
+     *
      * @param e The exception to check
      * @return <code>true</code> if specified {@link OXException}'s attributes matches this code's ones; otherwise <code>false</code>
      */
@@ -67,28 +67,28 @@ public interface OXExceptionCode extends OXExceptionConstants {
 
     /**
      * Gets the {@link OXException}'s code number.
-     * 
+     *
      * @return The code number
      */
     int getNumber();
 
     /**
      * Gets the {@link OXException}'s initial category.
-     * 
+     *
      * @return The initial category.
      */
     Category getCategory();
 
     /**
      * Gets the prefix which is part of the compound error code: &lt;prefix&gt; + "-" + &lt;code&gt;
-     * 
+     *
      * @return The prefix
      */
     String getPrefix();
 
     /**
      * Gets the message either for display or for logging purpose.
-     * 
+     *
      * @return The message
      */
     String getMessage();

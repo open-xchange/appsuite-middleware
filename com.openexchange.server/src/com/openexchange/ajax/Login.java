@@ -403,7 +403,7 @@ public class Login extends AJAXServlet {
                             sb.append("Parameter \"").append(LoginFields.CLIENT_IP_PARAM).append("\" not found for action ").append(ACTION_CHANGEIP);
                             LOG.info(sb.toString());
                         }
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);                        
+                        throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.CLIENT_IP_PARAM);
                     }
                     final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
                     final Session session = sessiondService.getSession(sessionId);

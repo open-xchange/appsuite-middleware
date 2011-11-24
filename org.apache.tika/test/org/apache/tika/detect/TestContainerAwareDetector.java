@@ -92,7 +92,7 @@ public class TestContainerAwareDetector extends TestCase {
         assertDetect("testPPT.pptm", "application/vnd.ms-powerpoint.presentation.macroenabled.12");
         assertDetect("testPPT.ppsx", "application/vnd.openxmlformats-officedocument.presentationml.slideshow");
         assertDetect("testPPT.ppsm", "application/vnd.ms-powerpoint.slideshow.macroEnabled.12");
-        
+
         // .xlsb is an OOXML file containing the binary parts, and not
         //  an OLE2 file as you might initially expect!
         assertDetect("testEXCEL.xlsb", "application/vnd.ms-excel.sheet.binary.macroEnabled.12");
@@ -110,6 +110,7 @@ public class TestContainerAwareDetector extends TestCase {
     private int countTemporaryFiles() {
         return new File(System.getProperty("java.io.tmpdir")).listFiles(
                 new FilenameFilter() {
+                    @Override
                     public boolean accept(File dir, String name) {
                         return name.startsWith("apache-tika-");
                     }
@@ -176,7 +177,7 @@ public class TestContainerAwareDetector extends TestCase {
             xlsx.close();
         }
 
-        // Now a truncated OLE2 file 
+        // Now a truncated OLE2 file
         TikaInputStream xls = getTruncatedFile("testEXCEL.xls", 400);
         try {
             assertEquals(

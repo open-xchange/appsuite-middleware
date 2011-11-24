@@ -107,7 +107,7 @@ public interface IndexAdapter {
 
     /**
      * Gets all mails in a fast manner. Returned mails only contain identifier and flags.
-     * 
+     *
      * @param optFullName The optional full name to restrict search results to specified folder
      * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
      * @param session The session
@@ -135,7 +135,7 @@ public interface IndexAdapter {
 
     /**
      * Performs specified search by provided query.
-     * 
+     *
      * @param query The query
      * @param fields The fields to set
      * @param session The session
@@ -230,7 +230,7 @@ public interface IndexAdapter {
 
     /**
      * Adds contents of previously added mails to index.
-     * 
+     *
      * @throws OXException If flushing contents fails
      */
     public void addContents() throws OXException;

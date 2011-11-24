@@ -45,6 +45,7 @@ public class IQTest extends SmackTestCase {
      */
     public void testInvalidNamespace() {
         IQ iq = new IQ() {
+            @Override
             public String getChildElementXML() {
                 StringBuilder buf = new StringBuilder();
                 buf.append("<query xmlns=\"jabber:iq:anything\">");
@@ -75,7 +76,7 @@ public class IQTest extends SmackTestCase {
 
     /**
      * Check that sending an IQ to a full JID that is offline returns an IQ ERROR instead
-     * of being route to some other resource of the same user. 
+     * of being route to some other resource of the same user.
      */
     public void testFullJIDToOfflineUser() {
         // Request the version from the server.
@@ -99,6 +100,7 @@ public class IQTest extends SmackTestCase {
         assertEquals("Server answered an incorrect error code", 503, result.getError().getCode());
     }
 
+    @Override
     protected int getMaxConnections() {
         return 1;
     }

@@ -61,7 +61,8 @@ import com.openexchange.ajax.mail.filter.action.AbstractAction;
  */
 public class SimpleActionWriterImpl implements ActionWriter {
 
-	public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
+	@Override
+    public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put("id", name);
 

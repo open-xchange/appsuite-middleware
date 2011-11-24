@@ -48,7 +48,7 @@
  */
 
  package com.openexchange.ajax.parser;
- 
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -61,7 +61,7 @@ import com.openexchange.search.Operation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SearchTerm.OperationPosition;
- 
+
  /**
   * @author tobiasprinz
   * @param <T>
@@ -73,13 +73,13 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	private StringBuilder bob;
 
 	private List<SQLInjector> injectors;
-	
+
 	private List<String> folders;
-		
+
 	private boolean nextIsFolder;
 
 	private String charset;
-	
+
 	public ContactSearchtermSqlConverter() {
 		initialize();
 	}
@@ -87,21 +87,22 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	public void setCharset(String charset) {
 		this.charset = charset;
 	}
-	
+
 	public String getCharset() {
 		return charset;
 	}
-	
+
 	/**
 	 * Takes a search term (basically an Abstract Syntax Tree, AST,
-	 * which is usually created from JSON sent by the GUI) and forms 
+	 * which is usually created from JSON sent by the GUI) and forms
 	 * a WHERE clause as used by SQL database queries.
-	 * 
+	 *
 	 */
-	public <T> void parse(SearchTerm<T> term) {
+	@Override
+    public <T> void parse(SearchTerm<T> term) {
 		traverseViaInOrder(term);
 	}
-	
+
 	/**
 	 * Resets the whole object so you don't get data from the last parse process.
 	 * Called during instantiation and before every new parse cycle.
@@ -112,7 +113,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 		folders = new LinkedList<String>();
 		nextIsFolder = false;
 	}
-	
+
 	/**
 	 * @return A string that can be added to a WHERE. It does not contain values but ?'s
 	 */
@@ -121,28 +122,29 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 			.replaceAll("\\s+", " ") //shrink whitespaces
 			.trim(); //remove ending whitespaces
 	}
-	
+
 	/**
 	 * @return A list of injectors that can be used on the resulting prepared string to replace the ?'s with values (to prevent SQLInjection attacks)
 	 */
 	public List<SQLInjector> getInjectors(){
 		return injectors;
 	}
-	
+
 	/**
-	 * Returns the folders that where queried. These are still in the 
-	 * result of #getPreparedWhereString(), too, but you might want 
+	 * Returns the folders that where queried. These are still in the
+	 * result of #getPreparedWhereString(), too, but you might want
 	 * them separately to check for access rights.
-	 * 
-	 * Result is of a generic type since mail folders can be strings but 
+	 *
+	 * Result is of a generic type since mail folders can be strings but
 	 * other modules generally use Integers.
-	 * 
+	 *
 	 * @return A list of folders that are requested to be searched
 	 */
-	public List<String> getFolders(){
+	@Override
+    public List<String> getFolders(){
 		return folders;
 	}
-	
+
 	public boolean hasFolders(){
 		return folders.size() != 0;
 	}
@@ -160,24 +162,24 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 		Operand<?>[] operands = term.getOperands();
 		Operation operation = term.getOperation();
 		bob.append(" ( ");
-		
-		
+
+
 		for(int i = 0; i < operands.length; i++){
 			Operand<?> o = operands[i];
-			
+
 			if(operation.getSqlPosition() == OperationPosition.BEFORE)
 				bob.append(operation.getSqlRepresentation());
 
 			if(o.getType() == Operand.Type.COLUMN){
 				String value = (String) o.getValue();
 				handleFolder(o);
-				
+
 				String field = translateFromJSONtoDB( value);
 				field = handlePrefix(field);
 				field = handleCharset(field);
 			bob.append(field);
 			}
-			
+
 			if(o.getType() == Operand.Type.CONSTANT){
 				String value = (String) o.getValue();
 				handleFolder(o);
@@ -185,14 +187,14 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 				injectors.add(new StringSQLInjector(value));
 				bob.append(handleCharset("?"));
 			}
-			
+
 			if(operation.getSqlPosition() == OperationPosition.AFTER)
 				bob.append(" ").append(operation.getSqlRepresentation());
-			
+
 			if(operation.getSqlPosition() == OperationPosition.BETWEEN)
 				if((i+1) < operands.length) //don't place an operator after the last operand here
 					bob.append(" ").append(operation.getSqlRepresentation()).append(" ");
-			
+
 		}
 		bob.append(" ) ");
 	}
@@ -200,15 +202,15 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	protected void traverseViaInorder(CompositeSearchTerm term) {
 		Operation operation = term.getOperation();
 		SearchTerm<?>[] operands = term.getOperands();
-		
+
 		bob.append(" ( ");
-		
+
 		if(operation.getSqlPosition() == OperationPosition.BEFORE)
 			bob.append(operation.getSqlRepresentation());
 
 		for(int i = 0; i < operands.length; i++){
 			traverseViaInOrder(operands[i]);
-			
+
 			if(operation.getSqlPosition() == OperationPosition.AFTER)
 				bob.append(" ").append(operation.getSqlRepresentation());
 			if(operation.getSqlPosition() == OperationPosition.BETWEEN)
@@ -220,13 +222,13 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	}
 
 	/**
-	 * Called to check whether an argument given is about a folder. We 
+	 * Called to check whether an argument given is about a folder. We
  * extract these separately because our access system works folder-based.
 	 */
 	protected void handleFolder(Operand<?> o) {
 		if(o.getType() == Operand.Type.COLUMN && o.getValue().equals(FOLDER_AJAXNAME))
 				nextIsFolder = true;
-		
+
 	if(o.getType() == Operand.Type.CONSTANT && nextIsFolder){
 				folders.add((String) o.getValue());
 				nextIsFolder = false;
@@ -234,22 +236,22 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	}
 
 	/**
-	 * Called to check whether an argument given contains asterisks 
+	 * Called to check whether an argument given contains asterisks
 	 * which work as wildcards. For SQL, we need to replace them with
 	 * percentage-signs and to replace an equals-sign with a LIKE
 	 * statement.
-	 * 
+	 *
 	 * @return the value reformatted for SQL use (means: with some % in most cases)
 	 */
 	protected String handlePatternMatching(String value) {
 		if(!value.contains("*"))
 			return value;
-			
+
 		value = value.replaceAll("\\*", "%");
 
 		int index = bob.lastIndexOf("=");
 		bob.replace(index, index+1, "LIKE");
-		
+
 		return value;
 	}
 
@@ -259,7 +261,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 	protected String handleCharset(String field) {
 		if(charset == null)
 			return field;
-		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(")").toString(); 
+		return new StringBuilder("CONVERT(").append(field).append(" USING ").append(getCharset()).append(")").toString();
 	}
 
 	/**
@@ -270,8 +272,8 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
 			return field;
 		return new StringBuilder(getPrefix()).append(".").append(field).toString();
 	}
-	
-	
+
+
 	/**
 	 * Translates a value given by the GUI to one in the database
 	 * @param fieldvalue As usable by the database (usually something hardly descriptive like 'field01' or 'intfield07')
@@ -285,7 +287,7 @@ public class ContactSearchtermSqlConverter  implements ContactSearchTermConverte
  		else
  			return fieldname;
  	}
-	
+
  	/**
  	 * @return the prefix our database queries usually use to refer to a table.
  	 */

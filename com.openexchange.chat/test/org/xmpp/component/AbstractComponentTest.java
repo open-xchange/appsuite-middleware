@@ -28,7 +28,7 @@ import org.xmpp.packet.IQ.Type;
 /**
  * Basic tests for the {@link AbstractComponent} implementation. The initial
  * implementation of this class has been tracked in JIRA as TINDER-16.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a
  *      href="http://www.igniterealtime.org/issues/browse/TINDER-16">Tinder&nbsp;&nbsp;bugtracker:&nbsp;TINDER-16</a>
@@ -38,7 +38,7 @@ public class AbstractComponentTest {
 	/**
 	 * This test verifies that the abstract component responds to XMPP Ping
 	 * requests correctly.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-20">Tinder&nbsp;bugtracker:&nbsp;TINDER-20</a>
 	 */
@@ -70,10 +70,10 @@ public class AbstractComponentTest {
 	/**
 	 * Every component should be functional after it has been shutdown and
 	 * restarted.
-	 * 
+	 *
 	 * This test creates a component, starts, stops and restarts it, and
 	 * verifies that it then responds to XMPP Ping requests.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-31">Tinder&nbsp;bugtracker:&nbsp;TINDER-31</a>
 	 */
@@ -106,7 +106,7 @@ public class AbstractComponentTest {
 	 * Verifies that an IQ error is returned if a request is sent from a remote
 	 * entity to be processed by a component that is configured to serve
 	 * entities on the local domain only.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-21">Tinder&nbsp;bugtracker:&nbsp;TINDER-21</a>
 	 */
@@ -142,7 +142,7 @@ public class AbstractComponentTest {
 	 * Verifies that no IQ error is returned if a request is sent from a local
 	 * entity to be processed by a component that is configured to serve
 	 * entities on the local domain only.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-21">Tinder&nbsp;bugtracker:&nbsp;TINDER-21</a>
 	 */
@@ -178,7 +178,7 @@ public class AbstractComponentTest {
 	 * Verifies that no IQ error is returned if a request is sent from a remote
 	 * entity to be processed by a component that is configured to serve
 	 * entities on both the local domain as remote domains.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-21">Tinder&nbsp;bugtracker:&nbsp;TINDER-21</a>
 	 */
@@ -209,12 +209,12 @@ public class AbstractComponentTest {
 		assertEquals(Type.result, response.getType());
 		assertEquals(pingRequest.getID(), response.getID());
 	}
-	
+
 	/**
 	 * Verifies that no IQ error is returned if a request is sent from a local
 	 * entity to be processed by a component that is configured to serve
 	 * entities on both the local domain as remote domains.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-21">Tinder&nbsp;bugtracker:&nbsp;TINDER-21</a>
 	 */
@@ -248,7 +248,7 @@ public class AbstractComponentTest {
 
 	/**
 	 * An AbstractComponent must expose its JID after it has been initialized.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-36">Tinder&nbsp;bugtracker:&nbsp;TINDER-36</a>
 	 */
@@ -267,7 +267,7 @@ public class AbstractComponentTest {
 	/**
 	 * An AbstractComponent can't expose its JID before it has been initialized,
 	 * as the JID is provided in the initialization.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-36">Tinder&nbsp;bugtracker:&nbsp;TINDER-36</a>
 	 */
@@ -282,7 +282,7 @@ public class AbstractComponentTest {
 
 	/**
 	 * An AbstractComponent must expose its JID after it has been restarted
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-36">Tinder&nbsp;bugtracker:&nbsp;TINDER-36</a>
 	 */
@@ -298,7 +298,7 @@ public class AbstractComponentTest {
 		component.start();
 		component.shutdown();
 		component.start();
-		
+
 		// verify
 		assertEquals(jid, component.jid);
 	}
@@ -317,11 +317,11 @@ public class AbstractComponentTest {
 		// verify
 		assertEquals(jid.getDomain(), component.getDomain());
 	}
-	
+
 	/**
 	 * This test verifies that the abstract component responds to XMPP Last Activity
 	 * requests correctly.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-38">Tinder&nbsp;bugtracker:&nbsp;TINDER-38</a>
 	 */
@@ -337,7 +337,7 @@ public class AbstractComponentTest {
 		request.setFrom("from.address");
 		request.setTo(component.jid);
 		final int wait = 2;
-		
+
 		// do magic
 		component.start();
 		Thread.sleep(wait*1000);
@@ -349,11 +349,11 @@ public class AbstractComponentTest {
 		assertEquals(Type.result, result.getType());
 		assertEquals(String.valueOf(wait), result.getChildElement().attributeValue("seconds"));
 	}
-	
+
 	/**
 	 * This test verifies that the abstract component responds to XMPP Last Activity
 	 * requests correctly, after the component has been restarted.
-	 * 
+	 *
 	 * @see <a
 	 *      href="http://www.igniterealtime.org/issues/browse/TINDER-38">Tinder&nbsp;bugtracker:&nbsp;TINDER-38</a>
 	 */
@@ -369,7 +369,7 @@ public class AbstractComponentTest {
 		request.setFrom("from.address");
 		request.setTo(component.jid);
 		final int wait = 2;
-		
+
 		// do magic
 		component.start();
 		Thread.sleep(wait*1000);
@@ -384,7 +384,7 @@ public class AbstractComponentTest {
 		assertEquals(Type.result, result.getType());
 		assertEquals(String.valueOf(wait), result.getChildElement().attributeValue("seconds"));
 	}
-	
+
 	/**
 	 * This test verifies that the abstract component responds to XMPP Entity Time requests.
 	 */
@@ -400,11 +400,11 @@ public class AbstractComponentTest {
 		request.setFrom("from.address");
 		request.setTo(component.jid);
 
-		
+
 		// do magic
 		component.start();
 		component.processPacket(request);
-		
+
 		// verify
 		final IQ result = (IQ) component.getSentPacket();
 		assertNotNull(result);

@@ -58,19 +58,20 @@ import com.openexchange.exception.OXException;
  */
 public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
 
-    private FixtureLoader fixtureLoader;
+    private final FixtureLoader fixtureLoader;
 
 	public MessagingFixtureFactory(FixtureLoader fixtureLoader) {
 		super();
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<Messaging> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Messaging> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
 		return new MessagingFixtures(fixtureName, entries, fixtureLoader);
     }
 
     private class MessagingFixtures  extends DefaultFixtures<Messaging> implements Fixtures<Messaging>{
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Messaging>>  messagings = new HashMap<String,Fixture<Messaging>>();
 
         public MessagingFixtures(final String fixtureName, final Map<String, Map<String, String>> entries, FixtureLoader fixtureLoader) {
@@ -78,6 +79,7 @@ public class MessagingFixtureFactory implements FixtureFactory<Messaging> {
             this.entries = entries;
         }
 
+        @Override
         public Fixture<Messaging> getEntry(final String entryName) throws OXException {
             if (messagings.containsKey(entryName)) {
                 return messagings.get(entryName);

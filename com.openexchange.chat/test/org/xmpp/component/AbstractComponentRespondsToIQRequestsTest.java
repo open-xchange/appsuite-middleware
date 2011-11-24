@@ -29,7 +29,7 @@ import org.xmpp.packet.IQ.Type;
 /**
  * The XMPP specification states that every IQ request should be responded to.
  * These tests verify that this is true even under exterme circumstances.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.igniterealtime.org/issues/browse/TINDER-17">Tinder
  *      bugtracker: TINDER-17</a>
@@ -86,13 +86,13 @@ public class AbstractComponentRespondsToIQRequestsTest {
 		assertTrue(result.isResponse());
 		assertEquals(request.getID(), result.getID());
 		assertEquals(request.getFrom(), result.getTo());
-		assertEquals(request.getTo(), result.getFrom());		
+		assertEquals(request.getTo(), result.getFrom());
 	}
-	
+
 	/**
 	 * If an exception is thrown during the processing of an IQ request,
 	 * AbstractComponent should still return a response to the request.
-	 * 
+	 *
 	 * This test uses a AbstractComponent that throws an exception every time it
 	 * processes an IQ get request.
 	 */
@@ -144,7 +144,7 @@ public class AbstractComponentRespondsToIQRequestsTest {
 	/**
 	 * If the component gets shut down after receiving the request, it should
 	 * still generate an answer.
-	 * 
+	 *
 	 * This test uses an AbstractComponent implementation that takes a
 	 * significant time to process a packet. The component is shut down
 	 * immediately after the request has been delivered to it. The test verifies
@@ -178,7 +178,7 @@ public class AbstractComponentRespondsToIQRequestsTest {
 	/**
 	 * If the component gets shut down after receiving the request, it should
 	 * still generate an answer.
-	 * 
+	 *
 	 * This test uses an AbstractComponent implementation that takes a
 	 * significant time to process a packet. The component is shut down shortly
 	 * after the request has been delivered to it, but before the request was

@@ -58,7 +58,7 @@ import com.openexchange.java.Streams;
 
 /**
  * {@link Rdiffs} - A utility class for rdiff.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Rdiffs {
@@ -72,7 +72,7 @@ public final class Rdiffs {
 
     /**
      * Compute the MD5 checksum for a file and returns the value as a 32 character hex string.
-     * 
+     *
      * @param fname The name of the file to checksum
      * @return The 32 character hex string of the MD5 digest of the file
      * @throws OXException If the file cannot be read
@@ -91,7 +91,7 @@ public final class Rdiffs {
 
     /**
      * Compute the MD5 checksum for a file, returning it in a new buffer.
-     * 
+     *
      * @param fname The name of the file to checksum
      * @return The MD5 digest of the file.
      * @throws OXException If the file cannot be read

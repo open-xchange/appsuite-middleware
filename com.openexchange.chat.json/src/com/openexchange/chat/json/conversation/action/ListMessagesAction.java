@@ -68,14 +68,14 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ListMessagesAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ListMessagesAction extends AbstractChatConversationAction {
 
     /**
      * Initializes a new {@link ListMessagesAction}.
-     * 
+     *
      * @param services
      */
     public ListMessagesAction(final ServiceLookup services) {

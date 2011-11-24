@@ -62,8 +62,8 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class ConfirmWith2IdsRequest extends AbstractConfirmRequest {
 
-    private Task task;
-    private int bodyId;
+    private final Task task;
+    private final int bodyId;
 
     public ConfirmWith2IdsRequest(Task task, int bodyId, int confirmStatus, String confirmMessage, boolean failOnError) {
         super(confirmStatus, confirmMessage, failOnError);

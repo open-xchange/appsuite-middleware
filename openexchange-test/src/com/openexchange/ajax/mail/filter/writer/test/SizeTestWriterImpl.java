@@ -61,7 +61,8 @@ import com.openexchange.ajax.mail.filter.test.AbstractTest;
  */
 public class SizeTestWriterImpl implements TestWriter {
 
-	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
+	@Override
+    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 
 

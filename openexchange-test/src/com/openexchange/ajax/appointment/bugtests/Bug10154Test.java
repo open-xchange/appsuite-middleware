@@ -152,6 +152,7 @@ public final class Bug10154Test extends AbstractAJAXSession {
                 final Participant[] participants = reload.getParticipants();
                 assertEquals("Participants should not be changed.", expected.length, participants.length);
                 final Comparator<Participant> comparator = new Comparator<Participant>() {
+                    @Override
                     public int compare(final Participant o1, final Participant o2) {
                         return o1.getIdentifier() - o2.getIdentifier();
                     }};

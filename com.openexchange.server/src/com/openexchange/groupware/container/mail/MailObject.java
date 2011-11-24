@@ -169,7 +169,7 @@ public class MailObject {
 
     /**
      * Sets whether this mail is transported to an internal recipient or not.
-     * 
+     *
      * @param internalRecipient <code>true</code> for internal recipient; otherwise <code>false</code>
      */
     public void setInternalRecipient(final boolean internalRecipient) {

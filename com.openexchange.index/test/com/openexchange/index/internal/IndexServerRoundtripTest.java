@@ -63,12 +63,12 @@ import com.openexchange.tools.sql.SQLTestCase;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexServerRoundtripTest extends SQLTestCase {
-    
+
     private Connection con;
-    
+
     private DBProvider dbProvider;
-    
-    
+
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -76,10 +76,10 @@ public class IndexServerRoundtripTest extends SQLTestCase {
         con = dbProvider.getWriteConnection(null);
         con.createStatement().executeUpdate("DELETE FROM index_servers");
     }
-    
+
     public void testIndexServerCreation() throws OXException {
         IndexServerImpl expected = createIndexServer();
-        
+
         // List all servers and check the inserted one
         List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         boolean found = false;
@@ -90,12 +90,12 @@ public class IndexServerRoundtripTest extends SQLTestCase {
                 break;
             }
         }
-        
+
         if (!found) {
             fail("Did not find the inserted server.");
         }
     }
-    
+
     public void testIndexServerModification() throws OXException {
         IndexServerImpl expected = createIndexServer();
         expected.setConnectionTimeout(32);
@@ -104,7 +104,7 @@ public class IndexServerRoundtripTest extends SQLTestCase {
         expected.setSoTimeout(64);
         expected.setUrl("http://4.3.2.1:5008");
         ConfigIndexMysql.getInstance().modifyIndexServer(con, expected);
-        
+
         // List all servers and check the modified one
         List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         boolean found = false;
@@ -115,15 +115,15 @@ public class IndexServerRoundtripTest extends SQLTestCase {
                 break;
             }
         }
-        
+
         if (!found) {
             fail("Did not find the modified server.");
         }
     }
-    
+
     public void testIndexServerDeletion() throws OXException {
         IndexServerImpl expected = createIndexServer();
-        
+
         // List all servers and check the inserted one
         List<IndexServer> servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         boolean found = false;
@@ -134,11 +134,11 @@ public class IndexServerRoundtripTest extends SQLTestCase {
                 break;
             }
         }
-        
+
         if (!found) {
             fail("Did not find the modified server.");
         }
-        
+
         ConfigIndexMysql.getInstance().unregisterIndexServer(con, expected.getId(), false);
         servers = ConfigIndexMysql.getInstance().getAllIndexServers(con);
         found = false;
@@ -148,16 +148,16 @@ public class IndexServerRoundtripTest extends SQLTestCase {
                 break;
             }
         }
-        
+
         if (found) {
             fail("Server was not deleted");
         }
     }
-    
+
     private IndexServerImpl createIndexServer() throws OXException {
         return IndexTestTool.createIndexServer(con);
     }
-    
+
     private void assertServers(IndexServer indexServer, IndexServer actual) {
         assertEquals("Id and Url were not equal.", indexServer, actual);
         assertEquals("Connection timeout was not equal.", indexServer.getConnectionTimeout(), actual.getConnectionTimeout());
@@ -165,10 +165,10 @@ public class IndexServerRoundtripTest extends SQLTestCase {
         assertEquals("Max indices was not equal.", indexServer.getMaxIndices(), actual.getMaxIndices());
         assertEquals("Socket timeout was not equal.", indexServer.getSoTimeout(), actual.getSoTimeout());
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
-        con.createStatement().executeUpdate("DELETE FROM index_servers");        
+        con.createStatement().executeUpdate("DELETE FROM index_servers");
         dbProvider.releaseWriteConnection(null, con);
         super.tearDown();
     }

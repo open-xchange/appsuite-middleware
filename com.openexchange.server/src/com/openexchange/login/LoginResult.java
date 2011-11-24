@@ -90,7 +90,7 @@ public interface LoginResult {
 
     /**
      * Checks if this result has warnings.
-     * 
+     *
      * @return <code>true</code> if this result has warnings; otherwise <code>false</code>
      */
     boolean hasWarnings();
@@ -99,21 +99,21 @@ public interface LoginResult {
      * Gets the warnings contained in this result.
      * <p>
      * Modifying methods are <b>NOT</b> supported by returned {@link Collection}!
-     * 
+     *
      * @return The (possibly empty) warnings
      */
     Collection<OXException> warnings();
 
     /**
      * Adds specified warning to this result.
-     * 
+     *
      * @param warning The warning to add
      */
     void addWarning(OXException warning);
 
     /**
      * Adds specified warnings to this result.
-     * 
+     *
      * @param warnings The warnings to add
      */
     void addWarnings(Collection<? extends OXException> warnings);

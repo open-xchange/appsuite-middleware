@@ -160,6 +160,7 @@ public class Bug15354Test extends AbstractAJAXSession {
         Throwable getThrowable() {
             return t;
         }
+        @Override
         public void run() {
             Random rand = new Random(System.currentTimeMillis());
             try {

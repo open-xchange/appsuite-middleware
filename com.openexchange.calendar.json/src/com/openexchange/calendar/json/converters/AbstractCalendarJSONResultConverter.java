@@ -63,13 +63,13 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractCalendarJSONResultConverter}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public abstract class AbstractCalendarJSONResultConverter implements ResultConverter {
 
     protected static final String OUTPUT_FORMAT = "json";
-    
+
     @Override
     public String getOutputFormat() {
         return OUTPUT_FORMAT;

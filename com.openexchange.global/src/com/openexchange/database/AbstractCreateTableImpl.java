@@ -86,7 +86,7 @@ public abstract class AbstractCreateTableImpl implements CreateTableService {
 
     /**
      * Gets the CREATE-TABLE statements.
-     * 
+     *
      * @return The CREATE-TABLE statements
      */
     protected abstract String[] getCreateStatements();

@@ -54,7 +54,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ChatService} - The chat service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatService {
@@ -71,7 +71,7 @@ public interface ChatService {
 
     /**
      * Gets the access to specified chat account.
-     * 
+     *
      * @param accountId The account identifier; e.g. "0" for default account
      * @return The access to specified chat account
      * @throws OXException If access cannot be provided; e.g. because no such account exists
@@ -81,14 +81,14 @@ public interface ChatService {
 
     /**
      * Gets the account manager for this chat service.
-     * 
+     *
      * @return The account manager
      */
     ChatAccountManager getAccountManager();
 
     /**
      * Gets the service's identifier.
-     * 
+     *
      * @return The identifier
      * @see #DEFAULT_SERVICE
      */
@@ -96,7 +96,7 @@ public interface ChatService {
 
     /**
      * Gets the service's display name.
-     * 
+     *
      * @return The display name
      */
     String getDisplayName();

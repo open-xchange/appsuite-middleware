@@ -92,10 +92,12 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
         this(api, contentType, DEFAULT_COLUMNS);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -107,6 +109,7 @@ public class VisibleFoldersRequest extends AbstractFolderRequest<VisibleFoldersR
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
     }
 
+    @Override
     public VisibleFoldersParser getParser() {
         return new VisibleFoldersParser(columns, true);
     }

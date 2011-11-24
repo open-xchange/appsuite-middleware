@@ -74,7 +74,7 @@ public class ConfigurationFile extends AbstractConfigSource {
 
     private static final String locationProperty = "com.openexchange.mail.autoconfig.path";
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     public ConfigurationFile(ServiceLookup services) {
         this.services = services;

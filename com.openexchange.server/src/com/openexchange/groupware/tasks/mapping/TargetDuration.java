@@ -60,7 +60,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * Methods for iterated processing of the target duration of task objects.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class TargetDuration implements Mapper<Long> {

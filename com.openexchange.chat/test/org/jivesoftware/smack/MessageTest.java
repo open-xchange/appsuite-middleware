@@ -216,7 +216,7 @@ public class MessageTest extends SmackTestCase {
         PacketCollector collector = getConnection(0).createPacketCollector(new MessageTypeFilter(Message.Type.chat));
         PacketCollector coll3 = conn3.createPacketCollector(new MessageTypeFilter(Message.Type.chat));
 
-        // User1 sends a message to the bare JID of User0 
+        // User1 sends a message to the bare JID of User0
         Chat chat = getConnection(1).getChatManager().createChat(getBareJID(0), null);
         chat.sendMessage("Test 1");
         chat.sendMessage("Test 2");
@@ -328,7 +328,7 @@ public class MessageTest extends SmackTestCase {
         PacketCollector coll3 = conn3.createPacketCollector(new MessageTypeFilter(Message.Type.chat));
         PacketCollector coll4 = conn4.createPacketCollector(new MessageTypeFilter(Message.Type.chat));
 
-        // Send a message from this resource to indicate most recent activity 
+        // Send a message from this resource to indicate most recent activity
         conn3.sendPacket(new Message("admin@" + getServiceName()));
 
         // User1 sends a message to the bare JID of User0
@@ -399,6 +399,7 @@ public class MessageTest extends SmackTestCase {
         assertEquals("Test 2", message.getBody());
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

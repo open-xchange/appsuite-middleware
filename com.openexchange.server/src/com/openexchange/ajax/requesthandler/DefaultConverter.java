@@ -60,7 +60,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DefaultConverter} - The default {@link Converter} implementation.
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class DefaultConverter implements Converter {
@@ -83,7 +83,7 @@ public class DefaultConverter implements Converter {
 
     /**
      * Adds specified result converter.
-     * 
+     *
      * @param converter The converter
      */
     public void addConverter(final ResultConverter converter) {
@@ -135,7 +135,7 @@ public class DefaultConverter implements Converter {
 
     /**
      * Removes given result converter.
-     * 
+     *
      * @param resultConverter The result converter
      */
     public void removeConverter(final ResultConverter resultConverter) {
@@ -154,7 +154,7 @@ public class DefaultConverter implements Converter {
 
     /**
      * Gets the shortest path from <code>from</code> to <code>to</code>.
-     * 
+     *
      * @param from The from format
      * @param to The target format
      * @return The calculated path

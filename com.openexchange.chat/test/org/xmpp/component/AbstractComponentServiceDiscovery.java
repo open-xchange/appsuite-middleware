@@ -33,7 +33,7 @@ import org.xmpp.packet.IQ.Type;
  * The {@link AbstractComponent} implementation offers basic responses to
  * Service Discovery requests. These tests verifies that these requests are
  * responded to.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.igniterealtime.org/issues/browse/TINDER-19">Tinder
  *      bugtracker: TINDER-19</a>
@@ -49,7 +49,7 @@ public class AbstractComponentServiceDiscovery {
 	/**
 	 * Makes sure that the <tt>response</tt> field of this class is assigned a
 	 * fresh response to a service discovery information request.
-	 * 
+	 *
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -169,7 +169,7 @@ public class AbstractComponentServiceDiscovery {
 
 		fail("The component should have the 'jabber:iq:last' feature.");
 	}
-	
+
 	/**
 	 * As the component supports XEP-0202, its service discovery response should
 	 * include the entity-time feature.
@@ -192,7 +192,7 @@ public class AbstractComponentServiceDiscovery {
 		}
 
 		fail("The component should have the 'urn:xmpp:time' feature.");
-	}	
+	}
 	/**
 	 * Verifies that namespaces returned by discoInfoFeatureNamespaces() are in disco info responses.
 	 */
@@ -202,16 +202,16 @@ public class AbstractComponentServiceDiscovery {
 		// setup
 		final String ns1 = "NS1";
 		final String ns2 = "NS2";
-		
+
 		final DummyAbstractComponent component = new DummyAbstractComponent() {
-			
+
 			@Override
 			protected String[] discoInfoFeatureNamespaces() {
-				final String[] result = {ns1, ns2}; 
+				final String[] result = {ns1, ns2};
 				return result;
-			}			
+			}
 		};
-		
+
 		// do magic
 		final IQ request = new IQ();
 		request.setType(Type.get);
@@ -219,11 +219,11 @@ public class AbstractComponentServiceDiscovery {
 		component.start();
 		component.processPacket(request);
 		response = (IQ) component.getSentPacket();
-		
+
 		// verify
 		boolean has1 = false;
 		boolean has2 = false;
-		
+
 		final Element childElement = response.getChildElement();
 		final Iterator<Element> iter = childElement.elementIterator("feature");
 		while (iter.hasNext()) {
@@ -235,7 +235,7 @@ public class AbstractComponentServiceDiscovery {
 				has2 = true;
 			}
 		}
-		
+
 		assertTrue(has1);
 		assertTrue(has2);
 	}

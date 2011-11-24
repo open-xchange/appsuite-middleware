@@ -76,10 +76,12 @@ public final class ListRequest extends AbstractFolderRequest<ListResponse> {
         this.lastModified = lastModified;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PROPFIND;
     }
 
+    @Override
     public RequestEntity getEntity() throws IOException {
         final Element objectmode = new Element("objectmode", XmlServlet.NS);
         objectmode.addContent("NEW_AND_MODIFIED,DELETED");
@@ -92,6 +94,7 @@ public final class ListRequest extends AbstractFolderRequest<ListResponse> {
         return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
+    @Override
     public ListParser getParser() {
         return new ListParser();
     }

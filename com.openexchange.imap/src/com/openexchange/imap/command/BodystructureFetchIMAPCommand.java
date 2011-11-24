@@ -67,7 +67,7 @@ import com.sun.mail.imap.protocol.UID;
  * This method avoids calling JavaMail's fetch() methods which implicitly requests whole message envelope (FETCH 1:* (ENVELOPE INTERNALDATE
  * RFC822.SIZE)) when later working on returned <code>javax.mail.Message</code> objects.
  * </p>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BODYSTRUCTURE[]> {
@@ -92,7 +92,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
 
     /**
      * Initializes a new {@link BodystructureFetchIMAPCommand}.
-     * 
+     *
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
@@ -120,7 +120,7 @@ public final class BodystructureFetchIMAPCommand extends AbstractIMAPCommand<BOD
 
     /**
      * Initializes a new {@link BodystructureFetchIMAPCommand}.
-     * 
+     *
      * @param imapFolder The IMAP folder providing connected protocol
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not

@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link DocumentContent} - The content of a document for input for or result from a conversion operation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface DocumentContent {
@@ -64,7 +64,7 @@ public interface DocumentContent {
      * This method returns an <code>InputStream</code> representing the data and throws the appropriate exception if it can not do so. Note
      * that a new <code>InputStream</code> object must be returned each time this method is called, and the stream must be positioned at the
      * beginning of the data.
-     * 
+     *
      * @return An input stream
      * @throws OXException If input stream cannot be returned
      */
@@ -72,7 +72,7 @@ public interface DocumentContent {
 
     /**
      * Gets the optional file carrying the content provided by {@link #getInputStream()}.
-     * 
+     *
      * @return The file or <code>null</code>
      * @throws OXException If file cannot be returned
      */
@@ -81,7 +81,7 @@ public interface DocumentContent {
     /**
      * This method returns the MIME type of the data in the form of a string. It should always return a valid type. It is suggested that
      * getContentType return "application/octet-stream" if the InputContent implementation can not determine the data type.
-     * 
+     *
      * @return The MIME Type
      */
     public String getContentType();
@@ -90,7 +90,7 @@ public interface DocumentContent {
      * Return the <i>name</i> of this object where the name of the object is dependent on the nature of the underlying objects. InputContent
      * encapsulating files may choose to return the filename of the object. (Typically this would be the last component of the filename, not
      * an entire pathname.)
-     * 
+     *
      * @return The name
      */
     public String getName();

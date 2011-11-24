@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link Roster} - Represents a user's roster, which is the collection of users a person receives presence updates for.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface Roster {
@@ -69,7 +69,7 @@ public interface Roster {
     /**
      * Returns the presence info for a particular user. If the user is offline, or if no presence data is available (such as when you are
      * not subscribed to the user's presence updates), unavailable presence will be returned.
-     * 
+     *
      * @param user The user to receive the presence from
      * @return The user's current presence, or unavailable presence if the user is offline or if no presence information is available.
      * @throws OXException If presence cannot be returned
@@ -78,14 +78,14 @@ public interface Roster {
 
     /**
      * Adds a listener to this roster. The listener will be fired anytime one or more changes to the roster are pushed from the server.
-     * 
+     *
      * @param rosterListener A roster listener.
      */
     public void addRosterListener(RosterListener rosterListener) throws OXException;
 
     /**
      * Removes a listener from this roster. The listener will be fired anytime one or more changes to the roster are pushed from the server.
-     * 
+     *
      * @param rosterListener A roster listener.
      */
     public void removeRosterListener(RosterListener rosterListener) throws OXException;

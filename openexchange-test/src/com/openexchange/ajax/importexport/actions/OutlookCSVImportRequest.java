@@ -72,6 +72,7 @@ public final class OutlookCSVImportRequest extends AbstractImportRequest {
         this.failOnError = failOnError;
     }
 
+    @Override
     public OutlookCSVImportParser getParser() {
         return new OutlookCSVImportParser(failOnError);
     }

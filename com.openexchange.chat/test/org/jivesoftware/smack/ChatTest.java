@@ -124,6 +124,7 @@ public class ChatTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

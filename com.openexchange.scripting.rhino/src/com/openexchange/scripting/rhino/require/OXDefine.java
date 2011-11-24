@@ -9,9 +9,9 @@ import org.mozilla.javascript.Wrapper;
 
 
 public class OXDefine extends ScriptableObject implements Function {
-	
-	private DependencyResolver resolver; 
-	private String defaultModuleName;
+
+	private final DependencyResolver resolver;
+	private final String defaultModuleName;
 
 	public OXDefine(String defaultModuleName, DependencyResolver resolver) {
 		this.defaultModuleName = defaultModuleName;
@@ -46,7 +46,7 @@ public class OXDefine extends ScriptableObject implements Function {
 					throw new IllegalArgumentException("Invalid call to 'define'");
 				}
 			}
-			
+
 			if (arg instanceof Function) {
 				if (factory == null) {
 					factory = (Function) arg;
@@ -55,23 +55,23 @@ public class OXDefine extends ScriptableObject implements Function {
 				}
 			}
 		}
-		
+
 		if (factory == null) {
 			throw new IllegalArgumentException("Invalid call to 'define'");
 		}
-		
+
 		if (id == null) {
 			id = defaultModuleName;
 		}
 		if (dependencies == null) {
 			dependencies = new String[]{"require"}; // TODO: exports, module
-			
+
 		}
 		Object[] resolved = new Object[dependencies.length];
 		for (int i = 0; i < dependencies.length; i++) {
 			resolved[i] = resolver.get(dependencies[i], cx, scope);
 		}
-		
+
 		final String theId = id;
 		DeferredResolution.awaitResolution(cx, scope, thisObj, resolved, factory, new Callback() {
 
@@ -79,9 +79,9 @@ public class OXDefine extends ScriptableObject implements Function {
 			public void handle(Object o) {
 				resolver.remember(theId, o);
 			}
-			
+
 		});
-		
+
 		return null;
 	}
 

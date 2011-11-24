@@ -68,18 +68,22 @@ public class GetRequest extends AbstractUserRequest<GetResponse> {
         this.timeZone = timeZone;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, "get"), new Parameter(AJAXServlet.PARAMETER_ID, userId) };
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser(true, userId, timeZone);
     }

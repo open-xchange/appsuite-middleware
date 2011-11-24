@@ -9,7 +9,7 @@ public class Bug17513Test extends AbstractManagedContactTest {
 		super(name);
 	}
 
-	private String json =
+	private final String json =
 		"{\"anniversary\":\"1970-01-01T00:00:00.000Z\",\"last_name\":\"Aussendorf\",\"first_name\":\"Maik\",\"display_name\":\"Maik Aussendorf\",\"folder_id\":497}";
 
 	public void testResultIsNotEmpty() throws Exception {

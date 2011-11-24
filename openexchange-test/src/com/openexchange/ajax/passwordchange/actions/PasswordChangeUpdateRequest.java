@@ -94,7 +94,8 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		final JSONObject retval = new JSONObject();
 		retval.put("new_password", newPassword);
 		retval.put("old_password", oldPassword);
@@ -106,7 +107,8 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
@@ -115,7 +117,8 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE));
 		return params.toArray(new Parameter[params.size()]);
@@ -126,7 +129,8 @@ public final class PasswordChangeUpdateRequest extends AbstractPasswordChangeRes
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public ResourceUpdateParser getParser() {
+	@Override
+    public ResourceUpdateParser getParser() {
 		return new ResourceUpdateParser(failOnError);
 	}
 

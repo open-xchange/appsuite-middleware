@@ -87,20 +87,24 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
         this.tree = tree;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = MailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
         return json;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return AJAXRequest.Method.PUT;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter("action", "validate"),
@@ -108,10 +112,12 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
         };
     }
 
+    @Override
     public AbstractAJAXParser<MailAccountValidateResponse> getParser() {
         return new MailAccountValidateParser(failOnError);
     }
 
+    @Override
     public String getServletPath() {
         return "/ajax/account";
     }
@@ -119,26 +125,32 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
     private MailAccount wrap(final MailAccountDescription acc) {
         return new MailAccount() {
 
+            @Override
             public String getConfirmedHam() {
                 return acc.getConfirmedHam();
             }
 
+            @Override
             public String getConfirmedSpam() {
                 return acc.getConfirmedSpam();
             }
 
+            @Override
             public String getDrafts() {
                 return acc.getDrafts();
             }
 
+            @Override
             public int getId() {
                 return acc.getId();
             }
 
+            @Override
             public String getLogin() {
                 return acc.getLogin();
             }
 
+            @Override
             public String generateMailServerURL() {
                 try {
                     return acc.generateMailServerURL();
@@ -147,54 +159,67 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
                 }
             }
 
+            @Override
             public int getMailPort() {
                 return acc.getMailPort();
             }
 
+            @Override
             public String getMailProtocol() {
                 return acc.getMailProtocol();
             }
 
+            @Override
             public String getMailServer() {
                 return acc.getMailServer();
             }
 
+            @Override
             public boolean isMailSecure() {
                 return acc.isMailSecure();
             }
 
+            @Override
             public String getName() {
                 return acc.getName();
             }
 
+            @Override
             public String getReplyTo() {
                 return acc.getReplyTo();
             }
 
+            @Override
             public String getPassword() {
                 return acc.getPassword();
             }
 
+            @Override
             public String getPrimaryAddress() {
                 return acc.getPrimaryAddress();
             }
 
+            @Override
             public String getPersonal() {
                 return acc.getPersonal();
             }
 
+            @Override
             public String getSent() {
                 return acc.getSent();
             }
 
+            @Override
             public String getSpam() {
                 return acc.getSpam();
             }
 
+            @Override
             public String getSpamHandler() {
                 return acc.getSpamHandler();
             }
 
+            @Override
             public String generateTransportServerURL() {
                 try {
                     return acc.generateTransportServerURL();
@@ -203,74 +228,92 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
                 }
             }
 
+            @Override
             public int getTransportPort() {
                 return acc.getTransportPort();
             }
 
+            @Override
             public String getTransportProtocol() {
                 return acc.getTransportProtocol();
             }
 
+            @Override
             public String getTransportServer() {
                 return acc.getTransportServer();
             }
 
+            @Override
             public boolean isTransportSecure() {
                 return acc.isTransportSecure();
             }
 
+            @Override
             public String getTrash() {
                 return acc.getTrash();
             }
 
+            @Override
             public int getUserId() {
                 return -1;
             }
 
+            @Override
             public boolean isDefaultAccount() {
                 return false;
             }
 
+            @Override
             public String getTransportLogin() {
                 return acc.getTransportLogin();
             }
 
+            @Override
             public String getTransportPassword() {
                 return acc.getTransportPassword();
             }
 
+            @Override
             public boolean isUnifiedINBOXEnabled() {
                 return acc.isUnifiedINBOXEnabled();
             }
 
+            @Override
             public String getConfirmedHamFullname() {
                 return acc.getConfirmedHamFullname();
             }
 
+            @Override
             public String getConfirmedSpamFullname() {
                 return acc.getConfirmedSpamFullname();
             }
 
+            @Override
             public String getDraftsFullname() {
                 return acc.getDraftsFullname();
             }
 
+            @Override
             public String getSentFullname() {
                 return acc.getSentFullname();
             }
 
+            @Override
             public String getSpamFullname() {
                 return acc.getSpamFullname();
             }
 
+            @Override
             public String getTrashFullname() {
                 return acc.getTrashFullname();
             }
 
+            @Override
             public void addProperty(final String name, final String value) {
                 acc.addProperty(name, value);
             }
 
+            @Override
             public Map<String, String> getProperties() {
                 return acc.getProperties();
             }

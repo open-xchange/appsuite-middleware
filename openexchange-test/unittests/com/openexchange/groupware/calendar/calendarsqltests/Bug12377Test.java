@@ -77,6 +77,7 @@ public class Bug12377Test extends CalendarSqlTest {
             final int[] changeExceptionId = new int[1];
             calendarListener.setVerifyer(new Verifyer() {
 
+                @Override
                 public void verify(final TestCalendarListener calendarListener) {
                     assertEquals("createdChangeExceptionInRecurringAppointment", calendarListener.getCalledMethodName());
                     final CalendarDataObject masterFromEvent = (CalendarDataObject) calendarListener.getArg(0);

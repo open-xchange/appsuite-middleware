@@ -80,7 +80,7 @@ import com.openexchange.timer.TimerService;
 
 /**
  * {@link CommonsHttpSolrServerManagement}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CommonsHttpSolrServerManagement {
@@ -100,7 +100,7 @@ public final class CommonsHttpSolrServerManagement {
         map = new LockBasedConcurrentMap<IndexUrl, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<IndexUrl, Wrapper>(maxCapacity));
         this.maxLifeMillis = maxLifeMillis;
         final Runnable task = new Runnable() {
-            
+
             @Override
             public void run() {
                 shrink();
@@ -112,7 +112,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Puts specified mapping into this cache (if not already present)
-     * 
+     *
      * @param indexUrl The index URL
      * @param solrServer The Solr server
      * @return <code>true</code> for successful put; otherwise <code>false</code>
@@ -159,7 +159,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Closes specified Solr server.
-     * 
+     *
      * @param server The Solr server to close
      */
     public static void closeSolrServer(final CommonsHttpSolrServer server) {
@@ -176,7 +176,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Checks is there is a mapping for specified index URL.
-     * 
+     *
      * @param indexUrl The index URL
      * @return <code>true</code> if there is a mapping; otherwise <code>false</code>
      */
@@ -186,7 +186,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Gets a new Solr server associated with specified index URL.
-     * 
+     *
      * @param indexUrl The index URL
      * @return The new Solr server
      * @throws OXException If creation of a new Solr server fails
@@ -197,7 +197,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Gets the Solr server without a SO_TIMEOUT set which is based on specified server's settings.
-     * 
+     *
      * @param solrServer The base server
      * @return The Solr server without a SO_TIMEOUT applied
      * @throws OXException If creation of a new Solr server fails
@@ -228,7 +228,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Gets a new Solr server without a SO_TIMEOUT set which is associated with specified index URL either from cache or newly established.
-     * 
+     *
      * @param indexUrl The index URL
      * @return The new Solr server without a SO_TIMEOUT applied
      * @throws OXException If creation of a new Solr server fails
@@ -239,7 +239,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Gets the Solr server associated with specified index URL either from cache or newly established.
-     * 
+     *
      * @param indexUrl The index URL
      * @return The Solr server
      * @throws OXException If creation of a new Solr server fails
@@ -337,7 +337,7 @@ public final class CommonsHttpSolrServerManagement {
 
     /**
      * Gets the Solr server associated with specified index URL.
-     * 
+     *
      * @param indexUrl The index URL
      * @return The Solr server or <code>null</code> if none available, yet
      */
@@ -375,7 +375,7 @@ public final class CommonsHttpSolrServerManagement {
         private final CommonsHttpSolrServer value;
 
         private final Lock readLock;
-        
+
         private final Lock writeLock;
 
         private volatile long lastAccessed;

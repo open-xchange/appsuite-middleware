@@ -71,10 +71,12 @@ public abstract class AbstractLinkRequest<T extends AbstractAJAXResponse> implem
         super();
     }
 
+    @Override
     public String getServletPath() {
         return LINK_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

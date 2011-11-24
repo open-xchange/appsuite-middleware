@@ -79,6 +79,7 @@ public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return new JSONObject();
     }
@@ -86,6 +87,7 @@ public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -93,13 +95,15 @@ public class ConfigRequest extends AbstractMailFilterRequest<ConfigResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CONFIG),
         };
     }
 
-	public ConfigParser getParser() {
+	@Override
+    public ConfigParser getParser() {
 		return new ConfigParser(failOnError);
 	}
 }

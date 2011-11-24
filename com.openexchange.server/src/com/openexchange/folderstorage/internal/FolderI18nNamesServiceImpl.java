@@ -62,7 +62,7 @@ import com.openexchange.i18n.I18nService;
 
 /**
  * {@link FolderI18nNamesServiceImpl} - Provides the localized folder names for specified folder modules.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService {
@@ -71,7 +71,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static FolderI18nNamesServiceImpl getInstance() {
@@ -131,7 +131,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
 
     /**
      * Adds specified service.
-     * 
+     *
      * @param service The service to add
      */
     public void addService(final I18nService service) {
@@ -141,7 +141,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
 
     /**
      * Removes specified service.
-     * 
+     *
      * @param service The service to remove
      */
     public void removeService(final I18nService service) {

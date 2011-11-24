@@ -167,7 +167,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
     /**
      * Validates specified account description.
-     * 
+     *
      * @param accountDescription The account description
      * @param session The associated session
      * @param warnings The warnings list

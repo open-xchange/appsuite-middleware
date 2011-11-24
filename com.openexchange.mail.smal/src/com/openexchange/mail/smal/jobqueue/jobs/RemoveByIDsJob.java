@@ -60,7 +60,7 @@ import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link RemoveByIDsJob} - Removes mails from index by specified identifiers.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RemoveByIDsJob extends AbstractMailSyncJob {
@@ -94,7 +94,7 @@ public final class RemoveByIDsJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link RemoveByIDsJob}.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -113,7 +113,7 @@ public final class RemoveByIDsJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ranking
-     * 
+     *
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
@@ -124,7 +124,7 @@ public final class RemoveByIDsJob extends AbstractMailSyncJob {
 
     /**
      * Sets the mails identifiers
-     * 
+     *
      * @param mailIds The identifiers to set
      * @return This folder job
      */

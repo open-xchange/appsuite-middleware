@@ -31,11 +31,13 @@ public class ValidationChainTest extends TestCase{
 
 	private static class TestValidation1 implements InfostoreValidator{
 
-		public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+		@Override
+        public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
 			return new DocumentMetadataValidation();
 		}
 
-		public String getName(){
+		@Override
+        public String getName(){
 			return "TestValidation1";
 		}
 
@@ -43,13 +45,15 @@ public class ValidationChainTest extends TestCase{
 
 	private static class TestValidation2 implements InfostoreValidator{
 
-		public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+		@Override
+        public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
 			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "sucks");
 			return validation;
 		}
 
-		public String getName(){
+		@Override
+        public String getName(){
 			return "TestValidation2";
 		}
 
@@ -57,14 +61,16 @@ public class ValidationChainTest extends TestCase{
 
 	private static class TestValidation3 implements InfostoreValidator{
 
-		public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
+		@Override
+        public DocumentMetadataValidation validate(final DocumentMetadata metadata) {
 			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "stinks");
 			validation.setError(Metadata.DESCRIPTION_LITERAL, "stinks");
 			return validation;
 		}
 
-		public String getName(){
+		@Override
+        public String getName(){
 			return "TestValidation3";
 		}
 

@@ -431,7 +431,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             throw handleRuntimeException(e);
         }
     }
-    
+
     @Override
     public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException {
         try {
@@ -1497,13 +1497,13 @@ public final class ElasticSearchAdapter implements IndexAdapter {
     @Override
     public void addContent(final MailMessage mail, final Session session) throws OXException {
         // TODO Auto-generated method stub
-        
+
     }
 
 	@Override
 	public void addContents() throws OXException {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

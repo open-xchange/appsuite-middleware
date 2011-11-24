@@ -67,7 +67,7 @@ public class Bug11210Test extends CalendarSqlTest {
 
     private CalendarDataObject sequenceMonthly;
 
-    private List<CalendarDataObject> allAppointments = new ArrayList<CalendarDataObject>();
+    private final List<CalendarDataObject> allAppointments = new ArrayList<CalendarDataObject>();
 
     private int THIS_YEAR, THIS_MONTH;
 

@@ -324,7 +324,8 @@ public class ResourceTest extends AbstractResourceTest{
 
 	// TESTS FOR PROPERTIES
 
-	public Object creationDate() throws OXException {
+	@Override
+    public Object creationDate() throws OXException {
 		final Date now = new Date();
 		WebdavResource res = createResource();
 		assertEquals(Utils.convert(res.getCreationDate()), res.getProperty("DAV:", "creationdate").getValue());
@@ -343,7 +344,8 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object displayName() throws OXException {
+	@Override
+    public Object displayName() throws OXException {
 		/*WebdavResource res = createResource();
 		String defaultDispName = res.getUrl().substring(res.getUrl().lastIndexOf("/")+1);
 		assertEquals(res.getDisplayName(), res.getProperty("DAV:", "displayname").getValue());
@@ -367,7 +369,8 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object contentLanguage() throws OXException {
+	@Override
+    public Object contentLanguage() throws OXException {
 		/*WebdavResource res = createResource();
 		String defaultLanguage = "en";
 		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
@@ -398,7 +401,8 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object contentLength() throws OXException {
+	@Override
+    public Object contentLength() throws OXException {
 		WebdavResource res = createResource();
 		final Long defaultLength = 0l;
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
@@ -439,7 +443,8 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object contentType() throws OXException {
+	@Override
+    public Object contentType() throws OXException {
 		WebdavResource res = createResource();
 
 		res.setContentType("text/plain");
@@ -459,7 +464,8 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object etag() throws OXException {
+	@Override
+    public Object etag() throws OXException {
 		WebdavResource res = createResource();
 		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag").getValue());
 
@@ -495,7 +501,8 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object lastModified() throws OXException {
+	@Override
+    public Object lastModified() throws OXException {
 		Date now = new Date();
 		final WebdavResource res = createResource();
 		assertEquals(Utils.convert(res.getLastModified()), res.getProperty("DAV:", "getlastmodified").getValue());
@@ -512,7 +519,8 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object resourceType() throws OXException {
+	@Override
+    public Object resourceType() throws OXException {
 		final WebdavResource res = createResource();
 		assertNotNull(res.getProperty("DAV:", "resourcetype"));
 		assertNull(res.getProperty("DAV:", "resourcetype").getValue()); // Is set, but is empty
@@ -521,17 +529,20 @@ public class ResourceTest extends AbstractResourceTest{
 		return null;
 	}
 
-	public Object lockDiscovery() throws OXException {
+	@Override
+    public Object lockDiscovery() throws OXException {
 		// Tested in Lock Test
 		return null;
 	}
 
-	public Object supportedLock() throws OXException {
+	@Override
+    public Object supportedLock() throws OXException {
 		// Tested in Lock Test
 		return null;
 	}
 
-	public Object source() throws OXException {
+	@Override
+    public Object source() throws OXException {
 		/*WebdavResource res = createResource();
 		try {
 			res.setSource("http://localhost/theSecretSource");

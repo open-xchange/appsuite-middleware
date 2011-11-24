@@ -56,7 +56,7 @@ import com.openexchange.preview.PreviewDocument;
 
 /**
  * {@link JODCPreviewDocument}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class JODCPreviewDocument implements PreviewDocument {

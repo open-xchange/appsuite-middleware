@@ -79,7 +79,7 @@ public final class LocaleTools {
 
     /**
      * Gets the sane (non-<code>null</code>) locale for specified locale.
-     * 
+     *
      * @param locale The locale to check for <code>null</code>
      * @return The passed locale or <tt>en_US</tt> if passed locale is <code>null</code>
      */

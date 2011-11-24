@@ -68,6 +68,7 @@ public class RedirectRequest extends AbstractRequest<RedirectResponse> {
         this.jvmRoute = jvmRoute;
     }
 
+    @Override
     public RedirectResponseParser getParser() {
         return new RedirectResponseParser();
     }

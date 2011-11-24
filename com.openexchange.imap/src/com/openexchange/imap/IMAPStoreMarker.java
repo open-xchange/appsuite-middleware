@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * {@link IMAPStoreMarker} - Marker for IMAP store.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPStoreMarker {
@@ -74,7 +74,7 @@ public final class IMAPStoreMarker {
 
     /**
      * Gets the pooled flag
-     * 
+     *
      * @return The pooled flag
      */
     public boolean isPooled() {
@@ -83,7 +83,7 @@ public final class IMAPStoreMarker {
 
     /**
      * Sets the pooled flag
-     * 
+     *
      * @param pooled The pooled flag
      */
     public void setPooled() {
@@ -92,7 +92,7 @@ public final class IMAPStoreMarker {
 
     /**
      * Gets the stamp
-     * 
+     *
      * @return The stamp
      */
     public long getStamp() {
@@ -101,7 +101,7 @@ public final class IMAPStoreMarker {
 
     /**
      * Sets the stamp
-     * 
+     *
      * @param stamp The stamp to set
      */
     public void setStamp(final long stamp) {
@@ -110,7 +110,7 @@ public final class IMAPStoreMarker {
 
     /**
      * Gets the in-use flag.
-     * 
+     *
      * @return The in-use flag
      */
     public boolean isInUse() {
@@ -119,7 +119,7 @@ public final class IMAPStoreMarker {
 
     /**
      * Tries to set the in-use flag.
-     * 
+     *
      * @return <code>true</code> for success; otherwise <code>false</code>
      */
     public boolean markInUse() {

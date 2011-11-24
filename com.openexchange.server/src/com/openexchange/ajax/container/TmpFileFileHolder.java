@@ -59,7 +59,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link TmpFileFileHolder} - The {@link IFileHolder file holder} backed by a temporary {@link File file}.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TmpFileFileHolder implements IFileHolder {
@@ -76,7 +76,7 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     /**
      * Initializes a new {@link TmpFileFileHolder}.
-     * 
+     *
      * @throws OXException If initialization fails
      */
     public TmpFileFileHolder() throws OXException {
@@ -95,7 +95,7 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     /**
      * Gets the newly created file.
-     * 
+     *
      * @return The file
      */
     public File getTmpFile() {
@@ -135,7 +135,7 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     /**
      * Sets the length
-     * 
+     *
      * @param length The length to set
      */
     public void setLength(final long length) {
@@ -144,7 +144,7 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     /**
      * Sets the content type
-     * 
+     *
      * @param contentType The content type to set
      */
     public void setContentType(final String contentType) {
@@ -153,7 +153,7 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     /**
      * Sets the name
-     * 
+     *
      * @param name The name to set
      */
     public void setName(final String name) {
@@ -162,7 +162,7 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     /**
      * Sets the disposition
-     * 
+     *
      * @param disposition The disposition to set
      */
     public void setDisposition(final String disposition) {
@@ -176,7 +176,7 @@ public final class TmpFileFileHolder implements IFileHolder {
      * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
      * machine.
      * </ol>
-     * 
+     *
      * @return An abstract pathname denoting a newly-created empty file
      * @throws OXException If a file could not be created
      */

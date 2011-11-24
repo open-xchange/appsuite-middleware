@@ -70,7 +70,7 @@ import com.openexchange.tools.UnsynchronizedStringWriter;
 
 /**
  * {@link APIResponseRenderer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class APIResponseRenderer implements ResponseRenderer {
@@ -111,7 +111,7 @@ public class APIResponseRenderer implements ResponseRenderer {
      * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
      * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
-     * 
+     *
      * @param response The response to write
      * @param action The request's action
      * @param req The HTTP Servlet request

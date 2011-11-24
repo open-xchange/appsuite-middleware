@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AppointmentResultConverter}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AppointmentResultConverter extends AbstractCalendarJSONResultConverter {

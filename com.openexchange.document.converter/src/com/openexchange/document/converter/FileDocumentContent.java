@@ -73,7 +73,7 @@ public final class FileDocumentContent implements DocumentContent {
 
     /**
      * Initializes a new {@link FileDocumentContent}.
-     * 
+     *
      * @param file The backing file
      */
     public FileDocumentContent(final File file) {
@@ -82,7 +82,7 @@ public final class FileDocumentContent implements DocumentContent {
 
     /**
      * Initializes a new {@link FileDocumentContent}.
-     * 
+     *
      * @param file The backing file
      * @param contentType The content type
      */

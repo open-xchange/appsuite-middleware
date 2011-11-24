@@ -61,8 +61,8 @@ import org.json.JSONObject;
  */
 public class SimpleOXModule {
 
-    private SimpleOXClient client;
-    private String moduleName;
+    private final SimpleOXClient client;
+    private final String moduleName;
 
     public SimpleOXModule(SimpleOXClient client, String moduleName) {
         super();

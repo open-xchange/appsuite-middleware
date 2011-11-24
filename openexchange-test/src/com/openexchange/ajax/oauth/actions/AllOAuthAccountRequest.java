@@ -69,10 +69,12 @@ public class AllOAuthAccountRequest extends AbstractOAuthAccountRequest<AllOAuth
         this.serviceId = serviceId;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
@@ -82,6 +84,7 @@ public class AllOAuthAccountRequest extends AbstractOAuthAccountRequest<AllOAuth
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<? extends AllOAuthAccountResponse> getParser() {
         return new AbstractAJAXParser<AllOAuthAccountResponse>(isFailOnError()) {
 
@@ -92,6 +95,7 @@ public class AllOAuthAccountRequest extends AbstractOAuthAccountRequest<AllOAuth
         };
     }
 
+    @Override
     public Object getBody() {
         return null;
     }

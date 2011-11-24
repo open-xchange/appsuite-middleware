@@ -62,7 +62,7 @@ import com.openexchange.ajax.parser.ResponseParser;
  */
 public class UpdateParser extends AbstractAJAXParser<UpdateResponse> {
 
-    private boolean withImage;
+    private final boolean withImage;
 
     /**
      * Initializes a new {@link UpdateParser}.

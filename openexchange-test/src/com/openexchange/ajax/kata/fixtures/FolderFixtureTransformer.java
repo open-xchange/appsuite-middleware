@@ -10,10 +10,12 @@ import com.openexchange.test.fixtures.Fixture;
 
 public class FolderFixtureTransformer extends AbstractFixtureTransformer<FolderObject> {
 
-	public boolean handles(Class class1, String fixtureName, Fixture fixture) {
+	@Override
+    public boolean handles(Class class1, String fixtureName, Fixture fixture) {
         return class1 == FolderObject.class;
     }
 
+    @Override
     public Step transform(Class class1, String fixtureName, Fixture fixture, String displayName) {
         if ( isDelete( fixtureName ) ) {
             return assign(fixtureName, new FolderDeleteStep(

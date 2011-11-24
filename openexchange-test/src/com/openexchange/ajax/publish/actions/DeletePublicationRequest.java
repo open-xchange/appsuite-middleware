@@ -69,6 +69,7 @@ public class DeletePublicationRequest extends AbstractPublicationRequest<DeleteP
 
     private Collection<Integer> ids;
 
+    @Override
     public Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
@@ -95,14 +96,17 @@ public class DeletePublicationRequest extends AbstractPublicationRequest<DeleteP
         this.ids = ids;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return JSON.collection2jsonArray(ids);
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public AbstractAJAXParser<? extends DeletePublicationResponse> getParser() {
         return new AbstractAJAXParser<DeletePublicationResponse>(isFailOnError()) {
 

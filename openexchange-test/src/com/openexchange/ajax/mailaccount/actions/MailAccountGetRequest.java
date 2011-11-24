@@ -60,8 +60,8 @@ import com.openexchange.ajax.framework.Header;
  */
 public class MailAccountGetRequest implements AJAXRequest<MailAccountGetResponse> {
 
-    private String id;
-    private boolean failOnError;
+    private final String id;
+    private final boolean failOnError;
 
     public MailAccountGetRequest(int id) {
         this(id, true);
@@ -72,18 +72,22 @@ public class MailAccountGetRequest implements AJAXRequest<MailAccountGetResponse
         this.failOnError = failOnError;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return AJAXRequest.Method.GET;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[]{
             new Parameter("id", id),
@@ -91,10 +95,12 @@ public class MailAccountGetRequest implements AJAXRequest<MailAccountGetResponse
         };
     }
 
+    @Override
     public AbstractAJAXParser<MailAccountGetResponse> getParser() {
         return new MailAccountGetParser(failOnError);
     }
 
+    @Override
     public String getServletPath() {
         return "/ajax/account";
     }

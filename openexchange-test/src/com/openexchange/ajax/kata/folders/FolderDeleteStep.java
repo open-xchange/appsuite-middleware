@@ -59,16 +59,18 @@ import com.openexchange.test.FolderTestManager;
  */
 public class FolderDeleteStep extends NeedExistingStep<FolderObject> {
 
-	private FolderObject entry;
+	private final FolderObject entry;
 
     public FolderDeleteStep(FolderObject entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         FolderTestManager manager = new FolderTestManager(client);

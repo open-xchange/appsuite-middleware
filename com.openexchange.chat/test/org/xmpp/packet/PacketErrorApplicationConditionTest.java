@@ -24,9 +24,9 @@ import org.xmpp.packet.PacketError.Condition;
 import org.xmpp.packet.PacketError.Type;
 
 /**
- * Tests compliance of Application-Specific Conditions provided by 
+ * Tests compliance of Application-Specific Conditions provided by
  * {@link PacketError} with the restrictions defined in RFC-3920.
- * 
+ *
  * @author G&uuml;nther Nie&szlig;, guenther.niess@web.de
  * @see <a href="http://www.ietf.org/rfc/rfc3920.txt">RFC 3920 - Extensible
  *      Messaging and Presence Protocol (XMPP): Core</a>
@@ -87,12 +87,12 @@ public class PacketErrorApplicationConditionTest {
 		if (!GENERAL_ERROR_NAMESPACE.equals(
 				stanzaError.getApplicationConditionNamespaceURI())) {
 			fail("According to the XEP-0182 the default namespace of general "
-					+ "application-specific error conditions is " 
+					+ "application-specific error conditions is "
 					+ GENERAL_ERROR_NAMESPACE + ". "
 					+ "This namespace should be applied as fallback.");
 		}
 	}
-	
+
 	/**
 	 * Testing the default behavior of the setter and getter methods, when an
 	 * application error including a namespace is set.
@@ -115,7 +115,7 @@ public class PacketErrorApplicationConditionTest {
 					+ "the text of the packet-error.");
 		}
 	}
-	
+
 	/**
 	 * Verifies the valid behavior of this class, even after a previously set condition is removed.
 	 */
@@ -125,10 +125,10 @@ public class PacketErrorApplicationConditionTest {
 		String appErrorName = "special-application-condition";
 		String appNS = "application-ns";
 		applicationError.setApplicationCondition(appErrorName, appNS);
-		
+
 		// unset error
 		applicationError.setApplicationCondition(null);
-		
+
 		// verify that unsetting the error propagated correctly.
 		if (applicationError.getApplicationConditionNamespaceURI() != null) {
 			fail("Removing the application-specific error condition don't "
@@ -145,7 +145,7 @@ public class PacketErrorApplicationConditionTest {
 	}
 
 	/**
-	 * Insert an application-specific error, using the namespace 
+	 * Insert an application-specific error, using the namespace
 	 * urn:ietf:params:xml:ns:xmpp-stanzas isn't allowed by RFC 3920.
 	 */
 	@Test(expected = IllegalArgumentException.class)

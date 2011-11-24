@@ -64,16 +64,18 @@ import com.openexchange.test.TaskTestManager;
  */
 public class TaskDeleteStep extends NeedExistingStep<Task> {
 
-    private Task entry;
+    private final Task entry;
 
     public TaskDeleteStep(Task entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         TaskTestManager manager = new TaskTestManager(client);

@@ -62,6 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class FolderTypeTransformator implements Transformator {
 
 
+    @Override
     public Object transform(String value) throws OXException {
         if("public".equalsIgnoreCase(value)) {
             return FolderObject.PUBLIC;

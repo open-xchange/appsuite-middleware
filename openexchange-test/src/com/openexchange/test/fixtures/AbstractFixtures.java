@@ -70,7 +70,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
     private final Map<String, Transformator> attributeTransformators = new HashMap<String, Transformator>();
 
     private final Map<String, List<String>> synonyms = new HashMap<String, List<String>>();
-    private List<String> entryNames;
+    private final List<String> entryNames;
 
     public AbstractFixtures(final Class<T> klass, final Map values) {
         this.klass = klass;
@@ -97,6 +97,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
 
     }
 
+    @Override
     public List<String> getEntryNames() {
         return entryNames;
     }
@@ -205,6 +206,7 @@ public abstract class AbstractFixtures<T> implements Fixtures<T> {
             }
         }
 
+        @Override
         public Object transform(final String value) throws OXException {
             try {
                 return constructor.newInstance(value);

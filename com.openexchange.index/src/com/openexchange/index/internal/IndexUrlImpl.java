@@ -54,21 +54,21 @@ import com.openexchange.index.IndexUrl;
 
 /**
  * {@link IndexUrlImpl}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexUrlImpl implements IndexUrl {
 
     private static final String DELIM = "/";
-    
+
     private final String fullUrl;
-    
+
     private final IndexServer server;
 
     /**
      * Initializes a new {@link IndexUrlImpl}.
-     * 
+     *
      * @param fullUrl
      */
     public IndexUrlImpl(final IndexServer server, final String indexName) {
@@ -96,7 +96,7 @@ public final class IndexUrlImpl implements IndexUrl {
     public int getMaxConnectionsPerHost() {
         return server.getMaxConnectionsPerHost();
     }
-    
+
     @Override
     public int getMaxIndices() {
         return server.getMaxIndices();

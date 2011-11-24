@@ -49,10 +49,11 @@
 
 package com.openexchange.ajax.folder.actions;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Folder;
 import com.openexchange.ajax.container.Response;
@@ -67,10 +68,12 @@ import com.openexchange.folderstorage.FolderStorage;
 public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
 
     private final String parent;
-    
+
     private final boolean failOnError;
 
-    private final Set<String> folderIds;
+    private final List<String> folderIds;
+
+    private final List<Boolean> flags;
 
     public SubscribeRequest(final API api, final boolean failOnError) {
         this(api, FolderStorage.ROOT_ID, failOnError);
@@ -80,27 +83,38 @@ public class SubscribeRequest extends AbstractFolderRequest<SubscribeResponse> {
         super(api);
         this.parent = parent;
         this.failOnError = failOnError;
-        folderIds = new LinkedHashSet<String>(4);
+        folderIds = new ArrayList<String>(4);
+        flags = new ArrayList<Boolean>(4);
     }
 
     /**
      * Adds specified folder identifier.
-     * 
+     *
      * @param folderId The folder identifier
+     * @param subscribe <code>true</code> to subscribe denoted folder to tree; otherwise <code>false</code>
      * @return This request with folder identifier added
      */
-    public SubscribeRequest addFolderId(final String folderId) {
+    public SubscribeRequest addFolderId(final String folderId, final boolean subscribe) {
         folderIds.add(folderId);
+        flags.add(Boolean.valueOf(subscribe));
         return this;
     }
 
     @Override
     public Object getBody() {
-        final JSONArray jArray = new JSONArray();
-        for (final String folderId : folderIds) {
-            jArray.put(folderId);
+        try {
+            final JSONArray jArray = new JSONArray();
+            final int size = folderIds.size();
+            for (int i = 0; i < size; i++) {
+                final JSONObject jObject = new JSONObject();
+                jObject.put("id", folderIds.get(i));
+                jObject.put("subscribe", flags.get(i).booleanValue());
+                jArray.put(jObject);
+            }
+            return jArray;
+        } catch (final JSONException e) {
+            return new JSONArray();
         }
-        return jArray;
     }
 
     @Override

@@ -23,7 +23,7 @@ import org.junit.Test;
 /**
  * Tests compliance of {@link JID} with the restrictions defined in RFC-3920 for
  * the domain identifier.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.ietf.org/rfc/rfc3920.txt">RFC 3920 - Extensible
  *      Messaging and Presence Protocol (XMPP): Core</a>
@@ -67,7 +67,7 @@ public class JIDCreationDomainTest {
 		} catch (NullPointerException ex) {
 			// expected
 		}
-		
+
 		try {
 			new JID(NODE, null, null);
 			fail("Domain identifiers should be a required part of "
@@ -89,7 +89,7 @@ public class JIDCreationDomainTest {
 		} catch (NullPointerException ex) {
 			// expected
 		}
-		
+
 		try {
 			new JID(NODE, null, RESOURCE);
 			fail("Domain identifiers should be a required part of "

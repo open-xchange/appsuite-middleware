@@ -68,7 +68,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
     public static FileActionFactory INSTANCE = new FileActionFactory();
 
     private final Map<String, AJAXActionService> actions;
-    
+
     /**
      * Initializes a new {@link FileActionFactory}.
      */

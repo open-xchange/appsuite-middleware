@@ -55,14 +55,14 @@ import org.json.JSONObject;
 
 /**
  * {@link JSONChatUser} - Represents a chat user rendered with JSON.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONChatUser {
 
     /**
      * Parses given JSON to a {@link JSONChatUser}
-     * 
+     *
      * @param jsonPresence The JSON chat user data
      * @return The parsed {@link JSONChatUser}
      * @throws JSONException If a JSON error occurs
@@ -95,7 +95,7 @@ public final class JSONChatUser {
 
     /**
      * Gets the id
-     * 
+     *
      * @return The id
      */
     public String getId() {
@@ -104,7 +104,7 @@ public final class JSONChatUser {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -113,7 +113,7 @@ public final class JSONChatUser {
 
     /**
      * Gets the name
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -122,7 +122,7 @@ public final class JSONChatUser {
 
     /**
      * Sets the name
-     * 
+     *
      * @param name The name to set
      */
     public void setName(final String name) {
@@ -131,7 +131,7 @@ public final class JSONChatUser {
 
     /**
      * Gets the presence
-     * 
+     *
      * @return The presence
      */
     public JSONPresence getPresence() {
@@ -140,7 +140,7 @@ public final class JSONChatUser {
 
     /**
      * Sets the presence
-     * 
+     *
      * @param presence The presence to set
      */
     public void setPresence(final JSONPresence presence) {

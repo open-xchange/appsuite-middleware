@@ -28,14 +28,14 @@ import org.jivesoftware.smackx.ServiceDiscoveryManager;
 
 /**
  * Test for Socks5 bytestreams with real XMPP servers.
- * 
+ *
  * @author Henning Staib
  */
 public class Socks5ByteStreamTest extends SmackTestCase {
 
     /**
      * Constructor
-     * 
+     *
      * @param arg0
      */
     public Socks5ByteStreamTest(final String arg0) {
@@ -44,7 +44,7 @@ public class Socks5ByteStreamTest extends SmackTestCase {
 
     /**
      * Socks5 feature should be added to the service discovery on Smack startup.
-     * 
+     *
      * @throws XMPPException should not happen
      */
     public void testInitializationSocks5FeaturesAndListenerOnStartup() throws XMPPException {
@@ -58,7 +58,7 @@ public class Socks5ByteStreamTest extends SmackTestCase {
     /**
      * Target should respond with not-acceptable error if no listeners for incoming Socks5
      * bytestream requests are registered.
-     * 
+     *
      * @throws XMPPException should not happen
      */
     public void notestRespondWithErrorOnSocks5BytestreamRequest() throws XMPPException {
@@ -82,7 +82,7 @@ public class Socks5ByteStreamTest extends SmackTestCase {
 
     /**
      * Socks5 bytestream should be successfully established using the local Socks5 proxy.
-     * 
+     *
      * @throws Exception should not happen
      */
     public void testSocks5BytestreamWithLocalSocks5Proxy() throws Exception {
@@ -129,7 +129,7 @@ public class Socks5ByteStreamTest extends SmackTestCase {
         final Socks5BytestreamSession session = initiatorByteStreamManager.establishSession(
                         targetConnection.getUser());
         final OutputStream outputStream = session.getOutputStream();
-        
+
         assertTrue(session.isDirect());
 
         // verify stream
@@ -151,7 +151,7 @@ public class Socks5ByteStreamTest extends SmackTestCase {
      * This test will fail if the XMPP server doesn't provide any Socks5 proxies or the Socks5 proxy
      * only allows Socks5 bytestreams in the context of a file transfer (like Openfire in default
      * configuration, see xmpp.proxy.transfer.required flag).
-     * 
+     *
      * @throws Exception if no Socks5 proxies found or proxy is unwilling to activate Socks5
      *         bytestream
      */
@@ -227,7 +227,7 @@ public class Socks5ByteStreamTest extends SmackTestCase {
      * This test will fail if the XMPP server doesn't provide any Socks5 proxies or the Socks5 proxy
      * only allows Socks5 bytestreams in the context of a file transfer (like Openfire in default
      * configuration, see xmpp.proxy.transfer.required flag).
-     * 
+     *
      * @throws Exception if no Socks5 proxies found or proxy is unwilling to activate Socks5
      *         bytestream
      */
@@ -275,9 +275,9 @@ public class Socks5ByteStreamTest extends SmackTestCase {
         final Socks5BytestreamManager initiatorByteStreamManager = Socks5BytestreamManager.getBytestreamManager(initiatorConnection);
 
         final Socks5BytestreamSession session = initiatorByteStreamManager.establishSession(targetConnection.getUser());
-        
+
         assertTrue(session.isMediated());
-        
+
         // verify stream
         final byte[] receivedData = new byte[3];
         final InputStream inputStream = session.getInputStream();

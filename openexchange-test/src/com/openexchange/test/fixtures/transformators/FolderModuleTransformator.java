@@ -65,6 +65,7 @@ public class FolderModuleTransformator implements Transformator {
     /* (non-Javadoc)
      * @see com.openexchange.test.fixtures.transformators.Transformator#transform(java.lang.String)
      */
+    @Override
     public Object transform(String value) throws OXException {
         if( value.equalsIgnoreCase(Folder.MODULE_CALENDAR))
             return FolderObject.CALENDAR;

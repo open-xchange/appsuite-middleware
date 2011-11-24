@@ -80,7 +80,7 @@ public final class IMAPProtocol extends Protocol {
     private volatile ConcurrentMap<InetAddress, Integer> map;
 
     private volatile Integer overallExternalMaxCount;
-    
+
     private volatile Integer maxCount;
 
     /**
@@ -94,7 +94,7 @@ public final class IMAPProtocol extends Protocol {
 
     /**
      * Sets the max. count.
-     * 
+     *
      * @param maxCount The max. count
      */
     public void setMaxCount(final int maxCount) {
@@ -103,7 +103,7 @@ public final class IMAPProtocol extends Protocol {
 
     /**
      * Sets the overall max. count for external accounts.
-     * 
+     *
      * @param overallMaxCount The max. count
      */
     public void setOverallExternalMaxCount(final int overallMaxCount) {

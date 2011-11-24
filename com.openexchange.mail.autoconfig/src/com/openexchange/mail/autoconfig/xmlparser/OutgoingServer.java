@@ -61,7 +61,7 @@ public class OutgoingServer extends Server {
     public enum OutgoingType {
         SMTP(Server.SMTP);
 
-        private String keyword;
+        private final String keyword;
 
         private OutgoingType(String keyword) {
             this.keyword = keyword;

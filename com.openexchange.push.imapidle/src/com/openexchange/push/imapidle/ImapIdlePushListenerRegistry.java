@@ -185,10 +185,11 @@ public final class ImapIdlePushListenerRegistry {
         // Bind ImapIdlePushListener to another session because of password change issues.
         Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
+            @Override
             public boolean accepts(Session tmp) {
                 return PushUtility.allowedClient(tmp.getClient());
             }
-            
+
         });
         if (null != session) {
             removeListener(key);

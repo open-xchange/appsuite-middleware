@@ -50,8 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 /**
- * Enumeration of possible folder APIs. There are now 2 implementations of the OX folder tree and 1 implementation of the Outlook-like
- * folder tree.
+ * Enumeration of possible folder APIs.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
@@ -59,10 +58,11 @@ public enum EnumAPI implements API {
 
     OX_OLD("/ajax/folders", -1),
     OX_NEW("/ajax/folders", 0),
-    OUTLOOK("/ajax/folders", 1);
+    OUTLOOK("/ajax/folders", 1),
+    EAS_FOLDERS("/ajax/folders", 20);
 
-    private String url;
-    private int treeId;
+    private final String url;
+    private final int treeId;
 
     private EnumAPI(final String url, final int treeId) {
         this.url = url;

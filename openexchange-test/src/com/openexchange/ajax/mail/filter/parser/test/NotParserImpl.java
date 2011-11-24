@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.test.NotTest;
  */
 public class NotParserImpl implements TestParser {
 
-	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		final JSONObject jsonTestObject = jsonObject.getJSONObject("test");
 		final String testname = jsonTestObject.getString("test");
 

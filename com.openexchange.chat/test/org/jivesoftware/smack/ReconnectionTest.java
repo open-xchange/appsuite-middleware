@@ -174,6 +174,7 @@ public class ReconnectionTest extends SmackTestCase {
         privacyManager.getPrivacyLists();
     }
 
+    @Override
     protected int getMaxConnections() {
         return 1;
     }
@@ -192,10 +193,12 @@ public class ReconnectionTest extends SmackTestCase {
         /**
          * Methods to test the listener.
          */
+        @Override
         public void connectionClosed() {
             connectionClosed = true;
         }
 
+        @Override
         public void connectionClosedOnError(Exception e) {
             connectionClosedOnError = true;
         }
@@ -204,16 +207,19 @@ public class ReconnectionTest extends SmackTestCase {
             reconnectionCanceled = true;
         }
 
+        @Override
         public void reconnectingIn(int seconds) {
             attemptsNotifications = attemptsNotifications + 1;
             remainingSeconds = seconds;
 
         }
 
+        @Override
         public void reconnectionSuccessful() {
             reconnected = true;
         }
 
+        @Override
         public void reconnectionFailed(Exception error) {
             reconnectionFailed = true;
         }

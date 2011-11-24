@@ -363,6 +363,7 @@ public abstract class AbstractMailTest extends TestCase {
             IOException, OXException {
         final File fdir = new File(dir);
         final File[] messageFiles = fdir.listFiles(new FilenameFilter() {
+            @Override
             public boolean accept(final File dir, final String name) {
                 return Pattern.compile("mail.*\\.eml").matcher(name).matches();
             }

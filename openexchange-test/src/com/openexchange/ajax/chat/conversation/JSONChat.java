@@ -58,14 +58,14 @@ import org.json.JSONObject;
 
 /**
  * {@link JSONChat} - Represents a chat rendered with JSON.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONChat {
 
     /**
      * Parses given JSON to a {@link JSONChat}.
-     * 
+     *
      * @param jsonChat The JSON chat data
      * @return The parsed {@link JSONChat}
      * @throws JSONException If a JSON error occurs
@@ -103,7 +103,7 @@ public final class JSONChat {
 
     /**
      * Gets the chat identifier
-     * 
+     *
      * @return The chat identifier
      */
     public String getChatId() {
@@ -112,7 +112,7 @@ public final class JSONChat {
 
     /**
      * Sets the chatId
-     * 
+     *
      * @param chatId The chatId to set
      */
     public void setChatId(final String chatId) {
@@ -121,7 +121,7 @@ public final class JSONChat {
 
     /**
      * Gets the subject
-     * 
+     *
      * @return The subject
      */
     public String getSubject() {
@@ -130,7 +130,7 @@ public final class JSONChat {
 
     /**
      * Sets the subject
-     * 
+     *
      * @param subject The subject to set
      */
     public void setSubject(final String subject) {
@@ -139,7 +139,7 @@ public final class JSONChat {
 
     /**
      * Gets the chat members
-     * 
+     *
      * @return The members
      */
     public List<JSONChatUser> getMembers() {
@@ -148,7 +148,7 @@ public final class JSONChat {
 
     /**
      * Adds given member
-     * 
+     *
      * @param user The member
      */
     public void add(final JSONChatUser user) {
@@ -157,7 +157,7 @@ public final class JSONChat {
 
     /**
      * Removes given member
-     * 
+     *
      * @param user The member
      */
     public void remove(final JSONChatUser user) {

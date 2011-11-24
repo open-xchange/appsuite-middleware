@@ -26,7 +26,7 @@ import org.junit.Test;
 /**
  * Tests that verify the behaviour of 'to' and 'from' related functionality of
  * the {@link Packet} implementation.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
 public class PacketAddressingTest {

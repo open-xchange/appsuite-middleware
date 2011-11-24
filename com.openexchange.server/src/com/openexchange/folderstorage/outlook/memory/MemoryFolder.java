@@ -117,7 +117,7 @@ public interface MemoryFolder {
 
     /**
      * Gets the sort number.
-     * 
+     *
      * @return The sort number or <code>0</code> if not set
      */
     public int getSortNum();

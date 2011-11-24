@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class AppointmentMoveStep extends NeedExistingStep<Appointment> {
 
-    private int destination;
+    private final int destination;
 
 
     public AppointmentMoveStep(int destination, String fixtureName, String expectedError) {
@@ -72,10 +72,12 @@ public class AppointmentMoveStep extends NeedExistingStep<Appointment> {
         this.destination = destination;
     }
 
+    @Override
     public void cleanUp() throws Exception {
 
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         Appointment appointment = new Appointment();

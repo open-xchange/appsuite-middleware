@@ -404,7 +404,7 @@ public class ICal4JParser implements ICalParser {
 			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
 			;
 	}
-	
+
 	private String workaroundFor20453(final String input) {
 		return input
 			.replaceAll("DTEND;\\s*\n", "")

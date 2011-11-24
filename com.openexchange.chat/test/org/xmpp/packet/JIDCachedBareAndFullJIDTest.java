@@ -22,14 +22,14 @@ import org.junit.Test;
 
 /**
  * These tests check for a bug identified as TINDER-29.
- * 
+ *
  * The implementation of {@link JID} caches a bare and full JID after a
  * constructor has been used. These tests verify that these cached values are
  * correct.
- * 
+ *
  * The full JID is exposed through the {@link JID#toString()} method. The bare
  * JID is exposed trough {@link JID#toBareJID()}.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.igniterealtime.org/issues/browse/TINDER-29">Tinder
  *      bugtracker: TINDER-29</a>

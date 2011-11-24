@@ -22,7 +22,7 @@ import org.junit.Test;
 
 /**
  * Verifies {@link JID#resourceprep(String)}.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  */
 public class ResourcePrepTest {

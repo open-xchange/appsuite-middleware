@@ -56,7 +56,7 @@ import com.openexchange.chat.ChatAccount;
 
 /**
  * {@link AccountWriter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AccountWriter {
@@ -70,7 +70,7 @@ public final class AccountWriter {
 
     /**
      * Generates the JSON representation of specified account.
-     * 
+     *
      * @param account The account
      * @return The JSON representation of specified account
      * @throws JSONException If a JSON error occurs

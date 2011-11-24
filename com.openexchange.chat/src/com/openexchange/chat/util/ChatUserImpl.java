@@ -53,7 +53,7 @@ import com.openexchange.chat.ChatUser;
 
 /**
  * {@link ChatUserImpl} - The basic {@link ChatUser chat user} implementation.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ChatUserImpl implements ChatUser {
@@ -71,7 +71,7 @@ public class ChatUserImpl implements ChatUser {
 
     /**
      * Initializes a new {@link ChatUserImpl}.
-     * 
+     *
      * @param id The identifier
      */
     public ChatUserImpl(final String id) {
@@ -80,7 +80,7 @@ public class ChatUserImpl implements ChatUser {
 
     /**
      * Initializes a new {@link ChatUserImpl}.
-     * 
+     *
      * @param id The identifier
      * @param name The name
      */
@@ -102,7 +102,7 @@ public class ChatUserImpl implements ChatUser {
 
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final String id) {
@@ -111,7 +111,7 @@ public class ChatUserImpl implements ChatUser {
 
     /**
      * Sets the name
-     * 
+     *
      * @param name The name to set
      */
     public void setName(final String name) {

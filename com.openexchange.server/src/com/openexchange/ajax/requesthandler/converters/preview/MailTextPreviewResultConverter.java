@@ -52,7 +52,7 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 /**
  * {@link MailTextPreviewResultConverter}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailTextPreviewResultConverter extends AbstractMailPreviewResultConverter {

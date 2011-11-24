@@ -54,11 +54,12 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 /**
  * This class maps names of fields found Outlook's CSV files to names used by OX
  * and vice versa. This class has been generated automatically from i18n files.
- * 
+ *
  * @deprecated Use the PropertyDrivenMapper with .properties files instead.
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
  *
  */
+@Deprecated
 public class FrenchOutlookMapper extends AbstractContactFieldMapper {
 
         public FrenchOutlookMapper(){
@@ -182,8 +183,8 @@ public class FrenchOutlookMapper extends AbstractContactFieldMapper {
         something2ox.put("RNIS" , ContactField.TELEPHONE_ISDN);
         ox2something.put(ContactField.TELEPHONE_ISDN , "RNIS");
 
-        something2ox.put("T\u00e9l. mobile" , ContactField.CELLULAR_TELEPHONE1); 
-        ox2something.put(ContactField.CELLULAR_TELEPHONE1 , "T\u00e9l. mobile"); 
+        something2ox.put("T\u00e9l. mobile" , ContactField.CELLULAR_TELEPHONE1);
+        ox2something.put(ContactField.CELLULAR_TELEPHONE1 , "T\u00e9l. mobile");
 
         something2ox.put("T\u00e9l\u00e9copie (autre)" , ContactField.FAX_OTHER);
         ox2something.put(ContactField.FAX_OTHER , "T\u00e9l\u00e9copie (autre)");

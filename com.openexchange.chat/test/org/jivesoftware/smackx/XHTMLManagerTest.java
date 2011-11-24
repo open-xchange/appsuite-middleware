@@ -117,9 +117,9 @@ public class XHTMLManagerTest extends SmackTestCase {
     /**
     * High level API test.
     * 1. User_1 will send a message with XHTML to user_2
-    * 2. User_2 will receive the message and iterate over the XHTML bodies to check if everything 
+    * 2. User_2 will receive the message and iterate over the XHTML bodies to check if everything
     *    is fine
-    * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then 
+    * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then
     *    something is wrong
     */
     public void testSendSimpleXHTMLMessageAndDisplayReceivedXHTMLMessage() {
@@ -177,9 +177,9 @@ public class XHTMLManagerTest extends SmackTestCase {
     /**
     * Low level API test. Test a message with two XHTML bodies and several XHTML tags.
     * 1. User_1 will send a message with XHTML to user_2
-    * 2. User_2 will receive the message and iterate over the XHTML bodies to check if everything 
+    * 2. User_2 will receive the message and iterate over the XHTML bodies to check if everything
     *    is fine
-    * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then 
+    * 3. User_1 will wait several seconds for an ACK from user_2, if none is received then
     *    something is wrong
     */
     public void testSendComplexXHTMLMessageAndDisplayReceivedXHTMLMessage() {
@@ -262,6 +262,7 @@ public class XHTMLManagerTest extends SmackTestCase {
             bodiesReceived);
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

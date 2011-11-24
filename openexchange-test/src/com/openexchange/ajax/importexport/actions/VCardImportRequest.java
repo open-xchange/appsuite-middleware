@@ -72,6 +72,7 @@ public final class VCardImportRequest extends AbstractImportRequest<VCardImportR
         this.failOnError = failOnError;
     }
 
+    @Override
     public VCardImportParser getParser() {
         return new VCardImportParser(failOnError);
     }

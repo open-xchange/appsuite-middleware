@@ -54,28 +54,28 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ChatAttachment} - Represents an attachment delivered by a chat message.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatAttachment {
 
     /**
      * Gets the MIME type. If <code>null</code> <i>application/octet-stream</i> is assumed.
-     * 
+     *
      * @return The MIME type
      */
     String getMimeType();
 
     /**
      * Gets the file name.
-     * 
+     *
      * @return The file name or <code>null</code>
      */
     String getFileName();
 
     /**
      * Gets the input stream providing attachment's content.
-     * 
+     *
      * @return The input stream to read from
      * @throws OXException If input stream cannot be returned
      */

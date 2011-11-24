@@ -66,7 +66,8 @@ public class ConfigurableDBProvider implements DBProvider {
 	private String login;
 	private String password;
 
-	public Connection getReadConnection(final Context ctx) {
+	@Override
+    public Connection getReadConnection(final Context ctx) {
 		try {
 			return DriverManager.getConnection(url,login,password);
 		} catch (final SQLException e) {
@@ -75,7 +76,8 @@ public class ConfigurableDBProvider implements DBProvider {
 		return null;
 	}
 
-	public void releaseReadConnection(final Context ctx, final Connection con) {
+	@Override
+    public void releaseReadConnection(final Context ctx, final Connection con) {
 		if(con == null) {
 			return;
 		}
@@ -88,11 +90,13 @@ public class ConfigurableDBProvider implements DBProvider {
 		}
 	}
 
-	public Connection getWriteConnection(final Context ctx) {
+	@Override
+    public Connection getWriteConnection(final Context ctx) {
 		return getReadConnection(ctx);
 	}
 
-	public void releaseWriteConnection(final Context ctx, final Connection con) {
+	@Override
+    public void releaseWriteConnection(final Context ctx, final Connection con) {
 		releaseReadConnection(ctx,con);
 	}
 

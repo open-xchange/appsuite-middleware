@@ -57,14 +57,14 @@ package com.openexchange.preview;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class PreviewPolicy {
-    
+
     private final String mimeType;
-    
+
     private final PreviewOutput output;
-    
+
     private final Quality quality;
-    
-    
+
+
     /**
      * Initializes a new {@link PreviewPolicy}.
      * @param mimeType
@@ -86,7 +86,7 @@ public class PreviewPolicy {
     public String getMimeType() {
         return mimeType;
     }
-    
+
     /**
      * Gets the output
      *
@@ -95,7 +95,7 @@ public class PreviewPolicy {
     public PreviewOutput getOutput() {
         return output;
     }
-    
+
     /**
      * Gets the quality
      *

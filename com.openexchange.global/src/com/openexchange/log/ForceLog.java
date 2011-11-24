@@ -53,7 +53,7 @@ package com.openexchange.log;
  * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
  * <p>
  * Useful to programmatically enforce logging of certain log values.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ForceLog {
@@ -62,7 +62,7 @@ public final class ForceLog {
 
     /**
      * Initializes a new {@link ForceLog} for specified value.
-     * 
+     *
      * @param value The value which is forced being logged
      * @throws NullPointerException If passed value is <code>null</code>
      */
@@ -76,7 +76,7 @@ public final class ForceLog {
 
     /**
      * Gets the associated value.
-     * 
+     *
      * @return The value
      */
     public Object getValue() {

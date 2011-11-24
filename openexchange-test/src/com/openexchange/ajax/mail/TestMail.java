@@ -596,19 +596,23 @@ public class TestMail implements IdentitySource<TestMail> {
         return bob.toString();
     }
 
+    @Override
     public void assumeIdentity(final TestMail entry) {
         entry.setId(getId());
         entry.setFolder(getFolder());
     }
 
+    @Override
     public void forgetIdentity(final TestMail entry) {
 
     }
 
+    @Override
     public Class<TestMail> getType() {
         return TestMail.class;
     }
 
+    @Override
     public void rememberIdentityValues(final TestMail entry) {
         setId(entry.getId());
         setFolder(entry.getFolder());

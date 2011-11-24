@@ -72,7 +72,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
 
     private final boolean failOnError;
 
-    private List<Parameter> parameters;
+    private final List<Parameter> parameters;
 
     /**
      * @param search
@@ -107,6 +107,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return ContactSearchJSONWriter.write(search);
     }
@@ -114,6 +115,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -121,6 +123,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return this.parameters.toArray(new Parameter[parameters.size()]);
     }
@@ -128,6 +131,7 @@ public final class SearchRequest extends AbstractUserRequest<SearchResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public SearchParser getParser() {
         return new SearchParser(failOnError, columns);
     }

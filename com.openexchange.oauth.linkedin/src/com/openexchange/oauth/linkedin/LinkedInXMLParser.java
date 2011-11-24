@@ -70,9 +70,9 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class LinkedInXMLParser {
-	
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInXMLParser.class));
-	
+
     private String getTextValue(Element ele, String tagName) {
         String textVal = null;
         NodeList nl = ele.getElementsByTagName(tagName);
@@ -84,7 +84,7 @@ public class LinkedInXMLParser {
         }
         return textVal;
     }
-    
+
 	public Contact parse(Element person){
         Contact contact = new Contact();
         contact.setGivenName(getTextValue(person, "first-name"));
@@ -156,7 +156,7 @@ public class LinkedInXMLParser {
         }
         return contact;
     }
-    
+
     public List<Contact> parseConnections(String body) {
         final List<Contact> contacts = new ArrayList<Contact>();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();

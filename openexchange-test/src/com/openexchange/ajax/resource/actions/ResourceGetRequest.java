@@ -86,7 +86,8 @@ public final class ResourceGetRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return null;
 	}
 
@@ -95,7 +96,8 @@ public final class ResourceGetRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.GET;
 	}
 
@@ -104,7 +106,8 @@ public final class ResourceGetRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
 		params.add(new Parameter(AJAXServlet.PARAMETER_ID, resourceId));
@@ -116,7 +119,8 @@ public final class ResourceGetRequest extends AbstractResourceRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public ResourceGetParser getParser() {
+	@Override
+    public ResourceGetParser getParser() {
 		return new ResourceGetParser(failOnError);
 	}
 

@@ -130,6 +130,7 @@ public class FileStorageThreadTest extends TestCase {
             return t;
         }
 
+        @Override
         public void run() {
         	try {
                 final File testfile = File.createTempFile("filestorage", ".test");

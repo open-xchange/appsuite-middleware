@@ -167,7 +167,7 @@ public abstract class AbstractPerformer {
 
     /**
      * Checks for duplicate folder through a LIST request.
-     * 
+     *
      * @param name The name to check for
      * @param treeId The tree identifier
      * @param parentId The parent identifier

@@ -2,7 +2,7 @@
  * Created on 2009-04-09
  */
 package org.jivesoftware.smackx.pubsub;
- 
+
 import java.util.Collection;
 
 import org.jivesoftware.smack.XMPPException;
@@ -28,7 +28,7 @@ public class OwnerUseCases extends SingleUserTestCase
 	{
 		// Generate reasonably unique for multiple tests
 		String id = "TestConfigNode" + System.currentTimeMillis();
-		
+
 		// Create and configure a node
 		ConfigureForm form = new ConfigureForm(FormType.submit);
 		form.setAccessModel(AccessModel.open);
@@ -38,7 +38,7 @@ public class OwnerUseCases extends SingleUserTestCase
 		form.setPublishModel(PublishModel.open);
 
 		LeafNode node = (LeafNode)getManager().createNode(id, form);
-		
+
 		ConfigureForm currentForm = node.getNodeConfiguration();
 		assertEquals(AccessModel.open, currentForm.getAccessModel());
 		assertFalse(currentForm.isDeliverPayloads());
@@ -51,7 +51,7 @@ public class OwnerUseCases extends SingleUserTestCase
 	{
 		// Generate reasonably unique for multiple tests
 		String id = "TestConfigNode2" + System.currentTimeMillis();
-		
+
 		// Create and configure a node
 		ConfigureForm form = new ConfigureForm(FormType.submit);
 		form.setAccessModel(AccessModel.open);
@@ -59,16 +59,16 @@ public class OwnerUseCases extends SingleUserTestCase
 		form.setNotifyRetract(true);
 		form.setPersistentItems(true);
 		form.setPublishModel(PublishModel.open);
-		
+
 		LeafNode myNode = (LeafNode)getManager().createNode(id, form);
 		ConfigureForm config = myNode.getNodeConfiguration();
-		
+
 		assertEquals(AccessModel.open, config.getAccessModel());
 		assertFalse(config.isDeliverPayloads());
 		assertTrue(config.isNotifyRetract());
 		assertTrue(config.isPersistItems());
 		assertEquals(PublishModel.open, config.getPublishModel());
-			
+
 		ConfigureForm submitForm = new ConfigureForm(config.createAnswerForm());
 		submitForm.setAccessModel(AccessModel.whitelist);
 		submitForm.setDeliverPayloads(true);
@@ -90,14 +90,14 @@ public class OwnerUseCases extends SingleUserTestCase
 		ConfigureForm form = getManager().getDefaultConfiguration();
 		assertNotNull(form);
 	}
-	
+
 	public void testDeleteNode() throws Exception
 	{
 		LeafNode myNode = getManager().createNode();
 		assertNotNull(getManager().getNode(myNode.getId()));
-		
+
 		getManager(0).deleteNode(myNode.getId());
-		
+
 		try
 		{
 			assertNull(getManager().getNode(myNode.getId()));
@@ -107,23 +107,23 @@ public class OwnerUseCases extends SingleUserTestCase
 		{
 		}
 	}
-	
+
 	public void testPurgeItems() throws XMPPException
 	{
 		LeafNode node = getRandomPubnode(getManager(), true, false);
-		
+
 		node.send(new Item());
 		node.send(new Item());
 		node.send(new Item());
 		node.send(new Item());
 		node.send(new Item());
-		
+
 		Collection<? extends Item> items = node.getItems();
 		assertTrue(items.size() == 5);
 
 		node.deleteAllItems();
 		items = node.getItems();
-		
+
 		// Pubsub service may keep the last notification (in spec), so 0 or 1 may be returned on get items.
 		assertTrue(items.size() < 2);
 	}

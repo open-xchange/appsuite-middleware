@@ -72,7 +72,7 @@ public final class DatabaseServiceRegistry {
 
     /**
      * Gets the service defined by given class
-     * 
+     *
      * @param <S> The type of service's class
      * @param clazz The service's class
      * @param errorOnAbsence <code>true</code> to throw an error on service absence; otherwise <code>false</code>

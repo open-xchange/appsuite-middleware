@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.Header;
  */
 public class ImageRequest implements AJAXRequest<ImageResponse> {
 
-    private String uid;
+    private final String uid;
 
 
     public ImageRequest(final String uid) {
@@ -70,14 +70,17 @@ public class ImageRequest implements AJAXRequest<ImageResponse> {
         this.uid = uid;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public String getServletPath() {
         return "/ajax/image";
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         Parameter[] parameters = new Parameter[] {
             new Parameter("uid", uid)
@@ -86,14 +89,17 @@ public class ImageRequest implements AJAXRequest<ImageResponse> {
         return parameters;
     }
 
+    @Override
     public ImageParser getParser() {
         return new ImageParser(true);
     }
 
+    @Override
     public Object getBody() throws IOException, JSONException {
         return null;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

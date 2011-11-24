@@ -61,13 +61,13 @@ public class SimpleTruncatedAttribute implements OXException.Truncated {
     private final int maxSize;
 
     private final int id;
-    
+
     private final String value;
 
     public SimpleTruncatedAttribute(final int id, final int maxSize, final int length) {
         this(id, maxSize, length, null);
     }
-    
+
     public SimpleTruncatedAttribute(final int id, final int maxSize, final int length, final String value) {
         this.id = id;
         this.maxSize = maxSize;
@@ -89,7 +89,7 @@ public class SimpleTruncatedAttribute implements OXException.Truncated {
     public int getLength() {
         return length;
     }
-    
+
     public String getValue() {
     	return value;
     }

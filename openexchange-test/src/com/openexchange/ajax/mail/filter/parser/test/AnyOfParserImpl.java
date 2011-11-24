@@ -63,7 +63,8 @@ import com.openexchange.ajax.mail.filter.test.AnyOfTest;
  */
 public class AnyOfParserImpl implements TestParser {
 
-	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		final JSONArray jsonTestArray = jsonObject.getJSONArray("tests");
 		final AbstractTest[] abstractTests = new AbstractTest[jsonTestArray.length()];
 		for (int a = 0; a < jsonTestArray.length(); a++) {

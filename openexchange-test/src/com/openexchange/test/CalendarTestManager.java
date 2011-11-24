@@ -100,7 +100,7 @@ public class CalendarTestManager implements TestManager {
 
     private AJAXClient client;
 
-    private List<Appointment> createdEntities = new ArrayList<Appointment>();
+    private final List<Appointment> createdEntities = new ArrayList<Appointment>();
 
     private TimeZone timezone;
 
@@ -150,18 +150,22 @@ public class CalendarTestManager implements TestManager {
         this.lastResponse = lastResponse;
     }
 
+    @Override
     public AbstractAJAXResponse getLastResponse() {
         return lastResponse;
     }
 
+    @Override
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
+    @Override
     public boolean getFailOnError() {
         return failOnError;
     }
 
+    @Override
     public boolean doesFailOnError() {
         return getFailOnError();
     }
@@ -171,10 +175,12 @@ public class CalendarTestManager implements TestManager {
         this.lastException = lastException;
     }
 
+    @Override
     public Exception getLastException() {
         return lastException;
     }
 
+    @Override
     public boolean hasLastException() {
         return lastException != null;
     }
@@ -191,6 +197,7 @@ public class CalendarTestManager implements TestManager {
         return getClient().getValues().getPrivateAppointmentFolder();
     }
 
+    @Override
     public void cleanUp() {
         boolean old = getFailOnError();
         setFailOnError(false); // switching off, because there are other ways to delete an appointment, for example creating enough delete

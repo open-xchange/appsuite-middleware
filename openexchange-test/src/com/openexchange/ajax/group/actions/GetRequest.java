@@ -71,14 +71,17 @@ public final class GetRequest extends AbstractGroupRequest<GetResponse> {
         this(groupId, true);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET),
@@ -86,6 +89,7 @@ public final class GetRequest extends AbstractGroupRequest<GetResponse> {
         };
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser(failOnError);
     }

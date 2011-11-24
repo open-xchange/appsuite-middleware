@@ -8,8 +8,8 @@ import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Wrapper;
 
 public class OXRequire extends ScriptableObject implements Function {
-	private DependencyResolver resolver;
-	
+	private final DependencyResolver resolver;
+
 	public OXRequire(DependencyResolver resolver) {
 		super();
 		this.resolver = resolver;
@@ -35,7 +35,7 @@ public class OXRequire extends ScriptableObject implements Function {
 					throw new IllegalArgumentException("Invalid call to 'define'");
 				}
 			}
-			
+
 			if (arg instanceof Function) {
 				if (fun == null) {
 					fun = (Function) arg;
@@ -44,22 +44,22 @@ public class OXRequire extends ScriptableObject implements Function {
 				}
 			}
 		}
-		
+
 		if (fun == null) {
 			throw new IllegalArgumentException("Invalid call to 'define'");
 		}
-		
+
 		if (dependencies == null) {
 			dependencies = new String[]{"require"}; // TODO: exports, module
-			
+
 		}
-		
+
 		Object[] resolved = new Object[dependencies.length];
 		for (int i = 0; i < dependencies.length; i++) {
 			resolved[i] = resolver.get(dependencies[i], cx, scope);
 		}
 		DeferredResolution.awaitResolution(cx, scope, thisObj, resolved, fun, null);
-		
+
 		return null;
 	}
 
@@ -72,5 +72,5 @@ public class OXRequire extends ScriptableObject implements Function {
 	public String getClassName() {
 		return "OXRequire";
 	}
-	
+
 }

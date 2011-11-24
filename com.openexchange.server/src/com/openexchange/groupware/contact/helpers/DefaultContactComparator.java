@@ -65,14 +65,14 @@ import com.openexchange.groupware.search.Order;
 public class DefaultContactComparator implements Comparator<Contact>{
 
     private static interface ComparatorProvider {
-        
+
         Comparator<Contact> getComparator(Locale locale);
     }
 
     private static final ComparatorProvider USE_COUNT_COMPARATOR_PROVIDER = new ComparatorProvider() {
 
         private final UseCountGlobalFirstComparator comparator = new UseCountGlobalFirstComparator();
-        
+
         @Override
         public Comparator<Contact> getComparator(final Locale locale) {
             return comparator;
@@ -80,7 +80,7 @@ public class DefaultContactComparator implements Comparator<Contact>{
     };
 
     private static final ComparatorProvider SPECIAL_COMPARATOR_PROVIDER = new ComparatorProvider() {
-        
+
         @Override
         public Comparator<Contact> getComparator(final Locale locale) {
             return new SpecialAlphanumSortContactComparator(locale);
@@ -100,7 +100,7 @@ public class DefaultContactComparator implements Comparator<Contact>{
         super();
         this.field = field;
         this.order = order;
-        
+
         this.locale = null == locale ? Locale.US : locale;
     }
 

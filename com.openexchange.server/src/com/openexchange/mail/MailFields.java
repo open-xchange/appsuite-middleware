@@ -136,7 +136,7 @@ public final class MailFields {
 
     /**
      * Gets the size.
-     * 
+     *
      * @return The size
      */
     public int size() {

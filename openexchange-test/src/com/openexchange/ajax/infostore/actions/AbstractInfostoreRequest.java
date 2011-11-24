@@ -80,10 +80,12 @@ public abstract class AbstractInfostoreRequest<T extends AbstractInfostoreRespon
         return failOnError;
     }
 
+    @Override
     public String getServletPath() {
         return INFOSTORE_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

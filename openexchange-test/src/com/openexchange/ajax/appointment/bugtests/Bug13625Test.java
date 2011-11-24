@@ -70,7 +70,7 @@ public class Bug13625Test extends AbstractAJAXSession {
 
     private int userId;
 
-    private int[] columns = new int[] { Appointment.OBJECT_ID };
+    private final int[] columns = new int[] { Appointment.OBJECT_ID };
 
     public Bug13625Test(String name) {
         super(name);

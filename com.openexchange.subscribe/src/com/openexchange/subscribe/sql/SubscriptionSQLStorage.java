@@ -653,7 +653,8 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 		}
 	}
 
-	public Map<String, Boolean> hasSubscriptions(Context ctx,
+	@Override
+    public Map<String, Boolean> hasSubscriptions(Context ctx,
 			List<String> folderIds) throws OXException {
 
 		Map<String, Boolean> retval = new HashMap<String, Boolean>();

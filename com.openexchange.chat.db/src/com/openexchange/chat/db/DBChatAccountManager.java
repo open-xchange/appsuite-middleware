@@ -61,7 +61,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link DBChatAccountManager}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DBChatAccountManager implements ChatAccountManager {
@@ -84,7 +84,7 @@ public class DBChatAccountManager implements ChatAccountManager {
 
     /**
      * Gets the default account
-     * 
+     *
      * @return The default account
      */
     public ChatAccountImpl getDefaultAccount() {

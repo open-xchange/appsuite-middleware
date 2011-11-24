@@ -63,7 +63,7 @@ import com.openexchange.ajax.tools.JSONCoercion;
  */
 public class SimpleResponse {
     private Object data;
-    private JSONObject response;
+    private final JSONObject response;
 
     private String error;
 

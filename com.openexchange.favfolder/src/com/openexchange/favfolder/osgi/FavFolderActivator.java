@@ -60,7 +60,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link FavFolderActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FavFolderActivator extends AJAXModuleActivator {

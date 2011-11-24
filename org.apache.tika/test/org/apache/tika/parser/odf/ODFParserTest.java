@@ -57,7 +57,7 @@ public class ODFParserTest extends TestCase {
              assertTrue(content.contains("Solr"));
              assertTrue(content.contains("one embedded"));
              assertTrue(content.contains("Rectangle Title"));
-             assertTrue(content.contains("a blue background and dark border"));        
+             assertTrue(content.contains("a blue background and dark border"));
           } finally {
              input.close();
           }
@@ -118,7 +118,7 @@ public class ODFParserTest extends TestCase {
            Metadata metadata = new Metadata();
            ContentHandler handler = new BodyContentHandler();
            new OpenDocumentParser().parse(input, handler, metadata);
-  
+
            assertEquals(
                    "application/vnd.oasis.opendocument.formula",
                    metadata.get(Metadata.CONTENT_TYPE));
@@ -132,13 +132,13 @@ public class ODFParserTest extends TestCase {
                    "OpenOffice.org/2.2$Win32 OpenOffice.org_project/680m14$Build-9134",
                    metadata.get("generator"));
            assertEquals("Pangram, fox, dog", metadata.get(Metadata.KEYWORDS));
-           
+
            // User defined metadata
            assertEquals("Text 1", metadata.get("custom:Info 1"));
            assertEquals("2", metadata.get("custom:Info 2"));
            assertEquals("false", metadata.get("custom:Info 3"));
            assertEquals("true", metadata.get("custom:Info 4"));
-           
+
            // No statistics present
            assertEquals(null, metadata.get("nbTab"));
            assertEquals(null, metadata.get("nbObject"));
@@ -147,7 +147,7 @@ public class ODFParserTest extends TestCase {
            assertEquals(null, metadata.get("nbPara"));
            assertEquals(null, metadata.get("nbWord"));
            assertEquals(null, metadata.get("nbCharacter"));
-  
+
            // Note - contents of maths files not currently supported
            String content = handler.toString();
            assertEquals("", content);
@@ -166,7 +166,7 @@ public class ODFParserTest extends TestCase {
            Metadata metadata = new Metadata();
            ContentHandler handler = new BodyContentHandler();
            new OpenDocumentParser().parse(input, handler, metadata);
-  
+
            assertEquals(
                    "application/vnd.oasis.opendocument.text",
                    metadata.get(Metadata.CONTENT_TYPE));
@@ -183,13 +183,13 @@ public class ODFParserTest extends TestCase {
                    "OpenOffice.org/3.1$Unix OpenOffice.org_project/310m19$Build-9420",
                    metadata.get("generator"));
            assertEquals("Apache, Lucene, Tika", metadata.get(Metadata.KEYWORDS));
-           
+
            // User defined metadata
            assertEquals("Bart Hanssens", metadata.get("custom:Editor"));
            assertEquals(null, metadata.get("custom:Info 2"));
            assertEquals(null, metadata.get("custom:Info 3"));
            assertEquals(null, metadata.get("custom:Info 4"));
-           
+
            // No statistics present
            assertEquals("0", metadata.get("nbTab"));
            assertEquals("2", metadata.get("nbObject"));
@@ -198,7 +198,7 @@ public class ODFParserTest extends TestCase {
            assertEquals("13", metadata.get("nbPara"));
            assertEquals("54", metadata.get("nbWord"));
            assertEquals("351", metadata.get("nbCharacter"));
-  
+
            String content = handler.toString();
            assertTrue(content.contains(
                  "Apache Tika Tika is part of the Lucene project."

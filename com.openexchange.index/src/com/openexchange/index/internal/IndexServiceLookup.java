@@ -59,17 +59,17 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexServiceLookup implements ServiceLookup {
-    
+
     private static final IndexServiceLookup INSTANCE = new IndexServiceLookup();
-    
+
     private final AtomicReference<ServiceLookup> serviceLookupRef;
-    
-    
+
+
     private IndexServiceLookup() {
         super();
         serviceLookupRef = new AtomicReference<ServiceLookup>();
     }
-    
+
     public static IndexServiceLookup getInstance() {
         return INSTANCE;
     }
@@ -80,10 +80,10 @@ public class IndexServiceLookup implements ServiceLookup {
         if (null == serviceLookup) {
             return null;
         }
-        
+
         return serviceLookup.getService(clazz);
     }
-    
+
     public void setServiceLookup(final ServiceLookup serviceLookup) {
         serviceLookupRef.set(serviceLookup);
     }

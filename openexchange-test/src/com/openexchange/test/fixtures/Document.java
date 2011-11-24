@@ -18,7 +18,7 @@ public class Document {
 	private String comments;
 	private SimpleCredentials createdBy;
 	private InfoItem parent;
-	private File datapath;
+	private final File datapath;
 	private Object seleniumDataPath;
 	private Object seleniumSeparator;
 

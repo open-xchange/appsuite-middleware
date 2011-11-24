@@ -73,7 +73,7 @@ import com.openexchange.test.FolderTestManager;
  */
 public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
 
-    private FolderObject entry;
+    private final FolderObject entry;
 
     private FolderTestManager manager;
 
@@ -88,6 +88,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         this.entry = entry;
     }
 
+    @Override
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
         this.manager = new FolderTestManager(myClient);
@@ -218,6 +219,7 @@ public class FolderVerificationStep extends NeedExistingStep<FolderObject> {
         return actual;
     }
 
+    @Override
     public void cleanUp() throws Exception {
         // Nothing to clean up
     }

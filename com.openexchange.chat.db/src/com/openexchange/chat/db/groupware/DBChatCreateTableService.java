@@ -66,63 +66,63 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     private static final String TABLE_CHAT_PRESENCE = "chatPresence";
     private static final String TABLE_CHAT_CHUNK = "chatChunk";
 
-    private static final String CREATE_CHAT = "CREATE TABLE "+TABLE_CHAT+" (\n" + 
-    		" cid INT4 unsigned NOT NULL,\n" + 
-    		" user INT4 unsigned NOT NULL,\n" + 
-    		" chatId INT4 unsigned NOT NULL,\n" + 
-    		" subject VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" + 
-    		" createdAt BIGINT(64) DEFAULT NULL,\n" + 
-    		" PRIMARY KEY (cid, chatId),\n" + 
-    		" INDEX `user` (cid, user)\n" + 
-    		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" + 
+    private static final String CREATE_CHAT = "CREATE TABLE "+TABLE_CHAT+" (\n" +
+    		" cid INT4 unsigned NOT NULL,\n" +
+    		" user INT4 unsigned NOT NULL,\n" +
+    		" chatId INT4 unsigned NOT NULL,\n" +
+    		" subject VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" +
+    		" createdAt BIGINT(64) DEFAULT NULL,\n" +
+    		" PRIMARY KEY (cid, chatId),\n" +
+    		" INDEX `user` (cid, user)\n" +
+    		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private static final String CREATE_CHAT_MEMBER = "CREATE TABLE "+TABLE_CHAT_MEMBER+" (\n" + 
-    		" cid INT4 unsigned NOT NULL,\n" + 
-    		" user INT4 unsigned NOT NULL,\n" + 
-    		" chatId INT4 unsigned NOT NULL,\n" + 
+
+    private static final String CREATE_CHAT_MEMBER = "CREATE TABLE "+TABLE_CHAT_MEMBER+" (\n" +
+    		" cid INT4 unsigned NOT NULL,\n" +
+    		" user INT4 unsigned NOT NULL,\n" +
+    		" chatId INT4 unsigned NOT NULL,\n" +
     		" chunkId INT4 unsigned NOT NULL,\n" +
     		" opMode INT4 unsigned NOT NULL,\n" +
     		" lastPoll BIGINT(64) DEFAULT NULL,\n" +
-    		" PRIMARY KEY (cid, user, chatId, chunkId),\n" + 
-    		" INDEX `user` (cid, user, chatId),\n" + 
-    		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" + 
+    		" PRIMARY KEY (cid, user, chatId, chunkId),\n" +
+    		" INDEX `user` (cid, user, chatId),\n" +
+    		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private static final String CREATE_CHAT_MESSAGE = "CREATE TABLE "+TABLE_CHAT_MESSAGE+" (\n" + 
-    		" cid INT4 unsigned NOT NULL,\n" + 
-    		" user INT4 unsigned NOT NULL,\n" + 
-    		" chatId INT4 unsigned NOT NULL,\n" + 
+
+    private static final String CREATE_CHAT_MESSAGE = "CREATE TABLE "+TABLE_CHAT_MESSAGE+" (\n" +
+    		" cid INT4 unsigned NOT NULL,\n" +
+    		" user INT4 unsigned NOT NULL,\n" +
+    		" chatId INT4 unsigned NOT NULL,\n" +
     		" chunkId INT4 unsigned NOT NULL,\n" +
-    		" messageId BINARY(16) NOT NULL,\n" + 
-    		" message TEXT NOT NULL,\n" + 
-    		" createdAt BIGINT(64) DEFAULT NULL,\n" + 
-    		" PRIMARY KEY (cid, chatId, messageId),\n" + 
-    		" INDEX `user` (cid, user),\n" + 
+    		" messageId BINARY(16) NOT NULL,\n" +
+    		" message TEXT NOT NULL,\n" +
+    		" createdAt BIGINT(64) DEFAULT NULL,\n" +
+    		" PRIMARY KEY (cid, chatId, messageId),\n" +
+    		" INDEX `user` (cid, user),\n" +
     		" INDEX `userMessage` (cid, user, chatId)\n" +
     		" INDEX `chunkMessage` (cid, chatId, chunkId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private static final String CREATE_CHAT_MESSAGE_MAP = "CREATE TABLE "+TABLE_CHAT_MESSAGE_MAP+" (\n" + 
-    		" cid INT4 unsigned NOT NULL,\n" + 
-    		" chatId INT4 unsigned NOT NULL,\n" + 
-    		" customId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" + 
-    		" messageId BINARY(16) NOT NULL,\n" + 
-    		" PRIMARY KEY (cid, chatId, messageId),\n" + 
-    		" INDEX `chat` (cid, chatId)\n" + 
+
+    private static final String CREATE_CHAT_MESSAGE_MAP = "CREATE TABLE "+TABLE_CHAT_MESSAGE_MAP+" (\n" +
+    		" cid INT4 unsigned NOT NULL,\n" +
+    		" chatId INT4 unsigned NOT NULL,\n" +
+    		" customId VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" +
+    		" messageId BINARY(16) NOT NULL,\n" +
+    		" PRIMARY KEY (cid, chatId, messageId),\n" +
+    		" INDEX `chat` (cid, chatId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
-    private static final String CREATE_CHAT_PRESENCE = "CREATE TABLE "+TABLE_CHAT_PRESENCE+" (\n" + 
-    		" cid INT4 unsigned NOT NULL,\n" + 
-    		" user INT4 unsigned NOT NULL,\n" + 
-    		" type INT4 unsigned NOT NULL DEFAULT 0, -- AVAILABLE\n" + 
-    		" mode INT4 unsigned NOT NULL DEFAULT 1, -- AVAILABLE\n" + 
-    		" statusMessage VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" + 
-    		" lastModified BINARY(16) NOT NULL,\n" + 
-    		" PRIMARY KEY (cid, user),\n" + 
-    		" INDEX `available` (cid, type)\n" + 
+
+    private static final String CREATE_CHAT_PRESENCE = "CREATE TABLE "+TABLE_CHAT_PRESENCE+" (\n" +
+    		" cid INT4 unsigned NOT NULL,\n" +
+    		" user INT4 unsigned NOT NULL,\n" +
+    		" type INT4 unsigned NOT NULL DEFAULT 0, -- AVAILABLE\n" +
+    		" mode INT4 unsigned NOT NULL DEFAULT 1, -- AVAILABLE\n" +
+    		" statusMessage VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,\n" +
+    		" lastModified BINARY(16) NOT NULL,\n" +
+    		" PRIMARY KEY (cid, user),\n" +
+    		" INDEX `available` (cid, type)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
-    
+
     private static final String CREATE_CHAT_CHUNK = "CREATE TABLE "+TABLE_CHAT_CHUNK+"(\n" +
     		" cid INT4 unsigned NOT NULL,\n" +
             " chatId INT4 unsigned NOT NULL,\n" +
@@ -136,7 +136,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
 
     /**
      * Gets the table names.
-     * 
+     *
      * @return The table names.
      */
     public static String[] getTablesToCreate() {
@@ -145,7 +145,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
 
     /**
      * Gets the CREATE-TABLE statements.
-     * 
+     *
      * @return The CREATE statements
      */
     public static String[] getCreateStmts() {

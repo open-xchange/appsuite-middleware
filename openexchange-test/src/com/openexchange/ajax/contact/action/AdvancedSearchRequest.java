@@ -37,15 +37,18 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 
 
 
-	public Object getBody() throws IOException, JSONException {
+	@Override
+    public Object getBody() throws IOException, JSONException {
 		return filter;
 	}
 
-	public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+	@Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
 		return Method.PUT;
 	}
 
-	public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters()
+	@Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters()
 			throws IOException, JSONException {
 		Params params = new Params(
 				AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_TERMSEARCH);
@@ -61,7 +64,8 @@ public class AdvancedSearchRequest extends AbstractContactRequest<SearchResponse
 		return params.toArray();
 	}
 
-	public AbstractAJAXParser<SearchResponse> getParser() {
+	@Override
+    public AbstractAJAXParser<SearchResponse> getParser() {
 		return new SearchParser(true, columns);
 	}
 

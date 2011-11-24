@@ -110,6 +110,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * @return Returns the name.
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -119,6 +120,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
      * @param subName Name of the sub setting.
      * @return the sub setting or <code>null</code> if it doesn't exist.
      */
+    @Override
     public T getElement(final String subName) {
         T element = null;
         if (null != elements) {
@@ -130,6 +132,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * @return Returns the id.
      */
+    @Override
     public int getId() {
         return id;
     }
@@ -137,6 +140,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * @return Returns the leaf.
      */
+    @Override
     public boolean isLeaf() {
         return null == elements || 0 == elements.size();
     }
@@ -183,6 +187,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * @return the sub elements of this element.
      */
+    @Override
     public T[] getElements() {
         final List<T> tmp = new ArrayList<T>();
         if (null != elements) {
@@ -197,6 +202,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
      * @return <code>true</code> if this setting is used in server and gui and
      * <code>false</code> if the setting is only used in gui.
      */
+    @Override
     public boolean isShared() {
         return -1 == shared.getId();
     }
@@ -235,6 +241,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * @return the path for this setting.
      */
+    @Override
     public String getPath() {
         final String retval;
         if (null == parent) {
@@ -248,6 +255,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * @return the parent
      */
+    @Override
     public T getParent() {
         return parent;
     }
@@ -255,6 +263,7 @@ public abstract class AbstractSetting<T extends AbstractSetting<? extends T>> im
     /**
      * @return the shared
      */
+    @Override
     public IValueHandler getShared() {
         return shared;
     }

@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.test.NotTest;
  */
 public class NotWriterImpl implements TestWriter {
 
-	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
+	@Override
+    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final NotTest notTest = (NotTest)abstractTest;
 		final AbstractTest test = notTest.getTest();

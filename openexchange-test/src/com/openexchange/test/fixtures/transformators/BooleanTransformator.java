@@ -50,6 +50,7 @@ package com.openexchange.test.fixtures.transformators;
 
 import com.openexchange.exception.OXException;
 public class BooleanTransformator implements Transformator {
+    @Override
     public Object transform(final String value) throws OXException {
         if("TRUE".equalsIgnoreCase(value)) { return true; }
         else if("FALSE".equalsIgnoreCase(value)) { return false; }

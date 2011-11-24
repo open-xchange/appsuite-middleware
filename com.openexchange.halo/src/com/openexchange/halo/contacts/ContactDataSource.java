@@ -17,11 +17,11 @@ public class ContactDataSource implements HaloContactDataSource {
 	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session)
 			throws OXException {
 		List<Contact> allContacts = new ArrayList<Contact>();
-		
+
 		allContacts.add(query.getContact());
 		List<Contact> mergedContacts = query.getMergedContacts();
 		allContacts.addAll(mergedContacts);
-		
+
 		return new AJAXRequestResult(allContacts, "contact");
 	}
 
@@ -29,7 +29,7 @@ public class ContactDataSource implements HaloContactDataSource {
 	public String getId() {
 		return "com.openexchange.halo.contacts";
 	}
-	
+
 	@Override
 	public boolean isAvailable(ServerSession session) {
 		return true;

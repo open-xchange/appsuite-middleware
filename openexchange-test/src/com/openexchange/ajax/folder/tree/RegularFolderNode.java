@@ -85,6 +85,7 @@ public class RegularFolderNode extends AbstractFolderNode {
         return new RegularFolderNode(folderObject, client);
     }
 
+    @Override
     public List<FolderNode> getChildren() {
         List<FolderNode> folders = new ArrayList<FolderNode>();
         for(FolderObject folder : getManager().listFoldersOnServer(getFolder())) {
@@ -93,6 +94,7 @@ public class RegularFolderNode extends AbstractFolderNode {
         return folders;
     }
 
+    @Override
     public boolean isRoot() {
         return false;
     }

@@ -52,7 +52,7 @@ package com.openexchange.mail.smal.jobqueue;
 
 /**
  * {@link UnboundedJobCompletionService} - An unbounded completion service.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnboundedJobCompletionService extends AbstractJobCompletionService {

@@ -58,7 +58,7 @@ import com.openexchange.mdns.MDNSServiceEntry;
 
 /**
  * {@link MDNSServiceEntryImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
@@ -103,7 +103,7 @@ public final class MDNSServiceEntryImpl implements MDNSServiceEntry {
 
     /**
      * Initializes a new {@link MDNSServiceEntryImpl}.
-     * 
+     *
      * @param address The address
      * @param port The port
      * @param number The number

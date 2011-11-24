@@ -65,6 +65,7 @@ abstract class AbstractContactRequest<T extends AbstractWebDAVResponse> implemen
         super();
     }
 
+    @Override
     public String getServletPath() {
         return URL;
     }

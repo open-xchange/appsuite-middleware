@@ -69,10 +69,12 @@ public abstract class AbstractPasswordChangeResourceRequest implements AJAXReque
         super();
     }
 
+    @Override
     public String getServletPath() {
         return RESOURCE_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

@@ -91,7 +91,7 @@ public final class AllMessageChatConversationRequest extends AbstractChatConvers
 
     /**
      * Sets the since time stamp
-     * 
+     *
      * @param date The time stamp
      * @param timeZoneId The time zone identifier
      */
@@ -102,7 +102,7 @@ public final class AllMessageChatConversationRequest extends AbstractChatConvers
 
     /**
      * Sets the since time stamp
-     * 
+     *
      * @param date The time stamp
      * @param timeZone The time zone
      */

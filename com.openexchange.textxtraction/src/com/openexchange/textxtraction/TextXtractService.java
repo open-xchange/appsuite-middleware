@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link TextXtractService} - The service to extract plain text from various document formats.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface TextXtractService {
@@ -63,7 +63,7 @@ public interface TextXtractService {
      * Extracts plain-text content from specified stream's content.
      * <p>
      * An auto-detection mechanism is performed to determine stream's document format if <code>optMimeType</code> is <code>null</code>.
-     * 
+     *
      * @param inputStream The input stream to extract text from
      * @param optMimeType The optional MIME type, pass <code>null</code> to auto-detect
      * @return The extracted plain-text
@@ -75,7 +75,7 @@ public interface TextXtractService {
      * Extracts plain-text content from specified content.
      * <p>
      * An auto-detection mechanism is performed to determine stream's document format if <code>optMimeType</code> is <code>null</code>.
-     * 
+     *
      * @param content The content to extract text from (and hopefully no plain-text content)
      * @param optMimeType The optional MIME type, pass <code>null</code> to auto-detect
      * @return The extracted plain-text
@@ -87,7 +87,7 @@ public interface TextXtractService {
      * Extracts plain-text content from specified resource's content.
      * <p>
      * An auto-detection mechanism is performed to determine file's/URL's document format if <code>optMimeType</code> is <code>null</code>.
-     * 
+     *
      * @param arg The (resource) argument either denotes an URL or a file
      * @param optMimeType The optional MIME type, pass <code>null</code> to auto-detect
      * @return The extracted plain-text

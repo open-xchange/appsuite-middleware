@@ -161,19 +161,23 @@ public abstract class UpdateTest extends TestCase {
 
     private class UpdateTaskDBProvider implements DBProvider {
 
+        @Override
         public Connection getReadConnection(final Context ctx) throws OXException {
             return Database.get(ctx, false);
         }
 
+        @Override
         public void releaseReadConnection(final Context ctx, final Connection con) {
             Database.back(ctx, false, con);
         }
 
+        @Override
         public Connection getWriteConnection(final Context ctx) throws OXException {
             return Database.get(ctx, true);
 
         }
 
+        @Override
         public void releaseWriteConnection(final Context ctx, final Connection con) {
             Database.back(ctx, true, con);
         }

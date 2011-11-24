@@ -211,6 +211,7 @@ public final class Init {
          */
         new Initialization() {
 
+            @Override
             public void start() throws OXException {
                 AJPv13Config.getInstance().start();
                 ServletConfigLoader.initDefaultInstance(AJPv13Config.getServletConfigs());
@@ -221,6 +222,7 @@ public final class Init {
                 HttpManagersInit.getInstance().start();
             }
 
+            @Override
             public void stop() throws OXException {
                 HttpManagersInit.getInstance().stop();
                 AJPv13Server.stopAJPServer();
@@ -443,6 +445,7 @@ public final class Init {
         final String message = cause.getMessage();
         final Component c = new Component() {
             private static final long serialVersionUID = 2411378382745647554L;
+            @Override
             public String getAbbreviation() {
                 return "TEST";
             }
@@ -670,10 +673,12 @@ public final class Init {
         if (null == ServerServiceRegistry.getInstance().getService(EventAdmin.class)) {
             EventQueue.setNewEventDispatcher(new EventDispatcher() {
 
+                @Override
                 public void addListener(final AppointmentEventInterface listener) {
                     // Do nothing.
                 }
 
+                @Override
                 public void addListener(final TaskEventInterface listener) {
                     // Do nothing.
                 }

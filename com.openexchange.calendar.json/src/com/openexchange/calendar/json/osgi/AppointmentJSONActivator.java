@@ -65,7 +65,7 @@ import com.openexchange.user.UserService;
 public class AppointmentJSONActivator extends AJAXModuleActivator {
 
     private static final Class<?>[] NEEDED = new Class[] { UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class };
-    
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;

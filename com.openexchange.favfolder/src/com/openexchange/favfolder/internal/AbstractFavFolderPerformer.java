@@ -68,8 +68,8 @@ public class AbstractFavFolderPerformer {
 
     /**
      * Initializes a new {@link AbstractFavFolderPerformer}.
-     * 
-     * @param serviceLookup 
+     *
+     * @param serviceLookup
      */
     protected AbstractFavFolderPerformer(final ServiceLookup serviceLookup) {
         super();

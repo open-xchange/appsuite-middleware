@@ -81,7 +81,7 @@ import com.openexchange.test.ContactTestManager;
  */
 public class ContactVerificationStep extends NeedExistingStep<Contact> {
 
-    private Contact entry;
+    private final Contact entry;
 
     private ContactTestManager manager;
 
@@ -108,6 +108,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         }
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new ContactTestManager(client);
@@ -257,6 +258,7 @@ public class ContactVerificationStep extends NeedExistingStep<Contact> {
         return actual;
     }
 
+    @Override
     public void cleanUp() throws Exception {
     }
 }

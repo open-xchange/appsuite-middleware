@@ -65,9 +65,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class WhiteboardSecretMigrator extends ServiceTracker implements SecretMigrator {
-	
+
 	private static final Log LOG = LogFactory.getLog(WhiteboardSecretMigrator.class);
-	
+
     public WhiteboardSecretMigrator(final BundleContext context) {
         super(context, SecretMigrator.class.getName(), null);
     }

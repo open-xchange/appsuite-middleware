@@ -97,7 +97,7 @@ public interface ManagedFile {
      * @param contentType The content type
      */
     public void setContentType(String contentType);
-    
+
     /**
      * Gets the (optional) content disposition.
      *

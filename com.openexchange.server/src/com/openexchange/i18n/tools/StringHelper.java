@@ -76,7 +76,7 @@ public class StringHelper {
 
     /**
      * Gets the {@link StringHelper} instance for specified locale.
-     * 
+     *
      * @param locale The locale
      * @return The associated {@link StringHelper} instance
      */

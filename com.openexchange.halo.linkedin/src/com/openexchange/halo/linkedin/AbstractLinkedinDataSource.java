@@ -95,7 +95,7 @@ public abstract class AbstractLinkedinDataSource  implements HaloContactDataSour
 		this.oauthService = oauthService;
 	}
 
-	
+
 	@Override
 	public String getId() {
 		return "com.openexchange.halo.linkedIn:fullProfile";
@@ -106,7 +106,7 @@ public abstract class AbstractLinkedinDataSource  implements HaloContactDataSour
 		String password = session.getPassword();
 		int uid = session.getUserId();
 		int cid = session.getContextId();
-		
+
 		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
 		return !accounts.isEmpty();
 	}

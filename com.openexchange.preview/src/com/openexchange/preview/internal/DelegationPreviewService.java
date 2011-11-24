@@ -85,14 +85,14 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DelegationPreviewService implements PreviewService, SimpleRegistryListener<InternalPreviewService> {
-    
+
     private final PreviewService delegate;
-    
+
     private final ConcurrentMap<String, ConcurrentMap<PreviewOutput, BlockingQueue<InternalPreviewService>>> serviceMap;
 
     /**
      * Initializes a new {@link DelegationPreviewService}.
-     * 
+     *
      * @param delegate The delegate preview service
      */
     public DelegationPreviewService(final PreviewService delegate) {
@@ -102,7 +102,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
     }
 
     @Override
-    public String detectDocumentType(final InputStream inputStream) throws OXException {                
+    public String detectDocumentType(final InputStream inputStream) throws OXException {
         return delegate.detectDocumentType(inputStream);
     }
 
@@ -128,7 +128,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(is);
-        }       
+        }
     }
 
     @Override
@@ -137,7 +137,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
         final PreviewService previewService = getBestFitOrDelegate(mimeType, output);
         return previewService.getPreviewFor(documentData, output, session);
     }
-    
+
     @Override
     public void added(final ServiceReference<InternalPreviewService> ref, final InternalPreviewService service) {
         for (final PreviewPolicy policy : service.getPreviewPolicies()) {
@@ -174,12 +174,12 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
                 final BlockingQueue<InternalPreviewService> queue = map.get(output);
                 if (queue != null)  {
                     queue.remove(service);
-                }                
+                }
             }
-            
+
         }
     }
-    
+
     private PreviewService getBestFitOrDelegate(final String mimeType, final PreviewOutput output) {
         final Map<PreviewOutput, BlockingQueue<InternalPreviewService>> map = serviceMap.get(mimeType);
         if (map == null) {
@@ -191,11 +191,11 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
         }
         return queue.peek();
     }
-    
+
     private static final class InternalPreviewServiceComparator implements Comparator<InternalPreviewService> {
-        
+
         private final PreviewOutput output;
-        
+
         private final String mimeType;
 
         protected InternalPreviewServiceComparator(final String mimeType, final PreviewOutput output) {
@@ -222,7 +222,7 @@ public class DelegationPreviewService implements PreviewService, SimpleRegistryL
             }
             return o1Quality - o2Quality;
         }
-        
+
     }
 
 }

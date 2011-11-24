@@ -171,7 +171,7 @@ public class SessiondServiceImpl implements SessiondService {
         final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId);
         return null == sessionControl ? null: sessionControl.getSession();
     }
-    
+
     @Override
     public Session findFirstMatchingSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
         return SessionHandler.findFirstSessionForUser(userId, contextId, matcher);

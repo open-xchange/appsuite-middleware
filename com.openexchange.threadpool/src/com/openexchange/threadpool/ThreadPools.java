@@ -315,7 +315,7 @@ public final class ThreadPools {
 
     /**
      * Creates a new <code>CancelableCompletionService</code> from passed thread pool.
-     * 
+     *
      * @param threadPool The thread pool
      * @return A newly created <code>CancelableCompletionService</code>
      */

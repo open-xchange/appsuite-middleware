@@ -62,7 +62,7 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     /**
      * Initializes a new {@link SpecialAlphanumSortContactComparator}.
-     * 
+     *
      * @param locale The locale
      */
     public SpecialAlphanumSortContactComparator(final Locale locale) {

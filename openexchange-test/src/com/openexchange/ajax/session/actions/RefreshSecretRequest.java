@@ -69,7 +69,8 @@ public class RefreshSecretRequest extends AbstractRequest<RefreshSecretResponse>
 		this.failOnError = failOnError;
 	}
 
-	public AbstractAJAXParser<RefreshSecretResponse> getParser() {
+	@Override
+    public AbstractAJAXParser<RefreshSecretResponse> getParser() {
 		return new AbstractAJAXParser<RefreshSecretResponse>(failOnError) {
 			@Override
 			protected RefreshSecretResponse createResponse(Response response) {

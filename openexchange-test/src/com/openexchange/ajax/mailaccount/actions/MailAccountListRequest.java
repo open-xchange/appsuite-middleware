@@ -62,11 +62,11 @@ import com.openexchange.ajax.framework.Header;
  */
 public class MailAccountListRequest implements AJAXRequest<MailAccountListResponse> {
 
-    private boolean failOnError;
-    private int[] ids;
-    private int[] cols;
-    private String columns;
-    private JSONArray idArray;
+    private final boolean failOnError;
+    private final int[] ids;
+    private final int[] cols;
+    private final String columns;
+    private final JSONArray idArray;
 
     public MailAccountListRequest(boolean failOnError, int[] ids, int[] cols) {
         this.failOnError = failOnError;
@@ -90,18 +90,22 @@ public class MailAccountListRequest implements AJAXRequest<MailAccountListRespon
         this(true, ids, cols);
     }
 
+    @Override
     public Object getBody() {
         return idArray;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[]{
             new Parameter("action", "list"),
@@ -109,10 +113,12 @@ public class MailAccountListRequest implements AJAXRequest<MailAccountListRespon
         };
     }
 
+    @Override
     public AbstractAJAXParser<MailAccountListResponse> getParser() {
         return new MailAccountListParser(failOnError, cols);
     }
 
+    @Override
     public String getServletPath() {
         return "/ajax/account";
     }

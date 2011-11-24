@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.test.SizeTest;
  */
 public class SizeTestParserImpl implements TestParser {
 
-	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		// TODO: parse comparator and size
 		return new SizeTest(null);
 	}

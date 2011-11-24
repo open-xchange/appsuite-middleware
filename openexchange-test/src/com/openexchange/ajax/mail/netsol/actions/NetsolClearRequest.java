@@ -73,29 +73,35 @@ public final class NetsolClearRequest implements AJAXRequest {
 		this.folderId = folderId;
 	}
 
-	public Object getBody() {
+	@Override
+    public Object getBody() {
 		final JSONArray array = new JSONArray();
 		array.put(folderId);
 		return array;
 	}
 
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		return new Parameter[] { new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR) };
 	}
 
-	public AbstractAJAXParser<NetsolClearResponse> getParser() {
+	@Override
+    public AbstractAJAXParser<NetsolClearResponse> getParser() {
 		return new ClearParser(true);
 	}
 
-	public String getServletPath() {
+	@Override
+    public String getServletPath() {
 		return AbstractMailRequest.MAIL_URL;
 	}
 

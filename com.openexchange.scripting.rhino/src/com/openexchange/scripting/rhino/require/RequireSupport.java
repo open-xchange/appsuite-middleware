@@ -14,9 +14,9 @@ import com.openexchange.scripting.rhino.SharedScope;
 /**
  * We'll implement the AMD spec here as best we can, with a few extensions
  * accounting for us living in OSGi
- * 
+ *
  * @author francisco.laguna@open-xchange.com
- * 
+ *
  */
 public class RequireSupport {
 

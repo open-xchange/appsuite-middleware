@@ -54,42 +54,42 @@ package com.openexchange.rdiff;
  * <p>
  * The weak "rolling" checksum is typically a 32-bit sum derived from the Adler32 algorithm; the strong checksum is usually a 128-bit MD4
  * checksum.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChecksumPair {
 
     /**
      * Get the weak checksum.
-     * 
+     *
      * @return The weak checksum
      */
     public int getWeak();
 
     /**
      * Get the strong checksum.
-     * 
+     *
      * @return The strong checksum
      */
     public byte[] getStrong();
 
     /**
      * Gets the offset from where this checksum pair was generated.
-     * 
+     *
      * @return The offset or <code>-1</code>
      */
     public long getOffset();
 
     /**
      * Gets the length of the data for which this checksum pair was generated.
-     * 
+     *
      * @return The length or <code>0</code>
      */
     public int getLength();
 
     /**
      * Gets the sequence number of this checksum pair, if any.
-     * 
+     *
      * @return The sequence number or <code>0</code>
      */
     public int getSequence();

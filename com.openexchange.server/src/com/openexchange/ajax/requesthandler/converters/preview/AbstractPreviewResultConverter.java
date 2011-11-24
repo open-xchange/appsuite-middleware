@@ -105,7 +105,7 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
             final PreviewDocument previewDocument;
             {
                 final PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-    
+
                 final DataProperties dataProperties = new DataProperties(4);
                 dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, fileHolder.getContentType());
                 dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
@@ -113,12 +113,12 @@ abstract class AbstractPreviewResultConverter implements ResultConverter {
                 dataProperties.put(DataProperties.PROPERTY_SIZE, String.valueOf(fileHolder.getLength()));
                 previewDocument =
                     previewService.getPreviewFor(new SimpleData<InputStream>(fileHolder.getStream(), dataProperties), getOutput(), session);
-    
+
             }
             if (requestData.getIntParameter("save") == 1) {
                 /*-
                  * Preview document should be saved.
-                 * We set the request format to file and return a FileHolder 
+                 * We set the request format to file and return a FileHolder
                  * containing the preview document.
                  */
                 requestData.setFormat("file");

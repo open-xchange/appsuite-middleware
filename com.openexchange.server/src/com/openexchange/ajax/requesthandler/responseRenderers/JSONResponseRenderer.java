@@ -62,7 +62,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JSONResponseRenderer}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class JSONResponseRenderer implements ResponseRenderer {

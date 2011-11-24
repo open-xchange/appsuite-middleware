@@ -82,7 +82,7 @@ public class TestServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         // Uncomment to test long-running task
         /*-
-         * 
+         *
         try {
             System.out.println("Going asleep...");
             Thread.sleep(100000);
@@ -90,7 +90,7 @@ public class TestServlet extends HttpServlet {
         } catch (final InterruptedException e) {
             e.printStackTrace();
         }
-         * 
+         *
          */
         final StringBuilder page = new StringBuilder();
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");

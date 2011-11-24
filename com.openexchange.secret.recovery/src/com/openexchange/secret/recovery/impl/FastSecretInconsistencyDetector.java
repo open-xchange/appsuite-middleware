@@ -64,7 +64,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link FastSecretInconsistencyDetector}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
  *         Laguna</a>
  */

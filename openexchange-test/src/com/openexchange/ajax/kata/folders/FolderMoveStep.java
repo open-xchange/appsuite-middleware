@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderMoveStep extends NeedExistingStep<FolderObject> {
 
-    private int destinationFolder;
+    private final int destinationFolder;
 
     /**
      * @param name
@@ -77,6 +77,7 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
+    @Override
     public void cleanUp() throws Exception {
         // TODO Auto-generated method stub
 
@@ -85,6 +86,7 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
      */
+    @Override
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
 

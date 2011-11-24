@@ -29,7 +29,7 @@ import org.junit.Test;
  * Implementation note: do not re-use the same values in different tests. As we
  * have no control over the JID cache, we might end up testing against a cached
  * value of the cache that's being tested by this JUnit testcase.
- * 
+ *
  * @author Guus der Kinderen, guus.der.kinderen@gmail.com
  * @see <a href="http://www.igniterealtime.org/issues/browse/TINDER-8">Tinder
  *      bugtracker: TINDER-8</a>

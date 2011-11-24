@@ -88,18 +88,22 @@ public class GetRequest extends AbstractConfigRequest<GetResponse> {
         return super.getServletPath() + path;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[0];
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser(failOnError);
     }

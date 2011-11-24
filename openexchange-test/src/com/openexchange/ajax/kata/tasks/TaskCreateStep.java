@@ -66,7 +66,7 @@ import com.openexchange.test.TaskTestManager;
  */
 public class TaskCreateStep extends AbstractStep implements IdentitySource<Task> {
 
-    private Task entry;
+    private final Task entry;
     private boolean inserted;
     private TaskTestManager manager;
     /**
@@ -82,6 +82,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.IdentitySource#assumeIdentity(java.lang.Object)
      */
+    @Override
     public void assumeIdentity(Task task) {
         task.setObjectID( entry.getObjectID() );
         task.setParentFolderID( entry.getParentFolderID());
@@ -91,6 +92,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
      */
+    @Override
     public void rememberIdentityValues(Task task) {
         entry.setLastModified(task.getLastModified());
         if(task.containsParentFolderID())
@@ -100,6 +102,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.IdentitySource#rememberIdentityValues(java.lang.Object)
      */
+    @Override
     public void forgetIdentity(Task entry) {
         inserted = false;
     }
@@ -107,6 +110,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
+    @Override
     public void cleanUp() throws Exception {
         if(!inserted) {
             return;
@@ -117,6 +121,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
      */
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new TaskTestManager(client);
@@ -128,6 +133,7 @@ public class TaskCreateStep extends AbstractStep implements IdentitySource<Task>
         checkError(insertResponse);
     }
 
+    @Override
     public Class<Task> getType() {
         return Task.class;
     }

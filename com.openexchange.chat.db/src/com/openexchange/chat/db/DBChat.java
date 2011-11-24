@@ -99,7 +99,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DBChat}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBChat implements Chat {
@@ -123,7 +123,7 @@ public final class DBChat implements Chat {
 
         /**
          * Executes this {@link SafeRunnable}'s task.
-         * 
+         *
          * @throws Exception If an error occurs
          */
         protected abstract void execute() throws Exception;
@@ -149,7 +149,7 @@ public final class DBChat implements Chat {
 
         /**
          * Handles specified key-value-pair.
-         * 
+         *
          * @param key The key
          * @param value The value
          * @throws Exception If an error occurs
@@ -200,7 +200,7 @@ public final class DBChat implements Chat {
 
     /**
      * Sets the crypto service reference.
-     * 
+     *
      * @param cryptoService The crypto service
      */
     public static void setCryptoService(final CryptoService cryptoService) {
@@ -209,7 +209,7 @@ public final class DBChat implements Chat {
 
     /**
      * Adds specified message listener.
-     * 
+     *
      * @param messageListener
      */
     public static void addMessageListenerStatic(final MessageListener messageListener) {
@@ -221,7 +221,7 @@ public final class DBChat implements Chat {
 
     /**
      * Removes specified message listener.
-     * 
+     *
      * @param messageListener
      */
     public static void removeMessageListenerStatic(final MessageListener messageListener) {
@@ -313,7 +313,7 @@ public final class DBChat implements Chat {
 
     /**
      * Gets the chat for specified arguments
-     * 
+     *
      * @param chatId The chat identifier
      * @param contextId The context identifier
      * @return The chat or <code>null</code> if absent
@@ -325,7 +325,7 @@ public final class DBChat implements Chat {
 
     /**
      * Gets the chat for specified arguments
-     * 
+     *
      * @param chatId The chat identifier
      * @param contextId The context identifier
      * @return The chat
@@ -352,7 +352,7 @@ public final class DBChat implements Chat {
 
     /**
      * Removes specified chat.
-     * 
+     *
      * @param chatId The chat identifier
      * @param contextId The context identifier
      * @throws OXException If removal fails
@@ -384,7 +384,7 @@ public final class DBChat implements Chat {
 
     /**
      * Removes specified chat.
-     * 
+     *
      * @param chatIds The chat identifiers
      * @param contextId The context identifier
      * @throws OXException If removal fails
@@ -419,7 +419,7 @@ public final class DBChat implements Chat {
 
     /**
      * Drops all data associated with specified chats.
-     * 
+     *
      * @param chatIds The chat identifiers
      * @param contextId The context identifier
      * @param con The connection to use
@@ -530,7 +530,7 @@ public final class DBChat implements Chat {
 
     /**
      * Gets lazy initialized context.
-     * 
+     *
      * @return The context
      * @throws OXException If initializing context fails
      */
@@ -550,7 +550,7 @@ public final class DBChat implements Chat {
 
     /**
      * Prepares given text queried from database.
-     * 
+     *
      * @param text The queried text
      * @return The prepared text ready for being returned to caller
      * @throws OXException If preparing text fails
@@ -561,7 +561,7 @@ public final class DBChat implements Chat {
 
     /**
      * Prepares given text intended for being written to database.
-     * 
+     *
      * @param text The text to insert/update
      * @return The prepared text ready for being written to database
      * @throws OXException If preparing text fails
@@ -572,7 +572,7 @@ public final class DBChat implements Chat {
 
     /**
      * Checks for newly arrived messages in this chat.
-     * 
+     *
      * @param con The connection to use
      * @return Newly arrived messages (sorted by time stamp) or an empty list
      * @throws OXException If check fails
@@ -585,8 +585,9 @@ public final class DBChat implements Chat {
             stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE chatId = ?");
             stmt.setInt(1, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.last()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -647,7 +648,7 @@ public final class DBChat implements Chat {
 
     /**
      * Gets the numeric chat identifier.
-     * 
+     *
      * @return The numeric chat identifier
      */
     public int getChatIdInt() {
@@ -794,8 +795,9 @@ public final class DBChat implements Chat {
             stmt.setInt(1, contextId);
             stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.last()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -921,8 +923,9 @@ public final class DBChat implements Chat {
             stmt.setInt(1, contextId);
             stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.last()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -1050,8 +1053,9 @@ public final class DBChat implements Chat {
             stmt.setInt(1, contextId);
             stmt.setInt(2, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            chunkId = rs.getInt(1);
+            if (rs.next()) {
+                chunkId = rs.getInt(1);
+            }
         } catch (final SQLException e) {
             ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
@@ -1143,7 +1147,7 @@ public final class DBChat implements Chat {
 
     /**
      * Deletes a message by specified identifier.
-     * 
+     *
      * @param messageId The message identifier
      */
     @Override
@@ -1244,14 +1248,14 @@ public final class DBChat implements Chat {
             closeSQLStuff(rs, stmt);
         }
     }
-    
+
     @Override
     public List<Message> pollMessages(final Date since, final ChatUser chatUser) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getWritable(contextId);
         try {
             con.setAutoCommit(false);
-            List<Message> messages = pollMessages(con, since, chatUser);
+            final List<Message> messages = pollMessages(con, since, chatUser);
             con.commit();
             return messages;
         } catch (final SQLException e) {
@@ -1266,7 +1270,7 @@ public final class DBChat implements Chat {
         }
     }
 
-    
+
     private List<Message> pollMessages(final Connection con, final Date since, final ChatUser chatUser) throws OXException {
         final int chatUserId = DBChatUtility.parseUnsignedInt(chatUser.getId());
         int chunkId = 1;
@@ -1332,11 +1336,10 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, chatUserId);
             stmt.setInt(pos, chatId);
             rs = stmt.executeQuery();
-            rs.last();
-            if (rs.getRow() == 1) {
+            if (rs.last()) {
                 chunkId = rs.getInt(1);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -1354,7 +1357,7 @@ public final class DBChat implements Chat {
             stmt.setInt(pos++, chunkId);
             stmt.setInt(pos, chatUserId);
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -1389,7 +1392,7 @@ public final class DBChat implements Chat {
 
     /**
      * Sets the subject
-     * 
+     *
      * @param subject The subject to set
      */
     public void setSubject(final String subject) throws OXException {
@@ -1442,7 +1445,7 @@ public final class DBChat implements Chat {
 
     /**
      * Gets the database service instance.
-     * 
+     *
      * @return The database service
      * @throws OXException If service cannot be returned
      */

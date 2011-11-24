@@ -73,6 +73,7 @@ import com.openexchange.folderstorage.cache.lock.TreeLockManagement;
 import com.openexchange.folderstorage.cache.lock.UserLockManagement;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -106,7 +107,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class, SessiondService.class };
+        return new Class<?>[] { CacheService.class, ThreadPoolService.class, ConfigurationService.class, SessiondService.class, MailAccountStorageService.class };
     }
 
     @Override

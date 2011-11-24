@@ -11,7 +11,7 @@ public class Bug20516Test extends AbstractManagedContactTest {
 	public Bug20516Test(String name) {
 		super(name);
 	}
-	
+
 	public void testEmail() throws Exception{
 		String ical = "Sur name,Given name,Email 1\nBroken,E-Mail,notanaddress\n";
 		CSVImportRequest request = new CSVImportRequest(folderID, new ByteArrayInputStream(ical.getBytes()));

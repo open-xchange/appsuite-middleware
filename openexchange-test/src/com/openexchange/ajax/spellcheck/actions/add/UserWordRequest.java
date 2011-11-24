@@ -84,7 +84,8 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return userWord;
 	}
 
@@ -93,7 +94,8 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
@@ -102,7 +104,8 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, add ? "add" : "remove"));
 		return params.toArray(new Parameter[params.size()]);
@@ -113,7 +116,8 @@ public final class UserWordRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public UserWordParser getParser() {
+	@Override
+    public UserWordParser getParser() {
 		return new UserWordParser(failOnError);
 	}
 

@@ -178,6 +178,7 @@ public class OfflineMessageManagerTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

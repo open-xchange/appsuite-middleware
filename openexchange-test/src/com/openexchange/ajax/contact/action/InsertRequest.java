@@ -123,7 +123,8 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		if(jsonObj != null)
 			return jsonObj;
 		return convert(contactObj);
@@ -132,14 +133,16 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return withImage ? Method.UPLOAD : Method.PUT;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 	    if (withImage) {
 	        return new Parameter[] {
 	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW),
@@ -157,7 +160,8 @@ public class InsertRequest extends AbstractContactRequest<InsertResponse> {
 	/**
 	 * {@inheritDoc}
 	 */
-	public InsertParser getParser() {
+	@Override
+    public InsertParser getParser() {
 		return new InsertParser(failOnError, withImage);
 	}
 }

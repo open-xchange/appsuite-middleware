@@ -26,11 +26,12 @@ import org.apache.tika.parser.chm.core.ChmConstants;
 
 /**
  * Tests all public methods of the ChmItspHeader
- * 
+ *
  */
 public class TestChmItspHeader extends TestCase {
     private ChmItspHeader chmItspHeader = null;
 
+    @Override
     public void setUp() throws Exception {
         byte[] data = TestParameters.chmData;
 
@@ -131,6 +132,7 @@ public class TestChmItspHeader extends TestCase {
                 TestParameters.VP_ISTP_SIGNATURE));
     }
 
+    @Override
     public void tearDown() throws Exception {
         chmItspHeader = null;
     }

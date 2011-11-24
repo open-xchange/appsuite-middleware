@@ -284,7 +284,8 @@ public class Executor extends Assert {
     private static String addQueryParamsToUri(String uri, List<NameValuePair> queryParams){
 
     	java.util.Collections.sort(queryParams, new Comparator<NameValuePair>(){
-			public int compare(NameValuePair o1, NameValuePair o2) {
+			@Override
+            public int compare(NameValuePair o1, NameValuePair o2) {
 				return (o1.getName().compareTo(o2.getName()));
 			}}); //sorting the query params alphabetically
 

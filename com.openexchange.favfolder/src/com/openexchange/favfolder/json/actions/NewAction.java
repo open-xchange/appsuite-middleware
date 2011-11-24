@@ -69,7 +69,7 @@ public final class NewAction extends AbstractFavFolderAction {
 
     /**
      * Initializes a new {@link NewAction}.
-     * 
+     *
      * @param services The service look-up
      */
     public NewAction(final ServiceLookup services) {

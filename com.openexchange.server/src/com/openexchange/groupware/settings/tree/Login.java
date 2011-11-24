@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,90 +47,58 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.groupware.settings.tree;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link FieldNamePair} - A pair of a field and its name.
- * <p>
- * Equality is only determined by field value, not its name.
- * 
+ * This class adds a node to the configuration tree containing the full user's login string.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FieldNamePair {
+public final class Login implements PreferencesItemService {
+
+    private static final String NAME = "login";
 
     /**
-     * Gets the instance for given field.
-     * 
-     * @param field The field
-     * @return The appropriate instance
+     * Default constructor.
      */
-    public static FieldNamePair valueOf(final int field) {
-        return new FieldNamePair(field, null);
-    }
-
-    private final int field;
-
-    private final String name;
-
-    /**
-     * Initializes a new {@link FieldNamePair}.
-     * 
-     * @param field The field number
-     * @param name The field name
-     */
-    public FieldNamePair(final int field, final String name) {
+    public Login() {
         super();
-        this.field = field;
-        this.name = name;
     }
 
     /**
-     * Gets the field.
-     * 
-     * @return The field
+     * {@inheritDoc}
      */
-    public int getField() {
-        return field;
+    @Override
+    public String[] getPath() {
+        return new String[] { NAME };
     }
 
     /**
-     * Gets the name.
-     * 
-     * @return The name
+     * {@inheritDoc}
      */
-    public String getName() {
-        return name;
-    }
-
     @Override
-    public int hashCode() {
-        return field;
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            @Override
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws OXException {
+                setting.setSingleValue(session.getLogin());
+            }
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
     }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof FieldNamePair)) {
-            return false;
-        }
-        final FieldNamePair other = (FieldNamePair) obj;
-        if (field != other.field) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder(48);
-        builder.append("FieldNamePair [field=").append(field).append(", ");
-        if (name != null) {
-            builder.append("name=").append(name);
-        }
-        builder.append("]");
-        return builder.toString();
-    }
-
 }

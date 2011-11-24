@@ -68,6 +68,8 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -99,19 +101,27 @@ import com.openexchange.folderstorage.internal.performers.StorageParametersProvi
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link CacheFolderStorage} - The cache folder storage.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CacheFolderStorage implements FolderStorage {
+
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CacheFolderStorage.class));
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {
@@ -157,7 +167,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Clears this cache with respect to specified session.
-     * 
+     *
      * @param session The session
      */
     public void clear(final Session session) {
@@ -166,7 +176,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Initializes this folder cache on available cache service.
-     * 
+     *
      * @throws OXException If initialization of this folder cache fails
      */
     public void onCacheAvailable() throws OXException {
@@ -177,7 +187,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Disposes this folder cache on absent cache service.
-     * 
+     *
      * @throws OXException If disposal of this folder cache fails
      */
     public void onCacheAbsent() throws OXException {
@@ -237,8 +247,63 @@ public final class CacheFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
+            if (REAL_TREE_ID.equals(treeId)) {
+                final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
+                final ServiceRegistry serviceRegistry = CacheServiceRegistry.getServiceRegistry();
+                final String realTreeId = this.realTreeId;
+                final Runnable task = new Runnable() {
+                    
+                    @Override
+                    public void run() {
+                        try {
+                            final StorageParameters params = newStorageParameters(storageParameters);
+                            if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                                final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
+                                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                                for (final MailAccount mailAccount : accounts) {
+                                    final int accountId = mailAccount.getId();
+                                    if (accountId != MailAccount.DEFAULT_ID) {
+                                        try {
+                                            final String folderId =
+                                                MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
+                                            final Folder rootFolder = getFolder(realTreeId, folderId, params);
+                                            final String[] subfolderIDs = rootFolder.getSubfolderIDs();
+                                            if (null != subfolderIDs) {
+                                                for (final String subfolderId : subfolderIDs) {
+                                                    getFolder(realTreeId, subfolderId, params);
+                                                }
+                                            }
+                                        } catch (final Exception e) {
+                                            // Pre-Accessing external account folder failed.
+                                            LOG.debug(e.getMessage(), e);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (final Exception e) {
+                            LOG.debug(e.getMessage(), e);
+                        }
+                    }
+                };
+                serviceRegistry.getService(ThreadPoolService.class).submit(ThreadPools.task(task), AbortBehavior.getInstance());
+            }
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * Checks if given folder storage is already contained in collection of opened storages. If yes, this method terminates immediately.
+     * Otherwise the folder storage is opened according to specified modify flag and is added to specified collection of opened storages.
+     */
+    protected static void checkOpenedStorage(final FolderStorage checkMe, final StorageParameters params, final boolean modify, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
+        if (openedStorages.contains(checkMe)) {
+            // Passed storage is already opened
+            return;
+        }
+        // Passed storage has not been opened before. Open now and add to collection
+        if (checkMe.startTransaction(params, modify)) {
+            openedStorages.add(checkMe);
         }
     }
 
@@ -437,7 +502,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes specified folder and all of its predecessor folders from cache.
-     * 
+     *
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param singleOnly <code>true</code> if only specified folder should be removed; otherwise <code>false</code> for complete folder's
@@ -518,7 +583,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes a single folder from cache.
-     * 
+     *
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param session The session
@@ -529,7 +594,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Removes a single folder from cache.
-     * 
+     *
      * @param id The folder identifier
      * @param treeId The tree identifier
      * @param contextId The context identifier
@@ -1464,7 +1529,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Creates the cache key for specified folder ID and tree ID pair.
-     * 
+     *
      * @param folderId The folder ID
      * @param treeId The tree ID
      * @return The cache key
@@ -1636,7 +1701,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Creates a new storage parameter instance.
-     * 
+     *
      * @return A new storage parameter instance.
      */
     static StorageParameters newStorageParameters(final StorageParameters source) {
@@ -1669,7 +1734,7 @@ public final class CacheFolderStorage implements FolderStorage {
 
     /**
      * Drops entries associated with specified user in given context.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      */

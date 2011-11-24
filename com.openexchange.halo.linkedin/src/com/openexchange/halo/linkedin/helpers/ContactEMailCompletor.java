@@ -58,9 +58,9 @@ import com.openexchange.user.UserService;
 
 public class ContactEMailCompletor {
 
-	private ServerSession session;
-	private ContactInterfaceDiscoveryService cids;
-	private UserService userService;
+	private final ServerSession session;
+	private final ContactInterfaceDiscoveryService cids;
+	private final UserService userService;
 
 	public ContactEMailCompletor(ServerSession session, ContactInterfaceDiscoveryService cids, UserService userService) {
 		this.session = session;
@@ -72,7 +72,7 @@ public class ContactEMailCompletor {
 		int fid = contact.getParentFolderID();
 		ContactInterface contactInterface = cids.newContactInterface(fid, session);
 		Contact fullContact = contactInterface.getObjectById(contact.getObjectID(), fid);
-		
+
 		if(fullContact.containsEmail1())
 			contact.setEmail1(fullContact.getEmail1());
 		if(fullContact.containsEmail2())

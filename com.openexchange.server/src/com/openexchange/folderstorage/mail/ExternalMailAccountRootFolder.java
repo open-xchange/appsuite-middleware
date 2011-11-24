@@ -172,7 +172,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
 
     @Override
     public boolean isCacheable() {
-        return false;
+        return true;
     }
 
     @Override

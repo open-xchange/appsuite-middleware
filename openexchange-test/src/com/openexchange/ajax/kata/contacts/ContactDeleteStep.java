@@ -59,16 +59,18 @@ import com.openexchange.test.ContactTestManager;
  */
 public class ContactDeleteStep extends NeedExistingStep<Contact> {
 
-	private Contact entry;
+	private final Contact entry;
 
     public ContactDeleteStep(Contact entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         assumeIdentity(entry);
         ContactTestManager manager = new ContactTestManager(client);

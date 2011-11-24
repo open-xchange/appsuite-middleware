@@ -39,7 +39,7 @@ import org.xml.sax.ContentHandler;
 
 public class OOXMLParserTest extends TikaTest {
     private Parser parser;
-   
+
     @Override
     protected void setUp() throws Exception {
        TikaConfig config = TikaConfig.getDefaultConfig();
@@ -54,7 +54,7 @@ public class OOXMLParserTest extends TikaTest {
                 .getResourceAsStream("/test-documents/testEXCEL.xlsx");
         assertNotNull(input);
 
-        Metadata metadata = new Metadata(); 
+        Metadata metadata = new Metadata();
         ContentHandler handler = new BodyContentHandler();
         ParseContext context = new ParseContext();
         context.set(Locale.class, Locale.US);
@@ -130,7 +130,7 @@ public class OOXMLParserTest extends TikaTest {
             // Currency $#,##0.00;[Red]($#,##0.00)
             assertTrue(content.contains("$1,599.99"));
             assertTrue(content.contains("($1,599.99)"));
-            
+
             // Below assertions represent outstanding formatting issues to be addressed
             // they are included to allow the issues to be progressed with the Apache POI
             // team - See TIKA-103.
@@ -163,7 +163,7 @@ public class OOXMLParserTest extends TikaTest {
     public void testPowerPoint() throws Exception {
 	String[] extensions = new String[] {
 		"pptx", "pptm", "ppsm", "ppsx",
-		//"thmx", // TIKA-418: Will be supported in POI 3.7 beta 2 
+		//"thmx", // TIKA-418: Will be supported in POI 3.7 beta 2
 		//"xps" // TIKA-418: Not yet supported by POI
 	};
 
@@ -180,47 +180,47 @@ public class OOXMLParserTest extends TikaTest {
 
             InputStream input = OOXMLParserTest.class
                     .getResourceAsStream("/test-documents/"+filename);
-    
+
             Parser parser = new AutoDetectParser();
             Metadata metadata = new Metadata();
             // TODO: should auto-detect without the resource name
             metadata.set(Metadata.RESOURCE_NAME_KEY, filename);
             ContentHandler handler = new BodyContentHandler();
             ParseContext context = new ParseContext();
-    
+
             try {
                 parser.parse(input, handler, metadata, context);
-    
+
                 assertEquals(
                         "Mime-type checking for " + filename,
                         mimeTypes[i],
                         metadata.get(Metadata.CONTENT_TYPE));
                 assertEquals("Attachment Test", metadata.get(Metadata.TITLE));
                 assertEquals("Rajiv", metadata.get(Metadata.AUTHOR));
-                
+
                 String content = handler.toString();
                 // Theme files don't have the text in them
                 if(extension.equals("thmx")) {
                     assertEquals("", content);
                 } else {
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content, 
+                    	"Text missing for " + filename + "\n" + content,
                     	content.contains("Attachment Test")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content, 
+                    	"Text missing for " + filename + "\n" + content,
                     	content.contains("This is a test file data with the same content")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content, 
+                    	"Text missing for " + filename + "\n" + content,
                     	content.contains("content parsing")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content, 
+                    	"Text missing for " + filename + "\n" + content,
                     	content.contains("Different words to test against")
                     );
                     assertTrue(
-                    	"Text missing for " + filename + "\n" + content, 
+                    	"Text missing for " + filename + "\n" + content,
                     	content.contains("Mystery")
                     );
                 }
@@ -229,7 +229,7 @@ public class OOXMLParserTest extends TikaTest {
             }
 	}
     }
-    
+
     /**
      * Test the plain text output of the Word converter
      * @throws Exception
@@ -291,7 +291,7 @@ public class OOXMLParserTest extends TikaTest {
     private XMLResult getXML(String filePath) throws Exception {
         InputStream input = null;
         Metadata metadata = new Metadata();
-        
+
         StringWriter sw = new StringWriter();
         SAXTransformerFactory factory = (SAXTransformerFactory)
                  SAXTransformerFactory.newInstance();
@@ -325,7 +325,7 @@ public class OOXMLParserTest extends TikaTest {
       assertEquals("Sample Word Document", metadata.get(Metadata.TITLE));
       assertEquals("Keith Bennett", metadata.get(Metadata.AUTHOR));
       assertTrue(xml.contains("Sample Word Document"));
-            
+
       // Check that custom headings came through
       assertTrue(xml.contains("<h1 class=\"title\">"));
       // Regular headings
@@ -353,7 +353,7 @@ public class OOXMLParserTest extends TikaTest {
       assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image2.png\" alt=\"A description...\"/>"));
       assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image3.jpeg\" alt=\"A description...\"/>"));
       assertTrue("Image not found in:\n"+xml, xml.contains("<img src=\"embedded:image4.png\" alt=\"A description...\"/>"));
-            
+
       // Text too
       assertTrue(xml.contains("<p>The end!</p>"));
 
@@ -369,7 +369,7 @@ public class OOXMLParserTest extends TikaTest {
       // TIKA-692: test document containing multiple
       // character runs within a bold tag:
       xml = getXML("/test-documents/testWORD_bold_character_runs2.docx").xml;
-            
+
       // Make sure bold text arrived as single
       // contiguous string even though Word parser
       // handled this as 3 character runs
@@ -408,7 +408,7 @@ public class OOXMLParserTest extends TikaTest {
     }
 
     /**
-     * Documents with some sheets are protected, but not all. 
+     * Documents with some sheets are protected, but not all.
      * See TIKA-364.
      */
     public void testProtectedExcelSheets() throws Exception {
@@ -434,7 +434,7 @@ public class OOXMLParserTest extends TikaTest {
     }
 
     /**
-     * An excel document which is password protected. 
+     * An excel document which is password protected.
      * See TIKA-437.
      */
     public void testProtectedExcelFile() throws Exception {
@@ -454,7 +454,7 @@ public class OOXMLParserTest extends TikaTest {
                     metadata.get(Metadata.CONTENT_TYPE));
 
             assertEquals("true", metadata.get(TikaMetadataKeys.PROTECTED));
-            
+
             String content = handler.toString();
             assertTrue(content.contains("Office"));
         } finally {

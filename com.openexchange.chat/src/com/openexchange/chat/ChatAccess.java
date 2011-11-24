@@ -54,7 +54,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link ChatAccess} - Provides access to chat functionality in the name of associated user.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ChatAccess {
@@ -66,21 +66,21 @@ public interface ChatAccess {
 
     /**
      * Logs in to the server, then sets presence to available.
-     * 
+     *
      * @throws OXException If an error occurs.
      */
     void login() throws OXException;
 
     /**
      * Gets the associated user.
-     * 
+     *
      * @return The user
      */
     ChatUser getUser();
 
     /**
      * Sends given presence packet for associated {@link #getUser() user}.
-     * 
+     *
      * @param presence The presence packet
      * @throws OXException If sending presence packet fails
      */
@@ -88,7 +88,7 @@ public interface ChatAccess {
 
     /**
      * Gets the user's roster.
-     * 
+     *
      * @return The roster
      * @throws OXException If roster cannot be returned
      */
@@ -96,7 +96,7 @@ public interface ChatAccess {
 
     /**
      * Gets all identifiers for opened chats for this access.
-     * 
+     *
      * @return All identifiers for opened chats
      * @throws OXException If an error occurs
      */
@@ -104,7 +104,7 @@ public interface ChatAccess {
 
     /**
      * Gets existing chat with specified member.
-     * 
+     *
      * @param chatId The chat identifier
      * @return The existing chat
      * @throws OXException If chat cannot be returned
@@ -113,7 +113,7 @@ public interface ChatAccess {
 
     /**
      * Opens described chat with specified member.
-     * 
+     *
      * @param chatId The chat identifier or <code>null</code> to generate a unique one
      * @param member The member with which to open the chat
      * @return The opened chat
@@ -123,7 +123,7 @@ public interface ChatAccess {
 
     /**
      * Opens described chat with specified members.
-     * 
+     *
      * @param chatId The chat identifier or <code>null</code> to generate a unique one
      * @param members The members with which to open the chat
      * @return The opened chat
@@ -133,7 +133,7 @@ public interface ChatAccess {
 
     /**
      * Updates the denoted chat by {@link ChatDescription}'s arguments.
-     * 
+     *
      * @param chatDescription The chat description
      * @throws OXException If update operation fails
      */

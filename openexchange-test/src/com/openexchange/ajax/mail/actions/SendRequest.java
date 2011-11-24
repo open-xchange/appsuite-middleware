@@ -101,18 +101,22 @@ public class SendRequest implements AJAXRequest<SendResponse> {
         this.upload = upload;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.UPLOAD;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<AJAXRequest.Parameter>(4);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
@@ -123,10 +127,12 @@ public class SendRequest implements AJAXRequest<SendResponse> {
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public String getServletPath() {
         return MAIL_URL;
     }
 
+    @Override
     public SendParser getParser() {
         return new SendParser(true);
     }

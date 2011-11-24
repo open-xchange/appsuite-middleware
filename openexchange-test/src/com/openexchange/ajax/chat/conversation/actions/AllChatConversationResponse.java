@@ -60,14 +60,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link AllChatConversationResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class AllChatConversationResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link AllChatConversationResponse}.
-     * 
+     *
      * @param response
      */
     public AllChatConversationResponse(final Response response) {
@@ -76,7 +76,7 @@ public final class AllChatConversationResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the identifiers of queried conversation streams.
-     * 
+     *
      * @return The identifiers
      * @throws JSONException If parsing JSON fails
      */

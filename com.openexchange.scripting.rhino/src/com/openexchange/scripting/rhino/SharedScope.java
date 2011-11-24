@@ -12,8 +12,8 @@ public class SharedScope {
 		try {
 			 cx = Context.enter();
 			 SHARED_SCOPE = cx.initStandardObjects(null, true);
-			 
-			// Force the LiveConnect stuff to be loaded. 
+
+			// Force the LiveConnect stuff to be loaded.
 			String loadMe = "RegExp; getClass; java; Packages; JavaAdapter;";
 			cx.evaluateString(SHARED_SCOPE , loadMe, "lazyLoad", 0, null);
 			Underscore.initialize(SHARED_SCOPE);

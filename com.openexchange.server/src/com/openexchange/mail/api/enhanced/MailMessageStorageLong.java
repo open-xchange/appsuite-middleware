@@ -245,7 +245,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * Gets the plain-text versions of the parts considered as primary mails' content.
      * <p>
      * If plain text for a single mail cannot be determined, <code>null</code> is inserted at corresponding position in returned array.
-     * 
+     *
      * @param folder The folder identifier
      * @param mailIds The mail identifiers
      * @return The plain-text versions of primary content
