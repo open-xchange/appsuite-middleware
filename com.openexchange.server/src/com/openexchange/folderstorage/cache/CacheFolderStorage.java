@@ -256,6 +256,8 @@ public final class CacheFolderStorage implements FolderStorage {
                     
                     @Override
                     public void run() {
+                        final Lock lock = readLockFor(treeId, storageParameters);
+                        lock.lock();
                         try {
                             final StorageParameters params = newStorageParameters(storageParameters);
                             if (session.getUserConfiguration().isMultipleMailAccounts()) {
@@ -283,6 +285,8 @@ public final class CacheFolderStorage implements FolderStorage {
                             }
                         } catch (final Exception e) {
                             LOG.debug(e.getMessage(), e);
+                        } finally {
+                            lock.unlock();
                         }
                     }
                 };
@@ -1756,7 +1760,7 @@ public final class CacheFolderStorage implements FolderStorage {
         return lockFor(treeId, params).readLock();
     }
 
-    private static Lock writeLockFor(final String treeId, final StorageParameters params) {
+    protected static Lock writeLockFor(final String treeId, final StorageParameters params) {
         return lockFor(treeId, params).writeLock();
     }
 
