@@ -64,13 +64,13 @@ public interface ParameterizedFolder extends Folder {
      * @param name The name
      * @param value The associated value (<code>null</code> removes the property)
      */
-    void setProperty(FieldNamePair name, Object value);
+    void setProperty(FolderField name, Object value);
 
     /**
      * Gets the properties
      *
      * @return The properties
      */
-    Map<FieldNamePair, FolderProperty> getProperties();
+    Map<FolderField, FolderProperty> getProperties();
 
 }

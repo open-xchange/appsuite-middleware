@@ -65,7 +65,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FieldNamePair;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
@@ -113,7 +113,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     /**
      * The property for "preDefined".
      */
-    public static final FieldNamePair FIELD_NAME_PAIR_PREDEFINED = new FieldNamePair(3040, "preDefined");
+    public static final FolderField FIELD_NAME_PAIR_PREDEFINED = new FolderField(3040, "preDefined", Boolean.FALSE);
 
     private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
         new ThreadPools.ExpectedExceptionFactory<OXException>() {

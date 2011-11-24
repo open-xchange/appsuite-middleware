@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FieldNamePair;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
@@ -98,7 +98,7 @@ public final class VirtualFolder implements ParameterizedFolder {
 
     private String newId;
 
-    private Map<FieldNamePair, FolderProperty> properties;
+    private Map<FolderField, FolderProperty> properties;
 
     /**
      * Initializes a {@link VirtualFolder} with specified real folder.
@@ -109,7 +109,7 @@ public final class VirtualFolder implements ParameterizedFolder {
         super();
         realFolder = source;
         modifiedBy = -1;
-        properties = new HashMap<FieldNamePair, FolderProperty>(4);
+        properties = new HashMap<FolderField, FolderProperty>(4);
     }
 
     @Override
@@ -140,7 +140,7 @@ public final class VirtualFolder implements ParameterizedFolder {
                 clone.subfolders = cloneSub;
             }
             if (properties != null) {
-                final Map<FieldNamePair, FolderProperty> cloneProps = new HashMap<FieldNamePair, FolderProperty>(properties);
+                final Map<FolderField, FolderProperty> cloneProps = new HashMap<FolderField, FolderProperty>(properties);
                 clone.properties = cloneProps;
             }
             return clone;
@@ -445,7 +445,7 @@ public final class VirtualFolder implements ParameterizedFolder {
     }
 
     @Override
-    public void setProperty(final FieldNamePair name, final Object value) {
+    public void setProperty(final FolderField name, final Object value) {
         if (null == value) {
             properties.remove(name);
         } else {
@@ -454,7 +454,7 @@ public final class VirtualFolder implements ParameterizedFolder {
     }
 
     @Override
-    public Map<FieldNamePair, FolderProperty> getProperties() {
+    public Map<FolderField, FolderProperty> getProperties() {
         return Collections.unmodifiableMap(properties);
     }
 

@@ -50,38 +50,41 @@
 package com.openexchange.folderstorage;
 
 /**
- * {@link FieldNamePair} - A pair of a field and its name.
+ * {@link FolderField} - A pair of a field and its name.
  * <p>
  * Equality is only determined by field value, not its name.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FieldNamePair {
-
-    /**
-     * Gets the instance for given field.
-     *
-     * @param field The field
-     * @return The appropriate instance
-     */
-    public static FieldNamePair valueOf(final int field) {
-        return new FieldNamePair(field, null);
-    }
+public final class FolderField {
 
     private final int field;
 
     private final String name;
 
+    private final Object defaultValue;
+
     /**
-     * Initializes a new {@link FieldNamePair}.
-     *
+     * Initializes a new {@link FolderField}.
+     * 
      * @param field The field number
      * @param name The field name
+     * @param defaulValue The default value if property is missing
      */
-    public FieldNamePair(final int field, final String name) {
+    public FolderField(final int field, final String name, final Object defaulValue) {
         super();
         this.field = field;
         this.name = name;
+        this.defaultValue = defaulValue;
+    }
+
+    /**
+     * Gets the default value if associated property is missing
+     * 
+     * @return The default value for this field
+     */
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
     /**
@@ -112,10 +115,10 @@ public final class FieldNamePair {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof FieldNamePair)) {
+        if (!(obj instanceof FolderField)) {
             return false;
         }
-        final FieldNamePair other = (FieldNamePair) obj;
+        final FolderField other = (FolderField) obj;
         if (field != other.field) {
             return false;
         }

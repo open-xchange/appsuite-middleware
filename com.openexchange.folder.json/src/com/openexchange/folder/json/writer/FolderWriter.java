@@ -55,7 +55,6 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -71,7 +70,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FieldNamePair;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.Permission;
@@ -479,7 +477,7 @@ public final class FolderWriter {
     public static JSONArray writeSingle2Array(final int[] fields, final UserizedFolder folder) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntSet fieldSet = FolderFieldRegistry.getInstance().getFields();
+        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
         for (int i = 0; i < ffws.length; i++) {
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
@@ -510,7 +508,7 @@ public final class FolderWriter {
     public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntSet fieldSet = FolderFieldRegistry.getInstance().getFields();
+        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
         for (int i = 0; i < ffws.length; i++) {
             final int curCol = cols[i];
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
@@ -553,7 +551,7 @@ public final class FolderWriter {
     public static JSONArray writeMultiple2Array(final int[] fields, final Collection<UserizedFolder> folders) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntSet fieldSet = FolderFieldRegistry.getInstance().getFields();
+        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
         for (int i = 0; i < ffws.length; i++) {
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
@@ -589,7 +587,7 @@ public final class FolderWriter {
     public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? getAllFields(additionalFolderFieldList) : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntSet fieldSet = FolderFieldRegistry.getInstance().getFields();
+        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
         for (int i = 0; i < ffws.length; i++) {
             final int curCol = cols[i];
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(curCol);
@@ -633,7 +631,7 @@ public final class FolderWriter {
     public static JSONArray writeMultiple2Object(final int[] fields, final UserizedFolder[] folders) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
-        final TIntSet fieldSet = FolderFieldRegistry.getInstance().getFields();
+        final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
         for (int i = 0; i < ffws.length; i++) {
             FolderFieldWriter ffw = STATIC_WRITERS_MAP.get(cols[i]);
             if (null == ffw) {
@@ -664,33 +662,30 @@ public final class FolderWriter {
 
     private static final class PropertyFieldWriter implements FolderFieldWriter {
 
-        private final int field;
+        private final com.openexchange.folderstorage.FolderField field;
 
-        protected PropertyFieldWriter(final int field) {
+        private final String name;
+
+        protected PropertyFieldWriter(final com.openexchange.folderstorage.FolderField field) {
             super();
             this.field = field;
+            final String name = field.getName();
+            this.name = null == name ? Integer.toString(field.getField()) : name;
         }
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-            final FolderProperty property = folder.getProperties().get(FieldNamePair.valueOf(field));
-            if (null == property) {
-                if (WARN) {
-                    LOG.warn("Unknown field: " + field, new Throwable());
-                }
-                UNKNOWN_FIELD_FFW.writeField(jsonPutter, folder);
-            } else {
-                final String name = property.getName();
-                jsonPutter.put(null == name ? String.valueOf(field) : name, property.getValue());
-            }
+            final FolderProperty property = folder.getProperties().get(field);
+            jsonPutter.put(name, null == property ? field.getDefaultValue() : property.getValue());
         }
 
     }
 
     private static final ConcurrentTIntObjectHashMap<PropertyFieldWriter> PROPERTY_WRITERS = new ConcurrentTIntObjectHashMap<PropertyFieldWriter>(4);
 
-    private static FolderFieldWriter getPropertyByField(final int field, final TIntSet fields) {
-        if (!fields.contains(field)) {
+    private static FolderFieldWriter getPropertyByField(final int field, final TIntObjectMap<com.openexchange.folderstorage.FolderField> fields) {
+        final com.openexchange.folderstorage.FolderField fieldNamePair = fields.get(field);
+        if (null == fieldNamePair) {
             if (WARN) {
                 LOG.warn("Unknown field: " + field, new Throwable());
             }
@@ -698,7 +693,7 @@ public final class FolderWriter {
         }
         PropertyFieldWriter pw = PROPERTY_WRITERS.get(field);
         if (null == pw) {
-            final PropertyFieldWriter npw = new PropertyFieldWriter(field);
+            final PropertyFieldWriter npw = new PropertyFieldWriter(fieldNamePair);
             pw = PROPERTY_WRITERS.putIfAbsent(field, npw);
             if (null == pw) {
                 pw = npw;
