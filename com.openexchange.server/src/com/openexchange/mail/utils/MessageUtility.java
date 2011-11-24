@@ -53,7 +53,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.mail.MessagingException;
@@ -62,11 +62,11 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.dataobjects.MIMERawSource;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MessageUtility} - Provides various helper methods for message processing.
@@ -299,34 +299,34 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, "GB2312");
+            String retval = new String(bytes, Charsets.forName("GB2312"));
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
-            retval = new String(bytes, "GB18030");
+            retval = new String(bytes, Charsets.forName("GB18030"));
             if (retval.indexOf(UNKNOWN) < 0) {
                 return retval;
             }
             /*
              * Detect the charset
              */
-            final String detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+            final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
             if (DEBUG) {
                 LOG.debug("Mapped \"GB2312\" charset to \"" + detectedCharset + "\".");
             }
             if (isBig5(detectedCharset)) {
                 return readBig5Bytes(bytes);
             }
-            return new String(bytes, detectedCharset);
+            return new String(bytes, Charsets.forName(detectedCharset));
         }
         return readStream0(inStream, charset);
     }
 
-    private static String readBig5Bytes(final byte[] bytes) throws UnsupportedEncodingException, Error {
+    private static String readBig5Bytes(final byte[] bytes) throws Error {
         if (bytes.length == 0) {
             return STR_EMPTY;
         }
-        final String retval = new String(bytes, "big5");
+        final String retval = new String(bytes, Charsets.forName("big5"));
         if (retval.indexOf(UNKNOWN) < 0) {
             return retval;
         }
@@ -334,7 +334,7 @@ public final class MessageUtility {
          * Expect the charset to be Big5-HKSCS
          */
         try {
-            return new String(bytes, "Big5-HKSCS");
+            return new String(bytes, Charsets.forName("Big5-HKSCS"));
         } catch (final Error error) {
             // Huh..?
             final Throwable cause = error.getCause();
@@ -342,7 +342,7 @@ public final class MessageUtility {
                 /*
                  * Retry with auto-detected charset
                  */
-                return new String(bytes, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes)));
+                return new String(bytes, Charsets.forName(CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes))));
             }
             throw error;
         }
@@ -353,27 +353,27 @@ public final class MessageUtility {
             return STR_EMPTY;
         }
         try {
-            final ByteArrayOutputStream tmp = new UnsynchronizedByteArrayOutputStream(BUFSIZE << 1);
+            final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream(BUFSIZE << 1);
             final byte[] buf = new byte[BUFSIZE];
             for (int read; (read = inStream.read(buf, 0, BUFSIZE)) > 0;) {
                 tmp.write(buf, 0, read);
             }
             if (null == charset) {
                 final byte[] bytes = tmp.toByteArray();
-                return new String(bytes, detectCharset(bytes));
+                return new String(bytes, Charsets.forName(detectCharset(bytes)));
             }
             try {
-                return new String(tmp.toByteArray(), charset);
-            } catch (final UnsupportedEncodingException e) {
+                return new String(tmp.toByteArray(), Charsets.forName(charset));
+            } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + charset + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(charset);
                 final byte[] bytes = tmp.toByteArray();
-                return new String(bytes, detectCharset(bytes));
+                return new String(bytes, Charsets.forName(detectCharset(bytes)));
             } catch (final Error error) {
                 final Throwable cause = error.getCause();
                 if ((cause instanceof java.io.CharConversionException) || (cause instanceof java.nio.charset.CharacterCodingException)) {
                     final byte[] bytes = tmp.toByteArray();
-                    return new String(bytes, detectCharset(bytes));
+                    return new String(bytes, Charsets.forName(detectCharset(bytes)));
                 }
                 throw error;
             }
@@ -396,7 +396,7 @@ public final class MessageUtility {
     }
 
     private static String detectCharset(final byte[] bytes) {
-        String charset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(bytes));
+        String charset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
         if ("US-ASCII".equalsIgnoreCase(charset)) {
             charset = "ISO-8859-1";
         }
@@ -459,7 +459,7 @@ public final class MessageUtility {
             if ((len = in.read(buf, 0, buf.length)) <= 0) {
                 return new byte[0];
             }
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUFSIZE);
+            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(BUFSIZE);
             do {
                 out.write(buf, 0, len);
             } while ((len = in.read(buf, 0, buf.length)) > 0);
