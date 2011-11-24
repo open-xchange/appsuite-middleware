@@ -120,6 +120,7 @@ public interface Folder extends Serializable, Cloneable {
      * Indicates if this folder is cacheable.
      *
      * @return <code>true</code> if this folder is cacheable; otherwise <code>false</code>
+     * @see #isGlobalID()
      */
     boolean isCacheable();
 

@@ -81,6 +81,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -247,10 +248,10 @@ public final class CacheFolderStorage implements FolderStorage {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }
             }
-            if (REAL_TREE_ID.equals(treeId)) {
+            final String realTreeId = this.realTreeId;
+            if (realTreeId.equals(treeId)) {
                 final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
                 final ServiceRegistry serviceRegistry = CacheServiceRegistry.getServiceRegistry();
-                final String realTreeId = this.realTreeId;
                 final Runnable task = new Runnable() {
                     
                     @Override
@@ -489,7 +490,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    private void putFolder(final Folder folder, final String treeId, final StorageParameters storageParameters) throws OXException {
+    protected void putFolder(final Folder folder, final String treeId, final StorageParameters storageParameters) throws OXException {
         /*
          * Put to cache
          */
@@ -1075,12 +1076,44 @@ public final class CacheFolderStorage implements FolderStorage {
          * Try user cache key
          */
         final FolderMap folderMap = optFolderMapFor(storageParameters.getSession());
-        folder = null == folderMap ? null : folderMap.get(folderId, treeId);
-        if (null != folder) {
-            /*
-             * Return a cloned version from user-bound cache
-             */
-            return (Folder) folder.clone();
+        if (null != folderMap) {
+            folder = folderMap.get(folderId, treeId);
+            if (null != folder) {
+                if (!folderMap.contains(folderId, treeId) && (folder instanceof RemoveAfterAccessFolder)) {
+                    /*-
+                     * Folder does no more exist in cache and implements RemoveAfterAccessFolder marker interface
+                     * 
+                     * Re-load that folder
+                     */
+                    final Runnable task = new Runnable() {
+                        
+                        @Override
+                        public void run() {
+                            try {
+                                final StorageParameters params = newStorageParameters(storageParameters);
+                                Folder loaded = loadFolder(treeId, folderId, StorageType.WORKING, params);
+                                putFolder(loaded, treeId, params);
+                                // Check for subfolders
+                                final String[] subfolderIDs = loaded.getSubfolderIDs();
+                                if (null != subfolderIDs) {
+                                    for (final String subfolderId : subfolderIDs) {
+                                        loaded = loadFolder(treeId, subfolderId, StorageType.WORKING, params);
+                                        putFolder(loaded, treeId, params);
+                                    }
+                                }
+                            } catch (final Exception e) {
+                                LOG.debug(e.getMessage(), e);
+                            }
+                        }
+                    };
+                    final ThreadPoolService threadPool = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+                    threadPool.submit(ThreadPools.task(task), AbortBehavior.getInstance());
+                }
+                /*
+                 * Return a cloned version from user-bound cache
+                 */
+                return (Folder) folder.clone();
+            }
         }
         /*
          * Cache miss
@@ -1570,7 +1603,7 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    private Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
+    protected Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         return loadFolder(treeId, folderId, storageType, false, storageParameters);
     }
 

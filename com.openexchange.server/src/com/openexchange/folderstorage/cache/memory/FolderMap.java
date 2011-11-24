@@ -57,6 +57,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 
 /**
  * {@link FolderMap} - An in-memory folder map with LRU eviction policy.
@@ -83,10 +84,7 @@ public final class FolderMap {
      * Initializes a new {@link FolderMap}.
      */
     public FolderMap(final int maxCapacity, final int maxLifeMillis) {
-        super();
-        final Lock lock = new ReentrantLock();
-        map = new LockBasedConcurrentMap<Key, Wrapper>(lock, lock, new MaxCapacityLinkedHashMap<Key, Wrapper>(maxCapacity));
-        this.maxLifeMillis = maxLifeMillis;
+        this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -94,10 +92,10 @@ public final class FolderMap {
      */
     public void shrink() {
         final List<Key> removeKeys = new ArrayList<Key>(16);
-        final long now = System.currentTimeMillis();
+        final long minStamp = System.currentTimeMillis() - maxLifeMillis;
         for (final Entry<Key, Wrapper> entry : map.entrySet()) {
             final Wrapper wrapper = entry.getValue();
-            if ((now - wrapper.getStamp()) > maxLifeMillis) {
+            if (wrapper.getStamp() < minStamp) {
                 removeKeys.add(entry.getKey());
             }
         }
@@ -139,8 +137,8 @@ public final class FolderMap {
         return map.isEmpty();
     }
 
-    public boolean containsKey(final String fullName) {
-        return map.containsKey(fullName);
+    public boolean contains(final String folderId, final String treeId) {
+        return map.containsKey(keyOf(folderId, treeId));
     }
 
     public Folder get(final String folderId, final String treeId) {
@@ -152,7 +150,7 @@ public final class FolderMap {
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(key);
             shrink();
-            return null;
+            return wrapper.removeAfterAccess ? wrapper.getValue() : null;
         }
         return wrapper.getValue();
     }
@@ -203,10 +201,13 @@ public final class FolderMap {
 
         private final long stamp;
 
+        protected final boolean removeAfterAccess;
+
         public Wrapper(final Folder value) {
             super();
             this.value = value;
             this.stamp = System.currentTimeMillis();
+            removeAfterAccess = (value instanceof RemoveAfterAccessFolder);
         }
 
         public long getStamp() {
