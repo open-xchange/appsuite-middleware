@@ -256,6 +256,8 @@ public final class CacheFolderStorage implements FolderStorage {
                     
                     @Override
                     public void run() {
+                        final Lock lock = readLockFor(treeId, storageParameters);
+                        lock.lock();
                         try {
                             final StorageParameters params = newStorageParameters(storageParameters);
                             if (session.getUserConfiguration().isMultipleMailAccounts()) {
@@ -283,6 +285,8 @@ public final class CacheFolderStorage implements FolderStorage {
                             }
                         } catch (final Exception e) {
                             LOG.debug(e.getMessage(), e);
+                        } finally {
+                            lock.unlock();
                         }
                     }
                 };
@@ -1089,6 +1093,8 @@ public final class CacheFolderStorage implements FolderStorage {
                         
                         @Override
                         public void run() {
+                            final Lock lock = readLockFor(treeId, storageParameters);
+                            lock.lock();
                             try {
                                 final StorageParameters params = newStorageParameters(storageParameters);
                                 Folder loaded = loadFolder(treeId, folderId, StorageType.WORKING, params);
@@ -1103,6 +1109,8 @@ public final class CacheFolderStorage implements FolderStorage {
                                 }
                             } catch (final Exception e) {
                                 LOG.debug(e.getMessage(), e);
+                            } finally {
+                                lock.unlock();
                             }
                         }
                     };
@@ -1748,11 +1756,11 @@ public final class CacheFolderStorage implements FolderStorage {
         return new StorageParametersImpl((ServerSession) session);
     }
 
-    private static Lock readLockFor(final String treeId, final StorageParameters params) {
+    protected static Lock readLockFor(final String treeId, final StorageParameters params) {
         return lockFor(treeId, params).readLock();
     }
 
-    private static Lock writeLockFor(final String treeId, final StorageParameters params) {
+    protected static Lock writeLockFor(final String treeId, final StorageParameters params) {
         return lockFor(treeId, params).writeLock();
     }
 
