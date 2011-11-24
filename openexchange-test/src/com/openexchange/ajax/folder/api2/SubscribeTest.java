@@ -113,15 +113,22 @@ public class SubscribeTest extends AbstractAJAXSession {
         final ListRequest listRequest = new ListRequest(api, FolderStorage.ROOT_ID);
         final ListResponse listResponse = client.execute(listRequest);
 
-        boolean found = false;
+        {
+            boolean found = false;
+            for (final Iterator<FolderObject> iterator = listResponse.getFolder(); iterator.hasNext();) {
+                final FolderObject folderObject = iterator.next();
+                if (fuid == folderObject.getObjectID()) {
+                    found = true;
+                    break;
+                }
+            }
+            assertTrue("Subscribed test folder could not be found in tree " + api.getTreeId(), found);
+        }
+
         for (final Iterator<FolderObject> iterator = listResponse.getFolder(); iterator.hasNext();) {
             final FolderObject folderObject = iterator.next();
-            if (fuid == folderObject.getObjectID()) {
-                found = true;
-                break;
-            }
+            assertFalse("Folder has subfolders, but shouldn't.", folderObject.hasSubfolders());
         }
-        assertTrue("Subscribed test folder could not be found in tree " + api.getTreeId(), found);
     }
 
 }

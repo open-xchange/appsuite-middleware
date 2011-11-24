@@ -86,8 +86,6 @@ public class PushOutputQueue implements Runnable {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PushOutputQueue.class));
 
-    private static final boolean DEBUG = LOG.isDebugEnabled();
-
     private static PushConfiguration pushConfigInterface;
 
     private static DelayQueue<PushDelayedObject> queue = new DelayQueue<PushDelayedObject>();
@@ -105,7 +103,7 @@ public class PushOutputQueue implements Runnable {
      * @throws OXException If an event exception occurs
      */
     public static void add(final PushObject pushObject, final boolean noDelay) throws OXException {
-        if (DEBUG) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("add PushObject: " + pushObject);
         }
 
@@ -153,7 +151,7 @@ public class PushOutputQueue implements Runnable {
      * @throws OXException If an event exception occurs
      */
     public static void add(final RegisterObject registerObject, final boolean noDelay) throws OXException {
-        if (DEBUG) {
+        if (LOG.isDebugEnabled()) {
             LOG.debug("add RegisterObject: " + registerObject);
         }
 
@@ -367,7 +365,7 @@ public class PushOutputQueue implements Runnable {
         final AbstractPushObject abstractPushObject = pushDelayedObject.getPushObject();
 
         if (abstractPushObject instanceof PushObject) {
-            if (DEBUG) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Send Push Object");
             }
 
@@ -376,7 +374,7 @@ public class PushOutputQueue implements Runnable {
 
             createAndDeliverPushPackage(pushObject);
         } else if (abstractPushObject instanceof RegisterObject) {
-            if (DEBUG) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Send Register Object");
             }
 
@@ -429,7 +427,7 @@ public class PushOutputQueue implements Runnable {
     @Override
     public void run() {
         while (isRunning) {
-            if (DEBUG) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("get push objects from queue: " + queue.size());
             }
 
