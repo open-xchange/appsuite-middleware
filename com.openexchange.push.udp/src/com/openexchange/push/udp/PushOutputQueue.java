@@ -104,35 +104,32 @@ public class PushOutputQueue implements Runnable {
      * @param pushObject The push object to deliver
      * @throws OXException If an event exception occurs
      */
-    public static void add(final PushObject pushObject, final boolean noDelay) throws OXException {
+    public static void add(final PushObject pushObject) throws OXException {
         if (DEBUG) {
             LOG.debug("add PushObject: " + pushObject);
         }
-
         if (!isEnabled) {
             return;
         }
-
         if (!isInit) {
             throw OXException.general("PushOutputQueue not initialisiert!");
         }
-
-        final PushDelayedObject pushDelayedObject;
-        if (existingPushObjects.containsKey(pushObject)) {
-            pushDelayedObject = existingPushObjects.get(pushObject);
-            if (noDelay) {
-                pushDelayedObject.setDelay(0);
-            } else {
-                pushDelayedObject.updateTime();
-            }
-        } else if (noDelay) {
-            pushDelayedObject = new PushDelayedObject(0, pushObject);
+        PushDelayedObject pushDelayedObject = existingPushObjects.get(pushObject);
+        if (Types.EMAIL == pushObject.getModule()) {
+            // No delay for emails. Push them immediately to the client. EMails can not be changed and every new push event indicates a new
+            // email in the INBOX which needs to be transfered to the client.
+            // Do not put into existingPushObjects because we do not need to find it again.
+            queue.add(new PushDelayedObject(0, pushObject));
+        } else if (null != pushDelayedObject) {
+            // Delay push for same PIM objects folder because of further changes in the same folder. The maximum for this further delaying
+            // is done in the {@link PushDelayedObject}.
+            // If existingPushObjects finds a {@link PushDelayedObject} it indicates the same folder and the same affected users.
+            pushDelayedObject.updateTime();
         } else {
             pushDelayedObject = new PushDelayedObject(delay, pushObject);
+            existingPushObjects.put(pushObject, pushDelayedObject);
+            queue.add(pushDelayedObject);
         }
-
-        existingPushObjects.put(pushObject, pushDelayedObject);
-        queue.add(pushDelayedObject);
     }
 
     /**

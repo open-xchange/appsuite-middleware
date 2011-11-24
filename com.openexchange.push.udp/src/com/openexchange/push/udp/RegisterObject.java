@@ -69,11 +69,10 @@ public class RegisterObject extends AbstractPushObject {
     private final Date timestamp;
 
     public RegisterObject(final int userId, final int contextId, final String hostAddress, final int port, final boolean isSync) {
+        super(contextId, isSync);
         this.userId = userId;
-        this.contextId = contextId;
         this.hostAddress = hostAddress;
         this.port = port;
-        remote = isSync;
         timestamp = new Date();
     }
 
@@ -98,22 +97,8 @@ public class RegisterObject extends AbstractPushObject {
     }
 
     @Override
-    public int hashCode() {
-        return toString().hashCode();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        return (hashCode() == obj.hashCode());
-    }
-
-    @Override
     public String toString() {
-        return new StringBuilder().append("USER_ID=").append(userId).append(",CONTEXT_ID=").append(contextId).append(",ADDRESS=").append(
+        return new StringBuilder().append("USER_ID=").append(userId).append(",CONTEXT_ID=").append(getContextId()).append(",ADDRESS=").append(
             hostAddress).append(",PORT").append(port).toString();
     }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.push.udp;
 
+import java.util.Arrays;
 import java.util.Date;
 import com.openexchange.tools.StringCollection;
 
@@ -81,12 +82,10 @@ public class PushObject extends AbstractPushObject {
      * @param isRemote <code>true</code> to mark this push object as remotely received; otherwise <code>false</code>
      */
     public PushObject(final int folderId, final int module, final int contextId, final int[] users, final boolean isRemote, final long timestamp) {
-        super();
+        super(contextId, isRemote);
         this.folderId = folderId;
         this.module = module;
-        this.contextId = contextId;
         this.users = users;
-        remote = isRemote;
         hash = hashCode0();
         this.timestamp = timestamp;
     }
@@ -96,6 +95,7 @@ public class PushObject extends AbstractPushObject {
         int result = super.hashCode();
         result = prime * result + folderId;
         result = prime * result + module;
+        result = prime * result + Arrays.hashCode(users);
         return result;
     }
 
@@ -146,25 +146,37 @@ public class PushObject extends AbstractPushObject {
 
     @Override
     public int hashCode() {
+        final int prime = 31;
+        int result = super.hashCode();
+        result = prime * result + folderId;
+        result = prime * result + module;
+        result = prime * result + Arrays.hashCode(users);
+        return result;
+    }
+
+    public int hashCode1() {
         return hash;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (!super.equals(obj)) {
             return false;
         }
-        if (!(obj instanceof PushObject)) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
-        final PushObject other = (PushObject) obj;
+        PushObject other = (PushObject) obj;
         if (folderId != other.folderId) {
             return false;
         }
         if (module != other.module) {
+            return false;
+        }
+        if (!Arrays.equals(users, other.users)) {
             return false;
         }
         return true;
@@ -173,6 +185,6 @@ public class PushObject extends AbstractPushObject {
     @Override
     public String toString() {
         return new StringBuilder().append("FOLDER_ID=").append(folderId).append(",MODULE=").append(module).append(",CONTEXT_ID=").append(
-            contextId).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_REMOTE=").append(remote).toString();
+            getContextId()).append(",USERS=").append(StringCollection.convertArray2String(users)).append(",IS_REMOTE=").append(isRemote()).toString();
     }
 }
