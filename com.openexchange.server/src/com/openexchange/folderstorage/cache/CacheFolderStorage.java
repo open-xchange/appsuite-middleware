@@ -1112,6 +1112,9 @@ public final class CacheFolderStorage implements FolderStorage {
                 /*
                  * Return a cloned version from user-bound cache
                  */
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Locally loaded folder " + folderId + " from context " + contextId + " for user " + storageParameters.getUserId());
+                }
                 return (Folder) folder.clone();
             }
         }

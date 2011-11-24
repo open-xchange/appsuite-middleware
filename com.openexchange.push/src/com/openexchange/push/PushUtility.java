@@ -76,8 +76,6 @@ public final class PushUtility {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUtility.class));
 
-    private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
-
     /**
      * Initializes a new {@link PushUtility}.
      */
@@ -132,7 +130,7 @@ public final class PushUtility {
              * Finally post it
              */
             eventAdmin.postEvent(event);
-            if (DEBUG_ENABLED) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug(new StringBuilder(64).append("Notified new mails in folder \"").append(folder).append("\" for user ").append(
                     userId).append(" in context ").append(contextId).toString());
             }
