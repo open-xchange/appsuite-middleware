@@ -57,34 +57,29 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
-
 public class PushDelayedObject implements Delayed {
 
-    private long delay;
+    private final long delay;
+
+    private final long finalTimeout;
 
     private final AbstractPushObject abstractPushObject;
 
     private long creationTime;
 
-    private final int hash;
-
     public PushDelayedObject(final long delay, final AbstractPushObject abstractPushObject) {
+        super();
         this.delay = delay;
         this.abstractPushObject = abstractPushObject;
         creationTime = System.currentTimeMillis();
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((abstractPushObject == null) ? 0 : abstractPushObject.hashCode());
-        hash = result;
+        finalTimeout = creationTime + 5 * delay;
     }
 
     @Override
     public long getDelay(final TimeUnit timeUnit) {
-        return (creationTime + delay) - System.currentTimeMillis();
-    }
-
-    public void setDelay(final long delay) {
-        this.delay = delay;
+        long currentTime = System.currentTimeMillis();
+        long retval = Math.min((creationTime + delay) - currentTime, finalTimeout - currentTime);
+        return timeUnit.convert(retval, TimeUnit.MILLISECONDS);
     }
 
     public AbstractPushObject getPushObject() {
@@ -92,39 +87,13 @@ public class PushDelayedObject implements Delayed {
     }
 
     @Override
-    public int compareTo(final Delayed delayed) {
-        return (int) (getDelay(TimeUnit.MILLISECONDS) - delayed.getDelay(TimeUnit.MILLISECONDS));
+    public int compareTo(final Delayed other) {
+        final long thisDelay = getDelay(TimeUnit.MICROSECONDS);
+        final long otherDelay = other.getDelay(TimeUnit.MICROSECONDS);
+        return (thisDelay < otherDelay ? -1 : (thisDelay == otherDelay ? 0 : 1));
     }
 
     public void updateTime() {
         creationTime = System.currentTimeMillis();
     }
-
-    @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(obj instanceof PushDelayedObject)) {
-            return false;
-        }
-        final PushDelayedObject other = (PushDelayedObject) obj;
-        if (abstractPushObject == null) {
-            if (other.abstractPushObject != null) {
-                return false;
-            }
-        } else if (!abstractPushObject.equals(other.abstractPushObject)) {
-            return false;
-        }
-        return true;
-    }
-
 }

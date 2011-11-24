@@ -1,3 +1,8 @@
+* 2011-11-24 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20801: Push events for email folders are now not delayed anymore. Delayed push for other folders may be postponed 5 times of
+   normal delay at maximum.
+
 * 2011-11-23 - marcus.klein@open-xchange.com
 
  - Partly fix for bug 20813: Caching information for resolving IMAP ACLs to users on a low level storage layer to reduce load on database.

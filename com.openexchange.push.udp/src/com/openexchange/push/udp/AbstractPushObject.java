@@ -56,15 +56,17 @@ package com.openexchange.push.udp;
  */
 public abstract class AbstractPushObject {
 
-    protected int contextId;
+    private final int contextId;
 
-    protected boolean remote;
+    private final boolean remote;
 
     /**
      * Initializes a new {@link AbstractPushObject}.
      */
-    protected AbstractPushObject() {
+    protected AbstractPushObject(final int contextId, final boolean remote) {
         super();
+        this.contextId = contextId;
+        this.remote = remote;
     }
 
     /**
