@@ -81,7 +81,6 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -138,6 +137,17 @@ public final class CacheFolderStorage implements FolderStorage {
             }
         };
 
+    private static final CacheFolderStorage INSTANCE = new CacheFolderStorage();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static CacheFolderStorage getInstance() {
+        return INSTANCE;
+    }
+
     private final String realTreeId;
 
     private final CacheFolderStorageRegistry registry;
@@ -151,7 +161,7 @@ public final class CacheFolderStorage implements FolderStorage {
     /**
      * Initializes a new {@link CacheFolderStorage}.
      */
-    public CacheFolderStorage() {
+    private CacheFolderStorage() {
         super();
         realTreeId = REAL_TREE_ID;
         registry = CacheFolderStorageRegistry.getInstance();
@@ -494,7 +504,15 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    protected void putFolder(final Folder folder, final String treeId, final StorageParameters storageParameters) throws OXException {
+    /**
+     * Puts specified folder into appropriate cache.
+     * 
+     * @param folder The folder
+     * @param treeId The tree identifier
+     * @param storageParameters The storage parameters
+     * @throws OXException If put into cache fails
+     */
+    public void putFolder(final Folder folder, final String treeId, final StorageParameters storageParameters) throws OXException {
         /*
          * Put to cache
          */
@@ -1083,40 +1101,6 @@ public final class CacheFolderStorage implements FolderStorage {
         if (null != folderMap) {
             folder = folderMap.get(folderId, treeId);
             if (null != folder) {
-                if (!folderMap.contains(folderId, treeId) && (folder instanceof RemoveAfterAccessFolder)) {
-                    /*-
-                     * Folder does no more exist in cache and implements RemoveAfterAccessFolder marker interface
-                     * 
-                     * Re-load that folder
-                     */
-                    final Runnable task = new Runnable() {
-                        
-                        @Override
-                        public void run() {
-                            final Lock lock = readLockFor(treeId, storageParameters);
-                            lock.lock();
-                            try {
-                                final StorageParameters params = newStorageParameters(storageParameters);
-                                Folder loaded = loadFolder(treeId, folderId, StorageType.WORKING, params);
-                                putFolder(loaded, treeId, params);
-                                // Check for subfolders
-                                final String[] subfolderIDs = loaded.getSubfolderIDs();
-                                if (null != subfolderIDs) {
-                                    for (final String subfolderId : subfolderIDs) {
-                                        loaded = loadFolder(treeId, subfolderId, StorageType.WORKING, params);
-                                        putFolder(loaded, treeId, params);
-                                    }
-                                }
-                            } catch (final Exception e) {
-                                LOG.debug(e.getMessage(), e);
-                            } finally {
-                                lock.unlock();
-                            }
-                        }
-                    };
-                    final ThreadPoolService threadPool = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
-                    threadPool.submit(ThreadPools.task(task), AbortBehavior.getInstance());
-                }
                 /*
                  * Return a cloned version from user-bound cache
                  */
@@ -1614,7 +1598,17 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
-    protected Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
+    /**
+     * Loads denoted folder from un-cached storage.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The folder identifier
+     * @param storageType The storage type
+     * @param storageParameters The storage parameters
+     * @return The loaded folder
+     * @throws OXException If loading folder fails
+     */
+    public Folder loadFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
         return loadFolder(treeId, folderId, storageType, false, storageParameters);
     }
 
@@ -1756,11 +1750,11 @@ public final class CacheFolderStorage implements FolderStorage {
         return new StorageParametersImpl((ServerSession) session);
     }
 
-    protected static Lock readLockFor(final String treeId, final StorageParameters params) {
+    public static Lock readLockFor(final String treeId, final StorageParameters params) {
         return lockFor(treeId, params).readLock();
     }
 
-    protected static Lock writeLockFor(final String treeId, final StorageParameters params) {
+    public static Lock writeLockFor(final String treeId, final StorageParameters params) {
         return lockFor(treeId, params).writeLock();
     }
 

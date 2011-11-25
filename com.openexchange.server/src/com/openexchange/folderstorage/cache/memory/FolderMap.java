@@ -58,6 +58,18 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
+import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.folderstorage.cache.CacheServiceRegistry;
+import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.log.LogProperties;
+import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.AbortBehavior;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link FolderMap} - An in-memory folder map with LRU eviction policy.
@@ -65,6 +77,8 @@ import com.openexchange.folderstorage.RemoveAfterAccessFolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderMap {
+
+    protected static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(FolderMap.class);
 
     private final ConcurrentMap<Key, Wrapper> map;
 
@@ -150,9 +164,19 @@ public final class FolderMap {
         if (wrapper.elapsed(maxLifeMillis)) {
             map.remove(key);
             shrink();
-            return wrapper.removeAfterAccess ? wrapper.getValue() : null;
+            if (!wrapper.removeAfterAccess) {
+                return null;
+            }
+            reloadFolder(folderId, treeId);
+            return wrapper.getValue();
         }
         return wrapper.getValue();
+    }
+
+    private void reloadFolder(final String folderId, final String treeId) {
+        final Runnable task = new RunnableImpl(folderId, treeId);
+        final ThreadPoolService threadPool = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+        threadPool.submit(ThreadPools.task(task), AbortBehavior.getInstance());
     }
 
     public Folder put(final String treeId, final Folder folder) {
@@ -175,7 +199,18 @@ public final class FolderMap {
 
     public Folder remove(final String folderId, final String treeId) {
         final Wrapper wrapper = map.remove(keyOf(folderId, treeId));
-        return wrapper == null ? null : wrapper.getIfNotElapsed(maxLifeMillis);
+        if (null == wrapper) {
+            return null;
+        }
+        final Folder ret = wrapper.getIfNotElapsed(maxLifeMillis);
+        /*
+         * Check remove-after-access flag
+         */
+        if (wrapper.removeAfterAccess) {
+            // Reload actively removed folder
+            reloadFolder(folderId, treeId);
+        }
+        return ret;
     }
 
     public void clear() {
@@ -296,5 +331,46 @@ public final class FolderMap {
         }
 
     } // End of class Key
+
+    private static final class RunnableImpl implements Runnable {
+
+        private final String folderId;
+        private final String treeId;
+
+        protected RunnableImpl(final String folderId, final String treeId) {
+            this.folderId = folderId;
+            this.treeId = treeId;
+        }
+
+        @Override
+        public void run() {
+            try {
+                final ServerSession session = ServerSessionAdapter.valueOf((Session) LogProperties.getLogProperties().get("com.openexchange.session.session"));
+                if (null == session) {
+                    return;
+                }
+                final StorageParameters params = new StorageParametersImpl(session);
+                final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
+                lock.lock();
+                try {
+                    final CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
+                    Folder loaded = folderStorage.loadFolder(treeId, folderId, StorageType.WORKING, params);
+                    folderStorage.putFolder(loaded, treeId, params);
+                    // Check for subfolders
+                    final String[] subfolderIDs = loaded.getSubfolderIDs();
+                    if (null != subfolderIDs) {
+                        for (final String subfolderId : subfolderIDs) {
+                            loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
+                            folderStorage.putFolder(loaded, treeId, params);
+                        }
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            } catch (final Exception e) {
+                LOG.debug(e.getMessage(), e); 
+            }
+        }
+    }
 
 }

@@ -206,7 +206,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     private void initCacheFolderStorage() throws OXException {
         // Start-up folder storage
-        cacheFolderStorage = new CacheFolderStorage();
+        cacheFolderStorage = CacheFolderStorage.getInstance();
         cacheFolderStorage.onCacheAvailable();
         // Register folder storage
         final Dictionary<String, String> dictionary = new Hashtable<String, String>();
