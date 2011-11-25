@@ -127,7 +127,7 @@ public final class ImapIdlePushListener implements PushListener {
         return null == debug ? LOG.isDebugEnabled() : debug.booleanValue();
     }
 
-    private static PushMode pushMode;
+    private static volatile PushMode pushMode;
 
     /**
      * @param pushmode the pushmode to set
@@ -412,6 +412,7 @@ public final class ImapIdlePushListener implements PushListener {
                 int deletedCount = 0;
                 int totalCount = 0;
                 int unreadCount = 0;
+                final PushMode pushMode = ImapIdlePushListener.pushMode;
                 if (PushMode.ALWAYS == pushMode) {
                     // Operations may be expensive, so only do them in always mode.
                     deletedCount = inbox.getDeletedMessageCount();
