@@ -281,6 +281,7 @@ public final class ImapIdlePushListener implements PushListener {
                         session = s;
                     }
                 }
+                invalidSessionIds.clear();
             }
             if (!sessionRef.compareAndSet(null, session)) {
                 session = sessionRef.get();
@@ -354,7 +355,8 @@ public final class ImapIdlePushListener implements PushListener {
      */
     public void close() {
         if (isDebugEnabled()) {
-            LOG.info("stopping IDLE for Context: " + contextId + ", Login: " + getSession().getLoginName());
+            final Session session = getSession();
+            LOG.info("stopping IDLE for Context: " + contextId + ", Login: " + (null == session ? "unknown" : session.getLoginName()));
         }
         shutdown = true;
         if (null != imapIdleFuture) {
@@ -387,6 +389,7 @@ public final class ImapIdlePushListener implements PushListener {
             final Session session = getSession();
             if (null == session) {
                 // No active session found for associated user. Abort...
+                LOG.info("IDLE: No active session found for associated user " + userId + " in context " + contextId + ". Abort...");
                 return false;
             }
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
