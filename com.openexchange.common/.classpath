@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="lib" path="lib/guava-r09.jar" sourcepath="source/guava-src-r09.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/trove-3.0.0.jar" sourcepath="source/trove-3.0.0-src.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/trove-3.0.2.jar" sourcepath="source/trove-3.0.2-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/mail-1.4.3.jar" sourcepath="lib/mail-1.4.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/chardet-1.1.jar" sourcepath="source/chardet-1.1-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/tnef-1.6.0.jar" sourcepath="source/tnef-1.6.0-sources.jar"/>
