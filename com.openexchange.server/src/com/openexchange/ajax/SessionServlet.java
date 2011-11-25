@@ -500,7 +500,7 @@ public abstract class SessionServlet extends AJAXServlet {
             properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
             final String client  = session.getClient();
             properties.put("com.openexchange.session.clientId", client == null ? "unknown" : client);
-            // properties.put("com.openexchange.session.session", session);
+            properties.put("com.openexchange.session.session", session);
         }
         /*
          * Get session secret
