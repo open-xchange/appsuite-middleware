@@ -1,3 +1,7 @@
+* 2011-11-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20858: Writing only supported capabilities to SIEVE rules
+
 * 2011-11-24 - marcus.klein@open-xchange.com
 
  - Fix for bug 20801: Push events for email folders are now not delayed anymore. Delayed push for other folders may be postponed 5 times of

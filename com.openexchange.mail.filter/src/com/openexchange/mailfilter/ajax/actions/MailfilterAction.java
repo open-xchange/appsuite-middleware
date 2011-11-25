@@ -55,7 +55,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.logging.Log;
@@ -199,7 +201,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 sieveHandler.initializeConnection();
                 final Capabilities capabilities = sieveHandler.getCapabilities();
                 final ArrayList<String> sieve = capabilities.getSieve();
-                tests = getTestAndActionObjects(sieve);
+                tests = getTestAndActionObjects(new HashSet<String>(capabilities.getSieve()));
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
             } catch (final IOException e) {
@@ -257,7 +259,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final RuleAndPosition deletedrule =
                     getRightRuleForUniqueId(rules, getUniqueId(json), credentials.getRightUsername(), credentials.getContextString());
                 rules.remove(deletedrule.getPosition());
-                final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
+                final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeScript(sieveHandler, activeScript, writeback);
             } catch (final UnsupportedEncodingException e) {
                 throw OXMailfilterExceptionCode.UNSUPPORTED_ENCODING.create(e, EMPTY_ARGS);
@@ -402,7 +404,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     clientrules.add(newrule);
                     position = clientrules.size() - 1;
                 }
-                final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
+                final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 if (log.isDebugEnabled()) {
                     log.debug("The following sieve script will be written:\n" + writeback);
                 }
@@ -480,7 +482,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                     clientrules.add(i, rightRule.getRule());
                 }
 
-                final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
+                final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 writeScript(sieveHandler, activeScript, writeback);
 
             } catch (final UnsupportedEncodingException e) {
@@ -545,17 +547,16 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 final Integer uniqueid = getUniqueId(json);
 
                 final ArrayList<Rule> clientrules = clientrulesandrequire.getRules();
-                if (null != uniqueid) {
-                    // First get the right rule which should be modified...
-                    final RuleAndPosition rightRule =
-                        getRightRuleForUniqueId(clientrules, uniqueid, credentials.getRightUsername(), credentials.getContextString());
-                    CONVERTER.parse(rightRule.getRule(), json);
-                    changeIncomingVacationRule(rightRule.getRule());
-                } else {
+                if (null == uniqueid) {
                     throw OXMailfilterExceptionCode.ID_MISSING.create();
                 }
+                // First get the right rule which should be modified...
+                final RuleAndPosition rightRule =
+                    getRightRuleForUniqueId(clientrules, uniqueid, credentials.getRightUsername(), credentials.getContextString());
+                CONVERTER.parse(rightRule.getRule(), json);
+                changeIncomingVacationRule(rightRule.getRule());
 
-                final String writeback = sieveTextFilter.writeback(clientrulesandrequire);
+                final String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
                 if (log.isDebugEnabled()) {
                     log.debug("The following sieve script will be written:\n" + writeback);
                 }
@@ -887,7 +888,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
             && null != arguments.get(2) && arguments.get(2) instanceof List<?> && "From".equals(((List<?>)arguments.get(2)).get(0));
     }
 
-    private JSONArray getActionArray(final ArrayList<String> sieve) {
+    private JSONArray getActionArray(final Set<String> capabilities) {
         final JSONArray actionarray = new JSONArray();
         for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
             final List<String> required = command.getRequired();
@@ -895,7 +896,7 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
                 actionarray.put(command.getJsonname());
             } else {
                 for (final String req : required) {
-                    if (sieve.contains(req)) {
+                    if (capabilities.contains(req)) {
                         actionarray.put(command.getJsonname());
                         break;
                     }
@@ -930,30 +931,29 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
     /**
      * Fills up the config object
      *
-     * @param sieve
-     *            A list of sieve capabilities
+     * @param hashSet A set of sieve capabilities
      * @return
      * @throws JSONException
      */
-    private JSONObject getTestAndActionObjects(final ArrayList<String> sieve) throws JSONException {
+    private JSONObject getTestAndActionObjects(final Set<String> capabilities) throws JSONException {
         final JSONObject retval = new JSONObject();
-        retval.put("tests", getTestArray(sieve));
-        retval.put("actioncommands", getActionArray(sieve));
+        retval.put("tests", getTestArray(capabilities));
+        retval.put("actioncommands", getActionArray(capabilities));
         return retval;
     }
 
-    private JSONArray getTestArray(final ArrayList<String> sieve) throws JSONException {
+    private JSONArray getTestArray(final Set<String> capabilities) throws JSONException {
         final JSONArray testarray = new JSONArray();
         for (final TestCommand.Commands command : TestCommand.Commands.values()) {
             final JSONObject object = new JSONObject();
-            if (null == command.getRequired() || sieve.contains(command.getRequired())) {
+            if (null == command.getRequired() || capabilities.contains(command.getRequired())) {
                 final JSONArray comparison = new JSONArray();
                 object.put("test", command.getCommandname());
                 final List<String[]> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
                     for (final String[] matchtype : jsonMatchTypes) {
                         final String value = matchtype[0];
-                        if ("".equals(value) || sieve.contains(value)) {
+                        if ("".equals(value) || capabilities.contains(value)) {
                             comparison.put(matchtype[1]);
                         }
                     }
