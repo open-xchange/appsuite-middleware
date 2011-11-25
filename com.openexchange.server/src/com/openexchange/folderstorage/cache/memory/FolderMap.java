@@ -95,7 +95,7 @@ public final class FolderMap {
         final long minStamp = System.currentTimeMillis() - maxLifeMillis;
         for (final Entry<Key, Wrapper> entry : map.entrySet()) {
             final Wrapper wrapper = entry.getValue();
-            if (!wrapper.removeAfterAccess && wrapper.getStamp() < minStamp) {
+            if (!wrapper.removeAfterAccess && (wrapper.getStamp() < minStamp)) {
                 removeKeys.add(entry.getKey());
             }
         }
