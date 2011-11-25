@@ -1164,13 +1164,7 @@ public class MIMEMessageFiller {
             } else {
                 final DataSource dataSource;
                 if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
-                    try {
-                        dataSource = new MessageDataSource(Base64.decodeBase64(image.getData().getBytes("US-ASCII")), image.getContentType());
-                    } catch (final UnsupportedEncodingException e) {
-                        // Cannot occur
-                        LOG.warn("Unknwon encoding: " + e.getMessage(), e);
-                        continue NextImg;
-                    }
+                    dataSource = new MessageDataSource(Base64.decodeBase64(image.getData().getBytes(com.openexchange.java.Charsets.US_ASCII)), image.getContentType());
                 } else {
                     /*
                      * Expect quoted-printable instead

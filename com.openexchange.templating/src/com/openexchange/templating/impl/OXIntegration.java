@@ -207,11 +207,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
         metadata.setVersionComment("Created as copy from default template");
         metadata.setFileMIMEType("text/plain");
 
-        try {
-            infostore.saveDocument(metadata, new ByteArrayInputStream(templateText.getBytes("UTF-8")), InfostoreFacade.NEW, session);
-        } catch (final UnsupportedEncodingException e) {
-            LOG.fatal(e.getMessage(), e);
-        }
+        infostore.saveDocument(metadata, new ByteArrayInputStream(templateText.getBytes(com.openexchange.java.Charsets.UTF_8)), InfostoreFacade.NEW, session);
     }
 
     @Override

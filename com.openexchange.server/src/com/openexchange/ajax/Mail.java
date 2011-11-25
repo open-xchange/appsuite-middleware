@@ -1984,7 +1984,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
                         attachmentInputStream =
                             new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
-                                htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(cs));
+                                htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));
                     } else {
                         attachmentInputStream = mailPart.getInputStream();
                     }
@@ -2186,7 +2186,7 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         String foo;
         try {
-            foo = new String(fn.getBytes("UTF-8"), "ISO-8859-1");
+            foo = new String(fn.getBytes(com.openexchange.java.Charsets.UTF_8), com.openexchange.java.Charsets.ISO_8859_1);
         } catch (final UnsupportedEncodingException e) {
             foo = null;
         }

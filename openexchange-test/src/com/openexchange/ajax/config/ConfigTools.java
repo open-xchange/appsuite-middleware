@@ -150,7 +150,7 @@ public final class ConfigTools extends Assert {
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         final WebRequest req = new PutMethodWebRequest(AbstractAJAXTest.PROTOCOL
             + hostName + CONFIG_URL + '/' + path + parameter.getURLParameters(),
-            new ByteArrayInputStream(value.getBytes("UTF-8")),
+            new ByteArrayInputStream(value.getBytes(com.openexchange.java.Charsets.UTF_8)),
             "application/octet-stream");
         final WebResponse resp = conversation.getResponse(req);
         assertEquals("Response code is not okay.", HttpServletResponse.SC_OK,

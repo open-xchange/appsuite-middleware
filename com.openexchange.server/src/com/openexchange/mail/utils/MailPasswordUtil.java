@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.utils;
 
-import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -125,32 +124,26 @@ public final class MailPasswordUtil {
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
         cipher.init(Cipher.ENCRYPT_MODE, key);
 
-        try {
-            final byte[] outputBytes = cipher.doFinal(password.getBytes("UTF-8"));
-            /*-
-             * It's safe to use "US-ASCII" to turn bytes into a Base64 encoded encrypted password string.
-             * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
-             *
-             * A 65-character subset of US-ASCII is used, enabling 6 bits to be
-             * represented per printable character. (The extra 65th character, "=",
-             * is used to signify a special processing function.)
-             *
-             * NOTE: This subset has the important property that it is represented
-             * identically in all versions of ISO 646, including US-ASCII, and all
-             * characters in the subset are also represented identically in all
-             * versions of EBCDIC. Other popular encodings, such as the encoding
-             * used by the uuencode utility, Macintosh binhex 4.0 [RFC-1741], and
-             * the base85 encoding specified as part of Level 2 PostScript, do not
-             * share these properties, and thus do not fulfill the portability
-             * requirements a binary transport encoding for mail must meet.
-             *
-             */
-            return new String(org.apache.commons.codec.binary.Base64.encodeBase64(outputBytes), "US-ASCII");
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            LOG.error(e.getMessage(), e);
-            return null;
-        }
+        final byte[] outputBytes = cipher.doFinal(password.getBytes(com.openexchange.java.Charsets.UTF_8));
+        /*-
+         * It's safe to use "US-ASCII" to turn bytes into a Base64 encoded encrypted password string.
+         * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
+         *
+         * A 65-character subset of US-ASCII is used, enabling 6 bits to be
+         * represented per printable character. (The extra 65th character, "=",
+         * is used to signify a special processing function.)
+         *
+         * NOTE: This subset has the important property that it is represented
+         * identically in all versions of ISO 646, including US-ASCII, and all
+         * characters in the subset are also represented identically in all
+         * versions of EBCDIC. Other popular encodings, such as the encoding
+         * used by the uuencode utility, Macintosh binhex 4.0 [RFC-1741], and
+         * the base85 encoding specified as part of Level 2 PostScript, do not
+         * share these properties, and thus do not fulfill the portability
+         * requirements a binary transport encoding for mail must meet.
+         *
+         */
+        return new String(org.apache.commons.codec.binary.Base64.encodeBase64(outputBytes), com.openexchange.java.Charsets.US_ASCII);
     }
 
     /**
@@ -166,7 +159,7 @@ public final class MailPasswordUtil {
             return null;
         }
         final byte encrypted[];
-        try {
+        {
             /*-
              * It's safe to use "US-ASCII" to turn Base64 encoded encrypted password string into bytes.
              * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
@@ -185,11 +178,7 @@ public final class MailPasswordUtil {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(encryptedPassword.getBytes("US-ASCII"));
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            LOG.error(e.getMessage(), e);
-            return null;
+            encrypted = org.apache.commons.codec.binary.Base64.decodeBase64(encryptedPassword.getBytes(com.openexchange.java.Charsets.US_ASCII));
         }
 
         final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
@@ -197,12 +186,7 @@ public final class MailPasswordUtil {
 
         final byte[] outputBytes = cipher.doFinal(encrypted);
 
-        try {
-            return new String(outputBytes, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            throw new GeneralSecurityException("Failed to decypt encrypted password.", e);
-        }
+        return new String(outputBytes, com.openexchange.java.Charsets.UTF_8);
     }
 
     /**
@@ -226,12 +210,7 @@ public final class MailPasswordUtil {
         if (null == key) {
             return null;
         }
-        try {
-            return new SecretKeySpec(ensureLength(key.getBytes("UTF-8")), ALGORITHM_DES);
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            throw new GeneralSecurityException("Failed to generate secret key.", e);
-        }
+        return new SecretKeySpec(ensureLength(key.getBytes(com.openexchange.java.Charsets.UTF_8)), ALGORITHM_DES);
     }
 
     private static byte[] ensureLength(final byte[] bytes) {

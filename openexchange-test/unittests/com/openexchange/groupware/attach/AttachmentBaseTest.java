@@ -185,7 +185,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             }
          }
          assertFalse(0 == attachment.getId());
-         final byte[] data  = "Hallo Welt".getBytes("UTF-8");
+         final byte[] data  = "Hallo Welt".getBytes(com.openexchange.java.Charsets.UTF_8);
 
          attachment.setFilesize(data.length);
          final Date oldCreationDate = attachment.getCreationDate();
@@ -208,7 +208,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
          while((b = in.read()) != -1) {
              out.write(b);
          }
-         assertEquals("Hallo Welt", new String(out.toByteArray(), "UTF-8"));
+         assertEquals("Hallo Welt", new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8));
     }
 
     public void doAttach(final int folderId, final int attachedId, final int moduleId) throws Exception{

@@ -67,13 +67,13 @@ public class BinaryValueDefinition extends ValueDefinition {
 
     @Override
     public Object createValue(final StringScanner s, final Property property) throws IOException {
-        return s.getRest().getBytes("ISO-8859-1");
+        return s.getRest().getBytes(com.openexchange.java.Charsets.ISO_8859_1);
     }
 
     @Override
     public String writeValue(final Object value) {
         try {
-            return new String((byte[]) value, "ISO-8859-1");
+            return new String((byte[]) value, com.openexchange.java.Charsets.ISO_8859_1);
         } catch (final UnsupportedEncodingException e) {
             return e.getMessage();
         }

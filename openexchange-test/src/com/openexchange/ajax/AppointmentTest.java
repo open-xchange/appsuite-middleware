@@ -292,7 +292,7 @@ public class AppointmentTest extends AbstractAJAXTest {
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION,
                 AJAXServlet.ACTION_NEW);
 
-        final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+        final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
         final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
                 + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse resp = webCon.getResponse(req);
@@ -346,7 +346,7 @@ public class AppointmentTest extends AbstractAJAXTest {
                 .valueOf(inFolder));
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, modified);
 
-        final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+        final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
         final WebRequest req = new PutMethodWebRequest(host + APPOINTMENT_URL
                 + parameter.getURLParameters(), bais, "text/javascript");
         final WebResponse resp = webCon.getResponse(req);

@@ -306,7 +306,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -363,7 +363,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -392,7 +392,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -443,7 +443,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -470,7 +470,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new UnsynchronizedByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -490,7 +490,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     public static int[] deleteFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int[] folderIds, final long timestamp) throws JSONException, IOException, SAXException {
         final JSONArray deleteIds = new JSONArray(Arrays.toString(folderIds));
-        final byte[] bytes = deleteIds.toString().getBytes("UTF-8");
+        final byte[] bytes = deleteIds.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new UnsynchronizedByteArrayInputStream(bytes);
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
@@ -527,7 +527,7 @@ public class FolderTest extends AbstractAJAXTest {
 
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
-            new UnsynchronizedByteArrayInputStream(clearIds.toString().getBytes("UTF-8")),
+            new UnsynchronizedByteArrayInputStream(clearIds.toString().getBytes(com.openexchange.java.Charsets.UTF_8)),
             "text/javascript; charset=UTF-8");
 
         final WebResponse resp = conversation.getResponse(req);

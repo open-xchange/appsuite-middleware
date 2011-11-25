@@ -252,7 +252,7 @@ public abstract class AbstractWriteTask implements Comparable<AbstractWriteTask>
             if (DEBUG_ENABLED) {
                 LOG.debug(new StringBuilder("Writing CSV line: ").append(csvLine).toString());
             }
-            fos.write(csvLine.getBytes("US-ASCII"));
+            fos.write(csvLine.getBytes(com.openexchange.java.Charsets.US_ASCII));
             fos.flush();
         } finally {
             try {

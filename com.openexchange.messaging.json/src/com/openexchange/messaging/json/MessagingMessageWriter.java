@@ -52,7 +52,6 @@ package com.openexchange.messaging.json;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -280,12 +279,7 @@ public class MessagingMessageWriter {
             /*
              * Return as base64-encoded string
              */
-            try {
-                return new String(Base64.encodeBase64(baos.toByteArray(), false), "US-ASCII");
-            } catch (final UnsupportedEncodingException e) {
-                Log.valueOf(LogFactory.getLog(MessagingMessageWriter.class)).error("Unsupported encoding: " + e.getMessage(), e);
-                return null;
-            }
+            return new String(Base64.encodeBase64(baos.toByteArray(), false), com.openexchange.java.Charsets.US_ASCII);
         }
 
         @Override

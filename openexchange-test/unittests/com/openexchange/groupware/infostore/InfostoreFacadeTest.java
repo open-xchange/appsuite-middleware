@@ -49,10 +49,9 @@
 
 package com.openexchange.groupware.infostore;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.server.impl.OCLPermission;
@@ -153,15 +152,13 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
             dm.setFileMIMEType("text/plain");
             dm.setFileName("bla.txt");
             dm.setFileSize(12);
-            infostore.saveDocument(dm, new ByteArrayInputStream("Hallo".getBytes("UTF-8")), Long.MAX_VALUE, session);
+            infostore.saveDocument(dm, new ByteArrayInputStream("Hallo".getBytes(com.openexchange.java.Charsets.UTF_8)), Long.MAX_VALUE, session);
             infostore.removeVersion(dm.getId(), new int[]{1}, session);
             infostore.commit();
         } catch(final OXException x) {
             x.printStackTrace();
             infostore.rollback();
             throw x;
-        } catch (final UnsupportedEncodingException e) {
-            // Subba!
         } finally {
             infostore.finish();
 
@@ -178,18 +175,18 @@ public class InfostoreFacadeTest extends AbstractInfostoreTest {
     }
 
     public void testTouch() throws Exception{
-        DocumentMetadata document = createEntry(folderId);
+        final DocumentMetadata document = createEntry(folderId);
         assertNotNull(document.getLastModified());
         assertTrue(document.getLastModified().getTime() != 0);
         Thread.sleep(100);
         infostore.touch(document.getId(), session);
-        DocumentMetadata reload = load(document.getId(), session);
+        final DocumentMetadata reload = load(document.getId(), session);
 
         assertTrue("lastModified did not change", reload.getLastModified().getTime() > document.getLastModified().getTime());
 
     }
 
-    private DocumentMetadata load(int id, ServerSession session) throws OXException {
+    private DocumentMetadata load(final int id, final ServerSession session) throws OXException {
         return infostore.getDocumentMetadata(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), session.getUser(), session.getUserConfiguration());
     }
 

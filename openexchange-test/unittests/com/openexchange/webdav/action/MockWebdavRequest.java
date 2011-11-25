@@ -1,19 +1,16 @@
 package com.openexchange.webdav.action;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
@@ -87,12 +84,7 @@ public class MockWebdavRequest implements WebdavRequest {
 
 	@Override
     public InputStream getBody(){
-		try {
-			return new ByteArrayInputStream((content == null) ? new byte[0] : content.getBytes("UTF-8"));
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return new ByteArrayInputStream((content == null) ? new byte[0] : content.getBytes(com.openexchange.java.Charsets.UTF_8));
 	}
 
 	public void setHeader(final String header, final String value) {
@@ -127,7 +119,7 @@ public class MockWebdavRequest implements WebdavRequest {
 		}
 		try {
 			return new IfHeaderParser().parse(getHeader("If"));
-		} catch (IfHeaderParseException e) {
+		} catch (final IfHeaderParseException e) {
 			throw new OXException(e);
 		}
 	}

@@ -252,13 +252,8 @@ public final class DownloadUtility {
          *
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
-        String foo;
-        try {
-            foo = new String(fn.getBytes("UTF-8"), "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            foo = null;
-        }
-        appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(null == foo ? fn : foo).append('"').toString();
+        final String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
+        appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(foo).append('"').toString();
     }
 
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");

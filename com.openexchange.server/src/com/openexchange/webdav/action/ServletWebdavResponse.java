@@ -90,7 +90,7 @@ public class ServletWebdavResponse implements WebdavResponse {
 
     @Override
     public void sendString(final String notFound) throws IOException {
-        final byte[] bytes = notFound.getBytes("UTF-8");
+        final byte[] bytes = notFound.getBytes(com.openexchange.java.Charsets.UTF_8);
         setHeader("Content-Length", String.valueOf(bytes.length));
         getOutputStream().write(bytes);
     }

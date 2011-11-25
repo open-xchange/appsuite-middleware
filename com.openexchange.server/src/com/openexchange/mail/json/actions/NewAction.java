@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.io.IOException;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -221,7 +220,7 @@ public final class NewAction extends AbstractMailAction {
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
             final PutNewMailData data;
             {
-                final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes("US-ASCII")));
+                final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(((String) req.getRequest().getData()).getBytes(com.openexchange.java.Charsets.US_ASCII)));
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
                 final MailMessage mail;
@@ -270,8 +269,6 @@ public final class NewAction extends AbstractMailAction {
             return new AJAXRequestResult(responseData, "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
         } catch (final RuntimeException e) {

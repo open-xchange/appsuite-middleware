@@ -1005,10 +1005,10 @@ public class MailfilterAction extends AbstractAction<Rule, MailfilterRequest> {
         final StringBuilder commandBuilder = new StringBuilder(64);
 
         if (null != activeScript && activeScript.equals(this.scriptname)) {
-            sieveHandler.setScript(activeScript, writeback.getBytes("UTF-8"), commandBuilder);
+            sieveHandler.setScript(activeScript, writeback.getBytes(com.openexchange.java.Charsets.UTF_8), commandBuilder);
             sieveHandler.setScriptStatus(activeScript, true, commandBuilder);
         } else {
-            sieveHandler.setScript(this.scriptname, writeback.getBytes("UTF-8"), commandBuilder);
+            sieveHandler.setScript(this.scriptname, writeback.getBytes(com.openexchange.java.Charsets.UTF_8), commandBuilder);
             sieveHandler.setScriptStatus(this.scriptname, true, commandBuilder);
         }
     }

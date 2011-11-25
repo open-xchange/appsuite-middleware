@@ -144,7 +144,7 @@ public class Bug16141Test extends AbstractAJAXSession {
         while ((length = isr.read(buf)) != -1) {
             sb.append(buf, 0, length);
         }
-        return new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), address).getBytes("UTF-8"));
+        return new ByteArrayInputStream(TestMails.replaceAddresses(sb.toString(), address).getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
     @Override

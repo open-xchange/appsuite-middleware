@@ -70,7 +70,7 @@ public class TestFolder extends TestCase {
 		/*
 		 * Insert OX Folder
 		 */
-		bytes = newOXFolderObj.getBytes("UTF-8");
+		bytes = newOXFolderObj.getBytes(com.openexchange.java.Charsets.UTF_8);
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=65", bais, "text/javascript; charset=UTF-8");
 		resp = wc.getResponse(req);
@@ -82,7 +82,7 @@ public class TestFolder extends TestCase {
 		/*
 		 * Insert Mail Folder
 		 */
-		bytes = newMailFolderObj.getBytes("UTF-8");
+		bytes = newMailFolderObj.getBytes(com.openexchange.java.Charsets.UTF_8);
 		bais = new ByteArrayInputStream(bytes);
 		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&folder=INBOX", bais, "text/javascript; charset=UTF-8");
 		resp = wc.getResponse(req);
@@ -96,7 +96,7 @@ public class TestFolder extends TestCase {
 		/*
 		 * Update OX folder
 		 */
-		bytes = updateOXFolderObj.getBytes("UTF-8");
+		bytes = updateOXFolderObj.getBytes(com.openexchange.java.Charsets.UTF_8);
 		bais = new ByteArrayInputStream(bytes);
 		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
 		resp = wc.getResponse(req);
@@ -104,7 +104,7 @@ public class TestFolder extends TestCase {
 		/*
 		 * Update IMAP Folder
 		 */
-		bytes = updateMailFolderObj.getBytes("UTF-8");
+		bytes = updateMailFolderObj.getBytes(com.openexchange.java.Charsets.UTF_8);
 		bais = new ByteArrayInputStream(bytes);
 		req = new PutMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&id=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
 		resp = wc.getResponse(req);
@@ -113,7 +113,7 @@ public class TestFolder extends TestCase {
 		 * Delete OX folder
 		 */
 		final String expectedDeletePrefix = "{OK: Folder successfully deleted";
-		bytes = "".getBytes("UTF-8");
+		bytes = "".getBytes(com.openexchange.java.Charsets.UTF_8);
 		bais = new ByteArrayInputStream(bytes);
 		req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + oxFolderId, bais, "text/javascript; charset=UTF-8");
 		resp = wc.getResponse(req);
@@ -122,7 +122,7 @@ public class TestFolder extends TestCase {
 		 * Delete IMAP folder
 		 */
 		mailFolderFullName += "Changed";
-		bytes = "".getBytes("UTF-8");
+		bytes = "".getBytes(com.openexchange.java.Charsets.UTF_8);
 		bais = new ByteArrayInputStream(bytes);
 		req = new PostMethodWebRequest("http://127.0.0.1/ajax/folders?session=" + sessionId + "&delete=" + mailFolderFullName, bais, "text/javascript; charset=UTF-8");
 		resp = wc.getResponse(req);

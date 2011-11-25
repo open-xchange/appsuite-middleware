@@ -640,11 +640,11 @@ public final class MIMEMessageUtility {
         final String asciiText = m.group(3);
         final String detectedCharset;
         final byte[] rawBytes;
-        try {
+        {
             final String transferEncoding = m.group(2);
             if ("Q".equalsIgnoreCase(transferEncoding)) {
                 try {
-                    rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(asciiText.getBytes("US-ASCII"));
+                    rawBytes = QuotedPrintableCodec.decodeQuotedPrintable(asciiText.getBytes(com.openexchange.java.Charsets.US_ASCII));
                 } catch (final DecoderException e) {
                     /*
                      * Invalid quoted-printable
@@ -653,7 +653,7 @@ public final class MIMEMessageUtility {
                     return asciiText;
                 }
             } else if ("B".equalsIgnoreCase(transferEncoding)) {
-                rawBytes = Base64.decodeBase64(asciiText.getBytes("US-ASCII"));
+                rawBytes = Base64.decodeBase64(asciiText.getBytes(com.openexchange.java.Charsets.US_ASCII));
             } else {
                 /*
                  * Unknown transfer-encoding; just return current match
@@ -662,12 +662,6 @@ public final class MIMEMessageUtility {
                 return asciiText;
             }
             detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
-        } catch (final UnsupportedEncodingException ignore) {
-            // Cannot occur
-            if (LOG.isTraceEnabled()) {
-                LOG.trace(ignore.getMessage(), ignore);
-            }
-            return asciiText;
         }
         try {
             return new String(rawBytes, detectedCharset);
@@ -757,7 +751,7 @@ public final class MIMEMessageUtility {
                             /*
                              * Retry with another library
                              */
-                            sb.append(new String(Base64.decodeBase64(m.group(3).getBytes("US-ASCII")), m.group(1)));
+                            sb.append(new String(Base64.decodeBase64(m.group(3).getBytes(com.openexchange.java.Charsets.US_ASCII)), m.group(1)));
                         }
                     } else {
                         sb.append(MimeUtility.decodeWord(m.group()));
@@ -1309,7 +1303,7 @@ public final class MIMEMessageUtility {
                                 /*
                                  * All read
                                  */
-                                return new String(buffer.toByteArray(), "US-ASCII");
+                                return new String(buffer.toByteArray(), com.openexchange.java.Charsets.US_ASCII);
 
                             }
                             /*
@@ -1346,7 +1340,7 @@ public final class MIMEMessageUtility {
                      * Found the first delimiting colon in header line
                      */
                     firstColonFound = true;
-                    if ((new String(buffer.toByteArray(start, buffer.size() - start - 1), "US-ASCII").equalsIgnoreCase(headerName))) {
+                    if ((new String(buffer.toByteArray(start, buffer.size() - start - 1), com.openexchange.java.Charsets.US_ASCII).equalsIgnoreCase(headerName))) {
                         /*
                          * Matching header
                          */

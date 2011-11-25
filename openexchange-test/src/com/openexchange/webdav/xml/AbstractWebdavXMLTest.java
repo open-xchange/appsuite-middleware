@@ -179,7 +179,7 @@ public abstract class AbstractWebdavXMLTest extends AbstractWebdavTest {
         req.setHeaderField("Authorization", "Basic " + authData);
         resp = webCon.getResponse(req);
 
-        bais = new ByteArrayInputStream(resp.getText().getBytes("UTF-8"));
+        bais = new ByteArrayInputStream(resp.getText().getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final Document doc = new SAXBuilder().build(bais);
         return parseResponse(doc, delete);

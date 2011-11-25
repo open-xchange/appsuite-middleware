@@ -98,7 +98,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         final List<ImportResult> results = imp.importData(
             sessObj,
             format,
-            new ByteArrayInputStream(ical.getBytes("UTF-8")),
+            new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)),
             _folders(),
             null);
         for (final ImportResult res : results) {
@@ -117,7 +117,7 @@ public class ICalImportTest extends AbstractICalImportTest {
         final List<ImportResult> results = imp.importData(
             sessObj,
             format,
-            new ByteArrayInputStream(ical.getBytes("UTF-8")),
+            new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)),
             _folders(),
             null);
         for (final ImportResult res : results) {
@@ -253,7 +253,7 @@ public class ICalImportTest extends AbstractICalImportTest {
     // "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:OPEN-XCHANGE\nBEGIN:VEVENT\nCLASS:PUBLIC\nCREATED:20060519T120300Z\nDTSTART:20060519T110000Z\nDTSTAMP:20070423T063205Z\nSUMMARY:External 1&1 Review call\nDTEND:20060519T120000Z\nATTENDEE;MEMBER=\"MAILTO:DEV-GROUP@host2.com\":MAILTO:joecool@host2.com:mailto:"+
     // testMailAddress + "\nEND:VEVENT\nEND:VCALENDAR";
     // //import and basic tests
-    // List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), folders, null);
+    // List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), folders, null);
     // assertEquals("One import?" , 1 , results.size());
     // ImportResult res = results.get(0);
     // assertEquals("Shouldn't have error" , null , res.getException() );

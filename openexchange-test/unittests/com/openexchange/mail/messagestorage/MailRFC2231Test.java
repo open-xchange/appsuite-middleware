@@ -298,7 +298,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
 		try {
             final SessionObject session = getSession();
 
-            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_1.getBytes("US-ASCII"));
+            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_1.getBytes(com.openexchange.java.Charsets.US_ASCII));
             final JSONMessageHandler messageHandler = new JSONMessageHandler(
                 MailAccount.DEFAULT_ID,
                 null,
@@ -335,7 +335,7 @@ public final class MailRFC2231Test extends AbstractMailTest {
         try {
             final SessionObject session = getSession();
 
-            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_2.getBytes("US-ASCII"));
+            final MailMessage rfc2231Mail = MIMEMessageConverter.convertMessage(RFC2231_2.getBytes(com.openexchange.java.Charsets.US_ASCII));
             final JSONMessageHandler messageHandler = new JSONMessageHandler(
                 MailAccount.DEFAULT_ID,
                 null,

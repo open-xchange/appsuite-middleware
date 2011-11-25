@@ -385,7 +385,7 @@ public abstract class AJAXTest {
     private void mailfilterdelete(final WebconversationAndSessionID conversation, final String hostname, final String username, int number) throws MalformedURLException, IOException, SAXException, JSONException {
         final JSONObject object = new JSONObject();
         object.put("id", number);
-        final byte[] bytes = object.toString().getBytes("UTF-8");
+        final byte[] bytes = object.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest reqmailfilter;
         if (null != username) {
@@ -457,7 +457,7 @@ public abstract class AJAXTest {
     }
 
     private String mailfilternew(final WebconversationAndSessionID conversation, final String hostname, final String username, String jsonString, String errorfound) throws MalformedURLException, IOException, SAXException, JSONException {
-        final byte[] bytes = jsonString.getBytes("UTF-8");
+        final byte[] bytes = jsonString.getBytes(com.openexchange.java.Charsets.UTF_8);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest reqmailfilter;
         if (null != username) {
@@ -485,7 +485,7 @@ public abstract class AJAXTest {
     }
 
     private void mailfilterreorder(final WebconversationAndSessionID conversation, final String hostname, final String username, String jsonArray) throws MalformedURLException, IOException, SAXException, JSONException {
-        final byte[] bytes = jsonArray.getBytes("UTF-8");
+        final byte[] bytes = jsonArray.getBytes(com.openexchange.java.Charsets.UTF_8);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest reqmailfilter;
         if (null != username) {
@@ -508,7 +508,7 @@ public abstract class AJAXTest {
     }
 
     private void mailfilterupdate(final WebconversationAndSessionID conversation, final String hostname, final String username, String test) throws MalformedURLException, IOException, SAXException, JSONException {
-        final byte[] bytes = test.getBytes("UTF-8");
+        final byte[] bytes = test.getBytes(com.openexchange.java.Charsets.UTF_8);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest reqmailfilter;
         if (null != username) {

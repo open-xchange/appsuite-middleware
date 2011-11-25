@@ -116,7 +116,7 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
             final File tempFile = fileManagement.newTempFile();
             final FileOutputStream fos = new FileOutputStream(tempFile);
             try {
-                fos.write(previewDocument.getContent().getBytes("UTF-8"));
+                fos.write(previewDocument.getContent().getBytes(com.openexchange.java.Charsets.UTF_8));
                 fos.flush();
             } finally {
                 Streams.close(fos);

@@ -199,7 +199,7 @@ public class JODCPreviewService implements InternalPreviewService {
         byte[] documentBytes;
         try {
             documentBytes = Streams.stream2bytes(is);
-            final String str = new String(documentBytes, "UTF-8");
+            final String str = new String(documentBytes, com.openexchange.java.Charsets.UTF_8);
             previewDocument.setContent(str);
 
             return previewDocument;

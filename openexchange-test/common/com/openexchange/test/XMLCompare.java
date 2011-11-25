@@ -25,8 +25,8 @@ public class XMLCompare {
 
 	public boolean compare(final String expect, final String got) throws UnsupportedEncodingException, JDOMException, IOException {
 		final SAXBuilder builder = new SAXBuilder();
-		final Document expectedDoc = builder.build(new ByteArrayInputStream(expect.getBytes("UTF-8")));
-		final Document gotDoc = builder.build(new ByteArrayInputStream(got.getBytes("UTF-8")));
+		final Document expectedDoc = builder.build(new ByteArrayInputStream(expect.getBytes(com.openexchange.java.Charsets.UTF_8)));
+		final Document gotDoc = builder.build(new ByteArrayInputStream(got.getBytes(com.openexchange.java.Charsets.UTF_8)));
 
 		return compareDocuments(expectedDoc.getRootElement(), gotDoc.getRootElement());
 	}

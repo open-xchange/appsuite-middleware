@@ -68,12 +68,12 @@ public class BASE64Encoding implements Encoding {
 
     @Override
     public String decode(final String text) throws IOException {
-        return new String(Base64.decode(text), "ISO-8859-1");
+        return new String(Base64.decode(text), com.openexchange.java.Charsets.ISO_8859_1);
     }
 
     @Override
     public String encode(final String text) throws IOException {
-        return Base64.encode(text.getBytes("ISO-8859-1"));
+        return Base64.encode(text.getBytes(com.openexchange.java.Charsets.ISO_8859_1));
     }
 
 }

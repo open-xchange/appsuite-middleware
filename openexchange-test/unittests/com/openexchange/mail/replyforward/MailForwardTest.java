@@ -100,7 +100,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
     public void testMailForward() {
         try {
-            final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
+            final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
             final Context ctx = new ContextImpl(getCid());
             final SessionObject session = getSession();
@@ -225,7 +225,7 @@ public final class MailForwardTest extends AbstractMailTest {
 
     public void testMailForwardAnother() {
         try {
-            final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_FORWARD.getBytes("US-ASCII"));
+            final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
             final Context ctx = new ContextImpl(getCid());
             final SessionObject session = getSession();
@@ -338,8 +338,8 @@ public final class MailForwardTest extends AbstractMailTest {
             try {
                 {
                     final MailMessage[] mails = new MailMessage[2];
-                    mails[0] = MIMEMessageConverter.convertMessage(RFC822_FORWARD.getBytes("US-ASCII"));
-                    mails[1] = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
+                    mails[0] = MIMEMessageConverter.convertMessage(RFC822_FORWARD.getBytes(com.openexchange.java.Charsets.US_ASCII));
+                    mails[1] = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
                     uids = mailAccess.getMessageStorage().appendMessages("INBOX", mails);
                 }
 
@@ -376,7 +376,7 @@ public final class MailForwardTest extends AbstractMailTest {
                         final MailMessage myMail = (MailMessage) part.getContent();
                         final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream();
                         myMail.writeTo(out);
-                        final String mailtext = new String(out.toByteArray(), "US-ASCII");
+                        final String mailtext = new String(out.toByteArray(), com.openexchange.java.Charsets.US_ASCII);
                         if (mailtext.contains("gibt obwohl er nen courier hat")) {
                             partOfFirstMailFound = true;
                         }
