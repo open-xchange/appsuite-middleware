@@ -138,6 +138,17 @@ public final class CacheFolderStorage implements FolderStorage {
             }
         };
 
+    private static final CacheFolderStorage INSTANCE = new CacheFolderStorage();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static CacheFolderStorage getInstance() {
+        return INSTANCE;
+    }
+
     private final String realTreeId;
 
     private final CacheFolderStorageRegistry registry;
@@ -151,7 +162,7 @@ public final class CacheFolderStorage implements FolderStorage {
     /**
      * Initializes a new {@link CacheFolderStorage}.
      */
-    public CacheFolderStorage() {
+    private CacheFolderStorage() {
         super();
         realTreeId = REAL_TREE_ID;
         registry = CacheFolderStorageRegistry.getInstance();
