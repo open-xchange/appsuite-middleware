@@ -50,7 +50,7 @@
 package com.openexchange.mail.utils;
 
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -60,6 +60,7 @@ import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.mime.HeaderName;
@@ -131,8 +132,6 @@ public final class StorageUtility {
         return (addressBuilder.toString());
     }
 
-    private static final String ENC_ASCII = "US-ASCII";
-
     /**
      * Parses specified headers into a map
      *
@@ -141,8 +140,8 @@ public final class StorageUtility {
      */
     public static Map<HeaderName, String> parseHeaders(final byte[] headers) {
         try {
-            return parseHeaders(new String(headers, ENC_ASCII));
-        } catch (final UnsupportedEncodingException e) {
+            return parseHeaders(new String(headers, Charsets.US_ASCII));
+        } catch (final UnsupportedCharsetException e) {
             /*
              * Cannot occur
              */

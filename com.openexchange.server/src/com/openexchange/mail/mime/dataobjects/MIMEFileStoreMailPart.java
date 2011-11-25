@@ -52,7 +52,7 @@ package com.openexchange.mail.mime.dataobjects;
 import static com.openexchange.mail.utils.CharsetDetector.detectCharset;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collection;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -65,6 +65,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -284,8 +285,8 @@ public abstract class MIMEFileStoreMailPart extends MailPart {
                 charset = "UTF-8";
             }
             try {
-                cachedContent = new String(mds.getData(), charset);
-            } catch (final UnsupportedEncodingException e) {
+                cachedContent = new String(mds.getData(), Charsets.forName(charset));
+            } catch (final UnsupportedCharsetException e) {
                 throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
             }
             return cachedContent;

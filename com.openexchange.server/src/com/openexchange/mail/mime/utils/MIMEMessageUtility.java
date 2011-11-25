@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -82,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -664,8 +666,8 @@ public final class MIMEMessageUtility {
             detectedCharset = CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(rawBytes));
         }
         try {
-            return new String(rawBytes, detectedCharset);
-        } catch (final UnsupportedEncodingException e) {
+            return new String(rawBytes, Charsets.forName(detectedCharset));
+        } catch (final UnsupportedCharsetException e) {
             /*
              * Even detected charset is unknown... giving up
              */
@@ -693,8 +695,8 @@ public final class MIMEMessageUtility {
             bytes[i] = (byte) rawHeader.charAt(i);
         }
         try {
-            return new String(bytes, MailProperties.getInstance().getDefaultMimeCharset());
-        } catch (final UnsupportedEncodingException e) {
+            return new String(bytes, Charsets.forName(MailProperties.getInstance().getDefaultMimeCharset()));
+        } catch (final UnsupportedCharsetException e) {
             // Cannot occur
             return rawHeader;
         }
@@ -751,7 +753,7 @@ public final class MIMEMessageUtility {
                             /*
                              * Retry with another library
                              */
-                            sb.append(new String(Base64.decodeBase64(m.group(3).getBytes(com.openexchange.java.Charsets.US_ASCII)), m.group(1)));
+                            sb.append(new String(Base64.decodeBase64(m.group(3).getBytes(com.openexchange.java.Charsets.US_ASCII)), Charsets.forName(m.group(1))));
                         }
                     } else {
                         sb.append(MimeUtility.decodeWord(m.group()));
