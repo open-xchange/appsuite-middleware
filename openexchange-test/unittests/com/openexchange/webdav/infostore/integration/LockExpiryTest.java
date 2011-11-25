@@ -155,7 +155,7 @@ public class LockExpiryTest extends AbstractInfostoreTest {
         assertFalse(resource.exists());
 
         resource.create();
-        resource.putBodyAndGuessLength(new ByteArrayInputStream("Hallo Welt".getBytes("UTF-8")));
+        resource.putBodyAndGuessLength(new ByteArrayInputStream("Hallo Welt".getBytes(com.openexchange.java.Charsets.UTF_8)));
         newRequest();
         resource = factory.resolveResource(testCollection + name);
         assertTrue(resource.exists());

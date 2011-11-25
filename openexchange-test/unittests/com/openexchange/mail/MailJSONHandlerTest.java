@@ -212,7 +212,7 @@ public final class MailJSONHandlerTest extends AbstractMailTest {
         try {
             final SessionObject session = getSession();
 
-            final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes("US-ASCII"));
+            final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
             final JSONMessageHandler handler = new JSONMessageHandler(
                 MailAccount.DEFAULT_ID,

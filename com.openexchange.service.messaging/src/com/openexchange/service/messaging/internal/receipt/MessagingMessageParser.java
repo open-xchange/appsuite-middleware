@@ -50,11 +50,10 @@
 package com.openexchange.service.messaging.internal.receipt;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.UUID;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -174,11 +173,7 @@ public final class MessagingMessageParser {
             throw MessagingServiceExceptionCodes.UNPARSEABLE_STRING.create();
         }
         if (encoded) {
-            try {
-                return new String(decodeQuotedPrintable(sb.toString().getBytes("US-ASCII")), "UTF-8");
-            } catch (final UnsupportedEncodingException e) {
-                throw MessagingServiceExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
+            return new String(decodeQuotedPrintable(sb.toString().getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
         }
         return sb.toString();
     }

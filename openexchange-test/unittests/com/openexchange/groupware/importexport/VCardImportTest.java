@@ -78,7 +78,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final String vcard = "BEGIN:VCARD\nVERSION:3.0\n\nN:"+stringTooLong+";givenName;;;\nEND:VCARD\n";
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)), folders, null);
 		assertTrue("One import?", 1 == results.size());
 		assertFalse("Should have no error" , results.get(0).hasError() );
 
@@ -99,7 +99,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 
 		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)), folders, null);
 		assertTrue("One import?" , 1 == results.size());
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );
@@ -115,7 +115,7 @@ public class VCardImportTest extends AbstractVCardTest {
 		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
 
 		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes("UTF-8")), folders, null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)), folders, null);
 		assertTrue("One import?" , 1 == results.size());
 		final ImportResult res = results.get(0);
 		assertEquals("Should have no error" , null, res.getException() );

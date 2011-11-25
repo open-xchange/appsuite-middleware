@@ -50,7 +50,6 @@
 package com.openexchange.groupware.notify;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1263,12 +1262,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private static final Pattern P_TRIM = Pattern.compile("[a-zA-Z-_]+:\r?\n");
 
     private static byte[] trimICal(final byte[] icalBytes) {
-        try {
-            return P_TRIM.matcher(new String(icalBytes, "UTF-8")).replaceAll("").getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            return icalBytes;
-        }
+        return P_TRIM.matcher(new String(icalBytes, com.openexchange.java.Charsets.UTF_8)).replaceAll("").getBytes(com.openexchange.java.Charsets.UTF_8);
     }
 
     private static boolean isAscii(final byte[] bytes) {

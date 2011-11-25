@@ -163,7 +163,7 @@ public class LinkedInXMLParser {
 
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
+            Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
             Element root = doc.getDocumentElement();
             NodeList connections = root.getElementsByTagName("person");
             if (connections != null && connections.getLength() > 0) {
@@ -187,7 +187,7 @@ public class LinkedInXMLParser {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
+            Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
             Element root = doc.getDocumentElement();
             Contact contact = parse(root);
             return contact;

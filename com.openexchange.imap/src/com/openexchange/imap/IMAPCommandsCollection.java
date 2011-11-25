@@ -60,7 +60,6 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2735,12 +2734,7 @@ public final class IMAPCommandsCollection {
             if (null == byteArray) {
                 return null;
             }
-            try {
-                return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
-            } catch (final UnsupportedEncodingException e) {
-                // Cannot occur
-                return "";
-            }
+            return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), com.openexchange.java.Charsets.US_ASCII);
         }
     };
 
@@ -2752,12 +2746,7 @@ public final class IMAPCommandsCollection {
             if (null == byteArray) {
                 return null;
             }
-            try {
-                return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
-            } catch (final UnsupportedEncodingException e) {
-                // Cannot occur
-                return "";
-            }
+            return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), com.openexchange.java.Charsets.US_ASCII);
         }
     };
 

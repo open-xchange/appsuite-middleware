@@ -170,7 +170,7 @@ public class MailTest extends AbstractAJAXTest {
 		/*
 		 * Create InputStream
 		 */
-		final byte[] bytes = new StringBuilder(50).append('[').append("{\"id\":\"").append(mailIdentifier).append("\"}").append(']').toString().getBytes("UTF-8");
+		final byte[] bytes = new StringBuilder(50).append('[').append("{\"id\":\"").append(mailIdentifier).append("\"}").append(']').toString().getBytes(com.openexchange.java.Charsets.UTF_8);
 		final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 		/*
 		 * Define the request

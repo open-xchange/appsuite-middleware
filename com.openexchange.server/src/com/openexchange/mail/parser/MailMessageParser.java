@@ -575,7 +575,7 @@ public final class MailMessageParser {
                          * Set part's body
                          */
                         {
-                            final byte[] bytes = calendar.toString().getBytes("UTF-8");
+                            final byte[] bytes = calendar.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
                             part.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentTypeStr)));
                             part.setSize(bytes.length);
                         }
@@ -946,7 +946,7 @@ public final class MailMessageParser {
                         if (WARN_ENABLED) {
                             LOG.warn("Unsupported encoding: " + e.getMessage(), e);
                         }
-                        return new String(bytes, "ISO-8859-1");
+                        return new String(bytes, com.openexchange.java.Charsets.ISO_8859_1);
                     }
                 }
                 /*

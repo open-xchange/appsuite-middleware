@@ -75,7 +75,7 @@ public class VCardValueDefinition extends TextValueDefinition {
         try {
             final ByteArrayOutputStream stream = new UnsynchronizedByteArrayOutputStream();
             VCard.definition.write(VCard.definition.getWriter(stream, "US-ASCII"), (VersitObject) value);
-            return new String(stream.toByteArray(), "US-ASCII");
+            return new String(stream.toByteArray(), com.openexchange.java.Charsets.US_ASCII);
         } catch (final IOException e) {
             return "";
         }

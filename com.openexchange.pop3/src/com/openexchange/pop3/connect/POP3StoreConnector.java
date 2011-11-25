@@ -263,7 +263,7 @@ public final class POP3StoreConnector {
             String tmpPass = pop3Config.getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), "ISO-8859-1");
+                    tmpPass = new String(tmpPass.getBytes(POP3Properties.getInstance().getPOP3AuthEnc()), com.openexchange.java.Charsets.ISO_8859_1);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }

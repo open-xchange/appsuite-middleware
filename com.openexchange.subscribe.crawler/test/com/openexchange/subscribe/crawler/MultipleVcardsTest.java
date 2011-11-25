@@ -96,7 +96,7 @@ public class MultipleVcardsTest extends TestCase {
             pageString = pageString.substring(endIndex);
 
             try {
-                byte[] vcard = vcardString.getBytes("UTF-8");
+                byte[] vcard = vcardString.getBytes(com.openexchange.java.Charsets.UTF_8);
                 VersitDefinition def = Versit.getDefinition("text/x-vcard");
                 VersitDefinition.Reader versitReader;
                 versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");

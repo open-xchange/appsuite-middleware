@@ -28,7 +28,7 @@ public class PutTest extends ActionTestCase {
 
 		final String content = "<html><head /><body>The New, Better Index</body></html>";
 		req.setBodyAsString(content);
-		req.setHeader("content-length",((Integer)content.getBytes("UTF-8").length).toString());
+		req.setHeader("content-length",((Integer)content.getBytes(com.openexchange.java.Charsets.UTF_8).length).toString());
 		req.setHeader("content-type", "text/html");
 
 		final WebdavAction action = new WebdavPutAction();
@@ -38,7 +38,7 @@ public class PutTest extends ActionTestCase {
 		assertEquals(HttpServletResponse.SC_CREATED, res.getStatus());
 
 		final WebdavResource resource = factory.resolveResource(INDEX_HTML_URL);
-		assertEquals(new Long(content.getBytes("UTF-8").length),resource.getLength());
+		assertEquals(new Long(content.getBytes(com.openexchange.java.Charsets.UTF_8).length),resource.getLength());
 		assertEquals("text/html", resource.getContentType());
 		assertEquals(content, getContent(INDEX_HTML_URL));
 	}
@@ -51,7 +51,7 @@ public class PutTest extends ActionTestCase {
 
 		final String content = "<html><head /><body>The New, Better Index</body></html>";
 		req.setBodyAsString(content);
-		req.setHeader("content-length",((Integer)content.getBytes("UTF-8").length).toString());
+		req.setHeader("content-length",((Integer)content.getBytes(com.openexchange.java.Charsets.UTF_8).length).toString());
 		req.setHeader("content-type", "text/html");
 
 		final WebdavAction action = new WebdavPutAction();
@@ -63,7 +63,7 @@ public class PutTest extends ActionTestCase {
 		final WebdavResource resource = factory.resolveResource(INDEX23_HTML_URL);
 		assertNotNull(resource);
 		assertTrue(resource.exists());
-		assertEquals(resource.getLength(), new Long(content.getBytes("UTF-8").length));
+		assertEquals(resource.getLength(), new Long(content.getBytes(com.openexchange.java.Charsets.UTF_8).length));
 		assertEquals("text/html", resource.getContentType());
 		assertEquals(content, getContent(INDEX23_HTML_URL));
 	}
@@ -77,7 +77,7 @@ public class PutTest extends ActionTestCase {
 
 		final String content = "<html><head /><body>The New, Better Index</body></html>";
 		req.setBodyAsString(content);
-		req.setHeader("content-length",((Integer)content.getBytes("UTF-8").length).toString());
+		req.setHeader("content-length",((Integer)content.getBytes(com.openexchange.java.Charsets.UTF_8).length).toString());
 		req.setHeader("content-type", "text/html");
 
 		final WebdavAction action = new WebdavPutAction() {
@@ -104,7 +104,7 @@ public class PutTest extends ActionTestCase {
 
 		final String content = "<html><head /><body>The New, Better Index</body></html>";
 		req.setBodyAsString(content);
-		req.setHeader("content-length",((Integer)content.getBytes("UTF-8").length).toString());
+		req.setHeader("content-length",((Integer)content.getBytes(com.openexchange.java.Charsets.UTF_8).length).toString());
 		req.setHeader("content-type", "text/html");
 
 		final WebdavAction action = new WebdavPutAction();

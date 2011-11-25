@@ -435,11 +435,11 @@ public final class StructureMailMessageParser {
                 }
                 {
                     final String version = mailPart.getFirstHeader("MIME-Version");
-                    buf.write(("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n").getBytes("US-ASCII"));
+                    buf.write(("MIME-Version: " + (null == version ? "1.0" : version) + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
                 }
                 {
                     final String ct = MIMEMessageUtility.extractHeader("Content-Type", new UnsynchronizedByteArrayInputStream(bytes), false);
-                    buf.write(("Content-Type:" + ct + "\r\n").getBytes("US-ASCII"));
+                    buf.write(("Content-Type:" + ct + "\r\n").getBytes(com.openexchange.java.Charsets.US_ASCII));
                 }
                 buf.write(extractBodyFrom(bytes));
                 if (!handler.handleSMIMEBodyData(buf.toByteArray())) {

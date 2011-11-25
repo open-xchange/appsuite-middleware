@@ -51,7 +51,6 @@ package com.openexchange.management.internal;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -188,14 +187,7 @@ public abstract class AbstractAgent {
             final byte[] salt = {};
 
             md.reset();
-            try {
-                md.update(raw.getBytes("UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
-                /*
-                 * Cannot occur
-                 */
-                LOG.error(e.getMessage(), e);
-            }
+            md.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
             md.update(salt);
 
             final String ret = getUSASCII().decode(ByteBuffer.wrap(Base64.encodeBase64(md.digest()))).toString();

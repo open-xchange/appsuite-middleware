@@ -340,12 +340,10 @@ public final class MIMEStructureHandler implements StructureHandler {
     @Override
     public boolean handleSMIMEBodyData(final byte[] data) throws OXException {
         try {
-            currentMailObject.put("smime_body_data", new String(Base64.encodeBase64(data, false), "US-ASCII"));
+            currentMailObject.put("smime_body_data", new String(Base64.encodeBase64(data, false), com.openexchange.java.Charsets.US_ASCII));
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final UnsupportedEncodingException e) {
-            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -426,7 +424,7 @@ public final class MIMEStructureHandler implements StructureHandler {
 
             @Override
             public InputStream getInputStream() throws IOException {
-                return new UnsynchronizedByteArrayInputStream(decodedTextContent.getBytes("UTF-8"));
+                return new UnsynchronizedByteArrayInputStream(decodedTextContent.getBytes(com.openexchange.java.Charsets.UTF_8));
             }
         }, contentType, id, headers.entrySet().iterator());
         return true;
@@ -741,10 +739,8 @@ public final class MIMEStructureHandler implements StructureHandler {
                     }
                 }
                 // Add own JSONString implementation to support streaming
-                bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), "US-ASCII"));
+                bodyObject.put(DATA, new String(Base64.encodeBase64(bytes, false), com.openexchange.java.Charsets.US_ASCII));
             }
-        } catch (final UnsupportedEncodingException e) {
-            throw MailExceptionCode.ENCODING_ERROR.create(e, "US-ASCII");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }

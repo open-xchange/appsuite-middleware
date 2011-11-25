@@ -50,10 +50,8 @@
 package com.openexchange.crypto.internal;
 
 import static com.openexchange.crypto.CryptoErrorMessage.BadPassword;
-import static com.openexchange.crypto.CryptoErrorMessage.EncodingException;
 import static com.openexchange.crypto.CryptoErrorMessage.NoSalt;
 import static com.openexchange.crypto.CryptoErrorMessage.SecurityException;
-import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
@@ -130,18 +128,18 @@ public class CryptoServiceImpl implements CryptoService {
     private final byte[] SALT = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
     @Override
-    public String encrypt(String data, String password) throws OXException {
+    public String encrypt(final String data, final String password) throws OXException {
         return encrypt(data, password, false).getData();
     }
 
     @Override
-    public String decrypt(String encryptedData, String password) throws OXException {
+    public String decrypt(final String encryptedData, final String password) throws OXException {
         return decrypt(new EncryptedData(encryptedData, null), password, false);
         // return decrypt(encryptedData, generateSecretKey(password));
     }
 
     @Override
-    public String decrypt(EncryptedData data, String password, boolean useSalt) throws OXException {
+    public String decrypt(final EncryptedData data, final String password, final boolean useSalt) throws OXException {
         if (useSalt && data.getSalt() == null) {
             throw NoSalt.create();
         }
@@ -154,9 +152,9 @@ public class CryptoServiceImpl implements CryptoService {
     }
 
     @Override
-    public EncryptedData encrypt(String data, String password, boolean useSalt) throws OXException {
+    public EncryptedData encrypt(final String data, final String password, final boolean useSalt) throws OXException {
         if (useSalt) {
-            byte[] salt = generateSalt();
+            final byte[] salt = generateSalt();
             return new EncryptedData(encrypt(data, generateSecretKey(password, salt)), salt);
         } else {
             return new EncryptedData(encrypt(data, generateSecretKey(password, SALT)), null);
@@ -176,7 +174,7 @@ public class CryptoServiceImpl implements CryptoService {
         try {
             final Cipher cipher = Cipher.getInstance(CIPHER_TYPE);
             cipher.init(Cipher.ENCRYPT_MODE, password, IV);
-            final byte[] outputBytes = cipher.doFinal(data.getBytes("UTF-8"));
+            final byte[] outputBytes = cipher.doFinal(data.getBytes(com.openexchange.java.Charsets.UTF_8));
             /*-
              * It's safe to use "US-ASCII" to turn bytes into a Base64 encoded encrypted password string.
              * Taken from RFC 2045 Section 6.8. "Base64 Content-Transfer-Encoding":
@@ -195,10 +193,8 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            retval = new String(Base64.encodeBase64(outputBytes), "US-ASCII");
-        } catch (final UnsupportedEncodingException e) {
-            throw EncodingException.create(e);
-        } catch (GeneralSecurityException e) {
+            retval = new String(Base64.encodeBase64(outputBytes), com.openexchange.java.Charsets.US_ASCII);
+        } catch (final GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
 
@@ -236,22 +232,18 @@ public class CryptoServiceImpl implements CryptoService {
              * requirements a binary transport encoding for mail must meet.
              *
              */
-            encrypted = Base64.decodeBase64(encryptedData.getBytes("US-ASCII"));
+            encrypted = Base64.decodeBase64(encryptedData.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
             cipher = Cipher.getInstance(CIPHER_TYPE);
             cipher.init(Cipher.DECRYPT_MODE, key, IV);
-        } catch (final UnsupportedEncodingException e) {
-            throw EncodingException.create(e);
-        } catch (GeneralSecurityException e) {
+        } catch (final GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
 
         try {
             final byte[] outputBytes = cipher.doFinal(encrypted);
-            retval = new String(outputBytes, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            throw EncodingException.create(e);
-        } catch (GeneralSecurityException e) {
+            retval = new String(outputBytes, com.openexchange.java.Charsets.UTF_8);
+        } catch (final GeneralSecurityException e) {
             throw BadPassword.create(e);
         }
 
@@ -265,21 +257,21 @@ public class CryptoServiceImpl implements CryptoService {
      * @return A secret key generated from specified password string
      * @throws OXException
      */
-    private SecretKey generateSecretKey(final String password, byte[] salt) throws OXException {
-        PBKDF2Parameters params = new PBKDF2Parameters(KEY_ALGORITHM, CHARSET, salt, 1000);
-        PBKDF2Engine engine = new PBKDF2Engine(params);
-        byte[] key = engine.deriveKey(password, KEY_LENGTH);
-        SecretKey secretKey = new SecretKeySpec(key, ALGORITHM);
+    private SecretKey generateSecretKey(final String password, final byte[] salt) throws OXException {
+        final PBKDF2Parameters params = new PBKDF2Parameters(KEY_ALGORITHM, CHARSET, salt, 1000);
+        final PBKDF2Engine engine = new PBKDF2Engine(params);
+        final byte[] key = engine.deriveKey(password, KEY_LENGTH);
+        final SecretKey secretKey = new SecretKeySpec(key, ALGORITHM);
         return secretKey;
     }
 
     private byte[] generateSalt() throws OXException {
         byte[] salt = null;
         try {
-            SecureRandom rand = SecureRandom.getInstance(RANDOM_ALGORITHM);
+            final SecureRandom rand = SecureRandom.getInstance(RANDOM_ALGORITHM);
             salt = new byte[16];
             rand.nextBytes(salt);
-        } catch (GeneralSecurityException e) {
+        } catch (final GeneralSecurityException e) {
             throw SecurityException.create(e);
         }
         return salt;

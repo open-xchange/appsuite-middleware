@@ -231,7 +231,7 @@ public final class GetAction extends AbstractMailAction {
                 if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
                     data = new AJAXRequestResult(new String(baos.toByteArray(), ct.getCharsetParameter()), "string");
                 } else {
-                    data = new AJAXRequestResult(new String(baos.toByteArray(), "UTF-8"), "string");
+                    data = new AJAXRequestResult(new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8), "string");
                 }
             } else if (showMessageHeaders) {
                 /*

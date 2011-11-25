@@ -94,7 +94,7 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
             file.setFolderId(folderId);
             file.setTitle("test.txt");
 
-            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes("UTF-8")), FileStorageFileAccess.DISTANT_FUTURE);
+            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes(com.openexchange.java.Charsets.UTF_8)), FileStorageFileAccess.DISTANT_FUTURE);
 
             final List<IDTuple> ids = new ArrayList<FileStorageFileAccess.IDTuple>(1);
             ids.add(new IDTuple(folderId, file.getId()));
@@ -117,7 +117,7 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
             file.setFolderId(folderId);
             file.setTitle("test.txt");
 
-            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes("UTF-8")), FileStorageFileAccess.DISTANT_FUTURE);
+            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes(com.openexchange.java.Charsets.UTF_8)), FileStorageFileAccess.DISTANT_FUTURE);
             try {
                 File storageFile1 = fileAccess.getFileMetadata(folderId, file.getId(), FileStorageFileAccess.CURRENT_VERSION);
                 Date lastModified1 = storageFile1.getLastModified();
@@ -149,7 +149,7 @@ public final class WebDAVFileStorageFileAccessTest extends AbstractWebDAVFileSto
             file.setFolderId(folderId);
             file.setTitle("test.txt");
 
-            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes("UTF-8")), FileStorageFileAccess.DISTANT_FUTURE);
+            fileAccess.saveDocument(file, new ByteArrayInputStream("Some text...".getBytes(com.openexchange.java.Charsets.UTF_8)), FileStorageFileAccess.DISTANT_FUTURE);
             try {
                 /*
                  * Create a new folder

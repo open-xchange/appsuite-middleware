@@ -52,7 +52,6 @@ package com.openexchange.webdav.action;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class CapturingWebdavResponse implements WebdavResponse {
@@ -147,11 +146,7 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		if(stream == null) {
 			return "No Body";
 		}
-		try {
-			return new String(stream.getCapture().toByteArray(), "UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			return e.toString();
-		}
+		return new String(stream.getCapture().toByteArray(), com.openexchange.java.Charsets.UTF_8);
 	}
 
 	@Override
@@ -161,7 +156,7 @@ public class CapturingWebdavResponse implements WebdavResponse {
 
     @Override
     public void sendString(final String notFound) throws IOException {
-        final byte[] bytes = notFound.getBytes("UTF-8");
+        final byte[] bytes = notFound.getBytes(com.openexchange.java.Charsets.UTF_8);
         setHeader("Content-Length", String.valueOf(bytes.length));
         getOutputStream().write(bytes);
     }

@@ -113,7 +113,7 @@ public class Bug6335Test extends ContactTest {
 
 		JSONObject jResponse = null;
 
-		final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+		final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 
 		req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		resp = webCon.getResponse(req);

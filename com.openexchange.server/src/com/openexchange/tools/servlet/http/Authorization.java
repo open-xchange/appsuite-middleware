@@ -105,7 +105,7 @@ public final class Authorization {
 
     public static Credentials decode(String auth) throws UnsupportedEncodingException {
         final byte[] decoded = Base64.decode(auth.substring(6));
-        final String userpass = new String(decoded, "UTF-8").trim();
+        final String userpass = new String(decoded, com.openexchange.java.Charsets.UTF_8).trim();
         final int delimiter = userpass.indexOf(':');
         String login = "";
         String pass = "";

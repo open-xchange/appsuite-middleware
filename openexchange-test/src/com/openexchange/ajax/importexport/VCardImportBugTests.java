@@ -220,7 +220,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
                 "END:VCARD\n";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
-            new ByteArrayInputStream(vcard.getBytes("UTF-8")),
+            new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)),
             contactFolderId,
             timeZone,
             emailaddress,

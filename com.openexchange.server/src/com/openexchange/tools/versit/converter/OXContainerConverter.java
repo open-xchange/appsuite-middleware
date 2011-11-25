@@ -2004,7 +2004,7 @@ public class OXContainerConverter {
 
     private static String encodeQP(final String string) throws ConverterException {
         try {
-            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes("UTF-8")),"US-ASCII").replaceAll("=", "%");
+            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),"US-ASCII").replaceAll("=", "%");
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             throw new ConverterException(e);
@@ -2013,10 +2013,7 @@ public class OXContainerConverter {
 
     private static String decodeQP(final String string) throws ConverterException {
         try {
-            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.replaceAll("%", "=").getBytes("US-ASCII")), "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            throw new ConverterException(e);
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.replaceAll("%", "=").getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
         } catch (final DecoderException e) {
             throw new ConverterException(e);
         }

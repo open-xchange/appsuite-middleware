@@ -478,7 +478,7 @@ public class MailConverterTest extends AbstractMailTest {
 		try {
 			getSession();
 
-			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes("US-ASCII"));
+			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final MailPartHandler handler = new MailPartHandler("2");
 			new MailMessageParser().parseMailMessage(mail, handler);
@@ -554,7 +554,7 @@ public class MailConverterTest extends AbstractMailTest {
 
 	public void testMIMEConverter2() {
 		try {
-			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC2.getBytes("US-ASCII"));
+			final MailMessage mail = MIMEMessageConverter.convertMessage(SRC2.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final int expectedCount = 2;
 			assertEquals("Unexpected number of enclosed parts", expectedCount, mail.getEnclosedCount());

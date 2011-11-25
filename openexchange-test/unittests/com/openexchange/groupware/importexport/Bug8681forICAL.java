@@ -134,7 +134,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 				"END:VCALENDAR";
 
 			imp.canImport(sessObj, format, _folders(), null);
-			imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
+			imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
 			fail("Could import appointment into Calendar module without permission");
 		} catch (final OXException e){
 			assertEquals(Category.CATEGORY_PERMISSION_DENIED, e.getCategory());
@@ -183,7 +183,7 @@ public class Bug8681forICAL extends AbstractICalImportTest {
 				"END:VCALENDAR";
 
 			imp.canImport(sessObj, format, _folders(), null);
-			imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
+			imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
 			fail("Could import appointment into Calendar module without permission");
 		} catch (final OXException e){
 			assertEquals(Category.CATEGORY_PERMISSION_DENIED, e.getCategory());

@@ -249,7 +249,7 @@ public class CarddavResource extends AbstractResource {
             contactDef.write(versitWriter, versitObject);
             versitWriter.flush();
 
-            String outputString = new String(byteArrayOutputStream.toByteArray(), "UTF-8");
+            String outputString = new String(byteArrayOutputStream.toByteArray(), com.openexchange.java.Charsets.UTF_8);
             outputString = removeXOPENXCHANGEAttributes(outputString);
             return outputString;
         } catch (IOException e) {
