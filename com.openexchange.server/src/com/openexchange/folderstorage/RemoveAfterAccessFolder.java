@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage;
 
 /**
- * {@link RemoveAfterAccessFolder} - A folder which is removed from cache after it was accessed.
+ * {@link RemoveAfterAccessFolder} - A folder which is removed from cache (if elapsed) after it was accessed.
  * <p>
  * Applies only to locally (not globally) cached folders; meaning {@link #isCacheable()} MUST return <code>true</code> AND
  * {@link #isGlobalID()} MUST return <code>false</code>.
