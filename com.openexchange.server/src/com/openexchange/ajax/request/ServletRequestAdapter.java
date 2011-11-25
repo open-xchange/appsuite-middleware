@@ -61,6 +61,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class ServletRequestAdapter implements SimpleRequest {
@@ -112,7 +113,7 @@ public class ServletRequestAdapter implements SimpleRequest {
 	        if (null == characterEncoding) {
 				characterEncoding=ServerConfig.getProperty(Property.DefaultEncoding);//"UTF-8";
 			}
-			final String body =  new String(baos.toByteArray(), characterEncoding);
+			final String body =  new String(baos.toByteArray(), Charsets.forName(characterEncoding));
 
 			return this.body = new JSONObject("{\"data\": "+body+'}').get("data");
 		} catch (final IOException e) {

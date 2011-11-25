@@ -68,6 +68,7 @@ import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenRegistry;
@@ -161,7 +162,7 @@ public class MailAttachment extends AJAXServlet {
                     final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
                     attachmentInputStream =
                         new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
-                            htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(cs));
+                            htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));
                 } else {
                     attachmentInputStream = mailPart.getInputStream();
                 }

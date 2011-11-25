@@ -71,6 +71,7 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.servlet.ServletResponseWrapper;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 
@@ -493,7 +494,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
         }
         errorMsgStr = errorMsgStr.replaceFirst("#VERSION#", Version.getVersionString());
         setContentType(new StringBuilder("text/html; charset=").append(getCharacterEncoding()).toString());
-        final byte[] errormessage = errorMsgStr.getBytes(getCharacterEncoding());
+        final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(getCharacterEncoding()));
         setContentLength(errormessage.length);
         return errormessage;
     }
@@ -529,7 +530,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             encoding = "UTF-8";
         }
         setContentType(new StringBuilder("text/html; charset=").append(encoding).toString());
-        final byte[] errormessage = errorMsgStr.getBytes(encoding);
+        final byte[] errormessage = errorMsgStr.getBytes(Charsets.forName(encoding));
         setContentLength(errormessage.length);
         return errormessage;
     }

@@ -54,6 +54,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -265,10 +266,11 @@ public final class RFC2231Tools {
         }
         final char[] chars = toEncode.toCharArray();
         try {
+            final Charset cs = Charsets.forName(charset);
             for (int i = 0; i < chars.length; i++) {
                 final char c = chars[i];
                 if (!isAscii(c) || (c == ' ')) {
-                    final byte[] bytes = String.valueOf(c).getBytes(charset);
+                    final byte[] bytes = String.valueOf(c).getBytes(cs);
                     for (int j = 0; j < bytes.length; j++) {
                         retval.append('%').append(Integer.toHexString(bytes[j] & 0xFF).toUpperCase(Locale.ENGLISH));
                     }
@@ -276,7 +278,7 @@ public final class RFC2231Tools {
                     retval.append(c);
                 }
             }
-        } catch (final java.io.UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             /*
              * Cannot occur
              */

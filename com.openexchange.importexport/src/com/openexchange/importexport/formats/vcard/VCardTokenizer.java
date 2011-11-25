@@ -57,6 +57,7 @@ import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.versit.ICalendar;
 import com.openexchange.tools.versit.VCard;
@@ -178,7 +179,7 @@ public class VCardTokenizer {
             if ('\n' == buf[0]) {
                 final byte[] ret = baos.toByteArray();
                 streamAsBytes.write(ret);
-                return new String(ret, ASCII_ENC);
+                return new String(ret, Charsets.US_ASCII);
             }
         }
         streamEnded = true;
@@ -188,7 +189,7 @@ public class VCardTokenizer {
             baos.write((byte) 10); // add final newline
             final byte[] ret = baos.toByteArray();
             streamAsBytes.write(ret);
-            return new String(ret, ASCII_ENC);
+            return new String(ret, Charsets.US_ASCII);
         }
         return null;
     }

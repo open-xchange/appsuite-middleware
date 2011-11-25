@@ -63,6 +63,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
@@ -98,6 +99,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1483,8 +1485,8 @@ public class OXContainerConverter {
                 final byte[] imageData = contact.getImage1();
                 // First try as URI
                 try {
-                    addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, CHARSET_ISO_8859_1)));
-                } catch (final UnsupportedEncodingException e2) {
+                    addProperty(object, "PHOTO", "VALUE", new String[] { "URI" }, new URI(new String(imageData, Charsets.ISO_8859_1)));
+                } catch (final UnsupportedCharsetException e2) {
                     LOG.error(e2);
                     throw new ConverterException(e2);
                 } catch (final URISyntaxException e) {
@@ -2004,8 +2006,8 @@ public class OXContainerConverter {
 
     private static String encodeQP(final String string) throws ConverterException {
         try {
-            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),"US-ASCII").replaceAll("=", "%");
-        } catch (final UnsupportedEncodingException e) {
+            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII).replaceAll("=", "%");
+        } catch (final UnsupportedCharsetException e) {
             // Cannot occur
             throw new ConverterException(e);
         }

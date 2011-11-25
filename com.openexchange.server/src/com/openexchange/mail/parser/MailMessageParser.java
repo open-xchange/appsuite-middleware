@@ -52,7 +52,7 @@ package com.openexchange.mail.parser;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -83,6 +83,7 @@ import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
@@ -941,8 +942,8 @@ public final class MailMessageParser {
                         if ("US-ASCII".equalsIgnoreCase(cs)) {
                             cs = "ISO-8859-1";
                         }
-                        return new String(bytes, cs);
-                    } catch (final UnsupportedEncodingException e) {
+                        return new String(bytes, Charsets.forName(cs));
+                    } catch (final UnsupportedCharsetException e) {
                         if (WARN_ENABLED) {
                             LOG.warn("Unsupported encoding: " + e.getMessage(), e);
                         }
@@ -971,7 +972,7 @@ public final class MailMessageParser {
                 /*
                  * Return textual content
                  */
-                return new String(bytes, charset);
+                return new String(bytes, Charsets.forName(charset));
             } catch (final OXException e) {
                 // getRawInputStream() failed
                 if (LOG.isDebugEnabled()) {

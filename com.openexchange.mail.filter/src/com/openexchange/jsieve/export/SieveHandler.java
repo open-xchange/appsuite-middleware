@@ -57,6 +57,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -65,6 +66,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Charsets;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerException;
 import com.openexchange.jsieve.export.exceptions.OXSieveHandlerInvalidCredentialsException;
 import com.openexchange.mailfilter.internal.MailFilterProperties;
@@ -294,7 +296,7 @@ public class SieveHandler {
              * Fire CAPABILITY command but only for cyrus and NEMESIS that is not sieve draft conform to sent CAPABILITY response again
              * directly as response for the STARTTLS command.
              */
-            String implementation = capa.getImplementation();
+            final String implementation = capa.getImplementation();
 
             if (implementation.matches(config.getProperty(MailFilterProperties.Values.NON_RFC_COMPLIANT_TLS_REGEX.property)) || implementation.startsWith("NEMESIS")) {
 	            measureStart();
@@ -861,10 +863,10 @@ public class SieveHandler {
      * @param toConvert The string to convert to Base64
      * @param charset The charset encoding to use when retrieving bytes from passed string
      * @return The Base64 string
-     * @throws UnsupportedEncodingException If charset encoding is unknown
+     * @throws UnsupportedCharsetException If charset encoding is unknown
      */
-    private static String convertStringToBase64(final String toConvert, final String charset) throws UnsupportedEncodingException {
-        final String converted = com.openexchange.tools.encoding.Base64.encode(toConvert.getBytes(charset));
+    private static String convertStringToBase64(final String toConvert, final String charset) throws UnsupportedCharsetException {
+        final String converted = com.openexchange.tools.encoding.Base64.encode(toConvert.getBytes(Charsets.forName(charset)));
         return converted.replaceAll("(\\r)?\\n", "");
     }
 
