@@ -53,12 +53,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.AddSessionParameter;
 import com.openexchange.sessiond.SessionMatcher;
@@ -168,6 +170,13 @@ public class SessiondServiceImpl implements SessiondService {
 
     @Override
     public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
+        final Map<String, Object> logProperties = LogProperties.optLogProperties();
+        if (null != logProperties) {
+            final Session session = (Session) logProperties.get("com.openexchange.session.session");
+            if (null != session && userId == session.getUserId() && contextId == session.getContextId()) {
+                return session;
+            }
+        }
         final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId);
         return null == sessionControl ? null: sessionControl.getSession();
     }

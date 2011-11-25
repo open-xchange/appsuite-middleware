@@ -287,6 +287,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 properties.put("com.openexchange.session.userId", null);
                 properties.put("com.openexchange.session.contextId", null);
                 properties.put("com.openexchange.session.clientId", null);
+                properties.put("com.openexchange.session.session", null);
             }
             if (null != counter) {
                 counter.getAndDecrement();
