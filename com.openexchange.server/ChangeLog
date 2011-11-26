@@ -1,3 +1,7 @@
+* 2011-11-26 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20837: Properly setting "hasSubscribedSubfolders" flag
+
 * 2011-11-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 20858: Writing only supported capabilities to SIEVE rules
