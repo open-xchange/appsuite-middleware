@@ -1230,9 +1230,21 @@ final class ListLsubCollection {
         if (null != parent && !parent.getChildrenSet().isEmpty()) {
             return true;
         }
-        for (final Iterator<String> iter = lsubMap.keySet().iterator(); iter.hasNext();) {
-            final String fn = iter.next();
-            if (fn.startsWith(fullName) && !fn.equals(fullName)) {
+        final Iterator<Entry<String, ListLsubEntryImpl>> iter = lsubMap.entrySet().iterator();
+        if (!iter.hasNext()) {
+            return false;
+        }
+        final String prefix;
+        {
+            final Entry<String, ListLsubEntryImpl> entry = iter.next();
+            prefix = fullName + entry.getValue().getSeparator();
+            if (entry.getKey().startsWith(prefix)) {
+                return true;
+            }
+        }
+        while (iter.hasNext()) {
+            final Entry<String, ListLsubEntryImpl> entry = iter.next();
+            if (entry.getKey().startsWith(prefix)) {
                 return true;
             }
         }
