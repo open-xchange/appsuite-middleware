@@ -167,8 +167,9 @@ public final class FolderMap {
             if (!wrapper.removeAfterAccess) {
                 return null;
             }
+            final Folder folder = wrapper.getValue();
             reloadFolder(folderId, treeId);
-            return wrapper.getValue();
+            return folder;
         }
         return wrapper.getValue();
     }
