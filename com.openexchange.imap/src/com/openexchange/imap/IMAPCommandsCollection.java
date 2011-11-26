@@ -1228,7 +1228,7 @@ public final class IMAPCommandsCollection {
                         if (li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);
                             throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder \"").append(fullName).append(
-                                "\" should hold folders AND messages, but can only hold messages.").toString());
+                                "\" (").append(newFolder.getStore().toString()).append(") should hold folders AND messages, but can only hold messages.").toString());
                         }
                     }
                     return Boolean.TRUE;
@@ -1236,12 +1236,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + "("+newFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + "("+newFolder.getStore().toString()+")"));
                 } else {
                     protocol.handleResult(response);
                 }
@@ -1251,7 +1251,7 @@ public final class IMAPCommandsCollection {
         if (null == ret) {
             final ProtocolException pex =
                 new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
-                    "\" cannot be created.").toString());
+                    "\" (").append(newFolder.getStore().toString()).append(") cannot be created.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
         // Set exists, type, and attributes
