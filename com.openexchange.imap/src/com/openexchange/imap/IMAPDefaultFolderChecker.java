@@ -684,7 +684,7 @@ public final class IMAPDefaultFolderChecker {
                  * OK, a full name was passed. Try to create obviously non-existing IMAP folder.
                  */
                 try {
-                    IMAPCommandsCollection.createFolder(f, sep, type);
+                    IMAPCommandsCollection.createFolder(f, sep, type, false);
                     if (1 == subscribe) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, true);
                     } else if (0 == subscribe) {
@@ -749,7 +749,7 @@ public final class IMAPDefaultFolderChecker {
                  * Zero or more than one candidate found. Try to create IMAP folder
                  */
                 try {
-                    IMAPCommandsCollection.createFolder(f, sep, type);
+                    IMAPCommandsCollection.createFolder(f, sep, type, false);
                     modified.set(true);
                 } catch (final MessagingException e) {
                     final String prfx = prefix.length() == 0 ? "INBOX" + sep : "";
@@ -762,7 +762,7 @@ public final class IMAPDefaultFolderChecker {
                 if (MailAccount.DEFAULT_ID == accountId) {
                     // Must not edit default mail account. Try to create IMAP folder
                     try {
-                        IMAPCommandsCollection.createFolder(f, sep, type);
+                        IMAPCommandsCollection.createFolder(f, sep, type, false);
                         modified.set(true);
                     } catch (final MessagingException e) {
                         LOG.warn(

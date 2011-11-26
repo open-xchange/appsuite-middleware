@@ -1201,6 +1201,10 @@ public final class IMAPCommandsCollection {
     }
 
     public static void createFolder(final IMAPFolder newFolder, final char separator, final int type) throws MessagingException {
+        createFolder(newFolder, separator, type, true);
+    }
+
+    public static void createFolder(final IMAPFolder newFolder, final char separator, final int type, final boolean errorOnUnsupportedType) throws MessagingException {
         final Boolean ret = (Boolean) newFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1225,7 +1229,7 @@ public final class IMAPCommandsCollection {
                      */
                     if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
                         final ListInfo[] li = protocol.list("", fullName);
-                        if (li != null && !li[0].hasInferiors) {
+                        if (errorOnUnsupportedType && li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);
                             throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder \"").append(fullName).append(
                                 "\" (").append(newFolder.getStore().toString()).append(") should hold folders AND messages, but can only hold messages.").toString());
