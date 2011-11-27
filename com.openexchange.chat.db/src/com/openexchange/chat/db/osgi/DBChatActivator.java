@@ -142,11 +142,13 @@ public final class DBChatActivator extends HousekeepingActivator {
             @Override
             public void added(final ServiceReference<SessiondService> ref, final SessiondService service) {
                 DBRoster.set(service);
+                addService(SessiondService.class, service);
             }
 
             @Override
             public void removed(final ServiceReference<SessiondService> ref, final SessiondService service) {
                 DBRoster.set(null);
+                removeService(SessiondService.class);
             }
         });
         track(CryptoService.class, new SimpleRegistryListener<CryptoService>() {
