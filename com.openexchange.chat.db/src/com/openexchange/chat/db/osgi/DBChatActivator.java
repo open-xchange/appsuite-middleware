@@ -66,6 +66,7 @@ import com.openexchange.chat.db.DBChatAccess;
 import com.openexchange.chat.db.DBChatService;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.chat.db.DBRoster;
+import com.openexchange.chat.db.groupware.DBChatAlterTableTask;
 import com.openexchange.chat.db.groupware.DBChatCreateTableService;
 import com.openexchange.chat.db.groupware.DBChatCreateTableTask;
 import com.openexchange.chat.db.groupware.DBChatDeleteListener;
@@ -168,7 +169,7 @@ public final class DBChatActivator extends HousekeepingActivator {
          */
         {
             registerService(CreateTableService.class, new DBChatCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBChatCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBChatCreateTableTask(), new DBChatAlterTableTask()));
             registerService(DeleteListener.class, new DBChatDeleteListener());
         }
         /*

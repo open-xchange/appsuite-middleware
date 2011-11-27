@@ -93,6 +93,14 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
         " -- INDEX `userMessage` (cid, user, chatId)\n" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
+    
+    /**
+     * Initializes a new {@link DBChatAlterTableTask}.
+     */
+    public DBChatAlterTableTask() {
+        super();
+    }
+
     @Override
     public void perform(final PerformParameters params) throws OXException {
         final DatabaseService databaseService = DBChatServiceLookup.getService(DatabaseService.class);
@@ -148,7 +156,7 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
                 stmt = con.prepareStatement(DBChatCreateTableService.getCreateStmts()[1]);
                 stmt.execute();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -173,7 +181,7 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
                 stmt = con.prepareStatement(DBChatCreateTableService.getCreateStmts()[2]);
                 stmt.execute();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
@@ -189,7 +197,7 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
                 stmt = con.prepareStatement(CREATE_CHAT_CHUNK);
                 stmt.execute();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
