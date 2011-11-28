@@ -253,6 +253,19 @@ public final class SieveTextFilter {
      * This method is used to get back the resulting sieve script
      *
      * @param clientrulesandrequire
+     * @return
+     * @throws SieveException
+     * @deprecated Use {@link #writeback(ClientRulesAndRequire, Set)}
+     */
+    @Deprecated
+    public String writeback(final ClientRulesAndRequire clientrulesandrequire) throws SieveException {
+        return writeback(clientrulesandrequire, Collections.<String> emptySet());
+    }
+
+    /**
+     * This method is used to get back the resulting sieve script
+     *
+     * @param clientrulesandrequire
      * @param capabilities The SIEVE capabilities
      * @return
      * @throws SieveException
