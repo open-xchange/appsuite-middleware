@@ -242,10 +242,10 @@ public final class Autoboxing {
     /**
      * Converts a collection of integers into an int-array
      */
-    public static int[] Coll2i(final Collection<Integer> collection){
-    	final int[] results = new int[collection.size()];
+    public static int[] Coll2i(Collection<Integer> collection){
+    	int[] results = new int[collection.size()];
     	int position = 0;
-    	for(final Integer value : collection) {
+    	for(Integer value : collection) {
             results[position++] = value.intValue();
         }
     	return results;
@@ -253,15 +253,15 @@ public final class Autoboxing {
 
     // Type Coercion
 
-    public static int a2i(final Object anything) {
+    public static int a2i(Object anything) {
         if(anything == null) {
             throw new NullPointerException("Can't convert null into integer");
         }
         if(Integer.class.isInstance(anything)){
-            return ((Integer) anything).intValue();
+            return (Integer) anything;
         }
         if(Byte.class.isInstance(anything)) {
-            return ((Byte) anything).intValue();
+            return (Byte) anything;
         }
         if(Long.class.isInstance(anything)) {
             return ((Long) anything).intValue();
@@ -273,12 +273,12 @@ public final class Autoboxing {
         throw new ClassCastException("I don't know how to turn "+anything+" of class "+anything.getClass().getName()+" into an int.");
     }
 
-    public static boolean a2b(final Object anything) {
+    public static boolean a2b(Object anything) {
         if(anything == null) {
             throw new NullPointerException("Can't convert null into boolean");
         }
         if(Boolean.class.isInstance(anything)){
-            return ((Boolean) anything).booleanValue();
+            return (Boolean) anything;
         }
 
         if(String.class.isInstance(anything)) {
