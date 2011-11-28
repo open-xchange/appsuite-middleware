@@ -56,6 +56,7 @@ import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.java.Charsets;
 import com.openexchange.webdav.xml.ContactTest;
 
 
@@ -66,7 +67,7 @@ import com.openexchange.webdav.xml.ContactTest;
  */
 public class VCardImportBugTests extends AbstractVCardImportTest {
 
-    public VCardImportBugTests(String name) throws Exception {
+    public VCardImportBugTests(final String name) throws Exception {
         super(name);
     }
 
@@ -220,7 +221,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
                 "END:VCARD\n";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
-            new ByteArrayInputStream(vcard.getBytes("UTF-8")),
+            new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)),
             contactFolderId,
             timeZone,
             emailaddress,
@@ -316,7 +317,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
                 "END:VCARD";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
-            new ByteArrayInputStream(vcard.getBytes("Cp1252")),
+            new ByteArrayInputStream(vcard.getBytes(Charsets.forName("Cp1252"))),
             contactFolderId,
             timeZone,
             emailaddress,
@@ -345,7 +346,7 @@ public class VCardImportBugTests extends AbstractVCardImportTest {
                 "END:VCARD";
         final ImportResult[] importResult = importVCard(
             getWebConversation(),
-            new ByteArrayInputStream(vcard.getBytes("Cp1252")),
+            new ByteArrayInputStream(vcard.getBytes(Charsets.forName("Cp1252"))),
             contactFolderId,
             timeZone,
             emailaddress,

@@ -89,7 +89,7 @@ public enum AjaxExceptionCodes implements OXExceptionCode {
      * Bad request. The server is unable to handle the request.
      */
     BAD_REQUEST("Bad request. The server is unable to handle the request.", Category.CATEGORY_ERROR, 20),
-    
+
     ;
 
     /**

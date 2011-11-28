@@ -79,10 +79,12 @@ public abstract class AbstractTaskRequest<T extends AbstractAJAXResponse> implem
         super();
     }
 
+    @Override
     public String getServletPath() {
         return TASKS_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

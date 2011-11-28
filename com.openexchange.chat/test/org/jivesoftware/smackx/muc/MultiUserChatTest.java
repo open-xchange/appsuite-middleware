@@ -70,7 +70,7 @@ import java.util.*;
 
 /**
  * Tests the new MUC functionalities.
- * 
+ *
  * @author Gaston Dombiak
  */
 public class MultiUserChatTest extends SmackTestCase {
@@ -89,7 +89,7 @@ public class MultiUserChatTest extends SmackTestCase {
      */
     public void testGroupchatCompatibility() {
         // TODO: this test needs to be re-written so that it manually emulates the old-style
-        // TODO: group chat protocol. Tne GroupChat class was deleted for Smack 3.0. 
+        // TODO: group chat protocol. Tne GroupChat class was deleted for Smack 3.0.
         /*try {
             Message message;
 
@@ -154,7 +154,7 @@ public class MultiUserChatTest extends SmackTestCase {
             System.out.println(UTC_FORMAT.format(delay.getStamp()));
 
             assertEquals("Body of first message is incorrect", "Message 3", msg.getBody());
-            // Try to get second historic message 
+            // Try to get second historic message
             msg = muc2.nextMessage(1000);
             assertNull("Second message is not null", msg);
 
@@ -165,15 +165,15 @@ public class MultiUserChatTest extends SmackTestCase {
             history.setMaxStanzas(2);
             muc3.join("testbot3", null, history, SmackConfiguration.getPacketReplyTimeout());
 
-            // Get first historic message 
+            // Get first historic message
             msg = muc3.nextMessage(1000);
             assertNotNull("First message is null", msg);
             assertEquals("Body of first message is incorrect", "Message 2", msg.getBody());
-            // Get second historic message 
+            // Get second historic message
             msg = muc3.nextMessage(1000);
             assertNotNull("Second message is null", msg);
             assertEquals("Body of second message is incorrect", "Message 3", msg.getBody());
-            // Try to get third historic message 
+            // Try to get third historic message
             msg = muc3.nextMessage(1000);
             assertNull("Third message is not null", msg);
 
@@ -285,6 +285,7 @@ public class MultiUserChatTest extends SmackTestCase {
 
             // User3 is listening to MUC invitations
             MultiUserChat.addInvitationListener(getConnection(2), new InvitationListener() {
+                @Override
                 public void invitationReceived(
                     Connection conn,
                     String room,
@@ -301,6 +302,7 @@ public class MultiUserChatTest extends SmackTestCase {
 
             // User2 is listening to invitation rejections
             muc2.addInvitationRejectionListener(new InvitationRejectionListener() {
+                @Override
                 public void invitationDeclined(String invitee, String reason) {
                     // Indicate that the rejection was received
                     answer[1] = reason;
@@ -335,6 +337,7 @@ public class MultiUserChatTest extends SmackTestCase {
 
             // User3 is listening to MUC invitations
             MultiUserChat.addInvitationListener(getConnection(2), new InvitationListener() {
+                @Override
                 public void invitationReceived(
                     Connection conn,
                     String room,
@@ -459,6 +462,7 @@ public class MultiUserChatTest extends SmackTestCase {
             muc2.join("testbot2");
 
             getConnection(0).getChatManager().addChatListener(new ChatManagerListener() {
+                @Override
                 public void chatCreated(Chat chat2, boolean createdLocally) {
                     assertEquals(
                         "Sender of chat is incorrect",
@@ -473,7 +477,7 @@ public class MultiUserChatTest extends SmackTestCase {
                 }
             });
 
-            // Start a private chat with another participant            
+            // Start a private chat with another participant
             Chat chat = muc2.createPrivateChat(room + "/testbot", null);
             PacketCollector collector = chat.createCollector();
             chat.sendMessage("Hello there");
@@ -614,13 +618,14 @@ public class MultiUserChatTest extends SmackTestCase {
 
             // User3 wants to be notified every time the room's subject is changed.
             muc3.addSubjectUpdatedListener(new SubjectUpdatedListener() {
+                @Override
                 public void subjectUpdated(String subject, String from) {
                     answer[0] = subject;
                     answer[1] = from;
                 }
             });
 
-            // Check that a 403 error is received when a not allowed user tries to change the 
+            // Check that a 403 error is received when a not allowed user tries to change the
             // subject in a room
             try {
                 muc2.changeSubject("New Subject2");
@@ -637,7 +642,7 @@ public class MultiUserChatTest extends SmackTestCase {
                     xmppError.getCode());
             }
 
-            // Check that every MUC updates its subject when an allowed user changes the subject 
+            // Check that every MUC updates its subject when an allowed user changes the subject
             // in a room
             muc.changeSubject("New Subject1");
             Thread.sleep(300);
@@ -673,8 +678,9 @@ public class MultiUserChatTest extends SmackTestCase {
             // User2 joins the new room
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             muc2.join("testbot2");
-            // User2 will lister for his own "kicking"            
+            // User2 will lister for his own "kicking"
             muc2.addUserStatusListener(new DefaultUserStatusListener() {
+                @Override
                 public void kicked(String actor, String reason) {
                     super.kicked(actor, reason);
                     answer[0] = actor;
@@ -685,8 +691,9 @@ public class MultiUserChatTest extends SmackTestCase {
             // User3 joins the new room
             MultiUserChat muc3 = new MultiUserChat(getConnection(2), room);
             muc3.join("testbot3");
-            // User3 will lister for user2's "kicking"            
+            // User3 will lister for user2's "kicking"
             muc3.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void kicked(String participant, String actor, String reason) {
                     super.kicked(participant, actor, reason);
                     answer[2] = participant;
@@ -750,8 +757,9 @@ public class MultiUserChatTest extends SmackTestCase {
             // User2 joins the new room
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             muc2.join("testbot2");
-            // User2 will lister for his own "banning"            
+            // User2 will lister for his own "banning"
             muc2.addUserStatusListener(new DefaultUserStatusListener() {
+                @Override
                 public void banned(String actor, String reason) {
                     super.banned(actor, reason);
                     answer[0] = actor;
@@ -762,8 +770,9 @@ public class MultiUserChatTest extends SmackTestCase {
             // User3 joins the new room
             MultiUserChat muc3 = new MultiUserChat(getConnection(2), room);
             muc3.join("testbot3");
-            // User3 will lister for user2's "banning"            
+            // User3 will lister for user2's "banning"
             muc3.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void banned(String participant, String actor, String reason) {
                     super.banned(participant, actor, reason);
                     answer[2] = participant;
@@ -830,12 +839,14 @@ public class MultiUserChatTest extends SmackTestCase {
             // User2 joins the new room (as a visitor)
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             muc2.join("testbot2");
-            // User2 will listen for his own "voice"            
+            // User2 will listen for his own "voice"
             muc2.addUserStatusListener(new DefaultUserStatusListener() {
+                @Override
                 public void voiceGranted() {
                     super.voiceGranted();
                     answer[0] = "canSpeak";
                 }
+                @Override
                 public void voiceRevoked() {
                     super.voiceRevoked();
                     answer[1] = "cannot speak";
@@ -845,13 +856,15 @@ public class MultiUserChatTest extends SmackTestCase {
             // User3 joins the new room (as a visitor)
             MultiUserChat muc3 = new MultiUserChat(getConnection(2), room);
             muc3.join("testbot3");
-            // User3 will lister for user2's "voice"            
+            // User3 will lister for user2's "voice"
             muc3.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void voiceGranted(String participant) {
                     super.voiceGranted(participant);
                     answer[2] = participant;
                 }
 
+                @Override
                 public void voiceRevoked(String participant) {
                     super.voiceRevoked(participant);
                     answer[3] = participant;
@@ -920,20 +933,24 @@ public class MultiUserChatTest extends SmackTestCase {
             // User2 joins the new room (as a visitor)
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             muc2.join("testbot2");
-            // User2 will listen for moderator privileges            
+            // User2 will listen for moderator privileges
             muc2.addUserStatusListener(new DefaultUserStatusListener() {
+                @Override
                 public void voiceGranted() {
                     super.voiceGranted();
                     answer[0] = "canSpeak";
                 }
+                @Override
                 public void voiceRevoked() {
                     super.voiceRevoked();
                     answer[1] = "cannot speak";
                 }
+                @Override
                 public void moderatorGranted() {
                     super.moderatorGranted();
                     answer[4] = "I'm a moderator";
                 }
+                @Override
                 public void moderatorRevoked() {
                     super.moderatorRevoked();
                     answer[5] = "I'm not a moderator";
@@ -943,20 +960,24 @@ public class MultiUserChatTest extends SmackTestCase {
             // User3 joins the new room (as a visitor)
             MultiUserChat muc3 = new MultiUserChat(getConnection(2), room);
             muc3.join("testbot3");
-            // User3 will lister for user2's moderator privileges            
+            // User3 will lister for user2's moderator privileges
             muc3.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void voiceGranted(String participant) {
                     super.voiceGranted(participant);
                     answer[2] = participant;
                 }
+                @Override
                 public void voiceRevoked(String participant) {
                     super.voiceRevoked(participant);
                     answer[3] = participant;
                 }
+                @Override
                 public void moderatorGranted(String participant) {
                     super.moderatorGranted(participant);
                     answer[6] = participant;
                 }
+                @Override
                 public void moderatorRevoked(String participant) {
                     super.moderatorRevoked(participant);
                     answer[7] = participant;
@@ -1067,12 +1088,14 @@ public class MultiUserChatTest extends SmackTestCase {
             // User2 joins the new room (as a visitor)
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             muc2.join("testbot2");
-            // User2 will listen for membership privileges            
+            // User2 will listen for membership privileges
             muc2.addUserStatusListener(new DefaultUserStatusListener() {
+                @Override
                 public void membershipGranted() {
                     super.membershipGranted();
                     answer[0] = "I'm a member";
                 }
+                @Override
                 public void membershipRevoked() {
                     super.membershipRevoked();
                     answer[1] = "I'm not a member";
@@ -1082,12 +1105,14 @@ public class MultiUserChatTest extends SmackTestCase {
             // User3 joins the new room (as a visitor)
             MultiUserChat muc3 = new MultiUserChat(getConnection(2), room);
             muc3.join("testbot3");
-            // User3 will lister for user2's membership privileges            
+            // User3 will lister for user2's membership privileges
             muc3.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void membershipGranted(String participant) {
                     super.membershipGranted(participant);
                     answer[2] = participant;
                 }
+                @Override
                 public void membershipRevoked(String participant) {
                     super.membershipRevoked(participant);
                     answer[3] = participant;
@@ -1161,20 +1186,24 @@ public class MultiUserChatTest extends SmackTestCase {
             // User2 joins the new room (as a visitor)
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             muc2.join("testbot2");
-            // User2 will listen for admin privileges            
+            // User2 will listen for admin privileges
             muc2.addUserStatusListener(new DefaultUserStatusListener() {
+                @Override
                 public void membershipGranted() {
                     super.membershipGranted();
                     answer[0] = "I'm a member";
                 }
+                @Override
                 public void membershipRevoked() {
                     super.membershipRevoked();
                     answer[1] = "I'm not a member";
                 }
+                @Override
                 public void adminGranted() {
                     super.adminGranted();
                     answer[2] = "I'm an admin";
                 }
+                @Override
                 public void adminRevoked() {
                     super.adminRevoked();
                     answer[3] = "I'm not an admin";
@@ -1184,20 +1213,24 @@ public class MultiUserChatTest extends SmackTestCase {
             // User3 joins the new room (as a visitor)
             MultiUserChat muc3 = new MultiUserChat(getConnection(2), room);
             muc3.join("testbot3");
-            // User3 will lister for user2's admin privileges            
+            // User3 will lister for user2's admin privileges
             muc3.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void membershipGranted(String participant) {
                     super.membershipGranted(participant);
                     answer[4] = participant;
                 }
+                @Override
                 public void membershipRevoked(String participant) {
                     super.membershipRevoked(participant);
                     answer[5] = participant;
                 }
+                @Override
                 public void adminGranted(String participant) {
                     super.adminGranted(participant);
                     answer[6] = participant;
                 }
+                @Override
                 public void adminRevoked(String participant) {
                     super.adminRevoked(participant);
                     answer[7] = participant;
@@ -1320,28 +1353,34 @@ public class MultiUserChatTest extends SmackTestCase {
             // User2 joins the new room (as a visitor)
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             muc2.join("testbot2");
-            // User2 will listen for ownership privileges            
+            // User2 will listen for ownership privileges
             muc2.addUserStatusListener(new DefaultUserStatusListener() {
+                @Override
                 public void membershipGranted() {
                     super.membershipGranted();
                     answer[0] = "I'm a member";
                 }
+                @Override
                 public void membershipRevoked() {
                     super.membershipRevoked();
                     answer[1] = "I'm not a member";
                 }
+                @Override
                 public void adminGranted() {
                     super.adminGranted();
                     answer[2] = "I'm an admin";
                 }
+                @Override
                 public void adminRevoked() {
                     super.adminRevoked();
                     answer[3] = "I'm not an admin";
                 }
+                @Override
                 public void ownershipGranted() {
                     super.ownershipGranted();
                     answer[4] = "I'm an owner";
                 }
+                @Override
                 public void ownershipRevoked() {
                     super.ownershipRevoked();
                     answer[5] = "I'm not an owner";
@@ -1351,28 +1390,34 @@ public class MultiUserChatTest extends SmackTestCase {
             // User3 joins the new room (as a visitor)
             MultiUserChat muc3 = new MultiUserChat(getConnection(2), room);
             muc3.join("testbot3");
-            // User3 will lister for user2's ownership privileges            
+            // User3 will lister for user2's ownership privileges
             muc3.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void membershipGranted(String participant) {
                     super.membershipGranted(participant);
                     answer[6] = participant;
                 }
+                @Override
                 public void membershipRevoked(String participant) {
                     super.membershipRevoked(participant);
                     answer[7] = participant;
                 }
+                @Override
                 public void adminGranted(String participant) {
                     super.adminGranted(participant);
                     answer[8] = participant;
                 }
+                @Override
                 public void adminRevoked(String participant) {
                     super.adminRevoked(participant);
                     answer[9] = participant;
                 }
+                @Override
                 public void ownershipGranted(String participant) {
                     super.ownershipGranted(participant);
                     answer[10] = participant;
                 }
+                @Override
                 public void ownershipRevoked(String participant) {
                     super.ownershipRevoked(participant);
                     answer[11] = participant;
@@ -1648,13 +1693,14 @@ public class MultiUserChatTest extends SmackTestCase {
     }
 
     /**
-     * Check that ParticipantStatusListener is receiving joining and leaving events correctly. 
+     * Check that ParticipantStatusListener is receiving joining and leaving events correctly.
      */
     public void testJoinLeftEvents() {
         final String[] answer = new String[8];
         try {
             // User1 will listen for occupants joining and leaving the room
             muc.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void joined(String participant) {
                     super.joined(participant);
                     if ((room + "/testbot2").equals(participant)) {
@@ -1664,6 +1710,7 @@ public class MultiUserChatTest extends SmackTestCase {
                         answer[1] = participant;
                     }
                 }
+                @Override
                 public void left(String participant) {
                     super.left(participant);
                     if ((room + "/testbot2").equals(participant)) {
@@ -1680,6 +1727,7 @@ public class MultiUserChatTest extends SmackTestCase {
             MultiUserChat muc2 = new MultiUserChat(getConnection(1), room);
             // User2 will listen for User3 joining and leaving the room
             muc2.addParticipantStatusListener(new DefaultParticipantStatusListener() {
+                @Override
                 public void joined(String participant) {
                     super.joined(participant);
                     if ((room + "/testbot").equals(participant)) {
@@ -1689,6 +1737,7 @@ public class MultiUserChatTest extends SmackTestCase {
                         answer[5] = participant;
                     }
                 }
+                @Override
                 public void left(String participant) {
                     super.left(participant);
                     if ((room + "/testbot").equals(participant)) {
@@ -1867,6 +1916,7 @@ public class MultiUserChatTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected void setUp() throws Exception {
         //XMPPConnection.DEBUG_ENABLED = false;
         super.setUp();
@@ -1891,6 +1941,7 @@ public class MultiUserChatTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected void tearDown() throws Exception {
         // Destroy the new room
         muc.destroy("The room has almost no activity...", null);
@@ -1898,6 +1949,7 @@ public class MultiUserChatTest extends SmackTestCase {
         super.tearDown();
     }
 
+    @Override
     protected int getMaxConnections() {
         return 3;
     }

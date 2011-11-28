@@ -84,16 +84,19 @@ public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
         this(group.getIdentifier(), group.getLastModified(), failOnError);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         json.put(DataFields.ID, groupId);
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
@@ -101,6 +104,7 @@ public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
         };
     }
 
+    @Override
     public DeleteParser getParser() {
         return new DeleteParser(failOnError);
     }

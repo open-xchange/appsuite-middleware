@@ -63,9 +63,10 @@ import com.openexchange.ajax.framework.Params;
  */
 public class ResourceUpdatesRequest  extends AbstractResourceRequest<ResourceUpdatesResponse>{
 
-    private boolean failOnError;
-    private Date lastModified;
+    private final boolean failOnError;
+    private final Date lastModified;
 
+    @Override
     public Object getBody(){
         return null;
     }
@@ -75,10 +76,12 @@ public class ResourceUpdatesRequest  extends AbstractResourceRequest<ResourceUpd
         this.lastModified = since;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters(){
         return new Params(
             AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATES,
@@ -86,6 +89,7 @@ public class ResourceUpdatesRequest  extends AbstractResourceRequest<ResourceUpd
         ).toArray();
     }
 
+    @Override
     public AbstractAJAXParser<? extends ResourceUpdatesResponse> getParser() {
         return new AbstractAJAXParser<ResourceUpdatesResponse>(this.failOnError){
             @Override

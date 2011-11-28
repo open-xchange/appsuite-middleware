@@ -104,6 +104,7 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
         this.failOnError = failOnError;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         if (-1 != folderId) {
@@ -115,10 +116,12 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
@@ -130,6 +133,7 @@ public class SearchInfostoreRequest extends AbstractInfostoreRequest<SearchInfos
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<? extends SearchInfostoreResponse> getParser() {
         return new AbstractAJAXParser<SearchInfostoreResponse>(failOnError) {
 

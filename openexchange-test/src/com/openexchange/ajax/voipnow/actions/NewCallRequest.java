@@ -82,6 +82,7 @@ public class NewCallRequest extends AbstractVoipNowRequest<NewCallResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
@@ -89,6 +90,7 @@ public class NewCallRequest extends AbstractVoipNowRequest<NewCallResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -96,6 +98,7 @@ public class NewCallRequest extends AbstractVoipNowRequest<NewCallResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "newcall"),
@@ -108,6 +111,7 @@ public class NewCallRequest extends AbstractVoipNowRequest<NewCallResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public NewCallParser getParser() {
         return new NewCallParser(true);
     }

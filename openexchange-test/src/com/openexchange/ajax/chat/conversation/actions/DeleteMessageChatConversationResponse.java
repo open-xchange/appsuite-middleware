@@ -54,14 +54,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link DeleteMessageChatConversationResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DeleteMessageChatConversationResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link DeleteMessageChatConversationResponse}.
-     * 
+     *
      * @param response
      */
     public DeleteMessageChatConversationResponse(final Response response) {

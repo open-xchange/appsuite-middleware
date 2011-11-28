@@ -58,13 +58,13 @@ public class WebdavFolderAliasesTest extends TestCase {
 
     private WebdavFolderAliases aliases = null;
 
-    private String alias1 = "Alias 1";
-    private int id1 = 42;
-    private int parent1 = 23;
+    private final String alias1 = "Alias 1";
+    private final int id1 = 42;
+    private final int parent1 = 23;
 
-    private String alias2 = "Alias 2";
-    private int id2 = 1337;
-    private int parent2 = 2017;
+    private final String alias2 = "Alias 2";
+    private final int id2 = 1337;
+    private final int parent2 = 2017;
 
 
     @Override

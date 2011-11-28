@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
@@ -86,14 +85,7 @@ public class UUEncodedPart extends UUEncodedMultiPart {
         super();
         this.startIndex = startIndex;
         this.endIndex = endIndex;
-        byte[] bytes;
-        try {
-            bytes = bodyPart.getBytes("US-ASCII");
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur since US-ASCII is supported by every JVM
-            bytes = bodyPart.getBytes();
-        }
-        this.bodyPart = bytes;
+        this.bodyPart = bodyPart.getBytes(com.openexchange.java.Charsets.US_ASCII);
         sPossibleFileName = filename;
     }
 

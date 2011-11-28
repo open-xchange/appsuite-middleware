@@ -7,9 +7,9 @@ import com.openexchange.ajax.framework.Params;
 
 public class GetContactForUserRequest extends AbstractContactRequest<GetResponse> {
 
-	private String id;
-	private boolean failOnError;
-	private TimeZone timezone;
+	private final String id;
+	private final boolean failOnError;
+	private final TimeZone timezone;
 
 	public GetContactForUserRequest(int id, boolean failOnError, TimeZone tz){
 		this.id = String.valueOf(id);
@@ -17,22 +17,26 @@ public class GetContactForUserRequest extends AbstractContactRequest<GetResponse
 		this.timezone = tz;
 	}
 
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.GET;
 	}
 
-	public Parameter[] getParameters() throws IOException, JSONException {
+	@Override
+    public Parameter[] getParameters() throws IOException, JSONException {
 		return new Params(
 			"action", "getuser",
 			"id",this.id)
 		.toArray();
 	}
 
-	public GetParser getParser() {
+	@Override
+    public GetParser getParser() {
 		return new GetParser(failOnError, timezone);
 	}
 
-	public Object getBody() throws IOException, JSONException {
+	@Override
+    public Object getBody() throws IOException, JSONException {
 		return null;
 	}
 

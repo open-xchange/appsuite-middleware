@@ -83,22 +83,22 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 		String password = session.getPassword();
 		int uid = session.getUserId();
 		int cid = session.getContextId();
-		
+
 		Contact contact = query.getContact();
 		ContactInterfaceDiscoveryService cids = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
 		UserService userService = serviceLookup.getService(UserService.class);
 		ContactEMailCompletor cc = new ContactEMailCompletor(session, cids, userService);
 		cc.complete(contact);
-		
+
 		List<String> email = getEMail(contact);
 		if(email == null || email.isEmpty())
 			throw new OXException(2).setPrefix("HAL-LI").setLogMessage("Need an e-mail address to look up LinkedIn data");
 
-		
+
 		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
 		if(accounts.size() == 0)
 			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
-		
+
 		OAuthAccount linkedinAccount = accounts.get(0);
 		JSONObject json = getLinkedinService().getFullProfileByEMail(email, password, uid, cid, linkedinAccount.getId());
 		AJAXRequestResult result = new AJAXRequestResult();

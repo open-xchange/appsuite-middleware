@@ -60,7 +60,6 @@ import gnu.trove.map.hash.TLongIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1202,6 +1201,10 @@ public final class IMAPCommandsCollection {
     }
 
     public static void createFolder(final IMAPFolder newFolder, final char separator, final int type) throws MessagingException {
+        createFolder(newFolder, separator, type, true);
+    }
+
+    public static void createFolder(final IMAPFolder newFolder, final char separator, final int type, final boolean errorOnUnsupportedType) throws MessagingException {
         final Boolean ret = (Boolean) newFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1226,10 +1229,10 @@ public final class IMAPCommandsCollection {
                      */
                     if ((type & IMAPFolder.HOLDS_FOLDERS) != 0) {
                         final ListInfo[] li = protocol.list("", fullName);
-                        if (li != null && !li[0].hasInferiors) {
+                        if (errorOnUnsupportedType && li != null && !li[0].hasInferiors) {
                             protocol.delete(fullName);
                             throw new ProtocolException(new StringBuilder(32).append("Created IMAP folder \"").append(fullName).append(
-                                "\" should hold folders AND messages, but can only hold messages.").toString());
+                                "\" (").append(newFolder.getStore().toString()).append(") should hold folders AND messages, but can only hold messages.").toString());
                         }
                     }
                     return Boolean.TRUE;
@@ -1237,12 +1240,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+newFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+newFolder.getStore().toString()+")"));
                 } else {
                     protocol.handleResult(response);
                 }
@@ -1252,7 +1255,7 @@ public final class IMAPCommandsCollection {
         if (null == ret) {
             final ProtocolException pex =
                 new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(newFolder.getFullName()).append(
-                    "\" cannot be created.").toString());
+                    "\" (").append(newFolder.getStore().toString()).append(") cannot be created.").toString());
             throw new MessagingException(pex.getMessage(), pex);
         }
         // Set exists, type, and attributes
@@ -1313,12 +1316,12 @@ public final class IMAPCommandsCollection {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else if (response.isNO()) {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else {
                         p.handleResult(response);
                     }
@@ -1371,12 +1374,12 @@ public final class IMAPCommandsCollection {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else if (response.isNO()) {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else {
                         p.handleResult(response);
                     }
@@ -1561,12 +1564,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }
@@ -1702,12 +1705,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_SEARCH_UNSEEN,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_SEARCH_UNSEEN,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }
@@ -1749,12 +1752,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_EXPUNGE,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_EXPUNGE,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }
@@ -2021,12 +2024,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         FETCH_FLAGS,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         FETCH_FLAGS,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }
@@ -2137,12 +2140,12 @@ public final class IMAPCommandsCollection {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else if (response.isNO()) {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else {
                         p.handleResult(response);
                     }
@@ -2207,12 +2210,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }
@@ -2287,12 +2290,12 @@ public final class IMAPCommandsCollection {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else if (response.isNO()) {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else {
                         p.handleResult(response);
                     }
@@ -2365,12 +2368,12 @@ public final class IMAPCommandsCollection {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else if (response.isNO()) {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else {
                         p.handleResult(response);
                     }
@@ -2438,12 +2441,12 @@ public final class IMAPCommandsCollection {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else if (response.isNO()) {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else {
                         p.handleResult(response);
                     }
@@ -2504,12 +2507,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_FETCH_UID_FLAGS,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_FETCH_UID_FLAGS,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }
@@ -2628,12 +2631,12 @@ public final class IMAPCommandsCollection {
                         throw new BadCommandException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else if (response.isNO()) {
                         throw new CommandFailedException(IMAPException.getFormattedMessage(
                             IMAPException.Code.PROTOCOL_ERROR,
                             command,
-                            response.toString()));
+                            response.toString() + " ("+imapFolder.getStore().toString()+")"));
                     } else {
                         p.handleResult(response);
                     }
@@ -2696,12 +2699,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }
@@ -2735,12 +2738,7 @@ public final class IMAPCommandsCollection {
             if (null == byteArray) {
                 return null;
             }
-            try {
-                return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
-            } catch (final UnsupportedEncodingException e) {
-                // Cannot occur
-                return "";
-            }
+            return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), com.openexchange.java.Charsets.US_ASCII);
         }
     };
 
@@ -2752,12 +2750,7 @@ public final class IMAPCommandsCollection {
             if (null == byteArray) {
                 return null;
             }
-            try {
-                return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), "US-ASCII");
-            } catch (final UnsupportedEncodingException e) {
-                // Cannot occur
-                return "";
-            }
+            return new String(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount(), com.openexchange.java.Charsets.US_ASCII);
         }
     };
 
@@ -2910,12 +2903,12 @@ public final class IMAPCommandsCollection {
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_FETCH_ENV_UID,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else if (response.isNO()) {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         COMMAND_FETCH_ENV_UID,
-                        response.toString()));
+                        response.toString() + " ("+imapFolder.getStore().toString()+")"));
                 } else {
                     p.handleResult(response);
                 }

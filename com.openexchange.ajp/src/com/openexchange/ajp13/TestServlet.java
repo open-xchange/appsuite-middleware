@@ -82,7 +82,7 @@ public class TestServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
         // Uncomment to test long-running task
         /*-
-         * 
+         *
         try {
             System.out.println("Going asleep...");
             Thread.sleep(100000);
@@ -90,7 +90,7 @@ public class TestServlet extends HttpServlet {
         } catch (final InterruptedException e) {
             e.printStackTrace();
         }
-         * 
+         *
          */
         final StringBuilder page = new StringBuilder();
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
@@ -128,7 +128,7 @@ public class TestServlet extends HttpServlet {
         page.append("</p><p>The content: ").append(getBody(req));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
-        final byte[] output = page.toString().getBytes("UTF-8");
+        final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         resp.setContentLength(output.length);
 
         final boolean split = Boolean.parseBoolean(req.getParameter("split"));
@@ -195,7 +195,7 @@ public class TestServlet extends HttpServlet {
         page.append("</p><p>The content: ").append(getBody(req));
         page.append("</p></body>\n</html>");
         resp.setContentType("text/html; charset=UTF-8");
-        final byte[] output = page.toString().getBytes("UTF-8");
+        final byte[] output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         resp.setContentLength(output.length);
         resp.getOutputStream().write(output);
     }

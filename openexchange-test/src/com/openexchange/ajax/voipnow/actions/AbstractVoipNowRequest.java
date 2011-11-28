@@ -69,10 +69,12 @@ public abstract class AbstractVoipNowRequest<T extends AbstractAJAXResponse> imp
         super();
     }
 
+    @Override
     public String getServletPath() {
         return URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

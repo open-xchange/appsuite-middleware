@@ -67,21 +67,25 @@ import com.openexchange.session.Session;
  */
 public class SimContactInterfaceDiscoveryService implements ContactInterfaceDiscoveryService {
 
-    private Map<Integer, ContactInterface> registered = new HashMap<Integer, ContactInterface>();
+    private final Map<Integer, ContactInterface> registered = new HashMap<Integer, ContactInterface>();
     private ContactInterface defaultContactInterface;
 
+    @Override
     public ContactInterfaceProvider getContactInterfaceProvider(int folderId, int contextId) throws OXException {
         return new StaticContactInterfaceProvider(newContactInterface(folderId, null));
     }
 
+    @Override
     public boolean hasSpecificContactInterface(int folderId, int contextId) {
         return registered.containsKey(folderId);
     }
 
+    @Override
     public ContactInterface newContactInterface(int folderId, Session session) throws OXException {
         return (hasSpecificContactInterface(folderId, -1)) ? registered.get(folderId) : newDefaultContactInterface(session);
     }
 
+    @Override
     public ContactInterface newDefaultContactInterface(Session session) throws OXException {
         return defaultContactInterface;
     }
@@ -95,18 +99,20 @@ public class SimContactInterfaceDiscoveryService implements ContactInterfaceDisc
     }
 
     private static final class StaticContactInterfaceProvider implements ContactInterfaceProvider {
-        private ContactInterface contacts;
+        private final ContactInterface contacts;
 
         public StaticContactInterfaceProvider(ContactInterface contacts) {
             this.contacts = contacts;
         }
 
+        @Override
         public ContactInterface newContactInterface(Session session) throws OXException {
             return contacts;
         }
 
     }
 
+    @Override
     public List<ContactInterfaceProviderRegistration> getRegistrations(int contextId) {
         Set<Entry<Integer,ContactInterface>> entrySet = registered.entrySet();
         List<ContactInterfaceProviderRegistration> registrations = new LinkedList<ContactInterfaceProviderRegistration>();

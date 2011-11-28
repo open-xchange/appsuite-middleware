@@ -75,22 +75,26 @@ public final class CreateRequest extends AbstractGroupRequest<CreateResponse> {
         this(group, true);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         new GroupWriter().writeGroup(group, json);
         return json;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW)
         };
     }
 
+    @Override
     public CreateParser getParser() {
         return new CreateParser(failOnError);
     }

@@ -395,7 +395,7 @@ public final class MIMEStructureParser {
                 mimePart.setText(jsonBody.getString("data"), "UTF-8", contentType.getSubType());
                 mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             } else {
-                final byte[] bytes = jsonBody.getString("data").toString().getBytes("UTF-8");
+                final byte[] bytes = jsonBody.getString("data").toString().getBytes(com.openexchange.java.Charsets.UTF_8);
                 mimePart.setDataHandler(new DataHandler(new MessageDataSource(bytes, contentType.toString(true))));
                 mimePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType.toString(true));
             }
@@ -403,8 +403,6 @@ public final class MIMEStructureParser {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e);
-        } catch (final UnsupportedEncodingException e) {
-            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 

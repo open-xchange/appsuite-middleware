@@ -92,7 +92,7 @@ public abstract class AbstractChatConversationRequest<T extends AbstractAJAXResp
 
     /**
      * Gets optional date parameter.
-     * 
+     *
      * @param request The JSON object
      * @param name The name
      * @param timeZone The time zone

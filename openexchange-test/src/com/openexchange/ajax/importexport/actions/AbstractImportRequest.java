@@ -81,18 +81,22 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
         this.upload = upload;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.UPLOAD;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
@@ -125,6 +129,7 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
         }
     }
 
+    @Override
     public String getServletPath() {
         return IMPORT_URL;
     }

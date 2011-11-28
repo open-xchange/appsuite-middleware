@@ -66,10 +66,12 @@ import com.openexchange.test.fixtures.Fixture;
 public class AppointmentFixtureTransformer extends AbstractFixtureTransformer<Appointment> {
 
 
+    @Override
     public boolean handles(Class aClass, String fixtureName, Fixture fixture) {
         return aClass == Appointment.class;
     }
 
+    @Override
     public Step transform(Class aClass, String fixtureName, Fixture fixture, String displayName) {
         if (isDelete(fixtureName)) {
             return assign( fixtureName, new AppointmentDeleteStep(

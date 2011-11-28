@@ -25,6 +25,7 @@ public class SharedGroupsTest extends SmackTestCase {
         assertNotNull("User groups was null", groups);
     }
 
+    @Override
     protected int getMaxConnections() {
         return 1;
     }

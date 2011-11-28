@@ -60,7 +60,7 @@ import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link IndexAdapters} - A utility class for index adapters.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IndexAdapters {
@@ -81,7 +81,7 @@ public final class IndexAdapters {
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param str The string to check
      * @return <code>true</code> if empty; otherwise <code>false</code>
      */
@@ -123,7 +123,7 @@ public final class IndexAdapters {
 
     /**
      * Detects the locale.
-     * 
+     *
      * @param str The string source
      * @return The detected locale
      * @throws OXException If language detection fails

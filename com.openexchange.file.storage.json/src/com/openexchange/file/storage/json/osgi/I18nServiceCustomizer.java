@@ -57,7 +57,7 @@ import com.openexchange.i18n.I18nService;
 
 /**
  * {@link I18nServiceCustomizer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nService, I18nService> {
@@ -68,7 +68,7 @@ public class I18nServiceCustomizer implements ServiceTrackerCustomizer<I18nServi
 
     /**
      * Initializes a new {@link I18nServiceCustomizer}.
-     * 
+     *
      * @param context The bundle context
      */
     protected I18nServiceCustomizer(final BundleContext context) {

@@ -85,6 +85,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -296,17 +297,28 @@ public class ICal4JParser implements ICalParser {
 
     private static final TimeZone chooseTimeZone(final DateProperty dateProperty, final TimeZone defaultTZ) {
         TimeZone tz = defaultTZ;
+        if(dateProperty.getParameter("TZID") == null 
+        || dateProperty.getParameter("TZID").getValue() == null){
+        	return tz;
+        }
         if (dateProperty.isUtc()) {
             tz = TimeZone.getTimeZone("UTC");
         }
-        final TimeZone inTZID = (null != dateProperty.getParameter("TZID")) ? TimeZone.getTimeZone(dateProperty.getParameter("TZID").getValue()) : null;
+        String tzidName = dateProperty.getParameter("TZID").getValue();
+		TimeZone inTZID = (null != dateProperty.getParameter("TZID")) ? TimeZone.getTimeZone(tzidName) : null;
+		
+        /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
+		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){
+			inTZID = ParserTools.findTzidBySimilarity(tzidName);
+		}
+		
         if (null != inTZID) {
             tz = inTZID;
         }
         return tz;
     }
 
-    private String getTimeZoneID(final TimeZone tz) {
+	private String getTimeZoneID(final TimeZone tz) {
         if(net.fortuna.ical4j.model.TimeZone.class.isAssignableFrom(tz.getClass())) {
             return "UTC";
         }
@@ -404,7 +416,7 @@ public class ICal4JParser implements ICalParser {
 			.replaceAll("TZOFFSETTO:\\s*(\\d\\d\\d\\d)",   "TZOFFSETTO:+$1")
 			;
 	}
-	
+
 	private String workaroundFor20453(final String input) {
 		return input
 			.replaceAll("DTEND;\\s*\n", "")

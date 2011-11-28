@@ -45,8 +45,10 @@ public class FileTransferTest extends SmackTestCase {
         final SynchronousQueue<byte[]> queue = new SynchronousQueue<byte[]>();
         FileTransferManager manager1 = new FileTransferManager(getConnection(0));
         manager1.addFileTransferListener(new FileTransferListener() {
+            @Override
             public void fileTransferRequest(final FileTransferRequest request) {
                 new Thread(new Runnable() {
+                    @Override
                     public void run() {
                         IncomingFileTransfer transfer = request.accept();
                         InputStream stream;
@@ -105,6 +107,7 @@ public class FileTransferTest extends SmackTestCase {
     }
 
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

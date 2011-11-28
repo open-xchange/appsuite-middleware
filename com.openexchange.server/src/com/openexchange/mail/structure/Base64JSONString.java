@@ -52,7 +52,6 @@ package com.openexchange.mail.structure;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.json.JSONString;
@@ -102,12 +101,7 @@ public final class Base64JSONString implements JSONString {
                 com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Base64JSONString.class)).error(e.getMessage(), e);
             }
         }
-        try {
-            value = JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), "US-ASCII"));
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-        }
+        value = JSONObject.quote(new String(Base64.encodeBase64(out.toByteArray(), false), com.openexchange.java.Charsets.US_ASCII));
     }
 
     @Override

@@ -70,7 +70,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ReorderFavFolderPerformer}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ReorderFavFolderPerformer extends AbstractFavFolderPerformer {
@@ -84,7 +84,7 @@ public final class ReorderFavFolderPerformer extends AbstractFavFolderPerformer 
 
     /**
      * Reorder according to specified folder collection's iterator order.
-     * 
+     *
      * @param treeId The tree identifier
      * @param folderIds The identifiers of the folders tom reorder
      * @param session The session providing user data
@@ -157,7 +157,7 @@ public final class ReorderFavFolderPerformer extends AbstractFavFolderPerformer 
             }
             /*-
              * Insert existing
-             * 
+             *
              * At first, detect max. sort number
              */
             int maxSortNum = 0;

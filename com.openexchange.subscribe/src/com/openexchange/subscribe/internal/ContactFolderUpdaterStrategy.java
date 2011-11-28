@@ -149,7 +149,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         final Object sqlInterface = getFromSession(SQL_INTERFACE, session);
         if (sqlInterface instanceof ContactInterface) {
             final ContactInterface contacts = (ContactInterface) getFromSession(SQL_INTERFACE, session);
-    
+
             final int folderId = target.getFolderIdAsInt();
             final int numberOfContacts = contacts.getNumberOfContacts(folderId);
             final SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(

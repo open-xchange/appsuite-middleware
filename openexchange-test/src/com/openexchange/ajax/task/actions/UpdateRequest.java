@@ -72,7 +72,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
 
     private final TimeZone timeZone;
 
-    private boolean failOnError;
+    private final boolean failOnError;
 
     /**
      * Constructor if the task should not be moved.
@@ -125,6 +125,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = convert(task, timeZone);
         if (removeFolderId) {
@@ -137,6 +138,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -144,6 +146,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
@@ -158,6 +161,7 @@ public class UpdateRequest extends AbstractTaskRequest<UpdateResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public UpdateParser getParser() {
         return new UpdateParser(failOnError);
     }

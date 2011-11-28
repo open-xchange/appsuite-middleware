@@ -66,14 +66,14 @@ public interface LinkedInService {
     public List<Contact> getContacts(String password, int user, int contextId, int accountId);
 
     public String getAccountDisplayName(String password, int user, int contextId, int accountId);
-   
+
     /**
-     * @return all data on a contact identified by e-mail (special feature, only available with extended API keys) 
+     * @return all data on a contact identified by e-mail (special feature, only available with extended API keys)
      */
 	public JSONObject getFullProfileByEMail(List<String> email, String password, int user, int contextId, int accountId) throws OXException;
 
     /**
-     * @return all data on a contact identified by id 
+     * @return all data on a contact identified by id
      */
 	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException;
 
@@ -91,7 +91,7 @@ public interface LinkedInService {
 	 * @return A list of contacts that list the targeted user to the current user
 	 */
 	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException;
-	
+
 	/**
 	 * @return A chronologically sorted list of all events that happened in a users network
 	 */

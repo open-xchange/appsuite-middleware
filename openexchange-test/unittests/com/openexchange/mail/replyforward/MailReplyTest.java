@@ -295,7 +295,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 	public void testMailReply() {
 		try {
-			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
+			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final Context ctx = new ContextImpl(getCid());
 			final SessionObject session = getSession();
@@ -373,7 +373,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 	public void testMailReplyAll() {
 		try {
-			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_REPLY_ALL.getBytes("US-ASCII"));
+			final MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_REPLY_ALL.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final Context ctx = new ContextImpl(getCid());
 			final SessionObject session = getSession();
@@ -458,7 +458,7 @@ public final class MailReplyTest extends AbstractMailTest {
 
 	public void testMailReplyMsgRef() {
 		try {
-			MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes("US-ASCII"));
+			MailMessage sourceMail = MIMEMessageConverter.convertMessage(RFC822_SRC.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 			final Context ctx = new ContextImpl(getCid());
 			final SessionObject session = getSession();

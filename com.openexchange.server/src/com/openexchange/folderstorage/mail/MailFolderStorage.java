@@ -642,17 +642,24 @@ public final class MailFolderStorage implements FolderStorage {
                         null);
                 addWarnings(mailAccess, storageParameters);
                 hasSubfolders = rootFolder.hasSubfolders();
+                /*
+                 * This one needs sorting. Just pass null or an empty array.
+                 */
+                retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
             } else {
                 /*
                  * An external account folder
                  */
+                mailAccess.connect(true);
                 retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
-                hasSubfolders = true;
+                final String parentId = prepareFullname(accountId, fullname);
+                final SortableId[] subfolders = getSubfolders(parentId, storageParameters, mailAccess);
+                final String[] ids = new String[subfolders.length];
+                for (int i = 0; i < ids.length; i++) {
+                    ids[i] = subfolders[i].getId();
+                }
+                retval.setSubfolderIDs(ids);
             }
-            /*
-             * This one needs sorting. Just pass null or an empty array.
-             */
-            retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
         } else {
             mailAccess.connect();
             final MailFolder mailFolder = getMailFolder(treeId, accountId, fullname, true, session, mailAccess);
@@ -800,7 +807,12 @@ public final class MailFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
+        return getSubfolders(parentId, storageParameters, null);
+    }
+
+    private SortableId[] getSubfolders(final String parentId, final StorageParameters storageParameters, final MailAccess<?, ?> mailAccessArg) throws OXException {
         MailAccess<?, ?> mailAccess = null;
+        boolean closeAccess = true;
         try {
             final ServerSession session = getServerSession(storageParameters);
             if (null == session) {
@@ -845,8 +857,17 @@ public final class MailFolderStorage implements FolderStorage {
             final FullnameArgument argument = prepareMailFolderParam(parentId);
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
-            mailAccess = MailAccess.getInstance(session, accountId);
-            mailAccess.connect(true);
+            if (null == mailAccessArg) {
+                mailAccess = MailAccess.getInstance(session, accountId);
+                mailAccess.connect(true);
+            } else {
+                mailAccess = mailAccessArg;
+                if (mailAccess.isConnected()) {
+                    closeAccess = false;
+                } else {
+                    mailAccess.connect(true);
+                }
+            }
 
             List<MailFolder> children = new ArrayList<MailFolder>(Arrays.asList(mailAccess.getFolderStorage().getSubfolders(fullname, true)));
             /*
@@ -965,7 +986,9 @@ public final class MailFolderStorage implements FolderStorage {
             }
             return list.toArray(new SortableId[list.size()]);
         } finally {
-            closeMailAccess(mailAccess);
+            if (closeAccess) {
+                closeMailAccess(mailAccess);
+            }
         }
     }
 
@@ -1439,7 +1462,7 @@ public final class MailFolderStorage implements FolderStorage {
 
     /**
      * Closes specified {@link MailAccess} instance
-     * 
+     *
      * @param mailAccess The mail access to close
      */
     protected static void closeMailAccess(final MailAccess<?, ?> mailAccess) {

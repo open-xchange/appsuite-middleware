@@ -87,10 +87,12 @@ public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
         this.mimeType = mimeType;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.UPLOAD;
     }
@@ -103,6 +105,7 @@ public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
         return json.toString();
     }
 
+    @Override
     public Parameter[] getParameters() throws JSONException {
         return new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, Attachment.ACTION_ATTACH),
@@ -111,6 +114,7 @@ public class AttachRequest extends AbstractAttachmentRequest<AttachResponse> {
         };
     }
 
+    @Override
     public AttachParser getParser() {
         return new AttachParser(true);
     }

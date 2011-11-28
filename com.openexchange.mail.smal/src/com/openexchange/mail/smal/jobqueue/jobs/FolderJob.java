@@ -91,7 +91,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderJob}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderJob extends AbstractMailSyncJob {
@@ -161,7 +161,7 @@ public final class FolderJob extends AbstractMailSyncJob {
      * Initializes a new {@link FolderJob} with default span.
      * <p>
      * This job is performed is span is exceeded and if able to exclusively set sync flag.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -180,7 +180,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ignore-deleted flag.
-     * 
+     *
      * @param ignoreDeleted The ignore-deleted flag
      * @return This folder job with new behavior applied
      */
@@ -191,7 +191,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the span; a negative span enforces this job to run if able to exclusively set sync flag
-     * 
+     *
      * @param span The span to set
      * @return This folder job with specified span applied
      */
@@ -202,7 +202,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ranking
-     * 
+     *
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
@@ -213,7 +213,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the storage mails
-     * 
+     *
      * @param storageMails The storage mails to set
      * @return This folder job with specified storage mails applied
      */
@@ -224,7 +224,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the index mails
-     * 
+     *
      * @param indexMail The index mails to set
      * @return This folder job with specified index mails applied
      */
@@ -235,7 +235,7 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     /**
      * Sets the mayScheduleJobs
-     * 
+     *
      * @param mayScheduleJobs The mayScheduleJobs to set
      */
     public FolderJob setMayScheduleJobs(final boolean mayScheduleJobs) {

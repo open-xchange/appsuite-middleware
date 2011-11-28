@@ -58,37 +58,37 @@ import com.openexchange.index.IndexServer;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexServerImpl implements IndexServer {
-    
+
     private int id;
-    
+
     private String url;
-    
+
     private int soTimeout;
-    
+
     private boolean hasSoTimeout;
 
     private int connectionTimeout;
-    
+
     private boolean hasConnectionTimeout;
 
     private int maxConnectionsPerHost;
-    
+
     private boolean hasMaxConnectionsPerHost;
-    
+
     private int maxIndices;
-    
+
     private boolean hasMaxIndices;
 
     private boolean hasUrl;
-    
-    
+
+
     public IndexServerImpl() {
       super();
       soTimeout = 1000;
       connectionTimeout = 100;
       maxConnectionsPerHost = 100;
       maxIndices = 1000;
-      
+
       hasSoTimeout = false;
       hasConnectionTimeout = false;
       hasMaxConnectionsPerHost = false;
@@ -105,7 +105,7 @@ public class IndexServerImpl implements IndexServer {
     public String getUrl() {
         return url;
     }
-    
+
     @Override
     public int getSoTimeout() {
         return soTimeout;
@@ -120,34 +120,34 @@ public class IndexServerImpl implements IndexServer {
     public int getMaxConnectionsPerHost() {
         return maxConnectionsPerHost;
     }
-    
+
     @Override
     public int getMaxIndices() {
         return maxIndices;
     }
-    
+
     /**
      * Sets the id
-     * 
+     *
      * @param id The id to set
      */
     public void setId(final int id) {
         this.id = id;
     }
-    
+
     /**
      * Sets the url
-     * 
+     *
      * @param url The url to set
      */
     public void setUrl(String url) {
         this.url = url;
         hasUrl = true;
     }
-    
+
     /**
      * Sets the soTimeout
-     * 
+     *
      * @param soTimeout The soTimeout to set
      */
     public void setSoTimeout(final int soTimeout) {
@@ -157,7 +157,7 @@ public class IndexServerImpl implements IndexServer {
 
     /**
      * Sets the connectionTimeout
-     * 
+     *
      * @param connectionTimeout The connectionTimeout to set
      */
     public void setConnectionTimeout(final int connectionTimeout) {
@@ -167,24 +167,24 @@ public class IndexServerImpl implements IndexServer {
 
     /**
      * Sets the maxConnectionsPerHost
-     * 
+     *
      * @param maxConnectionsPerHost The maxConnectionsPerHost to set
      */
     public void setMaxConnectionsPerHost(final int maxConnectionsPerHost) {
         this.maxConnectionsPerHost = maxConnectionsPerHost;
         hasMaxConnectionsPerHost = true;
     }
-    
+
     /**
      * Sets the maxIndices
-     * 
+     *
      * @param maxIndices The maxIndices to set
      */
     public void setMaxIndices(int maxIndices) {
-        this.maxIndices = maxIndices;        
+        this.maxIndices = maxIndices;
         hasMaxIndices = true;
     }
-    
+
     @Override
     public boolean hasSoTimeout() {
         return hasSoTimeout;
@@ -204,7 +204,7 @@ public class IndexServerImpl implements IndexServer {
     public boolean hasMaxIndices() {
         return hasMaxIndices;
     }
-    
+
     @Override
     public boolean hasUrl() {
         return hasUrl;

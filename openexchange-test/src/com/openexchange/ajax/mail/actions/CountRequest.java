@@ -64,21 +64,24 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class CountRequest extends AbstractMailRequest<CountResponse>{
 
-    private String folderID;
+    private final String folderID;
 
     public CountRequest(final String folderID) {
         super();
         this.folderID = folderID;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return null;//does not have a RequestBody - return null, empty JSONObject or empty JSONArray?
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return  new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COUNT),
@@ -86,6 +89,7 @@ public class CountRequest extends AbstractMailRequest<CountResponse>{
         };
     }
 
+    @Override
     public AbstractAJAXParser getParser() {
         return new AbstractAJAXParser<CountResponse>(false) {
             @Override

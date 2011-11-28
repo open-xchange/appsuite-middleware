@@ -108,21 +108,24 @@ public class AllRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return null;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.GET;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST));
 		if (userName != null) {
@@ -134,7 +137,8 @@ public class AllRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public AllParser getParser() {
+	@Override
+    public AllParser getParser() {
 		return new AllParser(failOnError);
 	}
 }

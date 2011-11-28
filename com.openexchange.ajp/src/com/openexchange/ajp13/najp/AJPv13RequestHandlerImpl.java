@@ -79,6 +79,7 @@ import com.openexchange.ajp13.servlet.http.HttpServletRequestWrapper;
 import com.openexchange.ajp13.servlet.http.HttpServletResponseWrapper;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link AJPv13RequestHandlerImpl} - The AJP request handler processes incoming AJP packages dependent on their prefix code and/or
@@ -676,7 +677,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
         if (charEnc == null) {
             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
         }
-        AJPv13ForwardRequest.parseQueryString(request, new String(contentBytes, charEnc));
+        AJPv13ForwardRequest.parseQueryString(request, new String(contentBytes, Charsets.forName(charEnc)));
     }
 
     @Override

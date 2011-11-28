@@ -126,7 +126,7 @@ public class DispatcherActivator extends HousekeepingActivator {
             defaultConverter.addConverter(new PreviewImageResultConverter());
             /*-
              * TODO: Mail converters
-             * 
+             *
              * Might throw: java.lang.IllegalArgumentException: Can't find path from mail to apiResponse
              */
             defaultConverter.addConverter(new MailTextPreviewResultConverter(textPreviewResultConverter));

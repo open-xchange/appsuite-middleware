@@ -74,7 +74,7 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TaskActionFactory implements AJAXActionServiceFactory {
-    
+
     private static final Map<String, TaskAction> ACTIONS = new ConcurrentHashMap<String, TaskAction>(10);
 
     /**

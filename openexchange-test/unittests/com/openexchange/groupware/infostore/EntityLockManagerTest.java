@@ -164,6 +164,7 @@ public class EntityLockManagerTest extends TestCase {
 
 	    private final List<Lock> expired = new ArrayList<Lock>();
 
+        @Override
         public void lockExpired(final Lock lock) {
             expired.add( lock );
         }

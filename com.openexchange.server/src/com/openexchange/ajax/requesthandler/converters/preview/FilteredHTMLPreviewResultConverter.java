@@ -93,7 +93,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
     public PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
-    
+
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         super.convert(requestData, result, session, converter);
@@ -165,7 +165,7 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
 
         /**
          * Initializes a new {@link SanitizedPreviewDocument}.
-         * 
+         *
          * @param metaData
          * @param sanitizedHtml
          */

@@ -50,9 +50,9 @@
 package com.openexchange.imap;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.SocketTimeoutException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Locale;
@@ -82,6 +82,7 @@ import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
@@ -102,7 +103,7 @@ import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link IMAPAccess} - Establishes an IMAP access and provides access to storages.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageStorage> {
@@ -137,11 +138,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Whether debug logging is enabled for this class.
      */
     private static final boolean DEBUG = LOG.isDebugEnabled();
-
-    /**
-     * The string for <code>ISO-8859-1</code> character encoding.
-     */
-    private static final String CHARENC_ISO8859 = "ISO-8859-1";
 
     /**
      * Remembers timed out servers for {@link IIMAPProperties#getImapTemporaryDown()} milliseconds. Any further attempts to connect to such
@@ -201,7 +197,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Initializes a new {@link IMAPAccess IMAP access} for default IMAP account.
-     * 
+     *
      * @param session The session providing needed user data
      */
     protected IMAPAccess(final Session session) {
@@ -211,7 +207,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Initializes a new {@link IMAPAccess IMAP access}.
-     * 
+     *
      * @param session The session providing needed user data
      * @param accountId The account ID
      */
@@ -222,7 +218,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets the underlying IMAP store.
-     * 
+     *
      * @return The IMAP store or <code>null</code> if this IMAP access is not connected
      */
     public AccessedIMAPStore getIMAPStore() {
@@ -332,7 +328,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets the IMAP configuration.
-     * 
+     *
      * @return The IMAP configuration
      */
     public IMAPConfig getIMAPConfig() {
@@ -414,8 +410,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String tmpPass = getMailConfig().getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
-                } catch (final UnsupportedEncodingException e) {
+                    tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
+                } catch (final UnsupportedCharsetException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -496,8 +492,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String tmpPass = config.getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
-                } catch (final UnsupportedEncodingException e) {
+                    tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
+                } catch (final UnsupportedCharsetException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -633,7 +629,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Connects specified <code>IMAPAccess</code> instance.
-     * 
+     *
      * @param imapAccess The <code>IMAPAccess</code> instance to connect
      * @throws OXException If connect attempt fails
      */
@@ -654,8 +650,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String tmpPass = config.getPassword();
             if (tmpPass != null) {
                 try {
-                    tmpPass = new String(tmpPass.getBytes(imapConfProps.getImapAuthEnc()), CHARENC_ISO8859);
-                } catch (final UnsupportedEncodingException e) {
+                    tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
+                } catch (final UnsupportedCharsetException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
@@ -901,7 +897,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Gets used IMAP session
-     * 
+     *
      * @return The IMAP session
      */
     public javax.mail.Session getMailSession() {
@@ -1224,7 +1220,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     /**
      * Checks if given string is empty.
-     * 
+     *
      * @param s The string to check
      * @return <code>true</code> if empty; otherwise <code>false</code>
      */

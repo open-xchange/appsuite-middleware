@@ -141,10 +141,12 @@ public class MultiUserChatCreationTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
         room = "fruta124@" + getMUCDomain();

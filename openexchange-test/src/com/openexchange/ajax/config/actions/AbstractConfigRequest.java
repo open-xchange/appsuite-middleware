@@ -68,10 +68,12 @@ abstract class AbstractConfigRequest<T extends AbstractAJAXResponse> implements 
         super();
     }
 
+    @Override
     public String getServletPath() {
         return CONFIG_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

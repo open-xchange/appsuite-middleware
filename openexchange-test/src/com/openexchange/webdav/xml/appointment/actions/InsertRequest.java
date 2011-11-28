@@ -75,6 +75,7 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         this.appointment = appointment;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -92,6 +93,7 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         return eProp;
     }
 
+    @Override
     public RequestEntity getEntity() throws OXException, IOException {
         final Document doc = RequestTools.createPropertyUpdate(createProp());
         final XMLOutputter xo = new XMLOutputter();
@@ -101,6 +103,7 @@ public class InsertRequest extends AbstractAppointmentRequest<InsertResponse> {
         return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
+    @Override
     public InsertParser getParser() {
         return new InsertParser();
     }

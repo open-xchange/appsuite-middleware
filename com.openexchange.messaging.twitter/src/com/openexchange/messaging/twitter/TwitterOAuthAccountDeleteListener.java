@@ -94,7 +94,8 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
             }
         }
     }
-    
+
+    @Override
     public void onAfterOAuthAccountInvalidation(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user, id);
     }

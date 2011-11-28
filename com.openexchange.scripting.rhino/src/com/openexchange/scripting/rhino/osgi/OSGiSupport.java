@@ -15,9 +15,9 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class OSGiSupport {
-	private BundleContext context;
-	private Scriptable baseScope;
-	
+	private final BundleContext context;
+	private final Scriptable baseScope;
+
 	public OSGiSupport(BundleContext context, Scriptable baseScope) {
 		super();
 		this.context = context;
@@ -29,16 +29,16 @@ public class OSGiSupport {
 		for(String dep : dependencies) {
 			all.add(new Expectation(context, dep, function.getParentScope(), function, all));
 		}
-		
+
 		for (Expectation expectation : all) {
 			expectation.start();
 		}
 	}
-	
+
 	public OSGiSupport register(String service, final Scriptable implementation) throws ClassNotFoundException {
 		try {
 			Context cx = Context.enter();
-			
+
 			Scriptable scope = cx.newObject(baseScope);
 			scope.setParentScope(null);
 			scope.setPrototype(baseScope);
@@ -50,7 +50,7 @@ public class OSGiSupport {
 		}
 		return this;
 	}
-	
+
 	private static final class Expectation {
 		private ServiceTracker tracker = null;
 		private Object service = null;
@@ -59,7 +59,7 @@ public class OSGiSupport {
 		private Function function;
 		private Scriptable scope;
 		private boolean tracking;
-		
+
 		public Expectation(BundleContext context, String serviceType, Scriptable scope, Function function, List<Expectation> otherExpectations) {
 			this.context = context;
 			this.otherExpectations = otherExpectations;
@@ -77,7 +77,7 @@ public class OSGiSupport {
 				public void modifiedService(ServiceReference reference,
 						Object service) {
 					// TODO Auto-generated method stub
-					
+
 				}
 
 				@Override
@@ -88,7 +88,7 @@ public class OSGiSupport {
 			this.scope = scope;
 			this.function = function;
 		}
-		
+
 		protected void resolve() {
 			Object[] args = new Object[otherExpectations.size()];
 			int i = 0;
@@ -106,13 +106,13 @@ public class OSGiSupport {
 			} finally {
 				Context.exit();
 			}
-			
+
 		}
 
 		public boolean isSatisfied() {
 			return service != null;
 		}
-		
+
 		public void start() {
 			if (tracking) {
 				return;
@@ -120,7 +120,7 @@ public class OSGiSupport {
 			tracker.open();
 			tracking = true;
 		}
-		
+
 		public void stop() {
 			if (!tracking) {
 				return;

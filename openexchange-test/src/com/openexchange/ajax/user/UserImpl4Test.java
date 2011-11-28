@@ -65,7 +65,8 @@ public class UserImpl4Test implements User {
 
 	}
 
-	public int getId() {
+	@Override
+    public int getId() {
 		return id;
 	}
 
@@ -77,79 +78,98 @@ public class UserImpl4Test implements User {
 		this.mail = mail;
 	}
 
-	public String getUserPassword() {
+	@Override
+    public String getUserPassword() {
 		return userPassword;
 	}
 
-	public String getPasswordMech() {
+	@Override
+    public String getPasswordMech() {
 		return passwordMech;
 	}
 
-	public boolean isMailEnabled() {
+	@Override
+    public boolean isMailEnabled() {
 		return mailEnabled;
 	}
 
-	public int getShadowLastChange() {
+	@Override
+    public int getShadowLastChange() {
 		return shadowLastChange;
 	}
 
-	public String getImapServer() {
+	@Override
+    public String getImapServer() {
 		return imapServer;
 	}
 
-	public String getImapLogin() {
+	@Override
+    public String getImapLogin() {
 		return imapLogin;
 	}
 
-	public String getSmtpServer() {
+	@Override
+    public String getSmtpServer() {
 		return smtpServer;
 	}
 
-	public String getMailDomain() {
+	@Override
+    public String getMailDomain() {
 		return mailDomain;
 	}
 
-	public String getGivenName() {
+	@Override
+    public String getGivenName() {
 		return givenName;
 	}
 
-	public String getSurname() {
+	@Override
+    public String getSurname() {
 		return surName;
 	}
 
-	public String getMail() {
+	@Override
+    public String getMail() {
 		return mail;
 	}
 
-	public String[] getAliases() {
+	@Override
+    public String[] getAliases() {
 		return null;
 	}
 
-	public Map<String, Set<String>> getAttributes() {
+	@Override
+    public Map<String, Set<String>> getAttributes() {
 		return Collections.unmodifiableMap(new HashMap<String, Set<String>>(0));
 	}
 
-	public String getDisplayName() {
+	@Override
+    public String getDisplayName() {
 		return displayName;
 	}
 
-	public String getTimeZone() {
+	@Override
+    public String getTimeZone() {
 		return timezone;
 	}
 
-	public String getPreferredLanguage() {
+	@Override
+    public String getPreferredLanguage() {
 		return preferedLanguage;
 	}
 
-	public int[] getGroups() {
+	@Override
+    public int[] getGroups() {
 		return null;
 	}
 
-	public int getContactId() {
+	@Override
+    public int getContactId() {
 		return -1;
 	}
 
-	public String getLoginInfo() {
+	@Override
+    public String getLoginInfo() {
 		return loginInfo;
 	}
 
@@ -157,7 +177,8 @@ public class UserImpl4Test implements User {
 		this.loginInfo = loginInfo;
 	}
 
-	public Locale getLocale() {
+	@Override
+    public Locale getLocale() {
 		return locale;
 	}
 

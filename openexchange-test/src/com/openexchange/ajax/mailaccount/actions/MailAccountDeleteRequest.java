@@ -62,8 +62,8 @@ import com.openexchange.ajax.framework.Header;
  */
 public class MailAccountDeleteRequest implements AJAXRequest<MailAccountDeleteResponse> {
 
-    private JSONArray ids = new JSONArray();
-    private boolean failOnError;
+    private final JSONArray ids = new JSONArray();
+    private final boolean failOnError;
 
     public MailAccountDeleteRequest(boolean failOnError, int...ids) {
         this.failOnError = failOnError;
@@ -76,29 +76,35 @@ public class MailAccountDeleteRequest implements AJAXRequest<MailAccountDeleteRe
         this(true, ids);
     }
 
+    @Override
     public Object getBody() {
         return ids;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return AJAXRequest.Method.PUT;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         return new Parameter[]{
             new Parameter("action", "delete")
         };
     }
 
+    @Override
     public AbstractAJAXParser<MailAccountDeleteResponse> getParser() {
         return new MailAccountDeleteResponseParser(failOnError);
     }
 
 
+    @Override
     public String getServletPath() {
         return "/ajax/account";
     }

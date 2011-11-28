@@ -82,18 +82,18 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class JODCPreviewService implements InternalPreviewService {
-    
+
     private final ServiceLookup serviceLookup;
-    
+
     private static final PreviewPolicy[] POLICIES = new PreviewPolicy[10];
-    
+
     static {
         int i = 0;
         POLICIES[i++] = new PreviewPolicy("application/vnd.oasis.opendocument.text", PreviewOutput.HTML, Quality.GOOD);
-        POLICIES[i++] = new PreviewPolicy("application/vnd.oasis.opendocument.spreadsheet", PreviewOutput.HTML, Quality.GOOD);        
+        POLICIES[i++] = new PreviewPolicy("application/vnd.oasis.opendocument.spreadsheet", PreviewOutput.HTML, Quality.GOOD);
     }
-    
-    
+
+
     public JODCPreviewService(final ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
@@ -109,13 +109,13 @@ public class JODCPreviewService implements InternalPreviewService {
         if (!isConvertableToOutput(output)) {
             return null;
         }
-        
+
         final File file = new File(arg);
         InputStream is = null;
         try {
             is = new FileInputStream(file);
-            final DocumentContent document = createDocumentContent(is, file.getName(), new MimetypesFileTypeMap().getContentType(file));            
-            
+            final DocumentContent document = createDocumentContent(is, file.getName(), new MimetypesFileTypeMap().getContentType(file));
+
             return convertDocument(document, output);
         } catch (final FileNotFoundException e) {
             // TODO Auto-generated catch block
@@ -131,77 +131,77 @@ public class JODCPreviewService implements InternalPreviewService {
         if (!isConvertableToOutput(output)) {
             return null;
         }
-        
+
         final InputStream is = documentData.getData();
         final String name = documentData.getDataProperties().get(DataProperties.PROPERTY_NAME);
         final String mimeType = documentData.getDataProperties().get(DataProperties.PROPERTY_CONTENT_TYPE);
-        final DocumentContent document = createDocumentContent(is, name, mimeType);       
+        final DocumentContent document = createDocumentContent(is, name, mimeType);
         return convertDocument(document, output);
     }
-    
+
     private DocumentContent createDocumentContent(final InputStream is, final String fileName, final String mimeType) {
         try {
             final byte[] documentBytes = Streams.stream2bytes(is);
             final DocumentContent document = new ByteArrayDocumentContent(documentBytes, fileName, mimeType);
-            
+
             return document;
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
             return null;
-        }         
+        }
     }
-    
+
     private boolean isConvertableToOutput(final PreviewOutput output) {
         return getOutputExtension(output) != null;
     }
-    
+
     private String getOutputExtension(final PreviewOutput output) {
         final String retval;
         switch (output) {
-        
+
             case XHTML:
                 retval = "xhtml";
                 break;
-            
+
             case HTML:
                 retval = "html";
                 break;
-                
+
             case TEXT:
                 retval = "txt";
                 break;
-                
+
             default:
                 retval = null;
                 break;
-        
+
         }
-        
+
         return retval;
     }
 
-    
+
     private PreviewDocument convertDocument(final DocumentContent document, final PreviewOutput output) throws OXException {
         final DocumentConverterService converterService = serviceLookup.getService(DocumentConverterService.class);
         if (converterService == null) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(DocumentConverterService.class.getName());
         }
-        
+
         final DocumentContent documentContent = converterService.convert(document, getOutputExtension(output));
         final JODCPreviewDocument previewDocument = new JODCPreviewDocument();
         final Map<String, String> metaData = new HashMap<String, String>();
         metaData.put("content-type", documentContent.getContentType());
         metaData.put("resourcename", documentContent.getName());
         previewDocument.setMetaData(metaData);
-        
+
         final InputStream is = documentContent.getInputStream();
         byte[] documentBytes;
         try {
             documentBytes = Streams.stream2bytes(is);
-            final String str = new String(documentBytes, "UTF-8");            
+            final String str = new String(documentBytes, com.openexchange.java.Charsets.UTF_8);
             previewDocument.setContent(str);
-            
+
             return previewDocument;
         } catch (final IOException e) {
             // TODO Auto-generated catch block
@@ -210,7 +210,7 @@ public class JODCPreviewService implements InternalPreviewService {
         } finally {
             Streams.close(is);
         }
-        
+
     }
 
     @Override

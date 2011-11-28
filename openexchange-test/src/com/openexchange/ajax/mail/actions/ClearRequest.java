@@ -79,7 +79,8 @@ public class ClearRequest extends AbstractMailRequest<ClearResponse> {
 		this.failOnError = failOnError;
 	}
 
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		final JSONArray array = new JSONArray();
         for (final String folderId : folderIds) {
             array.put(folderId);
@@ -87,16 +88,19 @@ public class ClearRequest extends AbstractMailRequest<ClearResponse> {
         return array;
 	}
 
-	public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+	@Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
 		return Method.PUT;
 	}
 
-	public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+	@Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
 		return new Parameter[] {
 	            new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR)};
 	}
 
-	public AbstractAJAXParser<ClearResponse> getParser() {
+	@Override
+    public AbstractAJAXParser<ClearResponse> getParser() {
 		return new AbstractAJAXParser<ClearResponse>(failOnError) {
 
             @Override

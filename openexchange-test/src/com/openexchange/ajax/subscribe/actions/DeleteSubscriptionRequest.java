@@ -90,20 +90,24 @@ public class DeleteSubscriptionRequest extends AbstractSubscriptionRequest<Delet
         setIDs(IDs);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         if(IDs == null)
             throw new JSONException("Cannot create DeleteRequest: No IDs given for deletion!");
         return JSON.collection2jsonArray(getIDs());
     }
 
+    @Override
     public Method getMethod() {
         return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[]{new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE)};
     }
 
+    @Override
     public AbstractAJAXParser<DeleteSubscriptionResponse> getParser() {
         return new AbstractAJAXParser<DeleteSubscriptionResponse>(getFailOnError()) {
 

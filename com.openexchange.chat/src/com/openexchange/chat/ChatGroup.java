@@ -63,7 +63,7 @@ public interface ChatGroup {
 
     /**
      * Gets the chat members.
-     * 
+     *
      * @return The identifiers of the chat members
      * @throws OXException If chat members cannot be returned
      */
@@ -71,7 +71,7 @@ public interface ChatGroup {
 
     /**
      * Gets the time stamp for this chunk.
-     * 
+     *
      * @return The time stamp
      */
     Date getTimeStamp();

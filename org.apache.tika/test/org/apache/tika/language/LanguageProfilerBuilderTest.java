@@ -94,6 +94,7 @@ public class LanguageProfilerBuilderTest extends TestCase {
         }
     }
 
+    @Override
     public void tearDown() throws Exception {
         File profile = new File(profileName + "." + FILE_EXTENSION);
         if (profile.exists())

@@ -66,6 +66,7 @@ import com.openexchange.chat.db.DBChatAccess;
 import com.openexchange.chat.db.DBChatService;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.chat.db.DBRoster;
+import com.openexchange.chat.db.groupware.DBChatAlterTableTask;
 import com.openexchange.chat.db.groupware.DBChatCreateTableService;
 import com.openexchange.chat.db.groupware.DBChatCreateTableTask;
 import com.openexchange.chat.db.groupware.DBChatDeleteListener;
@@ -92,7 +93,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DBChatActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBChatActivator extends HousekeepingActivator {
@@ -141,11 +142,13 @@ public final class DBChatActivator extends HousekeepingActivator {
             @Override
             public void added(final ServiceReference<SessiondService> ref, final SessiondService service) {
                 DBRoster.set(service);
+                addService(SessiondService.class, service);
             }
 
             @Override
             public void removed(final ServiceReference<SessiondService> ref, final SessiondService service) {
                 DBRoster.set(null);
+                removeService(SessiondService.class);
             }
         });
         track(CryptoService.class, new SimpleRegistryListener<CryptoService>() {
@@ -168,7 +171,7 @@ public final class DBChatActivator extends HousekeepingActivator {
          */
         {
             registerService(CreateTableService.class, new DBChatCreateTableService());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBChatCreateTableTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DBChatCreateTableTask(), new DBChatAlterTableTask()));
             registerService(DeleteListener.class, new DBChatDeleteListener());
         }
         /*
@@ -232,7 +235,7 @@ public final class DBChatActivator extends HousekeepingActivator {
                         }
                         /*-
                          * Last session gone: clean up
-                         * 
+                         *
                          * 1. Mark as unavailable in roster
                          * 2. Remove associated chat access
                          */

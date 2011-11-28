@@ -126,6 +126,7 @@ public class SearchRequest extends AbstractMailRequest<SearchResponse> {
         this.order = order;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> params = new ArrayList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_SEARCH));
@@ -143,10 +144,12 @@ public class SearchRequest extends AbstractMailRequest<SearchResponse> {
         return failOnError;
     }
 
+    @Override
     public SearchParser getParser() {
         return new SearchParser(failOnError, columns);
     }
 
+    @Override
     public Object getBody() throws IOException, JSONException {
         if (null != searchObject) {
             return searchObject;
@@ -161,6 +164,7 @@ public class SearchRequest extends AbstractMailRequest<SearchResponse> {
         return ja;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.PUT;
     }

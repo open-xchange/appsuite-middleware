@@ -95,12 +95,12 @@ public class QuotaFileStorageTest extends TestCase {
         // And again, some lines from the original test
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent
-            .getBytes("UTF-8"));
+            .getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final String id = quotaStorage.saveNewFile(bais);
 
-        assertEquals(fileContent.getBytes("UTF-8").length, quotaStorage.getUsage());
-        assertEquals(fileContent.getBytes("UTF-8").length, quotaStorage.getFileSize(id));
+        assertEquals(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length, quotaStorage.getUsage());
+        assertEquals(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length, quotaStorage.getFileSize(id));
 
 
         quotaStorage.deleteFile(id);
@@ -121,10 +121,10 @@ public class QuotaFileStorageTest extends TestCase {
 
         final String fileContent = RandomString.generateLetter(100);
 
-        quotaStorage.setQuota(fileContent.getBytes("UTF-8").length-2);
+        quotaStorage.setQuota(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length-2);
 
         try {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes("UTF-8"));
+            final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
             quotaStorage.saveNewFile(bais);
             fail("Managed to exceed quota");
         } catch (final OXException x) {
@@ -291,98 +291,122 @@ public class QuotaFileStorageTest extends TestCase {
 
     static final class DummyDatabaseService implements DatabaseService {
 
+        @Override
         public void back(final int poolId, final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public void backForUpdateTask(final int contextId, final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public void backReadOnly(final Context ctx, final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public void backReadOnly(final int contextId, final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public void backWritable(final Context ctx, final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public void backWritable(final int contextId, final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public Connection get(final int poolId, final String schema) {
             return null;
         }
 
+        @Override
         public int[] getContextsInSameSchema(final int contextId) {
             return null;
         }
 
+        @Override
         public Connection getForUpdateTask(final int contextId) {
             return null;
         }
 
+        @Override
         public Connection getReadOnly(final Context ctx) {
             return null;
         }
 
+        @Override
         public Connection getReadOnly(final int contextId) {
             return null;
         }
 
+        @Override
         public String getSchemaName(final int contextId) {
             return null;
         }
 
+        @Override
         public Connection getWritable(final Context ctx) {
             return null;
         }
 
+        @Override
         public Connection getWritable(final int contextId) {
             return null;
         }
 
+        @Override
         public int getWritablePool(final int contextId) {
             return 0;
         }
 
+        @Override
         public void invalidate(final int contextId) {
             // Nothing to do.
         }
 
+        @Override
         public void backReadOnly(final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public void backWritable(final Connection con) {
             // Nothing to do.
         }
 
+        @Override
         public Connection getReadOnly() {
             return null;
         }
 
+        @Override
         public Connection getWritable() {
             return null;
         }
 
+        @Override
         public int[] listContexts(final int poolId) {
             return null;
         }
 
+        @Override
         public Connection getNoTimeout(final int poolId, final String schema) {
             return null;
         }
 
+        @Override
         public void backNoTimeoout(final int poolId, final Connection con) {
             // Nothing to do
         }
 
+        @Override
         public int getServerId() {
             return 0;
         }

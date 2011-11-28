@@ -50,7 +50,6 @@
 package com.openexchange.tools.versit.valuedefinitions.rfc2445;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import com.openexchange.tools.versit.Encoding;
 import com.openexchange.tools.versit.Property;
 import com.openexchange.tools.versit.StringScanner;
@@ -67,16 +66,12 @@ public class BinaryValueDefinition extends ValueDefinition {
 
     @Override
     public Object createValue(final StringScanner s, final Property property) throws IOException {
-        return s.getRest().getBytes("ISO-8859-1");
+        return s.getRest().getBytes(com.openexchange.java.Charsets.ISO_8859_1);
     }
 
     @Override
     public String writeValue(final Object value) {
-        try {
-            return new String((byte[]) value, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return e.getMessage();
-        }
+        return new String((byte[]) value, com.openexchange.java.Charsets.ISO_8859_1);
     }
 
 }

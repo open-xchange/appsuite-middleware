@@ -767,7 +767,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this exception is similar to specified exception code regarding category and code number.
-     * 
+     *
      * @param exceptionCode The exception code to check against
      * @return <code>true</code> if this exception is similar to specified exception code; otherwise <code>false</code>
      */
@@ -777,7 +777,7 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Checks if this exception is similar to specified exception regarding category and code number.
-     * 
+     *
      * @param other The exception to check against
      * @return <code>true</code> if this exception is similar to specified exception; otherwise <code>false</code>
      */

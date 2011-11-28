@@ -85,9 +85,11 @@ public class HttpAuthRequest extends AbstractRequest<HttpAuthResponse> {
     public Header[] getHeaders() {
         return new Header[] {
             new Header() {
+                @Override
                 public String getName() {
                     return "Authorization";
                 }
+                @Override
                 public String getValue() {
                     return "Basic " + Base64.encode(login + ':' + password);
                 }
@@ -95,6 +97,7 @@ public class HttpAuthRequest extends AbstractRequest<HttpAuthResponse> {
         };
     }
 
+    @Override
     public HttpAuthParser getParser() {
         return new HttpAuthParser();
     }

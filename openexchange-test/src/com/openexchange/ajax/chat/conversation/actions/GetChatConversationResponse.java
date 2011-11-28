@@ -58,14 +58,14 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
  * {@link GetChatConversationResponse}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class GetChatConversationResponse extends AbstractAJAXResponse {
 
     /**
      * Initializes a new {@link GetChatConversationResponse}.
-     * 
+     *
      * @param response
      */
     public GetChatConversationResponse(final Response response) {
@@ -74,7 +74,7 @@ public final class GetChatConversationResponse extends AbstractAJAXResponse {
 
     /**
      * Gets the requested JSON chat.
-     * 
+     *
      * @return The JSON chat
      * @throws JSONException If parsing JSON data fails
      */

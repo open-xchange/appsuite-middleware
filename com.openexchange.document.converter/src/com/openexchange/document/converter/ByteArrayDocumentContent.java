@@ -59,7 +59,7 @@ import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 
 /**
  * {@link ByteArrayDocumentContent} - The {@link DocumentContent} backed by a <code>byte</code> array.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ByteArrayDocumentContent implements DocumentContent {
@@ -72,7 +72,7 @@ public final class ByteArrayDocumentContent implements DocumentContent {
 
     /**
      * Initializes a new {@link ByteArrayDocumentContent}.
-     * 
+     *
      * @param bytes The backing byte array
      * @param name The file name
      */
@@ -82,7 +82,7 @@ public final class ByteArrayDocumentContent implements DocumentContent {
 
     /**
      * Initializes a new {@link ByteArrayDocumentContent}.
-     * 
+     *
      * @param bytes The backing byte array
      * @param name The file name
      * @param contentType The content type

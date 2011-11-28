@@ -7,15 +7,15 @@ import org.jivesoftware.smack.packet.PacketExtension;
 
 class CarExtension implements PacketExtension
 {
-	private String color;
-	private int numTires;
+	private final String color;
+	private final int numTires;
 
 	public CarExtension(String col, int num)
 	{
 		color = col;
 		numTires = num;
 	}
-	
+
 	public String getColor()
 	{
 		return color;
@@ -26,20 +26,23 @@ class CarExtension implements PacketExtension
 		return numTires;
 	}
 
-	public String getElementName()
+	@Override
+    public String getElementName()
 	{
 		return "car";
 	}
 
-	public String getNamespace()
+	@Override
+    public String getNamespace()
 	{
 		return "pubsub:test:vehicle";
 	}
 
-	public String toXML()
+	@Override
+    public String toXML()
 	{
-		return "<" + getElementName() + " xmlns='" + getNamespace() + "'><paint color='" + 
+		return "<" + getElementName() + " xmlns='" + getNamespace() + "'><paint color='" +
 			getColor() + "'/><tires num='" + getNumTires() + "'/></" + getElementName() + ">";
 	}
-	
+
 }

@@ -63,7 +63,8 @@ import com.openexchange.ajax.mail.filter.test.EnvelopeTest;
  */
 public class EnvelopeParserImpl implements TestParser {
 
-	public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractTest parseTest(String name, JSONObject jsonObject) throws JSONException {
 		final JSONArray jsonHeaderArray = jsonObject.getJSONArray("headers");
 		final String[] headers = new String[jsonHeaderArray.length()];
 		for (int a = 0; a < headers.length; a++) {

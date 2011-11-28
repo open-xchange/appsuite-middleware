@@ -223,7 +223,7 @@ public class MessagingMessageWriterTest extends TestCase {
 
     public void testBinaryMessage() throws OXException, JSONException, UnsupportedEncodingException {
         final SimpleMessagingMessage message = new SimpleMessagingMessage();
-        message.setContent("content".getBytes("UTF-8"));
+        message.setContent("content".getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final JSONObject messageJSON = new MessagingMessageWriter().write(message, null, null, null);
 
@@ -236,7 +236,7 @@ public class MessagingMessageWriterTest extends TestCase {
     public void testMultipartMessage() throws UnsupportedEncodingException, OXException, JSONException {
         final SimpleMessagingMessage binMessage = new SimpleMessagingMessage();
         binMessage.setSectionId("1");
-        binMessage.setContent("content".getBytes("UTF-8"));
+        binMessage.setContent("content".getBytes(com.openexchange.java.Charsets.UTF_8));
         binMessage.setDisposition(MessagingMessage.ATTACHMENT);
         binMessage.setFileName("content.txt");
 

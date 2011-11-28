@@ -70,7 +70,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DocumentPatchAction}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class DocumentPatchAction extends AbstractFileAction {
@@ -159,7 +159,7 @@ public class DocumentPatchAction extends AbstractFileAction {
 
     /**
      * Creates a new temporary file.
-     * 
+     *
      * @return A new temporary file
      * @throws OXException If file creation fails
      */

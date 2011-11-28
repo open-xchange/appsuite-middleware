@@ -366,7 +366,7 @@ public class MessagingMessageParserTest extends TestCase {
         while((b = data.read()) != -1) {
             baos.write(b);
         }
-        return new String(baos.toByteArray(), "UTF-8");
+        return new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8);
     }
 
     private static final class SimInputStreamRegistry implements MessagingInputStreamRegistry {
@@ -376,7 +376,7 @@ public class MessagingMessageParserTest extends TestCase {
         @Override
         public InputStream get(final Object id) throws OXException, IOException {
             this.id = id;
-            return new ByteArrayInputStream("Mock value".getBytes("UTF-8"));
+            return new ByteArrayInputStream("Mock value".getBytes(com.openexchange.java.Charsets.UTF_8));
         }
 
         public Object getId() {

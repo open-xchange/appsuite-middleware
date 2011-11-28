@@ -421,7 +421,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
                          * Now log actual UploadServletException
                          */
                         LOG.error(e.getMessage(), e);
-                        closeAndKeepAlive((HttpServletResponseWrapper) e.getRes(), e.getData().getBytes("UTF-8"), ajpCon);
+                        closeAndKeepAlive((HttpServletResponseWrapper) e.getRes(), e.getData().getBytes(com.openexchange.java.Charsets.UTF_8), ajpCon);
                     } catch (final ServletException e) {
                         LOG.error(e.getMessage(), e);
                         closeAndKeepAlive(ajpCon);

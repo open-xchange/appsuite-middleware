@@ -85,17 +85,17 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  */
 public class CarddavResource extends AbstractResource {
 
-    private GroupwareCarddavFactory factory;
+    private final GroupwareCarddavFactory factory;
 
-    private AggregatedCollection parent;
+    private final AggregatedCollection parent;
 
     private WebdavPath url;
 
     private Contact contact;
 
-    private OXContainerConverter converter = new OXContainerConverter((TimeZone) null, (String) null);
+    private final OXContainerConverter converter = new OXContainerConverter((TimeZone) null, (String) null);
 
-    private boolean exists;
+    private final boolean exists;
 
     public static final Log LOG = LogFactory.getLog(CarddavResource.class);
 
@@ -249,7 +249,7 @@ public class CarddavResource extends AbstractResource {
             contactDef.write(versitWriter, versitObject);
             versitWriter.flush();
 
-            String outputString = new String(byteArrayOutputStream.toByteArray(), "UTF-8");
+            String outputString = new String(byteArrayOutputStream.toByteArray(), com.openexchange.java.Charsets.UTF_8);
             outputString = removeXOPENXCHANGEAttributes(outputString);
             return outputString;
         } catch (IOException e) {

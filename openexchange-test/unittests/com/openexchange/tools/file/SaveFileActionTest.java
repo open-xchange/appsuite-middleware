@@ -97,7 +97,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 		storage = FileStorage.getInstance(tempFile.toURI());
 		saveFile = new SaveFileAction();
 		saveFile.setStorage(storage);
-		saveFile.setIn(new ByteArrayInputStream(content.getBytes("UTF-8")));
+		saveFile.setIn(new ByteArrayInputStream(content.getBytes(com.openexchange.java.Charsets.UTF_8)));
 		return saveFile;
 	}
 
@@ -118,7 +118,7 @@ public class SaveFileActionTest extends AbstractActionTest {
 			}
 			out.close();
 		}
-		final String got = new String(out.toByteArray(), "UTF-8");
+		final String got = new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8);
 		assertEquals(content, got);
 	}
 

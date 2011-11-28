@@ -59,9 +59,9 @@ import com.openexchange.groupware.search.Order;
  */
 public final class UpdatesRequest extends AbstractUpdatesRequest<TaskUpdatesResponse> {
 
-    private boolean failOnError;
+    private final boolean failOnError;
 
-    private int[] columns;
+    private final int[] columns;
 
     private TimeZone timeZone = TimeZone.getTimeZone("UTC");
 
@@ -98,6 +98,7 @@ public final class UpdatesRequest extends AbstractUpdatesRequest<TaskUpdatesResp
         }
     }
 
+    @Override
     public TaskUpdatesParser getParser() {
         return new TaskUpdatesParser(failOnError, columns, timeZone);
     }

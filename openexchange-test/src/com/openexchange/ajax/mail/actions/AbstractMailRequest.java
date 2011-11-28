@@ -70,10 +70,12 @@ public abstract class AbstractMailRequest<T extends AbstractAJAXResponse> implem
         super();
     }
 
+    @Override
     public String getServletPath() {
         return MAIL_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

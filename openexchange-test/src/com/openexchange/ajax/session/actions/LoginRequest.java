@@ -83,6 +83,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public LoginResponseParser getParser() {
         return new LoginResponseParser(failOnError);
     }

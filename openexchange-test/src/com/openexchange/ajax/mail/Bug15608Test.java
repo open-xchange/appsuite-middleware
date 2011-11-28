@@ -93,7 +93,7 @@ public class Bug15608Test extends AbstractAJAXSession {
         String mail = TestMails.replaceAddresses(TestMails.UMLAUT_MAIL, address);
         ByteArrayInputStream[] massMails = new ByteArrayInputStream[100];
         for (int i = 0; i < massMails.length; i++) {
-            massMails[i] = new ByteArrayInputStream(mail.getBytes("UTF-8"));
+            massMails[i] = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         }
         ImportMailRequest request = new ImportMailRequest(folder, ORIG_FLAGS, massMails);
         ImportMailResponse response = client.execute(request);

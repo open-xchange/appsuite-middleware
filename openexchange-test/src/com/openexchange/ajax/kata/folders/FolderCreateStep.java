@@ -48,7 +48,7 @@
 package com.openexchange.ajax.kata.folders;
 
 import java.util.Date;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -62,7 +62,7 @@ import com.openexchange.test.FolderTestManager;
  */
 public class FolderCreateStep extends AbstractStep implements IdentitySource<FolderObject>{
 
-    private FolderObject entry;
+    private final FolderObject entry;
     private boolean inserted;
     private FolderTestManager manager;
 
@@ -71,6 +71,7 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
         if( inserted ){
             entry.setLastModified(new Date(Long.MAX_VALUE));
@@ -79,17 +80,19 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         }
     }
 
+    @Override
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
         this.manager = new FolderTestManager(myClient);
 
-        InsertRequest insertRequest = new InsertRequest(API.OX_OLD, entry, false);
+        InsertRequest insertRequest = new InsertRequest(EnumAPI.OX_OLD, entry, false);
         CommonInsertResponse insertResponse = execute(insertRequest);
         insertResponse.fillObject(entry);
         inserted = !insertResponse.hasError();
         checkError(insertResponse);
     }
 
+    @Override
     public void assumeIdentity(FolderObject folder) {
         folder.setObjectID( entry.getObjectID() );
         folder.setParentFolderID( entry.getParentFolderID());
@@ -97,14 +100,17 @@ public class FolderCreateStep extends AbstractStep implements IdentitySource<Fol
         folder.setPermissions(entry.getPermissions());
     }
 
+    @Override
     public void rememberIdentityValues(FolderObject folder) {
         folder.setLastModified( entry.getLastModified());
     }
 
+    @Override
     public void forgetIdentity(FolderObject myEntry) {
         inserted = false;
     }
 
+    @Override
     public Class<FolderObject> getType() {
         return FolderObject.class;
     }

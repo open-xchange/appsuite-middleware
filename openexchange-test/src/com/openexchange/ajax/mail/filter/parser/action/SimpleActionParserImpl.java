@@ -63,7 +63,8 @@ import com.openexchange.ajax.mail.filter.action.Stop;
  */
 public class SimpleActionParserImpl implements ActionParser {
 
-	public AbstractAction parseAction(final String name, final JSONObject jsonObject) {
+	@Override
+    public AbstractAction parseAction(final String name, final JSONObject jsonObject) {
 		if (name.equalsIgnoreCase(Discard.DISCARD)) {
 			return new Discard();
 		} else if (name.equalsIgnoreCase(Keep.KEEP)) {

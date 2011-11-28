@@ -56,6 +56,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,6 +87,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.html.HTMLService;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
@@ -252,10 +254,10 @@ public final class TikaDocumentHandler {
             final ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
             type.process(stream, bout, this);
             if (HTML_ALIKE.contains(output)) {
-                return serviceLookup.getService(HTMLService.class).getConformHTML(new String(bout.toByteArray(), encoding), encoding);
+                return serviceLookup.getService(HTMLService.class).getConformHTML(new String(bout.toByteArray(), Charsets.forName(encoding)), encoding);
             }
-            return new String(bout.toByteArray(), encoding);
-        } catch (final UnsupportedEncodingException e) {
+            return new String(bout.toByteArray(), Charsets.forName(encoding));
+        } catch (final UnsupportedCharsetException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(stream);

@@ -167,13 +167,13 @@ public abstract class AbstractPerformer {
 
     /**
      * Checks for duplicate folder through a LIST request.
-     * 
+     *
      * @param name The name to check for
      * @param treeId The tree identifier
      * @param parentId The parent identifier
      * @throws FolderException If name look-up fails
      */
-    protected void checkForDuplicate(final String name, final String treeId, final String parentId) throws OXException {
+    protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
         if (!check4Duplicates) {
             return;
         }
@@ -186,7 +186,9 @@ public abstract class AbstractPerformer {
             for (final UserizedFolder userizedFolder : new ListPerformer(session, null, folderStorageDiscoverer).doList(treeId, parentId, true, true)) {
                 final String localizedName = userizedFolder.getLocalizedName(locale);
                 if (localizedName.toLowerCase(locale).equals(lcName)) {
-                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(name, localizedName, treeId);
+                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+                    checkOpenedStorage(realStorage, openedStorages);
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(name, realStorage.getFolder(FolderStorage.REAL_TREE_ID, parentId, storageParameters).getLocalizedName(locale), treeId);
                 }
             }
         }

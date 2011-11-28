@@ -64,7 +64,7 @@ import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link TaskDurationAndCostsTest}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TaskDurationAndCostsTest extends AbstractAJAXSession {
@@ -82,6 +82,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         super(name);
     }
 
+    @Override
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
@@ -98,6 +99,7 @@ public class TaskDurationAndCostsTest extends AbstractAJAXSession {
         response.fillTask(task);
     }
 
+    @Override
     public void tearDown() throws Exception {
         DeleteRequest req = new DeleteRequest(task);
         client.execute(req);

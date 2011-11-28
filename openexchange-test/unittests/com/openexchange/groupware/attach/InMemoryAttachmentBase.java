@@ -72,22 +72,27 @@ public class InMemoryAttachmentBase implements AttachmentBase{
     private final Map<Context, List<AttachmentMetadata>> changes = new HashMap<Context, List<AttachmentMetadata>>();
     private final Map<Context, List<AttachmentMetadata>> deletions = new HashMap<Context, List<AttachmentMetadata>>();
 
+    @Override
     public long attachToObject(final AttachmentMetadata attachment, final InputStream input, Session session, final Context ctx, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public long detachFromObject(final int folderId, final int objectId, final int moduleId, final int[] ids, Session session, final Context ctx, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public AttachmentMetadata getAttachment(final int folderId, final int objectId, final int moduleId, final int id, final Context ctx, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public InputStream getAttachedFile(final int folderId, final int attachedId, final int moduleId, final int id, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public SortedSet<String> getAttachmentFileStoreLocationsperContext(final Context ctx) {
         final SortedSet<String> locations = new TreeSet<String>();
         for(final AttachmentMetadata metadata : getCtxMap(ctx).values()) {
@@ -96,34 +101,42 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return locations;
     }
 
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] columns, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public TimedResult<AttachmentMetadata> getAttachments(final int folderId, final int attachedId, final int moduleId, final int[] idsToFetch, final AttachmentField[] fields, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Delta<AttachmentMetadata> getDelta(final int folderId, final int attachedId, final int moduleId, final long ts, final boolean ignoreDeleted, final AttachmentField[] fields, final AttachmentField sort, final int order, final Context context, final User user, final UserConfiguration userConfig) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void registerAttachmentListener(final AttachmentListener listener, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void removeAttachmentListener(final AttachmentListener listener, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public int[] removeAttachment(final String file_id, final Context ctx) {
         for(final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
             final String location = attachment.getFileId();
@@ -135,6 +148,7 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return new int[]{1,1};
     }
 
+    @Override
     public int modifyAttachment(final String file_id, final String new_file_id, final String new_comment, final String new_mime, final Context ctx) {
         for(final AttachmentMetadata attachment : getCtxMap(ctx).values()) {
             final String location = attachment.getFileId();
@@ -149,42 +163,52 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return -1;
     }
 
+    @Override
     public void addAuthorization(final AttachmentAuthorization authz, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void removeAuthorization(final AttachmentAuthorization authz, final int moduleId) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void deleteAll(final Context context) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void startTransaction() {
         //IGNORE
     }
 
+    @Override
     public void commit() {
         //IGNORE
     }
 
+    @Override
     public void rollback() {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void finish() {
         //IGNORE
     }
 
+    @Override
     public void setTransactional(final boolean transactional) {
         //IGNORE
     }
 
+    @Override
     public void setRequestTransactional(final boolean transactional) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public void setCommitsTransaction(final boolean commits) {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -221,10 +245,12 @@ public class InMemoryAttachmentBase implements AttachmentBase{
         return deletions.get(ctx);
     }
 
+    @Override
     public Date getNewestCreationDate(Context ctx, int moduleId, int attachedId) {
         throw new UnsupportedOperationException();
     }
 
+    @Override
     public Map<Integer, Date> getNewestCreationDates(Context ctx, int moduleId, int[] attachedIds) {
         throw new UnsupportedOperationException();
     }

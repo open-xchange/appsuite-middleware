@@ -90,7 +90,7 @@ public class ICalEmitterTest extends TestCase {
     private ICal4JEmitter emitter;
     private MockUserLookup users;
     private UserResolver oldUserResolver;
-    private TimeZone tz = TimeZone.getDefault();
+    private final TimeZone tz = TimeZone.getDefault();
 
     private Appointment getDefault() {
         final Appointment app = new Appointment();
@@ -598,6 +598,7 @@ public class ICalEmitterTest extends TestCase {
         emitter = new ICal4JEmitter();
         oldUserResolver = com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver;
         com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants.userResolver = new UserResolver(){
+            @Override
             public List<User> findUsers(final List<String> mails, final Context ctx) {
                 final List<User> found = new LinkedList<User>();
                 for(final String mail : mails) {
@@ -610,6 +611,7 @@ public class ICalEmitterTest extends TestCase {
                 return found;
             }
 
+            @Override
             public User loadUser(final int userId, final Context ctx) throws OXException {
                 return ICalEmitterTest.this.users.getUser(userId);
             }

@@ -63,7 +63,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 /**
  * {@link ThreadPoolCompletionService} - A {@link CompletionService} that uses a supplied {@link ThreadPoolService} to execute tasks. This
  * class arranges that submitted tasks are, upon completion, placed on a queue accessible using <tt>take</tt>.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolCompletionService<V> implements CancelableCompletionService<V> {
@@ -101,7 +101,7 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
 
     /**
      * Initializes a new {@link ThreadPoolCompletionService} with caller-runs behavior and an unbound {@link BlockingQueue}.
-     * 
+     *
      * @param threadPoolService The thread pool to use
      * @throws NullPointerException If threadPoolService is <tt>null</tt>
      */
@@ -118,7 +118,7 @@ public final class ThreadPoolCompletionService<V> implements CancelableCompletio
 
     /**
      * Initializes a new {@link ThreadPoolCompletionService}.
-     * 
+     *
      * @param threadPoolService The thread pool to use
      * @param completionQueue The queue to use as the completion queue normally one dedicated for use by this service
      * @param behavior The behavior to apply to submitted tasks

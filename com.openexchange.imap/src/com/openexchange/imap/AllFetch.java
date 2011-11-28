@@ -306,7 +306,8 @@ public final class AllFetch {
      * @throws MessagingException If an error occurs in underlying protocol
      */
     public static MailMessage[] fetchLowCost(final IMAPFolder imapFolder, final LowCostItem[] items, final boolean ascending, final IMAPConfig config, final Session session) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             /*
              * Empty folder...
              */
@@ -330,7 +331,8 @@ public final class AllFetch {
                 {
                     final String lowCostItems = getFetchCommand(items);
                     command =
-                        new StringBuilder(12 + lowCostItems.length()).append("FETCH 1:* (").append(lowCostItems).append(')').toString();
+                        new StringBuilder(12 + lowCostItems.length()).append("FETCH ").append(1 == messageCount ? "1" : "1:*").append(" (").append(
+                            lowCostItems).append(')').toString();
                 }
                 /*
                  * Enable tracer

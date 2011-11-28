@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Iterator;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.AllowedModules;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.ListRequest;
 import com.openexchange.ajax.folder.actions.ListResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -92,7 +92,7 @@ public class Bug16243Test extends AbstractAJAXSession {
     }
 
     public void testListWithoutInfoStore() throws Throwable {
-        ListRequest request = new ListRequest(API.OUTLOOK, FolderStorage.PRIVATE_ID, COLUMNS, false);
+        ListRequest request = new ListRequest(EnumAPI.OUTLOOK, FolderStorage.PRIVATE_ID, COLUMNS, false);
         request.setAllowedModules(AllowedModules.CALENDAR, AllowedModules.MAIL, AllowedModules.CONTACTS, AllowedModules.TASKS);
         ListResponse response = client.execute(request);
         Iterator<FolderObject> iter = response.getFolder();

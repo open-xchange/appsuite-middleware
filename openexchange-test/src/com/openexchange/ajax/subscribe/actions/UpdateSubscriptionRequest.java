@@ -94,6 +94,7 @@ public class UpdateSubscriptionRequest extends AbstractSubscriptionRequest<Updat
         setSubscription(subscription);
     }
 
+    @Override
     public Object getBody() throws JSONException {
         SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         try {
@@ -103,14 +104,17 @@ public class UpdateSubscriptionRequest extends AbstractSubscriptionRequest<Updat
         }
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE).toArray();
     }
 
+    @Override
     public AbstractAJAXParser<UpdateSubscriptionResponse> getParser() {
         return new AbstractAJAXParser<UpdateSubscriptionResponse>(getFailOnError()) {
 

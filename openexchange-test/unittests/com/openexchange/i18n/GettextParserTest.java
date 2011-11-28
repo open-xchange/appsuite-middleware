@@ -50,14 +50,11 @@
 package com.openexchange.i18n;
 
 import static com.openexchange.java.Autoboxing.i;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-
 import junit.framework.TestCase;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.parsing.I18NErrorMessages;
 import com.openexchange.i18n.parsing.POParser;
@@ -261,7 +258,7 @@ public class GettextParserTest extends TestCase {
             + "msgstr \"Ich bin eine andere Nachricht.\"";
 
         try {
-            parse(poText.getBytes("UTF-8"));
+            parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
             assertEquals(I18NErrorMessages.UNEXPECTED_TOKEN.getNumber(), x
@@ -289,7 +286,7 @@ public class GettextParserTest extends TestCase {
             + "msgid \"I am another message.\"\n"
             + "msgstr \"Ich bin eine andere Nachricht.\"";
         try {
-            parse(poText.getBytes("UTF-8"));
+            parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
             assertEquals(
@@ -316,7 +313,7 @@ public class GettextParserTest extends TestCase {
             + "msgstr[Blupp] \"Ich bin eine andere Nachricht.\"";
 
         try {
-            parse(poText.getBytes("UTF-8"));
+            parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
             assertEquals(I18NErrorMessages.EXPECTED_NUMBER.getNumber(), x
@@ -340,7 +337,7 @@ public class GettextParserTest extends TestCase {
             + "msgstTUEDELUE \"Ich bin eine andere Nachricht.\"";
 
         try {
-            parse(poText.getBytes("UTF-8"));
+            parse(poText.getBytes(com.openexchange.java.Charsets.UTF_8));
             fail("Expected parsing error");
         } catch (final OXException x) {
             assertEquals(I18NErrorMessages.MALFORMED_TOKEN.getNumber(), x
@@ -374,12 +371,7 @@ public class GettextParserTest extends TestCase {
         final String withContentType = "msgid \"\"\n"
             + "msgstr \"\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\r\n"
             + poText;
-        try {
-            return parse(withContentType.getBytes("UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            I18NErrorMessages.IO_EXCEPTION.create(e, "test.po");
-        }
-        return null;
+        return parse(withContentType.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
     protected Translations parse(final byte[] poText) throws OXException {

@@ -95,11 +95,11 @@ final class SessionData {
     private final Lock wlock;
 
     private final LinkedList<Map<String, SessionControl>> longTermList;
-    
+
     // The LongTermUserGuardian contains an entry for a given UserKey if the longTermList contains a session for the user
     // This is used to guard against potentially slow serial searches of the long term sessions
     private final Set<UserKey> longTermUserGuardian = new HashSet<UserKey>();
-    
+
     private final Lock longTermLock = new ReentrantLock();
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
@@ -251,7 +251,7 @@ final class SessionData {
         }
         return retval.toArray(new SessionControl[retval.size()]);
     }
-    
+
     public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId) {
         rlock.lock();
         try {
@@ -282,7 +282,7 @@ final class SessionData {
         }
         return null;
     }
-    
+
     public Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
         rlock.lock();
         try {

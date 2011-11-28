@@ -58,7 +58,7 @@ import com.openexchange.chat.json.rest.MethodHandler;
 
 /**
  * {@link RosterRestServlet} - The REST Servlet for module "roster".
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RosterRestServlet extends AbstractRestServlet {

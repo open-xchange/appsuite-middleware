@@ -79,6 +79,7 @@ public abstract class AbstractContactRequest<T extends AbstractAJAXResponse> imp
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getServletPath() {
         return URL;
     }
@@ -91,6 +92,7 @@ public abstract class AbstractContactRequest<T extends AbstractAJAXResponse> imp
         return jsonObj;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

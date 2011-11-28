@@ -66,7 +66,7 @@ public class AdditionalFieldsUtils {
         for(FolderObject f : folder) {
             retval.add(field.getValue(f, session));
         }
-        
+
         return retval;
     }
 }

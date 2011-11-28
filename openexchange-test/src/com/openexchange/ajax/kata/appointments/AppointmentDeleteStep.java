@@ -64,17 +64,19 @@ import com.openexchange.test.CalendarTestManager;
  */
 public class AppointmentDeleteStep extends NeedExistingStep<Appointment> {
 
-    private Appointment entry;
+    private final Appointment entry;
 
     public AppointmentDeleteStep(Appointment entry, String name, String expectedError) {
         super(name, expectedError);
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
         //no cleaning needed
     }
 
+    @Override
     public void perform(AJAXClient ajaxclient) throws Exception {
         assumeIdentity(entry);
         CalendarTestManager manager = new CalendarTestManager(ajaxclient);

@@ -55,7 +55,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.SAXException;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -104,7 +104,7 @@ public abstract class AbstractMailTest extends AbstractAJAXSession {
     protected int count(final String folder) throws OXException, IOException, JSONException {
         final JSONObject data =
             (JSONObject) client.execute(
-                new com.openexchange.ajax.folder.actions.GetRequest(API.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
+                new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder, new int[] { FolderField.TOTAL.getColumn() })).getData();
         return data.getInt(FolderField.TOTAL.getName());
     }
 

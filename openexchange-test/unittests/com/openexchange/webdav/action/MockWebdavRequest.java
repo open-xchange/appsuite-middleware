@@ -1,19 +1,16 @@
 package com.openexchange.webdav.action;
 
-import com.openexchange.exception.OXException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
@@ -32,7 +29,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	private WebdavResource res = null;
 	private WebdavResource dest;
 
-	private Map<String, Object> userInfo = new HashMap<String,Object>();
+	private final Map<String, Object> userInfo = new HashMap<String,Object>();
 
 	public MockWebdavRequest(final WebdavFactory factory, final String prefix) {
 		this.factory = factory;
@@ -44,6 +41,7 @@ public class MockWebdavRequest implements WebdavRequest {
         this.url = url;
     }
 
+    @Override
     public WebdavResource getResource() throws OXException {
 		if(res != null) {
 			return res;
@@ -51,7 +49,8 @@ public class MockWebdavRequest implements WebdavRequest {
 		return res = factory.resolveResource(url);
 	}
 
-	public WebdavResource getDestination() throws OXException {
+	@Override
+    public WebdavResource getDestination() throws OXException {
 		if(null == getHeader("destination")) {
 			return null;
 		}
@@ -61,18 +60,21 @@ public class MockWebdavRequest implements WebdavRequest {
 		return dest = factory.resolveResource(getHeader("destination"));
 	}
 
-	public WebdavCollection getCollection() throws OXException {
+	@Override
+    public WebdavCollection getCollection() throws OXException {
 		if(res != null) {
 			return (WebdavCollection) res;
 		}
 		return (WebdavCollection) (res = factory.resolveCollection(url));
 	}
 
-	public WebdavPath getDestinationUrl(){
+	@Override
+    public WebdavPath getDestinationUrl(){
 		return new WebdavPath(getHeader("destination"));
 	}
 
-	public WebdavPath getUrl() {
+	@Override
+    public WebdavPath getUrl() {
 		return url;
 	}
 
@@ -80,48 +82,50 @@ public class MockWebdavRequest implements WebdavRequest {
 		this.content = content;
 	}
 
-	public InputStream getBody(){
-		try {
-			return new ByteArrayInputStream((content == null) ? new byte[0] : content.getBytes("UTF-8"));
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
+	@Override
+    public InputStream getBody(){
+		return new ByteArrayInputStream((content == null) ? new byte[0] : content.getBytes(com.openexchange.java.Charsets.UTF_8));
 	}
 
 	public void setHeader(final String header, final String value) {
 		headers .put(header.toLowerCase(), value);
 	}
 
-	public String getHeader(final String header) {
+	@Override
+    public String getHeader(final String header) {
 		return headers.get(header.toLowerCase());
 	}
 
-	public List<String> getHeaderNames() {
+	@Override
+    public List<String> getHeaderNames() {
 		return new LinkedList<String>(headers.keySet());
 	}
 
-	public Document getBodyAsDocument() throws JDOMException, IOException {
+	@Override
+    public Document getBodyAsDocument() throws JDOMException, IOException {
 		return new SAXBuilder().build(getBody());
 	}
 
-	public String getURLPrefix() {
+	@Override
+    public String getURLPrefix() {
 		return uriPrefix;
 	}
 
-	public IfHeader getIfHeader() throws OXException {
+	@Override
+    public IfHeader getIfHeader() throws OXException {
 		final String ifHeader = getHeader("If");
 		if(ifHeader == null) {
 			return null;
 		}
 		try {
 			return new IfHeaderParser().parse(getHeader("If"));
-		} catch (IfHeaderParseException e) {
+		} catch (final IfHeaderParseException e) {
 			throw new OXException(e);
 		}
 	}
 
-	public int getDepth(final int def) {
+	@Override
+    public int getDepth(final int def) {
 		final String depth = getHeader("depth");
 		if(null == depth) {
 			return def;
@@ -129,20 +133,24 @@ public class MockWebdavRequest implements WebdavRequest {
 		return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : new Integer(depth);
 	}
 
-	public WebdavFactory getFactory() throws OXException {
+	@Override
+    public WebdavFactory getFactory() throws OXException {
 		return factory;
 	}
 
 
-	public String getCharset() {
+	@Override
+    public String getCharset() {
 		return "UTF-8";
 	}
 
 
+    @Override
     public boolean hasBody() {
         return content != null;
     }
 
+    @Override
     public Map<String, Object> getUserInfo() {
         return userInfo;
     }

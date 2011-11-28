@@ -51,8 +51,8 @@ package com.openexchange.ajax.folder.api2;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Date;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.PathRequest;
@@ -86,7 +86,7 @@ public class Bug15980Test extends AbstractAJAXSession {
         testFolder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
         testFolder.setPermissions(PermissionTools.P(I(client.getValues().getUserId()), PermissionTools.ADMIN));
         testFolder.setFolderName("testFolder4Bug15980");
-        InsertRequest iReq = new InsertRequest(API.OUTLOOK, testFolder);
+        InsertRequest iReq = new InsertRequest(EnumAPI.OUTLOOK, testFolder);
         InsertResponse iResp = client.execute(iReq);
         iResp.fillObject(testFolder);
         // Unfortunately no timestamp when creating a mail folder through Outlook folder tree.
@@ -95,12 +95,12 @@ public class Bug15980Test extends AbstractAJAXSession {
 
     @Override
     protected void tearDown() throws Exception {
-        client.execute(new DeleteRequest(API.OUTLOOK, testFolder));
+        client.execute(new DeleteRequest(EnumAPI.OUTLOOK, testFolder));
         super.tearDown();
     }
 
     public void testPath() throws Throwable {
-        PathRequest request = new PathRequest(API.OUTLOOK, testFolder.getObjectID(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME });
+        PathRequest request = new PathRequest(EnumAPI.OUTLOOK, testFolder.getObjectID(), new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME });
         PathResponse response = client.execute(request);
         Object[][] objects = response.getArray();
         int idPos = response.getColumnPos(FolderObject.OBJECT_ID);

@@ -72,9 +72,10 @@ public class DistributionListTransformator implements Transformator {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	private FixtureLoader fixtureLoader;
+	private final FixtureLoader fixtureLoader;
 
-	public Object transform(final String value) throws OXException {
+	@Override
+    public Object transform(final String value) throws OXException {
 		if (null == value || 1 > value.length()) { return null; }
 		String fixtureName = "users";
 		String fixtureEntry = "";

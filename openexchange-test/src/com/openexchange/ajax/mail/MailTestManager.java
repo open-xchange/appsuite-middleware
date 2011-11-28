@@ -87,7 +87,7 @@ import com.openexchange.mail.MailListField;
  */
 public class MailTestManager {
 
-    private List<MailCleaner> cleaningSteps;
+    private final List<MailCleaner> cleaningSteps;
 
     private boolean failOnError;
 

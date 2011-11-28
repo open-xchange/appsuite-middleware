@@ -106,7 +106,7 @@ public class AttachmentTest extends AbstractWebdavXMLTest {
         final WebResponse webResponse = webCon.getResponse(webRequest);
         assertEquals(207, webResponse.getResponseCode());
 
-        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(webResponse.getText().getBytes("UTF-8"));
+        final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(webResponse.getText().getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final Document doc = new SAXBuilder().build(byteArrayInputStream);
         return parseResponse(doc, false);

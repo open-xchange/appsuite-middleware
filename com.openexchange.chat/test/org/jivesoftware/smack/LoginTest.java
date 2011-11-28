@@ -24,7 +24,7 @@ import org.jivesoftware.smack.test.SmackTestCase;
 import org.jivesoftware.smack.util.StringUtils;
 
 /**
- * Includes set of login tests. 
+ * Includes set of login tests.
  *
  * @author Gaston Dombiak
  */
@@ -113,7 +113,7 @@ public class LoginTest extends SmackTestCase {
             config.setSASLAuthenticationEnabled(false);
             XMPPConnection conn2 = new XMPPConnection(config);
             conn2.connect();
-            
+
             try {
                 // Try to login anonymously
                 conn1.loginAnonymously();
@@ -171,6 +171,7 @@ public class LoginTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected int getMaxConnections() {
         return 0;
     }

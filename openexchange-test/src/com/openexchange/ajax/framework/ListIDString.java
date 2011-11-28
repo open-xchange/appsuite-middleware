@@ -68,6 +68,7 @@ public final class ListIDString implements ListID {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFolder() {
         return folder;
     }
@@ -75,6 +76,7 @@ public final class ListIDString implements ListID {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getObject() {
         return object;
     }

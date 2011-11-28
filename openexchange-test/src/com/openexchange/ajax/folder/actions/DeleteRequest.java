@@ -69,30 +69,30 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
     private final Date lastModified;
     private final boolean failOnError;
 
-    public DeleteRequest(API api, String[] folderIds, Date lastModified, boolean failOnError) {
+    public DeleteRequest(final API api, final String[] folderIds, final Date lastModified, final boolean failOnError) {
         super(api);
         this.folderIds = folderIds;
         this.lastModified = lastModified;
         this.failOnError = failOnError;
     }
 
-    public DeleteRequest(API api, String[] folderIds, Date lastModified) {
+    public DeleteRequest(final API api, final String[] folderIds, final Date lastModified) {
         this(api, folderIds, lastModified, true);
     }
 
-    public DeleteRequest(API api, String folderId, Date lastModified) {
+    public DeleteRequest(final API api, final String folderId, final Date lastModified) {
         this(api, new String[] { folderId }, lastModified);
     }
 
-    public DeleteRequest(API api, int[] folderIds, Date lastModified) {
+    public DeleteRequest(final API api, final int[] folderIds, final Date lastModified) {
         this(api, i2s(folderIds), lastModified);
     }
 
-    public DeleteRequest(API api, int folderId, Date lastModified) {
+    public DeleteRequest(final API api, final int folderId, final Date lastModified) {
         this(api, new int[] { folderId }, lastModified);
     }
 
-    public DeleteRequest(API api, boolean failOnError, final FolderObject... folder) {
+    public DeleteRequest(final API api, final boolean failOnError, final FolderObject... folder) {
         super(api);
         folderIds = new String[folder.length];
         Date maxLastModified = new Date(Long.MIN_VALUE);
@@ -110,10 +110,11 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         this.failOnError = failOnError;
     }
 
-    public DeleteRequest(API api, final FolderObject... folder) {
+    public DeleteRequest(final API api, final FolderObject... folder) {
         this(api, true, folder);
     }
 
+    @Override
     public Object getBody() {
         final JSONArray array = new JSONArray();
         for (final String folderId : folderIds) {
@@ -122,16 +123,18 @@ public class DeleteRequest extends AbstractFolderRequest<CommonDeleteResponse> {
         return array;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
     @Override
-    protected void addParameters(List<Parameter> params) {
+    protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
         params.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, lastModified.getTime()));
     }
 
+    @Override
     public CommonDeleteParser getParser() {
         return new CommonDeleteParser(failOnError);
     }

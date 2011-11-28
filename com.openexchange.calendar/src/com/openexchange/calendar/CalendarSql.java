@@ -84,7 +84,6 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Charsets;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -1266,7 +1265,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     public boolean getIncludePrivateAppointments() {
         return this.includePrivateAppointments;
     }
-    
+
     @Override
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(String email, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
         List<Appointment> appointments = new ArrayList<Appointment>();
@@ -1287,7 +1286,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
             }
         }
-        
+
         return appointments;
     }
 
@@ -1311,19 +1310,19 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
             }
         }
-        
+
         return appointments;
     }
 
     private int[] addColumnIfNecessary(int[] cols, int participants) {
-        
+
         ArrayList<Integer> columns = new ArrayList<Integer>();
         for (int c : cols) {
             columns.add(c);
         }
         if (!columns.contains(participants))
             columns.add(participants);
-        
+
         return I2i(columns);
     }
 }

@@ -84,7 +84,8 @@ public final class CheckRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getBody()
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		return htmlContent;
 	}
 
@@ -93,7 +94,8 @@ public final class CheckRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getMethod()
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
@@ -102,7 +104,8 @@ public final class CheckRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		final List<Parameter> params = new ArrayList<Parameter>();
 		params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "check"));
 		params.add(new Parameter("lang", locale));
@@ -114,7 +117,8 @@ public final class CheckRequest extends AbstractSpellCheckRequest {
 	 *
 	 * @see com.openexchange.ajax.framework.AJAXRequest#getParser()
 	 */
-	public CheckParser getParser() {
+	@Override
+    public CheckParser getParser() {
 		return new CheckParser(failOnError);
 	}
 

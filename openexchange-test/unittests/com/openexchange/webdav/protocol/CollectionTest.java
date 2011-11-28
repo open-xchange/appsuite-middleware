@@ -37,7 +37,7 @@ public class CollectionTest extends ResourceTest {
 		final WebdavCollection coll = createResource().toCollection();
 
 		final String content = "Hallo Welt!";
-		final byte[] bytes = content.getBytes("UTF-8");
+		final byte[] bytes = content.getBytes(com.openexchange.java.Charsets.UTF_8);
 
 		try {
 			coll.putBody(new ByteArrayInputStream(bytes));
@@ -49,18 +49,18 @@ public class CollectionTest extends ResourceTest {
 
 	public static void createStructure(final WebdavCollection coll, final WebdavFactory factory) throws OXException, UnsupportedEncodingException {
 		final String content = "Hallo Welt!";
-		final byte[] bytes = content.getBytes("UTF-8");
+		final byte[] bytes = content.getBytes(com.openexchange.java.Charsets.UTF_8);
 
 		WebdavResource res = coll.resolveResource(new WebdavPath("index.html"));
-		res.putBody(new ByteArrayInputStream(INDEX_HTML.getBytes("UTF-8")));
+		res.putBody(new ByteArrayInputStream(INDEX_HTML.getBytes(com.openexchange.java.Charsets.UTF_8)));
 		res.setContentType("text/html");
 		res.putBodyAndGuessLength(new ByteArrayInputStream(bytes));
 		res.create();
 
 		res = coll.resolveResource(new WebdavPath("sitemap.html"));
-		res.putBody(new ByteArrayInputStream(SITEMAP_HTML.getBytes("UTF-8")));
+		res.putBody(new ByteArrayInputStream(SITEMAP_HTML.getBytes(com.openexchange.java.Charsets.UTF_8)));
 		res.setContentType("text/html");
-		res.setLength((long)SITEMAP_HTML.getBytes("UTF-8").length);
+		res.setLength((long)SITEMAP_HTML.getBytes(com.openexchange.java.Charsets.UTF_8).length);
 		res.create();
 
 		res = coll.resolveCollection(new WebdavPath("development"));
@@ -70,18 +70,18 @@ public class CollectionTest extends ResourceTest {
 		res.create();
 
         res = res.toCollection().resolveResource(new WebdavPath("index3.html"));
-		res.putBody(new ByteArrayInputStream(INDEX3_HTML.getBytes("UTF-8")));
+		res.putBody(new ByteArrayInputStream(INDEX3_HTML.getBytes(com.openexchange.java.Charsets.UTF_8)));
 		res.setContentType("text/html");
-		res.setLength((long)INDEX3_HTML.getBytes("UTF-8").length);
+		res.setLength((long)INDEX3_HTML.getBytes(com.openexchange.java.Charsets.UTF_8).length);
 		res.create();
 
 		res = factory.resolveCollection(coll.getUrl()+"/pm");
 		res.create();
 
 		res = coll.resolveCollection(new WebdavPath("pm")).resolveResource(new WebdavPath("index2.html"));
-		res.putBody(new ByteArrayInputStream(INDEX2_HTML.getBytes("UTF-8")));
+		res.putBody(new ByteArrayInputStream(INDEX2_HTML.getBytes(com.openexchange.java.Charsets.UTF_8)));
 		res.setContentType("text/html");
-		res.setLength((long)INDEX2_HTML.getBytes("UTF-8").length);
+		res.setLength((long)INDEX2_HTML.getBytes(com.openexchange.java.Charsets.UTF_8).length);
 		res.create();
 
 		res = coll.resolveCollection(new WebdavPath("special characters?"));
@@ -417,7 +417,8 @@ public class CollectionTest extends ResourceTest {
 
 	protected static final class DisplayNameCollector implements Injector<List<String>, WebdavResource> {
 
-		public List<String> inject(final List<String> list, final WebdavResource element) {
+		@Override
+        public List<String> inject(final List<String> list, final WebdavResource element) {
 			try {
 				list.add(element.getDisplayName());
 			} catch (final OXException e) {

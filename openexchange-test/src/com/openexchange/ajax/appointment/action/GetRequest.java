@@ -113,6 +113,7 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
         this(appointment.getParentFolderID(), appointment.getObjectID(), failOnError);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
@@ -120,6 +121,7 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -127,6 +129,7 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>(4);
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
@@ -141,6 +144,7 @@ public class GetRequest extends AbstractAppointmentRequest<GetResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public GetParser getParser() {
         return new GetParser(failOnError);
     }

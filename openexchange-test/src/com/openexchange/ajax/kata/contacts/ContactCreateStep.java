@@ -66,7 +66,7 @@ import com.openexchange.test.ContactTestManager;
  */
 public class ContactCreateStep extends AbstractStep implements IdentitySource<Contact>{
 
-    private Contact entry;
+    private final Contact entry;
     private boolean inserted;
     private ContactTestManager manager;
 
@@ -75,6 +75,7 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
         this.entry = entry;
     }
 
+    @Override
     public void cleanUp() throws Exception {
         if( inserted ){
             entry.setLastModified(new Date(Long.MAX_VALUE));
@@ -83,6 +84,7 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
         }
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
         this.manager = new ContactTestManager(client);
@@ -94,21 +96,25 @@ public class ContactCreateStep extends AbstractStep implements IdentitySource<Co
         checkError(insertResponse);
     }
 
+    @Override
     public void assumeIdentity(Contact contact) {
         contact.setObjectID( entry.getObjectID() );
         contact.setParentFolderID( entry.getParentFolderID());
         contact.setLastModified( entry.getLastModified());
     }
 
+    @Override
     public void rememberIdentityValues(Contact contact) {
         contact.setLastModified( entry.getLastModified());
         contact.setParentFolderID(entry.getParentFolderID());
     }
 
+    @Override
     public void forgetIdentity(Contact entry) {
         inserted = false;
     }
 
+    @Override
     public Class<Contact> getType() {
         return Contact.class;
     }

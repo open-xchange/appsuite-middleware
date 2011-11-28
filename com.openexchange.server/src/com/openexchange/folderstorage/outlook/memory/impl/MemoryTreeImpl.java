@@ -90,7 +90,7 @@ public final class MemoryTreeImpl implements MemoryTree {
 
     /**
      * Initializes a new {@link MemoryTreeImpl}.
-     * @param treeId 
+     * @param treeId
      */
     public MemoryTreeImpl(final int treeId) {
         super();
@@ -394,13 +394,10 @@ public final class MemoryTreeImpl implements MemoryTree {
         public int compare(final MemoryFolder o1, final MemoryFolder o2) {
             final int sortNum1 = o1.getSortNum();
             final int sortNum2 = o2.getSortNum();
-            if (sortNum1 < sortNum2) {
-                return -1;
-            }
             if (sortNum1 == sortNum2) {
                 return collator.compare(stringHelper.getString(o1.getName()), stringHelper.getString(o2.getName()));
             }
-            return 1;
+            return sortNum1 - sortNum2;
         }
 
     } // End of MemoryFolderComparator

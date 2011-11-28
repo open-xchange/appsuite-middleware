@@ -332,7 +332,7 @@ public enum ContactField{
 		}
 		return null;
 	}
-	
+
 
 	public static ContactField getBySimilarity(String value){ //I call this the "d7-compatibility mode"
 		String needle = value.replaceAll("[_\\. ]", "").toLowerCase();
@@ -473,7 +473,7 @@ public enum ContactField{
 		default: return null;
 		}
 	}
-	
+
 	private static final EnumSet<ContactField> VIRTUAL_FIELDS = EnumSet.of(IMAGE1_URL);
 	public boolean isVirtual() {
 		return VIRTUAL_FIELDS.contains(this);

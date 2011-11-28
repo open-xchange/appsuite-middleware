@@ -50,7 +50,6 @@
 package com.openexchange.groupware.notify;
 
 import java.io.ByteArrayOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -660,7 +659,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                     }
                 } else {
                     sendMail = !p.ignoreNotification && (!newObj.containsNotification() || newObj.getNotification()) || (newObj.getModifiedBy() != p.id && forceNotifyOthers);
-                    sendMail = sendMail && (!ParticipantNotify.isStatusUpdate(state) || p.email.equals(newObj.getOrganizer()));                    
+                    sendMail = sendMail && (!ParticipantNotify.isStatusUpdate(state) || p.email.equals(newObj.getOrganizer()));
 //                    sendMail = sendMail && (!EnumSet.of(State.Type.ACCEPTED, State.Type.DECLINED, State.Type.TENTATIVELY_ACCEPTED).contains(
 //                        state.getType()) || p.email.equals(newObj.getOrganizer()));
                     if (p.timeZone != null) {
@@ -1158,7 +1157,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
             /*
              * Compose iCal part
              */
-            
+
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             final ICalSession icalSession = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
             Date until = null;
@@ -1263,12 +1262,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     private static final Pattern P_TRIM = Pattern.compile("[a-zA-Z-_]+:\r?\n");
 
     private static byte[] trimICal(final byte[] icalBytes) {
-        try {
-            return P_TRIM.matcher(new String(icalBytes, "UTF-8")).replaceAll("").getBytes("UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            return icalBytes;
-        }
+        return P_TRIM.matcher(new String(icalBytes, com.openexchange.java.Charsets.UTF_8)).replaceAll("").getBytes(com.openexchange.java.Charsets.UTF_8);
     }
 
     private static boolean isAscii(final byte[] bytes) {
@@ -2353,18 +2347,18 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     /**
-     * Gets a value indicating whether the supplied notification {@link State} 
-     * reflects an update of the accept/decline status or not. 
+     * Gets a value indicating whether the supplied notification {@link State}
+     * reflects an update of the accept/decline status or not.
      * @param state The {@link State} to check
      * @return <code>true</code>, if it is a status update, <code>false</code>, otherwise
      */
     private static boolean isStatusUpdate(final State state) {
     	return null != state &&
-			State.Type.ACCEPTED.equals(state.getType()) ||  
-        	State.Type.DECLINED.equals(state.getType()) || 
+			State.Type.ACCEPTED.equals(state.getType()) ||
+        	State.Type.DECLINED.equals(state.getType()) ||
         	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType());
     }
-    
+
     /**
      * Gets the recurrence master's title of specified event.
      *

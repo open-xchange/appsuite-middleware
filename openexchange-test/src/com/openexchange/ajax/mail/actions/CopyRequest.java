@@ -65,10 +65,10 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class CopyRequest extends AbstractMailRequest<CopyResponse> {
 
-	private String sourceFolderID;
-	private String destinationFolderID;
-	private boolean failOnError = true;
-    private String mailID;
+	private final String sourceFolderID;
+	private final String destinationFolderID;
+	private final boolean failOnError = true;
+    private final String mailID;
 
     public CopyRequest(String mailID, String sourceFolderID, String destinationFolderID){
     	this.mailID = mailID;
@@ -76,17 +76,20 @@ public class CopyRequest extends AbstractMailRequest<CopyResponse> {
     	this.destinationFolderID = destinationFolderID;
     }
 
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
         JSONObject jso = new JSONObject();
         jso.put("folder_id", destinationFolderID);
         return jso;
 	}
 
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
-	public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+	@Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
 		List<Parameter> list = new LinkedList<Parameter>();
 
         list.add(new Parameter(Mail.PARAMETER_ACTION, Mail.ACTION_COPY));
@@ -96,7 +99,8 @@ public class CopyRequest extends AbstractMailRequest<CopyResponse> {
         return list.toArray(new Parameter[list.size()]);
 	}
 
-	public AbstractAJAXParser<? extends CopyResponse> getParser() {
+	@Override
+    public AbstractAJAXParser<? extends CopyResponse> getParser() {
 		return new AbstractAJAXParser<CopyResponse>(failOnError) {
 
             @Override

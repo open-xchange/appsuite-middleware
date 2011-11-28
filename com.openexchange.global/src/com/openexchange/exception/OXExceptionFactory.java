@@ -77,7 +77,7 @@ public class OXExceptionFactory {
     /**
      * Checks if attributes of specified {@link OXException} instance or the ones from any of its causes (recursive check) matches this
      * code's ones.
-     * 
+     *
      * @param code The code to check against
      * @param e The exception to check
      * @return <code>true</code> if specified {@link OXException}'s attributes matches this code's ones; otherwise <code>false</code>

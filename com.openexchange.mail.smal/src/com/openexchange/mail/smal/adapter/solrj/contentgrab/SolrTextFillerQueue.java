@@ -97,7 +97,7 @@ import com.openexchange.threadpool.ThreadRenamer;
 
 /**
  * {@link SolrTextFillerQueue}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class SolrTextFillerQueue implements Runnable, SolrConstants {
@@ -153,7 +153,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
         simpleName = getClass().getSimpleName();
         gate = new Gate(-1);
     }
-    
+
     /**
      * Starts consuming from queue.
      */
@@ -191,7 +191,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     /**
      * Adds specified text filler
-     * 
+     *
      * @param filler The text filler
      */
     public void add(final TextFiller filler) {
@@ -202,7 +202,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     /**
      * Adds specified text fillers
-     * 
+     *
      * @param fillers The text fillers
      */
     public void add(final Collection<TextFiller> fillers) {
@@ -213,7 +213,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     /**
      * Pauses taking from queue.
-     * 
+     *
      * @return <code>true</code> if caller paused the consuming thread; otherwise <code>false</code> if already paused
      */
     public boolean pause() {
@@ -285,7 +285,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     /**
      * Handles specified equally-grouped fillers
-     * 
+     *
      * @param groupedFillers The equally-grouped fillers
      * @param threadDesc The thread description
      * @throws InterruptedException If thread is interrupted
@@ -367,7 +367,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     /**
      * Handles specified chunk of equally-grouped fillers
-     * 
+     *
      * @param fillersChunk The chunk of equally-grouped fillers
      * @param threadDesc The thread description
      * @throws InterruptedException If thread is interrupted
@@ -618,7 +618,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                         }
                         /*-
                          * Get text
-                         * 
+                         *
                          * --> mime4j
                          */
                         final String text = contents[i];
@@ -645,7 +645,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
     /**
      * Checks specified document if content still needs to be added.
-     * 
+     *
      * @param solrDocument The document to check
      * @return <code>true</code> if no content is present in document; otherwise <code>false</code> if content was found
      */
@@ -673,7 +673,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
 
         /**
          * Opens this task for processing.
-         * 
+         *
          * @param sf The stamped future object associated with this task
          */
         protected void start(final StampedFuture sf) {

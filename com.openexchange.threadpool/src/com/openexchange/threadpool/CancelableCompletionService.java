@@ -53,7 +53,7 @@ import java.util.concurrent.CompletionService;
 
 /**
  * {@link CancelableCompletionService} - Extends {@link CompletionService} interface by {@link #cancel(boolean)} method.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface CancelableCompletionService<V> extends CompletionService<V> {
@@ -63,7 +63,7 @@ public interface CancelableCompletionService<V> extends CompletionService<V> {
      * been cancelled, or could not be cancelled for some other reason. If a task has already started, then the
      * <tt>mayInterruptIfRunning</tt> parameter determines whether the thread executing this task should be interrupted in an attempt to
      * stop the task.
-     * 
+     *
      * @param mayInterruptIfRunning <tt>true</tt> if the thread executing a task should be interrupted; otherwise, in-progress tasks are
      *            allowed to complete
      */

@@ -98,14 +98,17 @@ public class GetRequest extends AbstractTaskRequest<GetResponse> {
         this(task.getParentFolderID(), task.getObjectID(), timeZone, true);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         List<Parameter> retval = new ArrayList<Parameter>(4);
         retval.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
@@ -117,6 +120,7 @@ public class GetRequest extends AbstractTaskRequest<GetResponse> {
         return retval.toArray(new Parameter[retval.size()]);
     }
 
+    @Override
     public GetParser getParser() {
         return new GetParser(failOnError);
     }

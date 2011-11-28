@@ -28,19 +28,23 @@ public class MockWebdavResponse implements WebdavResponse {
 		return headers.get(headerName.toUpperCase());
 	}
 
-	public OutputStream getOutputStream() {
+	@Override
+    public OutputStream getOutputStream() {
 		return out;
 	}
 
-	public void setHeader(final String header, final String value) {
+	@Override
+    public void setHeader(final String header, final String value) {
 		headers.put(header.toUpperCase(),value);
 	}
 
-	public int getStatus() {
+	@Override
+    public int getStatus() {
 		return status;
 	}
 
-	public void setStatus(final int status) {
+	@Override
+    public void setStatus(final int status) {
 		this.status = status;
 	}
 
@@ -48,12 +52,14 @@ public class MockWebdavResponse implements WebdavResponse {
 		return out.toByteArray();
 	}
 
-	public void setContentType(final String s) {
+	@Override
+    public void setContentType(final String s) {
 		setHeader("Content-Type", s);
 	}
 
+    @Override
     public void sendString(final String notFound) throws IOException {
-        final byte[] bytes = notFound.getBytes("UTF-8");
+        final byte[] bytes = notFound.getBytes(com.openexchange.java.Charsets.UTF_8);
         setHeader("Content-Length", String.valueOf(bytes.length));
         getOutputStream().write(bytes);
     }

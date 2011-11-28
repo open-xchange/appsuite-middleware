@@ -1104,7 +1104,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Pre-process specified HTML content with <a href="http://jsoup.org/">jsoup</a> library.
-     * 
+     *
      * @param htmlContent The HTML content
      * @return The safe HTML content according to JSoup processing
      */
@@ -1146,7 +1146,7 @@ public final class HTMLServiceImpl implements HTMLService {
         try {
             /*-
              * http://stackoverflow.com/questions/238036/java-html-parsing
-             * 
+             *
              * Clean...
              */
             final TagNode htmlNode = HTML_CLEANER.clean(preprocessWithJSoup(htmlContent));

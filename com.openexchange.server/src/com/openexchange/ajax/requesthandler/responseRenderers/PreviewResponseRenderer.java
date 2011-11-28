@@ -62,7 +62,7 @@ import com.openexchange.preview.PreviewDocument;
 
 /**
  * {@link PreviewResponseRenderer} - The response renderer for {@link PreviewDocument}s.
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

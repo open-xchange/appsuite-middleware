@@ -64,16 +64,18 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ContactMoveStep extends NeedExistingStep<Contact>{
 
-    private int destinationFolder;
+    private final int destinationFolder;
 
     public ContactMoveStep(int destinationFolder, String name, String expectedError) {
         super(name, expectedError);
         this.destinationFolder = destinationFolder;
     }
 
+    @Override
     public void cleanUp() throws Exception {
     }
 
+    @Override
     public void perform(AJAXClient client) throws Exception {
         this.client = client;
 

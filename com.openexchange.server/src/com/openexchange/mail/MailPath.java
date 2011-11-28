@@ -193,7 +193,7 @@ public final class MailPath implements Cloneable, Serializable {
 
     /**
      * Sets specified arguments.
-     * 
+     *
      * @param accountId The account ID
      * @param folder Folder full name
      * @param uid The mail's unique ID

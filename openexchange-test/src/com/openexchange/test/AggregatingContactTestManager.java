@@ -77,7 +77,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class AggregatingContactTestManager extends ContactTestManager {
 
-    private Set<UUID> createdAssociations = new HashSet<UUID>();
+    private final Set<UUID> createdAssociations = new HashSet<UUID>();
 
     public AggregatingContactTestManager(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         super(client);

@@ -248,6 +248,7 @@ public class MultipleRecipientManagerTest extends SmackTestCase {
         collector3.cancel();
     }
 
+    @Override
     protected int getMaxConnections() {
         return 4;
     }

@@ -152,13 +152,13 @@ public class Bug14357Test extends AbstractAJAXSession {
 
     private class MyListRequest extends ListRequest {
 
-        private int pos;
+        private final int pos;
 
-        private int recId;
+        private final int recId;
 
-        private int createdBy;
+        private final int createdBy;
 
-        private int folder;
+        private final int folder;
 
         public MyListRequest(ListIDs identifier, int[] columns, boolean failOnError, int folder, int pos, int recId, int createdBy) {
             super(identifier, columns, failOnError);

@@ -65,7 +65,7 @@ import com.openexchange.test.fixtures.Fixtures;
  */
 public class FixtureStepFactory {
 
-    private FixtureLoader loader;
+    private final FixtureLoader loader;
 
     public FixtureStepFactory(FixtureLoader loader) {
         this.loader = loader;
@@ -122,6 +122,7 @@ public class FixtureStepFactory {
             this.fixture = fixture;
         }
 
+        @Override
         public int compareTo(Entry<T> o) {
             Long myStep = fixture.getAttribute("step") != null ? (Long)fixture.getAttribute("step") : Long.valueOf(0);
             Long otherStep = o.fixture.getAttribute("step") != null ? (Long)o.fixture.getAttribute("step") : Long.valueOf(0);

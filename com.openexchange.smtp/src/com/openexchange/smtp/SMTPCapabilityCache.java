@@ -123,7 +123,7 @@ public final class SMTPCapabilityCache {
 
     /**
      * Gets the SMTP server's capabilities.
-     * 
+     *
      * @param address The address
      * @param isSecure Whether a secure connection should be established
      * @param smtpProperties The SMTP properties
@@ -188,6 +188,7 @@ public final class SMTPCapabilityCache {
             this.smtpProperties = smtpProperties;
         }
 
+        @Override
         public Capabilities call() throws IOException {
             Socket s = null;
             try {

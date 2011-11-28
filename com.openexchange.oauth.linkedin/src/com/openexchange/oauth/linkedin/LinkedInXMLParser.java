@@ -70,9 +70,9 @@ import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class LinkedInXMLParser {
-	
+
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInXMLParser.class));
-	
+
     private String getTextValue(Element ele, String tagName) {
         String textVal = null;
         NodeList nl = ele.getElementsByTagName(tagName);
@@ -84,7 +84,7 @@ public class LinkedInXMLParser {
         }
         return textVal;
     }
-    
+
 	public Contact parse(Element person){
         Contact contact = new Contact();
         contact.setGivenName(getTextValue(person, "first-name"));
@@ -156,14 +156,14 @@ public class LinkedInXMLParser {
         }
         return contact;
     }
-    
+
     public List<Contact> parseConnections(String body) {
         final List<Contact> contacts = new ArrayList<Contact>();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
+            Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
             Element root = doc.getDocumentElement();
             NodeList connections = root.getElementsByTagName("person");
             if (connections != null && connections.getLength() > 0) {
@@ -187,7 +187,7 @@ public class LinkedInXMLParser {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
-            Document doc = db.parse(new ByteArrayInputStream(body.getBytes("UTF-8")));
+            Document doc = db.parse(new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)));
             Element root = doc.getDocumentElement();
             Contact contact = parse(root);
             return contact;

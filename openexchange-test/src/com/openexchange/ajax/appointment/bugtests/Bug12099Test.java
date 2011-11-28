@@ -59,7 +59,7 @@ import com.openexchange.ajax.appointment.action.GetRequest;
 import com.openexchange.ajax.appointment.action.GetResponse;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -167,7 +167,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
                 OCLPermission.ADMIN_PERMISSION));
         {
             final CommonInsertResponse response = clientA.execute(
-                new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+                new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
             response.fillObject(folder);
         }
         final Appointment appointment = new Appointment();
@@ -210,7 +210,7 @@ public final class Bug12099Test extends AbstractAJAXSession {
 //                clientB.execute(new DeleteRequest(appointment.getObjectID(),
 //                    folder.getObjectID(), appointment.getLastModified()));
 //            }
-            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD,
+            clientA.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD,
                 folder.getObjectID(), folder.getLastModified()));
         }
     }

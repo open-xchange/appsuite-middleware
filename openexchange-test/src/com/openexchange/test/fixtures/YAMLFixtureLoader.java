@@ -68,24 +68,27 @@ import com.openexchange.exception.OXException;
  */
 public class YAMLFixtureLoader implements FixtureLoader {
 
-    private List<File> loadPath = new ArrayList<File>();
-    private Map<String, Map<String, Map<String, String>>> fixtureDefinitions = new HashMap<String, Map<String, Map<String, String>>>();
-    private Map<Class<?>, FixtureFactory<?>> factories = new HashMap<Class<?>, FixtureFactory<?>>();
-    private Map<String, Fixtures<?>> fixturesCache = new HashMap<String, Fixtures<?>>();
-    private Map<String, Class<?>> fixturesClasses = new HashMap<String, Class<?>>();
+    private final List<File> loadPath = new ArrayList<File>();
+    private final Map<String, Map<String, Map<String, String>>> fixtureDefinitions = new HashMap<String, Map<String, Map<String, String>>>();
+    private final Map<Class<?>, FixtureFactory<?>> factories = new HashMap<Class<?>, FixtureFactory<?>>();
+    private final Map<String, Fixtures<?>> fixturesCache = new HashMap<String, Fixtures<?>>();
+    private final Map<String, Class<?>> fixturesClasses = new HashMap<String, Class<?>>();
 
+    @Override
     public void appendToLoadPath(final String... paths) {
         for (final String path : paths) {
             loadPath.add(new File(path));
         }
     }
 
+    @Override
     public void load(final String... fixtureNames) throws OXException {
         for (final String fixtureName : fixtureNames) {
             parse(locateFile(fixtureName), fixtureName );
         }
     }
 
+    @Override
     public <T> Fixtures<T> getFixtures(final String fixtureName, final Class<T> aClass) throws OXException {
         if (fixturesCache.containsKey(fixtureName) && fixturesClasses.get(fixtureName).equals(aClass)) {
             return (Fixtures<T>) fixturesCache.get(fixtureName);

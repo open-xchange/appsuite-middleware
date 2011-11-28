@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.test.TrueTest;
  */
 public class TrueWriterImpl implements TestWriter {
 
-	public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
+	@Override
+    public JSONObject writeTest(final String name, final AbstractTest abstractTest) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final TrueTest trueTest = (TrueTest)abstractTest;
 		final AbstractTest test = trueTest.getTest();

@@ -1292,9 +1292,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     final ContentType ct = mail.getContentType();
                     if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                        data = new String(baos.toByteArray(), ct.getCharsetParameter());
+                        data = new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter()));
                     } else {
-                        data = new String(baos.toByteArray(), STR_UTF8);
+                        data = new String(baos.toByteArray(), Charsets.UTF_8);
                     }
                 } else if (showMessageHeaders) {
                     /*
@@ -1984,7 +1984,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
                         attachmentInputStream =
                             new UnsynchronizedByteArrayInputStream(htmlService.filterWhitelist(
-                                htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(cs));
+                                htmlService.getConformHTML(htmlContent, contentType.getCharsetParameter())).getBytes(Charsets.forName(cs)));
                     } else {
                         attachmentInputStream = mailPart.getInputStream();
                     }
@@ -2178,19 +2178,14 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
         /*-
          * On socket layer characters are casted to byte values.
-         * 
+         *
          * See AJPv13Response.writeString():
          * sink.write((byte) chars[i]);
-         * 
+         *
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
-        String foo;
-        try {
-            foo = new String(fn.getBytes("UTF-8"), "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            foo = null;
-        }
-        return new StringBuilder("attachment; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(null == foo ? fn : foo).append('"').toString();
+        final String foo = new String(fn.getBytes(com.openexchange.java.Charsets.UTF_8), com.openexchange.java.Charsets.ISO_8859_1);
+        return new StringBuilder("attachment; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(foo).append('"').toString();
     }
 
     public void actionPutForwardMultiple(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {

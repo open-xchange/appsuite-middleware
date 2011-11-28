@@ -80,14 +80,17 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
         this.tz = tz;
     }
 
+    @Override
     public Object getBody(){
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         if(uuid != null)
             return new Params(
@@ -113,6 +116,7 @@ public class GetAssociatedContactsRequest extends AbstractContactRequest<GetAsso
         return params.toArray();
     }
 
+    @Override
     public AbstractAJAXParser<GetAssociatedContactsResponse> getParser() {
         return new AbstractAJAXParser<GetAssociatedContactsResponse>(true){
             @Override

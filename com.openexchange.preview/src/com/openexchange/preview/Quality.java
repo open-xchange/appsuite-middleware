@@ -58,14 +58,14 @@ package com.openexchange.preview;
 public enum Quality {
     GOOD(1),
     BAD(2);
-    
-    
+
+
     private int value;
-    
+
     private Quality(final int value) {
         this.value = value;
     }
-    
+
     public int getValue() {
         return value;
     }

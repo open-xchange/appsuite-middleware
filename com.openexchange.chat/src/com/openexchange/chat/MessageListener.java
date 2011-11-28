@@ -51,14 +51,14 @@ package com.openexchange.chat;
 
 /**
  * {@link MessageListener} - Listens for new messages to arrive.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface MessageListener {
 
     /**
      * Handles arrived message.
-     * 
+     *
      * @param chat The associated chat in which the message arrived
      * @param message The arrived message
      */

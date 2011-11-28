@@ -163,48 +163,52 @@ public final class Insert {
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-        // Insert permission data if non-null and not empty
-        final Permission[] permissions = folder.getPermissions();
-        if (null != permissions && permissions.length > 0) {
-            try {
-                stmt = con.prepareStatement(SQL_INSERT_PERM);
-                for (final Permission p : permissions) {
-                    int pos = 1;
-                    stmt.setInt(pos++, cid);
-                    stmt.setInt(pos++, tree);
-                    stmt.setInt(pos++, user);
-                    stmt.setString(pos++, folderId);
-                    stmt.setInt(pos++, p.getEntity());
-                    stmt.setInt(pos++, p.isGroup() ? 1 : 0);
-                    stmt.setInt(pos++, p.getFolderPermission());
-                    stmt.setInt(pos++, p.getReadPermission());
-                    stmt.setInt(pos++, p.getWritePermission());
-                    stmt.setInt(pos++, p.getDeletePermission());
-                    stmt.setInt(pos++, p.isAdmin() ? 1 : 0);
-                    stmt.setInt(pos++, p.getSystem());
-                    stmt.addBatch();
+        if (false) {
+            // Insert permission data if non-null and not empty
+            final Permission[] permissions = folder.getPermissions();
+            if (null != permissions && permissions.length > 0) {
+                try {
+                    stmt = con.prepareStatement(SQL_INSERT_PERM);
+                    for (final Permission p : permissions) {
+                        int pos = 1;
+                        stmt.setInt(pos++, cid);
+                        stmt.setInt(pos++, tree);
+                        stmt.setInt(pos++, user);
+                        stmt.setString(pos++, folderId);
+                        stmt.setInt(pos++, p.getEntity());
+                        stmt.setInt(pos++, p.isGroup() ? 1 : 0);
+                        stmt.setInt(pos++, p.getFolderPermission());
+                        stmt.setInt(pos++, p.getReadPermission());
+                        stmt.setInt(pos++, p.getWritePermission());
+                        stmt.setInt(pos++, p.getDeletePermission());
+                        stmt.setInt(pos++, p.isAdmin() ? 1 : 0);
+                        stmt.setInt(pos++, p.getSystem());
+                        stmt.addBatch();
+                    }
+                    stmt.executeBatch();
+                } catch (final SQLException e) {
+                    throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(stmt);
                 }
-                stmt.executeBatch();
+            }
+        }
+        if (false) {
+            // Insert subscription data
+            try {
+                stmt = con.prepareStatement(SQL_INSERT_SUBS);
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos++, folderId);
+                stmt.setInt(pos, folder.isSubscribed() ? 1 : 0);
+                stmt.executeUpdate();
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }
-        }
-        // Insert subscription data
-        try {
-            stmt = con.prepareStatement(SQL_INSERT_SUBS);
-            int pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, tree);
-            stmt.setInt(pos++, user);
-            stmt.setString(pos++, folderId);
-            stmt.setInt(pos, folder.isSubscribed() ? 1 : 0);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
         }
     }
 

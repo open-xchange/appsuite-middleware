@@ -439,7 +439,7 @@ public final class TNEF2ICal {
         final MimeMessage mimeMessage =
             new MimeMessage(
                 MIMEDefaultSession.getDefaultSession(),
-                new UnsynchronizedByteArrayInputStream(mailSrc.getBytes("US-ASCII")));
+                new UnsynchronizedByteArrayInputStream(mailSrc.getBytes(com.openexchange.java.Charsets.US_ASCII)));
 
         final Multipart mulitpart = (Multipart) mimeMessage.getContent();
         final int count = mulitpart.getCount();

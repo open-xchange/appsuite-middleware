@@ -68,30 +68,32 @@ public class RootRequest extends AbstractFolderRequest<ListResponse> {
 
     private final boolean ignoreMail;
 
-    public RootRequest(API api, int[] columns, boolean ignoreMail) {
+    public RootRequest(final API api, final int[] columns, final boolean ignoreMail) {
         super(api);
         this.columns = columns;
         this.ignoreMail = ignoreMail;
     }
 
-    public RootRequest(API api) {
+    public RootRequest(final API api) {
         this(api, DEFAULT_COLUMNS, false);
     }
 
-    public RootRequest(API api, boolean ignoreMail) {
+    public RootRequest(final API api, final boolean ignoreMail) {
         this(api, DEFAULT_COLUMNS, ignoreMail);
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
     @Override
-    protected void addParameters(List<Parameter> params) {
+    protected void addParameters(final List<Parameter> params) {
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ROOT));
         params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, columns));
         if (ignoreMail) {
@@ -99,6 +101,7 @@ public class RootRequest extends AbstractFolderRequest<ListResponse> {
         }
     }
 
+    @Override
     public ListParser getParser() {
         return new ListParser(columns, true);
     }

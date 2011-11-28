@@ -66,7 +66,7 @@ import com.openexchange.rdiff.RdiffService;
 
 /**
  * {@link RdiffServiceImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RdiffServiceImpl implements RdiffService {

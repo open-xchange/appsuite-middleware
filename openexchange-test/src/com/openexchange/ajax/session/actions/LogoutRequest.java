@@ -63,6 +63,7 @@ public class LogoutRequest extends AbstractRequest<LogoutResponse> {
         });
     }
 
+    @Override
     public LogoutParser getParser() {
         return new LogoutParser();
     }

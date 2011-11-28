@@ -87,15 +87,19 @@ public class NaughtyClientTest extends WebdavClientTest {
         final PutMethod put = new PutMethod(url.getEscapedURI());
         put.getHostAuthState().setAuthScheme(new BasicScheme());
         put.setRequestEntity(new RequestEntity() {
+            @Override
             public long getContentLength() {
                 return pretendSize;
             }
+            @Override
             public String getContentType() {
                 return "application/octet-stream";
             }
+            @Override
             public boolean isRepeatable() {
                 return false;
             }
+            @Override
             public void writeRequest(OutputStream out) throws IOException {
                 out.write(data);
             }

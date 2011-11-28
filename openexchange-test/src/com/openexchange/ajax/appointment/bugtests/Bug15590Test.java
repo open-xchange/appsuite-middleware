@@ -10,8 +10,8 @@ import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -56,16 +56,16 @@ public class Bug15590Test extends AbstractAJAXSession {
         testFolder.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
 
         com.openexchange.ajax.folder.actions.InsertRequest insFolder = new com.openexchange.ajax.folder.actions.InsertRequest(
-            API.OX_NEW,
+            EnumAPI.OX_NEW,
             testFolder);
         InsertResponse folderInsertResponse = client.execute(insFolder);
         testFolder.setObjectID(folderInsertResponse.getId());
         // Only necessary because new folder API missed the time stamps.
-        testFolder.setLastModified(client.execute(new GetRequest(API.OX_NEW, testFolder.getObjectID())).getTimestamp());
+        testFolder.setLastModified(client.execute(new GetRequest(EnumAPI.OX_NEW, testFolder.getObjectID())).getTimestamp());
 
         FolderTools.shareFolder(
             client,
-            API.OX_NEW,
+            EnumAPI.OX_NEW,
             testFolder.getObjectID(),
             secondUserValues.getUserId(),
             OCLPermission.CREATE_OBJECTS_IN_FOLDER,
@@ -129,7 +129,7 @@ public class Bug15590Test extends AbstractAJAXSession {
 
         // Delete testFolder
         if (testFolder != null) {
-            final DeleteRequest delFolder = new DeleteRequest(API.OX_NEW, testFolder);
+            final DeleteRequest delFolder = new DeleteRequest(EnumAPI.OX_NEW, testFolder);
             client.execute(delFolder);
         }
 

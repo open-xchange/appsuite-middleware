@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ChangeByIDsJob} - Changes the flags of specified mails in index.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ChangeByIDsJob extends AbstractMailSyncJob {
@@ -99,7 +99,7 @@ public final class ChangeByIDsJob extends AbstractMailSyncJob {
 
     /**
      * Initializes a new {@link ChangeByIDsJob}.
-     * 
+     *
      * @param fullName The folder full name
      * @param accountId The account ID
      * @param userId The user ID
@@ -118,7 +118,7 @@ public final class ChangeByIDsJob extends AbstractMailSyncJob {
 
     /**
      * Sets the ranking
-     * 
+     *
      * @param ranking The ranking to set
      * @return This folder job with specified ranking applied
      */
@@ -129,7 +129,7 @@ public final class ChangeByIDsJob extends AbstractMailSyncJob {
 
     /**
      * Sets the mail identifiers
-     * 
+     *
      * @param mailIds The identifiers
      * @return This folder job
      */

@@ -56,11 +56,11 @@ package com.openexchange.index.internal;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexDatabaseStuff {
-    
+
     public static final String TBL_IDX_SERVER = "index_servers";
-    
+
     public static final String TBL_IDX_MAPPING = "user_module2index";
-    
+
     public static final String SQL_SELECT_INDEX_URL = "SELECT " +
                                                           "s.id, s.serverUrl, s.maxIndices, s.socketTimeout, " +
                                                           "s.connectionTimeout, s.maxConnections, u.indexName " +
@@ -72,7 +72,7 @@ public class IndexDatabaseStuff {
                                                           "s.id = u.server " +
                                                       "WHERE " +
                                                           "u.cid = ? AND u.uid = ? AND u.module = ?";
-    
+
     public static final String SQL_CREATE_SERVER_TBL = "CREATE TABLE " + TBL_IDX_SERVER + " (" +
                                                            "id int(10) unsigned NOT NULL," +
                                                            "serverUrl varchar(32) NOT NULL," +
@@ -83,7 +83,7 @@ public class IndexDatabaseStuff {
                                                            "PRIMARY KEY (id)," +
                                                            "KEY url (serverUrl)" +
                                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    
+
     public static final String SQL_CREATE_MAPPING_TBL = "CREATE TABLE " + TBL_IDX_MAPPING + " (" +
                                                             "cid int(10) unsigned NOT NULL," +
                                                             "uid int(10) unsigned NOT NULL," +
@@ -94,55 +94,55 @@ public class IndexDatabaseStuff {
                                                             "KEY user_module (cid,uid,module)," +
                                                             "KEY server (server)" +
                                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
-    
-    public static final String SQL_DEL_USR_FROM_MAPPING = "DELETE FROM " + 
+
+    public static final String SQL_DEL_USR_FROM_MAPPING = "DELETE FROM " +
                                                               TBL_IDX_MAPPING + " " +
                                                           "WHERE " +
                                                               "cid = ? AND uid = ?";
-    
-    public static final String SQL_DEL_CTX_FROM_MAPPING = "DELETE FROM " + 
+
+    public static final String SQL_DEL_CTX_FROM_MAPPING = "DELETE FROM " +
                                                               TBL_IDX_MAPPING + " " +
                                                           "WHERE " +
                                                               "cid = ?";
-    
+
     public static final String SQL_INSERT_INDEX_SERVER = "INSERT INTO " + TBL_IDX_SERVER + " " +
                                                              "(id, serverUrl, maxIndices, socketTimeout, connectionTimeout, maxConnections) " +
                                                          "VALUES " +
                                                              "(?, ?, ?, ?, ?, ?)";
-    
+
     public static final String SQL_DELETE_INDEX_SERVER = "DELETE FROM " +
     		                                                 TBL_IDX_SERVER + " " +
     		                                             "WHERE id = ?";
-    
+
     public static final String SQL_DELETE_INDEX_MAPPING = "DELETE FROM " +
                                                               TBL_IDX_MAPPING + " " +
                                                           "WHERE cid = ? AND uid = ? AND module = ?";
-    
+
     public static final String SQL_UPDATE_INDEX_MAPPING = "UPDATE " + TBL_IDX_MAPPING + " " +
                                                           "SET " +
                                                               "server = ?, indexName = ? " +
                                                           "WHERE cid = ? AND uid = ? AND module = ?";
-    
+
     public static final String SQL_SELECT_INDEX_SERVERS = "SELECT " +
     		                                                  "id, serverUrl, maxIndices, socketTimeout, connectionTimeout, maxConnections " +
     		                                              "FROM " +
     		                                                  TBL_IDX_SERVER;
-    
+
     public static final String SQL_INSERT_INDEX_MAPPING = "INSERT INTO " + TBL_IDX_MAPPING + " " +
                                                     	      "(cid, uid, module, server, indexName) " +
                                                     	  "VALUES " +
                                                     	      "(?, ?, ?, ?, ?)";
-    
+
     public static final String SQL_UPDATE_INDEX_SERVER = "UPDATE " + TBL_IDX_SERVER + " " +
                                                 		 "SET " +
                                                 		     "serverUrl = ?, maxIndices = ?, socketTimeout = ?, " +
                                                 		     "connectionTimeout = ?, maxConnections = ? " +
                                                 		 "WHERE id = ?";
-    
+
     public static final String SQL_DELETE_INDEX_MAPPING_BY_SERVER = "DELETE FROM " +
                                                                         TBL_IDX_MAPPING + " " +
                                                                     "WHERE server = ?";
-    
+
     public static final String SQL_SELECT_SUITABLE_INDEX_SERVER = "SELECT " +
     		                                                          "i.id, i.maxIndices, COUNT(m.server) AS count " +
     		                                                      "FROM " +

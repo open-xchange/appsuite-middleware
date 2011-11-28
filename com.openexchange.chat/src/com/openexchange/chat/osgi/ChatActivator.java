@@ -64,9 +64,9 @@ import com.openexchange.chat.ChatServiceRegistry;
 public class ChatActivator implements BundleActivator {
 
     private OSGiChatServiceRegistry registry;
-    
+
     private ServiceRegistration<ChatServiceRegistry> serviceRegistration;
-    
+
     /**
      * Initializes a new {@link ChatActivator}.
      */

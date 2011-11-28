@@ -41,7 +41,7 @@ public class TestEvents extends SmackTestCase
 	{
 		String nodeId = "MyTestNode";
 		PubSubManager creatorMgr = new PubSubManager(getConnection(0), getService());
-		
+
 		LeafNode creatorNode = null;
 		try
 		{
@@ -54,10 +54,10 @@ public class TestEvents extends SmackTestCase
 			else
 				throw e;
 		}
-		
+
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
-		
+
 		assertNotNull(subNode);
 	}
 
@@ -66,7 +66,7 @@ public class TestEvents extends SmackTestCase
 		// Setup event source
 		String nodeId = "TestNode" + System.currentTimeMillis();
 		PubSubManager creatorMgr = new PubSubManager(getConnection(0), getService());
-		
+
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, false, true);
 
 		BlockingQueue<NodeConfigCoordinator> queue = new ArrayBlockingQueue<NodeConfigCoordinator>(3);
@@ -78,8 +78,8 @@ public class TestEvents extends SmackTestCase
 		NodeConfigListener sub1Handler = new NodeConfigCoordinator(queue, "sub1");
 		subNode.subscribe(getConnection(1).getUser());
 		subNode.addConfigurationListener(sub1Handler);
-		
-		ConfigureForm currentConfig = creatorNode.getNodeConfiguration(); 
+
+		ConfigureForm currentConfig = creatorNode.getNodeConfiguration();
 		ConfigureForm form = new ConfigureForm(currentConfig.createAnswerForm());
 		form.setPersistentItems(true);
 		form.setDeliverPayloads(false);
@@ -89,8 +89,8 @@ public class TestEvents extends SmackTestCase
    		ConfigurationEvent event = queue.poll(5, TimeUnit.SECONDS).event;
    		assertEquals(nodeId, event.getNode());
    		assertNull(event.getConfiguration());
-   		
-		currentConfig = creatorNode.getNodeConfiguration(); 
+
+		currentConfig = creatorNode.getNodeConfiguration();
 		form = new ConfigureForm(currentConfig.createAnswerForm());
 		form.setDeliverPayloads(true);
 		creatorNode.sendConfigurationForm(form);
@@ -112,7 +112,7 @@ public class TestEvents extends SmackTestCase
 		BlockingQueue<ItemEventCoordinator<Item>> queue = new ArrayBlockingQueue<ItemEventCoordinator<Item>>(3);
 		ItemEventCoordinator<Item> creatorHandler = new ItemEventCoordinator<Item>(queue, "creator");
 		creatorNode.addItemEventListener(creatorHandler);
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
@@ -120,11 +120,11 @@ public class TestEvents extends SmackTestCase
 		ItemEventCoordinator<Item> sub1Handler = new ItemEventCoordinator<Item>(queue, "sub1");
 		subNode.addItemEventListener(sub1Handler);
 		Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
-		
+
         // Send event
         String itemId = String.valueOf(System.currentTimeMillis());
         creatorNode.send(new Item(itemId));
-        
+
         for(int i=0; i<2; i++)
         {
     		ItemEventCoordinator<Item> coord = queue.take();
@@ -132,7 +132,7 @@ public class TestEvents extends SmackTestCase
         	assertEquals(itemId, coord.events.getItems().iterator().next().getId());
         }
 	}
-	
+
 	public void testPublishAndReceiveNoPayload() throws Exception
 	{
 		// Setup event source
@@ -141,7 +141,7 @@ public class TestEvents extends SmackTestCase
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, true, false);
 
 		BlockingQueue<ItemEventCoordinator<Item>> queue = new ArrayBlockingQueue<ItemEventCoordinator<Item>>(3);
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
@@ -149,11 +149,11 @@ public class TestEvents extends SmackTestCase
 		ItemEventCoordinator<Item> sub1Handler = new ItemEventCoordinator<Item>(queue, "sub1");
 		subNode.addItemEventListener(sub1Handler);
 		Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
-		
+
         // Send event
         String itemId = String.valueOf(System.currentTimeMillis());
         creatorNode.publish(new Item(itemId));
-        
+
    		ItemEventCoordinator<Item> coord = queue.take();
        	assertEquals(1, coord.events.getItems().size());
        	assertEquals(itemId, coord.events.getItems().get(0).getId());
@@ -167,7 +167,7 @@ public class TestEvents extends SmackTestCase
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, true, true);
 
 		BlockingQueue<ItemEventCoordinator<PayloadItem<SimplePayload>>> queue = new ArrayBlockingQueue<ItemEventCoordinator<PayloadItem<SimplePayload>>>(3);
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
@@ -175,12 +175,12 @@ public class TestEvents extends SmackTestCase
 		ItemEventCoordinator<PayloadItem<SimplePayload>> sub1Handler = new ItemEventCoordinator<PayloadItem<SimplePayload>>(queue, "sub1");
 		subNode.addItemEventListener(sub1Handler);
 		Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
-		
+
         // Send event
         String itemId = String.valueOf(System.currentTimeMillis());
         String payloadString = "<book xmlns=\"pubsub:test:book\"><author>Sir Arthur Conan Doyle</author></book>";
         creatorNode.send(new PayloadItem<SimplePayload>(itemId, new SimplePayload("book", "pubsub:test:book", payloadString)));
-        
+
    		ItemEventCoordinator<PayloadItem<SimplePayload>> coord = queue.take();
        	assertEquals(1, coord.events.getItems().size());
        	PayloadItem<SimplePayload> item = coord.events.getItems().get(0);
@@ -192,7 +192,7 @@ public class TestEvents extends SmackTestCase
 
 	/*
 	 * For this test, the following extension needs to be added to the meta-inf/smack.providers file
-	 * 
+	 *
 	 * 	 <extensionProvider>
 	 *     	<elementName>car</elementName>
 	 *      <namespace>pubsub:test:vehicle</namespace>
@@ -208,7 +208,7 @@ public class TestEvents extends SmackTestCase
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, true, true);
 
 		BlockingQueue<ItemEventCoordinator<PayloadItem<CarExtension>>> queue = new ArrayBlockingQueue<ItemEventCoordinator<PayloadItem<CarExtension>>>(3);
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		Node subNode = subMgr.getNode(nodeId);
@@ -216,12 +216,12 @@ public class TestEvents extends SmackTestCase
 		ItemEventCoordinator<PayloadItem<CarExtension>> sub1Handler = new ItemEventCoordinator<PayloadItem<CarExtension>>(queue, "sub1");
 		subNode.addItemEventListener(sub1Handler);
 		Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
-		
+
         // Send event
         String itemId = String.valueOf(System.currentTimeMillis());
         String payloadString = "<car xmlns='pubsub:test:vehicle'><paint color='green'/><tires num='4'/></car>";
         creatorNode.send(new PayloadItem(itemId, new SimplePayload("car", "pubsub:test:vehicle", payloadString)));
-        
+
    		ItemEventCoordinator<PayloadItem<CarExtension>> coord = queue.take();
        	assertEquals(1, coord.events.getItems().size());
        	PayloadItem item = coord.events.getItems().get(0);
@@ -233,7 +233,7 @@ public class TestEvents extends SmackTestCase
        	assertEquals(4, car.getNumTires());
 	}
 */
-	
+
 	public void testSendAndReceiveMultipleSubs() throws Exception
 	{
 		// Setup event source
@@ -244,7 +244,7 @@ public class TestEvents extends SmackTestCase
 		BlockingQueue<ItemEventCoordinator<Item>> queue = new ArrayBlockingQueue<ItemEventCoordinator<Item>>(3);
 		ItemEventCoordinator<Item> creatorHandler = new ItemEventCoordinator<Item>(queue, "creator");
 		creatorNode.addItemEventListener(creatorHandler);
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
@@ -252,7 +252,7 @@ public class TestEvents extends SmackTestCase
 		ItemEventCoordinator<Item> sub1Handler = new ItemEventCoordinator<Item>(queue, "sub1");
 		subNode.addItemEventListener(sub1Handler);
 		Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
-		
+
 		ItemEventCoordinator<Item> sub2Handler = new ItemEventCoordinator<Item>(queue, "sub2");
 		subNode.addItemEventListener(sub2Handler);
 		Subscription sub2 = subNode.subscribe(getConnection(1).getUser());
@@ -260,13 +260,13 @@ public class TestEvents extends SmackTestCase
 		// Send event
         String itemId = String.valueOf(System.currentTimeMillis());
         creatorNode.send(new Item(itemId));
-        
+
         for(int i=0; i<3; i++)
         {
     		ItemEventCoordinator<Item> coord = queue.take();
         	assertEquals(1, coord.events.getItems().size());
         	assertEquals(itemId, coord.events.getItems().iterator().next().getId());
-        	
+
         	if (coord.id.equals("sub1") || coord.id.equals("sub2"))
         	{
         		assertEquals(2, coord.events.getSubscriptions().size());
@@ -279,14 +279,14 @@ public class TestEvents extends SmackTestCase
 		// Setup event source
 		String nodeId = "TestNode" + System.currentTimeMillis();
 		PubSubManager creatorMgr = new PubSubManager(getConnection(0), getService());
-		
+
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, true, true);
 
 		BlockingQueue<ItemEventCoordinator<PayloadItem<SimplePayload>>> queue = new ArrayBlockingQueue<ItemEventCoordinator<PayloadItem<SimplePayload>>>(3);
 		ItemEventCoordinator<PayloadItem<SimplePayload>> creatorHandler = new ItemEventCoordinator<PayloadItem<SimplePayload>>(queue, "creator");
 		creatorNode.addItemEventListener(creatorHandler);
 		creatorNode.subscribe(getConnection(0).getUser());
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
@@ -294,24 +294,24 @@ public class TestEvents extends SmackTestCase
 		ItemEventCoordinator<PayloadItem<SimplePayload>> sub1Handler = new ItemEventCoordinator<PayloadItem<SimplePayload>>(queue, "sub1");
 		subNode.addItemEventListener(sub1Handler);
 		Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
-		
+
 		ItemEventCoordinator<PayloadItem<SimplePayload>> sub2Handler = new ItemEventCoordinator<PayloadItem<SimplePayload>>(queue, "sub2");
 		subNode.addItemEventListener(sub2Handler);
 		Subscription sub2 = subNode.subscribe(getConnection(1).getUser());
-		
+
 		assertEquals(Subscription.State.subscribed, sub1.getState());
 		assertEquals(Subscription.State.subscribed, sub2.getState());
 
         // Send event
         String itemId = String.valueOf(System.currentTimeMillis());
-        
+
         Collection<PayloadItem<SimplePayload>> items = new ArrayList<PayloadItem<SimplePayload>>(3);
         String ids[] = {"First-" + itemId, "Second-" + itemId, "Third-" + itemId};
         items.add(new PayloadItem<SimplePayload>(ids[0], new SimplePayload("a", "pubsub:test", "<a xmlns='pubsub:test' href='1'/>")));
         items.add(new PayloadItem<SimplePayload>(ids[1], new SimplePayload("a", "pubsub:test", "<a xmlns='pubsub:test' href='1'/>")));
         items.add(new PayloadItem<SimplePayload>(ids[2], new SimplePayload("a", "pubsub:test", "<a xmlns='pubsub:test' href='1'/>")));
         creatorNode.send(items);
-        
+
         for(int i=0; i<3; i++)
         {
     		ItemEventCoordinator<PayloadItem<SimplePayload>> coord = queue.poll(5, TimeUnit.SECONDS);
@@ -336,7 +336,7 @@ public class TestEvents extends SmackTestCase
 		// Setup event source
 		String nodeId = "TestNode" + System.currentTimeMillis();
 		PubSubManager creatorMgr = new PubSubManager(getConnection(0), getService());
-		
+
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, true, false);
 
 		// Send event
@@ -366,11 +366,11 @@ public class TestEvents extends SmackTestCase
 		// Setup event source
 		String nodeId = "TestNode" + System.currentTimeMillis();
 		PubSubManager creatorMgr = new PubSubManager(getConnection(0), getService());
-		
+
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, true, false);
 
 		BlockingQueue<ItemDeleteCoordinator> queue = new ArrayBlockingQueue<ItemDeleteCoordinator>(3);
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
@@ -381,7 +381,7 @@ public class TestEvents extends SmackTestCase
 
 		// Send event
         String itemId = String.valueOf(System.currentTimeMillis());
-        
+
         Collection<Item> items = new ArrayList<Item>(3);
         String id1 = "First-" + itemId;
         String id2 = "Second-" + itemId;
@@ -390,9 +390,9 @@ public class TestEvents extends SmackTestCase
         items.add(new Item(id2));
         items.add(new Item(id3));
         creatorNode.send(items);
-        
+
         creatorNode.deleteItem(id1);
-        
+
    		ItemDeleteCoordinator coord = queue.poll(5, TimeUnit.SECONDS);
    		assertEquals(1, coord.event.getItemIds().size());
    		assertEquals(id1, coord.event.getItemIds().get(0));
@@ -410,11 +410,11 @@ public class TestEvents extends SmackTestCase
 		// Setup event source
 		String nodeId = "TestNode" + System.currentTimeMillis();
 		PubSubManager creatorMgr = new PubSubManager(getConnection(0), getService());
-		
+
 		LeafNode creatorNode = getPubnode(creatorMgr, nodeId, true, false);
 
 		BlockingQueue<ItemDeleteCoordinator> queue = new ArrayBlockingQueue<ItemDeleteCoordinator>(3);
-		
+
 		// Setup event receiver
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode = (LeafNode)subMgr.getNode(nodeId);
@@ -425,7 +425,7 @@ public class TestEvents extends SmackTestCase
 
 		// Send event
         String itemId = String.valueOf(System.currentTimeMillis());
-        
+
         Collection<Item> items = new ArrayList<Item>(3);
         String id1 = "First-" + itemId;
         String id2 = "Second-" + itemId;
@@ -434,9 +434,9 @@ public class TestEvents extends SmackTestCase
         items.add(new Item(id2));
         items.add(new Item(id3));
         creatorNode.send(items);
-        
+
         creatorNode.deleteAllItems();
-        
+
    		ItemDeleteCoordinator coord = queue.poll(5, TimeUnit.SECONDS);
    		assertNull(nodeId, coord.event);
 	}
@@ -447,31 +447,31 @@ public class TestEvents extends SmackTestCase
 		String nodeId1 = "Node-1-" + System.currentTimeMillis();
 		PubSubManager creatorMgr = new PubSubManager(getConnection(0), getService());
 		String nodeId2 = "Node-2-" + System.currentTimeMillis();
-		
+
 		LeafNode creatorNode1 = getPubnode(creatorMgr, nodeId1, true, false);
 		LeafNode creatorNode2 = getPubnode(creatorMgr, nodeId2, true, false);
 
 		BlockingQueue<ItemEventCoordinator<Item>> queue = new ArrayBlockingQueue<ItemEventCoordinator<Item>>(3);
-		
+
 		PubSubManager subMgr = new PubSubManager(getConnection(1), getService());
 		LeafNode subNode1 = (LeafNode)subMgr.getNode(nodeId1);
 		LeafNode subNode2 = (LeafNode)subMgr.getNode(nodeId2);
-		
+
 		subNode1.addItemEventListener(new ItemEventCoordinator<Item>(queue, "sub1"));
 		subNode2.addItemEventListener(new ItemEventCoordinator<Item>(queue, "sub2"));
-		
+
 		subNode1.subscribe(getConnection(1).getUser());
 		subNode2.subscribe(getConnection(1).getUser());
-		
+
 		creatorNode1.send(new Item("item1"));
 		creatorNode2.send(new Item("item2"));
 		boolean check1 = false;
 		boolean check2 = false;
-		
+
 		for (int i=0; i<2; i++)
 		{
 			ItemEventCoordinator<Item> event = queue.take();
-			
+
 			if (event.id.equals("sub1"))
 			{
 				assertEquals(event.events.getNodeId(), nodeId1);
@@ -489,17 +489,18 @@ public class TestEvents extends SmackTestCase
 
 	class ItemEventCoordinator <T extends Item> implements ItemEventListener<T>
 	{
-		private BlockingQueue<ItemEventCoordinator<T>> theQueue;
+		private final BlockingQueue<ItemEventCoordinator<T>> theQueue;
 		private ItemPublishEvent<T> events;
-		private String id;
-		
+		private final String id;
+
 		ItemEventCoordinator(BlockingQueue<ItemEventCoordinator<T>> queue, String id)
 		{
 			theQueue = queue;
 			this.id = id;
 		}
 
-		public void handlePublishedItems(ItemPublishEvent<T> items)
+		@Override
+        public void handlePublishedItems(ItemPublishEvent<T> items)
 		{
 			events = items;
 			theQueue.add(this);
@@ -510,22 +511,23 @@ public class TestEvents extends SmackTestCase
 		{
 			return "ItemEventCoordinator: " + id;
 		}
-		
+
 	}
-	
+
 	class NodeConfigCoordinator implements NodeConfigListener
 	{
-		private BlockingQueue<NodeConfigCoordinator> theQueue;
-		private String id;
+		private final BlockingQueue<NodeConfigCoordinator> theQueue;
+		private final String id;
 		private ConfigurationEvent event;
-		
+
 		NodeConfigCoordinator(BlockingQueue<NodeConfigCoordinator> queue, String id)
 		{
 			theQueue = queue;
 			this.id = id;
 		}
 
-		public void handleNodeConfiguration(ConfigurationEvent config)
+		@Override
+        public void handleNodeConfiguration(ConfigurationEvent config)
 		{
 			event = config;
 			theQueue.add(this);
@@ -541,24 +543,26 @@ public class TestEvents extends SmackTestCase
 
 	class ItemDeleteCoordinator implements ItemDeleteListener
 	{
-		private BlockingQueue<ItemDeleteCoordinator> theQueue;
-		private String id;
+		private final BlockingQueue<ItemDeleteCoordinator> theQueue;
+		private final String id;
 		private ItemDeleteEvent event;
-		
+
 		ItemDeleteCoordinator(BlockingQueue<ItemDeleteCoordinator> queue, String id)
 		{
 			theQueue = queue;
 			this.id = id;
 		}
 
-		public void handleDeletedItems(ItemDeleteEvent delEvent)
+		@Override
+        public void handleDeletedItems(ItemDeleteEvent delEvent)
 		{
 			event = delEvent;
 			theQueue.add(this);
 		}
 
 
-		public void handlePurge()
+		@Override
+        public void handlePurge()
 		{
 			event = null;
 			theQueue.add(this);
@@ -571,7 +575,7 @@ public class TestEvents extends SmackTestCase
 		}
 	}
 
-	static private LeafNode getPubnode(PubSubManager manager, String id, boolean persistItems, boolean deliverPayload) 
+	static private LeafNode getPubnode(PubSubManager manager, String id, boolean persistItems, boolean deliverPayload)
 		throws XMPPException
 	{
 		ConfigureForm form = new ConfigureForm(FormType.submit);

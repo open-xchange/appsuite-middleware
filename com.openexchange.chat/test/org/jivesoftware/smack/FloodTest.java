@@ -100,6 +100,7 @@ public class FloodTest extends SmackTestCase {
         }
     }*/
 
+    @Override
     protected int getMaxConnections() {
         return 4;
     }

@@ -52,7 +52,7 @@ package com.openexchange.ajax.folder.api2;
 import java.util.Locale;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -89,7 +89,7 @@ public class Bug15995Test extends AbstractAJAXSession {
     }
 
     public void testGlobalAddressbookName() throws Throwable {
-        GetRequest request = new GetRequest(API.OX_NEW, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        GetRequest request = new GetRequest(EnumAPI.OX_NEW, FolderObject.SYSTEM_LDAP_FOLDER_ID);
         GetResponse response = client.execute(request);
         FolderObject folder = response.getFolder();
         assertEquals("Name of global address book is not set properly.", FolderStrings.SYSTEM_LDAP_FOLDER_NAME, folder.getFolderName());

@@ -362,7 +362,7 @@ public class InfostoreAJAXTest extends AbstractAJAXTest {
         final StringBuffer url = getUrl(sessionId,"new", hostname, protocol);
         final JSONObject obj = toJSONArgs(fields);
 
-        final PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes("UTF-8")),"text/javascript");
+        final PutMethodWebRequest m = new PutMethodWebRequest(url.toString(), new ByteArrayInputStream(obj.toString().getBytes(com.openexchange.java.Charsets.UTF_8)),"text/javascript");
 
         final WebResponse resp = webConv.getResponse(m);
         try {

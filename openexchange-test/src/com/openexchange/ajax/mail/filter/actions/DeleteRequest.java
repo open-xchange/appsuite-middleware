@@ -86,7 +86,8 @@ public class DeleteRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Object getBody() throws JSONException {
+	@Override
+    public Object getBody() throws JSONException {
 		final JSONObject json = new JSONObject();
 		json.put(DataFields.ID, objectId);
 
@@ -96,14 +97,16 @@ public class DeleteRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Method getMethod() {
+	@Override
+    public Method getMethod() {
 		return Method.PUT;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Parameter[] getParameters() {
+	@Override
+    public Parameter[] getParameters() {
 		return new Parameter[] {
 				new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
 				new Parameter(AJAXServlet.PARAMETER_ID, objectId)
@@ -113,7 +116,8 @@ public class DeleteRequest extends AbstractMailFilterRequest {
 	/**
 	 * {@inheritDoc}
 	 */
-	public AbstractAJAXParser getParser() {
+	@Override
+    public AbstractAJAXParser getParser() {
 		return new DeleteParser(failOnError);
 	}
 }

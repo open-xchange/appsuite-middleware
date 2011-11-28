@@ -67,7 +67,7 @@ public class ThreadLocalSessionHolder implements SessionHolder {
 
     /**
      * Gets the instance.
-     * 
+     *
      * @return The instance
      */
     public static ThreadLocalSessionHolder getInstance() {

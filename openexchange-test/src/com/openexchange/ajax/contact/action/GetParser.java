@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class GetParser extends AbstractAJAXParser<GetResponse> {
 
-    private TimeZone timeZone;
+    private final TimeZone timeZone;
 
     GetParser(boolean failOnError, TimeZone timeZone) {
         super(failOnError);

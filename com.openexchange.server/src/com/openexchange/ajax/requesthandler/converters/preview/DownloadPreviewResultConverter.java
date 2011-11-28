@@ -73,15 +73,15 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class DownloadPreviewResultConverter extends AbstractPreviewResultConverter {
-    
-    
+
+
     /**
      * Initializes a new {@link DownloadPreviewResultConverter}.
      */
     public DownloadPreviewResultConverter() {
         super();
     }
-    
+
     @Override
     public String getInputFormat() {
         return "preview";
@@ -101,11 +101,11 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
     public PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
-    
+
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         super.convert(requestData, result, session, converter);
-        
+
         /*
          * Provide URL to document
          */
@@ -116,7 +116,7 @@ public class DownloadPreviewResultConverter extends AbstractPreviewResultConvert
             final File tempFile = fileManagement.newTempFile();
             final FileOutputStream fos = new FileOutputStream(tempFile);
             try {
-                fos.write(previewDocument.getContent().getBytes("UTF-8"));
+                fos.write(previewDocument.getContent().getBytes(com.openexchange.java.Charsets.UTF_8));
                 fos.flush();
             } finally {
                 Streams.close(fos);

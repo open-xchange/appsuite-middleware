@@ -83,6 +83,7 @@ public final class DeleteRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public JSONObject getBody() throws JSONException {
         final JSONArray array = new JSONArray();
         final JSONArray linkTarget = new JSONArray();
@@ -98,6 +99,7 @@ public final class DeleteRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -105,6 +107,7 @@ public final class DeleteRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE),
@@ -117,6 +120,7 @@ public final class DeleteRequest extends AbstractLinkRequest {
     /**
      * {@inheritDoc}
      */
+    @Override
     public CommonDeleteParser getParser() {
         return new CommonDeleteParser(failOnError);
     }

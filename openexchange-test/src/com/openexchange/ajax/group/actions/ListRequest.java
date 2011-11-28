@@ -85,6 +85,7 @@ public final class ListRequest extends AbstractGroupRequest<ListResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         final JSONArray json = new JSONArray();
         for (final int groupId : groupIds) {
@@ -98,6 +99,7 @@ public final class ListRequest extends AbstractGroupRequest<ListResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -105,6 +107,7 @@ public final class ListRequest extends AbstractGroupRequest<ListResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LIST)
@@ -114,6 +117,7 @@ public final class ListRequest extends AbstractGroupRequest<ListResponse> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public ListParser getParser() {
         return new ListParser(failOnError);
     }

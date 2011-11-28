@@ -1110,9 +1110,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         for (final Attribute attribute : orderedAttributes) {
                             attribute.doSwitch(sqlBuilder);
                         }
-    
+
                         stmt = con.prepareStatement(sqlBuilder.getUpdateQuery());
-    
+
                         final GetSwitch getter = new GetSwitch(mailAccount);
                         pos = 1;
                         for (final Attribute attribute : orderedAttributes) {
@@ -1151,17 +1151,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 stmt.setObject(pos++, value);
                             }
                         }
-    
+
                         stmt.setLong(pos++, cid);
                         stmt.setLong(pos++, mailAccount.getId());
                         stmt.setLong(pos++, user);
-    
+
                         if (LOG.isDebugEnabled()) {
                             final String query = stmt.toString();
                             LOG.debug(new StringBuilder(query.length() + 32).append("Trying to perform SQL update query for attributes ").append(
                                 orderedAttributes).append(" :\n").append(query.substring(query.indexOf(':') + 1)));
                         }
-    
+
                         stmt.executeUpdate();
                         closeSQLStuff(stmt);
                     } else {

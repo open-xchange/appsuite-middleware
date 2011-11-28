@@ -64,6 +64,7 @@ public class PacketTypeFilterTest extends TestCase {
 
     private class InnerClassDummy {
         public class DummyPacket extends Packet {
+            @Override
             public String toXML() {
                 return null;
             }
@@ -75,6 +76,7 @@ public class PacketTypeFilterTest extends TestCase {
 
     private static class StaticInnerClassDummy {
         public static class StaticDummyPacket extends Packet {
+            @Override
             public String toXML() {
                 return null;
             }

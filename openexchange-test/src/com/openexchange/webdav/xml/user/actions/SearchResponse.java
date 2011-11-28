@@ -85,6 +85,7 @@ public final class SearchResponse extends AbstractWebDAVResponse implements Iter
         this.contacts = contacts;
     }
 
+    @Override
     public Iterator<Contact> iterator() {
         return Arrays.asList(contacts).iterator();
     }

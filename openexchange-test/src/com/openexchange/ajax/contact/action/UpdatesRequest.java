@@ -58,7 +58,7 @@ import com.openexchange.groupware.search.Order;
  */
 public class UpdatesRequest extends AbstractUpdatesRequest<ContactUpdatesResponse> {
 
-    private int[] columns;
+    private final int[] columns;
 
     /**
      * @param folderId
@@ -80,6 +80,7 @@ public class UpdatesRequest extends AbstractUpdatesRequest<ContactUpdatesRespons
         this.columns = columns;
     }
 
+    @Override
     public ContactUpdatesParser getParser() {
         return new ContactUpdatesParser(true, columns);
     }

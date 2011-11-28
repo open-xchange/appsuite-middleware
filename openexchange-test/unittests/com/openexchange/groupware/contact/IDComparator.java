@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class IDComparator implements Comparator<Contact> {
 
+    @Override
     public int compare(Contact o1, Contact o2) {
         return o1.getObjectID() - o2.getObjectID();
     }

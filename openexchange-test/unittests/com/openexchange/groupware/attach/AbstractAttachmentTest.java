@@ -35,17 +35,21 @@ public abstract class AbstractAttachmentTest extends TestCase {
 
 
 	public static class INTEGRATION implements Mode {
-		public void setUp() throws Exception {
+		@Override
+        public void setUp() throws Exception {
 	        Init.startServer();
 		}
+        @Override
         public void tearDown() throws Exception {
             Init.stopServer();
         }
 	}
 
 	public static class ISOLATION implements Mode {
-		public void setUp() throws Exception {
+		@Override
+        public void setUp() throws Exception {
 	    }
+        @Override
         public void tearDown() throws Exception {
         }
 	}

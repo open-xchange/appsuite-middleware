@@ -116,9 +116,9 @@ public interface AppointmentSQLInterface {
      * @return a boolean[] that contains true if the user has an appointment on this day or false if not
      */
     public boolean[] hasAppointmentsBetween(Date start, Date end) throws OXException;
-    
+
     public List<Appointment> getAppointmentsWithExternalParticipantBetween(String email, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException;
-    
+
     public List<Appointment> getAppointmentsWithUserBetween(User user, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException;
 
     /**

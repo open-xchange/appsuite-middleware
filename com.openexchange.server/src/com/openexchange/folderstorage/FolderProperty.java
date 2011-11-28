@@ -51,7 +51,7 @@ package com.openexchange.folderstorage;
 
 /**
  * {@link FolderProperty} - A folder property.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FolderProperty {
@@ -62,7 +62,7 @@ public final class FolderProperty {
 
     /**
      * Initializes a new {@link FolderProperty}.
-     * 
+     *
      * @param name The property name
      * @param value The property value
      */
@@ -74,7 +74,7 @@ public final class FolderProperty {
 
     /**
      * Gets the name.
-     * 
+     *
      * @return The name
      */
     public String getName() {
@@ -83,7 +83,7 @@ public final class FolderProperty {
 
     /**
      * Gets the value.
-     * 
+     *
      * @return The value
      */
     public Object getValue() {

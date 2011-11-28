@@ -70,10 +70,12 @@ public abstract class AbstractResourceRequest<T extends AbstractAJAXResponse> im
         super();
     }
 
+    @Override
     public String getServletPath() {
         return RESOURCE_URL;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

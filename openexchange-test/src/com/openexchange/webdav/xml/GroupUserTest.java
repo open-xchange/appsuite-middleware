@@ -160,7 +160,7 @@ public class GroupUserTest extends AbstractWebdavXMLTest {
 		final PropFindMethod propFindMethod = new PropFindMethod(host + GROUPUSER_URL);
 		propFindMethod.setDoAuthentication( true );
 
-        LOG.debug("Request Body: " + new String(baos.toByteArray(), "UTF-8"));
+        LOG.debug("Request Body: " + new String(baos.toByteArray(), com.openexchange.java.Charsets.UTF_8));
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		propFindMethod.setRequestBody(bais);
 

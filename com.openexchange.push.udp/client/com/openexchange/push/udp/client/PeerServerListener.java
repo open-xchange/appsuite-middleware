@@ -103,7 +103,7 @@ public class PeerServerListener {
         System.out.println("I'm listenin'");
         try {
             mySocket.receive(datagramPacket);
-            String[] event = new String(datagramPacket.getData(), "UTF-8").split("\1");
+            String[] event = new String(datagramPacket.getData(), com.openexchange.java.Charsets.UTF_8).split("\1");
 
             StringBuilder b = new StringBuilder();
             for (String string : event) {
@@ -126,7 +126,7 @@ public class PeerServerListener {
             }
             b.setLength(b.length()-1);
             StringBuilder b2 = new StringBuilder().append(PushRequest.MAGIC).append("\1").append(b.length()).append("\1").append(b);
-            data = b2.toString().getBytes("US-ASCII");
+            data = b2.toString().getBytes(com.openexchange.java.Charsets.US_ASCII);
             DatagramPacket datagramPackage = new DatagramPacket(data, data.length, remoteAddress, remotePort);
             mySocket.send(datagramPackage);
         } catch (UnsupportedEncodingException e) {

@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.kata.folders;
 
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -63,7 +63,7 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderMoveStep extends NeedExistingStep<FolderObject> {
 
-    private int destinationFolder;
+    private final int destinationFolder;
 
     /**
      * @param name
@@ -77,6 +77,7 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#cleanUp()
      */
+    @Override
     public void cleanUp() throws Exception {
         // TODO Auto-generated method stub
 
@@ -85,6 +86,7 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
     /* (non-Javadoc)
      * @see com.openexchange.ajax.kata.Step#perform(com.openexchange.ajax.framework.AJAXClient)
      */
+    @Override
     public void perform(AJAXClient myClient) throws Exception {
         this.client = myClient;
 
@@ -92,7 +94,7 @@ public class FolderMoveStep extends NeedExistingStep<FolderObject> {
         assumeIdentity(entry);
         entry.setParentFolderID(destinationFolder);
 
-        UpdateRequest updateRequest = new UpdateRequest(API.OX_OLD, entry, false);
+        UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_OLD, entry, false);
         CommonInsertResponse updateResponse = execute(updateRequest);
 
         if(!updateResponse.hasError()) {

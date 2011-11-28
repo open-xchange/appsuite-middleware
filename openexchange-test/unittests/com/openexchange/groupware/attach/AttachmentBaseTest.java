@@ -185,7 +185,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             }
          }
          assertFalse(0 == attachment.getId());
-         final byte[] data  = "Hallo Welt".getBytes("UTF-8");
+         final byte[] data  = "Hallo Welt".getBytes(com.openexchange.java.Charsets.UTF_8);
 
          attachment.setFilesize(data.length);
          final Date oldCreationDate = attachment.getCreationDate();
@@ -208,7 +208,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
          while((b = in.read()) != -1) {
              out.write(b);
          }
-         assertEquals("Hallo Welt", new String(out.toByteArray(), "UTF-8"));
+         assertEquals("Hallo Welt", new String(out.toByteArray(), com.openexchange.java.Charsets.UTF_8));
     }
 
     public void doAttach(final int folderId, final int attachedId, final int moduleId) throws Exception{
@@ -638,22 +638,26 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
     public static class ISOLATION extends AbstractAttachmentTest.ISOLATION implements Mode {
 
+        @Override
         public DBProvider getProvider() {
             // TODO Auto-generated method stub
             return null;
         }
 
 
+        @Override
         public Context getContext() {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public User getUser() {
             // TODO Auto-generated method stub
             return null;
         }
 
+        @Override
         public Session getSession() {
             // TODO Auto-generated method stub
             return null;
@@ -663,14 +667,17 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
     public static class INTEGRATION extends AbstractAttachmentTest.INTEGRATION implements Mode {
 
+        @Override
         public DBProvider getProvider() {
             return new DBPoolProvider();
         }
 
+        @Override
         public Session getSession() {
             return SessionObjectWrapper.createSessionObject(getUser().getId(), getContext(), String.valueOf(System.currentTimeMillis()));
         }
 
+        @Override
         public Context getContext()  {
             try {
                 final TestConfig config = new TestConfig();
@@ -683,6 +690,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             }
         }
 
+        @Override
         public User getUser() {
             try {
                 final UserStorage users = UserStorage.getInstance();
@@ -705,6 +713,7 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
     public static class STATIC extends AbstractAttachmentTest.ISOLATION implements Mode {
 
+        @Override
         public DBProvider getProvider() {
             final ConfigurableDBProvider provider = new ConfigurableDBProvider();
             try {
@@ -719,14 +728,17 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
             return provider;
         }
 
+        @Override
         public Session getSession() {
             return SessionObjectWrapper.createSessionObject(getUser().getId(), getContext(), String.valueOf(System.currentTimeMillis()));
         }
 
+        @Override
         public Context getContext() {
             return new ContextImpl(1);
         }
 
+        @Override
         public User getUser() {
             final MockUser u = new MockUser(23);
             return u;
@@ -742,11 +754,13 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
         private AttachmentEvent e;
 
+        @Override
         public long attached(final AttachmentEvent e) throws Exception {
             this.e = e;
             return System.currentTimeMillis();
         }
 
+        @Override
         public long detached(final AttachmentEvent e) throws Exception {
             this.e = e;
             return System.currentTimeMillis();
@@ -762,16 +776,19 @@ public class AttachmentBaseTest extends AbstractAttachmentTest {
 
         private int checked = -1;
 
+        @Override
         public void checkMayAttach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
             checked = 1;
             throw OXException.noPermissionForModule(Module.INFOSTORE.getName());
         }
 
+        @Override
         public void checkMayDetach(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
             checked = 2;
             throw OXException.noPermissionForModule(Module.INFOSTORE.getName());
         }
 
+        @Override
         public void checkMayReadAttachments(final int folderId, final int objectId, final User user, final UserConfiguration userConfig, final Context ctx) throws OXException {
             checked = 3;
             throw OXException.noPermissionForModule(Module.INFOSTORE.getName());

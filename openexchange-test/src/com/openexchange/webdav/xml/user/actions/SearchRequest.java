@@ -73,10 +73,12 @@ public final class SearchRequest extends AbstractGroupUserRequest<SearchResponse
         super();
     }
 
+    @Override
     public Method getMethod() {
         return Method.PROPFIND;
     }
 
+    @Override
     public RequestEntity getEntity() throws IOException {
         final Element users = new Element("user", NS);
         users.addContent("*");
@@ -89,6 +91,7 @@ public final class SearchRequest extends AbstractGroupUserRequest<SearchResponse
         return new ByteArrayRequestEntity(baos.toByteArray());
     }
 
+    @Override
     public SearchParser getParser() {
         return new SearchParser();
     }

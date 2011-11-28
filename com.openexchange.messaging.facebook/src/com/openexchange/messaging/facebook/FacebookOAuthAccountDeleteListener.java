@@ -93,7 +93,8 @@ public final class FacebookOAuthAccountDeleteListener implements OAuthAccountDel
             }
         }
     }
-    
+
+    @Override
     public void onAfterOAuthAccountInvalidation(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         FacebookOAuthAccessRegistry.getInstance().purgeUserAccess(cid, user, id);
     }

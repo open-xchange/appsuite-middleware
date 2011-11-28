@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JSONRosterWriter} - Provides write methods.
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONRosterWriter {
@@ -78,7 +78,7 @@ public final class JSONRosterWriter {
 
     /**
      * Writes specified roster to its JSON representation.
-     * 
+     *
      * @param roster The roster
      * @param rosterId The roster identifier
      * @param timeZone The time zone
@@ -104,7 +104,7 @@ public final class JSONRosterWriter {
 
     /**
      * Writes specified chat user to its JSON representation.
-     * 
+     *
      * @param chatUser The chat user
      * @param optPresence The optional presence
      * @param optTimeZone The user's time zone
@@ -117,7 +117,7 @@ public final class JSONRosterWriter {
 
     /**
      * Writes specified chat user to its JSON representation.
-     * 
+     *
      * @param chatUser The chat user
      * @param optPresence The optional presence
      * @param optTimeZone The user's time zone
@@ -137,7 +137,7 @@ public final class JSONRosterWriter {
 
     /**
      * Writes specified presence to its JSON representation.
-     * 
+     *
      * @param presence The presence
      * @return The JSON object
      * @throws JSONException If a JSON error occurs
@@ -148,7 +148,7 @@ public final class JSONRosterWriter {
 
     /**
      * Writes specified presence to its JSON representation.
-     * 
+     *
      * @param presence The presence
      * @return The JSON object
      * @throws JSONException If a JSON error occurs

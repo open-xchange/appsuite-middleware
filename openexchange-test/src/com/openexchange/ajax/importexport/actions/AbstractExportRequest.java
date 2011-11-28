@@ -76,18 +76,22 @@ public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> impl
         this.folderId = folderId;
     }
 
+    @Override
     public Object getBody() {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
@@ -95,6 +99,7 @@ public abstract class AbstractExportRequest<T extends AbstractAJAXResponse> impl
         };
     }
 
+    @Override
     public String getServletPath() {
         return EXPORT_URL;
     }

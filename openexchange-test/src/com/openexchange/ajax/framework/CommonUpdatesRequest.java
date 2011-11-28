@@ -66,6 +66,7 @@ public class CommonUpdatesRequest<T extends CommonUpdatesResponse> extends Abstr
         super(servletPath, folderId, columns, sort, order, lastModified, ignore, failOnError);
     }
 
+    @Override
     public CommonUpdatesParser<T> getParser() {
         return new CommonUpdatesParser<T>(isFailOnError(), getColumns());
     }

@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.action.Move;
  */
 public class MoveWriterImpl implements ActionWriter {
 
-	public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
+	@Override
+    public JSONObject writeAction(final String name, final AbstractAction abstractAction) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 		final Move moveAction = (Move)abstractAction;
 

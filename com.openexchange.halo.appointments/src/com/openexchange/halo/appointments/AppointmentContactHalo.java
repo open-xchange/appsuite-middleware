@@ -18,7 +18,7 @@ import com.openexchange.tools.session.ServerSession;
 
 public class AppointmentContactHalo implements HaloContactDataSource {
 
-	private ServiceLookup services;
+	private final ServiceLookup services;
 
 	public AppointmentContactHalo(
 			ServiceLookup services) {
@@ -34,7 +34,7 @@ public class AppointmentContactHalo implements HaloContactDataSource {
 	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req,
 			ServerSession session) throws OXException {
 		AppointmentSQLInterface appointmentService = getAppointmentService(session);
-		
+
 		int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
 		String parameterStart = req.checkParameter(AJAXServlet.PARAMETER_START);
 		Date start = new Date(Long.parseLong(parameterStart));
@@ -44,28 +44,28 @@ public class AppointmentContactHalo implements HaloContactDataSource {
         int orderBy = parameterSort == null ? 0 : Integer.parseInt(parameterSort);
         String parameterOrder = req.getParameter(AJAXServlet.PARAMETER_ORDER);
         Order order = OrderFields.parse(parameterOrder);
-        
+
 		List<Appointment> appointments = null;
 		if (query.getUser() != null) {
 		    appointments = appointmentService.getAppointmentsWithUserBetween(query.getUser(), columns, start, end, orderBy, order);
 		} else {
 		    appointments = appointmentService.getAppointmentsWithExternalParticipantBetween(query.getContact().getEmail1(), columns, start, end, orderBy, order);
 		}
-		
+
 //		//TODO: Construct a list of appointments with the given user and the session user in the near future
 //		CalendarDataObject cdo1 = new CalendarDataObject();
 //		cdo1.setTitle("An Appointment");
 //		cdo1.setStartDate(new Date());
 //		cdo1.setEndDate(new Date());
-//		
+//
 //		CalendarDataObject cdo2 = new CalendarDataObject();
 //		cdo2.setTitle("Another Appointment");
 //		cdo2.setStartDate(new Date());
 //		cdo2.setEndDate(new Date());
-		
+
 		return new AJAXRequestResult(appointments, "appointment");
 	}
-	
+
 	public AppointmentSQLInterface getAppointmentService(ServerSession session) {
 		AppointmentSqlFactoryService factoryService = services.getService(AppointmentSqlFactoryService.class);
 		return factoryService.createAppointmentSql(session);

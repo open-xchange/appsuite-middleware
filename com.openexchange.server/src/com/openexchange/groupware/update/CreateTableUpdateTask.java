@@ -69,7 +69,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     /**
      * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
-     * 
+     *
      * @param create The create-table service
      * @param dependencies The dependencies to preceding update tasks
      * @param version The version number

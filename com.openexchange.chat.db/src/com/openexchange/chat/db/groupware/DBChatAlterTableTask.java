@@ -71,17 +71,17 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class DBChatAlterTableTask extends UpdateTaskAdapter {
-    
+
     private static final String TABLE_CHAT_MEMBER = "chatMember";
     private static final String TABLE_CHAT_MESSAGE = "chatMessage";
     private static final String TABLE_CHAT_CHUNK = "chatChunk";
-    
+
     private static final String ALTER_CHAT_MEMBER_1 = "ALTER TABLE "+TABLE_CHAT_MEMBER +" ADD chunkId INT4 UNSIGNED NOT NULL";
-    
+
     private static final String ALTER_CHAT_MEMBER_2 = "ALTER TABLE "+TABLE_CHAT_MEMBER+" ADD lastPoll BIGINT(64) DEFAULT NULL";
-    
+
     private static final String ALTER_CHAT_MESSAGE = "ALTER TABLE "+TABLE_CHAT_MESSAGE+" ADD chunkId INT4 UNSIGNED NOT NULL";
-    
+
     private static final String CREATE_CHAT_CHUNK = "CREATE TABLE "+TABLE_CHAT_CHUNK+" (\n" +
         " cid INT4 unsigned NOT NULL,\n" +
         " chatId INT4 unsigned NOT NULL,\n" +
@@ -92,6 +92,14 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
         " INDEX `chat` (cid, chatId)\n" +
         " -- INDEX `userMessage` (cid, user, chatId)\n" +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+
+    
+    /**
+     * Initializes a new {@link DBChatAlterTableTask}.
+     */
+    public DBChatAlterTableTask() {
+        super();
+    }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
@@ -123,7 +131,7 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[]{DBChatCreateTableTask.class.getName()};
     }
-    
+
     private void alterChatMember(final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -148,13 +156,13 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
                 stmt = con.prepareStatement(DBChatCreateTableService.getCreateStmts()[1]);
                 stmt.execute();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
     }
-    
+
     private void alterChatMessage(final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -173,13 +181,13 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
                 stmt = con.prepareStatement(DBChatCreateTableService.getCreateStmts()[2]);
                 stmt.execute();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
     }
-    
+
     private void alterChatChunk(final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
@@ -189,7 +197,7 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
                 stmt = con.prepareStatement(CREATE_CHAT_CHUNK);
                 stmt.execute();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);

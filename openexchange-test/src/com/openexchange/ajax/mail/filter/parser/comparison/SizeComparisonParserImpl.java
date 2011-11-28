@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.comparison.SizeComparison;
  */
 public class SizeComparisonParserImpl implements ComparisonParser {
 
-	public AbstractComparison parseComparison(final String name, final JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractComparison parseComparison(final String name, final JSONObject jsonObject) throws JSONException {
 		final JSONObject jsonObj = new JSONObject();
 
 		int size = jsonObj.getInt("size");

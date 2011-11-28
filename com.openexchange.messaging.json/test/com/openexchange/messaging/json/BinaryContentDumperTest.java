@@ -77,7 +77,7 @@ public class BinaryContentDumperTest extends TestCase {
     }
 
     public void testDump() throws OXException, IOException {
-        final InputStream is = new ByteArrayInputStream("Hello World".getBytes("UTF-8"));
+        final InputStream is = new ByteArrayInputStream("Hello World".getBytes(com.openexchange.java.Charsets.UTF_8));
         final BinaryContent content = getBinaryContent(is);
 
         final ByteArrayOutputStream bout = new ByteArrayOutputStream();

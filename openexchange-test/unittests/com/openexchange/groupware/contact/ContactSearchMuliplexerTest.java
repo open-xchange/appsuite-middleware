@@ -145,84 +145,101 @@ public class ContactSearchMuliplexerTest extends TestCase {
 
         return new ContactSQLInterface() {
 
+            @Override
             public void deleteContactObject(final int objectId, final int inFolder, final Date clientLastModified) throws OXException, OXException, OXException {
                 // TODO Auto-generated method stub
 
             }
 
+            @Override
             public void insertContactObject(final Contact contactObj) throws OXException {
                 // TODO Auto-generated method stub
 
             }
 
+            @Override
             public void updateContactObject(final Contact contactObj, final int inFolder, final Date clientLastModified) throws OXException, OXException {
                 // TODO Auto-generated method stub
 
             }
 
+            @Override
             public void updateUserContact(Contact contact, Date lastmodified) throws OXException {
                 // Nothing to do.
             }
 
+            @Override
             public SearchIterator<Contact> getContactsByExtendedSearch(final ContactSearchObject searchobject, final int orderBy, final Order order, final String collation, final int[] cols) throws OXException {
                 return new SearchIteratorAdapter<Contact>(contacts.iterator());
             }
 
+            @Override
             public SearchIterator<Contact> getContactsInFolder(final int folderId, final int from, final int to, final int orderBy, final Order order, String collation, final int[] cols) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public SearchIterator<Contact> getDeletedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public int getFolderId() {
                 // TODO Auto-generated method stub
                 return 0;
             }
 
+            @Override
             public LdapServer getLdapServer() {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public SearchIterator<Contact> getModifiedContactsInFolder(final int folderId, final int[] cols, final Date since) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public int getNumberOfContacts(final int folderId) throws OXException {
                 // TODO Auto-generated method stub
                 return 0;
             }
 
+            @Override
             public Contact getObjectById(final int objectId, final int inFolder) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public SearchIterator<Contact> getObjectsById(final int[][] objectIdAndInFolder, final int[] cols) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public Contact getUserById(final int userId, final boolean performReadCheck) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public Contact[] getUsersById(int[] userIds, boolean performReadCheck) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public Contact getUserById(final int userId) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
             }
 
+            @Override
             public SearchIterator<Contact> searchContacts(final String searchpattern, final int folderId, final int orderBy, final Order order, final int[] cols) throws OXException {
                 // TODO Auto-generated method stub
                 return null;
@@ -253,7 +270,8 @@ public class ContactSearchMuliplexerTest extends TestCase {
 
             }
 
-			public <T> SearchIterator<Contact> getContactsByExtendedSearch(
+			@Override
+            public <T> SearchIterator<Contact> getContactsByExtendedSearch(
 					SearchTerm<T> searchterm, int orderBy, Order order,
 					String collation, int[] cols) throws OXException {
                 return new SearchIteratorAdapter<Contact>(contacts.iterator());

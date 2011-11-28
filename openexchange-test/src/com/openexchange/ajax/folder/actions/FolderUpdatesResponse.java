@@ -64,7 +64,7 @@ import com.openexchange.groupware.container.FolderObject;
 public class FolderUpdatesResponse extends CommonUpdatesResponse {
 
     private List<FolderObject> folders = new ArrayList<FolderObject>();
-    private List<Integer> deleted = new ArrayList<Integer>();
+    private final List<Integer> deleted = new ArrayList<Integer>();
 
     public FolderUpdatesResponse(Response response) {
         super(response);

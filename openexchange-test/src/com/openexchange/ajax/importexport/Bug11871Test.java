@@ -55,7 +55,7 @@ import java.util.TimeZone;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -94,7 +94,7 @@ public final class Bug11871Test extends AbstractAJAXSession {
         {
             folder.setParentFolderID(folderId);
             final CommonInsertResponse response = Executor.execute(myClient,
-                new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+                new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
             folder.setObjectID(response.getId());
             folder.setLastModified(response.getTimestamp());
         }
@@ -134,7 +134,7 @@ public final class Bug11871Test extends AbstractAJAXSession {
         } finally {
             Executor.execute(myClient, new DeleteRequest(appointment.getObjectID(),
                 appointment.getParentFolderID(), appointment.getLastModified()));
-            Executor.execute(myClient, new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(),
+            Executor.execute(myClient, new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(),
                 folder.getLastModified()));
         }
     }

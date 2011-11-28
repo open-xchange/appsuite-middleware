@@ -67,11 +67,11 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 public class IndexDeleteListener implements DeleteListener {
-    
+
     public IndexDeleteListener() {
         super();
     }
-    
+
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (event.getType() == DeleteEvent.TYPE_USER) {
@@ -94,7 +94,7 @@ public class IndexDeleteListener implements DeleteListener {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-        }        
+        }
     }
 
     private void deleteUserEntriesFromDB(DeleteEvent event, Connection writeCon) throws OXException {
@@ -110,7 +110,7 @@ public class IndexDeleteListener implements DeleteListener {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-        }        
+        }
     }
 
 }

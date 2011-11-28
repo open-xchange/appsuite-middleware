@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link LanguageDetectionService}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface LanguageDetectionService {
@@ -72,7 +72,7 @@ public interface LanguageDetectionService {
      * <p>
      * If more than one language matches, other languages are reported (in decreasing order of probability) in the list. If more than the
      * maximum number of matched languages are matched, an "UNKNOWN" language is reported.
-     * 
+     *
      * @param input The (textual) input data
      * @return The detected language(s)
      * @throws OXException OIf language detection fails for any reason
@@ -84,7 +84,7 @@ public interface LanguageDetectionService {
      * <p>
      * If more than one language matches, other languages are reported (in decreasing order of probability) in the list. If more than the
      * maximum number of matched languages are matched, an "UNKNOWN" language is reported.
-     * 
+     *
      * @param input The (textual) input data
      * @return The detected language(s)
      * @throws OXException OIf language detection fails for any reason
@@ -96,7 +96,7 @@ public interface LanguageDetectionService {
      * <p>
      * If more than one language matches, other languages are reported (in decreasing order of probability) in the list. If more than the
      * maximum number of matched languages are matched, an "UNKNOWN" language is reported.
-     * 
+     *
      * @param input The (textual) input data
      * @return The detected language(s)
      * @throws OXException OIf language detection fails for any reason

@@ -88,7 +88,7 @@ public final class NewMessageChatConversationRequest extends AbstractChatConvers
     public void setConversationId(final ConversationID conversationId) {
         this.conversationId = conversationId;
     }
-    
+
     /**
      * Sets the message
      *

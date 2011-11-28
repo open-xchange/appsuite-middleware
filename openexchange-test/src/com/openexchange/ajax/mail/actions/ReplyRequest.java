@@ -145,10 +145,12 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         this.failOnError = failOnError;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         return Method.GET;
     }
@@ -157,6 +159,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         return Mail.ACTION_REPLY;
     }
 
+    @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
         List<Parameter> list = new LinkedList<Parameter>();
 
@@ -169,6 +172,7 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         return list.toArray(new Parameter[list.size()]);
     }
 
+    @Override
     public AbstractAJAXParser<? extends ReplyResponse> getParser() {
         return new AbstractAJAXParser<ReplyResponse>(failOnError) {
             @Override

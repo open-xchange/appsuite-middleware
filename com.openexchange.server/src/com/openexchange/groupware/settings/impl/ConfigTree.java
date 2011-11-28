@@ -78,7 +78,7 @@ public final class ConfigTree {
     /**
      * Set of all identifiers for the database to check for duplicate ones.
      */
-    private Set<Integer> dbIdentifier = new HashSet<Integer>();
+    private final Set<Integer> dbIdentifier = new HashSet<Integer>();
 
     /**
      * Prevent instantiation
@@ -231,6 +231,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.CalendarNotification.class,
             com.openexchange.groupware.settings.tree.ContactID.class,
             com.openexchange.groupware.settings.tree.ContextID.class,
+            com.openexchange.groupware.settings.tree.Login.class,
             com.openexchange.groupware.settings.tree.CookieLifetime.class,
             com.openexchange.groupware.settings.tree.CurrentTime.class,
             com.openexchange.groupware.settings.tree.FastGUI.class,

@@ -38,6 +38,7 @@ public class GroupwareTests extends AJAXTest {
         CookieProperties.setPathMatchingStrict(false);
         CookieProperties.addCookieListener(new CookieListener() {
 
+            @Override
             public void cookieRejected(String cookieName, int reason, String attribute) {
                 System.out.println("Cookie: " + cookieName + " was rejected due to " + reason + " ; attribute " + attribute);
             }

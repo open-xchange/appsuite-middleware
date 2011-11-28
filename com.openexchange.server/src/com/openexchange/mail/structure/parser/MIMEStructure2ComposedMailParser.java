@@ -322,7 +322,7 @@ public final class MIMEStructure2ComposedMailParser {
                         /*
                          * Treat as an attachment
                          */
-                        addAsAttachment(jsonBody.getString("data").getBytes("US-ASCII"), contentType, headers);
+                        addAsAttachment(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII), contentType, headers);
                     }
                 } else {
                     if (null == textBodyPart) {
@@ -333,26 +333,22 @@ public final class MIMEStructure2ComposedMailParser {
                         /*
                          * Treat as an attachment
                          */
-                        addAsAttachment(jsonBody.getString("data").getBytes("US-ASCII"), contentType, headers);
+                        addAsAttachment(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII), contentType, headers);
                     }
                 }
             } else {
-                addAsAttachment(jsonBody.getString("data").getBytes("US-ASCII"), contentType, headers);
+                addAsAttachment(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII), contentType, headers);
             }
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final UnsupportedEncodingException e) {
-            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 
     private void parseSimpleBodyBinary(final JSONObject jsonBody, final ContentType contentType, final Map<String, String> headers) throws OXException {
         try {
-            addAsAttachment(Base64.decodeBase64(jsonBody.getString("data").getBytes("US-ASCII")), contentType, headers);
+            addAsAttachment(Base64.decodeBase64(jsonBody.getString("data").getBytes(com.openexchange.java.Charsets.US_ASCII)), contentType, headers);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final UnsupportedEncodingException e) {
-            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }
 

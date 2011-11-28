@@ -1,11 +1,7 @@
 package com.openexchange.ajax.task;
 
 import java.util.TimeZone;
-
 import junit.framework.AssertionFailedError;
-
-import net.fortuna.ical4j.util.TimeZones;
-
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.task.actions.DeleteRequest;
@@ -18,7 +14,7 @@ import com.openexchange.ajax.task.actions.UpdateResponse;
 import com.openexchange.groupware.tasks.Task;
 
 public class Bug20008Test extends AbstractAJAXSession {
-    
+
     private AJAXClient client;
     private Task task;
     private TimeZone tz;
@@ -26,7 +22,7 @@ public class Bug20008Test extends AbstractAJAXSession {
     public Bug20008Test(String name) {
         super(name);
     }
-    
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -43,14 +39,14 @@ public class Bug20008Test extends AbstractAJAXSession {
         InsertResponse response = client.execute(request);
         response.fillTask(task);
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
         DeleteRequest delete = new DeleteRequest(task);
         client.execute(delete);
         super.tearDown();
     }
-    
+
     public void testUpdate() throws Throwable {
         task.setActualDuration(null);
         task.setTargetDuration(null);

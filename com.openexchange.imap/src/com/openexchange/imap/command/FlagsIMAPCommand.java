@@ -155,10 +155,11 @@ public final class FlagsIMAPCommand extends AbstractIMAPCommand<Boolean> {
      */
     public FlagsIMAPCommand(final IMAPFolder imapFolder, final Flags flags, final boolean enable, final boolean silent) throws MessagingException {
         super(imapFolder);
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             returnDefaultValue = true;
         }
-        args = ARGS_ALL;
+        args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
         if (flags == null) {
             returnDefaultValue = true;
             flagsStr = null;

@@ -62,7 +62,8 @@ import com.openexchange.ajax.mail.filter.action.Reject;
  */
 public class RejectParserImpl implements ActionParser {
 
-	public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
+	@Override
+    public AbstractAction parseAction(final String name, final JSONObject jsonObject) throws JSONException {
 		final String text = jsonObject.getString("text");
 
 		return new Reject(text);

@@ -182,7 +182,8 @@ public final class MailAccessTest extends AbstractMailTest {
 			this.testRef = testRef;
 		}
 
-		public void run() {
+		@Override
+        public void run() {
 			try {
 				final SessionObject session = SessionObjectWrapper.createSessionObject(testRef.getUser(),
 						new ContextImpl(testRef.getCid()), "mail-test-session");

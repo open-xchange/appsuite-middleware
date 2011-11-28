@@ -73,7 +73,7 @@ public class AbstractVCardUnitTest extends TestCase {
 	public List<Contact> performTest(final String testName, final String vcard, final String mime) throws ConverterException, IOException{
 		final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
 		final VersitDefinition def = Versit.getDefinition(mime);
-		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard.getBytes("UTF-8")), "UTF-8");
+		final VersitDefinition.Reader versitReader = def.getReader(new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)), "UTF-8");
 		List<Contact> results = new LinkedList<Contact>();
 
 		VersitObject versitObject = def.parse(versitReader);

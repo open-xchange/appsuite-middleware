@@ -69,10 +69,12 @@ public abstract class AbstractSpellCheckRequest implements AJAXRequest {
 		super();
 	}
 
-	public String getServletPath() {
+	@Override
+    public String getServletPath() {
 		return SPELL_CHECK_URL;
 	}
 
+    @Override
     public Header[] getHeaders() {
         return NO_HEADER;
     }

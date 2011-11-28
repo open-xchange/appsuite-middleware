@@ -59,7 +59,7 @@ import com.openexchange.ajax.framework.CommonDeleteResponse;
  */
 public class DeleteOAuthAccountRequest extends AbstractOAuthAccountRequest<CommonDeleteResponse> {
 
-    private int id;
+    private final int id;
 
     private boolean failOnError = false;
 
@@ -72,10 +72,12 @@ public class DeleteOAuthAccountRequest extends AbstractOAuthAccountRequest<Commo
         this.failOnError = failOnError;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         LinkedList<Parameter> params = new LinkedList<Parameter>();
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE));
@@ -83,10 +85,12 @@ public class DeleteOAuthAccountRequest extends AbstractOAuthAccountRequest<Commo
         return params.toArray(new Parameter[params.size()]);
     }
 
+    @Override
     public DeleteOAuthAccountParser getParser() {
         return new DeleteOAuthAccountParser(failOnError);
     }
 
+    @Override
     public Object getBody() {
         return new JSONArray();
     }

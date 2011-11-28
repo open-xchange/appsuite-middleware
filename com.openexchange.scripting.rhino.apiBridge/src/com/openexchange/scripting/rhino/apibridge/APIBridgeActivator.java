@@ -23,7 +23,7 @@ public class APIBridgeActivator extends AJAXModuleActivator {
 					JSConverter jsConverter) {
 				resolver.remember("httpAPI", jsConverter.toJS(new HTTPAPISupport(APIBridgeActivator.this)));
 			}
-			
+
 		});
 	}
 

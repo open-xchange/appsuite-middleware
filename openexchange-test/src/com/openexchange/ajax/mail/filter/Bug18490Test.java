@@ -52,8 +52,8 @@ package com.openexchange.ajax.mail.filter;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -94,7 +94,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
         client = getClient();
         folder = Create.createPrivateFolder("Bug18490 test F\u00f6lder", FolderObject.MAIL, client.getValues().getUserId());
         folder.setFullName(client.getValues().getInboxFolder() + "/Bug18490 test F\u00f6lder");
-        final InsertResponse folderInsertResponse = client.execute(new InsertRequest(API.OX_NEW, folder));
+        final InsertResponse folderInsertResponse = client.execute(new InsertRequest(EnumAPI.OX_NEW, folder));
         folderInsertResponse.fillObject(folder);
 
         final String forUser = null;
@@ -137,7 +137,7 @@ public class Bug18490Test extends AbstractMailFilterTest {
     @Override
     public void tearDown() throws Exception {
         if (folder != null) {
-            client.execute(new DeleteRequest(API.OX_NEW, folder));
+            client.execute(new DeleteRequest(EnumAPI.OX_NEW, folder));
         }
 
         super.tearDown();

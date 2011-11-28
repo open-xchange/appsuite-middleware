@@ -69,7 +69,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
 
     private final Date lastModified;
 
-    private boolean failOnError;
+    private final boolean failOnError;
 
     public DeleteRequest(final int folderId, final int objectId, final Date lastModified, boolean failOnError) {
         super();
@@ -96,6 +96,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
         json.put(DataFields.ID, objectId);
@@ -106,6 +107,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -113,6 +115,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet
@@ -124,6 +127,7 @@ public class DeleteRequest extends AbstractContactRequest<CommonDeleteResponse> 
     /**
      * {@inheritDoc}
      */
+    @Override
     public DeleteParser getParser() {
         return new DeleteParser(failOnError);
     }

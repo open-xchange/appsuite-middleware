@@ -60,7 +60,7 @@ import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.appointment.action.UpdateRequest;
 import com.openexchange.ajax.appointment.action.UpdateResponse;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -94,7 +94,7 @@ public class Bug16151Test extends AbstractAJAXSession {
         // client2 shares folder
         FolderTools.shareFolder(
             client2,
-            API.OX_NEW,
+            EnumAPI.OX_NEW,
             client2.getValues().getPrivateAppointmentFolder(),
             client.getValues().getUserId(),
             OCLPermission.CREATE_OBJECTS_IN_FOLDER,
@@ -121,7 +121,7 @@ public class Bug16151Test extends AbstractAJAXSession {
         appointment.setLastModified(new Date(Long.MAX_VALUE));
         client.execute(new DeleteRequest(appointment));
         // client2 unshares folder
-        FolderTools.unshareFolder(client2, API.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId());
+        FolderTools.unshareFolder(client2, EnumAPI.OX_NEW, client2.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId());
         super.tearDown();
     }
 

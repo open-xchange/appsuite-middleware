@@ -91,22 +91,22 @@ public class DBChatDeleteListener implements DeleteListener {
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
-            
+
             stmt = writeCon.prepareStatement("DELETE FROM chatMember WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
-            
+
             stmt = writeCon.prepareStatement("DELETE FROM chatMessage WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
-            
+
             stmt = writeCon.prepareStatement("DELETE FROM chatMessageMap WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
             DBUtils.closeSQLStuff(stmt);
-            
+
             stmt = writeCon.prepareStatement("DELETE FROM chatPresence WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();

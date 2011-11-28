@@ -9,7 +9,7 @@ import org.jivesoftware.smack.test.SmackTestCase;
 
 /**
  * Test cases for adding the {@link RosterListener} in different connection states.
- * 
+ *
  * @author Henning Staib
  */
 public class RosterListenerTest extends SmackTestCase {
@@ -43,18 +43,22 @@ public class RosterListenerTest extends SmackTestCase {
         Roster inviteeRoster = inviteeConnection.getRoster();
         inviteeRoster.addRosterListener(new RosterListener() {
 
+            @Override
             public void presenceChanged(Presence presence) {
                 // ignore
             }
 
+            @Override
             public void entriesUpdated(Collection<String> addresses) {
                 // ignore
             }
 
+            @Override
             public void entriesDeleted(Collection<String> addresses) {
                 // ignore
             }
 
+            @Override
             public void entriesAdded(Collection<String> addresses) {
                 addedEntries.addAll(addresses);
             }
@@ -100,18 +104,22 @@ public class RosterListenerTest extends SmackTestCase {
         Roster inviteeRoster = inviteeConnection.getRoster();
         inviteeRoster.addRosterListener(new RosterListener() {
 
+            @Override
             public void presenceChanged(Presence presence) {
                 // ignore
             }
 
+            @Override
             public void entriesUpdated(Collection<String> addresses) {
                 // ignore
             }
 
+            @Override
             public void entriesDeleted(Collection<String> addresses) {
                 // ignore
             }
 
+            @Override
             public void entriesAdded(Collection<String> addresses) {
                 addedEntries.addAll(addresses);
             }
@@ -131,10 +139,12 @@ public class RosterListenerTest extends SmackTestCase {
         super.tearDown();
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }
 
+    @Override
     protected boolean createOfflineConnections() {
         return true;
     }

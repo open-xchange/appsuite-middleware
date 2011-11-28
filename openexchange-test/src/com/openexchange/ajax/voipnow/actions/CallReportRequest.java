@@ -102,6 +102,7 @@ public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
@@ -109,6 +110,7 @@ public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -116,6 +118,7 @@ public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "callreport"),
@@ -129,6 +132,7 @@ public class CallReportRequest extends AbstractVoipNowRequest<CallReportResponse
     /**
      * {@inheritDoc}
      */
+    @Override
     public CallReportParser getParser() {
         return new CallReportParser(true);
     }

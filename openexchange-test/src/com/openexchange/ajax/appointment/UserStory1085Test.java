@@ -56,7 +56,7 @@ import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.appointment.action.DeleteRequest;
 import com.openexchange.ajax.appointment.action.InsertRequest;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonInsertResponse;
@@ -111,7 +111,7 @@ public class UserStory1085Test extends AppointmentTest {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION));
 
-        CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(API.OX_OLD, folder));
+        CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
 
         appointmenShare = new Appointment();
@@ -151,7 +151,7 @@ public class UserStory1085Test extends AppointmentTest {
         clientB.execute(new DeleteRequest(appointmenShare));
         clientC.execute(new DeleteRequest(appointmentPrivate));
         clientC.execute(new DeleteRequest(appointmentNormal));
-        clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OX_OLD, folder.getObjectID(), folder.getLastModified()));
+        clientB.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_OLD, folder.getObjectID(), folder.getLastModified()));
 
         super.tearDown();
     }

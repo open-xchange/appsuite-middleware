@@ -72,7 +72,7 @@ import com.meterware.httpunit.WebResponse;
 import com.openexchange.ajax.config.ConfigTools;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.folder.FolderTools;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.FolderUpdatesResponse;
 import com.openexchange.ajax.folder.actions.GetRequest;
 import com.openexchange.ajax.folder.actions.GetResponse;
@@ -306,7 +306,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -363,7 +363,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -392,7 +392,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -443,7 +443,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -470,7 +470,7 @@ public class FolderTest extends AbstractAJAXTest {
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
         urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
-        final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+        final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new UnsynchronizedByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -490,7 +490,7 @@ public class FolderTest extends AbstractAJAXTest {
 
     public static int[] deleteFolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final int[] folderIds, final long timestamp) throws JSONException, IOException, SAXException {
         final JSONArray deleteIds = new JSONArray(Arrays.toString(folderIds));
-        final byte[] bytes = deleteIds.toString().getBytes("UTF-8");
+        final byte[] bytes = deleteIds.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new UnsynchronizedByteArrayInputStream(bytes);
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE);
@@ -527,7 +527,7 @@ public class FolderTest extends AbstractAJAXTest {
 
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
-            new UnsynchronizedByteArrayInputStream(clearIds.toString().getBytes("UTF-8")),
+            new UnsynchronizedByteArrayInputStream(clearIds.toString().getBytes(com.openexchange.java.Charsets.UTF_8)),
             "text/javascript; charset=UTF-8");
 
         final WebResponse resp = conversation.getResponse(req);
@@ -1184,7 +1184,7 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInGet() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // Load an existing folder
-        final GetRequest getRequest = new GetRequest(API.OX_OLD,
+        final GetRequest getRequest = new GetRequest(EnumAPI.OX_OLD,
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC });
         final GetResponse response = Executor.execute(client, getRequest);
@@ -1196,7 +1196,7 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInList() throws JSONException, IOException, SAXException, OXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
-        final ListRequest listRequest = new ListRequest(API.OX_OLD,
+        final ListRequest listRequest = new ListRequest(EnumAPI.OX_OLD,
             "" + FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC },
             false);
@@ -1217,7 +1217,7 @@ public class FolderTest extends AbstractAJAXTest {
     public void testLastModifiedUTCInUpdates() throws JSONException, OXException, IOException, SAXException {
         final AJAXClient client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()));
         // List known folder
-        final UpdatesRequest updatesRequest = new UpdatesRequest(API.OX_OLD,
+        final UpdatesRequest updatesRequest = new UpdatesRequest(EnumAPI.OX_OLD,
             FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
             new int[] { FolderObject.LAST_MODIFIED_UTC },
             -1,

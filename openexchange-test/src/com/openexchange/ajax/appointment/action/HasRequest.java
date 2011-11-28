@@ -74,14 +74,17 @@ public class HasRequest extends AbstractAppointmentRequest<HasResponse> {
         this.tz = tz;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
 
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
 
+    @Override
     public Parameter[] getParameters() {
         final List<Parameter> parameterList = new ArrayList<Parameter>();
         parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_HAS));
@@ -90,6 +93,7 @@ public class HasRequest extends AbstractAppointmentRequest<HasResponse> {
         return parameterList.toArray(new Parameter[parameterList.size()]);
     }
 
+    @Override
     public HasParser getParser() {
         return new HasParser();
     }

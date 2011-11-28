@@ -59,10 +59,10 @@ import com.openexchange.test.fixtures.transformators.CredentialsTransformator;
  */
 public class DocumentFixtureFactory implements FixtureFactory<Document> {
 
-	private File datapath;
+	private final File datapath;
 	private String seleniumDataPath;
 	private String seleniumSeparator;
-	private FixtureLoader fixtureLoader;
+	private final FixtureLoader fixtureLoader;
 
 	public DocumentFixtureFactory(File datapath, FixtureLoader fixtureLoader) {
 		super();
@@ -70,7 +70,8 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
 		this.fixtureLoader = fixtureLoader;
 	}
 
-	public Fixtures<Document> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
+	@Override
+    public Fixtures<Document> createFixture(final String fixtureName, final Map<String, Map<String, String>> entries) {
          DocumentFixtures documentFixtures = new DocumentFixtures(fixtureName, entries, datapath, fixtureLoader);
          if(seleniumDataPath != null) {
         	 documentFixtures.setSeleniumConfiguration(seleniumDataPath, seleniumSeparator);
@@ -84,9 +85,9 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
     }
 
     private class DocumentFixtures extends DefaultFixtures<Document> implements Fixtures<Document> {
-        private Map<String, Map<String, String>> entries;
+        private final Map<String, Map<String, String>> entries;
         private final Map<String, Fixture<Document>> knownDocuments = new HashMap<String, Fixture<Document>>();
-		private File datapath;
+		private final File datapath;
 		private String seleniumDataPath;
 		private String seleniumSeparator;
 
@@ -98,6 +99,7 @@ public class DocumentFixtureFactory implements FixtureFactory<Document> {
             super.addTransformator(new CredentialsTransformator(fixtureLoader), "created_by");
         }
 
+        @Override
         public Fixture<Document> getEntry(final String entryName) throws OXException {
             if (knownDocuments.containsKey(entryName)) {
                 return knownDocuments.get(entryName);

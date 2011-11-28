@@ -87,7 +87,7 @@ public final class VirtualFolderAddSortNumTask extends SimpleUpdateTask {
             }
         } finally {
             closeSQLStuff(stmt);
-        }  
+        }
     }
 
 }

@@ -67,8 +67,8 @@ import com.openexchange.test.fixtures.ajax.FixtureLoaderFactory;
  */
 public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
 
-    private String dirName;
-    private Class aClass;
+    private final String dirName;
+    private final Class aClass;
 
     public AbstractDirectoryRunner(String name, String dirName, Class aClass) {
         super(name);
@@ -105,6 +105,7 @@ public abstract class AbstractDirectoryRunner extends AbstractAJAXSession {
     private String[] scanDirectory() {
         return new File(dirName).list(new FilenameFilter() {
 
+            @Override
             public boolean accept(File dir, String name) {
                 return name.endsWith(".kata.yml");
             }

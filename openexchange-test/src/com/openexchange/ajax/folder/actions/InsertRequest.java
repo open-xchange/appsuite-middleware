@@ -82,10 +82,12 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
         this.folder = folder;
     }
 
+    @Override
     public Object getBody() throws JSONException {
         return convert(folder);
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
@@ -108,6 +110,7 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
         }
     }
 
+    @Override
     public InsertParser getParser() {
         return new InsertParser(failOnError);
     }

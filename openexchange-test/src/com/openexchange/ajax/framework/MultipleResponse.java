@@ -18,6 +18,7 @@ public class MultipleResponse<T extends AbstractAJAXResponse> extends AbstractAJ
         return responses[pos];
     }
 
+    @Override
     public Iterator<T> iterator() {
         return Collections.unmodifiableList(Arrays.asList(responses)).iterator();
     }

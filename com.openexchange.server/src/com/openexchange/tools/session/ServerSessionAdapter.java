@@ -82,7 +82,7 @@ public class ServerSessionAdapter implements ServerSession {
         if (ServerSession.class.isInstance(session)) {
             return (ServerSession) session;
         }
-        return new ServerSessionAdapter(session);
+        return null == session ? null : new ServerSessionAdapter(session);
     }
 
     private Session session;

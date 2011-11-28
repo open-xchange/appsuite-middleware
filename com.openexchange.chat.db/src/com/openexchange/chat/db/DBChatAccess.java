@@ -85,7 +85,7 @@ import com.openexchange.user.UserService;
 
 /**
  * {@link DBChatAccess}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class DBChatAccess implements ChatAccess {
@@ -98,7 +98,7 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Removes associated chat access.
-     * 
+     *
      * @param session The session
      * @throws OXException If clean-up fails
      */
@@ -110,7 +110,7 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Removes associated chat access.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @throws OXException If clean-up fails
@@ -124,7 +124,7 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Gets the database chat access for specified arguments.
-     * 
+     *
      * @param session The session
      * @return The access
      * @throws OXException If initialization fails
@@ -135,7 +135,7 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Gets the database chat access for specified arguments.
-     * 
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The access
@@ -168,7 +168,7 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Initializes a new {@link DBChatAccess}.
-     * 
+     *
      * @throws OXException If init fails
      */
     private DBChatAccess(final int userId, final int contextId) throws OXException {
@@ -188,7 +188,7 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Clean up any remaining single-chats/occurrences.
-     * 
+     *
      * @throws OXException If an error occurs
      */
     private void cleanUp() throws OXException {
@@ -212,7 +212,7 @@ public final class DBChatAccess implements ChatAccess {
 
     /**
      * Clean up any remaining single-chats and user occurrences.
-     * 
+     *
      * @throws OXException If an error occurs
      */
     private void cleanUp(final Connection con) throws OXException {
@@ -438,7 +438,7 @@ public final class DBChatAccess implements ChatAccess {
             }
             /*-
              * Action needed:
-             * 
+             *
              * Create new chunk
              */
             final int newChunkId = currentChunkId + 1;

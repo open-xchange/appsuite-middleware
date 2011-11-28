@@ -182,15 +182,15 @@ public class PermissionTools {
 
         private static final int PERMISSIONS_MODE = 0;
 
-        private String permissionString;
+        private final String permissionString;
 
         private int index;
 
-        private int[] permissions = new int[] { NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS };
+        private final int[] permissions = new int[] { NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS };
 
         private int mode;
 
-        private boolean[] options = new boolean[2];
+        private final boolean[] options = new boolean[2];
 
         public PermissionScanner(String permission) {
             this.permissionString = permission;

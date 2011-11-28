@@ -9,7 +9,7 @@ import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.GetResponse;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.folder.Create;
-import com.openexchange.ajax.folder.actions.API;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertRequest;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.groupware.container.Contact;
@@ -42,7 +42,7 @@ public class CopyTest extends AbstractContactTest {
 
 		folder = Create.createPrivateFolder("testCopy", FolderObject.CONTACT, userId);
 		folder.setParentFolderID(client.getValues().getPrivateContactFolder());
-		InsertResponse folderCreateResponse = client.execute(new InsertRequest(API.OUTLOOK, folder));
+		InsertResponse folderCreateResponse = client.execute(new InsertRequest(EnumAPI.OUTLOOK, folder));
 		folderCreateResponse.fillObject(folder);
 
 		targetFolder = folder.getObjectID();
@@ -84,7 +84,7 @@ public class CopyTest extends AbstractContactTest {
         if (objectId2 > 0) {
             client.execute(new DeleteRequest(targetFolder, objectId2, new Date()));
         }
-        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(API.OUTLOOK, folder));
+        client.execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OUTLOOK, folder));
 
         super.tearDown();
     }

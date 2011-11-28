@@ -49,8 +49,8 @@
 
 package com.openexchange.folder.json;
 
-import gnu.trove.ConcurrentTIntHashSet;
-import gnu.trove.set.TIntSet;
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -58,7 +58,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.folderstorage.FieldNamePair;
+import com.openexchange.folderstorage.FolderField;
 
 
 /**
@@ -77,7 +77,7 @@ public final class FolderFieldRegistry {
 
     /**
      * Gets the registry instance.
-     * 
+     *
      * @return The registry instance
      */
     public static FolderFieldRegistry getInstance() {
@@ -102,46 +102,46 @@ public final class FolderFieldRegistry {
     }
 
     /*-
-     * 
+     *
      * ----------------------- MEMBER STUFF --------------------------
-     * 
+     *
      */
-    
-    private final ConcurrentMap<FieldNamePair, Object> map;
 
-    private final ConcurrentTIntHashSet numSet;
+    private final ConcurrentMap<FolderField, Object> map;
 
-    private volatile ServiceTracker<FieldNamePair, FieldNamePair> serviceTracker;
+    private final ConcurrentTIntObjectHashMap<FolderField> numSet;
+
+    private volatile ServiceTracker<FolderField, FolderField> serviceTracker;
 
     /**
      * Initializes a new {@link FolderFieldRegistry}.
      */
     private FolderFieldRegistry() {
         super();
-        map = new ConcurrentHashMap<FieldNamePair, Object>(8);
-        numSet = new ConcurrentTIntHashSet(8);
+        map = new ConcurrentHashMap<FolderField, Object>(8);
+        numSet = new ConcurrentTIntObjectHashMap<FolderField>(8);
     }
 
     /**
      * Starts up this registry.
-     * 
+     *
      * @param context The bundle context
      */
     public void startUp(final BundleContext context) {
-        ServiceTracker<FieldNamePair, FieldNamePair> tmp = serviceTracker;
+        ServiceTracker<FolderField, FolderField> tmp = serviceTracker;
         if (null == tmp) {
             synchronized (map) {
                 tmp = serviceTracker;
                 if (null == tmp) {
-                    final ConcurrentMap<FieldNamePair, Object> m = this.map;
-                    final ConcurrentTIntHashSet ns = this.numSet;
-                    tmp = new ServiceTracker<FieldNamePair, FieldNamePair>(context, FieldNamePair.class, new ServiceTrackerCustomizer<FieldNamePair, FieldNamePair>() {
+                    final ConcurrentMap<FolderField, Object> m = this.map;
+                    final ConcurrentTIntObjectHashMap<FolderField> ns = this.numSet;
+                    tmp = new ServiceTracker<FolderField, FolderField>(context, FolderField.class, new ServiceTrackerCustomizer<FolderField, FolderField>() {
 
                         @Override
-                        public FieldNamePair addingService(final ServiceReference<FieldNamePair> reference) {
-                            final FieldNamePair pair = context.getService(reference);
+                        public FolderField addingService(final ServiceReference<FolderField> reference) {
+                            final FolderField pair = context.getService(reference);
                             if (null == m.putIfAbsent(pair, PRESENT)) {
-                                ns.add(pair.getField());
+                                ns.put(pair.getField(), pair);
                                 return pair;
                             }
                             context.ungetService(reference);
@@ -149,12 +149,12 @@ public final class FolderFieldRegistry {
                         }
 
                         @Override
-                        public void modifiedService(final ServiceReference<FieldNamePair> reference, final FieldNamePair pair) {
+                        public void modifiedService(final ServiceReference<FolderField> reference, final FolderField pair) {
                             // Nope
                         }
 
                         @Override
-                        public void removedService(final ServiceReference<FieldNamePair> reference, final FieldNamePair pair) {
+                        public void removedService(final ServiceReference<FolderField> reference, final FolderField pair) {
                             m.remove(pair);
                             ns.remove(pair.getField());
                             context.ungetService(reference);
@@ -171,7 +171,7 @@ public final class FolderFieldRegistry {
      * Shuts down this registry.
      */
     public void shutDown() {
-        ServiceTracker<FieldNamePair, FieldNamePair> tmp = serviceTracker;
+        ServiceTracker<FolderField, FolderField> tmp = serviceTracker;
         if (null != tmp) {
             synchronized (map) {
                 tmp = serviceTracker;
@@ -185,19 +185,19 @@ public final class FolderFieldRegistry {
 
     /**
      * Gets the registered pairs.
-     * 
+     *
      * @return The registered pairs
      */
-    public Set<FieldNamePair> getPairs() {
+    public Set<FolderField> getPairs() {
         return map.keySet();
     }
 
     /**
      * Gets the registered fields.
-     * 
+     *
      * @return The registered fields
      */
-    public TIntSet getFields() {
+    public TIntObjectMap<FolderField> getFields() {
         return numSet;
     }
 

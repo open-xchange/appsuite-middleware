@@ -108,6 +108,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
@@ -288,7 +289,7 @@ public class MIMEMessageFiller {
 
     /**
      * Add "X-Originating-IP" header.
-     * 
+     *
      * @param mimeMessage The MIME message
      * @param session The session
      * @throws MessagingException If an error occurs
@@ -1027,7 +1028,7 @@ public class MIMEMessageFiller {
                 def.write(w, versitObj);
                 w.flush();
                 os.flush();
-                return new String(os.toByteArray(), charset);
+                return new String(os.toByteArray(), Charsets.forName(charset));
             } finally {
                 if (readCon != null) {
                     DBPool.closeReaderSilent(ctx, readCon);
@@ -1164,13 +1165,7 @@ public class MIMEMessageFiller {
             } else {
                 final DataSource dataSource;
                 if ("base64".equalsIgnoreCase(image.getTransferEncoding())) {
-                    try {
-                        dataSource = new MessageDataSource(Base64.decodeBase64(image.getData().getBytes("US-ASCII")), image.getContentType());
-                    } catch (final UnsupportedEncodingException e) {
-                        // Cannot occur
-                        LOG.warn("Unknwon encoding: " + e.getMessage(), e);
-                        continue NextImg;
-                    }
+                    dataSource = new MessageDataSource(Base64.decodeBase64(image.getData().getBytes(com.openexchange.java.Charsets.US_ASCII)), image.getContentType());
                 } else {
                     /*
                      * Expect quoted-printable instead

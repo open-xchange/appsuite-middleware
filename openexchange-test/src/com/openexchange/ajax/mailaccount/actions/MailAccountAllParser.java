@@ -65,7 +65,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
  */
 public class MailAccountAllParser extends AbstractAJAXParser<MailAccountAllResponse> {
 
-    private int[] cols;
+    private final int[] cols;
 
     protected MailAccountAllParser(boolean failOnError, int[] cols) {
         super(failOnError);

@@ -69,6 +69,7 @@ public class TaskFixtureTransformer extends AbstractFixtureTransformer<Task> imp
      * @see com.openexchange.ajax.kata.fixtures.FixtureTransformer#handles(java.lang.Class, java.lang.String,
      * com.openexchange.test.fixtures.Fixture)
      */
+    @Override
     public boolean handles(Class class1, String fixtureName, Fixture fixture) {
         return class1 == Task.class;
     }
@@ -78,6 +79,7 @@ public class TaskFixtureTransformer extends AbstractFixtureTransformer<Task> imp
      * @see com.openexchange.ajax.kata.fixtures.FixtureTransformer#transform(java.lang.Class, java.lang.String,
      * com.openexchange.test.fixtures.Fixture, java.lang.String)
      */
+    @Override
     public Step transform(Class class1, String fixtureName, Fixture fixture, String displayName) {
         if (isUpdate(fixtureName)) {
             return assign(fixtureName, new TaskUpdateStep(

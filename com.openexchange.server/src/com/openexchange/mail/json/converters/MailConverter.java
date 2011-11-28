@@ -126,7 +126,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     /**
      * Converts to JSON output format.
-     * 
+     *
      * @param requestData The AJAX request data
      * @param result The AJAX result
      * @param session The associated session

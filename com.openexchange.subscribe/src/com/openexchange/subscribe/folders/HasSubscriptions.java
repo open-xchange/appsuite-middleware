@@ -114,7 +114,7 @@ public class HasSubscriptions implements AdditionalFolderField {
          }
          final List<String> folderIdsToQuery = new ArrayList<String>(folder.size());
          final List<String> folderIds= new ArrayList<String>(folder.size());
-         
+
          final Map<String, Boolean> hasSubscriptions = new HashMap<String, Boolean>();
          for (final FolderObject f : folder) {
              String fn = f.getFullName();

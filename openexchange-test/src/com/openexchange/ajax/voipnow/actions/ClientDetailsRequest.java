@@ -75,6 +75,7 @@ public class ClientDetailsRequest extends AbstractVoipNowRequest<ClientDetailsRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
@@ -82,6 +83,7 @@ public class ClientDetailsRequest extends AbstractVoipNowRequest<ClientDetailsRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -89,6 +91,7 @@ public class ClientDetailsRequest extends AbstractVoipNowRequest<ClientDetailsRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "clientdetails"),
@@ -100,6 +103,7 @@ public class ClientDetailsRequest extends AbstractVoipNowRequest<ClientDetailsRe
     /**
      * {@inheritDoc}
      */
+    @Override
     public ClientDetailsParser getParser() {
         return new ClientDetailsParser(true);
     }

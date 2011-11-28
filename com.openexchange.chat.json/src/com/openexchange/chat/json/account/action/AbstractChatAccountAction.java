@@ -121,7 +121,7 @@ public abstract class AbstractChatAccountAction implements AJAXActionService {
 
     /**
      * Checks if specified string is empty.
-     * 
+     *
      * @param string The string
      * @return <code>true</code> if string is empty; otherwise <code>false</code>
      */

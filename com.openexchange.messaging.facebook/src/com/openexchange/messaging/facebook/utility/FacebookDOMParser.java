@@ -124,7 +124,7 @@ public final class FacebookDOMParser {
              * Parse to DOM document
              */
             final DOMParser parser = new DOMParser();
-            parser.parse(new InputSource(new UnsynchronizedByteArrayInputStream(xmlReponse.getBytes("UTF-8"))));
+            parser.parse(new InputSource(new UnsynchronizedByteArrayInputStream(xmlReponse.getBytes(com.openexchange.java.Charsets.UTF_8))));
             final Document dom = parser.getDocument();
             /*
              * Get document's root element

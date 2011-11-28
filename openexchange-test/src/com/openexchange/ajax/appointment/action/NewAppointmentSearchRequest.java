@@ -124,6 +124,7 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
     /**
      * {@inheritDoc}
      */
+    @Override
     public Object getBody() throws JSONException {
         return null;
     }
@@ -131,6 +132,7 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
     /**
      * {@inheritDoc}
      */
+    @Override
     public Method getMethod() {
         return Method.GET;
     }
@@ -138,6 +140,7 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
     /**
      * {@inheritDoc}
      */
+    @Override
     public Parameter[] getParameters() {
 		final List<Parameter> parameterList = new ArrayList<Parameter>();
 		parameterList.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW_APPOINTMENTS));
@@ -152,6 +155,7 @@ public class NewAppointmentSearchRequest extends AbstractAppointmentRequest<NewA
     /**
      * {@inheritDoc}
      */
+    @Override
     public NewAppointmentSearchParser getParser() {
         return new NewAppointmentSearchParser(columns, timeZone);
     }

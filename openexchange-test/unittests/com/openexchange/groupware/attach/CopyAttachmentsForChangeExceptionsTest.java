@@ -87,7 +87,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
     private int userId;
     private Session session;
     private AttachmentBase attachments;
-    private List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
+    private final List<CalendarDataObject> clean = new ArrayList<CalendarDataObject>();
     private User userObject;
     private UserConfiguration userConfig;
 
@@ -146,7 +146,7 @@ public class CopyAttachmentsForChangeExceptionsTest extends TestCase {
         attachment.setFilename("A nice file!");
         attachment.setComment("A nice comment!");
 
-        attachments.attachToObject(attachment, new ByteArrayInputStream("Hallo".getBytes("UTF-8")), session, ctx, userObject, userConfig);
+        attachments.attachToObject(attachment, new ByteArrayInputStream("Hallo".getBytes(com.openexchange.java.Charsets.UTF_8)), session, ctx, userObject, userConfig);
 
         listener.createdChangeExceptionInRecurringAppointment(master, exception,0, new ServerSessionAdapter(session));
 

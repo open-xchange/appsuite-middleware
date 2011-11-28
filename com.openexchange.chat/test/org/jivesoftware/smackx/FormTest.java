@@ -61,7 +61,7 @@ import org.jivesoftware.smack.test.SmackTestCase;
 
 /**
  * Tests the DataForms extensions.
- * 
+ *
  * @author Gaston Dombiak
  */
 public class FormTest extends SmackTestCase {
@@ -185,6 +185,7 @@ public class FormTest extends SmackTestCase {
         }
     }
 
+    @Override
     protected int getMaxConnections() {
         return 2;
     }

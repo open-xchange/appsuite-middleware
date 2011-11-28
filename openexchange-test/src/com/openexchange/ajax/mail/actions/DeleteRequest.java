@@ -94,15 +94,18 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
         this.hardDelete = hardDelete;
     }
 
+    @Override
     public Method getMethod() {
         return Method.PUT;
     }
 
+    @Override
     public Parameter[] getParameters() {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_DELETE), new Parameter("harddelete", hardDelete ? "1" : "0") };
     }
 
+    @Override
     public AbstractAJAXParser<DeleteResponse> getParser() {
         return new AbstractAJAXParser<DeleteResponse>(failOnError) {
 
@@ -113,6 +116,7 @@ public class DeleteRequest extends AbstractMailRequest<DeleteResponse> {
         };
     }
 
+    @Override
     public Object getBody() throws JSONException {
         final JSONArray array = new JSONArray();
         for (final String[] folderAndObject : folderAndMailIds) {

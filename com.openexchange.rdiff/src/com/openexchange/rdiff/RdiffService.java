@@ -64,21 +64,21 @@ import com.openexchange.exception.OXException;
  * file. Those deltas are in turn sent back to client</li>
  * <li>Client receives server's deltas and patches his local file using deltas</li>
  * </ul>
- * 
+ *
  * <pre>
  * // client does this first
  * RdiffService clientRdiff = ...;
  * clientRdiff.createSignatures(new FileInputStream(mutated), new FileOutputStream(signature));
- * 
+ *
  * // server gets signature file, and does this now
  * RdiffService serverRdiff = ...;
  * List&lt;ChecksumPair&gt; signatures = serverRdiff.readSignatures(new FileInputStream(signature));
  * serverRdiff.createDeltas(signatures, new FileInputStream(basis), new FileOutputStream(newdelta));
- * 
+ *
  * // finally, client patches his file
  * clientRdiff.rebuildFile(mutated, new FileInputStream(newdelta), new FileOutputStream(output));
  * </pre>
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface RdiffService {
@@ -87,7 +87,7 @@ public interface RdiffService {
      * Generates the signatures for specified resource's <code>InputStream</code> and writes them to specified <code>OutputStream</code>.
      * <p>
      * Provided streams are closed/flushed orderly.
-     * 
+     *
      * @param sourceIn The resource input stream to read from
      * @param signatureOut The output stream to write resulting signatures to
      * @throws OXException If generating signatures fails
@@ -98,7 +98,7 @@ public interface RdiffService {
      * Generates the signatures for specified resource's <code>InputStream</code>.
      * <p>
      * Provided stream is closed orderly.
-     * 
+     *
      * @param sourceIn The resource input stream to read from
      * @return The resulting checksum pairs
      * @throws OXException If generating signatures fails
@@ -109,7 +109,7 @@ public interface RdiffService {
      * Write the signatures to the specified output stream.
      * <p>
      * Provided stream is closed/flushed orderly.
-     * 
+     *
      * @param sigs The signatures to write.
      * @param out The OutputStream to write to.
      * @throws OXException If writing fails.
@@ -120,7 +120,7 @@ public interface RdiffService {
      * Reads the signatures from the input stream.
      * <p>
      * Provided stream is closed orderly.
-     * 
+     *
      * @param signatureIn The input stream to read from
      * @return A collection of {@link ChecksumPair}s
      * @throws OXException If reading signatures fails
@@ -132,7 +132,7 @@ public interface RdiffService {
      * deltas to specified output stream.
      * <p>
      * Provided streams are closed/flushed orderly.
-     * 
+     *
      * @param sums The checksum pairs (generated from signatures using <code>readSignatures</code> method)
      * @param baseIn The input stream providing data base
      * @param deltaOut The output stream to write resulting deltas to
@@ -142,7 +142,7 @@ public interface RdiffService {
 
     /**
      * Generates the deltas for provided base input stream using given checksum pairs (generated from signatures).
-     * 
+     *
      * @param sums The checksum pairs (generated from signatures using <code>readSignatures</code> method)
      * @param baseIn The input stream providing data base
      * @return The deltas
@@ -152,7 +152,7 @@ public interface RdiffService {
 
     /**
      * Rebuilds specified base file with given deltas and writes patched file to <code>patchOut</code>.
-     * 
+     *
      * @param baseFile The base file
      * @param deltaIn The input stream providing the deltas
      * @param patchOut The output stream to write patched file to

@@ -47,90 +47,17 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.mailaccount.internal;
 
 /**
- * {@link FieldNamePair} - A pair of a field and its name.
- * <p>
- * Equality is only determined by field value, not its name.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link CachedResolveType}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class FieldNamePair {
+public enum CachedResolveType {
 
-    /**
-     * Gets the instance for given field.
-     * 
-     * @param field The field
-     * @return The appropriate instance
-     */
-    public static FieldNamePair valueOf(final int field) {
-        return new FieldNamePair(field, null);
-    }
+    LOGIN,
 
-    private final int field;
-
-    private final String name;
-
-    /**
-     * Initializes a new {@link FieldNamePair}.
-     * 
-     * @param field The field number
-     * @param name The field name
-     */
-    public FieldNamePair(final int field, final String name) {
-        super();
-        this.field = field;
-        this.name = name;
-    }
-
-    /**
-     * Gets the field.
-     * 
-     * @return The field
-     */
-    public int getField() {
-        return field;
-    }
-
-    /**
-     * Gets the name.
-     * 
-     * @return The name
-     */
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public int hashCode() {
-        return field;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof FieldNamePair)) {
-            return false;
-        }
-        final FieldNamePair other = (FieldNamePair) obj;
-        if (field != other.field) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder(48);
-        builder.append("FieldNamePair [field=").append(field).append(", ");
-        if (name != null) {
-            builder.append("name=").append(name);
-        }
-        builder.append("]");
-        return builder.toString();
-    }
+    PRIMARY_ADDRESS
 
 }

@@ -304,7 +304,7 @@ public class TaskTestManager implements TestManager{
 //            retval = Integer.valueOf(((Long) value).intValue());
 //            break;
         case Task.BILLING_INFORMATION:
-            retval = (String) value;
+            retval = value;
             break;
         default:
             retval = value;
@@ -345,6 +345,7 @@ public class TaskTestManager implements TestManager{
     /**
      * removes all tasks created by this fixture
      */
+    @Override
     public void cleanUp() {
         for (Task task : new LinkedList<Task>(createdEntities)) {
             deleteTaskOnServer(task);
@@ -419,6 +420,7 @@ public class TaskTestManager implements TestManager{
         this.lastResponse = lastResponse;
     }
 
+    @Override
     public AbstractAJAXResponse getLastResponse() {
         return lastResponse;
     }
@@ -431,22 +433,27 @@ public class TaskTestManager implements TestManager{
         return client;
     }
 
+    @Override
     public void setFailOnError(boolean failOnError) {
         this.failOnError = failOnError;
     }
 
+    @Override
     public boolean getFailOnError() {
         return failOnError;
     }
 
+    @Override
     public boolean doesFailOnError() {
         return getFailOnError();
     }
 
+    @Override
     public Throwable getLastException() {
         return this.lastException;
     }
 
+    @Override
     public boolean hasLastException() {
         return this.lastException != null;
     }

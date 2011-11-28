@@ -26,13 +26,13 @@ public class HaloActivator extends HousekeepingActivator {
 		ContactInterfaceDiscoveryService contactDiscoveryService = getService(ContactInterfaceDiscoveryService.class);
 		SessionSpecificContainerRetrievalService sessionScope = getService(SessionSpecificContainerRetrievalService.class);
 		ConfigViewFactory configViews = getService(ConfigViewFactory.class);
-		
+
 		final ContactHaloImpl halo = new ContactHaloImpl(userService, contactDiscoveryService, sessionScope, configViews);
-		
+
 		halo.addContactDataSource(new ContactDataSource());
-		
+
 		registerService(ContactHalo.class, halo);
-		
+
 		track(HaloContactDataSource.class, new SimpleRegistryListener<HaloContactDataSource>(){
 
 			@Override
@@ -46,11 +46,11 @@ public class HaloActivator extends HousekeepingActivator {
 					HaloContactDataSource service) {
 				halo.removeContactDataSource(service);
 			}
-			
+
 		});
-		
+
 		openTrackers();
-		
+
 	}
 
 }

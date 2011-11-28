@@ -69,18 +69,22 @@ public class SimICalParser implements ICalParser{
     private List<Task> tasks;
 
 
+    @Override
     public List<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return appointments;
     }
 
+    @Override
     public List<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return appointments;
     }
 
+    @Override
     public List<Task> parseTasks(final String icalText, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return tasks;
     }
 
+    @Override
     public List<Task> parseTasks(final InputStream ical, final TimeZone defaultTZ, final Context context, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
         return tasks;
     }
@@ -93,6 +97,7 @@ public class SimICalParser implements ICalParser{
         this.tasks = tasks;
     }
 
+    @Override
     public String parseProperty(final String propertyName, final InputStream ical) {
         return null;
     }

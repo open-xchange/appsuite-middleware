@@ -59,6 +59,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.URLDecoder;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -90,6 +91,7 @@ import com.openexchange.ajp13.servlet.http.HttpServletManager;
 import com.openexchange.ajp13.servlet.http.HttpSessionManagement;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -812,7 +814,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
                         }
                         final byte[] bytes = sink.toByteArray();
-                        parseQueryString(new String(bytes, charEnc));
+                        try {
+                            parseQueryString(new String(bytes, Charsets.forName(charEnc)));
+                        } catch (final UnsupportedCharsetException e) {
+                            parseQueryString(new String(bytes, Charsets.ISO_8859_1));
+                        }
                         /*
                          * Apply already read data to request to make them re-available.
                          */
