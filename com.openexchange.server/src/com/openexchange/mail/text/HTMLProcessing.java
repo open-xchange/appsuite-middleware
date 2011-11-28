@@ -55,6 +55,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -182,6 +183,26 @@ public final class HTMLProcessing {
                         retval = filterInlineImages(retval, session, mailPath);
                     }
                     // TODO: Replace CSS classes
+                    String css = htmlService.getCSSFromHTMLHeader(retval);
+                    String newCss = new String(css);
+                    UUID uuid = UUID.randomUUID();
+                    Pattern cssClassName = Pattern.compile("(\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*)\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+                    Matcher cssClassMatcher = cssClassName.matcher(css);
+                    while (cssClassMatcher.find()) {
+                        String cssClass = cssClassMatcher.group(1);
+                        newCss.replace(cssClass, "#" + uuid.toString() + " " + cssClass);
+                    }
+                    retval.replace(css, newCss);
+                    Pattern htmlBody = Pattern.compile("<(body.*?)>(.*?)</(body)>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+                    Matcher htmlBodyMatcher = htmlBody.matcher(retval);
+                    String bodyStart = "", bodyEnd = "", bodyContent = "";
+                    if (htmlBodyMatcher.find()) {
+                        bodyStart = htmlBodyMatcher.group(1);
+                        bodyContent = htmlBodyMatcher.group(2);
+                        bodyEnd = htmlBodyMatcher.group(3);
+                        retval.replace(bodyStart, "div id=\"#" + uuid.toString() + "\"");
+                        retval.replace(bodyEnd, "div");
+                    }
                 }
             }
             // if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
