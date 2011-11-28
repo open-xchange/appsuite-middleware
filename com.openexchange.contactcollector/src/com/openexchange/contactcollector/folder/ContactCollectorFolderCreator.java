@@ -123,17 +123,15 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
              */
             return;
         }
-        if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
+        if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue()) {
             /*
-             * Explicitly turned off
+             * Both - collect-on-mail-access and collect-on-mail-transport - disabled
              */
             return;
         }
-        /*
+        /*-
          * Should collect, or not explicitly set, so create folder
-         */
-
-        /*
+         * 
          * Create folder
          */
         int collectFolderID = 0;
@@ -154,8 +152,8 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
          * Remember folder ID
          */
         serverUserSetting.setContactCollectionFolder(cid, userId, Integer.valueOf(collectFolderID));
-        serverUserSetting.setContactCollectOnMailAccess(cid, userId, true);
-        serverUserSetting.setContactCollectOnMailTransport(cid, userId, true);
+        serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
+        serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
         if (LOG.isInfoEnabled()) {
             LOG.info(new StringBuilder("Contact collector folder (id=").append(collectFolderID).append(
                 ") successfully created for user ").append(userId).append(" in context ").append(cid));
