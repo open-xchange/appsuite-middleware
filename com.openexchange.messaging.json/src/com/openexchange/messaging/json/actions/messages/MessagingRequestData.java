@@ -69,6 +69,7 @@ import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.generic.internet.MimeAddressMessagingHeader;
+import com.openexchange.messaging.json.ManagedFileInputStreamRegistry;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.cacheing.CacheingMessageAccess;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
@@ -316,7 +317,7 @@ public class MessagingRequestData {
         if (!JSONObject.class.isInstance(data)) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("body", data.toString());
         }
-        return parser.parse((JSONObject) data, null);
+        return parser.parse((JSONObject) data, ManagedFileInputStreamRegistry.getInstance());
     }
 
     /**

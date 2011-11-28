@@ -47,37 +47,31 @@
  *
  */
 
-package com.openexchange.messaging.json;
+package com.openexchange.messaging;
 
-import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.exception.OXException;
+
 
 /**
- * A {@link MessagingInputStreamRegistry} can look up a certain InputStream for a given name. This is used to resolve references to binaries
- * when parsing MessagingMessages.
- * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link ManagedFileContent} - Represents a binary content.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since Open-Xchange v6.20.1
  */
-public interface MessagingInputStreamRegistry {
+public interface ManagedFileContent extends SimpleContent<InputStream> {
 
     /**
-     * Gets the binary content for specified identifier
+     * Gets the content type of associated managed file.
      * 
-     * @param id The identifier
-     * @return The binary content as an input stream
-     * @throws OXException If a messaging error occurs
-     * @throws IOException If an I/O error occurs
+     * @return The content type; e.g. <code><i>application/octet-stream</i></code>
      */
-    public InputStream get(Object id) throws OXException, IOException;
+    String getContentType();
 
     /**
-     * Gets the registry entry for specified identifier
-     * 
-     * @param id The identifier
-     * @return The registry entry
-     * @throws OXException If a messaging error occurs
+     * Gets the (optional) file name.
+     *
+     * @return The file name
      */
-    public Object getRegistryEntry(Object id) throws OXException;
+    String getFileName();
+
 }

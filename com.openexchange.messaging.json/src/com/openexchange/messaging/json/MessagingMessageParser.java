@@ -65,15 +65,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.messaging.ByteArrayContent;
+import com.openexchange.messaging.ContentDisposition;
+import com.openexchange.messaging.ContentType;
+import com.openexchange.messaging.ManagedFileContent;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
+import com.openexchange.messaging.generic.internet.MimeContentDisposition;
+import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMessagingMessage;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
@@ -161,14 +168,14 @@ public class MessagingMessageParser {
         return message;
     }
 
-    protected void setValues(final MimeMessagingBodyPart message, final MessagingInputStreamRegistry registry, final JSONObject messageJSON) throws JSONException, OXException, IOException {
+    protected void setValues(final MimeMessagingBodyPart bodyPart, final MessagingInputStreamRegistry registry, final JSONObject messageJSON) throws JSONException, OXException, IOException {
 
         if (messageJSON.has("id")) {
-            message.setSectionId(messageJSON.getString("id"));
+            bodyPart.setSectionId(messageJSON.getString("id"));
         }
 
         if (messageJSON.has("size")) {
-            message.setSize(messageJSON.getLong("size"));
+            bodyPart.setSize(messageJSON.getLong("size"));
         }
 
         JSONObject headers = messageJSON.optJSONObject("headers");
@@ -182,10 +189,10 @@ public class MessagingMessageParser {
             }
         }
 
-        setHeaders(headers, message);
+        setHeaders(headers, bodyPart);
 
         if (messageJSON.has("body")) {
-            setContent(messageJSON.get("body"), registry, message);
+            setContent(messageJSON.get("body"), registry, bodyPart);
         }
 
     }
@@ -217,7 +224,7 @@ public class MessagingMessageParser {
         contentParsers.remove(parser);
     }
 
-    private void setHeaders(final JSONObject object, final MimeMessagingBodyPart message) throws JSONException, OXException {
+    private void setHeaders(final JSONObject object, final MimeMessagingBodyPart bodyPart) throws JSONException, OXException {
         final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>();
         for (final String key : object.keySet()) {
             final Object value = object.get(key);
@@ -240,24 +247,38 @@ public class MessagingMessageParser {
             }
 
         }
-        message.setAllHeaders(headers);
+        bodyPart.setAllHeaders(headers);
     }
 
-    private void setContent(final Object content, final MessagingInputStreamRegistry registry, final MimeMessagingBodyPart message) throws OXException, JSONException, IOException {
+    private void setContent(final Object content, final MessagingInputStreamRegistry registry, final MimeMessagingBodyPart bodyPart) throws OXException, JSONException, IOException {
         MessagingContentParser candidate = null;
         int ranking = 0;
 
         for (final MessagingContentParser parser : contentParsers) {
-            if (parser.handles(message, content)) {
-                if (candidate == null || ranking < parser.getRanking()) {
+            if (parser.handles(bodyPart, content)) {
+                if ((candidate == null) || (ranking < parser.getRanking())) {
                     candidate = parser;
                     ranking = parser.getRanking();
                 }
             }
         }
         if (candidate != null) {
-            final MessagingContent parsedContent = candidate.parse(message, content, registry);
-            message.setContent(parsedContent, message.getContentType().getValue());
+            final MessagingContent parsedContent = candidate.parse(bodyPart, content, registry);
+            if (parsedContent instanceof ManagedFileContent) {
+                final ManagedFileContent managedFileContent = (ManagedFileContent) parsedContent;
+                final ContentType mct = new MimeContentType(managedFileContent.getContentType());
+                final ContentDisposition mcd = new MimeContentDisposition(MessagingPart.ATTACHMENT);
+                final String fileName = managedFileContent.getFileName();
+                if (null != fileName) {
+                    mct.setParameter("name", fileName);
+                    mcd.setParameter("filename", fileName);
+                }
+                bodyPart.setHeader("Content-Type", mct.toString());
+                bodyPart.setHeader("Content-Disposition", mcd.toString());
+                bodyPart.setContent(managedFileContent, managedFileContent.getContentType());
+            } else {
+                bodyPart.setContent(parsedContent, bodyPart.getContentType().getValue());
+            }
         }
     }
 
@@ -342,11 +363,37 @@ public class MessagingMessageParser {
                 return new ByteArrayContent(decoded);
             } else if (JSONObject.class.isInstance(content)) {
                 final JSONObject reference = (JSONObject) content;
-                final Object id = reference.get("ref");
+                final Object identifier = reference.get("ref");
+                /*
+                 * Check entry object first
+                 */
+                {
+                    final Object registryEntry = registry.getRegistryEntry(identifier);
+                    if (registryEntry instanceof ManagedFile) {
+                        final ManagedFile managedFile = (ManagedFile) registryEntry;
+                        return new ManagedFileContent() {
+                            
+                            @Override
+                            public InputStream getData() throws OXException {
+                                return managedFile.getInputStream();
+                            }
+                            
+                            @Override
+                            public String getFileName() {
+                                return managedFile.getFileName();
+                            }
+                            
+                            @Override
+                            public String getContentType() {
+                                return managedFile.getContentType();
+                            }
+                        };
+                    }
+                }
                 /*
                  * Initialize input stream
                  */
-                final InputStream in = new BufferedInputStream(registry.get(id));
+                final InputStream in = new BufferedInputStream(registry.get(identifier));
                 try {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(8192 << 1);
                     final byte[] buf = new byte[8192];
