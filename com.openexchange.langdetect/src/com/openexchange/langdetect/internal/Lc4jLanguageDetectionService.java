@@ -57,7 +57,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -70,6 +70,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import net.olivo.lc4j.LanguageCategorization;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.langdetect.LanguageDetectionExceptionCodes;
 import com.openexchange.langdetect.LanguageDetectionService;
@@ -229,7 +230,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
     @Override
     public List<Locale> findLanguages(final String input) throws OXException {
         try {
-            final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes("utf-8")));
+            final List<String> languages = defaultLanguageCategorization.findLanguage(new ByteArrayList(input.getBytes(Charsets.UTF_8)));
             final Set<Locale> locales = new LinkedHashSet<Locale>(languages.size());
             for (final String language : languages) {
                 if (UNKNOWN.equals(language)) {
@@ -252,7 +253,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
                 }
             }
             return new ArrayList<Locale>(locales);
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             // Cannot occur
             throw LanguageDetectionExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {

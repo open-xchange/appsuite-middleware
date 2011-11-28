@@ -170,7 +170,7 @@ public final class CreatePerformer extends AbstractPerformer {
              * Check for duplicates for OLOX-covered folders
              */
             if (!"infostore".equals(toCreate.getContentType().toString())) {
-                checkForDuplicate(toCreate.getName(), treeId, parentId);
+                checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
             }
             /*
              * Create folder dependent on folder is virtual or not

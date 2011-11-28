@@ -26,4 +26,4 @@ elif [ "3" = "$comment" ]; then
  comment="$alias3"
 fi
 
-git add --all && git commit -m "$comment" && git push origin master
+git add --all && git commit -m "$comment" && git pull && git push origin master

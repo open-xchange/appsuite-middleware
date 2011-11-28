@@ -49,17 +49,25 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
+
+import org.apache.commons.collections.BidiMap;
+import org.apache.commons.collections.DoubleOrderedMap;
+import org.apache.commons.collections.bidimap.TreeBidiMap;
+
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
 
-/**
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
- */
 public final class ParserTools {
 
     /**
@@ -179,4 +187,78 @@ public final class ParserTools {
         }
         return new Date(icaldate.getTime());
     }
+    
+    /**
+     * Takes an Outlook timezone id and guesses the appropriate 
+     * Java timezone. It does so by counting all timezones that
+     * have somewhat matching names, sorts them by their UTC 
+     * offset and chooses one of those that have the most often
+     * used offset, e.g. if you have three zones that have a +1 
+     * offset and one with +2, you'll get one of the +1 ones.
+     *  
+     * This thing would be way better if we had the timezone 
+     * information that we probably painfully extracted somewhere 
+     * in ical4j but got rid off again before this method is 
+     * needed. 
+     */
+    public static TimeZone findTzidBySimilarity(String tzidName) {
+    	if("Z".equals(tzidName)){
+    		return TimeZone.getTimeZone("Zulu");
+    	}
+    	//generate name variations of the outlook timezone name
+    	List<String> candidates1 = new LinkedList<String>();
+    	if(tzidName.contains(",")){
+    		String[] split = tzidName.split(",");
+    		for(String tmp: split)
+    			candidates1.add(tmp.trim());
+    	} else {
+    		candidates1.add(tzidName);
+    	}
+    	//compare all Java timezones to the candidates
+    	String[] availableIDs = TimeZone.getAvailableIDs();
+    	List<TimeZone> candidates2 = new LinkedList<TimeZone>();
+    	for(String javaId: availableIDs){
+    		for(String idPart: candidates1){
+    			if(javaId.equals(idPart)){
+    				candidates2.add(TimeZone.getTimeZone(javaId));
+    			}
+    			if(javaId.equalsIgnoreCase(idPart)){
+    				candidates2.add(TimeZone.getTimeZone(javaId));
+    			}
+    			if(javaId.contains(idPart)){
+    				candidates2.add(TimeZone.getTimeZone(javaId));
+    			}
+    			if(javaId.toLowerCase().contains(idPart.toLowerCase())){
+    				candidates2.add(TimeZone.getTimeZone(javaId));
+    			}
+    		}
+    	}
+		//now count how many different offsets there are
+    	BidiMap occurrences = new TreeBidiMap(); 
+    	int highestNumberOccurrences = 0;
+    	for(TimeZone cand: candidates2){
+    		int offset = cand.getRawOffset();
+    		if(!occurrences.containsKey(offset))
+    			occurrences.put(offset, 0);
+    		int numOccurrences = ((Integer)occurrences.get(offset))+1;
+    		occurrences.put(offset, numOccurrences);
+    		highestNumberOccurrences = highestNumberOccurrences < numOccurrences ? numOccurrences : highestNumberOccurrences; 
+    	}
+    	//select the most often occurring ones and take the one with the shortest name (probably a generic name)
+    	Integer mostCommonOffset = (Integer) occurrences.getKey((Integer)highestNumberOccurrences);
+    	int maxlength = Integer.MAX_VALUE;
+    	TimeZone candidate = null;
+    	for(TimeZone cand: candidates2){
+    		if(cand.getRawOffset() == mostCommonOffset){
+    			int l2 = cand.getID().length();
+    			if(l2 < maxlength){
+    				candidate = cand;
+    				maxlength = l2; 
+    			}
+    		}
+    	}
+    	return candidate;
+	}
+    
+    
 }

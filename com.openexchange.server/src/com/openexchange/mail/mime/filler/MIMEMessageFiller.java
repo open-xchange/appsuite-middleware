@@ -108,6 +108,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
@@ -1027,7 +1028,7 @@ public class MIMEMessageFiller {
                 def.write(w, versitObj);
                 w.flush();
                 os.flush();
-                return new String(os.toByteArray(), charset);
+                return new String(os.toByteArray(), Charsets.forName(charset));
             } finally {
                 if (readCon != null) {
                     DBPool.closeReaderSilent(ctx, readCon);

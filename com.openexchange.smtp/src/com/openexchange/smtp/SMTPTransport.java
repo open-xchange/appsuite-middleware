@@ -54,10 +54,10 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.parseAddressLi
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import static java.util.regex.Matcher.quoteReplacement;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -84,6 +84,7 @@ import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
@@ -603,8 +604,8 @@ public final class SMTPTransport extends MailTransport {
         String tmpPass = password;
         if (password != null) {
             try {
-                tmpPass = new String(password.getBytes(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc()), CHARENC_ISO_8859_1);
-            } catch (final UnsupportedEncodingException e) {
+                tmpPass = new String(password.getBytes(Charsets.forName(getTransportConfig0().getSMTPProperties().getSmtpAuthEnc())), Charsets.ISO_8859_1);
+            } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in a message detected and monitored: \"" + e.getMessage() + '"', e);
                 mailInterfaceMonitor.addUnsupportedEncodingExceptions(e.getMessage());
             }

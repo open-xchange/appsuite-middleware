@@ -1292,9 +1292,9 @@ public class Mail extends PermissionServlet implements UploadListener {
                     }
                     final ContentType ct = mail.getContentType();
                     if (ct.containsCharsetParameter() && CharsetDetector.isValid(ct.getCharsetParameter())) {
-                        data = new String(baos.toByteArray(), ct.getCharsetParameter());
+                        data = new String(baos.toByteArray(), Charsets.forName(ct.getCharsetParameter()));
                     } else {
-                        data = new String(baos.toByteArray(), STR_UTF8);
+                        data = new String(baos.toByteArray(), Charsets.UTF_8);
                     }
                 } else if (showMessageHeaders) {
                     /*

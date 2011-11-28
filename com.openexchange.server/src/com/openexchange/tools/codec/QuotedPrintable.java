@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeUtility;
+import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
@@ -117,7 +118,7 @@ public final class QuotedPrintable {
         while ((k = inStream.read(buffer)) != -1) {
             decodedBytes.write(buffer, 0, k);
         }
-        return new String(decodedBytes.toByteArray(), charset);
+        return new String(decodedBytes.toByteArray(), Charsets.forName(charset));
     }
 
 }
