@@ -92,7 +92,7 @@ public final class Bug12414Test extends AbstractAJAXSession {
     public void testTruncation() throws OXException, IOException,
         SAXException, JSONException {
         final VCardImportRequest request = new VCardImportRequest(folderId,
-            new ByteArrayInputStream(vCard.getBytes("UTF-8")), false);
+            new ByteArrayInputStream(vCard.getBytes(com.openexchange.java.Charsets.UTF_8)), false);
         final VCardImportResponse importR = client.execute(request);
         assertEquals("Missing import response.", 1, importR.size());
         final Response response = importR.get(0);

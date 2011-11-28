@@ -52,7 +52,6 @@ package com.openexchange.caldav;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,11 +167,7 @@ public class CaldavResource extends AbstractResource {
     protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
         if (namespace.equals(CaldavProtocol.CAL_NS.getURI()) && name.equals("calendar-data")) {
             final WebdavProperty property = new WebdavProperty(namespace, name);
-            try {
-                property.setValue(new String(icalFile(), "UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
-                throw WebdavProtocolException.generalError(getUrl(), 500);
-            }
+            property.setValue(new String(icalFile(), com.openexchange.java.Charsets.UTF_8));
             return property;
         }
         return null;
@@ -243,7 +238,7 @@ public class CaldavResource extends AbstractResource {
                 }
 
             }
-        } catch (ConversionError e) {
+        } catch (final ConversionError e) {
             LOG.error(e.getMessage(), e);
             throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -329,14 +324,14 @@ public class CaldavResource extends AbstractResource {
             if (create) {
                 appointmentSQLInterface.insertAppointmentObject(toSave);
             } else {
-                Appointment oldAppointment = factory.getState().get(appointment.getUid(), appointment.getParentFolderID());
+                final Appointment oldAppointment = factory.getState().get(appointment.getUid(), appointment.getParentFolderID());
                 patchResources(oldAppointment, toSave);
                 appointmentSQLInterface.updateAppointmentObject(toSave, parent.getId(), toSave.getLastModified());
             }
 
             // Exceptions may not change resource participants, so don't patch them here
-            for (Appointment exception : exceptionsToSave) {
-                Appointment matchingException = getMatchingChangeException(exception);
+            for (final Appointment exception : exceptionsToSave) {
+                final Appointment matchingException = getMatchingChangeException(exception);
                 if (matchingException != null) {
                     exception.setObjectID(matchingException.getObjectID());
                     exception.setLastModified(matchingException.getLastModified());
@@ -350,8 +345,8 @@ public class CaldavResource extends AbstractResource {
                 appointmentSQLInterface.updateAppointmentObject(cdo, exception.getParentFolderID(), appointment.getLastModified());
             }
 
-            for (CalendarDataObject deleteException : deleteExceptionsToSave) {
-                Appointment matchingException = getMatchingChangeException(deleteException);
+            for (final CalendarDataObject deleteException : deleteExceptionsToSave) {
+                final Appointment matchingException = getMatchingChangeException(deleteException);
                 if (matchingException != null) {
                     deleteException.setObjectID(matchingException.getObjectID());
                     deleteException.setLastModified(matchingException.getLastModified());
@@ -379,9 +374,9 @@ public class CaldavResource extends AbstractResource {
         }
     }
 
-    private Appointment getMatchingChangeException(Appointment exception) {
-        List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
-        for (Appointment existingException : changeExceptions) {
+    private Appointment getMatchingChangeException(final Appointment exception) {
+        final List<Appointment> changeExceptions = factory.getState().getChangeExceptions(appointment.getUid(), parent.getId());
+        for (final Appointment existingException : changeExceptions) {
            if (existingException.getRecurrenceDatePosition().equals(exception.getRecurrenceDatePosition())) {
                 return existingException;
             }
@@ -599,7 +594,7 @@ public class CaldavResource extends AbstractResource {
     }
 
     private void patchSeriesStartAndEnd() {
-        CalendarCollectionService calUtils = factory.getCalendarUtilities();
+        final CalendarCollectionService calUtils = factory.getCalendarUtilities();
         calUtils.safelySetStartAndEndDateForRecurringAppointment((CalendarDataObject) appointment);
 
         if (this.appointment.containsUntil()) {
@@ -607,9 +602,9 @@ public class CaldavResource extends AbstractResource {
         }
     }
 
-    private Date plusOneDay(Date until) {
+    private Date plusOneDay(final Date until) {
 
-        GregorianCalendar calendar = new GregorianCalendar();
+        final GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(until);
         calendar.setTimeZone(UTC);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
@@ -618,20 +613,20 @@ public class CaldavResource extends AbstractResource {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        Date oneDayLater = calendar.getTime();
+        final Date oneDayLater = calendar.getTime();
         return oneDayLater;
     }
 
     private void patchGroups() {
         // We want to add all user participants to the participants list and remove all group participants
 
-        Set<Integer> guardian = new HashSet<Integer>();
-        List<Participant> newParticipants = new ArrayList<Participant>();
+        final Set<Integer> guardian = new HashSet<Integer>();
+        final List<Participant> newParticipants = new ArrayList<Participant>();
 
-        Participant[] participants = appointment.getParticipants();
-        for (Participant participant : participants) {
+        final Participant[] participants = appointment.getParticipants();
+        for (final Participant participant : participants) {
             if (UserParticipant.class.isInstance(participant)) {
-                UserParticipant userParticipant = (UserParticipant) participant;
+                final UserParticipant userParticipant = (UserParticipant) participant;
                 guardian.add(userParticipant.getIdentifier());
                 newParticipants.add(userParticipant);
             } else if (!GroupParticipant.class.isInstance(participant)) {
@@ -639,8 +634,8 @@ public class CaldavResource extends AbstractResource {
             }
         }
 
-        UserParticipant[] users = appointment.getUsers();
-        for (UserParticipant userParticipant : users) {
+        final UserParticipant[] users = appointment.getUsers();
+        for (final UserParticipant userParticipant : users) {
             if (!guardian.contains(userParticipant.getIdentifier())) {
                 newParticipants.add(userParticipant);
             }
@@ -649,13 +644,13 @@ public class CaldavResource extends AbstractResource {
         appointment.setParticipants(newParticipants);
     }
 
-    private void patchResources(Appointment old, Appointment update) {
+    private void patchResources(final Appointment old, final Appointment update) {
         // We want to add all ResourceParticipants from the oldAppointment to the update, effectively disallowing modification of resources
-        Set<Integer> guardian = new HashSet<Integer>();
-        List<Participant> newParticipants = new ArrayList<Participant>();
+        final Set<Integer> guardian = new HashSet<Integer>();
+        final List<Participant> newParticipants = new ArrayList<Participant>();
 
         Participant[] participants = update.getParticipants();
-        for (Participant participant : participants) {
+        for (final Participant participant : participants) {
             if (ResourceParticipant.class.isInstance(participant)) {
                 guardian.add(participant.getIdentifier());
             }
@@ -663,7 +658,7 @@ public class CaldavResource extends AbstractResource {
         }
 
         participants = old.getParticipants();
-        for (Participant participant : participants) {
+        for (final Participant participant : participants) {
             if (ResourceParticipant.class.isInstance(participant) && !guardian.contains(participant.getIdentifier())) {
                 newParticipants.add(participant);
             }

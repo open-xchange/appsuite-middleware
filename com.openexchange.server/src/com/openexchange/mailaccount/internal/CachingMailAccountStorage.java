@@ -272,7 +272,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     public MailAccount[] resolveLogin(final String login, final int cid) throws OXException {
         final int[][] idsAndUsers = resolveFromCache(login, cid, new FromDelegate() {
             @Override
-            public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
+            public int[][] getFromDelegate(final String pattern, final int contextId) throws OXException {
                 return getDelegate().resolveLogin2IDs(pattern, contextId);
             }
         }, CachedResolveType.LOGIN);
@@ -288,7 +288,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     public MailAccount[] resolveLogin(final String login, final InetSocketAddress server, final int cid) throws OXException {
         final int[][] idsAndUsers = resolveFromCache(login, cid, new FromDelegate() {
             @Override
-            public int[][] getFromDelegate(String pattern, int contextId) throws OXException {
+            public int[][] getFromDelegate(final String pattern, final int contextId) throws OXException {
                 return getDelegate().resolveLogin2IDs(pattern, contextId);
             }
         }, CachedResolveType.LOGIN);
@@ -349,35 +349,37 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         return l.toArray(new MailAccount[l.size()]);
     }
 
-    private interface FromDelegate {
+    private static interface FromDelegate {
         int[][] getFromDelegate(String pattern, int cid) throws OXException;
     }
 
     private static int[][] resolveFromCache(final String pattern, final int cid, final FromDelegate delegate, final CachedResolveType type) throws OXException {
-        final int[][] idsAndUsers;
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null == cacheService) {
+            return delegate.getFromDelegate(pattern, cid);
+        }
         Cache cache;
         try {
             cache = cacheService.getCache(REGION_NAME);
         } catch (final OXException e) {
             cache = null;
         }
-        if (null == cacheService || null == cache) { // Warning here is wrong.
+        if (null == cache) {
+            return delegate.getFromDelegate(pattern, cid);
+        }
+        final int[][] idsAndUsers;
+        final CacheKey key = cacheService.newCacheKey(type.ordinal(), pattern);
+        int[][] tmp;
+        try {
+            tmp = (int[][]) cache.getFromGroup(key, Integer.toString(cid));
+        } catch (final ClassCastException e) {
+            tmp = null;
+        }
+        if (null == tmp) {
             idsAndUsers = delegate.getFromDelegate(pattern, cid);
+            cache.putInGroup(key, Integer.toString(cid), idsAndUsers);
         } else {
-            final CacheKey key = cacheService.newCacheKey(type.ordinal(), pattern);
-            int[][] tmp;
-            try {
-                tmp = (int[][]) cache.getFromGroup(key, Integer.toString(cid));
-            } catch (final ClassCastException e) {
-                tmp = null;
-            }
-            if (null == tmp) {
-                idsAndUsers = delegate.getFromDelegate(pattern, cid);
-                cache.putInGroup(key, Integer.toString(cid), idsAndUsers);
-            } else {
-                idsAndUsers = tmp;
-            }
+            idsAndUsers = tmp;
         }
         return idsAndUsers;
     }
@@ -400,7 +402,7 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         delegate.migratePasswords(user, cid, oldSecret, newSecret);
         final int[] ids = delegate.getUserMailAccountIDs(user, cid);
-        for (int id : ids) {
+        for (final int id : ids) {
             invalidateMailAccount(id, user, cid);
         }
     }

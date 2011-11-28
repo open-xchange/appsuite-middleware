@@ -108,6 +108,6 @@ public abstract class ActionTestCase extends TestCase {
         final byte[] bytes = new byte[(int)res.getLength().longValue()];
         final InputStream in = res.getBody();
         in.read(bytes);
-        return new String(bytes, "UTF-8");
+        return new String(bytes, com.openexchange.java.Charsets.UTF_8);
     }
 }

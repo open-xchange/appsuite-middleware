@@ -149,7 +149,7 @@ public final class BundleTestEventAdmin extends AbstractBundleTest {
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
 
-        final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+        final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
         final WebRequest req = new PutMethodWebRequest(
             PROTOCOL + host + APPOINTMENT_URL + parameter.getURLParameters(),
             bais,

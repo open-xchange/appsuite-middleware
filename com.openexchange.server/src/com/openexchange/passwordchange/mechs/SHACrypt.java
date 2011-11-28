@@ -67,7 +67,7 @@ public final class SHACrypt {
         final byte[] salt = {};
 
         md.reset();
-        md.update(raw.getBytes("UTF-8"));
+        md.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
         md.update(salt);
 
         final byte[] pwhash = md.digest();

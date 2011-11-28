@@ -54,7 +54,7 @@ public abstract class AbstractOXContainerConverterTest extends TestCase {
 		final VersitDefinition def = ICalendar.definition;
 
 		final VersitDefinition.Reader versitReader = def.getReader(
-				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
+				new ByteArrayInputStream(versitData.getBytes(com.openexchange.java.Charsets.UTF_8)), "UTF-8");
 
 		final VersitObject rootVersitObject = def.parseBegin(versitReader);
 		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
@@ -67,7 +67,7 @@ public abstract class AbstractOXContainerConverterTest extends TestCase {
 		final VersitDefinition def = ICalendar.definition;
 
 		final VersitDefinition.Reader versitReader = def.getReader(
-				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
+				new ByteArrayInputStream(versitData.getBytes(com.openexchange.java.Charsets.UTF_8)), "UTF-8");
 
 		final VersitObject rootVersitObject = def.parseBegin(versitReader);
 		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);
@@ -80,7 +80,7 @@ public abstract class AbstractOXContainerConverterTest extends TestCase {
 		final VersitDefinition def = ICalendar.definition;
 
 		final VersitDefinition.Reader versitReader = def.getReader(
-				new ByteArrayInputStream(versitData.getBytes("UTF-8")), "UTF-8");
+				new ByteArrayInputStream(versitData.getBytes(com.openexchange.java.Charsets.UTF_8)), "UTF-8");
 
 		final VersitObject rootVersitObject = def.parseBegin(versitReader);
 		final VersitObject versitObject = def.parseChild(versitReader, rootVersitObject);

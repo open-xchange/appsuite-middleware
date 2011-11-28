@@ -95,12 +95,12 @@ public class QuotaFileStorageTest extends TestCase {
         // And again, some lines from the original test
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent
-            .getBytes("UTF-8"));
+            .getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final String id = quotaStorage.saveNewFile(bais);
 
-        assertEquals(fileContent.getBytes("UTF-8").length, quotaStorage.getUsage());
-        assertEquals(fileContent.getBytes("UTF-8").length, quotaStorage.getFileSize(id));
+        assertEquals(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length, quotaStorage.getUsage());
+        assertEquals(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length, quotaStorage.getFileSize(id));
 
 
         quotaStorage.deleteFile(id);
@@ -121,10 +121,10 @@ public class QuotaFileStorageTest extends TestCase {
 
         final String fileContent = RandomString.generateLetter(100);
 
-        quotaStorage.setQuota(fileContent.getBytes("UTF-8").length-2);
+        quotaStorage.setQuota(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8).length-2);
 
         try {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes("UTF-8"));
+            final ByteArrayInputStream bais = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
             quotaStorage.saveNewFile(bais);
             fail("Managed to exceed quota");
         } catch (final OXException x) {

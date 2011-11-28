@@ -81,6 +81,6 @@ public class AbstractHashingFileStorageTest extends TestCase {
 
 
     protected InputStream IS(String data) throws UnsupportedEncodingException {
-        return new ByteArrayInputStream(data.getBytes("UTF-8"));
+        return new ByteArrayInputStream(data.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 }

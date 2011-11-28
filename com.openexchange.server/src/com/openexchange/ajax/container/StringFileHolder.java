@@ -50,7 +50,8 @@
 package com.openexchange.ajax.container;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
+import com.openexchange.java.Charsets;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -87,9 +88,9 @@ public final class StringFileHolder implements IFileHolder {
     public StringFileHolder(final String string, final String encoding) {
         super();
         try {
-            this.bytes = string.getBytes(encoding);
+            this.bytes = string.getBytes(Charsets.forName(encoding));
             contentType = "application/octet-stream";
-        } catch (final UnsupportedEncodingException e) {
+        } catch (final UnsupportedCharsetException e) {
             throw new IllegalStateException(e);
         }
     }

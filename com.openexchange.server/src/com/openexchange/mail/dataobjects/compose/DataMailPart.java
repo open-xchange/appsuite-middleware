@@ -53,7 +53,7 @@ import static com.openexchange.mail.utils.MessageUtility.readStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Map;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -62,6 +62,7 @@ import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
@@ -137,8 +138,8 @@ public abstract class DataMailPart extends MailPart implements ComposedMailPart 
 
     private void applyByteContent(final String charset) throws OXException {
         try {
-            cachedContent = new String(bytes, charset);
-        } catch (final UnsupportedEncodingException e) {
+            cachedContent = new String(bytes, Charsets.forName(charset));
+        } catch (final UnsupportedCharsetException e) {
             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
         }
     }

@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.helper;
 
-import java.io.UnsupportedEncodingException;
+import com.openexchange.java.Charsets;
 
 /**
  * {@link HTMLDetector} - Detects HTML tags in a byte sequence.
@@ -100,30 +100,24 @@ public final class HTMLDetector {
      * @return <code>true</code> if given byte sequence contains specified HTML tag; otherwise <code>false</code>
      */
     public static boolean containsHTMLTag(final byte[] sequence, final String tag) {
-        try {
-            final StringBuilder tmp = new StringBuilder(tag.length() + 2);
-            // lower-case
-            if (indexOf(
-                sequence,
-                tmp.append('<').append(tag.toLowerCase()).append('>').toString().getBytes("US-ASCII"),
-                0,
-                sequence.length,
-                null) != -1) {
-                return true;
-            }
-            tmp.setLength(0);
-            // upper-case
-            return (indexOf(
-                sequence,
-                tmp.append('<').append(tag.toUpperCase()).append('>').toString().getBytes("US-ASCII"),
-                0,
-                sequence.length,
-                null) != -1);
-        } catch (final UnsupportedEncodingException e) {
-            // Cannot occur
-            LOG.error(e.getMessage(), e);
-            return false;
+        final StringBuilder tmp = new StringBuilder(tag.length() + 2);
+        // lower-case
+        if (indexOf(
+            sequence,
+            tmp.append('<').append(tag.toLowerCase()).append('>').toString().getBytes(Charsets.US_ASCII),
+            0,
+            sequence.length,
+            null) != -1) {
+            return true;
         }
+        tmp.setLength(0);
+        // upper-case
+        return (indexOf(
+            sequence,
+            tmp.append('<').append(tag.toUpperCase()).append('>').toString().getBytes(Charsets.US_ASCII),
+            0,
+            sequence.length,
+            null) != -1);
     }
 
     /**

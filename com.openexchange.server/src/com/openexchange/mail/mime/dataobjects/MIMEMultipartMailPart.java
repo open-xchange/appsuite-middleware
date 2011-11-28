@@ -55,9 +55,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.UnsupportedCharsetException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessagingException;
@@ -358,13 +358,8 @@ public final class MIMEMultipartMailPart extends MailPart {
             if (getHeaderEnd(subArr) < 0) {
                 try {
                     return createTextPart(subArr, CharsetDetector.detectCharset(new UnsynchronizedByteArrayInputStream(subArr)));
-                } catch (final UnsupportedEncodingException e) {
-                    try {
-                        return createTextPart(subArr, "ISO-8859-1");
-                    } catch (final UnsupportedEncodingException e1) {
-                        // Cannot occur
-                        LOG.error(e1.getMessage(), e1);
-                    }
+                } catch (final UnsupportedCharsetException e) {
+                    return createTextPart(subArr, "ISO-8859-1");
                 }
             }
             /*
@@ -397,10 +392,10 @@ public final class MIMEMultipartMailPart extends MailPart {
         }
     }
 
-    private static MailPart createTextPart(final byte[] subArr, final String charset) throws UnsupportedEncodingException, OXException {
+    private static MailPart createTextPart(final byte[] subArr, final String charset) throws UnsupportedCharsetException, OXException {
         try {
             final MimeBodyPart mbp = new MimeBodyPart();
-            mbp.setText(new String(subArr, charset), charset);
+            mbp.setText(new String(subArr, Charsets.forName(charset)), charset);
             mbp.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
             mbp.setHeader(
                 MessageHeaders.HDR_CONTENT_TYPE,

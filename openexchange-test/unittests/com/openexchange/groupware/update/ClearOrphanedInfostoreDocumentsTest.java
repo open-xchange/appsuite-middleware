@@ -142,7 +142,7 @@ public class ClearOrphanedInfostoreDocumentsTest extends UpdateTest {
         FileStorage fs  = QuotaFileStorage.getInstance(
                 FilestoreStorage.createURI(ctx), ctx);
 
-        String path = fs.saveNewFile(new ByteArrayInputStream("Hallo Welt".getBytes("UTF-8")));
+        String path = fs.saveNewFile(new ByteArrayInputStream("Hallo Welt".getBytes(com.openexchange.java.Charsets.UTF_8)));
         paths.add(path);
 
         exec("INSERT INTO infostore_document (cid, infostore_id, version_number, file_store_location, creating_date, last_modified, created_by) VALUES (?,?,?,?, 0,0, ?)", ctx.getContextId(), id, version, path, user_id);

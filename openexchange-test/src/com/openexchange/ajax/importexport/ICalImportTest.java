@@ -159,7 +159,7 @@ public class ICalImportTest extends AbstractICalTest {
 
         final AJAXSession aSession = new AJAXSession(getWebConversation(), getHostName(), getSessionId());
         final AJAXClient client = new AJAXClient(aSession);
-        final ICalImportRequest request = new ICalImportRequest(appointmentFolderId, new ByteArrayInputStream(icalText.toString().getBytes("UTF-8")), false);
+        final ICalImportRequest request = new ICalImportRequest(appointmentFolderId, new ByteArrayInputStream(icalText.toString().getBytes(com.openexchange.java.Charsets.UTF_8)), false);
 	    final ICalImportResponse iResponse = client.execute(request);
         final ImportResult[] importResult = iResponse.getImports();
 

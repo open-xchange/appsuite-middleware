@@ -263,7 +263,7 @@ public abstract class AbstractAJAXTest extends TestCase {
     // Query methods
 
     protected String putS(final WebConversation webConv, final String url, final String body) throws MalformedURLException, IOException, SAXException {
-        final PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes("UTF-8")), "text/javascript; charset=UTF-8");
+        final PutMethodWebRequest m = new PutMethodWebRequest(url, new ByteArrayInputStream(body.getBytes(com.openexchange.java.Charsets.UTF_8)), "text/javascript; charset=UTF-8");
         final WebResponse resp = webConv.getResponse(m);
         String text = resp.getText();
         return text;

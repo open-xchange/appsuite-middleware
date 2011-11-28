@@ -18,7 +18,7 @@ public class HeadTest extends ActionTestCase {
 		final String content = getContent(INDEX_HTML_URL);
 
 		assertEquals("", res.getResponseBodyAsString());
-		assertEquals(content.getBytes("UTF-8").length, (int) new Integer(res.getHeader("content-length")));
+		assertEquals(content.getBytes(com.openexchange.java.Charsets.UTF_8).length, (int) new Integer(res.getHeader("content-length")));
 		assertEquals("text/html", res.getHeader("content-type"));
 		assertEquals("bytes", res.getHeader("Accept-Ranges"));
 	}

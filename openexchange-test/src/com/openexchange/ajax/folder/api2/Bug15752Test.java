@@ -86,7 +86,7 @@ public class Bug15752Test extends AbstractAJAXSession {
         client = getClient();
         inboxFolder = client.getValues().getInboxFolder();
         String mail = MAIL.replaceAll("#ADDR#", client.getValues().getSendAddress());
-        ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes("UTF-8"));
+        ByteArrayInputStream mailStream = new ByteArrayInputStream(mail.getBytes(com.openexchange.java.Charsets.UTF_8));
         ImportMailRequest request = new ImportMailRequest(inboxFolder, 0, new ByteArrayInputStream[] { mailStream });
         ImportMailResponse response = client.execute(request);
         mailIds = response.getIds()[0];

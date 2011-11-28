@@ -239,17 +239,9 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     con = databaseService.getWritable(contextId);
                 }
             }
-            final ServerSession session;
-            {
-                final Session s = storageParameters.getSession();
-                if (null == s) {
-                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-                }
-                if (s instanceof ServerSession) {
-                    session = ((ServerSession) s);
-                } else {
-                    session = new ServerSessionAdapter(s);
-                }
+            final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
             }
             /*
              * Determine folder with non-existing parents

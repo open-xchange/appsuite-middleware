@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.logging.Log;
@@ -252,11 +253,12 @@ public final class SieveTextFilter {
      * This method is used to get back the resulting sieve script
      *
      * @param clientrulesandrequire
+     * @param capabilities The SIEVE capabilities
      * @return
      * @throws SieveException
      */
-    public String writeback(final ClientRulesAndRequire clientrulesandrequire) throws SieveException {
-        final ArrayList<Rule> finalruleswithrightrequires = addRightRequires(clientrulesandrequire);
+    public String writeback(final ClientRulesAndRequire clientrulesandrequire, final Set<String> capabilities) throws SieveException {
+        final ArrayList<Rule> finalruleswithrightrequires = addRightRequires(clientrulesandrequire, capabilities);
         addLines(finalruleswithrightrequires);
         final ArrayList<Rule> noncommented = new ArrayList<Rule>();
         final ArrayList<Rule> commented = new ArrayList<Rule>();
@@ -386,9 +388,10 @@ public final class SieveTextFilter {
      * command within
      *
      * @param clientrulesandrequire
+     * @param capabilities The SIEVE capabilities
      * @return
      */
-    private ArrayList<Rule> addRightRequires(final ClientRulesAndRequire clientrulesandrequire) {
+    private ArrayList<Rule> addRightRequires(final ClientRulesAndRequire clientrulesandrequire, final Set<String> capabilities) {
         final ArrayList<Rule> newruleslist = new ArrayList<Rule>();
         final HashSet<String> requiredlist = new HashSet<String>();
         for (final Rule rule : clientrulesandrequire.getRules()) {
@@ -397,7 +400,9 @@ public final class SieveTextFilter {
                 final ArrayList<Command> commands = rule.getCommands();
                 if (!rule.isCommented() && null != commands) {
                     for (final Command command : commands) {
-                        requiredlist.addAll(command.getRequired());
+                        final Set<String> required = command.getRequired();
+                        required.retainAll(capabilities);
+                        requiredlist.addAll(required);
                     }
                 }
             }

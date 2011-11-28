@@ -2,7 +2,6 @@ package com.openexchange.webdav.protocol;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -40,7 +39,7 @@ public class ResourceTest extends AbstractResourceTest{
 	public void testBody() throws Exception{
 		final WebdavResource res = createResource();
 		final String content = "Hello, I'm the content!";
-		final byte[] bytes = content.getBytes("UTF-8");
+		final byte[] bytes = content.getBytes(com.openexchange.java.Charsets.UTF_8);
 
 		res.putBody(new ByteArrayInputStream(bytes));
 
@@ -80,7 +79,7 @@ public class ResourceTest extends AbstractResourceTest{
 		res.putProperty(prop);
 
 		final String content = "Hello, I'm the content!";
-		final byte[] bytes = content.getBytes("UTF-8");
+		final byte[] bytes = content.getBytes(com.openexchange.java.Charsets.UTF_8);
 
 		res.putBody(new ByteArrayInputStream(bytes));
 
@@ -132,7 +131,7 @@ public class ResourceTest extends AbstractResourceTest{
 		res.putProperty(prop);
 
 		final String content = "Hello, I'm the content!";
-		final byte[] bytes = content.getBytes("UTF-8");
+		final byte[] bytes = content.getBytes(com.openexchange.java.Charsets.UTF_8);
 
 		res.putBody(new ByteArrayInputStream(bytes));
 
@@ -178,7 +177,7 @@ public class ResourceTest extends AbstractResourceTest{
         WebdavResource res = createResource();
 
         final String content = "Hello, I'm the content!";
-        final byte[] bytes = content.getBytes("UTF-8");
+        final byte[] bytes = content.getBytes(com.openexchange.java.Charsets.UTF_8);
 
         res.putBody(new ByteArrayInputStream(bytes));
 
@@ -427,16 +426,14 @@ public class ResourceTest extends AbstractResourceTest{
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
 		assertEquals((Long)2l, res.getLength());
 
-		try {
+		{
 			final String content = "Hello, I'm the content!";
-			final byte[] bytes = content.getBytes("UTF-8");
+			final byte[] bytes = content.getBytes(com.openexchange.java.Charsets.UTF_8);
 
 			res.putBodyAndGuessLength(new ByteArrayInputStream(bytes));
 
 			assertEquals(bytes.length, (int)(long) res.getLength());
 
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
 		}
 
 
@@ -480,13 +477,7 @@ public class ResourceTest extends AbstractResourceTest{
 		assertEquals(eTag, res.getETag());
 
 		final String text = "Hallo";
-		byte[] bytes;
-		try {
-			bytes = text.getBytes("UTF-8");
-		} catch (final UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
+		final byte[] bytes = text.getBytes(com.openexchange.java.Charsets.UTF_8);
 
 		try {
 			res.putBody(new ByteArrayInputStream(bytes));

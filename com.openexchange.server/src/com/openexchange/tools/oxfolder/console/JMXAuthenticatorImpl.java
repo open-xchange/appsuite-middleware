@@ -49,7 +49,6 @@
 
 package com.openexchange.tools.oxfolder.console;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
@@ -109,14 +108,7 @@ final class JMXAuthenticatorImpl implements JMXAuthenticator {
         final byte[] salt = {};
 
         md.reset();
-        try {
-            md.update(raw.getBytes("UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            /*
-             * Cannot occur
-             */
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(JMXAuthenticatorImpl.class)).error(e.getMessage(), e);
-        }
+        md.update(raw.getBytes(com.openexchange.java.Charsets.UTF_8));
         md.update(salt);
 
         try {

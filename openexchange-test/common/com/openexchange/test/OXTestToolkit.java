@@ -118,6 +118,6 @@ public class OXTestToolkit {
         is.close();
         buffer = baos.toByteArray();
         baos.close();
-        return new String(buffer, "UTF-8");
+        return new String(buffer, com.openexchange.java.Charsets.UTF_8);
     }
 }

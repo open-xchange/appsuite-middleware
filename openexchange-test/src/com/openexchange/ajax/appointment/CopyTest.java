@@ -59,7 +59,7 @@ public class CopyTest extends AppointmentTest {
 
 		final JSONObject jsonObj = new JSONObject();
 		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolder);
-		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes("UTF-8"));
+		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		final WebResponse resp = getWebConversation().getResponse(req);
 

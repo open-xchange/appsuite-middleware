@@ -105,7 +105,7 @@ public class FileStorageTest extends TestCase {
         tempFile.delete();
         final String fileContent = RandomString.generateLetter(100);
         final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent
-            .getBytes("UTF-8"));
+            .getBytes(com.openexchange.java.Charsets.UTF_8));
         final FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
@@ -120,7 +120,7 @@ public class FileStorageTest extends TestCase {
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();
         final String fileContent = RandomString.generateLetter(100);
-        final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent.getBytes("UTF-8"));
+        final ByteArrayInputStream baos = new ByteArrayInputStream(fileContent.getBytes(com.openexchange.java.Charsets.UTF_8));
         final FileStorage storage = new LocalFileStorage(tempFile.toURI());
         final String identifier = storage.saveNewFile(baos);
         rmdir(tempFile);
@@ -161,7 +161,7 @@ public class FileStorageTest extends TestCase {
      */
     public final void testDeleteFile() throws Throwable {
         final ByteArrayInputStream baos = new ByteArrayInputStream(
-        		RandomString.generateLetter(100).getBytes("UTF-8"));
+        		RandomString.generateLetter(100).getBytes(com.openexchange.java.Charsets.UTF_8));
 
         final File tempFile = File.createTempFile("filestorage", ".tmp");
         tempFile.delete();

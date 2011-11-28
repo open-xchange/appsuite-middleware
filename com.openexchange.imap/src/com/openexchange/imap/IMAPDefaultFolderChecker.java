@@ -684,7 +684,7 @@ public final class IMAPDefaultFolderChecker {
                  * OK, a full name was passed. Try to create obviously non-existing IMAP folder.
                  */
                 try {
-                    IMAPCommandsCollection.createFolder(f, sep, type);
+                    IMAPCommandsCollection.createFolder(f, sep, type, false);
                     if (1 == subscribe) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, fullName, true);
                     } else if (0 == subscribe) {
@@ -693,136 +693,138 @@ public final class IMAPDefaultFolderChecker {
                     modified.set(true);
                     return fullName;
                 } catch (final MessagingException e) {
-                    final String prfx = "INBOX" + sep;
+                    String prfx;
+                    {
+                        final ListLsubEntry inboxEntry;
+                        if (modified.get()) {
+                            inboxEntry = ListLsubCache.getActualLISTEntry("INBOX", accountId, imapStore, session);
+                        } else {
+                            inboxEntry = ListLsubCache.getCachedLISTEntry("INBOX", accountId, imapStore, session);
+                        }
+                        if (null != inboxEntry && inboxEntry.exists()) {
+                            prfx = inboxEntry.hasInferiors() ? ("INBOX" + sep) : ("");
+                        } else {
+                            prfx = "";
+                        }
+                    }
+                    if ((0 == prfx.length() && fullName.indexOf(sep) < 0) || (fullName.startsWith(prfx, 0))) {
+                        // No need to retry with same prefix
+                        throw e;
+                    }
                     LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
                     ListLsubCache.clearCache(accountId, session);
                     modified.set(true);
-                    if (fullName.indexOf(sep) < 0) {
-                        /*
-                         * Creation at root level failed...
-                         */
-                        throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
-                    }
-                }
-            } else {
-                /*
-                 * A name was passed. Perform a case-insensitive look-up because some IMAP servers do not allow to create a folder of which
-                 * name equals ignore-case to an existing folder.
-                 */
-                final IMAPFolder parent;
-                final int len = prefix.length();
-                if (0 == len) {
-                    parent = (IMAPFolder) imapStore.getDefaultFolder();
-                } else {
-                    /*
-                     * Cut off trailing separator character
-                     */
-                    final String parentFullName = prefix.substring(0, len - 1);
-                    parent = (IMAPFolder) imapStore.getFolder(parentFullName);
-                }
-                final Folder[] folders = parent.list();
-                final List<String> candidates = new ArrayList<String>(2);
-                for (int i = 0; i < folders.length; i++) {
-                    final String folderName = folders[i].getName();
-                    if (qualifiedName.equalsIgnoreCase(folderName)) {
-                        /*
-                         * Detected a similarly named folder
-                         */
-                        candidates.add(folderName);
-                    }
-                }
-                final int nCandidates = candidates.size();
-                if (nCandidates <= 0 || nCandidates > 1) {
-                    /*
-                     * Zero or more than one candidate found. Try to create IMAP folder
-                     */
-                    try {
-                        IMAPCommandsCollection.createFolder(f, sep, type);
-                        modified.set(true);
-                    } catch (final MessagingException e) {
-                        final String prfx = prefix.length() == 0 ? "INBOX" + sep : "";
-                        LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
-                        ListLsubCache.clearCache(accountId, session);
-                        modified.set(true);
-                        throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
-                    }
-                } else {
-                    if (MailAccount.DEFAULT_ID == accountId) {
-                        // Must not edit default mail account. Try to create IMAP folder
-                        try {
-                            IMAPCommandsCollection.createFolder(f, sep, type);
-                            modified.set(true);
-                        } catch (final MessagingException e) {
-                            LOG.warn(
-                                new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullName).append(
-                                    "\" failed.").toString(),
-                                e);
-                            ListLsubCache.clearCache(accountId, session);
-                            modified.set(true);
-                        }
-                    } else {
-                        /*
-                         * Found _ONE_ candidate of which name passed ignore-case comparison
-                         */
-                        final String candidate = candidates.get(0);
-                        final MailAccountDescription mad = new MailAccountDescription();
-                        final Set<Attribute> attributes;
-                        mad.setId(accountId);
-                        switch (index) {
-                        case StorageUtility.INDEX_CONFIRMED_HAM:
-                            mad.setConfirmedHam(candidate);
-                            attributes = EnumSet.of(Attribute.CONFIRMED_HAM_LITERAL);
-                            break;
-                        case StorageUtility.INDEX_CONFIRMED_SPAM:
-                            mad.setConfirmedSpam(candidate);
-                            attributes = EnumSet.of(Attribute.CONFIRMED_SPAM_LITERAL);
-                            break;
-                        case StorageUtility.INDEX_DRAFTS:
-                            mad.setDrafts(candidate);
-                            attributes = EnumSet.of(Attribute.DRAFTS_LITERAL);
-                            break;
-                        case StorageUtility.INDEX_SENT:
-                            mad.setSent(candidate);
-                            attributes = EnumSet.of(Attribute.SENT_LITERAL);
-                            break;
-                        case StorageUtility.INDEX_SPAM:
-                            mad.setSpam(candidate);
-                            attributes = EnumSet.of(Attribute.SPAM_LITERAL);
-                            break;
-                        case StorageUtility.INDEX_TRASH:
-                            mad.setTrash(candidate);
-                            attributes = EnumSet.of(Attribute.TRASH_LITERAL);
-                            break;
-                        default:
-                            throw new MessagingException("Unexpected index: " + index);
-                        }
-                        {
-                            final MailAccountStorageService storageService =
-                                IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
-                            final SecretService secretService = IMAPServiceRegistry.getService(SecretService.class);
-
-                            storageService.updateMailAccount(
-                                mad,
-                                attributes,
-                                session.getUserId(),
-                                session.getContextId(),
-                                secretService.getSecret(session));
-                        }
-                        final String fn = tmp.append(prefix).append(candidate).toString();
-                        tmp.setLength(0);
-                        f = (IMAPFolder) imapStore.getFolder(fn);
-                    }
+                    throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
                 }
             }
-            /*-
-             *
-             *
-            final IMAPException oxme = IMAPException.Code.NO_DEFAULT_FOLDER_CREATION.create(
-                tmp.append(prefix).append(name).toString());
-            tmp.setLength(0);
-            LOG.error(oxme.getMessage(), oxme);
-            checkSubscribed = false;
+            /*
+             * A name was passed. Perform a case-insensitive look-up because some IMAP servers do not allow to create a folder of which
+             * name equals ignore-case to an existing folder.
              */
+            final IMAPFolder parent;
+            final int len = prefix.length();
+            if (0 == len) {
+                parent = (IMAPFolder) imapStore.getDefaultFolder();
+            } else {
+                /*
+                 * Cut off trailing separator character
+                 */
+                final String parentFullName = prefix.substring(0, len - 1);
+                parent = (IMAPFolder) imapStore.getFolder(parentFullName);
+            }
+            final Folder[] folders = parent.list();
+            final List<String> candidates = new ArrayList<String>(2);
+            for (int i = 0; i < folders.length; i++) {
+                final String folderName = folders[i].getName();
+                if (qualifiedName.equalsIgnoreCase(folderName)) {
+                    /*
+                     * Detected a similarly named folder
+                     */
+                    candidates.add(folderName);
+                }
+            }
+            final int nCandidates = candidates.size();
+            if (nCandidates <= 0 || nCandidates > 1) {
+                /*
+                 * Zero or more than one candidate found. Try to create IMAP folder
+                 */
+                try {
+                    IMAPCommandsCollection.createFolder(f, sep, type, false);
+                    modified.set(true);
+                } catch (final MessagingException e) {
+                    final String prfx = prefix.length() == 0 ? "INBOX" + sep : "";
+                    LOG.warn("Creating default folder by full name \"" + fullName + "\" failed. Retry with prefix \"" + prfx + "\".", e);
+                    ListLsubCache.clearCache(accountId, session);
+                    modified.set(true);
+                    throw new RetryOtherPrefixException(prfx, e.getMessage(), e);
+                }
+            } else {
+                if (MailAccount.DEFAULT_ID == accountId) {
+                    // Must not edit default mail account. Try to create IMAP folder
+                    try {
+                        IMAPCommandsCollection.createFolder(f, sep, type, false);
+                        modified.set(true);
+                    } catch (final MessagingException e) {
+                        LOG.warn(
+                            new StringBuilder(64).append("Creation of non-existing default IMAP folder \"").append(fullName).append(
+                                "\" failed.").toString(),
+                            e);
+                        ListLsubCache.clearCache(accountId, session);
+                        modified.set(true);
+                    }
+                } else {
+                    /*
+                     * Found _ONE_ candidate of which name passed ignore-case comparison
+                     */
+                    final String candidate = candidates.get(0);
+                    final MailAccountDescription mad = new MailAccountDescription();
+                    final Set<Attribute> attributes;
+                    mad.setId(accountId);
+                    switch (index) {
+                    case StorageUtility.INDEX_CONFIRMED_HAM:
+                        mad.setConfirmedHam(candidate);
+                        attributes = EnumSet.of(Attribute.CONFIRMED_HAM_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_CONFIRMED_SPAM:
+                        mad.setConfirmedSpam(candidate);
+                        attributes = EnumSet.of(Attribute.CONFIRMED_SPAM_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_DRAFTS:
+                        mad.setDrafts(candidate);
+                        attributes = EnumSet.of(Attribute.DRAFTS_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_SENT:
+                        mad.setSent(candidate);
+                        attributes = EnumSet.of(Attribute.SENT_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_SPAM:
+                        mad.setSpam(candidate);
+                        attributes = EnumSet.of(Attribute.SPAM_LITERAL);
+                        break;
+                    case StorageUtility.INDEX_TRASH:
+                        mad.setTrash(candidate);
+                        attributes = EnumSet.of(Attribute.TRASH_LITERAL);
+                        break;
+                    default:
+                        throw new MessagingException("Unexpected index: " + index);
+                    }
+                    {
+                        final MailAccountStorageService storageService =
+                            IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
+                        final SecretService secretService = IMAPServiceRegistry.getService(SecretService.class);
+
+                        storageService.updateMailAccount(
+                            mad,
+                            attributes,
+                            session.getUserId(),
+                            session.getContextId(),
+                            secretService.getSecret(session));
+                    }
+                    final String fn = tmp.append(prefix).append(candidate).toString();
+                    tmp.setLength(0);
+                    f = (IMAPFolder) imapStore.getFolder(fn);
+                }
+            }
         }
         if (1 == subscribe) {
             if (!f.isSubscribed()) {

@@ -570,7 +570,7 @@ public class ContactTest extends AbstractAJAXTest {
             f.delete();
             jResponse = extractFromCallback(resp.getText());
         } else {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 
             req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
             resp = webCon.getResponse(req);
@@ -634,7 +634,7 @@ public class ContactTest extends AbstractAJAXTest {
             f.delete();
             jResponse = extractFromCallback(resp.getText());
         } else {
-            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes("UTF-8"));
+            final ByteArrayInputStream bais = new ByteArrayInputStream(stringWriter.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 
             req = new PutMethodWebRequest(host + CONTACT_URL + parameter.getURLParameters(), bais, "text/javascript");
             resp = webCon.getResponse(req);

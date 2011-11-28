@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,87 +50,15 @@
 package com.openexchange.folderstorage;
 
 /**
- * {@link FieldNamePair} - A pair of a field and its name.
+ * {@link RemoveAfterAccessFolder} - A folder which is removed from cache (if elapsed) after it was accessed.
  * <p>
- * Equality is only determined by field value, not its name.
- *
+ * Applies only to locally (not globally) cached folders; meaning {@link #isCacheable()} MUST return <code>true</code> AND
+ * {@link #isGlobalID()} MUST return <code>false</code>.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FieldNamePair {
+public interface RemoveAfterAccessFolder extends Folder {
 
-    /**
-     * Gets the instance for given field.
-     *
-     * @param field The field
-     * @return The appropriate instance
-     */
-    public static FieldNamePair valueOf(final int field) {
-        return new FieldNamePair(field, null);
-    }
-
-    private final int field;
-
-    private final String name;
-
-    /**
-     * Initializes a new {@link FieldNamePair}.
-     *
-     * @param field The field number
-     * @param name The field name
-     */
-    public FieldNamePair(final int field, final String name) {
-        super();
-        this.field = field;
-        this.name = name;
-    }
-
-    /**
-     * Gets the field.
-     *
-     * @return The field
-     */
-    public int getField() {
-        return field;
-    }
-
-    /**
-     * Gets the name.
-     *
-     * @return The name
-     */
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public int hashCode() {
-        return field;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof FieldNamePair)) {
-            return false;
-        }
-        final FieldNamePair other = (FieldNamePair) obj;
-        if (field != other.field) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder(48);
-        builder.append("FieldNamePair [field=").append(field).append(", ");
-        if (name != null) {
-            builder.append("name=").append(name);
-        }
-        builder.append("]");
-        return builder.toString();
-    }
+    // Marker interface
 
 }

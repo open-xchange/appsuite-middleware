@@ -281,7 +281,7 @@ public class LockTest extends InfostoreAJAXTest {
 			urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
 			urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
 			urlParam.setParameter("timestamp", String.valueOf(timestamp));
-			final byte[] bytes = jsonFolder.toString().getBytes("UTF-8");
+			final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
 			final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 			final WebRequest req = new PutMethodWebRequest(PROTOCOL + hostname + FOLDER_URL + urlParam.getURLParameters(), bais,
 				"text/javascript; charset=UTF-8");

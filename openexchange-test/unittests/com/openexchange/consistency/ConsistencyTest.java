@@ -49,9 +49,7 @@
 
 package com.openexchange.consistency;
 
-import com.openexchange.exception.OXException;
 import static com.openexchange.java.Autoboxing.I;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.InMemoryAttachmentBase;
@@ -391,11 +390,7 @@ public class ConsistencyTest extends TestCase {
     }
 
     private void createFilestoreEntry(final Context context, final String filestoreId, final String content) {
-        try {
-            storage.put(context,filestoreId, content.getBytes("UTF-8"));
-        } catch (final UnsupportedEncodingException e) {
-            //IGNORE
-        }
+        storage.put(context,filestoreId, content.getBytes(com.openexchange.java.Charsets.UTF_8));
     }
 
     private void createAttachment(final Context context, final String filestorePath) {
@@ -488,7 +483,7 @@ public class ConsistencyTest extends TestCase {
         }
 
         @Override
-        protected FileStorage getFileStorage(Context ctx) {
+        protected FileStorage getFileStorage(final Context ctx) {
             storage.setContext(ctx);
             return new FileStorage(storage);
         }

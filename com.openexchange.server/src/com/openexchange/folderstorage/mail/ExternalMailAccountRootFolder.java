@@ -55,6 +55,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
@@ -68,11 +69,11 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ExternalMailAccountRootFolder} - A mail folder.
+ * {@link ExternalMailAccountRootFolder} - A mail folder especially for root folder of an external account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ExternalMailAccountRootFolder extends AbstractFolder {
+public final class ExternalMailAccountRootFolder extends AbstractFolder implements RemoveAfterAccessFolder {
 
     private static final long serialVersionUID = -7259106085690350497L;
 
@@ -172,7 +173,7 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder {
 
     @Override
     public boolean isCacheable() {
-        return false;
+        return true;
     }
 
     @Override

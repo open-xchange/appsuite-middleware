@@ -183,7 +183,7 @@ public final class MailImageTest extends AbstractMailTest {
 					.appendMessages(
 							"INBOX",
 							new MailMessage[] { MIMEMessageConverter.convertMessage(MSG_WITH_INLINE_IMG
-									.getBytes("US-ASCII")) })[0];
+									.getBytes(com.openexchange.java.Charsets.US_ASCII)) })[0];
 			try {
 				final MailMessage mail = mailAccess.getMessageStorage().getMessage("INBOX", uid, true);
 

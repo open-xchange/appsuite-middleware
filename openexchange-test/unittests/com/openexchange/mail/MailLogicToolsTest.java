@@ -168,7 +168,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 			mailAccess.connect(/* mailConfig */);
 			try {
 				// ByteArrayInputStream in = new
-				// ByteArrayInputStream(TEST_MAIL.getBytes("US-ASCII"));
+				// ByteArrayInputStream(TEST_MAIL.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 				final MailMessage[] mails = mailAccess.getMessageStorage().searchMessages("INBOX", null,
 						MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);
@@ -207,7 +207,7 @@ public final class MailLogicToolsTest extends AbstractMailTest {
 			mailConnection.connect(/* mailConfig */);
 			try {
 				// ByteArrayInputStream in = new
-				// ByteArrayInputStream(TEST_MAIL.getBytes("US-ASCII"));
+				// ByteArrayInputStream(TEST_MAIL.getBytes(com.openexchange.java.Charsets.US_ASCII));
 
 				final MailMessage[] mails = mailConnection.getMessageStorage().searchMessages("INBOX", null,
 						MailSortField.RECEIVED_DATE, OrderDirection.DESC, null, COMMON_LIST_FIELDS);

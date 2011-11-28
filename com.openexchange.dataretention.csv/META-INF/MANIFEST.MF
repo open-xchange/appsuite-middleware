@@ -9,10 +9,11 @@ Import-Package: com.openexchange.config,
  com.openexchange.dataretention,
  com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.server,
  com.openexchange.server.osgiservice,
  org.apache.commons.logging,
- com.openexchange.log,
  org.apache.commons.logging.impl,
  org.osgi.framework
 Bundle-Activator: com.openexchange.dataretention.csv.osgi.CSVDataRetentionActivator

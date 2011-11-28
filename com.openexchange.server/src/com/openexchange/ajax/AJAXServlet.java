@@ -58,6 +58,7 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLDecoder;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -553,8 +554,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 if (charEnc == null) {
                     charEnc = ServerConfig.getProperty(ServerConfig.Property.DefaultEncoding);
                 }
-                return new String(baos.toByteArray(), charEnc);
-            } catch (final UnsupportedEncodingException e) {
+                return new String(baos.toByteArray(), Charsets.forName(charEnc));
+            } catch (final UnsupportedCharsetException e) {
                 LOG.error("Unsupported encoding in request", e);
                 return new String(baos.toByteArray(), Charsets.ISO_8859_1);
             }

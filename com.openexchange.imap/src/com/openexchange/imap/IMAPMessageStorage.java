@@ -57,6 +57,7 @@ import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -77,6 +78,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.exception.OXException;
@@ -127,7 +129,6 @@ import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
-import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
@@ -298,9 +299,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final String subtype = bodystructure.subtype.toLowerCase(Locale.ENGLISH);
             if ("text".equals(type)) {
                 final String sequenceId = getSequenceId(prefix, partCount);
-                final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
-                String content = readContent(bytes);
-                boolean extractPlainText;
+                String content;
+                {
+                    final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
+                    content = readContent(bytes, bodystructure.cParams.get("charset"), bodystructure.encoding);
+                }
                 if ("plain".equals(subtype)) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
                         final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
@@ -308,16 +311,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             content = uuencodedMP.getCleanText();
                         }
                     }
-                    extractPlainText = false;
-                } else {
-                    if (subtype.startsWith("htm")) {
-                        //content = htmlService.getConformHTML(content, "UTF-8");
-                        content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
-                    }
-                    extractPlainText = true;
-                }
-                if (!extractPlainText) {
                     return content;
+                }
+                if (subtype.startsWith("htm")) {
+                    //content = htmlService.getConformHTML(content, "UTF-8");
+                    content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
                 }
                 try {
                     return extractPlainText(content);
@@ -401,26 +399,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
-    private static String readContent(final byte[] bytes) throws IOException {
-        String cs;
-        try {
-            cs = CharsetDetector.detectCharsetFailOnError(Streams.newByteArrayInputStream(bytes));
-        } catch (final IOException e) {
-            cs = CharsetDetector.getFallback();
+    private static String readContent(final byte[] bytes, final String charset, final String encoding) throws IOException {
+        if (null == encoding) {
+            return MessageUtility.readStream(Streams.newByteArrayInputStream(bytes), charset);
         }
+        InputStream in;
         try {
-            return MessageUtility.readStream(Streams.newByteArrayInputStream(bytes), cs);
-        } catch (final java.io.CharConversionException e) {
-            // Obviously charset was wrong or bogus implementation of character conversion
-            final String fallback = "ISO-8859-1";
-            if (LOG.isWarnEnabled()) {
-                LOG.warn(
-                    new StringBuilder("Character conversion exception while reading content with charset \"").append(cs).append(
-                        "\". Using fallback charset \"").append(fallback).append("\" instead."),
-                    e);
-            }
-            return MessageUtility.readStream(Streams.newByteArrayInputStream(bytes), fallback);
+            in = MimeUtility.decode(Streams.newByteArrayInputStream(bytes), encoding);
+        } catch (final MessagingException e) {
+            in = Streams.newByteArrayInputStream(bytes);
         }
+        return MessageUtility.readStream(in, charset);
     }
 
     /**

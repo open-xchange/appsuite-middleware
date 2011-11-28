@@ -68,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.java.Charsets;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -178,7 +179,7 @@ public class ConfigMenu extends SessionServlet {
             log("Client did not specify the character encoding.");
             encoding = ServerConfig.getProperty(Property.DefaultEncoding);
         }
-        String value = new String(baos.toByteArray(), encoding);
+        String value = new String(baos.toByteArray(), Charsets.forName(encoding));
         if (value.length() > 0 && value.charAt(0) == '"') {
             value = value.substring(1);
         }

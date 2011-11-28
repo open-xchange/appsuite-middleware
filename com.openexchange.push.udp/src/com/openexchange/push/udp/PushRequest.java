@@ -172,7 +172,7 @@ public class PushRequest {
                     LOG.debug("push sync package: " + pushObject);
                 }
 
-                PushOutputQueue.add(pushObject, true);
+                PushOutputQueue.add(pushObject);
                 break;
             case REMOTE_HOST_REGISTER:
                 /*

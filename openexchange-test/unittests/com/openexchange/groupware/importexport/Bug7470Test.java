@@ -157,7 +157,7 @@ public class Bug7470Test extends AbstractContactTest {
 			"END:VCALENDAR";
 
 		assertTrue("Can import?" ,  imp.canImport(sessObj, format, _folders(), null));
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes("UTF-8")), _folders(), null);
+		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(ical.getBytes(com.openexchange.java.Charsets.UTF_8)), _folders(), null);
 		assertEquals("One import?" , 1 , results.size());
 		final ImportResult res = results.get(0);
 		assertEquals("Shouldn't have error" , null, res.getException());

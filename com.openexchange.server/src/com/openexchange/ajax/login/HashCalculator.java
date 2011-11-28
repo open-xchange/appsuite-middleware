@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.login;
 
-import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
@@ -59,6 +58,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Charsets;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.encoding.Base64;
 
@@ -78,21 +78,19 @@ public class HashCalculator {
     public static String getHash(final HttpServletRequest req, final String client) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(getUserAgent(req).getBytes("UTF-8"));
-            md.update(client.getBytes("UTF-8"));
+            md.update(getUserAgent(req).getBytes(Charsets.UTF_8));
+            md.update(client.getBytes(Charsets.UTF_8));
             final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             final String fieldList = null == service ? "" : service.getProperty("com.openexchange.cookie.hash.fields", "");
             final String[] fields = PATTERN_SPLIT.split(fieldList, 0);
             for (final String field : fields) {
                 final String header = req.getHeader(field);
                 if (header != null) {
-                    md.update(header.getBytes("UTF-8"));
+                    md.update(header.getBytes(Charsets.UTF_8));
                 }
             }
             return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
         } catch (final NoSuchAlgorithmException e) {
-            LOG.fatal(e.getMessage(), e);
-        } catch (final UnsupportedEncodingException e) {
             LOG.fatal(e.getMessage(), e);
         }
         return "";

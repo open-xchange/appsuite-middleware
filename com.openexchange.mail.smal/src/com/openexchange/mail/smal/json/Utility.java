@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal.json;
 
-import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.TimeZone;
 import java.util.concurrent.Callable;
@@ -90,11 +89,9 @@ public final class Utility {
             final AbstractChecksum checksum =
                 GeneralProgram.isSupportFor("1.4.2") ? new MD("SHA-256") : new MDgnu(jonelo.jacksum.adapt.gnu.crypto.Registry.SHA256_HASH);
             checksum.setEncoding(encoding);
-            checksum.update(string.getBytes("UTF-8"));
+            checksum.update(string.getBytes(com.openexchange.java.Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
-        } catch (final UnsupportedEncodingException e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         }
         return null;
@@ -122,11 +119,9 @@ public final class Utility {
         try {
             final AbstractChecksum checksum = JacksumAPI.getChecksumInstance(algorithm);
             checksum.setEncoding(encoding);
-            checksum.update(string.getBytes("UTF-8"));
+            checksum.update(string.getBytes(com.openexchange.java.Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
-        } catch (final UnsupportedEncodingException e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(Utility.class)).error(e.getMessage(), e);
         }
         return null;

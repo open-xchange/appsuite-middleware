@@ -107,7 +107,7 @@ public class ContactObjectsByVcardFileStep extends AbstractStep<Contact[], Page>
             vcardString = deleteUnwantedLines(vcardString, unwantedLines);
             pageString = pageString.substring(endIndex);
             try {
-                final byte[] vcard = vcardString.getBytes("UTF-8");
+                final byte[] vcard = vcardString.getBytes(com.openexchange.java.Charsets.UTF_8);
                 final VersitDefinition def = Versit.getDefinition("text/x-vcard");
                 VersitDefinition.Reader versitReader;
                 versitReader = def.getReader(new ByteArrayInputStream(vcard), "UTF-8");
