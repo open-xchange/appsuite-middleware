@@ -49,14 +49,25 @@
 
 package com.openexchange.messaging.smslmms;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link MessagingSMSService} - The messaging service for SMS/MMS.
+ * {@link SMSMessagingService} - The messaging service for SMS/MMS.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingSMSService extends MessagingService {
+public interface SMSMessagingService extends MessagingService {
+
+    /**
+     * Gets the SMS/MMS configuration for the user associated with specified session.
+     * 
+     * @param session The session providing user data
+     * @return The SMS/MMS configuration
+     * @throws OXException If configuration cannot be returned
+     */
+    SMSMessagingConfiguration getSMSConfiguration(Session session) throws OXException;
 
 }

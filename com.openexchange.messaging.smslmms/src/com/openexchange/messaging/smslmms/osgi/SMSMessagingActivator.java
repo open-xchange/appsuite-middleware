@@ -49,33 +49,75 @@
 
 package com.openexchange.messaging.smslmms.osgi;
 
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.smslmms.SMSMessagingService;
+import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.server.osgiservice.SimpleRegistryListener;
 
 
 /**
- * {@link MessagingSMSActivator} - The activator for SMS/MMS bundle.
+ * {@link SMSMessagingActivator} - The activator for SMS/MMS bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessagingSMSActivator extends HousekeepingActivator {
+public final class SMSMessagingActivator extends HousekeepingActivator {
+
+    protected volatile ServiceRegistration<MessagingService> messagingServiceRegistration;
 
     /**
-     * Initializes a new {@link MessagingSMSActivator}.
+     * Initializes a new {@link SMSMessagingActivator}.
      */
-    public MessagingSMSActivator() {
+    public SMSMessagingActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] {};
     }
 
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
+        trackService(SMSMessagingService.class);
+        /*
+         * Publish tracked SMSMessagingService as MessagingService
+         */
+        final BundleContext context = this.context;
+        track(SMSMessagingService.class, new SimpleRegistryListener<SMSMessagingService>() {
 
+            @Override
+            public void added(final ServiceReference<SMSMessagingService> ref, final SMSMessagingService service) {
+                final MessagingService tmp = service;
+                messagingServiceRegistration = context.registerService(MessagingService.class, tmp, null);
+            }
+
+            @Override
+            public void removed(final ServiceReference<SMSMessagingService> ref, final SMSMessagingService service) {
+                final ServiceRegistration<MessagingService> registration = messagingServiceRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    messagingServiceRegistration = null;
+                }
+            }
+        });
+        openTrackers();
+
+        registerService(PreferencesItemService.class, new SMSPreferencesItem(this));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        final ServiceRegistration<MessagingService> registration = messagingServiceRegistration;
+        if (null != registration) {
+            registration.unregister();
+            messagingServiceRegistration = null;
+        }
+        super.stopBundle();
     }
 
 }
