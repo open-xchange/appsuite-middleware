@@ -171,9 +171,11 @@ public final class SubscribePerformer extends AbstractPerformer {
                         true,
                         openedStorages,
                         false);
+                final String sourceId = sourceFolder.getID();
+                final String sourceName = sourceFolder.getName();
                 for (final UserizedFolder userizedFolder : subfolders) {
-                    if (userizedFolder.getName().equals(sourceFolder.getName())) {
-                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(sourceFolder.getName(), targetParentId, targetTreeId);
+                    if (!userizedFolder.getID().equals(sourceId) && userizedFolder.getName().equals(sourceName)) {
+                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(sourceName, targetParentId, targetTreeId);
                     }
                 }
             }
