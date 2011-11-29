@@ -114,6 +114,7 @@ public class AJAXActionServiceAdapterHandler implements MultipleHandler, Multipl
         request.setSecure(secure);
         request.setHostname(jsonObject.getString(HOSTNAME));
         request.setRoute(jsonObject.getString(ROUTE));
+        request.setRemoteAddress(jsonObject.getString(REMOTE_ADDRESS));
         for (final Entry<String, Object> entry : jsonObject.entrySet()) {
             final String key = entry.getKey();
             if (DATA.equals(key)) {

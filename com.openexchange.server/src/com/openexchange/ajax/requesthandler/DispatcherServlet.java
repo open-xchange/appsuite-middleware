@@ -424,6 +424,7 @@ public class DispatcherServlet extends SessionServlet {
                 request.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
+        request.setRemoteAddress(req.getRemoteAddr());
         request.setRoute(Tools.getRoute(req.getSession(true).getId()));
     }
 

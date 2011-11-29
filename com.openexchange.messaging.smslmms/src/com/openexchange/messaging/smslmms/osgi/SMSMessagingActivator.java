@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.smslmms.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -83,6 +85,7 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(SMSMessagingActivator.class));
         trackService(SMSMessagingService.class);
         /*
          * Publish tracked SMSMessagingService as MessagingService
@@ -92,6 +95,10 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
             @Override
             public void added(final ServiceReference<SMSMessagingService> ref, final SMSMessagingService service) {
+                if (null != getService(SMSMessagingService.class)) {
+                    logger.error("Detected multiple SMS/MMS services!");
+                    return;
+                }
                 final MessagingService tmp = service;
                 messagingServiceRegistration = context.registerService(MessagingService.class, tmp, null);
             }

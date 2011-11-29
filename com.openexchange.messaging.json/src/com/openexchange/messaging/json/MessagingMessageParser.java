@@ -128,7 +128,7 @@ public class MessagingMessageParser {
     /**
      * Parses the JSON representation of a messaging message. References to binaries are resolved using the attached registry.
      */
-    public MessagingMessage parse(final JSONObject messageJSON, final MessagingInputStreamRegistry registry) throws JSONException, OXException, IOException {
+    public MessagingMessage parse(final JSONObject messageJSON, final MessagingInputStreamRegistry registry, final String remoteAddress) throws JSONException, OXException, IOException {
 
         final MimeMessagingMessage message = new MimeMessagingMessage();
 
@@ -281,6 +281,13 @@ public class MessagingMessageParser {
             } else {
                 bodyPart.setContent(parsedContent, bodyPart.getContentType().getValue());
             }
+        } else {
+            // Expect content to be a string
+            final StringContent stringContent = new StringContent(content.toString());
+            final String contentType = "text/plain; charset=ISO-8859-1";
+            final ContentType mct = new MimeContentType(contentType);
+            bodyPart.setHeader("Content-Type", mct.toString());
+            bodyPart.setContent(stringContent, contentType);
         }
     }
 

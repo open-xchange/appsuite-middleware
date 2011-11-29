@@ -93,6 +93,7 @@ public class MultipleAdapter implements MultipleHandler {
 
         request.setHostname(jsonObject.getString(HOSTNAME));
         request.setRoute(jsonObject.getString(ROUTE));
+        request.setRemoteAddress(jsonObject.getString(REMOTE_ADDRESS));
 
         for (final Entry<String, Object> entry : jsonObject.entrySet()) {
             final String name = entry.getKey();
