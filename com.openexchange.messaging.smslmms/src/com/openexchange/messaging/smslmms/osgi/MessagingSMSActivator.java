@@ -49,6 +49,9 @@
 
 package com.openexchange.messaging.smslmms.osgi;
 
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.messaging.smslmms.MessagingSMSService;
+import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 
@@ -68,13 +71,15 @@ public final class MessagingSMSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return new Class<?>[] {};
     }
 
     @Override
     protected void startBundle() throws Exception {
-        // TODO Auto-generated method stub
+        trackService(MessagingSMSService.class);
+        openTrackers();
+
+        registerService(PreferencesItemService.class, new SMSPreferencesItem(this));
 
     }
 

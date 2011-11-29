@@ -47,27 +47,59 @@
  *
  */
 
-package com.openexchange.messaging.smslmms;
+package com.openexchange.messaging.smslmms.internal;
 
+import static com.openexchange.java.Autoboxing.B;
 import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.messaging.smslmms.MessagingSMSService;
+import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link MessagingSMSService} - The messaging service for SMS/MMS.
+ * {@link SMSPreferencesItem} - The {@link PreferencesItemService} for SMS/MMS bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingSMSService extends MessagingService {
+public class SMSPreferencesItem implements PreferencesItemService {
 
-    /**
-     * Gets the SMS/MMS configuration for the user associated with specified session.
-     * 
-     * @param session The session providing user data
-     * @return The SMS/MMS configuration
-     * @throws OXException If configuration cannot be returned
-     */
-    MessagingSMSConfiguration getSMSConfiguration(Session session) throws OXException;
+    protected final ServiceLookup serviceLookup;
+
+    public SMSPreferencesItem(final ServiceLookup serviceLookup) {
+        super();
+        this.serviceLookup = serviceLookup;
+    }
+
+    @Override
+    public String[] getPath() {
+        return new String[] { "modules", "com.openexchange.messaging.sms" };
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            @Override
+            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                final MessagingSMSService smsService = serviceLookup.getService(MessagingSMSService.class);
+                if (null == smsService) {
+                    throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(MessagingSMSService.class.getName());
+                }
+                setting.setSingleValue(B(smsService.getSMSConfiguration(session).isEnabled()));
+            }
+
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
+    }
 
 }
