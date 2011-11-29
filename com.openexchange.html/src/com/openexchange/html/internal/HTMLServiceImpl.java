@@ -778,53 +778,41 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_HTML_HEAD = Pattern.compile("<head>.*</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
     private static final Pattern PATTERN_STYLESHEET_FILE = Pattern.compile(
         "<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>",
         Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
-    private static final Pattern PATTERN_STYLESHEET = Pattern.compile(
-        "<style[^>]*type=['\"]text/css['\"][^>]*>(.*?)(?:\\Q</style>\\E)",
-        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_STYLESHEET = Pattern.compile("<style.*?>(.*?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     @Override
     public String getCSSFromHTMLHeader(final String htmlContent) {
         String css = "";
-        final Matcher mHeader = PATTERN_HTML_HEAD.matcher(htmlContent);
-        if (!mHeader.find()) {
-            return css;
-        } else {
-            String head = mHeader.group();
-            if (head != null && !head.equals("") && !head.isEmpty()) {
-                final Matcher mStyle = PATTERN_STYLESHEET.matcher(head);
-                while (mStyle.find()) {
-                    css += mStyle.group(1);
-                }
-                final Matcher mStyleFile = PATTERN_STYLESHEET_FILE.matcher(head);
-                while (mStyleFile.find()) {
-                    String cssFile = mStyleFile.group(2);
-                    HttpClient client = new HttpClient();
-                    GetMethod get = new GetMethod(cssFile);
-                    try {
-                        int statusCode = client.executeMethod(get);
-                        if (statusCode != HttpStatus.SC_OK) {
-//                             throw new OXException(); //TODO: set exceptioncode
-                        } else {
-                            byte[] responseBody = get.getResponseBody();
-                            css += new String(responseBody);
-                        }
-                    } catch (HttpException e) {
-//                        throw new OXException(); //TODO: set exceptioncode
-                    } catch (IOException e) {
-//                        throw new OXException(); //TODO: set exceptioncode
-                    } finally {
-                        get.releaseConnection();
-                    }
-                }
-            }
-            return css;
+        final Matcher mStyle = PATTERN_STYLESHEET.matcher(htmlContent);
+        while (mStyle.find()) {
+            css += mStyle.group(1);
         }
+        final Matcher mStyleFile = PATTERN_STYLESHEET_FILE.matcher(htmlContent);
+        while (mStyleFile.find()) {
+            String cssFile = mStyleFile.group(2);
+            HttpClient client = new HttpClient();
+            GetMethod get = new GetMethod(cssFile);
+            try {
+                int statusCode = client.executeMethod(get);
+                if (statusCode != HttpStatus.SC_OK) {
+                    // throw new OXException(); //TODO: set exceptioncode
+                } else {
+                    byte[] responseBody = get.getResponseBody();
+                    css += new String(responseBody);
+                }
+            } catch (HttpException e) {
+                // throw new OXException(); //TODO: set exceptioncode
+            } catch (IOException e) {
+                // throw new OXException(); //TODO: set exceptioncode
+            } finally {
+                get.releaseConnection();
+            }
+        }
+        return css;
     }
 
     @Override
@@ -1104,7 +1092,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Pre-process specified HTML content with <a href="http://jsoup.org/">jsoup</a> library.
-     *
+     * 
      * @param htmlContent The HTML content
      * @return The safe HTML content according to JSoup processing
      */
