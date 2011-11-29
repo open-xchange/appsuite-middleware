@@ -27,3 +27,4 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker
+Bundle-Activator: com.openexchange.messaging.smslmms.osgi.MessagingSMSActivator
