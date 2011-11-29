@@ -64,6 +64,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.BinaryContent;
+import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingField;
@@ -329,7 +330,8 @@ public class MessagingMessageParserTest extends TestCase {
 
         @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
-            return partlyParsedMessage.getContentType().getBaseType().equals("text/plain");
+            final ContentType contentType = partlyParsedMessage.getContentType();
+            return null != contentType && "text/plain".equals(contentType.getBaseType());
         }
 
         @Override

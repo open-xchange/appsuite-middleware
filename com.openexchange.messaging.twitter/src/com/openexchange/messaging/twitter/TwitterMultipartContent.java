@@ -91,4 +91,9 @@ public final class TwitterMultipartContent implements MultipartContent {
         return parts[index];
     }
 
+    @Override
+    public String getSubType() {
+        return "alternative";
+    }
+
 }

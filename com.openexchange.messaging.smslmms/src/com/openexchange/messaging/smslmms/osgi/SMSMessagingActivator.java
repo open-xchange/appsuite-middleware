@@ -85,6 +85,7 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(SMSMessagingActivator.class));
         trackService(SMSMessagingService.class);
         /*
