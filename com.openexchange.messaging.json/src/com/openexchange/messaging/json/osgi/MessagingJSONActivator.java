@@ -100,7 +100,11 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        register();
+        try {
+            register();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -118,56 +122,53 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         try {
             parser = new MessagingMessageParser();
-
+    
             rememberTracker(new ContentParserTracker(context, parser));
             rememberTracker(new HeaderParserTracker(context, parser));
-
+    
             writer = new MessagingMessageWriter();
             rememberTracker(new ContentWriterTracker(context, writer));
             rememberTracker(new HeaderWriterTracker(context, writer));
             track(I18nService.class, new I18nServiceCustomizer(context));
-
+    
             openTrackers();
-
+    
             fileInputStreamRegistry = ManagedFileInputStreamRegistry.getInstance();
             fileInputStreamRegistry.start(context);
-
+    
             register();
-        } catch (final Throwable x) {
+        } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
+            throw x;
         }
     }
 
-    private void register() {
-        try {
-            boolean initializeFacs = false;
-            if (cacheService == null) {
-                cacheService = getService(CacheService.class);
-                initializeFacs = true;
-            }
-            if (registry == null) {
-                registry = getService(MessagingServiceRegistry.class);
-                initializeFacs = true;
-            }
+    private void register() throws Exception {
+        boolean initializeFacs = false;
+        if (cacheService == null) {
+            cacheService = getService(CacheService.class);
+            initializeFacs = true;
+        }
+        if (registry == null) {
+            registry = getService(MessagingServiceRegistry.class);
+            initializeFacs = true;
+        }
 
-            if (!allAvailable()) {
-                return;
-            }
+        if (!allAvailable()) {
+            return;
+        }
 
-            if (initializeFacs) {
-                AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
-                MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
-                ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
-            }
-            if (!hasRegisteredServices()) {
-                registerModule(AccountActionFactory.INSTANCE, "messaging/account");
-                registerModule(MessagingActionFactory.INSTANCE, "messaging/message");
-                registerModule(ServicesActionFactory.INSTANCE, "messaging/service");
-                registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
-                registerService(PreferencesItemService.class, new GUI());
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+        if (initializeFacs) {
+            AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
+            MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
+            ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
+        }
+        if (!hasRegisteredServices()) {
+            registerModule(AccountActionFactory.INSTANCE, "messaging/account");
+            registerModule(MessagingActionFactory.INSTANCE, "messaging/message");
+            registerModule(ServicesActionFactory.INSTANCE, "messaging/service");
+            registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
+            registerService(PreferencesItemService.class, new GUI());
         }
     }
 

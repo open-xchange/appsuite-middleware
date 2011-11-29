@@ -105,6 +105,11 @@ public final class ManagedFileInputStreamRegistry implements MessagingInputStrea
         super();
     }
 
+    /**
+     * Starts this registry.
+     * 
+     * @param context The bundle context used to track needed service
+     */
     public void start(final BundleContext context) {
         if (null != tracker) {
             return;
@@ -136,6 +141,9 @@ public final class ManagedFileInputStreamRegistry implements MessagingInputStrea
         tracker.open();
     }
 
+    /**
+     * Stops this registry orderly.
+     */
     public void stop() {
         fileManagement = null;
         if (null != tracker) {
