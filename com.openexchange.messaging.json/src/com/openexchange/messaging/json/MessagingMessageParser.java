@@ -67,6 +67,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.messaging.ByteArrayContent;
+import com.openexchange.messaging.CaptchaParams;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.ManagedFileContent;
@@ -78,6 +79,7 @@ import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
+import com.openexchange.messaging.ParameterizedMessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentDisposition;
@@ -165,6 +167,24 @@ public class MessagingMessageParser {
         }
 
         setValues(message, registry, messageJSON);
+
+        /*
+         * Parse possible captcha element
+         */
+        if (messageJSON.hasAndNotNull("captcha")) {
+            final JSONObject captcha = messageJSON.getJSONObject("captcha");
+            final CaptchaParams params = new CaptchaParams();
+            if (captcha.has("challenge")) {
+                params.setChallenge(captcha.getString("challenge"));
+            }
+            if (captcha.has("response")) {
+                params.setResponse(captcha.getString("response"));
+            }
+            if (null != remoteAddress) {
+                params.setAddress(remoteAddress);
+            }
+            message.putParameter(ParameterizedMessagingMessage.PARAM_CAPTCHA_PARAMS, params);
+        }
 
         return message;
     }

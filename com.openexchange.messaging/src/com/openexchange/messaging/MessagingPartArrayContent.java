@@ -80,4 +80,9 @@ public class MessagingPartArrayContent implements MultipartContent {
         return parts.length;
     }
 
+    @Override
+    public String getSubType() {
+        return "mixed";
+    }
+
 }
