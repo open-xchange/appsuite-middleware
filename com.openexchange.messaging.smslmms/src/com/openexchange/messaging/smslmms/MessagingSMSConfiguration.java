@@ -95,6 +95,11 @@ public interface MessagingSMSConfiguration {
     public static final String PROP_MMS = "mms";
 
     /**
+     * The property name whether folders are supported.
+     */
+    public static final String PROP_FOLDER_STORAGE = "folderStorage";
+
+    /**
      * The property name for upsell link.
      */
     public static final String PROP_UPSELL_LINK = "upsellLink";
@@ -154,6 +159,13 @@ public interface MessagingSMSConfiguration {
      * @return <code>true</code> if MMS is allowed; otherwise <code>false</code>
      */
     public boolean isMMS();
+
+    /**
+     * Indicates if folder storage access is supported.
+     * 
+     * @return <code>true</code> if access to folder storage is supported; otherwise <code>false</code>
+     */
+    public boolean supportsFolderStorage();
     
     /**
      * Gets an optional upsell link, if the user has no SMS enabled.

@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link DefaultMessagingSMSConfiguration}
+ * {@link DefaultMessagingSMSConfiguration} - The default {@link MessagingSMSConfiguration configuration} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,6 +76,8 @@ public class DefaultMessagingSMSConfiguration implements MessagingSMSConfigurati
     private Boolean multiSMS;
 
     private Boolean mms;
+
+    private Boolean folderStorage;
 
     private String upsellLink;
 
@@ -213,6 +215,24 @@ public class DefaultMessagingSMSConfiguration implements MessagingSMSConfigurati
      */
     public void setMms(final boolean mms) {
         this.mms = Boolean.valueOf(mms);
+    }
+
+    @Override
+    public boolean supportsFolderStorage() {
+        if (null != folderStorage) {
+            return folderStorage.booleanValue();
+        }
+        final Boolean b = (Boolean) configuration.get(PROP_FOLDER_STORAGE);
+        return null == b ? true : b.booleanValue();
+    }
+
+    /**
+     * Sets the folder storage flag.
+     * 
+     * @param folderStorage The flag to set
+     */
+    public void setFolderStorage(final boolean folderStorage) {
+        this.folderStorage = Boolean.valueOf(folderStorage);
     }
 
     @Override
