@@ -62,6 +62,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.json.Enabled;
 import com.openexchange.messaging.json.GUI;
+import com.openexchange.messaging.json.ManagedFileInputStreamRegistry;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
@@ -89,6 +90,8 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     private CacheService cacheService;
 
     private boolean cacheConfigured;
+
+    private ManagedFileInputStreamRegistry fileInputStreamRegistry;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -125,6 +128,9 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
             track(I18nService.class, new I18nServiceCustomizer(context));
 
             openTrackers();
+
+            fileInputStreamRegistry = ManagedFileInputStreamRegistry.getInstance();
+            fileInputStreamRegistry.start(context);
 
             register();
         } catch (final Throwable x) {
@@ -182,6 +188,10 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            if (null != fileInputStreamRegistry) {
+                fileInputStreamRegistry.stop();
+                ManagedFileInputStreamRegistry.dropInstance();
+            }
             cleanUp();
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);

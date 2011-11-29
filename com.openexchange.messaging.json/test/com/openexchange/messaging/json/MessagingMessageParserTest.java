@@ -383,6 +383,11 @@ public class MessagingMessageParserTest extends TestCase {
             return id;
         }
 
+        @Override
+        public Object getRegistryEntry(final Object id) throws OXException {
+            return "Mock value";
+        }
+
     }
 
 }

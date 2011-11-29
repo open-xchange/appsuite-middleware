@@ -82,10 +82,11 @@ public final class ManagedFileInitialization implements Initialization {
             return;
         }
         // Simulate bundle registration
-        ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, ManagedFileManagementImpl.getInstance());
+        final ManagedFileManagementImpl fileManagement = ManagedFileManagementImpl.getInstance();
+        ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, fileManagement);
         final BundleContext context = ServerActivator.getContext();
         if (null != context) {
-            registerService = context.registerService(ManagedFileManagement.class, ManagedFileManagementImpl.getInstance(), null);
+            registerService = context.registerService(ManagedFileManagement.class, fileManagement, null);
         }
     }
 
