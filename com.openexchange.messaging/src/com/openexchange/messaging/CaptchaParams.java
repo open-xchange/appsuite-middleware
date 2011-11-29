@@ -62,30 +62,63 @@ public final class CaptchaParams {
 
     private String address;
 
+    /**
+     * Initializes a new {@link CaptchaParams}.
+     */
     public CaptchaParams() {
         super();
     }
 
+    /**
+     * Gets the challenge.
+     * 
+     * @return The challenge
+     */
     public String getChallenge() {
         return challenge;
     }
 
+    /**
+     * Sets the challenge.
+     * 
+     * @param challenge The challenge
+     */
     public void setChallenge(final String challenge) {
         this.challenge = challenge;
     }
 
+    /**
+     * Gets the response string.
+     * 
+     * @return The response string
+     */
     public String getResponse() {
         return response;
     }
 
+    /**
+     * Sets the response string.
+     * 
+     * @param response The response string.
+     */
     public void setResponse(final String response) {
         this.response = response;
     }
 
+    /**
+     * Gets the host; either an IP address or a host name.
+     * 
+     * @return The host name
+     */
     public String getHost() {
         return address;
     }
 
+    /**
+     * Sets the remote address.
+     * 
+     * @param address The remote address
+     */
     public void setAddress(final String address) {
         this.address = address;
     }
