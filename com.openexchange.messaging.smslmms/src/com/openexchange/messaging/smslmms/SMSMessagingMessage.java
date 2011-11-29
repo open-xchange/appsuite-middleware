@@ -51,10 +51,13 @@ package com.openexchange.messaging.smslmms;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
@@ -77,6 +80,7 @@ import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
 import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link SMSMessagingMessage} - Represents a SMS message.
@@ -87,18 +91,27 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
 
     private static final long serialVersionUID = 5324611878535898301L;
 
-    private static final AtomicReference<ManagedFileManagement> FILE_MANAGEMENT = new AtomicReference<ManagedFileManagement>();
+    private static final AtomicReference<ServiceLookup> SERVICE_LOOKUP = new AtomicReference<ServiceLookup>();
 
     /**
-     * Sets the tracked file management.
+     * Sets the service look-up.
      * 
-     * @param fileManagement The file management
+     * @param serviceLookup The service look-up
      */
-    public static void setManagedFileManagement(final ManagedFileManagement fileManagement) {
-        FILE_MANAGEMENT.set(fileManagement);
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        SERVICE_LOOKUP.set(serviceLookup);
     }
 
-    private static final String MESSAGE_ID = "smsMessage";
+    /**
+     * Gets the service look-up.
+     * 
+     * @return The service look-up
+     */
+    public static ServiceLookup getServiceLookup() {
+        return SERVICE_LOOKUP.get();
+    }
+
+    private static final String MESSAGE_TYPE = "smsMessage";
 
     private static final ContentType CONTENT_TYPE;
 
@@ -117,11 +130,15 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
 
     private final Map<String, Collection<MessagingHeader>> headers = new HashMap<String, Collection<MessagingHeader>>(16);
 
+    private final String message;
+
     private MessagingContent content;
 
     private final long size;
 
     private final Map<String, Object> parameters;
+
+    private final List<ManagedFile> files;
 
     private CaptchaParams captchaParams;
 
@@ -132,7 +149,25 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
      * @param from The sending user
      */
     public SMSMessagingMessage(final String sender, final String receiver, final String message) {
+        this(toAddressHeader(MessagingHeader.KnownHeader.FROM.toString(), sender), toAddressHeader(
+            MessagingHeader.KnownHeader.TO.toString(),
+            receiver), message);
+    }
+
+    private static MessagingHeader toAddressHeader(final String name, final String address) {
+        return MimeAddressMessagingHeader.valueOfPlain(name, null, address);
+    }
+
+    /**
+     * Initializes a new {@link SMSMessagingMessage}.
+     * 
+     * @param recipient The recipient of the direct message
+     * @param from The sending user
+     */
+    public SMSMessagingMessage(final MessagingHeader sender, final MessagingHeader receiver, final String message) {
         super();
+        this.message = message;
+        files = new LinkedList<ManagedFile>();
         parameters = new HashMap<String, Object>(4);
         /*
          * Assign string content and size
@@ -146,11 +181,11 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
         headers.put(CONTENT_DISPOSITION.getName(), wrap(CONTENT_DISPOSITION));
         {
             final String name = MessagingHeader.KnownHeader.FROM.toString();
-            headers.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, null, sender)));
+            headers.put(name, wrap(sender));
         }
         {
             final String name = MessagingHeader.KnownHeader.TO.toString();
-            headers.put(name, wrap(MimeAddressMessagingHeader.valueOfPlain(name, null, receiver)));
+            headers.put(name, wrap(receiver));
         }
         {
             final String name = MessagingHeader.KnownHeader.SUBJECT.toString();
@@ -158,8 +193,26 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
         }
         {
             final String name = MessagingHeader.KnownHeader.MESSAGE_TYPE.toString();
-            headers.put(name, getSimpleHeader(name, MESSAGE_ID));
+            headers.put(name, getSimpleHeader(name, MESSAGE_TYPE));
         }
+    }
+
+    /**
+     * Gets the message text.
+     * 
+     * @return The message text
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Gets the associated files.
+     * 
+     * @return The files.
+     */
+    public List<ManagedFile> getFiles() {
+        return new ArrayList<ManagedFile>(files);
     }
 
     @Override
@@ -230,7 +283,14 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
 
     @Override
     public long getSize() {
-        return size;
+        if (files.isEmpty()) {
+            return size;
+        }
+        long ret = size;
+        for (final ManagedFile mf : files) {
+            ret += mf.getFile().length();
+        }
+        return ret;
     }
 
     @Override
@@ -323,19 +383,12 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
     }
 
     /**
-     * Adds the attachment associated with specified identifier.
+     * Adds specified attachment.
      * 
-     * @param attachmentId The attachment identifier
+     * @param managedFile The attachment as a managed file
      * @throws OXException If attaching denoted file fails
      */
-    public void addAttachment(final String attachmentId) throws OXException {
-        /*
-         * Ensure presence of needed service
-         */
-        final ManagedFileManagement managedFileManagement = FILE_MANAGEMENT.get();
-        if (null == managedFileManagement) {
-            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
-        }
+    public void addAttachment(final ManagedFile managedFile) throws OXException {
         /*
          * Check current message's content
          */
@@ -363,12 +416,32 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
          * Create an appropriate body part for referenced file
          */
         final MimeMessagingBodyPart bodyPart = new MimeMessagingBodyPart(mimeMultipartContent);
-        final ManagedFile managedFile = managedFileManagement.getByID(attachmentId);
         final MessagingContent attachmentContent = new ManagedFileContentImpl(managedFile);
         bodyPart.setContent(attachmentContent, managedFile.getContentType());
         bodyPart.setDisposition(managedFile.getContentDisposition());
         bodyPart.setFileName(managedFile.getFileName());
         mimeMultipartContent.addBodyPart(bodyPart);
+        /*
+         * Add to list
+         */
+        files.add(managedFile);
+    }
+
+    /**
+     * Adds the attachment associated with specified identifier.
+     * 
+     * @param attachmentId The attachment identifier
+     * @throws OXException If attaching denoted file fails
+     */
+    public void addAttachment(final String attachmentId) throws OXException {
+        /*
+         * Ensure presence of needed service
+         */
+        final ManagedFileManagement managedFileManagement = SERVICE_LOOKUP.get().getService(ManagedFileManagement.class);
+        if (null == managedFileManagement) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
+        }
+        addAttachment(managedFileManagement.getByID(attachmentId));
     }
 
     private static final class ManagedFileContentImpl implements ManagedFileContent {
@@ -398,6 +471,11 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
         @Override
         public String getContentType() {
             return managedFile.getContentType();
+        }
+
+        @Override
+        public String getId() {
+            return managedFile.getID();
         }
     }
 

@@ -82,13 +82,13 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { ManagedFileManagement.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(SMSMessagingActivator.class));
+        SMSMessagingMessage.setServiceLookup(this);
         trackService(SMSMessagingService.class);
         /*
          * Publish tracked SMSMessagingService as MessagingService
@@ -115,18 +115,6 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
                 }
             }
         });
-        track(ManagedFileManagement.class, new SimpleRegistryListener<ManagedFileManagement>() {
-
-            @Override
-            public void added(final ServiceReference<ManagedFileManagement> ref, final ManagedFileManagement service) {
-                SMSMessagingMessage.setManagedFileManagement(service);
-            }
-
-            @Override
-            public void removed(final ServiceReference<ManagedFileManagement> ref, final ManagedFileManagement service) {
-                SMSMessagingMessage.setManagedFileManagement(null);
-            }
-        });
         openTrackers();
 
         registerService(PreferencesItemService.class, new SMSPreferencesItem(this));
@@ -134,6 +122,7 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        SMSMessagingMessage.setServiceLookup(null);
         final ServiceRegistration<MessagingService> registration = messagingServiceRegistration;
         if (null != registration) {
             registration.unregister();

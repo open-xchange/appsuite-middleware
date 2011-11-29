@@ -578,6 +578,11 @@ public class MessagingMessageParser {
         public String getContentType() {
             return managedFile.getContentType();
         }
+
+        @Override
+        public String getId() {
+            return managedFile.getID();
+        }
     }
 
 }

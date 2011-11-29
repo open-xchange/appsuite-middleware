@@ -74,4 +74,11 @@ public interface ManagedFileContent extends SimpleContent<InputStream> {
      */
     String getFileName();
 
+    /**
+     * Gets the managed file's identifier.
+     * 
+     * @return The identifier
+     */
+    String getId();
+
 }
