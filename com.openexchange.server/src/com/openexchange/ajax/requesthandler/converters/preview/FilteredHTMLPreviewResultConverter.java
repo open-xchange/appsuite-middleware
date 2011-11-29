@@ -137,12 +137,16 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             newCss.replace(cssClass, "#" + uuid.toString() + " " + cssClass);
         }
         sanitizedHtml.replace(css, newCss);
+        Pattern cssFile = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Matcher cssFileMatcher = cssFile.matcher(sanitizedHtml);
+        if (cssFileMatcher.find()) {
+            sanitizedHtml.replace(cssFileMatcher.group(), "<style type=\"text/css\">" + newCss + "</style>");
+        }
         Pattern htmlBody = Pattern.compile("<(body.*?)>(.*?)</(body)>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
         Matcher htmlBodyMatcher = htmlBody.matcher(sanitizedHtml);
-        String bodyStart = "", bodyEnd = "", bodyContent = "";
+        String bodyStart = "", bodyEnd = "";
         if (htmlBodyMatcher.find()) {
             bodyStart = htmlBodyMatcher.group(1);
-            bodyContent = htmlBodyMatcher.group(2);
             bodyEnd = htmlBodyMatcher.group(3);
             sanitizedHtml.replace(bodyStart, "div id=\"#" + uuid.toString() + "\"");
             sanitizedHtml.replace(bodyEnd, "/div");
