@@ -326,10 +326,8 @@ public class MessagingMessageParser {
 
         @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
-            if (null != partlyParsedMessage.getContentType()) {
-                return partlyParsedMessage.getContentType().getPrimaryType().equals("text");
-            }
-            return false;
+            final ContentType contentType = partlyParsedMessage.getContentType();
+            return (null != contentType) && contentType.getPrimaryType().equals("text");
         }
 
         @Override
@@ -351,8 +349,9 @@ public class MessagingMessageParser {
 
         @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
-            if (null != partlyParsedMessage.getContentType()) {
-                final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
+            final ContentType contentType = partlyParsedMessage.getContentType();
+            if (null != contentType) {
+                final String primaryType = contentType.getPrimaryType();
                 return !primaryType.equals("text") && !primaryType.equals("multipart");
             }
             return false;
@@ -435,11 +434,8 @@ public class MessagingMessageParser {
 
         @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
-            if (null != partlyParsedMessage.getContentType()) {
-                final String primaryType = partlyParsedMessage.getContentType().getPrimaryType();
-                return primaryType.equals("multipart");
-            }
-            return false;
+            final ContentType contentType = partlyParsedMessage.getContentType();
+            return (null != contentType) && contentType.getPrimaryType().equals("multipart");
         }
 
         @Override
