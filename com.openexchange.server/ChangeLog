@@ -5,6 +5,7 @@
 * 2011-11-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 20876: Disabled to track errors in JSoup library
+ - Fix for bug 20882: Checking for possibly passed null reference when checking folder name
 
 * 2011-11-28 - thorben.betten@open-xchange.com
 
@@ -13,7 +14,6 @@
 * 2011-11-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 20837: Properly setting "hasSubscribedSubfolders" flag
- - Fix for bug 20802: Passing proper folder name to equally-named-folder check routine
 
 * 2011-11-25 - thorben.betten@open-xchange.com
 
