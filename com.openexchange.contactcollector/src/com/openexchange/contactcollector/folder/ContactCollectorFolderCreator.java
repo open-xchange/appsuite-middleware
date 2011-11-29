@@ -123,7 +123,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService {
              */
             return;
         }
-        if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue()) {
+        if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
             /*
              * Both - collect-on-mail-access and collect-on-mail-transport - disabled
              */
