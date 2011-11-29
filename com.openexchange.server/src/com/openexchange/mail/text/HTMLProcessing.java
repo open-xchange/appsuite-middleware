@@ -202,13 +202,9 @@ public final class HTMLProcessing {
 //                    }
                     Pattern htmlBody = Pattern.compile("<(body.*?)>(.*?)</(body)>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
                     Matcher htmlBodyMatcher = htmlBody.matcher(retval);
-                    String bodyStart = "", bodyEnd = "", bodyContent = "";
+                    String bodyContent = "";
                     if (htmlBodyMatcher.find()) {
-                        bodyStart = htmlBodyMatcher.group(1);
                         bodyContent = htmlBodyMatcher.group(2);
-                        bodyEnd = htmlBodyMatcher.group(3);
-//                        retval.replace(bodyStart, "div id=\"#" + uuid.toString() + "\"");
-//                        retval.replace(bodyEnd, "div");
                         bodyContent = "<div id=\"" + uuid.toString() + "\">" + bodyContent + "</div>";
                         return newCss + bodyContent;
                     }
