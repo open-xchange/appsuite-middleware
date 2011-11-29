@@ -75,6 +75,7 @@ import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingHeader;
+import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.StringContent;
@@ -184,14 +185,15 @@ public class MessagingMessageParser {
         }
 
         for (final MessagingField field : MessagingField.values()) {
-            if (field.getEquivalentHeader() != null && messageJSON.has(field.toString())) {
-                headers.put(field.getEquivalentHeader().toString(), messageJSON.get(field.toString()));
+            final KnownHeader header = field.getEquivalentHeader();
+            if (header != null && messageJSON.hasAndNotNull(field.toString())) {
+                headers.put(header.toString(), messageJSON.get(field.toString()));
             }
         }
 
         setHeaders(headers, bodyPart);
 
-        if (messageJSON.has("body")) {
+        if (messageJSON.hasAndNotNull("body")) {
             setContent(messageJSON.get("body"), registry, bodyPart);
         }
 
