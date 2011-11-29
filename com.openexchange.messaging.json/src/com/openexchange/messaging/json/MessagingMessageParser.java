@@ -368,7 +368,14 @@ public class MessagingMessageParser {
                 }
             }
         }
-        if (candidate != null) {
+        if (candidate == null) {
+            // Expect content to be a string
+            final StringContent stringContent = new StringContent(content.toString());
+            final String contentType = "text/plain; charset=ISO-8859-1";
+            final ContentType mct = new MimeContentType(contentType);
+            bodyPart.setHeader("Content-Type", mct.toString());
+            bodyPart.setContent(stringContent, contentType);
+        } else {
             final MessagingContent parsedContent = candidate.parse(bodyPart, content, registry);
             if (parsedContent instanceof ManagedFileContent) {
                 final ManagedFileContent managedFileContent = (ManagedFileContent) parsedContent;
@@ -385,13 +392,6 @@ public class MessagingMessageParser {
             } else {
                 bodyPart.setContent(parsedContent, bodyPart.getContentType().getValue());
             }
-        } else {
-            // Expect content to be a string
-            final StringContent stringContent = new StringContent(content.toString());
-            final String contentType = "text/plain; charset=ISO-8859-1";
-            final ContentType mct = new MimeContentType(contentType);
-            bodyPart.setHeader("Content-Type", mct.toString());
-            bodyPart.setContent(stringContent, contentType);
         }
     }
 
