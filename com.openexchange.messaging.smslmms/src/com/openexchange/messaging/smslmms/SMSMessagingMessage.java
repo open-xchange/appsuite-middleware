@@ -323,7 +323,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
     }
 
     /**
-     * Adds specified attachment identifier.
+     * Adds the attachment associated with specified identifier.
      * 
      * @param attachmentId The attachment identifier
      * @throws OXException If attaching denoted file fails
