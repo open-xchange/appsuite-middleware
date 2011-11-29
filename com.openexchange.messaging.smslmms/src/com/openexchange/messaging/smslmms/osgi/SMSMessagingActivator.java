@@ -47,59 +47,68 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.internal;
+package com.openexchange.messaging.smslmms.osgi;
 
-import static com.openexchange.java.Autoboxing.B;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.smslmms.SMSMessagingService;
-import com.openexchange.server.ServiceExceptionCodes;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.server.osgiservice.SimpleRegistryListener;
 
 
 /**
- * {@link SMSPreferencesItem} - The {@link PreferencesItemService} for SMS/MMS bundle.
+ * {@link SMSMessagingActivator} - The activator for SMS/MMS bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMSPreferencesItem implements PreferencesItemService {
+public final class SMSMessagingActivator extends HousekeepingActivator {
 
-    protected final ServiceLookup serviceLookup;
+    protected volatile ServiceRegistration<MessagingService> messagingServiceRegistration;
 
-    public SMSPreferencesItem(final ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link SMSMessagingActivator}.
+     */
+    public SMSMessagingActivator() {
         super();
-        this.serviceLookup = serviceLookup;
     }
 
     @Override
-    public String[] getPath() {
-        return new String[] { "modules", "com.openexchange.messaging.sms" };
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
     }
 
     @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
+    protected void startBundle() throws Exception {
+        trackService(SMSMessagingService.class);
+        /*
+         * Publish tracked SMSMessagingService as MessagingService
+         */
+        final BundleContext context = this.context;
+        track(SMSMessagingService.class, new SimpleRegistryListener<SMSMessagingService>() {
+
             @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final SMSMessagingService smsService = serviceLookup.getService(SMSMessagingService.class);
-                if (null == smsService) {
-                    throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(SMSMessagingService.class.getName());
+            public void added(final ServiceReference<SMSMessagingService> ref, final SMSMessagingService service) {
+                final MessagingService tmp = service;
+                messagingServiceRegistration = context.registerService(MessagingService.class, tmp, null);
+            }
+
+            @Override
+            public void removed(final ServiceReference<SMSMessagingService> ref, final SMSMessagingService service) {
+                final ServiceRegistration<MessagingService> registration = messagingServiceRegistration;
+                if (null != registration) {
+                    registration.unregister();
+                    messagingServiceRegistration = null;
                 }
-                setting.setSingleValue(B(smsService.getSMSConfiguration(session).isEnabled()));
             }
+        });
+        openTrackers();
 
-            @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
+        registerService(PreferencesItemService.class, new SMSPreferencesItem(this));
+
     }
 
 }

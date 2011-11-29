@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,26 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.osgi;
+package com.openexchange.messaging.smslmms;
 
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.messaging.smslmms.MessagingSMSService;
-import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link MessagingSMSActivator} - The activator for SMS/MMS bundle.
+ * {@link SMSMessagingExceptionMessages} - Exception messages that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessagingSMSActivator extends HousekeepingActivator {
+public final class SMSMessagingExceptionMessages implements LocalizableStrings {
+
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
     /**
-     * Initializes a new {@link MessagingSMSActivator}.
+     * Initializes a new {@link SMSMessagingExceptionMessages}.
      */
-    public MessagingSMSActivator() {
+    private SMSMessagingExceptionMessages() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        trackService(MessagingSMSService.class);
-        openTrackers();
-
-        registerService(PreferencesItemService.class, new SMSPreferencesItem(this));
-
     }
 
 }

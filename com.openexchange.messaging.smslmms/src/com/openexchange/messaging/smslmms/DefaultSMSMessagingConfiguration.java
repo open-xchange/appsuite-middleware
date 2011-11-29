@@ -55,11 +55,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link DefaultMessagingSMSConfiguration} - The default {@link MessagingSMSConfiguration configuration} implementation.
+ * {@link DefaultSMSMessagingConfiguration} - The default {@link SMSMessagingConfiguration configuration} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultMessagingSMSConfiguration implements MessagingSMSConfiguration {
+public class DefaultSMSMessagingConfiguration implements SMSMessagingConfiguration {
 
     private final Map<String, Object> configuration;
 
@@ -82,9 +82,9 @@ public class DefaultMessagingSMSConfiguration implements MessagingSMSConfigurati
     private String upsellLink;
 
     /**
-     * Initializes a new {@link DefaultMessagingSMSConfiguration}.
+     * Initializes a new {@link DefaultSMSMessagingConfiguration}.
      */
-    public DefaultMessagingSMSConfiguration(final Map<String, Object> configuration) {
+    public DefaultSMSMessagingConfiguration(final Map<String, Object> configuration) {
         super();
         this.configuration = configuration;
         length = -1;

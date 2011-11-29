@@ -50,24 +50,26 @@
 package com.openexchange.messaging.smslmms;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingService;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link MessagingSMSService} - The messaging service for SMS/MMS.
+ * {@link AbstractSMSMessagingService} - The abstract {@link SMSMessagingService SMS service}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingSMSService extends MessagingService {
+public abstract class AbstractSMSMessagingService implements SMSMessagingService {
 
     /**
-     * Gets the SMS/MMS configuration for the user associated with specified session.
-     * 
-     * @param session The session providing user data
-     * @return The SMS/MMS configuration
-     * @throws OXException If configuration cannot be returned
+     * Initializes a new {@link AbstractSMSMessagingService}.
      */
-    MessagingSMSConfiguration getSMSConfiguration(Session session) throws OXException;
+    protected AbstractSMSMessagingService() {
+        super();
+    }
+
+    @Override
+    public SMSMessagingConfiguration getSMSConfiguration(final Session session) throws OXException {
+        return new DefaultSMSMessagingConfiguration(getAccountManager().getAccount(0, session).getConfiguration());
+    }
 
 }
