@@ -49,18 +49,21 @@
 
 package com.openexchange.messaging.smslmms;
 
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.messaging.CaptchaParams;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.ContentType;
+import com.openexchange.messaging.ManagedFileContent;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingHeader;
@@ -73,6 +76,7 @@ import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
+import com.openexchange.server.ServiceExceptionCodes;
 
 /**
  * {@link SMSMessagingMessage} - Represents a SMS message.
@@ -81,9 +85,20 @@ import com.openexchange.messaging.generic.internet.MimeMultipartContent;
  */
 public final class SMSMessagingMessage implements ParameterizedMessagingMessage {
 
-    private static final String MESSAGE_ID = "smsMessage";
-
     private static final long serialVersionUID = 5324611878535898301L;
+
+    private static final AtomicReference<ManagedFileManagement> FILE_MANAGEMENT = new AtomicReference<ManagedFileManagement>();
+
+    /**
+     * Sets the tracked file management.
+     * 
+     * @param fileManagement The file management
+     */
+    public static void setManagedFileManagement(final ManagedFileManagement fileManagement) {
+        FILE_MANAGEMENT.set(fileManagement);
+    }
+
+    private static final String MESSAGE_ID = "smsMessage";
 
     private static final ContentType CONTENT_TYPE;
 
@@ -314,6 +329,16 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
      * @throws OXException If attaching denoted file fails
      */
     public void addAttachment(final String attachmentId) throws OXException {
+        /*
+         * Ensure presence of needed service
+         */
+        final ManagedFileManagement managedFileManagement = FILE_MANAGEMENT.get();
+        if (null == managedFileManagement) {
+            throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ManagedFileManagement.class.getName());
+        }
+        /*
+         * Check current message's content
+         */
         final MessagingContent content = this.content;
         final MimeMultipartContent mimeMultipartContent;
         if (content instanceof MimeMultipartContent) {
@@ -321,23 +346,59 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
         } else {
             mimeMultipartContent = new MimeMultipartContent("mixed");
             final MimeMessagingBodyPart bodyPart = new MimeMessagingBodyPart(mimeMultipartContent);
-            final MessagingHeader contentType = getHeader(CONTENT_TYPE.getName()).iterator().next();
+            final MessagingHeader contentType = CONTENT_TYPE;
             bodyPart.setContent(content, contentType.getValue());
             bodyPart.setHeader(contentType);
-            bodyPart.setHeader(getHeader(CONTENT_DISPOSITION.getName()).iterator().next());
+            bodyPart.setHeader(CONTENT_DISPOSITION);
             mimeMultipartContent.addBodyPart(bodyPart);
             this.content = mimeMultipartContent;
+            /*
+             * Fix message headers
+             */
             headers.remove(CONTENT_TYPE.getName());
             headers.remove(CONTENT_DISPOSITION.getName());
-            // headers.put(CONTENT_TYPE.getName(), mimeMultipartContent.g)
+            headers.put(CONTENT_TYPE.getName(), wrap(new MimeContentType(mimeMultipartContent.getContentType())));
+        }
+        /*
+         * Create an appropriate body part for referenced file
+         */
+        final MimeMessagingBodyPart bodyPart = new MimeMessagingBodyPart(mimeMultipartContent);
+        final ManagedFile managedFile = managedFileManagement.getByID(attachmentId);
+        final MessagingContent attachmentContent = new ManagedFileContentImpl(managedFile);
+        bodyPart.setContent(attachmentContent, managedFile.getContentType());
+        bodyPart.setDisposition(managedFile.getContentDisposition());
+        bodyPart.setFileName(managedFile.getFileName());
+        mimeMultipartContent.addBodyPart(bodyPart);
+    }
+
+    private static final class ManagedFileContentImpl implements ManagedFileContent {
+
+        private final ManagedFile managedFile;
+
+        /**
+         * Initializes a new {@link ManagedFileContentImplementation}.
+         * 
+         * @param managedFile
+         */
+        public ManagedFileContentImpl(final ManagedFile managedFile) {
+            super();
+            this.managedFile = managedFile;
         }
 
-        if (headers.containsKey(MessagingPart.ATTACHMENT)) {
-            headers.get(MessagingPart.ATTACHMENT).add(new StringMessageHeader(MessagingPart.ATTACHMENT, attachmentId));
-        } else {
-            final List<MessagingHeader> list = new ArrayList<MessagingHeader>();
-            list.add(new StringMessageHeader(MessagingPart.ATTACHMENT, attachmentId));
-            headers.put(MessagingPart.ATTACHMENT, list);
+        @Override
+        public InputStream getData() throws OXException {
+            return managedFile.getInputStream();
+        }
+
+        @Override
+        public String getFileName() {
+            return managedFile.getFileName();
+        }
+
+        @Override
+        public String getContentType() {
+            return managedFile.getContentType();
         }
     }
+
 }

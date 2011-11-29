@@ -54,8 +54,10 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.smslmms.SMSMessagingMessage;
 import com.openexchange.messaging.smslmms.SMSMessagingService;
 import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
@@ -111,6 +113,18 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
                     registration.unregister();
                     messagingServiceRegistration = null;
                 }
+            }
+        });
+        track(ManagedFileManagement.class, new SimpleRegistryListener<ManagedFileManagement>() {
+
+            @Override
+            public void added(final ServiceReference<ManagedFileManagement> ref, final ManagedFileManagement service) {
+                SMSMessagingMessage.setManagedFileManagement(service);
+            }
+
+            @Override
+            public void removed(final ServiceReference<ManagedFileManagement> ref, final ManagedFileManagement service) {
+                SMSMessagingMessage.setManagedFileManagement(null);
             }
         });
         openTrackers();

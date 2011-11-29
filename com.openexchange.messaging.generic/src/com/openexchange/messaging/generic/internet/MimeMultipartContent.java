@@ -104,6 +104,15 @@ public class MimeMultipartContent implements MultipartContent {
     }
 
     /**
+     * Gets this multipart's content type.
+     * 
+     * @return The content type
+     */
+    public String getContentType() {
+        return mimeMultipart.getContentType();
+    }
+
+    /**
      * Gets the identifier.
      *
      * @return The identifier
