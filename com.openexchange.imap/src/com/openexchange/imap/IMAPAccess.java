@@ -497,6 +497,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
+            final boolean certainUser = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
+            if (certainUser) {
+                tmpPass = "secret";
+            }
             final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
             /*
              * Check for already failed authentication
@@ -523,7 +527,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapProps.put("mail.imap.sasl.authorizationid", user);
                 imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
             }
-
             /*
              * Get parameterized IMAP session
              */
@@ -531,7 +534,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check if debug should be enabled
              */
-            final boolean certainUser = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
             if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
                 imapSession.setDebug(true);
                 imapSession.setDebugOut(System.out);
