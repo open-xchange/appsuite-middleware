@@ -51,6 +51,9 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.InputStream;
 import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -108,8 +111,8 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         }
         final Map<String, String> metaData = previewDocument.getMetaData();
         final String sanitizedHtml;
+        final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
         {
-            final HTMLService htmlService = ServerServiceRegistry.getInstance().getService(HTMLService.class);
             String content = previewDocument.getContent();
             content = htmlService.dropScriptTagsInHeader(content);
             final String charset = metaData.get("charset");
@@ -124,6 +127,30 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             sanitizedHtml = content;
         }
         // TODO: Replace CSS classes
+        String css = htmlService.getCSSFromHTMLHeader(sanitizedHtml);
+        String newCss = new String(css);
+        UUID uuid = UUID.randomUUID();
+        Pattern cssClassName = Pattern.compile("(\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*)\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Matcher cssClassMatcher = cssClassName.matcher(css);
+        while (cssClassMatcher.find()) {
+            String cssClass = cssClassMatcher.group(1);
+            newCss.replace(cssClass, "#" + uuid.toString() + " " + cssClass);
+        }
+        sanitizedHtml.replace(css, newCss);
+        Pattern cssFile = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Matcher cssFileMatcher = cssFile.matcher(sanitizedHtml);
+        if (cssFileMatcher.find()) {
+            sanitizedHtml.replace(cssFileMatcher.group(), "<style type=\"text/css\">" + newCss + "</style>");
+        }
+        Pattern htmlBody = Pattern.compile("<(body.*?)>(.*?)</(body)>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+        Matcher htmlBodyMatcher = htmlBody.matcher(sanitizedHtml);
+        String bodyStart = "", bodyEnd = "";
+        if (htmlBodyMatcher.find()) {
+            bodyStart = htmlBodyMatcher.group(1);
+            bodyEnd = htmlBodyMatcher.group(3);
+            sanitizedHtml.replace(bodyStart, "div id=\"#" + uuid.toString() + "\"");
+            sanitizedHtml.replace(bodyEnd, "/div");
+        }
         result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
     }
 

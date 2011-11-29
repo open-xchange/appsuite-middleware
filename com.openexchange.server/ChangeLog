@@ -1,3 +1,7 @@
+* 2011-11-29 - jan.bauerdick@open-xchange.com
+
+ - Replace CSS classes in e-mail
+
 * 2011-11-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 20876: Disabled to track errors in JSoup library

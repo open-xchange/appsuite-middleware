@@ -197,6 +197,13 @@ public interface HTMLService {
      * @return The HTML content with <code>&lt;script&gt;</code> tags removed
      */
     String dropScriptTagsInHeader(String htmlContent);
+    
+    /**
+     * Extracts CSS-stylesheets from HTML header
+     * @param htmlContent The HTML content
+     * @return The stylesheet from HTML header
+     */
+    String getCSSFromHTMLHeader(String htmlContent);
 
     /**
      * Checks for existence of a <code>&lt;base&gt;</code> tag. Allowing it if an absolute URL is specified in <code><i>href</i></code>
