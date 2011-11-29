@@ -108,7 +108,16 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(PreferencesItemService.class, new SMSPreferencesItem(this));
+    }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        final ServiceRegistration<MessagingService> registration = messagingServiceRegistration;
+        if (null != registration) {
+            registration.unregister();
+            messagingServiceRegistration = null;
+        }
+        super.stopBundle();
     }
 
 }
