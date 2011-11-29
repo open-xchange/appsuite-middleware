@@ -50,22 +50,22 @@
 package com.openexchange.messaging.smslmms.osgi;
 
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.messaging.smslmms.MessagingSMSService;
+import com.openexchange.messaging.smslmms.SMSMessagingService;
 import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 
 /**
- * {@link MessagingSMSActivator} - The activator for SMS/MMS bundle.
+ * {@link SMSMessagingActivator} - The activator for SMS/MMS bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessagingSMSActivator extends HousekeepingActivator {
+public final class SMSMessagingActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link MessagingSMSActivator}.
+     * Initializes a new {@link SMSMessagingActivator}.
      */
-    public MessagingSMSActivator() {
+    public SMSMessagingActivator() {
         super();
     }
 
@@ -76,7 +76,7 @@ public final class MessagingSMSActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(MessagingSMSService.class);
+        trackService(SMSMessagingService.class);
         openTrackers();
 
         registerService(PreferencesItemService.class, new SMSPreferencesItem(this));

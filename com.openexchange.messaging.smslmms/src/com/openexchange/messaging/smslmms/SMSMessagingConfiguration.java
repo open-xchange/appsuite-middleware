@@ -53,11 +53,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link MessagingSMSConfiguration} - The user configuration for a SMS/MMS account.
+ * {@link SMSMessagingConfiguration} - The user configuration for a SMS/MMS account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MessagingSMSConfiguration {
+public interface SMSMessagingConfiguration {
 
     /**
      * The property name for addresses.

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,26 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.internal;
+package com.openexchange.messaging.smslmms;
 
-import static com.openexchange.java.Autoboxing.B;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.messaging.smslmms.SMSMessagingService;
-import com.openexchange.server.ServiceExceptionCodes;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link SMSPreferencesItem} - The {@link PreferencesItemService} for SMS/MMS bundle.
+ * {@link SMSMessagingExceptionMessages} - Exception messages that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMSPreferencesItem implements PreferencesItemService {
+public final class SMSMessagingExceptionMessages implements LocalizableStrings {
 
-    protected final ServiceLookup serviceLookup;
+    // An error occurred: %1$s
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred: %1$s";
 
-    public SMSPreferencesItem(final ServiceLookup serviceLookup) {
+    /**
+     * Initializes a new {@link SMSMessagingExceptionMessages}.
+     */
+    private SMSMessagingExceptionMessages() {
         super();
-        this.serviceLookup = serviceLookup;
-    }
-
-    @Override
-    public String[] getPath() {
-        return new String[] { "modules", "com.openexchange.messaging.sms" };
-    }
-
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-            @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final SMSMessagingService smsService = serviceLookup.getService(SMSMessagingService.class);
-                if (null == smsService) {
-                    throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(SMSMessagingService.class.getName());
-                }
-                setting.setSingleValue(B(smsService.getSMSConfiguration(session).isEnabled()));
-            }
-
-            @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
     }
 
 }
