@@ -497,6 +497,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error(e.getMessage(), e);
                 }
             }
+            final boolean certainPassword = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
+            if (certainPassword) {
+                tmpPass = "secret";
+            }
             final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
             /*
              * Check for already failed authentication
@@ -523,7 +527,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 imapProps.put("mail.imap.sasl.authorizationid", user);
                 imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
             }
-
             /*
              * Get parameterized IMAP session
              */
