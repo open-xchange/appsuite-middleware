@@ -49,14 +49,18 @@
 
 package com.openexchange.messaging.smslmms;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAction;
+import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.smslmms.api.SMSAccess;
 import com.openexchange.messaging.smslmms.api.SMSConfiguration;
@@ -71,7 +75,15 @@ import com.openexchange.session.Session;
  */
 public class SMSMessagingService implements MessagingService, SMSService {
 
+    private static final List<MessagingAction> ACTIONS = Collections.unmodifiableList(Arrays.asList(
+        new MessagingAction(SMSMessagingConstants.TYPE_REPLY_TO, MessagingAction.Type.STORAGE, SMSMessagingConstants.TYPE_NEW),
+        new MessagingAction(SMSMessagingConstants.TYPE_DELETE, MessagingAction.Type.STORAGE),
+        new MessagingAction(SMSMessagingConstants.TYPE_OPEN, MessagingAction.Type.STORAGE),
+        new MessagingAction(SMSMessagingConstants.TYPE_NEW, MessagingAction.Type.MESSAGE)));
+
     private final SMSService smsService;
+
+    private final DynamicFormDescription formDescription;
 
     /**
      * Initializes a new {@link SMSMessagingService}.
@@ -81,6 +93,8 @@ public class SMSMessagingService implements MessagingService, SMSService {
     public SMSMessagingService(final SMSService smsService) {
         super();
         this.smsService = smsService;
+        final DynamicFormDescription tmpDescription = new DynamicFormDescription();
+        formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
     @Override
@@ -90,32 +104,35 @@ public class SMSMessagingService implements MessagingService, SMSService {
 
     @Override
     public String getId() {
-        return smsService.getId();
+        return SMSService.SERVICE_ID;
     }
 
     @Override
     public List<MessagingAction> getMessageActions() {
-        return smsService.getMessageActions();
+        return ACTIONS;
     }
 
     @Override
     public String getDisplayName() {
-        return smsService.getDisplayName();
+        return SMSService.DISPLAY_NAME;
     }
 
     @Override
     public DynamicFormDescription getFormDescription() {
-        return smsService.getFormDescription();
+        return formDescription;
     }
 
     @Override
     public Set<String> getSecretProperties() {
-        return smsService.getSecretProperties();
+        return Collections.emptySet();
     }
 
     @Override
     public int[] getStaticRootPermissions() {
-        return smsService.getStaticRootPermissions();
+        return new int[] {MessagingPermission.READ_FOLDER,
+            MessagingPermission.READ_ALL_OBJECTS,
+            MessagingPermission.NO_PERMISSIONS,
+            MessagingPermission.DELETE_OWN_OBJECTS};
     }
 
     @Override

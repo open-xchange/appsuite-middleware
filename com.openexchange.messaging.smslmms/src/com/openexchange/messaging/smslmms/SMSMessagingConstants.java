@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,40 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.api;
-
-import java.util.Set;
-import com.openexchange.exception.OXException;
-
+package com.openexchange.messaging.smslmms;
 
 /**
- * {@link SMSTransport} - The SMS/MMS transport.
+ * {@link SMSMessagingConstants} - Provides useful constants for SMS/MMS.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SMSTransport {
+public final class SMSMessagingConstants {
 
     /**
-     * Connects this SMS/MMS transport.
-     * 
-     * @throws OXException If the SMS/MMS transport could not be opened for various reasons
+     * The type denoting a common SMS/MMS message to be sent.
      */
-    void connectTransport() throws OXException;
+    public static final String TYPE_NEW = "new";
 
     /**
-     * Closes this SMS/MMS transport.
+     * The type denoting SMS/MMS reply-to.
      */
-    void closeTransport();
+    public static final String TYPE_REPLY_TO = "reply-to";
 
     /**
-     * Transports specified SMS/MMS message.
-     * 
-     * @param smsMessage The SMS/MMS message
-     * @param recipients The optional recipients; if <code>null</code> or empty the recipients from SMS/MMS message are taken
-     * @throws OXException If transport fails
+     * The type denoting SMS/MMS delete.
      */
-    void transport(SMSMessage smsMessage, Set<String> recipients) throws OXException;
+    public static final String TYPE_DELETE = "delete";
+
+    /**
+     * The type denoting SMS/MMS open.
+     */
+    public static final String TYPE_OPEN = "open";
+
+    /**
+     * Initializes a new {@link SMSMessagingConstants}.
+     */
+    private SMSMessagingConstants() {
+        super();
+    }
+
 }
