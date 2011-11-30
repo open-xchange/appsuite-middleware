@@ -975,8 +975,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     output.write(flushMessageArray);
                     lastWriteAccess = System.currentTimeMillis();
                     // output.flush();
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Performed keep-alive through a flush package.");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Performed keep-alive through a flush package.");
                     }
                 } else {
                     /*
@@ -989,8 +989,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Receive empty body chunk
                      */
                     receive();
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
                     }
                 }
             } catch (final IOException e) {
