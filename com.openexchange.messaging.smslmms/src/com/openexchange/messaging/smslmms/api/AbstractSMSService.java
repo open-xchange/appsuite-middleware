@@ -50,6 +50,7 @@
 package com.openexchange.messaging.smslmms.api;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.session.Session;
 
 
@@ -69,7 +70,25 @@ public abstract class AbstractSMSService implements SMSService {
 
     @Override
     public SMSConfiguration getSMSConfiguration(final int accountId, final Session session) throws OXException {
-        return new DefaultSMSConfiguration(getAccountManager().getAccount(accountId, session).getConfiguration());
+        return new DefaultSMSConfiguration(getAccountManager().getAccount(accountId, session));
     }
+
+    @Override
+    public SMSAccess getSMSAccess(final int accountId, final Session session) throws OXException {
+        if (!getSMSConfiguration(accountId, session).supportsAccess()) {
+            throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(SMSService.DISPLAY_NAME);
+        }
+        return getSMSAccessInternal(accountId, session);
+    }
+
+    /**
+     * Gets the account access for specified account identifier.
+     *
+     * @param accountId The account identifier
+     * @param session The session providing needed user data
+     * @return The account access for specified account identifier
+     * @throws OXException If account access cannot be returned for given account identifier
+     */
+    protected abstract SMSAccess getSMSAccessInternal(int accountId, Session session) throws OXException;
 
 }

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.messaging.MessagingAccount;
 
 /**
  * {@link DefaultSMSConfiguration} - The default {@link SMSConfiguration configuration} implementation.
@@ -77,6 +78,8 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     private Boolean mms;
 
+    private Boolean access;
+
     private Boolean folderStorage;
 
     private String upsellLink;
@@ -84,10 +87,18 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
     /**
      * Initializes a new {@link DefaultSMSConfiguration}.
      */
+    public DefaultSMSConfiguration(final MessagingAccount smsAccount) {
+        this(smsAccount.getConfiguration());
+    }
+
+    /**
+     * Initializes a new {@link DefaultSMSConfiguration}.
+     */
     public DefaultSMSConfiguration(final Map<String, Object> configuration) {
         super();
-        this.configuration = configuration;
+        this.configuration = null == configuration ? Collections.<String, Object> emptyMap() : configuration;
         length = -1;
+        upsellLink = null;
     }
 
     @Override
@@ -115,7 +126,11 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
 
     @Override
     public String getDisplayString() {
-        return displayString == null ? ((String) configuration.get(PROP_DISPLAY_STRING)) : displayString;
+        if (displayString != null) {
+            return displayString;
+        }
+        final String ds = (String) configuration.get(PROP_DISPLAY_STRING);
+        return null == ds ? "" : ds;
     }
 
     /**
@@ -169,7 +184,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
             return captcha.booleanValue();
         }
         final Boolean b = (Boolean) configuration.get(PROP_CAPTCHA);
-        return null == b ? true : b.booleanValue();
+        return null == b ? false : b.booleanValue();
     }
 
     /**
@@ -187,7 +202,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
             return multiSMS.booleanValue();
         }
         final Boolean b = (Boolean) configuration.get(PROP_MULTI_SMS);
-        return null == b ? true : b.booleanValue();
+        return null == b ? false : b.booleanValue();
     }
 
     /**
@@ -223,7 +238,7 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
             return folderStorage.booleanValue();
         }
         final Boolean b = (Boolean) configuration.get(PROP_FOLDER_STORAGE);
-        return null == b ? true : b.booleanValue();
+        return null == b ? false : b.booleanValue();
     }
 
     /**
@@ -233,6 +248,24 @@ public class DefaultSMSConfiguration implements SMSConfiguration {
      */
     public void setFolderStorage(final boolean folderStorage) {
         this.folderStorage = Boolean.valueOf(folderStorage);
+    }
+
+    @Override
+    public boolean supportsAccess() {
+        if (null != access) {
+            return access.booleanValue();
+        }
+        final Boolean b = (Boolean) configuration.get(PROP_SMS_ACCESS);
+        return null == b ? false : b.booleanValue();
+    }
+
+    /**
+     * Sets the access flag.
+     *
+     * @param access The access flag to set
+     */
+    public void setAccess(final boolean access) {
+        this.access = Boolean.valueOf(access);
     }
 
     @Override
