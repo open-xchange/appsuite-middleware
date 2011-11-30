@@ -104,7 +104,7 @@ public interface SMSMessageAccess {
      * <b>Note</b> that sorting needs not to be supported by underlying mailing system. This can be done on application side, too.<br>
      * Same is for search, but in most cases it's faster to search on mailing system, but this heavily depends on how mails are accessed.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -120,7 +120,7 @@ public interface SMSMessageAccess {
     /**
      * Gets the message's attachment identified through given section identifier.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param messageId The message identifier
      * @param sectionId The attachment's section identifier
      * @return The attachment wrapped by a {@link MessagingPart} instance
