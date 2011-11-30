@@ -160,6 +160,22 @@ public final class HTMLProcessing {
             } else {
                 retval = htmlService.dropScriptTagsInHeader(content);
                 retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
+                Pattern bodyTag = Pattern.compile("(<body.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+                Matcher bodyTagMatcher = bodyTag.matcher(retval);
+                String className = "", styleName = "";
+                if (bodyTagMatcher.find()) {
+                    String body = bodyTagMatcher.group(1);
+                    Pattern bodyStyle = Pattern.compile("(style=['\"].*?['\"])", Pattern.CASE_INSENSITIVE);
+                    Pattern bodyClass = Pattern.compile("(class=['\"].*?['\"])", Pattern.CASE_INSENSITIVE);
+                    Matcher bodyStyleMatcher = bodyStyle.matcher(body);
+                    Matcher bodyClassMatcher = bodyClass.matcher(body);
+                    if (bodyClassMatcher.find()) {
+                        className = bodyClassMatcher.group(1);
+                    }
+                    if (bodyStyleMatcher.find()) {
+                        styleName = bodyStyleMatcher.group(1);
+                    }
+                }
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
@@ -194,18 +210,19 @@ public final class HTMLProcessing {
                     }
                     newCss = "<style>" + newCss + "</style>";
 //                    retval.replace(css, newCss);
-                    retval = HTMLProcessing.dropStyles(retval);
+                    
 //                    Pattern cssFile = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 //                    Matcher cssFileMatcher = cssFile.matcher(retval);
 //                    if (cssFileMatcher.find()) {
 //                        retval.replace(cssFileMatcher.group(), "<style type=\"text/css\">" + newCss + "</style>");
 //                    }
-                    Pattern htmlBody = Pattern.compile("<(body.*?)>(.*?)</(body)>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+                    retval = HTMLProcessing.dropStyles(retval);
+                    Pattern htmlBody = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
                     Matcher htmlBodyMatcher = htmlBody.matcher(retval);
                     String bodyContent = "";
                     if (htmlBodyMatcher.find()) {
-                        bodyContent = htmlBodyMatcher.group(2);
-                        bodyContent = "<div id=\"" + uuid.toString() + "\">" + bodyContent + "</div>";
+                        bodyContent = htmlBodyMatcher.group(1);
+                        bodyContent = "<div id=\"" + uuid.toString() + "\" " + className + " " + styleName + ">" + bodyContent + "</div>";
                         return newCss + bodyContent;
                     }
                 }
