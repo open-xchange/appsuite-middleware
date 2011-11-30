@@ -745,43 +745,47 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 error = true;
                 break;
             } catch (final Throwable t) {
-                LOG.debug("Header message parsing failed", t);
+                LOG.debug("400 - Bad Request: Parsing forward-request failed", t);
                 // 400 - Bad Request
                 response.setStatus(400);
                 error = true;
             } finally {
                 listenerMonitor.decrementNumWaiting();
             }
-            /*
-             * Setting up filters, and parse some request headers
-             */
-            stage = Stage.STAGE_PREPARE;
-            try {
+            if (!error) {
                 /*
-                 * Parse AJP FORWARD-REQUEST package
+                 * Setting up filters, and parse some request headers
                  */
-                prepareRequest();
-            } catch (final IndexOutOfBoundsException indexException) {
-                /*-
-                 * Parsing of forward-request failed
-                 *
-                 * Usually the servlet didn't read the previous request body
-                 */
-                if (LOG.isDebugEnabled()) {
-                    requestHeaderMessage.dump("Invalid forward-request detected");
+                stage = Stage.STAGE_PREPARE;
+                try {
+                    /*
+                     * Parse AJP FORWARD-REQUEST package
+                     */
+                    prepareRequest();
+                } catch (final IndexOutOfBoundsException indexException) {
+                    /*-
+                     * Parsing of forward-request failed
+                     *
+                     * Usually the servlet didn't read the previous request body
+                     */
+                    if (LOG.isDebugEnabled()) {
+                        requestHeaderMessage.dump("Invalid forward-request detected");
+                    }
+                    continue;
+                } catch (final Throwable t) {
+                    if (LOG.isDebugEnabled()) {
+                        final StringBuilder sb = new StringBuilder(512);
+                        sb.append("400 - Bad RequestError preparing forward-request: ").append(t.getClass().getName());
+                        sb.append(" message=").append(t.getMessage()).append("\n");
+                        appendStackTrace(t.getStackTrace(), sb);
+                        LOG.debug(sb.toString());
+                    }
+                    /*
+                     * 400 - Internal Server Error
+                     */
+                    response.setStatus(400);
+                    error = true;
                 }
-                continue;
-            } catch (final Throwable t) {
-                final StringBuilder sb = new StringBuilder(512);
-                sb.append("Error preparing request: ").append(t.getClass().getName());
-                sb.append(" message=").append(t.getMessage()).append("\n");
-                appendStackTrace(t.getStackTrace(), sb);
-                LOG.debug(sb.toString());
-                /*
-                 * 400 - Internal Server Error
-                 */
-                response.setStatus(400);
-                error = true;
             }
             /*
              * Process the request in the servlet
@@ -1471,6 +1475,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // Invalid character
                     error = true;
                     // 400 - Bad request
+                    LOG.debug("400 - Bad Request: Invalid character in server name: \"" + host + '"');
                     response.setStatus(400);
                     break;
                 }
