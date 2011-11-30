@@ -142,7 +142,7 @@ public final class ImapIdlePushListenerRegistry {
             return;
         }
         for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
-            ImapIdlePushListener l = i.next();
+            final ImapIdlePushListener l = i.next();
             try {
                 l.open();
             } catch (final OXException e) {
@@ -181,12 +181,12 @@ public final class ImapIdlePushListenerRegistry {
      */
     public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         // Bind ImapIdlePushListener to another session because of password change issues.
-        Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+        final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
             @Override
-            public boolean accepts(Session tmp) {
+            public boolean accepts(final Session tmp) {
                 return PushUtility.allowedClient(tmp.getClient());
             }
 
@@ -194,9 +194,11 @@ public final class ImapIdlePushListenerRegistry {
         if (null != session) {
             removeListener(key);
             final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);
-            final ImapIdlePushListener removed = map.putIfAbsent(key, pushListener);
-            pushListener.open();
-            return null == removed;
+            if (null == map.putIfAbsent(key, pushListener)) {
+                pushListener.open();
+                return true;
+            }
+            return false;
         }
         return removeListener(key);
     }
@@ -226,7 +228,7 @@ public final class ImapIdlePushListenerRegistry {
     }
 
     private boolean removeListener(final SimpleKey key) {
-        ImapIdlePushListener listener = map.remove(key);
+        final ImapIdlePushListener listener = map.remove(key);
         if (null != listener) {
             listener.close();
         }
