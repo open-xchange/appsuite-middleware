@@ -50,6 +50,8 @@
 package com.openexchange.messaging.generic.internet;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.internet.MimeMessage;
@@ -57,16 +59,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.ParameterizedMessagingMessage;
 import com.openexchange.messaging.generic.internal.InternalUtility;
 import com.openexchange.messaging.generic.internal.InternalUtility.ParsedFlags;
 
 /**
  * {@link MimeMessagingMessage}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class MimeMessagingMessage extends MimeMessagingBodyPart implements MessagingMessage {
+public class MimeMessagingMessage extends MimeMessagingBodyPart implements ParameterizedMessagingMessage {
 
     private static final Flags ALL_COLOR_LABELS;
 
@@ -112,22 +115,26 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     private String picture;
 
+    private final Map<String, Object> parameters;
+
     /**
      * Initializes a new {@link MimeMessagingMessage}.
      */
     public MimeMessagingMessage() {
         super(new MimeMessage(MIMEDefaultSession.getDefaultSession()), null);
         mimeMessage = (MimeMessage) part;
+        parameters = new HashMap<String, Object>(4);
     }
 
     /**
      * Initializes a new {@link MimeMessagingMessage}.
-     *
+     * 
      * @param mimeMessage The MIME message
      */
     protected MimeMessagingMessage(final MimeMessage mimeMessage) {
         super(mimeMessage, null);
         this.mimeMessage = mimeMessage;
+        parameters = new HashMap<String, Object>(4);
     }
 
     @Override
@@ -144,7 +151,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     /**
      * Sets the color label.
-     *
+     * 
      * @param colorLabel The color label
      * @throws OXException If setting color label fails
      */
@@ -182,7 +189,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     /**
      * Sets the flags.
-     *
+     * 
      * @param flags The flags
      * @throws OXException If given flags cannot be set
      */
@@ -219,7 +226,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     /**
      * Sets specified user flags.
-     *
+     * 
      * @param userFlags The user flags to set
      * @throws OXException If setting user flags fails
      */
@@ -267,7 +274,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     /**
      * Sets the folder fullname.
-     *
+     * 
      * @param folder The folder fullname to set
      */
     public void setFolder(final String folder) {
@@ -281,7 +288,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     /**
      * Sets the received date.
-     *
+     * 
      * @param receivedDate The received date
      */
     public void setReceivedDate(final long receivedDate) {
@@ -295,7 +302,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     /**
      * Sets the thread level.
-     *
+     * 
      * @param threadLevel The thread level
      */
     public void setThreadLevel(final int threadLevel) {
@@ -309,7 +316,7 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
 
     /**
      * Sets the message identifier.
-     *
+     * 
      * @param id The message identifier
      */
     public void setId(final String id) {
@@ -321,10 +328,9 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         return picture;
     }
 
-
     /**
      * Sets the picture
-     *
+     * 
      * @param picture The picture url
      */
     public void setPicture(final String picture) {
@@ -336,5 +342,38 @@ public class MimeMessagingMessage extends MimeMessagingBodyPart implements Messa
         return null;
     }
 
+    @Override
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
+    @Override
+    public Object getParameter(final String name) {
+        return parameters.get(name);
+    }
+
+    @Override
+    public void putParameter(final String name, final Object value) {
+        parameters.put(name, value);
+    }
+
+    @Override
+    public boolean putParameterIfAbsent(final String name, final Object value) {
+        if (parameters.containsKey(name)) {
+            return false;
+        }
+        parameters.put(name, value);
+        return true;
+    }
+
+    @Override
+    public void clearParameters() {
+        parameters.clear();
+    }
+
+    @Override
+    public boolean containsParameter(final String name) {
+        return parameters.containsKey(name);
+    }
 
 }

@@ -7,6 +7,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
+ com.openexchange.filemanagement,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,

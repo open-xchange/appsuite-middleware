@@ -100,6 +100,7 @@ public class MessagingRequestData {
     private final Collection<MessagingAccountAccess> closeables = new LinkedList<MessagingAccountAccess>();
 
     public MessagingRequestData(final AJAXRequestData request, final ServerSession session, final MessagingServiceRegistry registry, final MessagingMessageParser parser, final Cache cache) {
+        super();
         this.request = request;
         this.registry = registry;
         this.session = session;
@@ -117,7 +118,6 @@ public class MessagingRequestData {
             access.connect();
             mustClose(access);
         }
-
         return wrap(access.getMessageAccess(), messagingService, account);
     }
 
@@ -317,7 +317,7 @@ public class MessagingRequestData {
         if (!JSONObject.class.isInstance(data)) {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("body", data.toString());
         }
-        return parser.parse((JSONObject) data, ManagedFileInputStreamRegistry.getInstance());
+        return parser.parse((JSONObject) data, ManagedFileInputStreamRegistry.getInstance(), request.getRemoteAddress());
     }
 
     /**

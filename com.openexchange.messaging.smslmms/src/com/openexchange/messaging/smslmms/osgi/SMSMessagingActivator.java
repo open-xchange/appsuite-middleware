@@ -49,11 +49,15 @@
 
 package com.openexchange.messaging.smslmms.osgi;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.smslmms.SMSMessagingMessage;
 import com.openexchange.messaging.smslmms.SMSMessagingService;
 import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
@@ -78,11 +82,13 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
+        return new Class<?>[] { ManagedFileManagement.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(SMSMessagingActivator.class));
+        SMSMessagingMessage.setServiceLookup(this);
         trackService(SMSMessagingService.class);
         /*
          * Publish tracked SMSMessagingService as MessagingService
@@ -92,6 +98,10 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
             @Override
             public void added(final ServiceReference<SMSMessagingService> ref, final SMSMessagingService service) {
+                if (null != getService(SMSMessagingService.class)) {
+                    logger.error("Detected multiple SMS/MMS services!");
+                    return;
+                }
                 final MessagingService tmp = service;
                 messagingServiceRegistration = context.registerService(MessagingService.class, tmp, null);
             }
@@ -112,6 +122,7 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
+        SMSMessagingMessage.setServiceLookup(null);
         final ServiceRegistration<MessagingService> registration = messagingServiceRegistration;
         if (null != registration) {
             registration.unregister();

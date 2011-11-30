@@ -255,6 +255,7 @@ public abstract class MultipleAdapterServletNew extends PermissionServlet {
                 retval.setHostname(null == hn ? req.getServerName() : hn);
             }
         }
+        retval.setRemoteAddress(req.getRemoteAddr());
         retval.setRoute(Tools.getRoute(req.getSession(true).getId()));
         /*
          * Pass all parameters to AJAX request object

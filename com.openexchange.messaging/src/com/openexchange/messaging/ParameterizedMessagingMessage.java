@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,36 +49,65 @@
 
 package com.openexchange.messaging;
 
-import java.io.InputStream;
-
+import java.util.Map;
 
 /**
- * {@link ManagedFileContent} - Represents a binary content.
- *
+ * {@link ParameterizedMessagingMessage} - Extends {@link MessagingMessage} by the capability to carry parameters.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.20.1
  */
-public interface ManagedFileContent extends SimpleContent<InputStream> {
+public interface ParameterizedMessagingMessage extends MessagingMessage {
 
     /**
-     * Gets the content type of associated managed file.
+     * The parameter name for captcha parameters.
+     */
+    public static final String PARAM_CAPTCHA_PARAMS = "__captchaParams";
+
+    /**
+     * Gets all parameters of this message as a map.
+     * <p>
+     * Note: Any modifications applied to returned map will also be reflectedf in message's parameters.
      * 
-     * @return The content type; e.g. <code><i>application/octet-stream</i></code>
+     * @return The parameters as a map
      */
-    String getContentType();
+    Map<String, Object> getParameters();
 
     /**
-     * Gets the (optional) file name.
-     *
-     * @return The file name
-     */
-    String getFileName();
-
-    /**
-     * Gets the managed file's identifier.
+     * Gets the associated parameter value.
      * 
-     * @return The identifier
+     * @param name The parameter name
+     * @return The parameter value or <code>null</code> if absent
      */
-    String getId();
+    Object getParameter(String name);
+
+    /**
+     * Puts specified parameter (and thus overwrites any existing parameter)
+     * 
+     * @param name The parameter name
+     * @param value The parameter value
+     */
+    void putParameter(String name, Object value);
+
+    /**
+     * Puts specified parameter if not already present.
+     * 
+     * @param name The parameter name
+     * @param value The parameter value
+     * @return <code>true</code> if parameter has been put; otherwise <code>false</code> if already present
+     */
+    boolean putParameterIfAbsent(String name, Object value);
+
+    /**
+     * Clears all parameters associated with this message.
+     */
+    void clearParameters();
+
+    /**
+     * Checks if this message contains denoted parameter.
+     * 
+     * @param name The parameter name
+     * @return <code>true</code> if such a parameter exists; <code>false</code> if absent
+     */
+    boolean containsParameter(String name);
 
 }

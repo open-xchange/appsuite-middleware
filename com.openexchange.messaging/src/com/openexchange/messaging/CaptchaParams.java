@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,36 +49,78 @@
 
 package com.openexchange.messaging;
 
-import java.io.InputStream;
-
-
 /**
- * {@link ManagedFileContent} - Represents a binary content.
- *
+ * {@link CaptchaParams} - Simple container class for captcha parameters,
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since Open-Xchange v6.20.1
  */
-public interface ManagedFileContent extends SimpleContent<InputStream> {
+public final class CaptchaParams {
+
+    private String challenge;
+
+    private String response;
+
+    private String address;
 
     /**
-     * Gets the content type of associated managed file.
+     * Initializes a new {@link CaptchaParams}.
+     */
+    public CaptchaParams() {
+        super();
+    }
+
+    /**
+     * Gets the challenge.
      * 
-     * @return The content type; e.g. <code><i>application/octet-stream</i></code>
+     * @return The challenge
      */
-    String getContentType();
+    public String getChallenge() {
+        return challenge;
+    }
 
     /**
-     * Gets the (optional) file name.
-     *
-     * @return The file name
-     */
-    String getFileName();
-
-    /**
-     * Gets the managed file's identifier.
+     * Sets the challenge.
      * 
-     * @return The identifier
+     * @param challenge The challenge
      */
-    String getId();
+    public void setChallenge(final String challenge) {
+        this.challenge = challenge;
+    }
+
+    /**
+     * Gets the response string.
+     * 
+     * @return The response string
+     */
+    public String getResponse() {
+        return response;
+    }
+
+    /**
+     * Sets the response string.
+     * 
+     * @param response The response string.
+     */
+    public void setResponse(final String response) {
+        this.response = response;
+    }
+
+    /**
+     * Gets the host; either an IP address or a host name.
+     * 
+     * @return The host name
+     */
+    public String getHost() {
+        return address;
+    }
+
+    /**
+     * Sets the remote address.
+     * 
+     * @param address The remote address
+     */
+    public void setAddress(final String address) {
+        this.address = address;
+    }
 
 }

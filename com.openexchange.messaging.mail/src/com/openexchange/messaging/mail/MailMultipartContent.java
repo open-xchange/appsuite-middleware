@@ -77,6 +77,11 @@ public class MailMultipartContent implements MultipartContent {
         mimeMultipart = multipart;
     }
 
+    @Override
+    public String getSubType() {
+        return mimeMultipart.getContentType().getSubType();
+    }
+
     /**
      * Gets the identifier.
      *
