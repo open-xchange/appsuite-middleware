@@ -49,98 +49,106 @@
 
 package com.openexchange.messaging.smslmms;
 
-import java.util.List;
-import java.util.Set;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingAccountTransport;
-import com.openexchange.messaging.MessagingAction;
-import com.openexchange.messaging.MessagingService;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingFolderAccess;
+import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.smslmms.api.SMSAccess;
-import com.openexchange.messaging.smslmms.api.SMSConfiguration;
-import com.openexchange.messaging.smslmms.api.SMSService;
-import com.openexchange.messaging.smslmms.api.SMSTransport;
-import com.openexchange.session.Session;
+import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
+
 
 /**
- * {@link SMSMessagingService} - The messaging service for SMS/MMS.
- * 
+ * {@link SMSAccountAccess} - The SMS/MMS messaging-based account access.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMSMessagingService implements MessagingService, SMSService {
+public class SMSAccountAccess implements MessagingAccountAccess, SMSAccess {
 
-    private final SMSService smsService;
+    protected boolean connected;
+
+    protected final SMSAccess smsAccess;
 
     /**
-     * Initializes a new {@link SMSMessagingService}.
+     * Initializes a new {@link SMSAccountAccess}.
      * 
-     * @param smsService THE SMS/MMS service
+     * @param smsAccess The SMS/MMS access
      */
-    public SMSMessagingService(final SMSService smsService) {
+    public SMSAccountAccess(final SMSAccess smsAccess) {
         super();
-        this.smsService = smsService;
+        this.smsAccess = smsAccess;
     }
 
     @Override
-    public SMSConfiguration getSMSConfiguration(final Session session) throws OXException {
-        return smsService.getSMSConfiguration(session);
+    public int getAccountId() {
+        return smsAccess.getAccountId();
     }
 
     @Override
-    public String getId() {
-        return smsService.getId();
+    public SMSMessageAccess getSMSMessageAccess() throws OXException {
+        return smsAccess.getSMSMessageAccess();
     }
 
     @Override
-    public List<MessagingAction> getMessageActions() {
-        return smsService.getMessageActions();
+    public MessagingMessageAccess getMessageAccess() throws OXException {
+        return new SMSMessagingMessageAccess(smsAccess.getSMSMessageAccess());
     }
 
     @Override
-    public String getDisplayName() {
-        return smsService.getDisplayName();
+    public MessagingFolderAccess getFolderAccess() throws OXException {
+        return smsAccess.getFolderAccess();
     }
 
     @Override
-    public DynamicFormDescription getFormDescription() {
-        return smsService.getFormDescription();
+    public MessagingFolder getRootFolder() throws OXException {
+        return smsAccess.getRootFolder();
     }
 
     @Override
-    public Set<String> getSecretProperties() {
-        return smsService.getSecretProperties();
+    public void connectAccess() throws OXException {
+        smsAccess.connectAccess();
     }
 
     @Override
-    public int[] getStaticRootPermissions() {
-        return smsService.getStaticRootPermissions();
+    public void closeAccess() {
+        smsAccess.closeAccess();
     }
 
     @Override
-    public MessagingAccountManager getAccountManager() {
-        return smsService.getAccountManager();
+    public void connect() throws OXException {
+        if (connected) {
+            return;
+        }
+        smsAccess.connectAccess();
+        connected = true;
     }
 
     @Override
-    public SMSAccess getSMSAccess(final int accountId, final Session session) throws OXException {
-        return smsService.getSMSAccess(accountId, session);
+    public boolean isConnected() {
+        return connected;
     }
 
     @Override
-    public SMSTransport getSMSTransport(final int accountId, final Session session) throws OXException {
-        return smsService.getSMSTransport(accountId, session);
+    public void close() {
+        if (!connected) {
+            return;
+        }
+        try {
+            smsAccess.closeAccess();
+        } catch (final Exception e) {
+            // Ignore
+        }
+        connected = false;
     }
 
     @Override
-    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
-        return new SMSAccountAccess(smsService.getSMSAccess(accountId, session));
+    public boolean ping() throws OXException {
+        return true;
     }
 
     @Override
-    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
-        return new SMSTransportAccess(smsService.getSMSTransport(accountId, session));
+    public boolean cacheable() {
+        return false;
     }
 
 }

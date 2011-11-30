@@ -135,7 +135,7 @@ public interface MessagingPart {
      * @return The size of this part or <code>-1</code>
      * @throws OXException If size cannot be returned
      */
-    public long getSize() throws OXException;;
+    public long getSize() throws OXException;
 
     /**
      * Get the filename associated with this part, if possible.

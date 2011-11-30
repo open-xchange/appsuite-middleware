@@ -68,7 +68,7 @@ public interface MessagingFolder {
     }
 
     /**
-     * The constant for fullname of an account's root folder.
+     * The constant for full name of an account's root folder.
      */
     public static final String ROOT_FULLNAME = "";
 

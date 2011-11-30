@@ -58,8 +58,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.messaging.smslmms.SMSMessagingService;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.messaging.smslmms.api.SMSService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -88,11 +87,8 @@ public class SMSPreferencesItem implements PreferencesItemService {
         return new ReadOnlyValue() {
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final SMSMessagingService smsService = serviceLookup.getService(SMSMessagingService.class);
-                if (null == smsService) {
-                    throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(SMSMessagingService.class.getName());
-                }
-                setting.setSingleValue(B(smsService.getSMSConfiguration(session).isEnabled()));
+                final SMSService smsService = serviceLookup.getService(SMSService.class);
+                setting.setSingleValue(B(null != smsService && smsService.getSMSConfiguration(session).isEnabled()));
             }
 
             @Override

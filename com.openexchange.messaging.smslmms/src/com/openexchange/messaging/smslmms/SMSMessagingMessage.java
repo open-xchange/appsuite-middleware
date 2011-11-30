@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -79,6 +80,7 @@ import com.openexchange.messaging.generic.internet.MimeContentDisposition;
 import com.openexchange.messaging.generic.internet.MimeContentType;
 import com.openexchange.messaging.generic.internet.MimeMessagingBodyPart;
 import com.openexchange.messaging.generic.internet.MimeMultipartContent;
+import com.openexchange.messaging.smslmms.api.SMSMessage;
 import com.openexchange.server.ServiceExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 
@@ -87,7 +89,7 @@ import com.openexchange.server.ServiceLookup;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMSMessagingMessage implements ParameterizedMessagingMessage {
+public final class SMSMessagingMessage implements ParameterizedMessagingMessage, SMSMessage {
 
     private static final long serialVersionUID = 5324611878535898301L;
 
@@ -132,6 +134,10 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
 
     private final String message;
 
+    private final String sender;
+
+    private final Set<String> recipients;
+
     private MessagingContent content;
 
     private final long size;
@@ -141,6 +147,58 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
     private final List<ManagedFile> files;
 
     private CaptchaParams captchaParams;
+
+    /**
+     * Initializes a new {@link SMSMessagingMessage}.
+     * 
+     * @param smsMessage The SMS/MMS message
+     * @throws OXException If creation fails
+     */
+    public SMSMessagingMessage(final SMSMessage smsMessage) throws OXException {
+        super();
+        this.captchaParams = smsMessage.getCaptchaParams();
+        this.files = new LinkedList<ManagedFile>();
+        this.message = smsMessage.getMessage();
+        this.sender = smsMessage.getSender();
+        this.recipients = smsMessage.getRecipients();
+        this.parameters = smsMessage.getParameters();
+        /*
+         * Assign string content and size
+         */
+        content = new StringContent(message);
+        size = message.length();
+        /*
+         * Assign headers
+         */
+        headers.put(CONTENT_TYPE.getName(), wrap(CONTENT_TYPE));
+        headers.put(CONTENT_DISPOSITION.getName(), wrap(CONTENT_DISPOSITION));
+        {
+            final String name = MessagingHeader.KnownHeader.FROM.toString();
+            headers.put(name, wrap(toAddressHeader(name, sender)));
+        }
+        {
+            final String name = MessagingHeader.KnownHeader.TO.toString();
+            final List<MessagingHeader> tos = new ArrayList<MessagingHeader>(recipients.size());
+            for (final String recipient : recipients) {
+                tos.add(toAddressHeader(name, recipient));
+            }
+            headers.put(name, tos);
+        }
+        {
+            final String name = MessagingHeader.KnownHeader.SUBJECT.toString();
+            headers.put(name, getSimpleHeader(name, message));
+        }
+        {
+            final String name = MessagingHeader.KnownHeader.MESSAGE_TYPE.toString();
+            headers.put(name, getSimpleHeader(name, MESSAGE_TYPE));
+        }
+        /*
+         * Add files
+         */
+        for (final ManagedFile managedFile : smsMessage.getFiles()) {
+            addAttachment(managedFile);
+        }
+    }
 
     /**
      * Initializes a new {@link SMSMessagingMessage}.
@@ -167,6 +225,8 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
     public SMSMessagingMessage(final MessagingHeader sender, final MessagingHeader receiver, final String message) {
         super();
         this.message = message;
+        this.sender = sender.getValue();
+        this.recipients = Collections.singleton(receiver.getValue());
         files = new LinkedList<ManagedFile>();
         parameters = new HashMap<String, Object>(4);
         /*
@@ -197,20 +257,22 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
         }
     }
 
-    /**
-     * Gets the message text.
-     * 
-     * @return The message text
-     */
+    @Override
+    public Set<String> getRecipients() {
+        return recipients;
+    }
+
+    @Override
+    public String getSender() {
+        return sender;
+    }
+
+    @Override
     public String getMessage() {
         return message;
     }
 
-    /**
-     * Gets the associated files.
-     * 
-     * @return The files.
-     */
+    @Override
     public List<ManagedFile> getFiles() {
         return new ArrayList<ManagedFile>(files);
     }
@@ -365,6 +427,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
      * 
      * @param params The captcha parameters
      */
+    @Override
     public void setCaptchaParameters(final CaptchaParams captchaParams) {
         this.captchaParams = captchaParams;
         parameters.put(PARAM_CAPTCHA_PARAMS, captchaParams);
@@ -375,6 +438,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
      * 
      * @return The captcha parameters
      */
+    @Override
     public CaptchaParams getCaptchaParams() {
         if (null == captchaParams) {
             captchaParams = (CaptchaParams) parameters.get(PARAM_CAPTCHA_PARAMS);
@@ -388,6 +452,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
      * @param managedFile The attachment as a managed file
      * @throws OXException If attaching denoted file fails
      */
+    @Override
     public void addAttachment(final ManagedFile managedFile) throws OXException {
         /*
          * Check current message's content
@@ -433,6 +498,7 @@ public final class SMSMessagingMessage implements ParameterizedMessagingMessage 
      * @param attachmentId The attachment identifier
      * @throws OXException If attaching denoted file fails
      */
+    @Override
     public void addAttachment(final String attachmentId) throws OXException {
         /*
          * Ensure presence of needed service

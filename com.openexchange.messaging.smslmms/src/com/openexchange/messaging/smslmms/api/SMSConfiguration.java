@@ -47,17 +47,17 @@
  *
  */
 
-package com.openexchange.messaging.smslmms;
+package com.openexchange.messaging.smslmms.api;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * {@link SMSMessagingConfiguration} - The user configuration for a SMS/MMS account.
+ * {@link SMSConfiguration} - The user configuration for a SMS/MMS account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SMSMessagingConfiguration {
+public interface SMSConfiguration {
 
     /**
      * The property name for addresses.

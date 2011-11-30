@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.messaging.smslmms;
+package com.openexchange.messaging.smslmms.api;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,11 +55,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * {@link DefaultSMSMessagingConfiguration} - The default {@link SMSMessagingConfiguration configuration} implementation.
+ * {@link DefaultSMSConfiguration} - The default {@link SMSConfiguration configuration} implementation.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DefaultSMSMessagingConfiguration implements SMSMessagingConfiguration {
+public class DefaultSMSConfiguration implements SMSConfiguration {
 
     private final Map<String, Object> configuration;
 
@@ -82,9 +82,9 @@ public class DefaultSMSMessagingConfiguration implements SMSMessagingConfigurati
     private String upsellLink;
 
     /**
-     * Initializes a new {@link DefaultSMSMessagingConfiguration}.
+     * Initializes a new {@link DefaultSMSConfiguration}.
      */
-    public DefaultSMSMessagingConfiguration(final Map<String, Object> configuration) {
+    public DefaultSMSConfiguration(final Map<String, Object> configuration) {
         super();
         this.configuration = configuration;
         length = -1;
