@@ -67,7 +67,7 @@ public interface SMSConfiguration {
     /**
      * The property name for display string.
      */
-    public static final String PROP_DISPLAY_STRING = "displayString";
+    public static final String PROP_DISPLAY_STRING = "display_string";
 
     /**
      * The property name for length.
@@ -87,7 +87,7 @@ public interface SMSConfiguration {
     /**
      * The property name for mulit-SMS flag.
      */
-    public static final String PROP_MULTI_SMS = "multiSMS";
+    public static final String PROP_MULTI_SMS = "multisms";
 
     /**
      * The property name for MMS flag.
@@ -97,12 +97,12 @@ public interface SMSConfiguration {
     /**
      * The property name whether folders are supported.
      */
-    public static final String PROP_FOLDER_STORAGE = "folderStorage";
+    public static final String PROP_FOLDER_STORAGE = "folder_storage";
 
     /**
      * The property name for upsell link.
      */
-    public static final String PROP_UPSELL_LINK = "upsellLink";
+    public static final String PROP_UPSELL_LINK = "upsell";
 
     /**
      * Gets user's account configuration as a map.

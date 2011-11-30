@@ -49,39 +49,69 @@
 
 package com.openexchange.messaging.json.actions.accounts;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.List;
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccount;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AccountActionFactory}
+ * Loads a messaging account. Parameters are:
+ * <dl>
+ *  <dt>messagingService</dt> <dd>The ID of the messaging service. </dd>
+ *  <dt>id</dt><dd>The id of the messaging service that is to be loaded</dd>
+ * </dl>
+ * Throws an exception upon an error or returns the loaded MessagingAccount JSON representation.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AccountActionFactory implements AJAXActionServiceFactory {
+public class GetConfigAction extends AbstractMessagingAccountAction {
 
-    public static volatile AccountActionFactory INSTANCE; // Initialize in Activator
-
-    private Map<String, AJAXActionService> actions = null;
-
-    public AccountActionFactory(final MessagingServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>();
-
-        actions.put("all", new AllAction(registry));
-        actions.put("delete", new DeleteAction(registry));
-        actions.put("get", new GetAction(registry));
-        actions.put("getconfig", new GetConfigAction(registry));
-        actions.put("new", new NewAction(registry));
-        actions.put("update", new UpdateAction(registry));
-
+    public GetConfigAction(final MessagingServiceRegistry registry) {
+        super(registry);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
+        final List<String> missingParameters = request.getMissingParameters("messagingService", "id");
+        if(!missingParameters.isEmpty()) {
+            throw MessagingExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
+        }
+        /*
+         * Get service identifier
+         */
+        final String messagingServiceId = request.getParameter("messagingService");
+        /*
+         * Get account identifier
+         */
+        final int id;
+        final String idS = request.getParameter("id");
+        try {
+            id = Integer.parseInt(idS);
+        } catch (final NumberFormatException x) {
+            throw MessagingExceptionCodes.INVALID_PARAMETER.create("id", idS);
+        }
+        /*
+         * Get account
+         */
+        final MessagingAccount account = registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId()).getAccountManager().getAccount(id, session);
+        /*
+         * Compose JSON object from configuration
+         */
+        final JSONObject jsonObject = new JSONObject();
+        for (final Entry<String, Object> entry : account.getConfiguration().entrySet()) {
+            jsonObject.put(entry.getKey(), JSONCoercion.coerceToJSON(entry.getValue()));
+        }
+        return new AJAXRequestResult(jsonObject);
     }
+
 }
