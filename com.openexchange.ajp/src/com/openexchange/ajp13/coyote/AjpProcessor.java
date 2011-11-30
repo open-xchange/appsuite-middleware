@@ -727,7 +727,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      *
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug("Unexpected message: " + type);
                     }
                     continue;
@@ -768,12 +768,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      *
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         requestHeaderMessage.dump("Invalid forward-request detected");
                     }
                     continue;
                 } catch (final Throwable t) {
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         final StringBuilder sb = new StringBuilder(512);
                         sb.append("400 - Bad RequestError preparing forward-request: ").append(t.getClass().getName());
                         sb.append(" message=").append(t.getMessage()).append("\n");
@@ -979,7 +979,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     output.write(flushMessageArray);
                     lastWriteAccess = System.currentTimeMillis();
                     // output.flush();
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug("Performed keep-alive through a flush package.");
                     }
                 } else {
@@ -993,7 +993,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      * Receive empty body chunk
                      */
                     receive();
-                    if (LOG.isDebugEnabled()) {
+                    if (DEBUG) {
                         LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
                     }
                 }
