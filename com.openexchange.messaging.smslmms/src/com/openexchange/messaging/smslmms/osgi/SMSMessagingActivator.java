@@ -61,9 +61,11 @@ import com.openexchange.messaging.smslmms.SMSMessagingMessage;
 import com.openexchange.messaging.smslmms.SMSMessagingService;
 import com.openexchange.messaging.smslmms.api.DefaultSMSMessage;
 import com.openexchange.messaging.smslmms.api.SMSService;
+import com.openexchange.messaging.smslmms.internal.SMSFolderSupportPreferencesItem;
 import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import com.openexchange.sessiond.SessiondService;
 
 
 /**
@@ -84,7 +86,7 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagedFileManagement.class };
+        return new Class<?>[] { ManagedFileManagement.class, SessiondService.class };
     }
 
     @Override
@@ -120,6 +122,7 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(PreferencesItemService.class, new SMSPreferencesItem(this));
+        registerService(PreferencesItemService.class, new SMSFolderSupportPreferencesItem(this));
     }
 
     @Override

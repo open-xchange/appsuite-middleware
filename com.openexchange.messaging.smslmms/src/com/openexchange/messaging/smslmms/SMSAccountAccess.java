@@ -51,11 +51,14 @@ package com.openexchange.messaging.smslmms;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountAccess;
+import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.MessagingMessageAccess;
 import com.openexchange.messaging.smslmms.api.SMSAccess;
+import com.openexchange.messaging.smslmms.api.SMSConfiguration;
 import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
+import com.openexchange.messaging.smslmms.api.SMSService;
 
 
 /**
@@ -69,13 +72,16 @@ public class SMSAccountAccess implements MessagingAccountAccess, SMSAccess {
 
     protected final SMSAccess smsAccess;
 
+    protected final SMSConfiguration configuration;
+
     /**
      * Initializes a new {@link SMSAccountAccess}.
      * 
      * @param smsAccess The SMS/MMS access
      */
-    public SMSAccountAccess(final SMSAccess smsAccess) {
+    public SMSAccountAccess(final SMSConfiguration configuration, final SMSAccess smsAccess) {
         super();
+        this.configuration = configuration;
         this.smsAccess = smsAccess;
     }
 
@@ -96,6 +102,9 @@ public class SMSAccountAccess implements MessagingAccountAccess, SMSAccess {
 
     @Override
     public MessagingFolderAccess getFolderAccess() throws OXException {
+        if (!configuration.supportsFolderStorage()) {
+            throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(SMSService.DISPLAY_NAME);
+        }
         return smsAccess.getFolderAccess();
     }
 

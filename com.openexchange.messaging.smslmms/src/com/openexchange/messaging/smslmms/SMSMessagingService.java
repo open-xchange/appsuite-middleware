@@ -135,7 +135,8 @@ public class SMSMessagingService implements MessagingService, SMSService {
 
     @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
-        return new SMSAccountAccess(smsService.getSMSAccess(accountId, session));
+        final SMSConfiguration configuration = smsService.getSMSConfiguration(session);
+        return new SMSAccountAccess(configuration, smsService.getSMSAccess(accountId, session));
     }
 
     @Override
