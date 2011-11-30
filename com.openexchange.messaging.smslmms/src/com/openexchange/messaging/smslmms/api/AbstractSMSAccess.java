@@ -78,7 +78,7 @@ public abstract class AbstractSMSAccess implements SMSAccess {
 
     @Override
     public MessagingFolderAccess getFolderAccess() throws OXException {
-        if (!smsService.getSMSConfiguration(session).supportsFolderStorage()) {
+        if (!smsService.getSMSConfiguration(accountId, session).supportsFolderStorage()) {
             throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(SMSService.DISPLAY_NAME);
         }
         return getFolderAccessInternal();

@@ -84,8 +84,8 @@ public class SMSMessagingService implements MessagingService, SMSService {
     }
 
     @Override
-    public SMSConfiguration getSMSConfiguration(final Session session) throws OXException {
-        return smsService.getSMSConfiguration(session);
+    public SMSConfiguration getSMSConfiguration(final int accountId, final Session session) throws OXException {
+        return smsService.getSMSConfiguration(accountId, session);
     }
 
     @Override
@@ -135,7 +135,7 @@ public class SMSMessagingService implements MessagingService, SMSService {
 
     @Override
     public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
-        final SMSConfiguration configuration = smsService.getSMSConfiguration(session);
+        final SMSConfiguration configuration = smsService.getSMSConfiguration(accountId, session);
         return new SMSAccountAccess(configuration, smsService.getSMSAccess(accountId, session));
     }
 

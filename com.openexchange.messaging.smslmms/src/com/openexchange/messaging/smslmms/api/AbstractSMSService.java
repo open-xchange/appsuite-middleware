@@ -68,8 +68,8 @@ public abstract class AbstractSMSService implements SMSService {
     }
 
     @Override
-    public SMSConfiguration getSMSConfiguration(final Session session) throws OXException {
-        return new DefaultSMSConfiguration(getAccountManager().getAccount(0, session).getConfiguration());
+    public SMSConfiguration getSMSConfiguration(final int accountId, final Session session) throws OXException {
+        return new DefaultSMSConfiguration(getAccountManager().getAccount(accountId, session).getConfiguration());
     }
 
 }

@@ -88,7 +88,7 @@ public class SMSPreferencesItem implements PreferencesItemService {
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final SMSService smsService = serviceLookup.getService(SMSService.class);
-                setting.setSingleValue(B(null != smsService && smsService.getSMSConfiguration(session).isEnabled()));
+                setting.setSingleValue(B(null != smsService && smsService.getSMSConfiguration(SMSService.DEFAULT_ACCOUNT_IDENTIFIER, session).isEnabled()));
             }
 
             @Override

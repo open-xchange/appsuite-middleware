@@ -89,11 +89,11 @@ public class SMSFolderSupportPreferencesItem implements PreferencesItemService {
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final SMSService smsService = serviceLookup.getService(SMSService.class);
-                if (null == smsService || !smsService.getSMSConfiguration(session).isEnabled()) {
+                if (null == smsService || !smsService.getSMSConfiguration(SMSService.DEFAULT_ACCOUNT_IDENTIFIER, session).isEnabled()) {
                     // No such service
                     setting.setSingleValue(Boolean.FALSE);
                 } else {
-                    final SMSConfiguration configuration = smsService.getSMSConfiguration(session);
+                    final SMSConfiguration configuration = smsService.getSMSConfiguration(SMSService.DEFAULT_ACCOUNT_IDENTIFIER, session);
                     setting.setSingleValue(B(configuration.supportsFolderStorage()));
                 }
             }

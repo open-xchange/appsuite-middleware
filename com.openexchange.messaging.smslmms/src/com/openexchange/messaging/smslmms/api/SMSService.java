@@ -66,6 +66,11 @@ import com.openexchange.session.Session;
 public interface SMSService {
 
     /**
+     * The identifier for a user's default SMS/MMS account.
+     */
+    public static final int DEFAULT_ACCOUNT_IDENTIFIER = 0;
+
+    /**
      * The service identifier.
      */
     public static final String SERVICE_ID = "com.openexchange.messaging.sms";
@@ -78,11 +83,12 @@ public interface SMSService {
     /**
      * Gets the SMS/MMS configuration for the user associated with specified session.
      * 
+     * @param accountId The account identifier
      * @param session The session providing user data
      * @return The SMS/MMS configuration
      * @throws OXException If configuration cannot be returned
      */
-    SMSConfiguration getSMSConfiguration(Session session) throws OXException;
+    SMSConfiguration getSMSConfiguration(int accountId, Session session) throws OXException;
 
     /**
      * Gets the identifier of this SMS/MMS service.
