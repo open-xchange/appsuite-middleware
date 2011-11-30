@@ -80,7 +80,6 @@ import com.openexchange.messaging.MessagingHeader.KnownHeader;
 import com.openexchange.messaging.MessagingMessage;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.MultipartContent;
-import com.openexchange.messaging.ParameterizedMessagingMessage;
 import com.openexchange.messaging.StringContent;
 import com.openexchange.messaging.StringMessageHeader;
 import com.openexchange.messaging.generic.internet.MimeContentDisposition;
@@ -191,7 +190,7 @@ public class MessagingMessageParser {
             if (null != remoteAddress) {
                 params.setAddress(remoteAddress);
             }
-            message.putParameter(ParameterizedMessagingMessage.PARAM_CAPTCHA_PARAMS, params);
+            message.putParameter("__captchaParams", params);
         }
 
         return message;

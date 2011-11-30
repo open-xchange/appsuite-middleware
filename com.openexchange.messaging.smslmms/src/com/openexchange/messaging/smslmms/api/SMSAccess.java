@@ -47,62 +47,77 @@
  *
  */
 
-package com.openexchange.messaging;
+package com.openexchange.messaging.smslmms.api;
 
-import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingFolderAccess;
+
 
 /**
- * {@link ParameterizedMessagingMessage} - Extends {@link MessagingMessage} by the capability to carry parameters.
- * 
+ * {@link SMSAccess} - The access to SMS/MMS storage.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface ParameterizedMessagingMessage extends MessagingMessage {
+public interface SMSAccess {
 
     /**
-     * Gets all parameters of this message as a map.
+     * Connects this SMS/MMS access.
+     * 
+     * @throws OXException If the SMS/MMS access could not be opened for various reasons
+     */
+    void connectAccess() throws OXException;
+
+    /**
+     * Closes this SMS/MMS access.
+     */
+    void closeAccess();
+
+    /**
+     * Gets the account identifier of this access.
+     *
+     * @return The account identifier
+     */
+    public int getAccountId();
+
+    /**
+     * Gets the SMS/MMS access for associated account.
+     *
+     * @return The message access
+     * @throws OXException If message access cannot be returned
+     */
+    public SMSMessageAccess getSMSMessageAccess() throws OXException;
+
+    /**
+     * Gets the folder access for associated account.
+     *
+     * @return The folder access
+     * @throws OXException If folder access cannot be returned
+     */
+    public MessagingFolderAccess getFolderAccess() throws OXException;
+
+    /**
+     * Convenience method to obtain root folder in a fast way; meaning no default folder check is performed which is not necessary to return
+     * the root folder.
      * <p>
-     * Note: Any modifications applied to returned map will also be reflected in message's parameters.
-     * 
-     * @return The parameters as a map
+     * The same result is yielded through calling <code>getFolderAccess().getRootFolder()</code> on a connected
+     * {@link MessagingFolderAccess}.
+     * <p>
+     * Since this account access instance is connected if not already done before, the {@link #close()} operation should be invoked
+     * afterwards:
+     *
+     * <pre>
+     * final MessagingMessageAccess access = MailAccess.getInstance(session);
+     * final MessagingFolder rootFolder = access.getRootFolder();
+     * try {
+     *     // Do something with root folder
+     * } finally {
+     *     access.close();
+     * }
+     * </pre>
+     *
+     * @throws OXException If returning the root folder fails
      */
-    Map<String, Object> getParameters();
-
-    /**
-     * Gets the associated parameter value.
-     * 
-     * @param name The parameter name
-     * @return The parameter value or <code>null</code> if absent
-     */
-    Object getParameter(String name);
-
-    /**
-     * Puts specified parameter (and thus overwrites any existing parameter)
-     * 
-     * @param name The parameter name
-     * @param value The parameter value
-     */
-    void putParameter(String name, Object value);
-
-    /**
-     * Puts specified parameter if not already present.
-     * 
-     * @param name The parameter name
-     * @param value The parameter value
-     * @return <code>true</code> if parameter has been put; otherwise <code>false</code> if already present
-     */
-    boolean putParameterIfAbsent(String name, Object value);
-
-    /**
-     * Clears all parameters associated with this message.
-     */
-    void clearParameters();
-
-    /**
-     * Checks if this message contains denoted parameter.
-     * 
-     * @param name The parameter name
-     * @return <code>true</code> if such a parameter exists; <code>false</code> if absent
-     */
-    boolean containsParameter(String name);
+    public MessagingFolder getRootFolder() throws OXException;
 
 }

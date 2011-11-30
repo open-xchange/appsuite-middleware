@@ -47,29 +47,37 @@
  *
  */
 
-package com.openexchange.messaging.smslmms;
+package com.openexchange.messaging.smslmms.api;
 
+import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 
 /**
- * {@link AbstractSMSMessagingService} - The abstract {@link SMSMessagingService SMS service}.
+ * {@link SMSTransport} - The SMS/MMS transport.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractSMSMessagingService implements SMSMessagingService {
+public interface SMSTransport {
 
     /**
-     * Initializes a new {@link AbstractSMSMessagingService}.
+     * Connects this SMS/MMS transport.
+     * 
+     * @throws OXException If the resource could not be opened for various reasons
      */
-    protected AbstractSMSMessagingService() {
-        super();
-    }
+    void connectTransport() throws OXException;
 
-    @Override
-    public SMSMessagingConfiguration getSMSConfiguration(final Session session) throws OXException {
-        return new DefaultSMSMessagingConfiguration(getAccountManager().getAccount(0, session).getConfiguration());
-    }
+    /**
+     * Closes this SMS/MMS transport.
+     */
+    void closeTransport();
 
+    /**
+     * Transports specified SMS/MMS message.
+     * 
+     * @param smsMessage The SMS/MMS message
+     * @param recipients The optional recipients; if <code>null</code> or empty the recipients from SMS/MMS message are taken
+     * @throws OXException If transport fails
+     */
+    void transport(SMSMessage smsMessage, Set<String> recipients) throws OXException;
 }

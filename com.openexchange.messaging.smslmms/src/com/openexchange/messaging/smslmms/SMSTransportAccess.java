@@ -49,98 +49,114 @@
 
 package com.openexchange.messaging.smslmms;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingAccountAccess;
-import com.openexchange.messaging.MessagingAccountManager;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.messaging.MessagingAccountTransport;
-import com.openexchange.messaging.MessagingAction;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.smslmms.api.SMSAccess;
-import com.openexchange.messaging.smslmms.api.SMSConfiguration;
-import com.openexchange.messaging.smslmms.api.SMSService;
+import com.openexchange.messaging.MessagingAddressHeader;
+import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.messaging.smslmms.api.SMSMessage;
 import com.openexchange.messaging.smslmms.api.SMSTransport;
-import com.openexchange.session.Session;
 
 /**
- * {@link SMSMessagingService} - The messaging service for SMS/MMS.
+ * {@link SMSTransportAccess} - The class for a messaging-based SMS/MMS transport.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMSMessagingService implements MessagingService, SMSService {
+public class SMSTransportAccess implements MessagingAccountTransport, SMSTransport {
 
-    private final SMSService smsService;
+    protected boolean connected;
+
+    protected final SMSTransport smsTransport;
 
     /**
-     * Initializes a new {@link SMSMessagingService}.
+     * Initializes a new {@link SMSTransportAccess}.
      * 
-     * @param smsService THE SMS/MMS service
+     * @param The SMS/MMS transport
      */
-    public SMSMessagingService(final SMSService smsService) {
+    public SMSTransportAccess(final SMSTransport smsTransport) {
         super();
-        this.smsService = smsService;
+        this.smsTransport = smsTransport;
     }
 
     @Override
-    public SMSConfiguration getSMSConfiguration(final Session session) throws OXException {
-        return smsService.getSMSConfiguration(session);
+    public final boolean isConnected() {
+        return connected;
     }
 
     @Override
-    public String getId() {
-        return smsService.getId();
+    public final boolean ping() {
+        return true;
     }
 
     @Override
-    public List<MessagingAction> getMessageActions() {
-        return smsService.getMessageActions();
+    public final boolean cacheable() {
+        return false;
     }
 
     @Override
-    public String getDisplayName() {
-        return smsService.getDisplayName();
+    public void connect() throws OXException {
+        if (connected) {
+            return;
+        }
+        connectTransport();
+        connected = true;
     }
 
     @Override
-    public DynamicFormDescription getFormDescription() {
-        return smsService.getFormDescription();
+    public void close() {
+        if (!connected) {
+            return;
+        }
+        try {
+            closeTransport();
+        } catch (final Exception e) {
+            // Ignore
+        }
+        connected = false;
     }
 
     @Override
-    public Set<String> getSecretProperties() {
-        return smsService.getSecretProperties();
+    public void transport(final MessagingMessage message, final Collection<MessagingAddressHeader> recipients) throws OXException {
+        SMSMessage smsMessage = null;
+        try {
+            smsMessage = SMSMessageConverter.getInstance().convert(message);
+            /*
+             * Perform transport
+             */
+            transport(smsMessage, Collections.<String> emptySet());
+        } finally {
+            if (null != smsMessage) {
+                final ManagedFileManagement fileManagement = SMSMessagingMessage.getServiceLookup().getService(ManagedFileManagement.class);
+                if (null != fileManagement) {
+                    for (final ManagedFile managedFile : smsMessage.getFiles()) {
+                        try {
+                            fileManagement.removeByID(managedFile.getID());
+                        } catch (final OXException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+        }
     }
 
     @Override
-    public int[] getStaticRootPermissions() {
-        return smsService.getStaticRootPermissions();
+    public void connectTransport() throws OXException {
+        smsTransport.connectTransport();
     }
 
     @Override
-    public MessagingAccountManager getAccountManager() {
-        return smsService.getAccountManager();
+    public void closeTransport() {
+        smsTransport.closeTransport();
     }
 
     @Override
-    public SMSAccess getSMSAccess(final int accountId, final Session session) throws OXException {
-        return smsService.getSMSAccess(accountId, session);
-    }
-
-    @Override
-    public SMSTransport getSMSTransport(final int accountId, final Session session) throws OXException {
-        return smsService.getSMSTransport(accountId, session);
-    }
-
-    @Override
-    public MessagingAccountAccess getAccountAccess(final int accountId, final Session session) throws OXException {
-        return new SMSAccountAccess(smsService.getSMSAccess(accountId, session));
-    }
-
-    @Override
-    public MessagingAccountTransport getAccountTransport(final int accountId, final Session session) throws OXException {
-        return new SMSTransportAccess(smsService.getSMSTransport(accountId, session));
+    public void transport(final SMSMessage smsMessage, final Set<String> recipients) throws OXException {
+        smsTransport.transport(smsMessage, recipients);
     }
 
 }
