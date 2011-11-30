@@ -162,9 +162,9 @@ public interface MessagingMessage extends MessagingPart, MessagingContent, Seria
     public static final String USER_READ_ACK = "$MDNSent";
 
     /**
-     * Gets the folder fullname.
+     * Gets the folder full name.
      * 
-     * @return The folder fullname or <code>null</code> if not available
+     * @return The folder full name or <code>null</code> if not available
      */
     public String getFolder();
 
