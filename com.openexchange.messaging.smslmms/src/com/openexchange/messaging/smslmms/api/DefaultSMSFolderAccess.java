@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link DefaultSMSFolderAccess}
+ * {@link DefaultSMSFolderAccess} - The default SMS folder access serving only one folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
