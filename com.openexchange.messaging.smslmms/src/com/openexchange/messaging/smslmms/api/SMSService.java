@@ -140,7 +140,7 @@ public interface SMSService {
     public MessagingAccountManager getAccountManager();
 
     /**
-     * Gets the account access for specified account identifier.
+     * Gets the SMS/MMS access for specified account identifier.
      *
      * @param accountId The account identifier
      * @param session The session providing needed user data
@@ -150,7 +150,7 @@ public interface SMSService {
     public SMSAccess getSMSAccess(int accountId, Session session) throws OXException;
 
     /**
-     * Gets the account transport for specified account identifier.
+     * Gets the SMS/MMS transport for specified account identifier.
      *
      * @param accountId The account identifier
      * @param session The session providing needed user data
