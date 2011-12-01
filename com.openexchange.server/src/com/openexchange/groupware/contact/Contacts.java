@@ -346,9 +346,13 @@ public final class Contacts {
         if (!contact.containsFileAs() && contact.containsDisplayName()) {
             contact.setFileAs(contact.getDisplayName());
         }
+        final int contextId = session.getContextId();
+        if (!contact.containsContextId() || contact.getContextId() <= 0) {
+            contact.setContextId(contextId);
+        }
         try {
             validateEmailAddress(contact);
-            context = ContextStorage.getStorageContext(session.getContextId());
+            context = ContextStorage.getStorageContext(contextId);
             contactSql = new ContactMySql(session, context);
 
             readcon = DBPool.pickup(context);
@@ -359,7 +363,7 @@ public final class Contacts {
 
             final FolderObject contactFolder = oxfs.getFolderObject(fid);
             if (contactFolder.getModule() != FolderObject.CONTACT) {
-                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(session.getContextId()), I(user));
+                throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(I(fid), I(contextId), I(user));
             }
 
             final EffectivePermission oclPerm = oxfs.getFolderPermission(
@@ -368,14 +372,14 @@ public final class Contacts {
                 UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), context));
 
             if (oclPerm.getFolderPermission() <= OCLPermission.NO_PERMISSIONS) {
-                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(session.getContextId()), I(user));
+                throw ContactExceptionCodes.NO_ACCESS_PERMISSION.create(I(fid), I(contextId), I(user));
             }
             if (!oclPerm.canCreateObjects()) {
-                throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(fid), I(session.getContextId()), I(user));
+                throw ContactExceptionCodes.NO_CREATE_PERMISSION.create(I(fid), I(contextId), I(user));
             }
 
             if ((contactFolder.getType() != FolderObject.PRIVATE) && contact.getPrivateFlag()) {
-                throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(I(fid), I(session.getContextId()), I(user));
+                throw ContactExceptionCodes.PFLAG_IN_PUBLIC_FOLDER.create(I(fid), I(contextId), I(user));
             }
             if (!contact.containsFileAs()) {
                 contact.setFileAs(contact.getDisplayName());
@@ -447,9 +451,9 @@ public final class Contacts {
 
             final long lmd = System.currentTimeMillis();
 
-            StringBuilder insert = contactSql.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, session.getContextId(), id);
+            StringBuilder insert = contactSql.iFperformContactStorageInsert(insert_fields, insert_values, user, lmd, contextId, id);
             if(override) {
-                insert = contactSql.iFperformOverridingContactStorageInsert(insert_fields, insert_values, user, lmd, session.getContextId(), id);
+                insert = contactSql.iFperformOverridingContactStorageInsert(insert_fields, insert_values, user, lmd, contextId, id);
             }
 
             ps = writecon.prepareStatement(insert.toString());
@@ -464,17 +468,17 @@ public final class Contacts {
             contact.setLastModified(ddd);
 
             if (DEBUG) {
-                LOG.debug(new StringBuilder(64).append("DEBUG: YOU WANT TO INSERT THIS: cid=").append(session.getContextId()).append(" oid=").append(
+                LOG.debug(new StringBuilder(64).append("DEBUG: YOU WANT TO INSERT THIS: cid=").append(contextId).append(" oid=").append(
                     contact.getObjectID()).append(" -> ").append(getStatementString(ps)).toString());
             }
 
             ps.execute();
 
             if (contact.containsNumberOfDistributionLists() && (contact.getSizeOfDistributionListArray() > 0)) {
-                writeDistributionListArrayInsert(contact.getDistributionList(), contact.getObjectID(), session.getContextId(), writecon);
+                writeDistributionListArrayInsert(contact.getDistributionList(), contact.getObjectID(), contextId, writecon);
             }
             if (contact.containsNumberOfLinks() && (contact.getSizeOfLinks() > 0)) {
-                writeContactLinkArrayInsert(contact.getLinks(), contact.getObjectID(), session.getContextId(), writecon);
+                writeContactLinkArrayInsert(contact.getLinks(), contact.getObjectID(), contextId, writecon);
             }
             if (contact.containsImage1()) {
                 if (ContactConfig.getInstance().getProperty(PROP_SCALE_IMAGES).equalsIgnoreCase("true")) {
@@ -489,7 +493,7 @@ public final class Contacts {
                     checkImageSize(contact.getImage1().length, Integer.parseInt(ContactConfig.getInstance().getProperty(PROP_MAX_IMAGE_SIZE)));
                 }
 
-                writeContactImage(contact.getObjectID(), contact.getImage1(), session.getContextId(), contact.getImageContentType(), lmd, writecon);
+                writeContactImage(contact.getObjectID(), contact.getImage1(), contextId, contact.getImageContentType(), lmd, writecon);
             }
             writecon.commit();
         } catch (final DataTruncation se) {
@@ -519,6 +523,9 @@ public final class Contacts {
 
         if (!co.containsParentFolderID() || (co.getParentFolderID() == 0)) {
             co.setParentFolderID(fid);
+        }
+        if (!co.containsContextId() || co.getContextId() <= 0) {
+            co.setContextId(ctx.getContextId());
         }
 
         final ContactSql cs = new ContactMySql(ctx, user);
@@ -947,6 +954,9 @@ public final class Contacts {
         validateEmailAddress(contact);
         if (!contact.containsParentFolderID() || (contact.getParentFolderID() == 0)) {
             contact.setParentFolderID(FolderObject.SYSTEM_LDAP_FOLDER_ID);
+        }
+        if (!contact.containsContextId() || contact.getContextId() <= 0) {
+            contact.setContextId(ctx.getContextId());
         }
         final ContactSql cs = new ContactMySql(ctx, userId);
         Contact original = null;
