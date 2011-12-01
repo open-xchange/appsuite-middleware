@@ -951,7 +951,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  * Add ZIP entry to output stream
                                  */
                                 final String subject = mails[i].getSubject();
-                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\s+", "_").replaceAll("[^\\p{ASCII}]+", "_")) + ".eml";
+                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\W+", "_")) + ".eml";
                                 int num = 1;
                                 while (true) {
                                     try {
