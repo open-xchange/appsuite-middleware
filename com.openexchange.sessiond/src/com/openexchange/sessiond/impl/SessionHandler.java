@@ -91,7 +91,7 @@ public final class SessionHandler {
 
     private static SessionIdGenerator sessionIdGenerator;
 
-    private static SessiondConfigInterface config;
+    static SessiondConfigInterface config;
 
     protected static volatile SessionData sessionData;
 
@@ -108,6 +108,8 @@ public final class SessionHandler {
     private static ScheduledTimerTask shortSessionContainerRotator;
 
     private static ScheduledTimerTask longSessionContainerRotator;
+
+    private static ScheduledTimerTask cleaner;
 
     /**
      * Initializes a new {@link SessionHandler session handler}
@@ -176,11 +178,11 @@ public final class SessionHandler {
         return sessionData.getUserSessions(userId, contextId);
     }
 
-    public static SessionControl getAnyActiveSessionForUser(int userId, int contextId) {
+    public static SessionControl getAnyActiveSessionForUser(final int userId, final int contextId) {
         return sessionData.getAnyActiveSessionForUser(userId, contextId);
     }
 
-    public static Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+    public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
         return sessionData.findFirstSessionForUser(userId, contextId, matcher);
     }
 
@@ -497,16 +499,28 @@ public final class SessionHandler {
 
     public static void addTimerService(final TimerService service) {
         sessionData.addTimerService(service);
-        shortSessionContainerRotator = service.scheduleWithFixedDelay(
-            new ShortSessionContainerRotator(),
-            config.getSessionContainerTimeout(),
-            config.getSessionContainerTimeout());
+        final long containerTimeout = config.getSessionContainerTimeout();
+        shortSessionContainerRotator =
+            service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
         if (config.isAutoLogin()) {
-            longSessionContainerRotator = service.scheduleWithFixedDelay(
-                new LongSessionContainerRotator(),
-                config.getLongTermSessionContainerTimeout(),
-                config.getLongTermSessionContainerTimeout());
+            final long longContainerTimeout = config.getLongTermSessionContainerTimeout();
+            longSessionContainerRotator =
+                service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
         }
+        final SessionData data = sessionData;
+        final Runnable task = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    data.checkEmAll();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        };
+        final long lifeTime = config.getLifeTime();
+        cleaner = service.scheduleWithFixedDelay(task, lifeTime, lifeTime);
     }
 
     public static void removeTimerService() {
@@ -517,6 +531,10 @@ public final class SessionHandler {
         if (shortSessionContainerRotator != null) {
             shortSessionContainerRotator.cancel(false);
             shortSessionContainerRotator = null;
+        }
+        if (cleaner != null) {
+            cleaner.cancel(false);
+            cleaner = null;
         }
         sessionData.removeTimerService();
     }

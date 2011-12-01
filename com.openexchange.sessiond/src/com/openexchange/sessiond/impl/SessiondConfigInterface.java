@@ -68,6 +68,8 @@ public interface SessiondConfigInterface {
 
     long getLifeTime();
 
+    long getLongLifeTime();
+
     long getRandomTokenTimeout();
 
     long getNumberOfLongTermSessionContainers();
