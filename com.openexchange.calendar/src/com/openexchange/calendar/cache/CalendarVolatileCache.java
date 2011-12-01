@@ -104,6 +104,15 @@ public final class CalendarVolatileCache {
         tmp.shutDown();
     }
 
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static CalendarVolatileCache getInstance() {
+        return INSTANCE_REF.get();
+    }
+
     /*-
      * --------------------------------------------------------------------------------------------
      */
@@ -121,30 +130,34 @@ public final class CalendarVolatileCache {
 
     private void startUp(final BundleContext context) {
         final CalendarVolatileCache instance = this;
-        tracker = new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new ServiceTrackerCustomizer<CacheService, CacheService>() {
+        tracker =
+            new ServiceTracker<CacheService, CacheService>(
+                context,
+                CacheService.class,
+                new ServiceTrackerCustomizer<CacheService, CacheService>() {
 
-            @Override
-            public CacheService addingService(final ServiceReference<CacheService> reference) {
-                final CacheService cacheService = context.getService(reference);
-                try {
-                    instance.cache = cacheService.getCache(REGION);
-                    return cacheService;
-                } catch (final OXException e) {
-                    return null;
-                }
-            }
+                    @Override
+                    public CacheService addingService(final ServiceReference<CacheService> reference) {
+                        final CacheService cacheService = context.getService(reference);
+                        try {
+                            instance.cache = cacheService.getCache(REGION);
+                            return cacheService;
+                        } catch (final OXException e) {
+                            return null;
+                        }
+                    }
 
-            @Override
-            public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
-                // Nope
-            }
+                    @Override
+                    public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
+                        // Nope
+                    }
 
-            @Override
-            public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
-                instance.shutDownCache();
-                context.ungetService(reference);
-            }
-        });
+                    @Override
+                    public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
+                        instance.shutDownCache();
+                        context.ungetService(reference);
+                    }
+                });
         tracker.open();
     }
 
