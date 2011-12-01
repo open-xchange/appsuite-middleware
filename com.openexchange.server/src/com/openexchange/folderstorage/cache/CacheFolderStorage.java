@@ -277,11 +277,13 @@ public final class CacheFolderStorage implements FolderStorage {
                                         try {
                                             final String folderId =
                                                 MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
-                                            final Folder rootFolder = getFolder(realTreeId, folderId, params);
+                                            final Folder rootFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, params);
+                                            putFolder(rootFolder, realTreeId, params);
                                             final String[] subfolderIDs = rootFolder.getSubfolderIDs();
                                             if (null != subfolderIDs) {
                                                 for (final String subfolderId : subfolderIDs) {
-                                                    getFolder(realTreeId, subfolderId, params);
+                                                    final Folder folder = loadFolder(realTreeId, subfolderId, StorageType.WORKING, params);
+                                                    putFolder(folder, realTreeId, params);
                                                 }
                                             }
                                         } catch (final Exception e) {
