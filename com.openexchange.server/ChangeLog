@@ -1,3 +1,9 @@
+* 2011-12-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20868: Checking for possible null dereference when composing folder query
+ - Fix for bug 20871: Sanitizing parsing of Content-Type
+ - Fix for bug 20857: Preserve context id during contact updates
+
 * 2011-11-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 20883: No validation check on account creation for POP3 accounts
