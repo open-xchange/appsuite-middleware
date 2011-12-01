@@ -377,7 +377,7 @@ public final class StringCollection {
         if (arr == null || arr.length == 0) {
             return null;
         }
-        final StringBuffer sb = new StringBuffer(arr.length * 5);
+        final StringBuilder sb = new StringBuilder(arr.length * 5);
         sb.append('(');
         for (int a = 0; a < arr.length; a++) {
             if (a > 0) {
@@ -400,7 +400,7 @@ public final class StringCollection {
      * @return SQLInString or null
      */
     public static String getSqlInString(final int arr[][]) {
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         if (arr.length > 0) {
             sb.append('(');
             for (int a = 0; a < arr.length; a++) {
@@ -429,13 +429,13 @@ public final class StringCollection {
      */
     public static String getSqlInString(final int i, final int arr[]) {
         if (null == arr) {
-            return null;
+            return new StringBuilder(8).append('(').append(i).append(')').toString();
         }
         final int length = arr.length;
         if (0 == length) {
             return null;
         }
-        final StringBuffer sb = new StringBuffer(length << 1);
+        final StringBuilder sb = new StringBuilder(length << 1);
         sb.append('(');
         sb.append(i);
         if (length > 0) {
@@ -460,7 +460,7 @@ public final class StringCollection {
         if (m == null) {
             return null;
         }
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         sb.append('(');
         final int size = m.size();
         if (size > 0) {
@@ -543,7 +543,7 @@ public final class StringCollection {
             return null;
         }
 
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         for (int a = 0; a < i.length; a++) {
             sb.append(i[a]);
             sb.append(',');
@@ -557,7 +557,7 @@ public final class StringCollection {
             return null;
         }
 
-        final StringBuffer sb = new StringBuffer();
+        final StringBuilder sb = new StringBuilder();
         for (int a = 0; a < s.length; a++) {
             sb.append(s[a]);
             sb.append(',');
