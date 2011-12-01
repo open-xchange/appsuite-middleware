@@ -167,6 +167,11 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder implemen
     }
 
     @Override
+    public boolean loadSubfolders() {
+        return true;
+    }
+
+    @Override
     public ExternalMailAccountRootFolder clone() {
         return (ExternalMailAccountRootFolder) super.clone();
     }

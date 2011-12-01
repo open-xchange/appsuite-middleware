@@ -77,6 +77,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.RemoveAfterAccessFolderWrapper;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -666,13 +667,15 @@ public final class MailFolderStorage implements FolderStorage {
             /*
              * Generate mail folder from loaded one
              */
-            retval =
-                new MailFolderImpl(
+            {
+                final MailFolderImpl mailFolderImpl = new MailFolderImpl(
                     mailFolder,
                     accountId,
                     mailAccess.getMailConfig(),
                     storageParameters,
                     new MailAccessFullnameProvider(mailAccess));
+                retval = MailAccount.DEFAULT_ID == accountId ? mailFolderImpl : new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);
+            }
             hasSubfolders = mailFolder.hasSubfolders();
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.

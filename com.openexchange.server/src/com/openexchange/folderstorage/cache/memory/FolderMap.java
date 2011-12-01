@@ -64,9 +64,6 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.log.LogProperties;
-import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -171,14 +168,14 @@ public final class FolderMap {
                 return null;
             }
             final Folder folder = wrapper.getValue();
-            reloadFolder(folderId, treeId);
+            reloadFolder(folderId, treeId, wrapper.loadSubfolders);
             return folder;
         }
         return wrapper.getValue();
     }
 
-    private void reloadFolder(final String folderId, final String treeId) {
-        final Runnable task = new RunnableImpl(folderId, treeId);
+    private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
+        final Runnable task = new RunnableImpl(folderId, treeId, loadSubfolders);
         final ThreadPoolService threadPool = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
         threadPool.submit(ThreadPools.task(task), AbortBehavior.getInstance());
     }
@@ -212,7 +209,7 @@ public final class FolderMap {
          */
         if (wrapper.removeAfterAccess) {
             // Reload actively removed folder
-            reloadFolder(folderId, treeId);
+            reloadFolder(folderId, treeId, wrapper.loadSubfolders);
         }
         return ret;
     }
@@ -242,11 +239,19 @@ public final class FolderMap {
 
         protected final boolean removeAfterAccess;
 
+        protected final boolean loadSubfolders;
+
         public Wrapper(final Folder value) {
             super();
             this.value = value;
             this.stamp = System.currentTimeMillis();
-            removeAfterAccess = (value instanceof RemoveAfterAccessFolder);
+            if (value instanceof RemoveAfterAccessFolder) {
+                removeAfterAccess = true;
+                loadSubfolders = ((RemoveAfterAccessFolder) value).loadSubfolders();
+            } else {
+                removeAfterAccess = false;
+                loadSubfolders = false;
+            }
         }
 
         public long getStamp() {
@@ -340,10 +345,12 @@ public final class FolderMap {
 
         private final String folderId;
         private final String treeId;
+        private final boolean loadSubfolders;
 
-        protected RunnableImpl(final String folderId, final String treeId) {
+        protected RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders) {
             this.folderId = folderId;
             this.treeId = treeId;
+            this.loadSubfolders = loadSubfolders;
         }
 
         @Override
@@ -360,9 +367,8 @@ public final class FolderMap {
                     final CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
                     Folder loaded = folderStorage.loadFolder(treeId, folderId, StorageType.WORKING, params);
                     folderStorage.putFolder(loaded, treeId, params);
-                    // Check for subfolders for root folders
-                    final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(folderId);
-                    if (MailFolder.DEFAULT_FOLDER_ID.equals(argument.getFullname())) {
+                    // Check for subfolders
+                    if (loadSubfolders) {
                         final String[] subfolderIDs = loaded.getSubfolderIDs();
                         if (null != subfolderIDs) {
                             for (final String subfolderId : subfolderIDs) {
