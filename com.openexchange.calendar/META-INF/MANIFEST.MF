@@ -39,6 +39,7 @@ Import-Package: com.openexchange.ajax.fields,
  com.openexchange.log,
  com.openexchange.preferences,
  com.openexchange.search,
+ com.openexchange.server,
  com.openexchange.server.impl,
  com.openexchange.server.osgiservice,
  com.openexchange.session,
@@ -53,5 +54,6 @@ Import-Package: com.openexchange.ajax.fields,
  com.openexchange.tools.sql,
  com.openexchange.tx,
  org.apache.commons.logging,
- org.osgi.framework
+ org.osgi.framework,
+ org.osgi.util.tracker
 Export-Package: com.openexchange.calendar
