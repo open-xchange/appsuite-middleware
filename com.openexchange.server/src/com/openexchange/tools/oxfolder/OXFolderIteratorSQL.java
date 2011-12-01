@@ -76,10 +76,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.Groups;
+import com.openexchange.groupware.ldap.RdbUserStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -488,7 +490,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, memberInGroups),
+                permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                 condBuilder.toString(),
                 getRootOrderBy(STR_OT));
@@ -575,7 +577,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, groups),
+                permissionIds(userId, groups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -679,7 +681,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, groups),
+                permissionIds(userId, groups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -747,7 +749,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, memberInGroups),
+                permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -812,7 +814,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 fields,
-                StringCollection.getSqlInString(userId, memberInGroups),
+                permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -872,7 +874,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 fields,
-                StringCollection.getSqlInString(userId, memberInGroups),
+                permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -964,7 +966,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, memberInGroups),
+                permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -1084,7 +1086,7 @@ public final class OXFolderIteratorSQL {
             stmt =
                 rc.prepareStatement(getSQLUserVisibleFolders(
                     "ot.fuid, ot.parent", // fuid, parent, ...
-                    StringCollection.getSqlInString(userId, groups),
+                    permissionIds(userId, groups, ctx),
                     StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                     condBuilder.toString(),
                     getSubfolderOrderBy(STR_OT)));
@@ -1157,7 +1159,7 @@ public final class OXFolderIteratorSQL {
             stmt =
                 rc.prepareStatement(getSQLUserVisibleFolders(
                     "ot.fuid, ot.parent", // fuid, parent, ...
-                    StringCollection.getSqlInString(userId, groups),
+                    permissionIds(userId, groups, ctx),
                     StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                     condBuilder.toString(),
                     getSubfolderOrderBy(STR_OT)));
@@ -1223,14 +1225,14 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static String buildQueryNonTreeVisibleFolders(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final int contextId) {
+    private static String buildQueryNonTreeVisibleFolders(final Integer module, final int userId, final int[] groups, final UserConfiguration userConfig, final Context ctx) throws OXException {
         /*
          * SQL select string for condition
          */
         String sqlStr =
             getSQLUserVisibleFolders(
                 "ot.fuid",
-                StringCollection.getSqlInString(userId, groups),
+                permissionIds(userId, groups, ctx),
                 StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                 null,
                 null);
@@ -1241,7 +1243,7 @@ public final class OXFolderIteratorSQL {
          */
         {
             final String regex = "\\?";
-            final String sContextId = String.valueOf(contextId);
+            final String sContextId = String.valueOf(ctx.getContextId());
             final String sUserId = String.valueOf(userId);
             sqlStr = sqlStr.replaceFirst(regex, sContextId);
             sqlStr = sqlStr.replaceFirst(regex, sUserId);
@@ -1262,7 +1264,7 @@ public final class OXFolderIteratorSQL {
         return
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, groups),
+                permissionIds(userId, groups, ctx),
                 StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                 condBuilder.toString(),
                 getOrderBy(STR_OT, "module", "fname"));
@@ -1296,7 +1298,7 @@ public final class OXFolderIteratorSQL {
                 final String sqlSelectStr =
                     getSQLUserVisibleFolders(
                         FolderObjectIterator.getFieldsForSQL(STR_OT),
-                        StringCollection.getSqlInString(userId, groups),
+                        permissionIds(userId, groups, ctx),
                         StringCollection.getSqlInString(userConfig.getAccessibleModules()),
                         condBuilder.toString(),
                         getOrderBy(STR_OT, "module", "fname"));
@@ -1608,7 +1610,7 @@ public final class OXFolderIteratorSQL {
             stmt =
                 readCon.prepareStatement(getSQLUserVisibleFolders(
                     FolderObjectIterator.getFieldsForSQL(STR_OT),
-                    StringCollection.getSqlInString(userId, memberInGroups),
+                    permissionIds(userId, memberInGroups, ctx),
                     StringCollection.getSqlInString(accessibleModules),
                     condBuilder.toString(),
                     getSubfolderOrderBy(STR_OT)));
@@ -1656,7 +1658,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, memberInGroups),
+                permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 new StringBuilder("AND (ot.module = ").append(module).append(')').toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -1738,9 +1740,7 @@ public final class OXFolderIteratorSQL {
         final String condition =
             since == null ? null : new StringBuilder(" AND (ot.changing_date > ").append(since.getTime()).append(')').toString();
         final String sqlSelectStr =
-            getSQLUserVisibleFolders("del_oxfolder_tree", "del_oxfolder_permissions", fields, StringCollection.getSqlInString(
-                userId,
-                memberInGroups), StringCollection.getSqlInString(accessibleModules), condition, "ORDER by ot.fuid");
+            getSQLUserVisibleFolders("del_oxfolder_tree", "del_oxfolder_permissions", fields, permissionIds(userId, memberInGroups, ctx), StringCollection.getSqlInString(accessibleModules), condition, "ORDER by ot.fuid");
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -1805,7 +1805,7 @@ public final class OXFolderIteratorSQL {
         final String sqlSelectStr =
             getSQLUserVisibleFolders(
                 FolderObjectIterator.getFieldsForSQL(STR_OT),
-                StringCollection.getSqlInString(userId, memberInGroups),
+                permissionIds(userId, memberInGroups, ctx),
                 StringCollection.getSqlInString(accessibleModules),
                 condBuilder.toString(),
                 getSubfolderOrderBy(STR_OT));
@@ -1943,6 +1943,17 @@ public final class OXFolderIteratorSQL {
             this.closeCon = closeCon;
             this.readCon = readCon;
         }
+    }
+
+    private static String permissionIds(final int userId, final int[] memberInGroups, final Context ctx) throws OXException {
+        int[] groups = memberInGroups;
+        if (null == groups) {
+            groups = RdbUserStorage.getInstance().getUser(userId, ctx).getGroups();
+            if (null == groups || 0 == groups.length) {
+                groups = new int[] { GroupStorage.GROUP_ZERO_IDENTIFIER };
+            }
+        }
+        return StringCollection.getSqlInString(userId, groups);
     }
 
 }
