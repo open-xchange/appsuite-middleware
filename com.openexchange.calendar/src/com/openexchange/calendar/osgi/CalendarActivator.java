@@ -52,15 +52,19 @@ package com.openexchange.calendar.osgi;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import com.openexchange.caching.CacheService;
 import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.cache.CalendarVolatileCache;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
+import com.openexchange.java.Streams;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
@@ -79,8 +83,8 @@ public class CalendarActivator extends HousekeepingActivator {
 
     @Override
     protected java.lang.Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    };
+        return new Class<?>[] { CacheService.class };
+    }
 
     @Override
     protected void startBundle() throws Exception {
@@ -90,6 +94,58 @@ public class CalendarActivator extends HousekeepingActivator {
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
         registerService(TargetService.class, new CalendarReminderDelete(), props);
+
+        registerCacheRegion();
+    }
+
+    private void registerCacheRegion() throws OXException {
+        /*
+         * Important cache configuration constants
+         */
+        final String regionName = CalendarVolatileCache.REGION;
+        final int maxObjects = 10000000;
+        final int maxLifeSeconds = 300;
+        final int idleTimeSeconds = 180;
+        final int shrinkerIntervalSeconds = 60;
+        /*
+         * Compose cache configuration
+         */
+        final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
+                "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
+                "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
+                "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
+                "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
+                "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+        getService(CacheService.class).loadConfiguration(Streams.newByteArrayInputStream(ccf));
+        CalendarVolatileCache.initInstance(context);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        CalendarVolatileCache.dropInstance();
+        unregisterCacheRegion();
+        super.stopBundle();
+    }
+
+    private void unregisterCacheRegion() {
+        final CacheService cacheService = getService(CacheService.class);
+        if (null != cacheService) {
+            try {
+                cacheService.freeCache("CalendarVolatileCache");
+            } catch (final OXException e) {
+                // Ignore
+            } catch (final RuntimeException e) {
+                // Ignore
+            }
+        }
     }
 
 }
