@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.session.Session;
 
 /**
@@ -70,14 +71,39 @@ public class SessionControl {
     private final SessionImpl session;
 
     /**
+     * Last-accessed time stamp.
+     */
+    private final AtomicLong lastAccessed;
+
+    /**
      * Initializes a new {@link SessionControl}
      *
      * @param session The stored session
      */
     public SessionControl(final SessionImpl session) {
         super();
+        lastAccessed = new AtomicLong(System.currentTimeMillis());
         this.session = session;
         creationTime = System.currentTimeMillis();
+    }
+
+    /**
+     * Gets the last-accessed time stamp.
+     * 
+     * @return The last-accessed time stamp
+     */
+    public long getLastAccessed() {
+        return lastAccessed.get();
+    }
+
+    /**
+     * Updates last-accessed time stamp.
+     * 
+     * @return This control with last-accessed time stamp updated
+     */
+    public SessionControl touch() {
+        lastAccessed.set(System.currentTimeMillis());
+        return this;
     }
 
     /**

@@ -64,6 +64,9 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.log.LogProperties;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -357,12 +360,15 @@ public final class FolderMap {
                     final CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
                     Folder loaded = folderStorage.loadFolder(treeId, folderId, StorageType.WORKING, params);
                     folderStorage.putFolder(loaded, treeId, params);
-                    // Check for subfolders
-                    final String[] subfolderIDs = loaded.getSubfolderIDs();
-                    if (null != subfolderIDs) {
-                        for (final String subfolderId : subfolderIDs) {
-                            loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
-                            folderStorage.putFolder(loaded, treeId, params);
+                    // Check for subfolders for root folders
+                    final FullnameArgument argument = MailFolderUtility.prepareMailFolderParam(folderId);
+                    if (MailFolder.DEFAULT_FOLDER_ID.equals(argument.getFullname())) {
+                        final String[] subfolderIDs = loaded.getSubfolderIDs();
+                        if (null != subfolderIDs) {
+                            for (final String subfolderId : subfolderIDs) {
+                                loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
+                                folderStorage.putFolder(loaded, treeId, params);
+                            }
                         }
                     }
                 } finally {
