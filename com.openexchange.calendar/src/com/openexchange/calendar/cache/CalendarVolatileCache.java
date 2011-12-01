@@ -104,6 +104,15 @@ public final class CalendarVolatileCache {
         tmp.shutDown();
     }
 
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static CalendarVolatileCache getInstance() {
+        return INSTANCE_REF.get();
+    }
+
     /*-
      * --------------------------------------------------------------------------------------------
      */
@@ -121,30 +130,34 @@ public final class CalendarVolatileCache {
 
     private void startUp(final BundleContext context) {
         final CalendarVolatileCache instance = this;
-        tracker = new ServiceTracker<CacheService, CacheService>(context, CacheService.class, new ServiceTrackerCustomizer<CacheService, CacheService>() {
+        tracker =
+            new ServiceTracker<CacheService, CacheService>(
+                context,
+                CacheService.class,
+                new ServiceTrackerCustomizer<CacheService, CacheService>() {
 
-            @Override
-            public CacheService addingService(final ServiceReference<CacheService> reference) {
-                final CacheService cacheService = context.getService(reference);
-                try {
-                    instance.cache = cacheService.getCache(REGION);
-                    return cacheService;
-                } catch (final OXException e) {
-                    return null;
-                }
-            }
+                    @Override
+                    public CacheService addingService(final ServiceReference<CacheService> reference) {
+                        final CacheService cacheService = context.getService(reference);
+                        try {
+                            instance.cache = cacheService.getCache(REGION);
+                            return cacheService;
+                        } catch (final OXException e) {
+                            return null;
+                        }
+                    }
 
-            @Override
-            public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
-                // Nope
-            }
+                    @Override
+                    public void modifiedService(final ServiceReference<CacheService> reference, final CacheService service) {
+                        // Nope
+                    }
 
-            @Override
-            public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
-                instance.shutDownCache();
-                context.ungetService(reference);
-            }
-        });
+                    @Override
+                    public void removedService(final ServiceReference<CacheService> reference, final CacheService service) {
+                        instance.shutDownCache();
+                        context.ungetService(reference);
+                    }
+                });
         tracker.open();
     }
 
@@ -177,7 +190,10 @@ public final class CalendarVolatileCache {
      * @throws OXException
      */
     public void clear() throws OXException {
-        cache.clear();
+        final Cache cache = this.cache;
+        if (null != cache) {
+            cache.clear();
+        }
     }
 
     /**
@@ -187,7 +203,8 @@ public final class CalendarVolatileCache {
      * @return The value or <code>null</code> if absent
      */
     public Object get(final Serializable key) {
-        return cache.get(key);
+        final Cache cache = this.cache;
+        return null == cache ? null : cache.get(key);
     }
 
     /**
@@ -198,7 +215,8 @@ public final class CalendarVolatileCache {
      * @return The value from group or <code>null</code> if absent
      */
     public Object getFromGroup(final Serializable key, final String group) {
-        return cache.getFromGroup(key, group);
+        final Cache cache = this.cache;
+        return null == cache ? null : cache.getFromGroup(key, group);
     }
 
     /**
@@ -207,7 +225,10 @@ public final class CalendarVolatileCache {
      * @param group The group identifier
      */
     public void invalidateGroup(final String group) {
-        cache.invalidateGroup(group);
+        final Cache cache = this.cache;
+        if (null != cache) {
+            cache.invalidateGroup(group);
+        }
     }
 
     /**
@@ -218,7 +239,10 @@ public final class CalendarVolatileCache {
      * @throws OXException If put into cache fails
      */
     public void put(final Serializable key, final Serializable obj) throws OXException {
-        cache.put(key, obj);
+        final Cache cache = this.cache;
+        if (null != cache) {
+            cache.put(key, obj);
+        }
     }
 
     /**
@@ -230,7 +254,10 @@ public final class CalendarVolatileCache {
      * @throws OXException If put into cache fails
      */
     public void putInGroup(final Serializable key, final String group, final Serializable value) throws OXException {
-        cache.putInGroup(key, group, value);
+        final Cache cache = this.cache;
+        if (null != cache) {
+            cache.putInGroup(key, group, value);
+        }
     }
 
     /**
@@ -240,7 +267,10 @@ public final class CalendarVolatileCache {
      * @throws OXException If removal fails
      */
     public void remove(final Serializable key) throws OXException {
-        cache.remove(key);
+        final Cache cache = this.cache;
+        if (null != cache) {
+            cache.remove(key);
+        }
     }
 
     /**
@@ -250,27 +280,34 @@ public final class CalendarVolatileCache {
      * @param group The group identifier
      */
     public void removeFromGroup(final Serializable key, final String group) {
-        cache.removeFromGroup(key, group);
+        final Cache cache = this.cache;
+        if (null != cache) {
+            cache.removeFromGroup(key, group);
+        }
     }
 
     /**
-     * @param contextId
-     * @param objectId
-     * @return
-     */
-    public CacheKey newCacheKey(final int contextId, final int objectId) {
-        return cache.newCacheKey(contextId, objectId);
-    }
-
-    /**
-     * New cache key cache.
+     * New cache key for given <code>int</code> pair.
      * 
-     * @param intVal
-     * @param objs
-     * @return
+     * @param int1 The first <code>int</code> value
+     * @param int2 The second <code>int</code> value
+     * @return The cache key or <code>null</code>
+     */
+    public CacheKey newCacheKey(final int int1, final int int2) {
+        final Cache cache = this.cache;
+        return null == cache ? null : cache.newCacheKey(int1, int2);
+    }
+
+    /**
+     * New cache key.
+     * 
+     * @param intVal An <code>int</code> value
+     * @param objs Arbitrary further keys
+     * @return The cache key or <code>null</code>
      */
     public CacheKey newCacheKey(final int intVal, final Serializable... objs) {
-        return cache.newCacheKey(intVal, objs);
+        final Cache cache = this.cache;
+        return null == cache ? null : cache.newCacheKey(intVal, objs);
     }
 
 }
