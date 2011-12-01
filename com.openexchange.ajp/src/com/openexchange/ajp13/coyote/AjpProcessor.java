@@ -674,6 +674,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
                 properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
             }
+            final boolean debug = LOG.isDebugEnabled();
             try {
                 stage = Stage.STAGE_AWAIT;
                 listenerMonitor.incrementNumWaiting();
@@ -704,7 +705,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                  * not regular request processing
                  */
                 final int type = requestHeaderMessage.getByte();
-                if (DEBUG) {
+                if (debug) {
                     final String ajpReqName =
                         Constants.JK_AJP13_CPING_REQUEST == type ? "CPing" : (Constants.JK_AJP13_FORWARD_REQUEST == type ? "Forward-Request" : "unknown");
                     LOG.debug("First " + ajpReqName + " AJP message successfully read from stream.");
@@ -727,7 +728,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      *
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (DEBUG) {
+                    if (debug) {
                         LOG.debug("Unexpected message: " + type);
                     }
                     continue;
@@ -745,8 +746,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 error = true;
                 break;
             } catch (final Throwable t) {
-                LOG.debug("400 - Bad Request: Parsing forward-request failed", t);
                 // 400 - Bad Request
+                if (debug) {
+                    LOG.warn("400 - Bad Request: Parsing forward-request failed", t);
+                } else {
+                    LOG.warn("400 - Bad Request: Parsing forward-request failed");
+                }
                 response.setStatus(400);
                 error = true;
             } finally {
@@ -768,21 +773,22 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                      *
                      * Usually the servlet didn't read the previous request body
                      */
-                    if (DEBUG) {
+                    if (debug) {
                         requestHeaderMessage.dump("Invalid forward-request detected");
                     }
                     continue;
                 } catch (final Throwable t) {
-                    if (DEBUG) {
+                    // 400 - Bad Request
+                    {
                         final StringBuilder sb = new StringBuilder(512);
                         sb.append("400 - Bad RequestError preparing forward-request: ").append(t.getClass().getName());
-                        sb.append(" message=").append(t.getMessage()).append("\n");
-                        appendStackTrace(t.getStackTrace(), sb);
-                        LOG.debug(sb.toString());
+                        sb.append(" message=");
+                        if (debug) {
+                            sb.append("\n");
+                            appendStackTrace(t.getStackTrace(), sb);
+                        }
+                        LOG.warn(sb.toString());
                     }
-                    /*
-                     * 400 - Internal Server Error
-                     */
                     response.setStatus(400);
                     error = true;
                 }
@@ -1475,7 +1481,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     // Invalid character
                     error = true;
                     // 400 - Bad request
-                    LOG.debug("400 - Bad Request: Invalid character in server name: \"" + host + '"');
+                    LOG.warn("400 - Bad Request: Invalid character in server name: \"" + host + '"');
                     response.setStatus(400);
                     break;
                 }
