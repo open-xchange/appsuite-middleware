@@ -516,7 +516,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -606,7 +606,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             /*
              * Ensure ordering of private default folder follows: calendar, contacts, tasks
              */
@@ -710,7 +710,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             return new SQLStuff(stmt, rs, readCon, closeCon);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
@@ -778,7 +778,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -843,7 +843,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             return rs.next();
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -903,7 +903,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (!rs.next()) {
                 return new TIntArrayList(0);
             }
@@ -995,7 +995,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1104,7 +1104,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (!rs.next()) {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return false;
@@ -1177,7 +1177,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (!rs.next()) {
                 closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
                 return FolderObjectIterator.EMPTY_FOLDER_ITERATOR;
@@ -1209,7 +1209,7 @@ public final class OXFolderIteratorSQL {
             }
             stmt = rc.prepareStatement("SELECT " + FolderObjectIterator.getFieldsForSQL(STR_OT) + " FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.fuid IN " + StringCollection.getSqlInString(fuid2parent.keys()) + ' ' + getSubfolderOrderBy(STR_OT));
             stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeReadCon ? rc : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1317,7 +1317,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             /*
              * asQueue() already closes all resources
              */
@@ -1345,7 +1345,7 @@ public final class OXFolderIteratorSQL {
             if (null != module) {
                 stmt.setInt(pos, module.intValue());
             }
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             final Set<Integer> nonVisibleSet = new HashSet<Integer>(1024);
             while (rs.next()) {
                 nonVisibleSet.add(Integer.valueOf(rs.getInt(1)));
@@ -1628,7 +1628,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1690,7 +1690,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1766,7 +1766,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1830,7 +1830,7 @@ public final class OXFolderIteratorSQL {
                 LOG.debug(new StringBuilder().append("\nFolderSQL Query: ").append(sql.substring(sql.indexOf(": ") + 2)).toString());
             }
 
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, readCon, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1910,7 +1910,7 @@ public final class OXFolderIteratorSQL {
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setLong(pos, since.getTime());
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
         } catch (final SQLException e) {
             closeResources(rs, stmt, closeCon ? readCon : null, true, ctx);
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -1942,6 +1942,19 @@ public final class OXFolderIteratorSQL {
             this.rs = rs;
             this.closeCon = closeCon;
             this.readCon = readCon;
+        }
+    }
+
+    private static ResultSet executeQuery(final PreparedStatement stmt) throws SQLException {
+        try {
+            return stmt.executeQuery();
+        } catch (final SQLException e) {
+            if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
+                final String sql = stmt.toString();
+                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
+                    sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+            throw e;
         }
     }
 
