@@ -433,7 +433,7 @@ public final class StringCollection {
         }
         final int length = arr.length;
         if (0 == length) {
-            return null;
+            return new StringBuilder(8).append('(').append(i).append(')').toString();
         }
         final StringBuilder sb = new StringBuilder(length << 1);
         sb.append('(');
