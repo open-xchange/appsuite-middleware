@@ -1,3 +1,7 @@
+* 2011-12-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20892: Safe loading of users
+
 * 2011-12-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 20868: Checking for possible null dereference when composing folder query
