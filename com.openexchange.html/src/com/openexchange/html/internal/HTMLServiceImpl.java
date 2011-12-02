@@ -55,6 +55,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -79,6 +80,7 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Charsets;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
@@ -786,10 +788,10 @@ public final class HTMLServiceImpl implements HTMLService {
 
     @Override
     public String getCSSFromHTMLHeader(final String htmlContent) {
-        String css = "";
+        final StringBuilder css = new StringBuilder(htmlContent.length() >> 1);
         final Matcher mStyle = PATTERN_STYLESHEET.matcher(htmlContent);
         while (mStyle.find()) {
-            css += mStyle.group(1);
+            css.append(mStyle.group(1));
         }
         final Matcher mStyleFile = PATTERN_STYLESHEET_FILE.matcher(htmlContent);
         while (mStyleFile.find()) {
@@ -802,7 +804,12 @@ public final class HTMLServiceImpl implements HTMLService {
                     // throw new OXException(); //TODO: set exceptioncode
                 } else {
                     final byte[] responseBody = get.getResponseBody();
-                    css += new String(responseBody);
+                    try {
+                        final String charSet = get.getResponseCharSet();
+                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                    } catch (final UnsupportedCharsetException e) {
+                        css.append(new String(responseBody, Charsets.ISO_8859_1));
+                    }
                 }
             } catch (final HttpException e) {
                 // throw new OXException(); //TODO: set exceptioncode
@@ -812,7 +819,7 @@ public final class HTMLServiceImpl implements HTMLService {
                 get.releaseConnection();
             }
         }
-        return css;
+        return css.toString();
     }
 
     @Override

@@ -127,6 +127,8 @@ public final class HTMLProcessing {
 
     private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
+    private static final Pattern PATTERN_HTML_BODY = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
     /**
      * Performs all the formatting for both text and HTML content for a proper display according to specified user's mail settings.
      * <p>
@@ -205,42 +207,27 @@ public final class HTMLProcessing {
                     final Matcher cssClassMatcher = PATTERN_CSS_CLASS_NAME.matcher(css);
                     if (cssClassMatcher.find()) {
                         final UUID uuid = UUID.randomUUID();
+                        final StringBuilder tmp = new StringBuilder(64);
                         String newCss = css;
                         do {
                             final String cssClass = cssClassMatcher.group();
-                            newCss = newCss.replace(cssClass, "#" + uuid.toString() + " " + cssClass);
+                            tmp.setLength(0);
+                            newCss =
+                                newCss.replace(cssClass, tmp.append('#').append(uuid.toString()).append(' ').append(cssClass).toString());
                         } while (cssClassMatcher.find());
-                        newCss = "<style>" + newCss + "</style>";
-                        // retval.replace(css, newCss);
-
-                        // Pattern cssFile =
-                        // Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>",
-                        // Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-                        // Matcher cssFileMatcher = cssFile.matcher(retval);
-                        // if (cssFileMatcher.find()) {
-                        // retval.replace(cssFileMatcher.group(), "<style type=\"text/css\">" + newCss + "</style>");
-                        // }
+                        tmp.setLength(0);
+                        newCss = tmp.append("<style>").append(newCss).append("</style>").toString();
                         retval = HTMLProcessing.dropStyles(retval);
-                        final Pattern htmlBody = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-                        final Matcher htmlBodyMatcher = htmlBody.matcher(retval);
-                        String bodyContent = "";
+                        final Matcher htmlBodyMatcher = PATTERN_HTML_BODY.matcher(retval);
                         if (htmlBodyMatcher.find()) {
-                            bodyContent = htmlBodyMatcher.group(1);
-                            bodyContent =
-                                "<div id=\"" + uuid.toString() + "\" " + className + " " + styleName + ">" + bodyContent + "</div>";
-                            retval = newCss + bodyContent;
+                            tmp.setLength(0);
+                            retval =
+                                tmp.append(newCss).append("<div id=\"").append(uuid.toString()).append("\" ").append(className).append(' ').append(
+                                    styleName).append('>').append(htmlBodyMatcher.group(1)).append("</div>").toString();
                         }
                     }
                 }
             }
-            // if (DisplayMode.DISPLAY.equals(mode) && usm.isDisplayHtmlInlineContent()) {
-            // if (!usm.isAllowHTMLImages()) {
-            // retval = filterExternalImages(retval, modified);
-            // }
-            // if (mailPath != null && session != null) {
-            // retval = filterInlineImages(retval, session, mailPath);
-            // }
-            // }
         } else {
             retval = content;
             if (DisplayMode.MODIFYABLE.isIncluded(mode)) {
