@@ -79,6 +79,7 @@ import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParameterList;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.exception.OXException;
@@ -302,7 +303,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 String content;
                 {
                     final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
-                    content = readContent(bytes, bodystructure.cParams.get("charset"), bodystructure.encoding);
+                    final ParameterList cParams = bodystructure.cParams;
+                    content = readContent(bytes, null == cParams ? null : cParams.get("charset"), bodystructure.encoding);
                 }
                 if ("plain".equals(subtype)) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
