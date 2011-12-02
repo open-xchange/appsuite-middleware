@@ -951,11 +951,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  * Add ZIP entry to output stream
                                  */
                                 final String subject = mails[i].getSubject();
-                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\W+", "_")) + ".eml";
+                                final String ext = ".eml";
+                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\W+", "_")) + ext;
                                 int num = 1;
                                 while (true) {
                                     try {
-                                        out.putNextEntry(new ZipEntry(name + (num > 1 ? "_(" + num + ")" : "")));
+                                        final int pos = name.indexOf(ext);
+                                        final String entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + ext;
+                                        out.putNextEntry(new ZipEntry(entryName));
                                         break;
                                     } catch (final java.util.zip.ZipException e) {
                                         final String message = e.getMessage();
@@ -1076,7 +1079,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 int num = 1;
                                 while (true) {
                                     try {
-                                        out.putNextEntry(new ZipEntry(name + (num > 1 ? "_(" + num + ")" : "")));
+                                        final String entryName;
+                                        {
+                                            final int pos = name.indexOf('.');
+                                            if (pos < 0) {
+                                                entryName = name + (num > 1 ? "_(" + num + ")" : "");
+                                            } else {
+                                                entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
+                                            }
+                                        }
+                                        out.putNextEntry(new ZipEntry(entryName));
                                         break;
                                     } catch (final java.util.zip.ZipException e) {
                                         final String message = e.getMessage();
