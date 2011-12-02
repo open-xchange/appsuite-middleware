@@ -793,20 +793,20 @@ public final class HTMLServiceImpl implements HTMLService {
         }
         final Matcher mStyleFile = PATTERN_STYLESHEET_FILE.matcher(htmlContent);
         while (mStyleFile.find()) {
-            String cssFile = mStyleFile.group(2);
-            HttpClient client = new HttpClient();
-            GetMethod get = new GetMethod(cssFile);
+            final String cssFile = mStyleFile.group(2);
+            final HttpClient client = new HttpClient();
+            final GetMethod get = new GetMethod(cssFile);
             try {
-                int statusCode = client.executeMethod(get);
+                final int statusCode = client.executeMethod(get);
                 if (statusCode != HttpStatus.SC_OK) {
                     // throw new OXException(); //TODO: set exceptioncode
                 } else {
-                    byte[] responseBody = get.getResponseBody();
+                    final byte[] responseBody = get.getResponseBody();
                     css += new String(responseBody);
                 }
-            } catch (HttpException e) {
+            } catch (final HttpException e) {
                 // throw new OXException(); //TODO: set exceptioncode
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // throw new OXException(); //TODO: set exceptioncode
             } finally {
                 get.releaseConnection();
