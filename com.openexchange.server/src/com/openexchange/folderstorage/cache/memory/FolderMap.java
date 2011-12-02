@@ -113,9 +113,7 @@ public final class FolderMap {
                 removeKeys.add(entry.getKey());
             }
         }
-        for (final Key key : removeKeys) {
-            map.remove(key);
-        }
+        map.keySet().removeAll(removeKeys);
     }
 
     public Folder putIfAbsent(final String treeId, final Folder folder) {

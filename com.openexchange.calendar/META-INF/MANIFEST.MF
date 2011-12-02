@@ -56,4 +56,5 @@ Import-Package: com.openexchange.ajax.fields,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker
-Export-Package: com.openexchange.calendar
+Export-Package: com.openexchange.calendar,
+ com.openexchange.calendar.cache
