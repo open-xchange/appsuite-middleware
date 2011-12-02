@@ -1947,7 +1947,7 @@ public final class OXFolderIteratorSQL {
 
     private static String permissionIds(final int userId, final int[] memberInGroups, final Context ctx) throws OXException {
         int[] groups = memberInGroups;
-        if (null == groups) {
+        if (null == groups || 0 == groups.length) {
             groups = RdbUserStorage.getInstance().getUser(userId, ctx).getGroups();
             if (null == groups || 0 == groups.length) {
                 groups = new int[] { GroupStorage.GROUP_ZERO_IDENTIFIER };
