@@ -1,6 +1,7 @@
 * 2011-12-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 20892: Safe loading of users
+ - Fix for bug 20887: Recursively checking for SMIME messages
 
 * 2011-12-01 - thorben.betten@open-xchange.com
 
