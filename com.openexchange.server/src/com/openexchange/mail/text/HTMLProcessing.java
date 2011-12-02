@@ -206,14 +206,14 @@ public final class HTMLProcessing {
                     final String css = htmlService.getCSSFromHTMLHeader(retval);
                     final Matcher cssClassMatcher = PATTERN_CSS_CLASS_NAME.matcher(css);
                     if (cssClassMatcher.find()) {
-                        final UUID uuid = UUID.randomUUID();
+                        final String uuid = UUID.randomUUID().toString();
                         final StringBuilder tmp = new StringBuilder(64);
                         String newCss = css;
                         do {
                             final String cssClass = cssClassMatcher.group();
                             tmp.setLength(0);
                             newCss =
-                                newCss.replace(cssClass, tmp.append('#').append(uuid.toString()).append(' ').append(cssClass).toString());
+                                newCss.replace(cssClass, tmp.append('#').append(uuid).append(' ').append(cssClass).toString());
                         } while (cssClassMatcher.find());
                         tmp.setLength(0);
                         newCss = tmp.append("<style>").append(newCss).append("</style>").toString();
@@ -222,7 +222,7 @@ public final class HTMLProcessing {
                         if (htmlBodyMatcher.find()) {
                             tmp.setLength(0);
                             retval =
-                                tmp.append(newCss).append("<div id=\"").append(uuid.toString()).append("\" ").append(className).append(' ').append(
+                                tmp.append(newCss).append("<div id=\"").append(uuid).append("\" ").append(className).append(' ').append(
                                     styleName).append('>').append(htmlBodyMatcher.group(1)).append("</div>").toString();
                         }
                     }
