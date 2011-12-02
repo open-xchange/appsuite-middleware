@@ -94,6 +94,8 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
         return PreviewOutput.HTML;
     }
 
+    private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
         super.convert(requestData, result, session, converter);
@@ -126,30 +128,31 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             content = htmlService.filterExternalImages(content, modified);
             sanitizedHtml = content;
         }
-        // TODO: Replace CSS classes
-        String css = htmlService.getCSSFromHTMLHeader(sanitizedHtml);
-        String newCss = new String(css);
-        UUID uuid = UUID.randomUUID();
-        Pattern cssClassName = Pattern.compile("(\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*)\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-        Matcher cssClassMatcher = cssClassName.matcher(css);
-        while (cssClassMatcher.find()) {
-            String cssClass = cssClassMatcher.group(1);
-            newCss.replace(cssClass, "#" + uuid.toString() + " " + cssClass);
-        }
-        sanitizedHtml.replace(css, newCss);
-        Pattern cssFile = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-        Matcher cssFileMatcher = cssFile.matcher(sanitizedHtml);
-        if (cssFileMatcher.find()) {
-            sanitizedHtml.replace(cssFileMatcher.group(), "<style type=\"text/css\">" + newCss + "</style>");
-        }
-        Pattern htmlBody = Pattern.compile("<(body.*?)>(.*?)</(body)>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-        Matcher htmlBodyMatcher = htmlBody.matcher(sanitizedHtml);
-        String bodyStart = "", bodyEnd = "";
-        if (htmlBodyMatcher.find()) {
-            bodyStart = htmlBodyMatcher.group(1);
-            bodyEnd = htmlBodyMatcher.group(3);
-            sanitizedHtml.replace(bodyStart, "div id=\"#" + uuid.toString() + "\"");
-            sanitizedHtml.replace(bodyEnd, "/div");
+        // Replace CSS classes
+        final String css = htmlService.getCSSFromHTMLHeader(sanitizedHtml);
+        final Matcher cssClassMatcher = PATTERN_CSS_CLASS_NAME.matcher(css);
+        if (cssClassMatcher.find()) {
+            final UUID uuid = UUID.randomUUID();
+            String newCss = css;
+            do {
+                final String cssClass = cssClassMatcher.group();
+                newCss = newCss.replace(cssClass, "#" + uuid.toString() + " " + cssClass);
+            } while (cssClassMatcher.find());
+            sanitizedHtml.replace(css, newCss);
+            final Pattern cssFile = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+            final Matcher cssFileMatcher = cssFile.matcher(sanitizedHtml);
+            if (cssFileMatcher.find()) {
+                sanitizedHtml.replace(cssFileMatcher.group(), "<style type=\"text/css\">" + newCss + "</style>");
+            }
+            final Pattern htmlBody = Pattern.compile("<(body.*?)>(.*?)</(body)>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+            final Matcher htmlBodyMatcher = htmlBody.matcher(sanitizedHtml);
+            String bodyStart = "", bodyEnd = "";
+            if (htmlBodyMatcher.find()) {
+                bodyStart = htmlBodyMatcher.group(1);
+                bodyEnd = htmlBodyMatcher.group(3);
+                sanitizedHtml.replace(bodyStart, "div id=\"#" + uuid.toString() + "\"");
+                sanitizedHtml.replace(bodyEnd, "/div");
+            }
         }
         result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
     }
