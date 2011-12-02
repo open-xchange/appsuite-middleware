@@ -134,7 +134,7 @@ public final class OXFolderSQL {
             stmt = con.prepareStatement(SQL_SELECT_WITH_NON_EXISTING_PARENT);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             final TIntHashSet set = new TIntHashSet(16);
             while (rs.next()) {
                 set.add(rs.getInt(1));
@@ -171,7 +171,7 @@ public final class OXFolderSQL {
             }
             stmt = readCon.prepareStatement(SQL_SELECT_ADMIN);
             stmt.setInt(1, ctx.getContextId());
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (!rs.next()) {
                 return -1;
             }
@@ -208,7 +208,7 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, userId);
             stmt.setInt(3, module);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -245,7 +245,7 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, FolderObject.PRIVATE);
             stmt.setInt(3, owner);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (!rs.next()) {
                 return new int[0];
             }
@@ -286,7 +286,7 @@ public final class OXFolderSQL {
             stmt.setInt(2, modifiedBy);
             stmt.setInt(3, ctx.getContextId());
             stmt.setInt(4, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
         }
@@ -317,7 +317,7 @@ public final class OXFolderSQL {
             stmt.setLong(1, lastModified);
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
         }
@@ -352,7 +352,7 @@ public final class OXFolderSQL {
             stmt.setInt(3, modifiedBy);
             stmt.setInt(4, ctx.getContextId());
             stmt.setInt(5, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, closeWriteCon ? writeCon : null, false, ctx);
         }
@@ -388,7 +388,7 @@ public final class OXFolderSQL {
             stmt.setInt(2, parent); // parent
             stmt.setString(3, folderName); // fname
             stmt.setInt(4, module); // module
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final String fname = rs.getString(2);
@@ -441,7 +441,7 @@ public final class OXFolderSQL {
             stmt.setInt(2, parent); // parent
             stmt.setString(3, folderName); // fname
             stmt.setInt(4, module); // module
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             while (rs.next()) {
                 final int fuid = rs.getInt(1);
                 final String fname = rs.getString(2);
@@ -475,7 +475,7 @@ public final class OXFolderSQL {
             stmt = readCon.prepareStatement(SQL_EXISTS);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             return rs.next();
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
@@ -501,7 +501,7 @@ public final class OXFolderSQL {
                 " WHERE cid = ? AND fuid = ?").toString());
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             return rs.next();
         } finally {
             closeResources(rs, stmt, closeReadCon ? readCon : null, true, ctx);
@@ -543,7 +543,7 @@ public final class OXFolderSQL {
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             stmt.setInt(pos++, permissionId);
-            if (stmt.executeUpdate() != 1) {
+            if (executeUpdate(stmt) != 1) {
                 return false;
             }
             closeSQLStuff(null, stmt);
@@ -599,7 +599,7 @@ public final class OXFolderSQL {
             stmt.setInt(pos++, objectDeletePermission);
             stmt.setInt(pos++, isAdmin ? 1 : 0);
             stmt.setInt(pos++, system);
-            return (stmt.executeUpdate() == 1);
+            return (executeUpdate(stmt) == 1);
         } finally {
             closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
         }
@@ -632,7 +632,7 @@ public final class OXFolderSQL {
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             stmt.setInt(pos++, permissionId);
-            return (stmt.executeUpdate() == 1);
+            return (executeUpdate(stmt) == 1);
         } finally {
             closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
         }
@@ -662,7 +662,7 @@ public final class OXFolderSQL {
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, closeWriteCon ? wc : null, false, ctx);
         }
@@ -689,7 +689,7 @@ public final class OXFolderSQL {
             stmt = readCon.prepareStatement(SQL_GETSUBFLDIDS);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             while (rs.next()) {
                 retval.add(rs.getInt(1));
             }
@@ -718,7 +718,7 @@ public final class OXFolderSQL {
             stmt.setLong(2, lastModified);
             stmt.setInt(3, ctx.getContextId());
             stmt.setInt(4, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, closeCon ? writeCon : null, false, ctx);
         }
@@ -743,7 +743,7 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             stmt.setInt(3, folderId);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -823,7 +823,7 @@ public final class OXFolderSQL {
                     } else {
                         stmt.setInt(13, 0); // default_flag
                     }
-                    stmt.executeUpdate();
+                    executeUpdate(stmt);
                     stmt.close();
                     stmt = null;
                     /*
@@ -833,7 +833,7 @@ public final class OXFolderSQL {
                     stmt.setLong(1, creatingTime);
                     stmt.setInt(2, ctx.getContextId());
                     stmt.setInt(3, folderObj.getParentFolderID());
-                    stmt.executeUpdate();
+                    executeUpdate(stmt);
                     stmt.close();
                     stmt = null;
                     /*
@@ -853,7 +853,7 @@ public final class OXFolderSQL {
                         stmt.setInt(9, ocl.isGroupPermission() ? 1 : 0);
                         stmt.addBatch();
                     }
-                    stmt.executeBatch();
+                    executeBatch(stmt);
                     stmt.close();
                     stmt = null;
                     final Date creatingDate = new Date(creatingTime);
@@ -939,7 +939,7 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, folderObj.getModule());
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folderObj.getObjectID());
-                    stmt.executeUpdate();
+                    executeUpdate(stmt);
                     stmt.close();
                     stmt = null;
                 } else {
@@ -950,7 +950,7 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, folderObj.getModule());
                     stmt.setInt(pos++, ctx.getContextId());
                     stmt.setInt(pos++, folderObj.getObjectID());
-                    stmt.executeUpdate();
+                    executeUpdate(stmt);
                     stmt.close();
                     stmt = null;
                 }
@@ -961,7 +961,7 @@ public final class OXFolderSQL {
                 pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
                 stmt.setInt(pos++, folderObj.getObjectID());
-                stmt.executeUpdate();
+                executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
                 /*
@@ -982,7 +982,7 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, oclPerm.isGroupPermission() ? 1 : 0);
                     stmt.addBatch();
                 }
-                stmt.executeBatch();
+                executeBatch(stmt);
                 stmt.close();
                 stmt = null;
             } catch (final SQLException e) {
@@ -1042,7 +1042,7 @@ public final class OXFolderSQL {
                 pst.setInt(3, src.getType() == FolderObject.SYSTEM_TYPE ? ctx.getMailadmin() : userId);
                 pst.setInt(4, ctx.getContextId());
                 pst.setInt(5, src.getObjectID());
-                pst.executeUpdate();
+                executeUpdate(pst);
                 pst.close();
                 pst = null;
                 /*
@@ -1051,7 +1051,7 @@ public final class OXFolderSQL {
                 pst = readCon.prepareStatement(SQL_MOVE_SELECT);
                 pst.setInt(1, ctx.getContextId());
                 pst.setInt(2, src.getParentFolderID());
-                subFolderRS = pst.executeQuery();
+                subFolderRS = executeQuery(pst);
                 final boolean srcParentHasSubfolders = subFolderRS.next();
                 subFolderRS.close();
                 subFolderRS = null;
@@ -1070,7 +1070,7 @@ public final class OXFolderSQL {
                 pst.setInt(4, ctx.getContextId());
                 pst.setInt(5, src.getParentFolderID());
                 pst.addBatch();
-                pst.executeBatch();
+                executeBatch(pst);
                 pst.close();
                 pst = null;
             } catch (final SQLException se) {
@@ -1114,7 +1114,7 @@ public final class OXFolderSQL {
                 pst.setInt(3, userId);
                 pst.setInt(4, ctx.getContextId());
                 pst.setInt(5, folderObj.getObjectID());
-                pst.executeUpdate();
+                executeUpdate(pst);
                 pst.close();
                 pst = null;
             } catch (final SQLException sqle) {
@@ -1190,13 +1190,13 @@ public final class OXFolderSQL {
                 stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
-                stmt.executeUpdate();
+                executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
                 stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
-                stmt.executeUpdate();
+                executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
                 /*
@@ -1205,13 +1205,13 @@ public final class OXFolderSQL {
                 stmt = writeCon.prepareStatement(SQL_DELETE_INSERT_OT);
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
-                stmt.executeUpdate();
+                executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
                 stmt = writeCon.prepareStatement(SQL_DELETE_INSERT_OP);
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
-                stmt.executeUpdate();
+                executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
             }
@@ -1222,7 +1222,7 @@ public final class OXFolderSQL {
                 stmt = writeCon.prepareStatement(SQL_DELETE_DELETE_SF);
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, folderId);
-                stmt.executeUpdate();
+                executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
             }
@@ -1232,7 +1232,7 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             /*
@@ -1241,7 +1241,7 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             if (backup) {
@@ -1253,7 +1253,7 @@ public final class OXFolderSQL {
                 stmt.setInt(2, userId);
                 stmt.setInt(3, ctx.getContextId());
                 stmt.setInt(4, folderId);
-                stmt.executeUpdate();
+                executeUpdate(stmt);
                 stmt.close();
                 stmt = null;
             }
@@ -1298,13 +1298,13 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             /*
@@ -1313,13 +1313,13 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(SQL_DELETE_INSERT_OT);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             stmt = writeCon.prepareStatement(SQL_DELETE_INSERT_OP);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             /*
@@ -1330,7 +1330,7 @@ public final class OXFolderSQL {
             stmt.setInt(2, userId);
             stmt.setInt(3, ctx.getContextId());
             stmt.setInt(4, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             /*
@@ -1378,13 +1378,13 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(SQL_RESTORE_OT);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             stmt = writeCon.prepareStatement(SQL_RESTORE_OP);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             /*
@@ -1393,13 +1393,13 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERPERMS));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             stmt = writeCon.prepareStatement(SQL_DELETE_DELETE.replaceFirst("#TABLE#", STR_DELOXFOLDERTREE));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, folderId);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
             stmt.close();
             stmt = null;
             /*
@@ -1576,7 +1576,7 @@ public final class OXFolderSQL {
             stmt = writeCon.prepareStatement(SQL_DROP_SYS_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, createReadCon ? writeCon : null, false, ctx);
         }
@@ -1596,7 +1596,7 @@ public final class OXFolderSQL {
             }
             stmt = readCon.prepareStatement(SQL_GET_CONTEXT_MAILADMIN);
             stmt.setInt(1, ctx.getContextId());
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -1646,7 +1646,7 @@ public final class OXFolderSQL {
                 folderTable).replaceFirst(TMPL_IDS, permissionsIDs));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             final Set<Integer> deletePerms = new HashSet<Integer>();
             final Set<Integer> reassignPerms = new HashSet<Integer>();
             while (rs.next()) {
@@ -1759,7 +1759,7 @@ public final class OXFolderSQL {
                 stmt.setInt(3, entity);
                 stmt.addBatch();
             }
-            stmt.executeBatch();
+            executeBatch(stmt);
         } finally {
             closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
         }
@@ -1803,7 +1803,7 @@ public final class OXFolderSQL {
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, mailAdmin);
                 stmt.setInt(3, fuid);
-                rs = stmt.executeQuery();
+                rs = executeQuery(stmt);
                 final boolean hasPerm = rs.next();
                 rs.close();
                 rs = null;
@@ -1831,7 +1831,7 @@ public final class OXFolderSQL {
                     stmt.setInt(3, fuid);
                     stmt.setInt(4, entity);
                     try {
-                        stmt.executeUpdate();
+                        executeUpdate(stmt);
                     } catch (final SQLException e) {
                         LOG.error(e.getMessage(), e);
                         continue Next;
@@ -1849,7 +1849,7 @@ public final class OXFolderSQL {
                 stmt.setInt(4, iter.next().intValue());
                 stmt.addBatch();
             }
-            stmt.executeBatch();
+            executeBatch(stmt);
         } finally {
             closeResources(rs, stmt, closeWrite ? wc : null, false, ctx);
             if (closeRead && rc != null) {
@@ -1873,7 +1873,7 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             stmt.setInt(3, fuid);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, close ? wc : null, false, ctx);
         }
@@ -1900,7 +1900,7 @@ public final class OXFolderSQL {
             stmt.setInt(7, ctx.getContextId());
             stmt.setInt(8, mailAdmin);
             stmt.setInt(9, fuid);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, close ? wc : null, false, ctx);
         }
@@ -1922,7 +1922,7 @@ public final class OXFolderSQL {
             innerStmt.setInt(1, ctx.getContextId());
             innerStmt.setInt(2, mailAdmin);
             innerStmt.setInt(3, fuid);
-            innerRs = innerStmt.executeQuery();
+            innerRs = executeQuery(innerStmt);
             if (!innerRs.next()) {
                 /*
                  * Merged permission is entity's permission since no permission is defined for admin
@@ -1933,7 +1933,7 @@ public final class OXFolderSQL {
                 innerStmt.setInt(1, ctx.getContextId());
                 innerStmt.setInt(2, entity);
                 innerStmt.setInt(3, fuid);
-                innerRs = innerStmt.executeQuery();
+                innerRs = executeQuery(innerStmt);
                 if (!innerRs.next()) {
                     /*
                      * Empty permission
@@ -1956,7 +1956,7 @@ public final class OXFolderSQL {
             innerStmt.setInt(1, ctx.getContextId());
             innerStmt.setInt(2, entity);
             innerStmt.setInt(3, fuid);
-            innerRs = innerStmt.executeQuery();
+            innerRs = executeQuery(innerStmt);
             if (!innerRs.next()) {
                 return adminPerm;
             }
@@ -2007,7 +2007,7 @@ public final class OXFolderSQL {
             stmt = readCon.prepareStatement(SQL_SEL_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             Set<Integer> deleteFolders = new HashSet<Integer>();
             Set<Integer> reassignFolders = new HashSet<Integer>();
             while (rs.next()) {
@@ -2057,7 +2057,7 @@ public final class OXFolderSQL {
             stmt = readCon.prepareStatement(SQL_SEL_FOLDERS2.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             deleteFolders = new HashSet<Integer>();
             reassignFolders = new HashSet<Integer>();
             while (rs.next()) {
@@ -2152,7 +2152,7 @@ public final class OXFolderSQL {
                 stmt.setInt(2, fuid);
                 stmt.addBatch();
             }
-            stmt.executeBatch();
+            executeBatch(stmt);
         } finally {
             closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
         }
@@ -2172,7 +2172,7 @@ public final class OXFolderSQL {
             stmt = wc.prepareStatement(SQL_DELETE_SPECIAL_REFS);
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, fuid);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
         }
@@ -2192,7 +2192,7 @@ public final class OXFolderSQL {
             stmt = wc.prepareStatement(SQL_DELETE_FOLDER_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, fuid);
-            stmt.executeUpdate();
+            executeUpdate(stmt);
         } finally {
             closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
         }
@@ -2231,7 +2231,7 @@ public final class OXFolderSQL {
                         stmt.setString(4, new StringBuilder(fname).append(fuid).toString());
                         stmt.setInt(5, ctx.getContextId());
                         stmt.setInt(6, fuid);
-                        stmt.executeUpdate();
+                        executeUpdate(stmt);
                         stmt.close();
                         stmt = null;
                         /*
@@ -2254,7 +2254,7 @@ public final class OXFolderSQL {
                 stmt.setInt(5, iter.next().intValue());
                 stmt.addBatch();
             }
-            stmt.executeBatch();
+            executeBatch(stmt);
         } finally {
             closeResources(null, stmt, closeWrite ? wc : null, false, ctx);
         }
@@ -2274,7 +2274,7 @@ public final class OXFolderSQL {
             stmt.setInt(2, fuid);
             stmt.setInt(3, FolderObject.INFOSTORE);
             stmt.setInt(4, entity);
-            rs = stmt.executeQuery();
+            rs = executeQuery(stmt);
             return rs.next() ? rs.getString(1) : null;
         } finally {
             closeResources(rs, stmt, null, true, ctx);
@@ -2289,6 +2289,45 @@ public final class OXFolderSQL {
         // FolderObject.PUBLIC && module
         // == FolderObject.INFOSTORE &&
         // defaultFlag);
+    }
+
+    private static int executeUpdate(final PreparedStatement stmt) throws SQLException {
+        try {
+            return stmt.executeUpdate();
+        } catch (final SQLException e) {
+            if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
+                final String sql = stmt.toString();
+                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
+                    sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+            throw e;
+        }
+    }
+
+    private static int[] executeBatch(final PreparedStatement stmt) throws SQLException {
+        try {
+            return stmt.executeBatch();
+        } catch (final SQLException e) {
+            if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
+                final String sql = stmt.toString();
+                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
+                    sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+            throw e;
+        }
+    }
+
+    private static ResultSet executeQuery(final PreparedStatement stmt) throws SQLException {
+        try {
+            return stmt.executeQuery();
+        } catch (final SQLException e) {
+            if ("MySQLSyntaxErrorException".equals(e.getClass().getSimpleName())) {
+                final String sql = stmt.toString();
+                LOG.error(new StringBuilder().append("\nFollowing SQL query contains syntax errors:\n").append(
+                    sql.substring(sql.indexOf(": ") + 2)).toString());
+            }
+            throw e;
+        }
     }
 
 }
