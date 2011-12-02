@@ -412,7 +412,7 @@ public final class StructureMailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(mpId);
             }
-            if (rootLevelMultipart && isMultipartSigned(lcct)) {
+            if (/*rootLevelMultipart && */isMultipartSigned(lcct)) {
                 /*
                  * Determine the part which is considered to be the message' text according to
                  */
