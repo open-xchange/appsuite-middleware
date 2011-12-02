@@ -30,7 +30,7 @@ Bundle-ClassPath: .,
  lib/mysql-connector-java-5.1.18-bin.jar,
  lib/tnef-1.6.0.jar,
  lib/trove-3.0.2.jar,
- lib/guava-r09.jar
+ lib/guava-10.0.1.jar
 Export-Package: com.davekoelle,
  com.google.common.annotations,
  com.google.common.base,
