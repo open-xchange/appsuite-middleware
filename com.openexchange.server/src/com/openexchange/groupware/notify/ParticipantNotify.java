@@ -150,6 +150,7 @@ import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -459,6 +460,14 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
      * TODO new object should have all necessary data when coming through the event system.
      */
     private void sendNotification(final CalendarObject oldObj, final CalendarObject newObj, final Session session, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader, final boolean isUpdate) {
+        // Safety check for passed session reference
+        if (session.getUserId() <= 0 || session.getContextId() <= 0) {
+            // Illegal session
+            final String sessionId = session.getSessionID();
+            if (null != sessionId) {
+                ServerServiceRegistry.getInstance().getService(SessiondService.class).removeSession(sessionId);
+            }
+        }
 
         if (onlyIrrelevantFieldsChanged(session, oldObj, newObj, state)) {
             return;
