@@ -51,7 +51,6 @@ package com.openexchange.ajax.requesthandler.converters.preview;
 
 import java.io.InputStream;
 import java.util.Map;
-import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -92,10 +91,6 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
     public PreviewOutput getOutput() {
         return PreviewOutput.HTML;
     }
-
-    private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern PATTERN_HTML_BODY = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
