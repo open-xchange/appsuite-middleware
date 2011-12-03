@@ -117,6 +117,8 @@ public final class IMAPDefaultFolderChecker {
 
     private final IMAPConfig imapConfig;
 
+    private boolean retry;
+
     /**
      * Initializes a new {@link IMAPDefaultFolderChecker}.
      *
@@ -128,11 +130,21 @@ public final class IMAPDefaultFolderChecker {
      */
     public IMAPDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final AccessedIMAPStore imapStore, final IMAPConfig imapConfig) {
         super();
+        retry = false;
         this.accountId = accountId;
         this.session = session;
         this.imapStore = imapStore;
         this.ctx = ctx;
         this.imapConfig = imapConfig;
+    }
+
+    /**
+     * Sets the retry behavior.
+     *
+     * @param retry <code>true</code> to retry
+     */
+    public void setRetry(final boolean retry) {
+        this.retry = retry;
     }
 
     /**
@@ -693,6 +705,9 @@ public final class IMAPDefaultFolderChecker {
                     modified.set(true);
                     return fullName;
                 } catch (final MessagingException e) {
+                    if (!retry) {
+                        return fullName;
+                    }
                     String prfx;
                     {
                         final ListLsubEntry inboxEntry;
