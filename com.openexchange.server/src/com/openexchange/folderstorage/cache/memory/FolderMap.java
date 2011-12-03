@@ -360,7 +360,7 @@ public final class FolderMap {
                     return;
                 }
                 final StorageParameters params = new StorageParametersImpl(session);
-                params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.TRUE);
+                params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
                 final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
                 lock.lock();
                 try {

@@ -870,16 +870,15 @@ public final class MailFolderStorage implements FolderStorage {
             final FullnameArgument argument = prepareMailFolderParam(parentId);
             final int accountId = argument.getAccountId();
             final String fullname = argument.getFullname();
+            final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
             if (null == mailAccessArg) {
                 mailAccess = MailAccess.getInstance(session, accountId);
-                final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
                 mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
             } else {
                 mailAccess = mailAccessArg;
                 if (mailAccess.isConnected()) {
                     closeAccess = false;
                 } else {
-                    final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
                     mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
                 }
             }
@@ -895,7 +894,7 @@ public final class MailFolderStorage implements FolderStorage {
             /*
              * Check if denoted parent can hold default folders like Trash, Sent, etc.
              */
-            if (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !"INBOX".equals(fullname)) {
+            if ((Boolean.TRUE.equals(accessFast)) || (!MailFolder.DEFAULT_FOLDER_ID.equals(fullname) && !"INBOX".equals(fullname))) {
                 /*
                  * Denoted parent is not capable to hold default folders. Therefore output as it is.
                  */
