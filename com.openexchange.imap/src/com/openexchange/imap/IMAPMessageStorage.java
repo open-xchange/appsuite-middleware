@@ -125,6 +125,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -1575,6 +1576,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (null == mailMessages || mailMessages.length == 0) {
             return new long[0];
         }
+        Message[] msgs = null;
         try {
             /*
              * Open and check user rights on source folder
@@ -1598,7 +1600,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Convert messages to JavaMail message objects
              */
-            final Message[] msgs = MIMEMessageConverter.convertMailMessages(mailMessages, true);
+            msgs = MIMEMessageConverter.convertMailMessages(mailMessages, true);
             /*
              * Check if destination folder supports user flags
              */
@@ -1676,6 +1678,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        } finally {
+            if (null != msgs) {
+                for (final Message message : msgs) {
+                    if (message instanceof ManagedMimeMessage) {
+                        try {
+                            ((ManagedMimeMessage) message).cleanUp();
+                        } catch (final MessagingException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
         }
     }
 

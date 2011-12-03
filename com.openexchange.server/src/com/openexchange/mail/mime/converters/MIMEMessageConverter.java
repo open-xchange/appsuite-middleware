@@ -55,6 +55,8 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -82,6 +84,8 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -98,6 +102,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -105,6 +110,7 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.pop3.POP3Folder;
@@ -302,10 +308,35 @@ public final class MIMEMessageConverter {
             if (!clone && (mail instanceof MIMEMailMessage)) {
                 mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
             } else {
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-                mail.writeTo(out);
-                mimeMessage =
-                    new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+                if (null == fileManagement) {
+                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
+                    mail.writeTo(out);
+                    mimeMessage =
+                        new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                } else {
+                    FileOutputStream fos = null;
+                    try {
+                        final File newTempFile = fileManagement.newTempFile();
+                        fos = new FileOutputStream(newTempFile);
+                        mail.writeTo(fos);
+                        fos.flush();
+                        fos.close();
+                        fos = null;
+                        final ManagedFile managedFile = fileManagement.createManagedFile(newTempFile);
+                        mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), managedFile);
+                    } catch (final IOException e) {
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                    } finally {
+                        if (null != fos) {
+                            try {
+                                fos.close();
+                            } catch (final IOException e) {
+                                // Ignore
+                            }
+                        }
+                    }
+                }
             }
             if (mail.containsFlags()) {
                 parseMimeFlags(mail.getFlags(), mimeMessage);
