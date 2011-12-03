@@ -58,6 +58,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
 
 /**
@@ -247,6 +248,25 @@ public final class CalendarVolatileCache {
     }
 
     /**
+     * Puts specified key-value-pair.
+     * 
+     * @param key The key
+     * @param obj The value
+     * @param attributes The optional attributes
+     * @throws OXException If put into cache fails
+     */
+    public void put(final Serializable key, final Serializable obj, final Attribute<?>... attributes) throws OXException {
+        final Cache cache = this.cache;
+        if (null != cache) {
+            final ElementAttributes elementAttributes = cache.getDefaultElementAttributes();
+            for (final Attribute<?> attribute : attributes) {
+                attribute.applyToElementAttaributes(elementAttributes);
+            }
+            cache.put(key, obj, elementAttributes);
+        }
+    }
+
+    /**
      * Puts specified key-value-pair into give group.
      * 
      * @param key The key
@@ -258,6 +278,26 @@ public final class CalendarVolatileCache {
         final Cache cache = this.cache;
         if (null != cache) {
             cache.putInGroup(key, group, value);
+        }
+    }
+
+    /**
+     * Puts specified key-value-pair into give group.
+     * 
+     * @param key The key
+     * @param group The group identifier
+     * @param value The value
+     * @param attributes The optional attributes
+     * @throws OXException If put into cache fails
+     */
+    public void putInGroup(final Serializable key, final String group, final Serializable value, final Attribute<?>... attributes) throws OXException {
+        final Cache cache = this.cache;
+        if (null != cache) {
+            final ElementAttributes elementAttributes = cache.getDefaultElementAttributes();
+            for (final Attribute<?> attribute : attributes) {
+                attribute.applyToElementAttaributes(elementAttributes);
+            }
+            cache.putInGroup(key, group, value, elementAttributes);
         }
     }
 
