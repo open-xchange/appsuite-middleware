@@ -143,6 +143,7 @@ public final class CalendarVolatileCache {
                             instance.cache = cacheService.getCache(REGION);
                             return cacheService;
                         } catch (final OXException e) {
+                            context.ungetService(reference);
                             return null;
                         }
                     }
