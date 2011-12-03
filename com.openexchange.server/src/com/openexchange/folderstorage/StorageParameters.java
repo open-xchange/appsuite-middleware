@@ -65,6 +65,13 @@ import com.openexchange.session.Session;
 public interface StorageParameters {
 
     /**
+     * The parameter name to indicate fast access to storage.
+     * 
+     * @type java.lang.Boolean
+     */
+    public static final String PARAM_ACCESS_FAST = "__accessFast";
+
+    /**
      * Adds a warning to this storage parameters.<br>
      * <b><small>NOTE</small></b>: Category is set to {@link Category#WARNING} if not done, yet.
      *
