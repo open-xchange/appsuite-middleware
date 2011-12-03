@@ -125,10 +125,6 @@ public final class HTMLProcessing {
 
     private static final String COMMENT_ID = "anchor-5fd15ca8-a027-4b14-93ea-35de1747419e:";
 
-    private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
-    private static final Pattern PATTERN_HTML_BODY = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
     /**
      * Performs all the formatting for both text and HTML content for a proper display according to specified user's mail settings.
      * <p>
@@ -164,22 +160,6 @@ public final class HTMLProcessing {
             } else {
                 retval = htmlService.dropScriptTagsInHeader(content);
                 retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
-                final Pattern bodyTag = Pattern.compile("(<body.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-                final Matcher bodyTagMatcher = bodyTag.matcher(retval);
-                String className = "", styleName = "";
-                if (bodyTagMatcher.find()) {
-                    final String body = bodyTagMatcher.group(1);
-                    final Pattern bodyStyle = Pattern.compile("(style=['\"].*?['\"])", Pattern.CASE_INSENSITIVE);
-                    final Pattern bodyClass = Pattern.compile("(class=['\"].*?['\"])", Pattern.CASE_INSENSITIVE);
-                    final Matcher bodyStyleMatcher = bodyStyle.matcher(body);
-                    final Matcher bodyClassMatcher = bodyClass.matcher(body);
-                    if (bodyClassMatcher.find()) {
-                        className = bodyClassMatcher.group(1);
-                    }
-                    if (bodyStyleMatcher.find()) {
-                        styleName = bodyStyleMatcher.group(1);
-                    }
-                }
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
@@ -203,29 +183,7 @@ public final class HTMLProcessing {
                         retval = filterInlineImages(retval, session, mailPath);
                     }
                     // Replace CSS classes
-                    final String css = htmlService.getCSSFromHTMLHeader(retval);
-                    final Matcher cssClassMatcher = PATTERN_CSS_CLASS_NAME.matcher(css);
-                    if (cssClassMatcher.find()) {
-                        final String uuid = UUID.randomUUID().toString();
-                        final StringBuilder tmp = new StringBuilder(64);
-                        String newCss = css;
-                        do {
-                            final String cssClass = cssClassMatcher.group();
-                            tmp.setLength(0);
-                            newCss =
-                                newCss.replace(cssClass, tmp.append('#').append(uuid).append(' ').append(cssClass).toString());
-                        } while (cssClassMatcher.find());
-                        tmp.setLength(0);
-                        newCss = tmp.append("<style>").append(newCss).append("</style>").toString();
-                        retval = HTMLProcessing.dropStyles(retval);
-                        final Matcher htmlBodyMatcher = PATTERN_HTML_BODY.matcher(retval);
-                        if (htmlBodyMatcher.find()) {
-                            tmp.setLength(0);
-                            retval =
-                                tmp.append(newCss).append("<div id=\"").append(uuid).append("\" ").append(className).append(' ').append(
-                                    styleName).append('>').append(htmlBodyMatcher.group(1)).append("</div>").toString();
-                        }
-                    }
+                    retval = saneCss(retval, htmlService);
                 }
             }
         } else {
@@ -244,20 +202,97 @@ public final class HTMLProcessing {
         }
         return retval;
     }
+
+    private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_HTML_BODY = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_BODY_TAG = Pattern.compile("(<body.*?>)", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_BODY_STYLE = Pattern.compile("(style=[\"].*?[\"]|style=['].*?['])", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_BODY_CLASS = Pattern.compile("(class=[\"].*?[\"]|class=['].*?['])", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Sanitizes possible CSS style sheets contained in provided HTML content.
+     * 
+     * @param htmlContent The HTML content
+     * @param optHtmlService The optional HTML service
+     * @return The HTML content with sanitized CSS style sheets
+     */
+    public static String saneCss(final String htmlContent, final HTMLService optHtmlService) {
+        if (null == htmlContent) {
+            return null;
+        }
+        String retval = htmlContent;
+        final String css = (optHtmlService == null ? ServerServiceRegistry.getInstance().getService(HTMLService.class) : optHtmlService).getCSSFromHTMLHeader(retval);
+        final Matcher cssClassMatcher = PATTERN_CSS_CLASS_NAME.matcher(css);
+        if (cssClassMatcher.find()) {
+            // Examine body tag
+            final Matcher bodyTagMatcher = PATTERN_BODY_TAG.matcher(retval);
+            String className = "", styleName = "";
+            if (bodyTagMatcher.find()) {
+                final String body = bodyTagMatcher.group(1);
+                Matcher m = PATTERN_BODY_CLASS.matcher(body);
+                if (m.find()) {
+                    className = m.group();
+                }
+                m = PATTERN_BODY_STYLE.matcher(body);
+                if (m.find()) {
+                    styleName = m.group();
+                }
+            }
+            // Proceed replacing CSS
+            final String uuid = UUID.randomUUID().toString();
+            final StringBuilder tmp = new StringBuilder(64);
+            String newCss = css;
+            do {
+                final String cssClass = cssClassMatcher.group();
+                tmp.setLength(0);
+                newCss =
+                    newCss.replace(cssClass, tmp.append('#').append(uuid).append(' ').append(cssClass).toString());
+            } while (cssClassMatcher.find());
+            tmp.setLength(0);
+            newCss = tmp.append("<style>").append(newCss).append("</style>").toString();
+            retval = HTMLProcessing.dropStyles(retval);
+            final Matcher htmlBodyMatcher = PATTERN_HTML_BODY.matcher(retval);
+            if (htmlBodyMatcher.find()) {
+                tmp.setLength(0);
+                retval =
+                    tmp.append(newCss).append("<div id=\"").append(uuid).append("\" ").append(className).append(' ').append(
+                        styleName).append('>').append(htmlBodyMatcher.group(1)).append("</div>").toString();
+            }
+        }
+        return retval;
+    }
+
+    private static final Pattern PATTERN_STYLE = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_STYLE_FILE = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
     
+    /**
+     * Drops CSS style sheet information from given HTML content.
+     * 
+     * @param htmlContent The HTML content
+     * @return The HTML content cleansed by CSS style sheet information
+     */
     private static String dropStyles(final String htmlContent) {
-        String ret = "";
-        final Pattern style = Pattern.compile("<style.*?>.*?</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-        final Matcher mStyle = style.matcher(htmlContent);
-        while (mStyle.find()) {
-            ret += htmlContent.replace(mStyle.group(), "");
+        final StringBuffer buf = new StringBuffer(htmlContent.length());
+
+        Matcher matcher = PATTERN_STYLE.matcher(htmlContent);
+        while (matcher.find()) {
+            matcher.appendReplacement(buf, "");
         }
-        final Pattern styleFile = Pattern.compile("<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-        final Matcher mStyleFile = styleFile.matcher(htmlContent);
-        while (mStyleFile.find()) {
-            ret += htmlContent.replace(mStyleFile.group(), "");
+        matcher.appendTail(buf);
+
+        matcher = PATTERN_STYLE_FILE.matcher(buf.toString());
+        buf.setLength(0);
+        while (matcher.find()) {
+            matcher.appendReplacement(buf, "");
         }
-        return ret;
+        matcher.appendTail(buf);
+
+        return buf.toString();
     }
 
     /**
