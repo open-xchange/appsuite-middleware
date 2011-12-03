@@ -139,7 +139,7 @@ public class CalendarActivator extends HousekeepingActivator {
         final CacheService cacheService = getService(CacheService.class);
         if (null != cacheService) {
             try {
-                cacheService.freeCache("CalendarVolatileCache");
+                cacheService.freeCache(CalendarVolatileCache.REGION);
             } catch (final OXException e) {
                 // Ignore
             } catch (final RuntimeException e) {
