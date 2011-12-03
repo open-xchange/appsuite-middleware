@@ -100,6 +100,7 @@ import com.openexchange.folderstorage.internal.performers.SessionStorageParamete
 import com.openexchange.folderstorage.internal.performers.StorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
+import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -272,6 +273,7 @@ public final class CacheFolderStorage implements FolderStorage {
                         public void run() {
                             try {
                                 final StorageParameters params = newStorageParameters(storageParameters);
+                                params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.TRUE);
                                 if (session.getUserConfiguration().isMultipleMailAccounts()) {
                                     final MailAccountStorageService storageService =
                                         serviceRegistry.getService(MailAccountStorageService.class, true);

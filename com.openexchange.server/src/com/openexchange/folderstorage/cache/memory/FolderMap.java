@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -359,6 +360,7 @@ public final class FolderMap {
                     return;
                 }
                 final StorageParameters params = new StorageParametersImpl(session);
+                params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.TRUE);
                 final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
                 lock.lock();
                 try {
