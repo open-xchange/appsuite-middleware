@@ -78,6 +78,11 @@ public final class SubjectTerm extends SearchTerm<String> {
         this.unicodeSubject = unicodeSubject;
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * @return The unicode representation of the subject
      */

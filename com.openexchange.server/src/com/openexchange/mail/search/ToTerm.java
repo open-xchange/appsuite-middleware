@@ -88,6 +88,11 @@ public final class ToTerm extends SearchTerm<String> {
         }
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * @return The pattern of the to address
      */

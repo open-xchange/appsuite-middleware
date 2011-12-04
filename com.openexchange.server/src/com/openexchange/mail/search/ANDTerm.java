@@ -84,6 +84,11 @@ public final class ANDTerm extends SearchTerm<SearchTerm<?>[]> {
         terms = new SearchTerm<?>[] { firstTerm, secondTerm };
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * Gets the search terms that should be linked with an AND as an array of {@link SearchTerm} with length <code>2</code>.
      *

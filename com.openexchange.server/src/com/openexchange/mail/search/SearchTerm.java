@@ -84,6 +84,8 @@ public abstract class SearchTerm<T> implements Serializable {
      * @return The pattern
      */
     public abstract T getPattern();
+    
+    public abstract void accept(SearchTermVisitor visitor);
 
     /**
      * Adds the addressed MailField to specified collection

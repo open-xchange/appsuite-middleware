@@ -88,6 +88,11 @@ public final class BccTerm extends SearchTerm<String> {
         }
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * @return The pattern of the bcc address
      */
@@ -152,4 +157,5 @@ public final class BccTerm extends SearchTerm<String> {
     public boolean containsWildcard() {
         return null == addr ? false : addr.indexOf('*') >= 0 || addr.indexOf('?') >= 0;
     }
+
 }

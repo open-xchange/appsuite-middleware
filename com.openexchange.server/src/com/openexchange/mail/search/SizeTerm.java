@@ -91,6 +91,11 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
     }
 
     @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public ComparablePattern<Integer> getPattern() {
         return pattern;
     }
