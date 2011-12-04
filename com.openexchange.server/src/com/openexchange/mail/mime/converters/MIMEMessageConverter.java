@@ -280,6 +280,32 @@ public final class MIMEMessageConverter {
     }
 
     /**
+     * Converts given instances of {@link MailMessage} into JavaMail-conform {@link Message} objects.
+     * <p>
+     * <b>Note</b>: This is just a convenience method that invokes {@link #convertMailMessage(MailMessage)} for each instance of
+     * {@link MailMessage}
+     *
+     * @param mails The source instances of {@link MailMessage}
+     * @param behavior Provides the behavior bits
+     * @return JavaMail-conform {@link Message} objects.
+     * @throws OXException If conversion fails
+     * @see #BEHAVIOR_CLONE
+     * @see #BEHAVIOR_STREAM2FILE
+     */
+    public static Message[] convertMailMessages(final MailMessage[] mails, final int behavior) throws OXException {
+        if (null == mails) {
+            return null;
+        }
+        final Message[] retval = new Message[mails.length];
+        for (int i = 0; i < retval.length; i++) {
+            if (null != mails[i]) {
+                retval[i] = convertMailMessage(mails[i], behavior);
+            }
+        }
+        return retval;
+    }
+
+    /**
      * Converts given instance of {@link MailMessage} into a JavaMail-conform {@link Message} object.
      *
      * @param mail The source instance of {@link MailMessage}
@@ -299,17 +325,43 @@ public final class MIMEMessageConverter {
      * @throws OXException If conversion fails
      */
     public static Message convertMailMessage(final MailMessage mail, final boolean clone) throws OXException {
+        return convertMailMessage(mail, clone ? BEHAVIOR_CLONE : 0);
+    }
+
+    /**
+     * Indicates to clone passed mail.
+     */
+    public static final int BEHAVIOR_CLONE = 1;
+
+    /**
+     * Indicates to stream content to a (managed) file.
+     */
+    public static final int BEHAVIOR_STREAM2FILE = 1 << 1;
+
+    /**
+     * Converts given instance of {@link MailMessage} into a JavaMail-conform {@link Message} object.
+     *
+     * @param mail The source instance of {@link MailMessage}
+     * @param behavior Provides the behavior bits
+     * @return A JavaMail-conform {@link Message} object
+     * @throws OXException If conversion fails
+     * @see #BEHAVIOR_CLONE
+     * @see #BEHAVIOR_STREAM2FILE
+     */
+    public static Message convertMailMessage(final MailMessage mail, final int behavior) throws OXException {
         if (mail instanceof ComposedMailMessage) {
             return convertComposedMailMessage((ComposedMailMessage) mail);
         }
         try {
             final int size = (int) mail.getSize();
+            final boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
+            final boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
             final MimeMessage mimeMessage;
             if (!clone && (mail instanceof MIMEMailMessage)) {
                 mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
             } else {
-                final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-                if (null == fileManagement) {
+                final ManagedFileManagement fileManagement;
+                if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
                     mail.writeTo(out);
                     mimeMessage =
