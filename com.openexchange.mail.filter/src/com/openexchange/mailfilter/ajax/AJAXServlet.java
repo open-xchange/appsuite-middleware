@@ -70,6 +70,7 @@ import com.openexchange.mailfilter.ajax.exceptions.OXMailfilterExceptionCode;
 import com.openexchange.mailfilter.services.MailFilterServletServiceRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -123,13 +124,19 @@ public abstract class AJAXServlet extends HttpServlet {
             }
             final Session session = service.getSession(sessionId);
             if (null == session) {
-                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("There is no session associated with session identifier: " + sessionId);
+                }
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
             final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
+                if (LOG.isInfoEnabled() && null != secret) {
+                    LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
+                }
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
 
             final AbstractRequest request = createRequest();
@@ -182,13 +189,19 @@ public abstract class AJAXServlet extends HttpServlet {
             }
             final Session session = service.getSession(sessionId);
             if (null == session) {
-                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("There is no session associated with session identifier: " + sessionId);
+                }
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             response.setLocale(session);
             final String secret = SessionServlet.extractSecret(hashSource, req, session.getHash(), session.getClient());
             // Check if session is valid
             if (!session.getSecret().equals(secret)) {
-                throw OXMailfilterExceptionCode.SESSION_EXPIRED.create("Can't find session.");
+                if (LOG.isInfoEnabled() && null != secret) {
+                    LOG.info("Session secret is different. Given secret \"" + secret + "\" differs from secret in session \"" + session.getSecret() + "\".");
+                }
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
             }
 
             final AbstractRequest request = createRequest();
