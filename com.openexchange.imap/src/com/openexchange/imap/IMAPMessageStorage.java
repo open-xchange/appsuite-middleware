@@ -1623,12 +1623,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             long[] retval = new long[0];
             final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
-            if (hasUIDPlus) {
-                // Perform append expecting APPENUID response code
-                retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
-            } else {
-                // Perform simple append
-                imapFolder.appendMessages(msgs);
+            try {
+                if (hasUIDPlus) {
+                    // Perform append expecting APPENUID response code
+                    retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+                } else {
+                    // Perform simple append
+                    imapFolder.appendMessages(msgs);
+                }
+            } catch (final MessagingException e) {
+                final Exception nextException = e.getNextException();
+                if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
+                    throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
+                }
+                throw e;
             }
             if (retval.length > 0) {
                 /*

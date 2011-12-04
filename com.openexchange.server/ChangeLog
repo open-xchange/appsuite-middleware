@@ -1,3 +1,7 @@
+* 2011-12-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20879: Improved error message if E-Mail import into IMAP server fails
+
 * 2011-12-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 20913: Suppressing notification mail if only folder has changed
