@@ -289,8 +289,17 @@ public final class CacheFolderStorage implements FolderStorage {
                                                     try {
                                                         final String folderId =
                                                             MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
-                                                        final Folder rootFolder =
-                                                            loadFolder(realTreeId, folderId, StorageType.WORKING, params);
+                                                        /*
+                                                         * Check if already present
+                                                         */
+                                                        Folder rootFolder = getRefFromCache(realTreeId, folderId, params);
+                                                        if (null != rootFolder) {
+                                                            return;
+                                                        }
+                                                        /*
+                                                         * Load it
+                                                         */
+                                                        rootFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, params);
                                                         putFolder(rootFolder, realTreeId, params);
                                                         final String[] subfolderIDs = rootFolder.getSubfolderIDs();
                                                         if (null != subfolderIDs) {
@@ -1101,6 +1110,19 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private Folder getCloneFromCache(final String treeId, final String folderId, final StorageParameters storageParameters) {
+        final Folder folder = getRefFromCache(treeId, folderId, storageParameters);
+        return null == folder ? null : (Folder) folder.clone();
+    }
+
+    /**
+     * Gets the folder reference from cache.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The fodler identifier
+     * @param storageParameters The storage parameters
+     * @return The folder or <code>null</code> on cache miss
+     */
+    protected Folder getRefFromCache(final String treeId, final String folderId, final StorageParameters storageParameters) {
         final int contextId = storageParameters.getContextId();
         /*
          * Try global cache key
@@ -1110,7 +1132,7 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Return a cloned version from global cache
              */
-            return (Folder) folder.clone();
+            return folder;
         }
         /*
          * Try user cache key
@@ -1125,7 +1147,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Locally loaded folder " + folderId + " from context " + contextId + " for user " + storageParameters.getUserId());
                 }
-                return (Folder) folder.clone();
+                return folder;
             }
         }
         /*
