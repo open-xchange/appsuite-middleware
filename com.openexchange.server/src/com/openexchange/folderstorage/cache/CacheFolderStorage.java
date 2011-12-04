@@ -267,11 +267,14 @@ public final class CacheFolderStorage implements FolderStorage {
                     final ServiceRegistry serviceRegistry = CacheServiceRegistry.getServiceRegistry();
                     final ThreadPoolService threadPool = serviceRegistry.getService(ThreadPoolService.class);
                     final RefusedExecutionBehavior<Object> behavior = AbortBehavior.getInstance();
+                    final Log log = LOG;
+                    final boolean debugEnabled = log.isDebugEnabled();
                     final Runnable task = new Runnable() {
 
                         @Override
                         public void run() {
                             try {
+                                final long st = debugEnabled ? System.currentTimeMillis() : 0L;
                                 final StorageParameters params = newStorageParameters(storageParameters);
                                 params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
                                 if (session.getUserConfiguration().isMultipleMailAccounts()) {
@@ -287,6 +290,7 @@ public final class CacheFolderStorage implements FolderStorage {
                                                 @Override
                                                 public void run() {
                                                     try {
+                                                        final long st2 = debugEnabled ? System.currentTimeMillis() : 0L;
                                                         final String folderId =
                                                             MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
                                                         /*
@@ -309,6 +313,14 @@ public final class CacheFolderStorage implements FolderStorage {
                                                                 putFolder(folder, realTreeId, params);
                                                             }
                                                         }
+                                                        if (debugEnabled) {
+                                                            final StringBuilder tmp = new StringBuilder(64);
+                                                            tmp.append("CacheFolderStorage.checkConsistency(): ");
+                                                            tmp.append("Loading external root folder \"");
+                                                            tmp.append(mailAccount.generateMailServerURL()).append("\" took ");
+                                                            tmp.append((System.currentTimeMillis() - st2)).append("msec");
+                                                            log.debug(tmp.toString());
+                                                        }
                                                     } catch (final Exception e) {
                                                         // Pre-Accessing external account folder failed.
                                                         LOG.debug(e.getMessage(), e);
@@ -318,6 +330,12 @@ public final class CacheFolderStorage implements FolderStorage {
                                             threadPool.submit(ThreadPools.task(mailAccountTask), behavior);
                                         }
                                     }
+                                }
+                                if (debugEnabled) {
+                                    final StringBuilder tmp = new StringBuilder(64);
+                                    tmp.append("CacheFolderStorage.checkConsistency(): Submitting loading external root folders took ");
+                                    tmp.append((System.currentTimeMillis() - st)).append("msec");
+                                    log.debug(tmp.toString());
                                 }
                             } catch (final Exception e) {
                                 LOG.debug(e.getMessage(), e);
