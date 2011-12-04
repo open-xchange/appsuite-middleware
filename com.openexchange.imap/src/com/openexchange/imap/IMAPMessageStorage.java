@@ -1600,7 +1600,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Convert messages to JavaMail message objects
              */
-            msgs = MIMEMessageConverter.convertMailMessages(mailMessages, true);
+            msgs = MIMEMessageConverter.convertMailMessages(mailMessages, MIMEMessageConverter.BEHAVIOR_CLONE | MIMEMessageConverter.BEHAVIOR_STREAM2FILE);
             /*
              * Check if destination folder supports user flags
              */
