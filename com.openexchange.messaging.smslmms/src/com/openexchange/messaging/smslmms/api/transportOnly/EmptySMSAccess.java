@@ -47,82 +47,65 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.api;
+package com.openexchange.messaging.smslmms.api.transportOnly;
 
-import java.util.Collections;
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.session.Session;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingFolderAccess;
+import com.openexchange.messaging.smslmms.api.SMSAccess;
+import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
 
 /**
- * {@link EmptySMSAccountManager} - The empty SMS/MMS {@link MessagingAccountManager}.
+ * {@link EmptySMSAccess}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class EmptySMSAccountManager implements MessagingAccountManager {
+public final class EmptySMSAccess implements SMSAccess {
 
-    private static final EmptySMSAccountManager INSTANCE = new EmptySMSAccountManager();
+    private final int accountId;
 
-    /**
-     * Gets the instance.
-     * 
-     * @return The instance
-     */
-    public static EmptySMSAccountManager getInstance() {
-        return INSTANCE;
-    }
+    private final int userId;
+
+    private final int contextId;
 
     /**
-     * Initializes a new {@link EmptySMSAccountManager}.
+     * Initializes a new {@link EmptySMSAccess}.
      */
-    private EmptySMSAccountManager() {
+    public EmptySMSAccess(final int accountId, final int userId, final int contextId) {
         super();
+        this.accountId = accountId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
     @Override
-    public int addAccount(final MessagingAccount account, final Session session) throws OXException {
-        throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(SMSService.DISPLAY_NAME);
-    }
-
-    @Override
-    public void updateAccount(final MessagingAccount account, final Session session) throws OXException {
-        throw MessagingExceptionCodes.ACCOUNT_NOT_FOUND.create(
-            Integer.valueOf(account.getId()),
-            SMSService.SERVICE_ID,
-            Integer.valueOf(session.getUserId()),
-            Integer.valueOf(session.getContextId()));
-    }
-
-    @Override
-    public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
+    public void connectAccess() throws OXException {
         // Nope
     }
 
     @Override
-    public List<MessagingAccount> getAccounts(final Session session) throws OXException {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public MessagingAccount getAccount(final int id, final Session session) throws OXException {
-        throw MessagingExceptionCodes.ACCOUNT_NOT_FOUND.create(
-            Integer.valueOf(id),
-            SMSService.SERVICE_ID,
-            Integer.valueOf(session.getUserId()),
-            Integer.valueOf(session.getContextId()));
-    }
-
-    @Override
-    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
+    public void closeAccess() {
         // Nope
     }
 
     @Override
-    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
-        return null;
+    public int getAccountId() {
+        return accountId;
+    }
+
+    @Override
+    public SMSMessageAccess getSMSMessageAccess() throws OXException {
+        return new EmptySMSMessageAccess(accountId, userId, contextId);
+    }
+
+    @Override
+    public MessagingFolderAccess getFolderAccess() throws OXException {
+        return new EmptySMSFolderAccess(accountId, userId, contextId);
+    }
+
+    @Override
+    public MessagingFolder getRootFolder() throws OXException {
+        return getFolderAccess().getRootFolder();
     }
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.api;
+package com.openexchange.messaging.smslmms.api.transportOnly;
 
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +59,9 @@ import com.openexchange.messaging.MessagingField;
 import com.openexchange.messaging.MessagingPart;
 import com.openexchange.messaging.OrderDirection;
 import com.openexchange.messaging.SearchTerm;
+import com.openexchange.messaging.smslmms.api.SMSMessage;
+import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
+import com.openexchange.messaging.smslmms.api.SMSService;
 
 /**
  * {@link EmptySMSMessageAccess}

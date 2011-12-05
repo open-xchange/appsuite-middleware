@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.api;
+package com.openexchange.messaging.smslmms.api.transportOnly;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingExceptionCodes;
@@ -55,6 +55,7 @@ import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingFolderAccess;
 import com.openexchange.messaging.Quota;
 import com.openexchange.messaging.Quota.Type;
+import com.openexchange.messaging.smslmms.api.SMSService;
 import com.openexchange.session.Session;
 
 /**

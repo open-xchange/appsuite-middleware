@@ -47,10 +47,14 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.api;
+package com.openexchange.messaging.smslmms.api.transportOnly;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountManager;
+import com.openexchange.messaging.smslmms.api.AbstractSMSService;
+import com.openexchange.messaging.smslmms.api.SMSAccess;
+import com.openexchange.messaging.smslmms.api.SMSConfiguration;
+import com.openexchange.messaging.smslmms.api.SMSService;
 import com.openexchange.session.Session;
 
 /**
