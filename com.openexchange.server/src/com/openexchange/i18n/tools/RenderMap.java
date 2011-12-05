@@ -88,7 +88,7 @@ public final class RenderMap implements Cloneable {
     /**
      * Gets those {@link TemplateReplacement}s that are marked as changed.
      *
-     * @return The changes {@link TemplateReplacement}s
+     * @return The changed {@link TemplateReplacement}s
      */
     public List<TemplateReplacement> getChanges() {
         final List<TemplateReplacement> changes = new ArrayList<TemplateReplacement>(map.size() >> 1);
