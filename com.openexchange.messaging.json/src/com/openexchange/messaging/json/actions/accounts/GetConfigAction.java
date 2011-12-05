@@ -50,6 +50,7 @@
 package com.openexchange.messaging.json.actions.accounts;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,8 +58,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.ConfigProvidingMessagingService;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingExceptionCodes;
+import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -101,14 +104,24 @@ public class GetConfigAction extends AbstractMessagingAccountAction {
             throw MessagingExceptionCodes.INVALID_PARAMETER.create("id", idS);
         }
         /*
-         * Get account
+         * Get configuration
          */
-        final MessagingAccount account = registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId()).getAccountManager().getAccount(id, session);
+        final Map<String, Object> configuration;
+        {
+            final MessagingService messagingService = registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId());
+            if (messagingService instanceof ConfigProvidingMessagingService) {
+                final ConfigProvidingMessagingService service = (ConfigProvidingMessagingService) messagingService;
+                configuration = service.getConfiguration(id, session);
+            } else {
+                final MessagingAccount account = messagingService.getAccountManager().getAccount(id, session);
+                configuration = account.getConfiguration();
+            }
+        }
         /*
          * Compose JSON object from configuration
          */
         final JSONObject jsonObject = new JSONObject();
-        for (final Entry<String, Object> entry : account.getConfiguration().entrySet()) {
+        for (final Entry<String, Object> entry : configuration.entrySet()) {
             jsonObject.put(entry.getKey(), JSONCoercion.coerceToJSON(entry.getValue()));
         }
         return new AJAXRequestResult(jsonObject);
