@@ -59,7 +59,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ConfigProvidingMessagingService;
-import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
