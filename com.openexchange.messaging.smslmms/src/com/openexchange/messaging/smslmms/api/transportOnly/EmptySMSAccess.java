@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,65 @@
  *
  */
 
-package com.openexchange.mail.dataobjects.compose;
+package com.openexchange.messaging.smslmms.api.transportOnly;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingFolder;
+import com.openexchange.messaging.MessagingFolderAccess;
+import com.openexchange.messaging.smslmms.api.SMSAccess;
+import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
 
 /**
- * {@link ComposeType} - The compose type of a message
- *
+ * {@link EmptySMSAccess}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ComposeType {
+public final class EmptySMSAccess implements SMSAccess {
+
+    private final int accountId;
+
+    private final int userId;
+
+    private final int contextId;
 
     /**
-     * New
+     * Initializes a new {@link EmptySMSAccess}.
      */
-    NEW(0),
-    /**
-     * Forward
-     */
-    FORWARD(2),
-    /**
-     * Reply
-     */
-    REPLY(1),
-    /**
-     * Draft-Edit
-     */
-    DRAFT_EDIT(3),
-    /**
-     * Draft
-     */
-    DRAFT(4),
-
-    ;
-
-    private final int type;
-
-    private ComposeType(final int type) {
-        this.type = type;
+    public EmptySMSAccess(final int accountId, final int userId, final int contextId) {
+        super();
+        this.accountId = accountId;
+        this.userId = userId;
+        this.contextId = contextId;
     }
 
-    /**
-     * Gets the corresponding {@link ComposeType}
-     *
-     * @param type The send type as <code>int</code>
-     * @return The corresponding {@link ComposeType} or <code>null</code>
-     */
-    public static final ComposeType getType(final int type) {
-        final ComposeType[] types = ComposeType.values();
-        for (final ComposeType composeType : types) {
-            if (composeType.type == type) {
-                return composeType;
-            }
-        }
-        return null;
+    @Override
+    public void connectAccess() throws OXException {
+        // Nope
     }
+
+    @Override
+    public void closeAccess() {
+        // Nope
+    }
+
+    @Override
+    public int getAccountId() {
+        return accountId;
+    }
+
+    @Override
+    public SMSMessageAccess getSMSMessageAccess() throws OXException {
+        return new EmptySMSMessageAccess(accountId, userId, contextId);
+    }
+
+    @Override
+    public MessagingFolderAccess getFolderAccess() throws OXException {
+        return new EmptySMSFolderAccess(accountId, userId, contextId);
+    }
+
+    @Override
+    public MessagingFolder getRootFolder() throws OXException {
+        return getFolderAccess().getRootFolder();
+    }
+
 }

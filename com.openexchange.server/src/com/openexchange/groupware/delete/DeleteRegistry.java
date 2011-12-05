@@ -179,6 +179,7 @@ public final class DeleteRegistry {
             new QuotaUsageDelete(),
             new AttachmentContextDelete(),
             new AttachmentDelDelete(),
+            new CacheClearerOnContextDelete(),
             /*
              * Insert folder delete listener
              */

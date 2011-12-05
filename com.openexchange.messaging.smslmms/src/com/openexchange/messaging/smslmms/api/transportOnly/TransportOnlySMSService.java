@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,53 @@
  *
  */
 
-package com.openexchange.mail.dataobjects.compose;
+package com.openexchange.messaging.smslmms.api.transportOnly;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.messaging.MessagingAccountManager;
+import com.openexchange.messaging.smslmms.api.AbstractSMSService;
+import com.openexchange.messaging.smslmms.api.SMSAccess;
+import com.openexchange.messaging.smslmms.api.SMSConfiguration;
+import com.openexchange.messaging.smslmms.api.SMSService;
+import com.openexchange.session.Session;
 
 /**
- * {@link ComposeType} - The compose type of a message
- *
+ * {@link TransportOnlySMSService} - The transport-only {@link SMSService}.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ComposeType {
+public abstract class TransportOnlySMSService extends AbstractSMSService {
 
     /**
-     * New
+     * Initializes a new {@link TransportOnlySMSService}.
      */
-    NEW(0),
-    /**
-     * Forward
-     */
-    FORWARD(2),
-    /**
-     * Reply
-     */
-    REPLY(1),
-    /**
-     * Draft-Edit
-     */
-    DRAFT_EDIT(3),
-    /**
-     * Draft
-     */
-    DRAFT(4),
+    public TransportOnlySMSService() {
+        super();
+    }
 
-    ;
+    @Override
+    public MessagingAccountManager getAccountManager() {
+        return EmptySMSAccountManager.getInstance();
+    }
 
-    private final int type;
+    @Override
+    protected SMSAccess getSMSAccessInternal(final int accountId, final Session session) throws OXException {
+        return new EmptySMSAccess(accountId, session.getUserId(), session.getContextId());
+    }
 
-    private ComposeType(final int type) {
-        this.type = type;
+    @Override
+    public SMSConfiguration getSMSConfiguration(final int accountId, final Session session) throws OXException {
+        return getSMSConfigurationInternal(accountId, session);
     }
 
     /**
-     * Gets the corresponding {@link ComposeType}
-     *
-     * @param type The send type as <code>int</code>
-     * @return The corresponding {@link ComposeType} or <code>null</code>
+     * Gets the SMS/MMS configuration for the user associated with specified session.
+     * 
+     * @param accountId The account identifier
+     * @param session The session providing user data
+     * @return The SMS/MMS configuration
+     * @throws OXException If configuration cannot be returned
      */
-    public static final ComposeType getType(final int type) {
-        final ComposeType[] types = ComposeType.values();
-        for (final ComposeType composeType : types) {
-            if (composeType.type == type) {
-                return composeType;
-            }
-        }
-        return null;
-    }
+    protected abstract SMSConfiguration getSMSConfigurationInternal(int accountId, Session session) throws OXException;
+
 }

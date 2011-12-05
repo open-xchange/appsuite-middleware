@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,59 @@
  *
  */
 
-package com.openexchange.mail.dataobjects.compose;
+package com.openexchange.groupware.delete;
+
+import java.sql.Connection;
+import java.util.Arrays;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.services.ServerServiceRegistry;
+
 
 /**
- * {@link ComposeType} - The compose type of a message
+ * {@link CacheClearerOnContextDelete} - Clears foreign caches on context delete.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ComposeType {
+public final class CacheClearerOnContextDelete extends ContextDelete {
 
     /**
-     * New
+     * Initializes a new {@link CacheClearerOnContextDelete}.
      */
-    NEW(0),
-    /**
-     * Forward
-     */
-    FORWARD(2),
-    /**
-     * Reply
-     */
-    REPLY(1),
-    /**
-     * Draft-Edit
-     */
-    DRAFT_EDIT(3),
-    /**
-     * Draft
-     */
-    DRAFT(4),
-
-    ;
-
-    private final int type;
-
-    private ComposeType(final int type) {
-        this.type = type;
+    public CacheClearerOnContextDelete() {
+        super();
     }
 
-    /**
-     * Gets the corresponding {@link ComposeType}
-     *
-     * @param type The send type as <code>int</code>
-     * @return The corresponding {@link ComposeType} or <code>null</code>
-     */
-    public static final ComposeType getType(final int type) {
-        final ComposeType[] types = ComposeType.values();
-        for (final ComposeType composeType : types) {
-            if (composeType.type == type) {
-                return composeType;
+    @Override
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+        if (!isContextDelete(event)) {
+            return;
+        }
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(CacheClearerOnContextDelete.class));
+        /*
+         * Get cache service
+         */
+        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (null == cacheService) {
+            logger.warn(CacheService.class.getSimpleName() + " is absent.");
+            return;
+        }
+        /*
+         * Clear foreign caches
+         */
+        final List<String> cacheNames = Arrays.asList("USMOXObjectIDToUUIDCache", "USMUUIDToOXObjectIDCache");
+        for (final String cacheName : cacheNames) {
+            try {
+                final Cache cache = cacheService.getCache(cacheName);
+                cache.clear();
+            } catch (final OXException e) {
+                logger.warn("Clearing cache \"" + cacheName + "\" failed.", e);
             }
         }
-        return null;
     }
+
 }

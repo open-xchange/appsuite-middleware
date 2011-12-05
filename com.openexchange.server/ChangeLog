@@ -1,3 +1,8 @@
+* 2011-12-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20872: Clearing foreign caches on context deletion
+ - Fix for bug 19250: Consider thrown exception classes in try-catch clause to ensure proper transaction roll-back
+
 * 2011-12-04 - thorben.betten@open-xchange.com
 
  - Fix for bug 20879: Improved error message if E-Mail import into IMAP server fails
