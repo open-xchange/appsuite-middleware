@@ -655,7 +655,7 @@ public class RdbUserStorage extends UserStorage {
                 }
                 if (size != lines) {
                     final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                    LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
             } finally {
@@ -684,7 +684,7 @@ public class RdbUserStorage extends UserStorage {
                 }
                 if (size != lines) {
                     final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                    LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
             } finally {
@@ -714,7 +714,7 @@ public class RdbUserStorage extends UserStorage {
                 }
                 if (size != lines) {
                     final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                    LOG.error(String.format("Old: %3$s, New: %4$s, Added: %5$s, Removed: %6$s, Changed: %7$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                     throw e;
                 }
             } finally {
