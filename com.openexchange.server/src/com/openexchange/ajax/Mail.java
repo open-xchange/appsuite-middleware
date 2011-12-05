@@ -2137,15 +2137,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 return fileName;
             }
         }
-        if (null != baseCT) {
+        if ((null != baseCT) && (null == getFileExtension(fileName))) {
             if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
-                if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
-                    tmp.append(".txt");
-                }
+                tmp.append(".txt");
             } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
-                if (!fileName.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
-                    tmp.append(".html");
-                }
+                tmp.append(".html");
             }
         }
         return escapeBackslashAndQuote(tmp.toString());
@@ -2160,15 +2156,11 @@ public class Mail extends PermissionServlet implements UploadListener {
             return new StringBuilder("attachment; filename=\"").append(escapeBackslashAndQuote(fileName.replaceAll(" ", "_"))).append('"').toString();
         }
         String fn = fileName;
-        if (null != baseCT) {
+        if ((null != baseCT) && (null == getFileExtension(fn))) {
             if (baseCT.regionMatches(true, 0, MIME_TEXT_PLAIN, 0, MIME_TEXT_PLAIN.length())) {
-                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".txt")) {
-                    fn += ".txt";
-                }
+                fn += ".txt";
             } else if (baseCT.regionMatches(true, 0, MIME_TEXT_HTML, 0, MIME_TEXT_HTML.length())) {
-                if (!fn.toLowerCase(Locale.ENGLISH).endsWith(".htm") && !fileName.toLowerCase(Locale.ENGLISH).endsWith(".html")) {
-                    fn += ".html";
-                }
+                fn += ".html";
             }
         }
         fn = escapeBackslashAndQuote(fn);
@@ -2186,6 +2178,22 @@ public class Mail extends PermissionServlet implements UploadListener {
          */
         final String foo = new String(fn.getBytes(com.openexchange.java.Charsets.UTF_8), com.openexchange.java.Charsets.ISO_8859_1);
         return new StringBuilder("attachment; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(foo).append('"').toString();
+    }
+
+    private static final Pattern P = Pattern.compile("^[\\w\\d\\:\\/\\.]+(\\.\\w{3,4})$");
+    
+    /**
+     * Checks if specified file name has a trailing file extension.
+     * 
+     * @param fileName The file name
+     * @return The extension (e.g. <code>".txt"</code>) or <code>null</code>
+     */
+    public static String getFileExtension(final String fileName) {
+        if (null == fileName || fileName.indexOf('.') <= 0) {
+            return null;
+        }
+        final Matcher m = P.matcher(fileName);
+        return m.matches() ? m.group(1).toLowerCase(Locale.ENGLISH) : null;
     }
 
     public void actionPutForwardMultiple(final ServerSession session, final JSONWriter writer, final JSONObject jsonObj, final MailServletInterface mi) throws JSONException {
