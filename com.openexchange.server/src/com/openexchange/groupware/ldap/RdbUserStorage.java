@@ -713,9 +713,12 @@ public class RdbUserStorage extends UserStorage {
                     lines += mLine;
                 }
                 if (size != lines) {
-                    final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
-                    LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
-                    throw e;
+                    // Ignoring the failed update of a clients login timestamp. This only happens if a parallel login with the same client took place.
+                    if (changed.size() != 1 || changed.keySet().iterator().next().startsWith("client:")) {
+                        final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
+                        LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
+                        throw e;
+                    }
                 }
             } finally {
                 closeSQLStuff(stmt);
