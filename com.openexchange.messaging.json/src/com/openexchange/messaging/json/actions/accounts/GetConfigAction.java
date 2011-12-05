@@ -110,11 +110,9 @@ public class GetConfigAction extends AbstractMessagingAccountAction {
         {
             final MessagingService messagingService = registry.getMessagingService(messagingServiceId, session.getUserId(), session.getContextId());
             if (messagingService instanceof ConfigProvidingMessagingService) {
-                final ConfigProvidingMessagingService service = (ConfigProvidingMessagingService) messagingService;
-                configuration = service.getConfiguration(id, session);
+                configuration = ((ConfigProvidingMessagingService) messagingService).getConfiguration(id, session);
             } else {
-                final MessagingAccount account = messagingService.getAccountManager().getAccount(id, session);
-                configuration = account.getConfiguration();
+                configuration = messagingService.getAccountManager().getAccount(id, session).getConfiguration();
             }
         }
         /*
