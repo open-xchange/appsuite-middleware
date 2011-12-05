@@ -2,6 +2,7 @@
 
  - Fix for bug 20872: Clearing foreign caches on context deletion
  - Fix for bug 19250: Consider thrown exception classes in try-catch clause to ensure proper transaction roll-back
+ - Fix for bug 20918: Don't append file extension according to Content-Type header if an extension is already present
 
 * 2011-12-04 - thorben.betten@open-xchange.com
 
