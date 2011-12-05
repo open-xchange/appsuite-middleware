@@ -430,6 +430,9 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
+        } catch (final RuntimeException re) {
+            rollback(writecon);
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(re, re.getMessage());
         } finally {
             if (null != writecon) {
                 autocommit(writecon);
@@ -499,9 +502,15 @@ public final class Contacts {
         } catch (final DataTruncation se) {
             rollback(writecon);
             throw Contacts.getTruncation(writecon, se, "prg_contacts", contact);
+        } catch (final OXException e) {
+            rollback(writecon);
+            throw e;
         } catch (final SQLException se) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(se);
+        } catch (final RuntimeException re) {
+            rollback(writecon);
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(re, re.getMessage());
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -937,6 +946,9 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+        } catch (final RuntimeException re) {
+            rollback(writecon);
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(re, re.getMessage());
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
@@ -1181,6 +1193,9 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
+        } catch (final RuntimeException re) {
+            rollback(writecon);
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(re, re.getMessage());
         } finally {
             closeSQLStuff(ps);
             if (null != writecon) {
