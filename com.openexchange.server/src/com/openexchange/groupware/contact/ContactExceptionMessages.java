@@ -142,6 +142,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String TOO_FEW_SEARCH_CHARS_MSG = "In order to accomplish the search, %1$d or more characters are required.";
 
+    public static final String UNEXPECTED_ERROR_MSG = "An unexpected error occurred: %1$s";
+
     private ContactExceptionMessages() {
         super();
     }
