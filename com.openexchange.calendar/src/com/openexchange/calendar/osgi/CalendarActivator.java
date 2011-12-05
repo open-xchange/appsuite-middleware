@@ -130,12 +130,12 @@ public class CalendarActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        CalendarVolatileCache.dropInstance();
         unregisterCacheRegion();
         super.stopBundle();
     }
 
     private void unregisterCacheRegion() {
+        CalendarVolatileCache.dropInstance();
         final CacheService cacheService = getService(CacheService.class);
         if (null != cacheService) {
             try {
