@@ -79,6 +79,9 @@ import java.util.zip.ZipOutputStream;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.dataretention.DataRetentionService;
 import com.openexchange.dataretention.RetentionData;
@@ -2158,6 +2161,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     } else {
                         setFlagForward(supPath);
                     }
+                } else if (ComposeType.DRAFT.equals(type)) {
+                    final ConfigViewFactory configViewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+                    if (null != configViewFactory) {
+                        try {
+                            final ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+                            final ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.deleteDraftOnTransport", boolean.class);
+                            if (property.isDefined() && property.get().booleanValue()) {
+                                deleteDraft(composedMail.getMsgref());
+                            }
+                        } catch (final Exception e) {
+                            LOG.warn("Draft mail cannot be deleted.", e);
+                        }
+                    }
                 }
             } catch (final OXException e) {
                 mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
@@ -2384,6 +2400,38 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 } finally {
                     otherAccess.close(false);
+                }
+            }
+        }
+    }
+
+    private void deleteDraft(final MailPath path) throws OXException {
+        if (null == path) {
+            LOG.warn("Missing msgref on draft-delete. Corresponding draft mail cannot be deleted.", new Throwable());
+            return;
+        }
+        /*
+         * Delete draft mail
+         */
+        final String fullname = path.getFolder();
+        final String[] uids = new String[] { path.getMailID() };
+        final int pathAccount = path.getAccountId();
+        if (mailAccess.getAccountId() == pathAccount) {
+            mailAccess.getMessageStorage().deleteMessages(fullname, uids, true);
+        } else {
+            MailAccess<?, ?> otherAccess = null;
+            try {
+                otherAccess = MailAccess.getInstance(session, pathAccount);
+                otherAccess.connect(true);
+                otherAccess.getMessageStorage().deleteMessages(fullname, uids, true);
+                try {
+                    MailMessageCache.getInstance().removeMessages(uids, pathAccount, fullname, session.getUserId(), session.getContextId());
+                } catch (final OXException e) {
+                    // Ignore
+                }
+            } finally {
+                if (null != otherAccess) {
+                    otherAccess.close(true);
                 }
             }
         }
