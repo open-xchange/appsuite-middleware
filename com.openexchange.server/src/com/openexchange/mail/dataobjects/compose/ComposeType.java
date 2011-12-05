@@ -73,9 +73,9 @@ public enum ComposeType {
      */
     DRAFT_EDIT(3),
     /**
-     * Draft-Delete
+     * Draft
      */
-    DRAFT_DELETE(4),
+    DRAFT(4),
 
     ;
 

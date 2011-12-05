@@ -2158,7 +2158,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     } else {
                         setFlagForward(supPath);
                     }
-                } else if (ComposeType.DRAFT_DELETE.equals(type)) {
+                } else if (ComposeType.DRAFT.equals(type)) {
                     deleteDraft(composedMail.getMsgref());
                 }
             } catch (final OXException e) {
