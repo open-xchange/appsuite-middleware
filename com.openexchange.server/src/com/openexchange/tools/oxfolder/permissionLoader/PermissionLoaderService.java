@@ -77,6 +77,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
+import com.openexchange.concurrent.TimeoutListener;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -172,6 +173,8 @@ public final class PermissionLoaderService implements Runnable {
 
     protected volatile ThreadPoolService threadPool;
 
+    private volatile TimeoutConcurrentMap<Integer, Connection> pooledCons;
+
     /**
      * Initializes a new {@link PermissionLoaderService}.
      */
@@ -217,6 +220,7 @@ public final class PermissionLoaderService implements Runnable {
 
         future = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
         permsMap = new TimeoutConcurrentMap<Pair, OCLPermission[]>(20, true);
+        pooledCons = new TimeoutConcurrentMap<Integer, Connection>(1, false);
         gate.open();
     }
 
@@ -249,13 +253,25 @@ public final class PermissionLoaderService implements Runnable {
 
     /**
      * Submits to load permission for specified folder in given context.
-     * 
+     * @param contextId The context identifier
+     * @param folderId The folder identifier
+     */
+    public void submitPermissionsFor(final int contextId, final int folderId) {
+        queue.offer(newPair(folderId, contextId));
+    }
+
+    /**
+     * Submits to load permission for specified folder in given context.
+     *
      * @param folderId The folder identifier
      * @param contextId The context identifier
      */
-    public void submitPermissionsFor(final int folderId, final int contextId) {
-        final Pair pair = newPair(folderId, contextId);
-        queue.offer(pair);
+    public void submitPermissionsFor(final int contextId, final int... folderIds) {
+        final List<Pair> tmp = new ArrayList<Pair>(folderIds.length);
+        for (final int folderId : folderIds) {
+            tmp.add(newPair(folderId, contextId));
+        }
+        queue.addAll(tmp);
     }
 
     /**
@@ -343,6 +359,8 @@ public final class PermissionLoaderService implements Runnable {
                             return;
                         }
                         list.add(next);
+                        // Await possible more
+                        Thread.sleep(50);
                     }
                     queue.drainTo(list);
                     final boolean quit = list.remove(POISON);
@@ -471,17 +489,52 @@ public final class PermissionLoaderService implements Runnable {
              * Handle fillers in chunks
              */
             final int contextId = pairsChunk.get(0).contextId;
-            final Connection readCon = Database.get(contextId, false);
-            try {
-                /*
-                 * Fill future(s) from concurrent map
-                 */
-                
+            final Integer key = Integer.valueOf(contextId);
+            /*
+             * Get read-only connection
+             */
+            Connection readCon = pooledCons.get(key);
+            if (null == readCon) {
+                final TimeoutListener<Connection> listener = new TimeoutListener<Connection>() {
+
+                    @Override
+                    public void onTimeout(final Connection con) {
+                        Database.backNoTimeout(contextId, false, con);
+                        if (debug) {
+                            LOG.debug("Released \"shared\" connection.");
+                        }
+                    }
+                };
+                final Connection newReadCon = Database.getNoTimeout(contextId, false);
+                readCon = pooledCons.putIfAbsent(key, newReadCon, 1, listener);
+                if (null != readCon) {
+                    // Wasn't able to put connection; work with newly fetched connection
+                    if (debug) {
+                        LOG.debug("Using \"un-shared\" connection.");
+                    }
+                    try {
+                        for (final Pair pair : pairsChunk) {
+                            permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, newReadCon), 60);
+                        }
+                    } finally {
+                        Database.backNoTimeout(contextId, false, newReadCon);
+                        if (debug) {
+                            LOG.debug("Released \"un-shared\" connection.");
+                        }
+                    }
+                    // Leave
+                    return;
+                }
+                // "Shared" connection
+                readCon = newReadCon;
+            } else if (debug) {
+                LOG.debug("Using \"shared\" connection.");
+            }
+            // Working with "shared" connection
+            synchronized (readCon) {
                 for (final Pair pair : pairsChunk) {
                     permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, readCon), 60);
                 }
-            } finally {
-                Database.back(contextId, false, readCon);
             }
         } catch (final OXException e) {
             LOG.error("Failed loading permissions.", e);
