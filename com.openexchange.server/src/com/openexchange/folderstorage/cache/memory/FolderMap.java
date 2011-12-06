@@ -174,9 +174,8 @@ public final class FolderMap {
     }
 
     private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
-        final Runnable task = new RunnableImpl(folderId, treeId, loadSubfolders);
         final ThreadPoolService threadPool = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
-        threadPool.submit(ThreadPools.task(task), AbortBehavior.getInstance());
+        threadPool.submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders)), AbortBehavior.getInstance());
     }
 
     public Folder put(final String treeId, final Folder folder) {
