@@ -504,6 +504,8 @@ public final class ListLsubCache {
                 MAP.remove(key);
             }
             throw e;
+        } catch (final InterruptedException e) {
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -545,15 +547,12 @@ public final class ListLsubCache {
         }
     }
 
-    private static ListLsubCollection getFrom(final Future<ListLsubCollection> future) throws OXException {
+    private static ListLsubCollection getFrom(final Future<ListLsubCollection> future) throws OXException, InterruptedException {
         if (null == future) {
             return null;
         }
         try {
             return future.get();
-        } catch (final InterruptedException e) {
-            // Cannot occur
-            throw new IllegalStateException(e);
         } catch (final ExecutionException e) {
             final Throwable t = e.getCause();
             if (t instanceof OXException) {
