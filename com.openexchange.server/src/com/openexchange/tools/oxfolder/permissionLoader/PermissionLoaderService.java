@@ -1,0 +1,745 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.tools.oxfolder.permissionLoader;
+
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReferenceArray;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.concurrent.TimeoutConcurrentMap;
+import com.openexchange.concurrent.TimeoutListener;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.EnumComponent;
+import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.server.osgi.ServerActivator;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.threadpool.Task;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+
+/**
+ * {@link PermissionLoaderService}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class PermissionLoaderService implements Runnable {
+
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(PermissionLoaderService.class));
+
+    private static volatile PermissionLoaderService instance;
+
+    /**
+     * Gets the {@link JobQueue} instance
+     *
+     * @return The {@link JobQueue} instance
+     */
+    public static PermissionLoaderService getInstance() {
+        PermissionLoaderService tmp = instance;
+        if (null == tmp) {
+            synchronized (PermissionLoaderService.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    instance = tmp = new PermissionLoaderService();
+                }
+            }
+        }
+        return tmp;
+    }
+
+    /**
+     * Drops the {@link JobQueue} instance.
+     */
+    public static void dropInstance() {
+        final PermissionLoaderService tmp = instance;
+        if (null != tmp) {
+            tmp.shutDown();
+            instance = null;
+        }
+    }
+
+    /**
+     * The poison element.
+     */
+    private static final Pair POISON = newPair(-1, -1);
+
+    /**
+     * The max. running time of 1 minute.
+     */
+    private static final long MAX_RUNNING_TIME = 60000;
+
+    /**
+     * The wait time in milliseconds.
+     */
+    private static final long WAIT_TIME = 3000;
+
+    /**
+     * The max. number of concurrent tasks.
+     */
+    private static final int MAX_CONCURRENT_TASKS = -1;
+
+    /**
+     * The container for currently running concurrent filler tasks.
+     */
+    protected final AtomicReferenceArray<StampedFuture> concurrentFutures;
+
+    private final BlockingQueue<Pair> queue;
+
+    private volatile TimeoutConcurrentMap<Pair, OCLPermission[]> permsMap;
+
+    private final AtomicBoolean keepgoing;
+
+    private volatile Future<Object> future;
+
+    private final String simpleName;
+
+    private final Gate gate;
+
+    private final StampedFuture placeHolder;
+
+    private volatile ServiceTracker<ThreadPoolService, ThreadPoolService> poolTracker;
+
+    protected volatile ThreadPoolService threadPool;
+
+    private volatile TimeoutConcurrentMap<Integer, Connection> pooledCons;
+
+    /**
+     * Initializes a new {@link PermissionLoaderService}.
+     */
+    public PermissionLoaderService() {
+        super();
+        placeHolder = MAX_CONCURRENT_TASKS > 0 ? new StampedFuture(null) : null;
+        keepgoing = new AtomicBoolean(true);
+        concurrentFutures = MAX_CONCURRENT_TASKS > 0 ? new AtomicReferenceArray<StampedFuture>(MAX_CONCURRENT_TASKS) : null;
+        queue = new LinkedBlockingQueue<Pair>();
+        simpleName = getClass().getSimpleName();
+        gate = new Gate(-1);
+    }
+
+    /**
+     * Starts up this service.
+     * 
+     * @throws OXException If start-up fails
+     */
+    public void startUp() throws OXException {
+        final BundleContext context = ServerActivator.getContext();
+        final ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService> customizer = new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
+
+            @Override
+            public ThreadPoolService addingService(final ServiceReference<ThreadPoolService> reference) {
+                final ThreadPoolService service = context.getService(reference);
+                threadPool = service;
+                return service;
+            }
+
+            @Override
+            public void modifiedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
+                // Nope
+            }
+
+            @Override
+            public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
+                threadPool = null;
+                context.ungetService(reference);
+            }
+        };
+        poolTracker = new ServiceTracker<ThreadPoolService, ThreadPoolService>(context, ThreadPoolService.class, customizer);
+        poolTracker.open();
+
+        future = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
+        permsMap = new TimeoutConcurrentMap<Pair, OCLPermission[]>(20, true);
+        pooledCons = new TimeoutConcurrentMap<Integer, Connection>(1, false);
+        gate.open();
+    }
+
+    /**
+     * Shuts-down this service.
+     */
+    public void shutDown() {
+        keepgoing.set(false);
+        queue.offer(POISON);
+        try {
+            future.get(3, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+        } catch (final ExecutionException e) {
+            LOG.error("Error stopping queue", e.getCause());
+        } catch (final TimeoutException e) {
+            future.cancel(true);
+        } finally {
+            if (null != permsMap) {
+                permsMap.dispose();
+                permsMap = null;
+            }
+            if (null != poolTracker) {
+                poolTracker.close();
+                poolTracker = null;
+            }
+        }
+    }
+
+    /**
+     * Submits to load permission for specified folder in given context.
+     * @param contextId The context identifier
+     * @param folderId The folder identifier
+     */
+    public void submitPermissionsFor(final int contextId, final int folderId) {
+        queue.offer(newPair(folderId, contextId));
+    }
+
+    /**
+     * Submits to load permission for specified folder in given context.
+     *
+     * @param folderId The folder identifier
+     * @param contextId The context identifier
+     */
+    public void submitPermissionsFor(final int contextId, final int... folderIds) {
+        final List<Pair> tmp = new ArrayList<Pair>(folderIds.length);
+        for (final int folderId : folderIds) {
+            tmp.add(newPair(folderId, contextId));
+        }
+        queue.addAll(tmp);
+    }
+
+    /**
+     * Polls the possibly loaded permissions for specified folder in given context.
+     * 
+     * @param folderId The folder identifier
+     * @param contextId The context identifier
+     * @return The loaded permissions or <code>null</code>
+     */
+    public OCLPermission[] pollPermissions(final int folderId, final int contextId) {
+        return permsMap.remove(newPair(folderId, contextId));
+    }
+
+    private final class DelegaterTask implements Task<Object> {
+
+        private final List<Pair> list;
+        private final TObjectProcedure<List<Pair>> proc;
+
+        protected DelegaterTask(final List<Pair> list, final TObjectProcedure<List<Pair>> proc) {
+            super();
+            this.list = list;
+            this.proc = proc;
+        }
+
+        @Override
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            // 
+        }
+
+        @Override
+        public void beforeExecute(final Thread t) {
+            // 
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            // 
+        }
+
+        @Override
+        public Object call() throws Exception {
+            groupByContext(list).forEachValue(proc);
+            return null;
+        }
+
+    }
+
+    @Override
+    public void run() {
+        try {
+            final Gate gate = this.gate;
+            final List<Pair> list = new ArrayList<Pair>(128);
+            final TObjectProcedure<List<Pair>> proc = new TObjectProcedure<List<Pair>>() {
+
+                @Override
+                public boolean execute(final List<Pair> pairs) {
+                    try {
+                        handlePairs(pairs, LOG.isDebugEnabled());
+                    } catch (final InterruptedException e) {
+                        LOG.error("Interrupted permission loader run.", e);
+                    } catch (final Exception e) {
+                        LOG.error("Failed permission loader run.", e);
+                    }
+                    return true;
+                }
+            };
+            while (keepgoing.get()) {
+                /*
+                 * Check if paused
+                 */
+                gate.pass();
+                try {
+                    /*
+                     * Proceed taking from queue
+                     */
+                    if (queue.isEmpty()) {
+                        final Pair next;
+                        try {
+                            next = queue.take();
+                        } catch (final InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            return;
+                        }
+                        if (POISON == next) {
+                            return;
+                        }
+                        list.add(next);
+                        // Await possible more
+                        Thread.sleep(50);
+                    }
+                    queue.drainTo(list);
+                    final boolean quit = list.remove(POISON);
+                    if (!list.isEmpty()) {
+                        final DelegaterTask task = new DelegaterTask(new ArrayList<Pair>(list), proc);
+                        final ThreadPoolService threadPool = this.threadPool;
+                        if (null == threadPool) {
+                            task.call();
+                        } else {
+                            threadPool.submit(task);
+                        }
+                    }
+                    if (quit) {
+                        return;
+                    }
+                    list.clear();
+                } finally {
+                    gate.signalDone();
+                }
+            }
+        } catch (final InterruptedException e) {
+            LOG.error("Interrupted permission loader run.", e);
+        } catch (final Exception e) {
+            LOG.error("Failed permission loader run.", e);
+        }
+    }
+
+    private static final int MAX_FILLER_CHUNK = 1024;
+
+    /**
+     * Handles specified equally-grouped fillers
+     * 
+     * @param groupedPairs The equally-grouped pairs
+     * @throws InterruptedException If thread is interrupted
+     */
+    protected void handlePairs(final List<Pair> groupedPairs, final boolean debug) throws InterruptedException {
+        final int size = groupedPairs.size();
+        final int configuredBlockSize = MAX_FILLER_CHUNK;
+        if (size <= configuredBlockSize) {
+            handlePairsSublist(groupedPairs, simpleName, debug);
+        } else {
+            int fromIndex = 0;
+            while (fromIndex < size) {
+                final int toIndex = fromIndex + configuredBlockSize;
+                if (toIndex > size) {
+                    schedulePairsSublist(groupedPairs.subList(fromIndex, size), debug);
+                    fromIndex = size;
+                } else {
+                    schedulePairsSublist(groupedPairs.subList(fromIndex, toIndex), debug);
+                    fromIndex = toIndex;
+                }
+            }
+        }
+    }
+
+    private void schedulePairsSublist(final List<Pair> groupedPairsSublist, final boolean debug) throws InterruptedException {
+        final ThreadPoolService threadPool = this.threadPool;
+        if (null == threadPool) {
+            /*
+             * Caller runs because thread pool is absent
+             */
+            handlePairsSublist(groupedPairsSublist, simpleName, debug);
+        } else if (null == concurrentFutures) {
+            /*
+             * Submit without check for a free slot
+             */
+            final PairHandlerTask task = new PairHandlerTask(groupedPairsSublist, debug);
+            threadPool.submit(ThreadPools.task(task));
+            task.start(null);
+        } else {
+            /*
+             * Find a free or elapsed slot
+             */
+            int index = -1;
+            while (index < 0) {
+                final long earliestStamp = System.currentTimeMillis() - MAX_RUNNING_TIME;
+                for (int i = 0; (index < 0) && (i < MAX_CONCURRENT_TASKS); i++) {
+                    final StampedFuture sf = concurrentFutures.get(i);
+                    if (null == sf) {
+                        if (concurrentFutures.compareAndSet(i, null, placeHolder)) {
+                            index = i; // Found a free slot
+                        }
+                    } else if (sf.getStamp() < earliestStamp) { // Elapsed
+                        sf.getFuture().cancel(true);
+                        if (debug) {
+                            LOG.debug("Cancelled elapsed task running for " + (System.currentTimeMillis() - sf.getStamp()) + "msec.");
+                        }
+                        if (concurrentFutures.compareAndSet(i, sf, placeHolder)) {
+                            index = i; // Found a slot with an elapsed task
+                        }
+                    }
+                }
+                if (debug) {
+                    LOG.debug(index < 0 ? "Awaiting a free/elapsed slot..." : "Found a free/elapsed slot...");
+                }
+                if (index < 0) {
+                    synchronized (placeHolder) {
+                        placeHolder.wait(WAIT_TIME);
+                    }
+                }
+            }
+            /*
+             * Submit to a free worker thread
+             */
+            final PairHandlerTask task = new IndexedPairHandlerTask(groupedPairsSublist, index, debug);
+            final Future<Object> f = threadPool.submit(ThreadPools.task(task));
+            final StampedFuture sf = new StampedFuture(f);
+            concurrentFutures.set(index, sf);
+            task.start(sf);
+        }
+    }
+
+    /**
+     * Handles specified chunk of equally-grouped pairs
+     * 
+     * @param pairsChunk The chunk of equally-grouped pairs
+     * @param threadDesc The thread description
+     */
+    protected void handlePairsSublist(final List<Pair> pairsChunk, final String threadDesc, final boolean debug) {
+        if (pairsChunk.isEmpty()) {
+            return;
+        }
+        final long st = debug ? System.currentTimeMillis() : 0L;
+        try {
+            /*
+             * Handle fillers in chunks
+             */
+            final int contextId = pairsChunk.get(0).contextId;
+            final Integer key = Integer.valueOf(contextId);
+            /*
+             * Get read-only connection
+             */
+            Connection readCon = pooledCons.get(key);
+            if (null == readCon) {
+                final TimeoutListener<Connection> listener = new TimeoutListener<Connection>() {
+
+                    @Override
+                    public void onTimeout(final Connection con) {
+                        Database.backNoTimeout(contextId, false, con);
+                        if (debug) {
+                            LOG.debug("Released \"shared\" connection.");
+                        }
+                    }
+                };
+                final Connection newReadCon = Database.getNoTimeout(contextId, false);
+                readCon = pooledCons.putIfAbsent(key, newReadCon, 1, listener);
+                if (null != readCon) {
+                    // Wasn't able to put connection; work with newly fetched connection
+                    if (debug) {
+                        LOG.debug("Using \"un-shared\" connection.");
+                    }
+                    try {
+                        for (final Pair pair : pairsChunk) {
+                            permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, newReadCon), 60);
+                        }
+                    } finally {
+                        Database.backNoTimeout(contextId, false, newReadCon);
+                        if (debug) {
+                            LOG.debug("Released \"un-shared\" connection.");
+                        }
+                    }
+                    // Leave
+                    return;
+                }
+                // "Shared" connection
+                readCon = newReadCon;
+            } else if (debug) {
+                LOG.debug("Using \"shared\" connection.");
+            }
+            // Working with "shared" connection
+            synchronized (readCon) {
+                for (final Pair pair : pairsChunk) {
+                    permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, readCon), 60);
+                }
+            }
+        } catch (final OXException e) {
+            LOG.error("Failed loading permissions.", e);
+        } catch (final RuntimeException e) {
+            LOG.error("Failed loading permissions.", e);
+        } finally {
+            if (debug) {
+                final long dur = System.currentTimeMillis() - st;
+                final StringBuilder tmp = new StringBuilder(64).append("Handled ").append(pairsChunk.size()).append(" pairs");
+                if (null != threadDesc) {
+                    tmp.append(" with thread \"").append(threadDesc).append('"');
+                }
+                tmp.append(" in ").append(dur).append("msec.");
+                LOG.debug(tmp.toString());
+            }
+            if (null != placeHolder) {
+                synchronized (placeHolder) {
+                    placeHolder.notifyAll();
+                }
+            }
+        }
+    }
+
+    private static final String SQL_LOAD_P =
+        "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
+
+    protected static OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(SQL_LOAD_P);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, folderId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                /*
+                 * Empty result set
+                 */
+                return new OCLPermission[0];
+            }
+            final ArrayList<OCLPermission> ret = new ArrayList<OCLPermission>(8);
+            do {
+                final OCLPermission p = new OCLPermission();
+                p.setEntity(rs.getInt(1)); // Entity
+                p.setAllPermission(rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5)); // fp, orp, owp, and odp
+                p.setFolderAdmin(rs.getInt(6) > 0 ? true : false); // admin_flag
+                p.setGroupPermission(rs.getInt(7) > 0 ? true : false); // group_flag
+                p.setSystem(rs.getInt(8)); // system
+                ret.add(p);
+            } while (rs.next());
+            return ret.toArray(new OCLPermission[ret.size()]);
+        } catch (final SQLException e) {
+            throw SearchIteratorExceptionCodes.SQL_ERROR.create(e, EnumComponent.FOLDER, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    protected static TIntObjectMap<List<Pair>> groupByContext(final Collection<Pair> pairs) {
+        final TIntObjectMap<List<Pair>> map = new TIntObjectHashMap<List<Pair>>(pairs.size());
+        for (final Pair pair : pairs) {
+            final int contextId = pair.contextId;
+            List<Pair> set = map.get(contextId);
+            if (null == set) {
+                set = new LinkedList<Pair>();
+                map.put(contextId, set);
+            }
+            set.add(pair);
+        }
+        return map;
+    }
+
+    private static Pair newPair(final int folderid, final int contextId) {
+        return new Pair(folderid, contextId);
+    }
+
+    private static final class Pair {
+
+        public final int folderId;
+
+        public final int contextId;
+
+        private final int hash;
+
+        public Pair(final int folderId, final int contextId) {
+            super();
+            this.folderId = folderId;
+            this.contextId = contextId;
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + folderId;
+            result = prime * result + contextId;
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Pair)) {
+                return false;
+            }
+            final Pair other = (Pair) obj;
+            if (folderId != other.folderId) {
+                return false;
+            }
+            if (contextId != other.contextId) {
+                return false;
+            }
+            return true;
+        }
+
+    }
+
+    private class PairHandlerTask implements Task<Object> {
+
+        protected final List<Pair> pairs;
+
+        protected final CountDownLatch startSignal;
+
+        protected final boolean debug;
+
+        protected PairHandlerTask(final List<Pair> pairs, final boolean debug) {
+            super();
+            this.debug = debug;
+            this.startSignal = new CountDownLatch(1);
+            this.pairs = pairs;
+        }
+
+        /**
+         * Opens this task for processing.
+         * 
+         * @param sf The stamped future object associated with this task
+         */
+        protected void start(final StampedFuture sf) {
+            startSignal.countDown();
+        }
+
+        @Override
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            // Nope
+        }
+
+        @Override
+        public void beforeExecute(final Thread t) {
+            // Nope
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            // Nope
+        }
+
+        @Override
+        public Object call() throws Exception {
+            startSignal.await();
+            handlePairsSublist(pairs, null, debug);
+            return null;
+        }
+
+    }
+
+    private final class IndexedPairHandlerTask extends PairHandlerTask {
+
+        private final int indexPos;
+
+        private volatile StampedFuture sf;
+
+        protected IndexedPairHandlerTask(final List<Pair> pairs, final int indexPos, final boolean debug) {
+            super(pairs, debug);
+            this.indexPos = indexPos;
+        }
+
+        /**
+         * Opens this task for processing.
+         * 
+         * @param sf The stamped future object associated with this task
+         */
+        @Override
+        protected void start(final StampedFuture sf) {
+            this.sf = sf;
+            startSignal.countDown();
+        }
+
+        @Override
+        public Object call() throws Exception {
+            try {
+                startSignal.await();
+                final StampedFuture sf = this.sf;
+                if (null != sf) {
+                    sf.setStamp(System.currentTimeMillis());
+                }
+                handlePairsSublist(pairs, String.valueOf(indexPos + 1), debug);
+                return null;
+            } finally {
+                concurrentFutures.set(indexPos, null);
+            }
+        }
+
+    }
+
+}

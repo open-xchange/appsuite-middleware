@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,56 @@
  *
  */
 
-package com.openexchange.push.imapidle;
+package com.openexchange.tools.oxfolder.permissionLoader;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Simple {@link Runnable} to trigger a listener's {@link ImapIdlePushListener#checkNewMail()} method.
+ * {@link StampedFuture}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ImapIdlePushListenerTask implements Runnable {
+public final class StampedFuture {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImapIdlePushListenerTask.class));
+    private final Future<Object> future;
 
-    private final ImapIdlePushListener listener;
+    private final AtomicLong stamp;
 
-    public ImapIdlePushListenerTask(final ImapIdlePushListener listener) {
+    /**
+     * Initializes a new {@link StampedFuture}.
+     */
+    public StampedFuture(final Future<Object> future) {
         super();
-        this.listener = listener;
+        this.future = future;
+        stamp = new AtomicLong(Long.MAX_VALUE);
     }
 
-    @Override
-    public void run() {
-        try {
-            while (listener.checkNewMail()) {
-                // Nothing...
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.info("Left checkNewMail() method for user " + listener.getUserId() + " in context " + listener.getContextId());
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            final ImapIdlePushListenerRegistry registry = ImapIdlePushListenerRegistry.getInstance();
-            try {
-                registry.removePushListener(listener.getContextId(), listener.getUserId());
-            } catch (final Exception e) {
-                registry.purgeUserPushListener(listener.getContextId(), listener.getUserId());
-            }
-        }
+    /**
+     * Sets the start-up time stamp.
+     *
+     * @param stamp The stamp millis
+     */
+    public void setStamp(final long stamp) {
+        this.stamp.set(stamp);
+    }
+
+    /**
+     * Gets the stamp
+     *
+     * @return The stamp
+     */
+    public long getStamp() {
+        return stamp.get();
+    }
+
+    /**
+     * Gets the future
+     *
+     * @return The future
+     */
+    public Future<Object> getFuture() {
+        return future;
     }
 
 }
