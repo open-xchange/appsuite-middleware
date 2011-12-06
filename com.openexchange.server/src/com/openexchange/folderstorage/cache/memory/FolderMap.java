@@ -72,6 +72,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
+// TODO: Auto-generated Javadoc
 /**
  * {@link FolderMap} - An in-memory folder map with LRU eviction policy.
  *
@@ -87,6 +88,10 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
+     * 
+     * @param maxCapacity the max capacity
+     * @param maxLifeUnits the max life units
+     * @param unit the unit
      */
     public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit) {
         super();
@@ -97,6 +102,9 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
+     * 
+     * @param maxCapacity the max capacity
+     * @param maxLifeMillis the max life millis
      */
     public FolderMap(final int maxCapacity, final int maxLifeMillis) {
         this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS);
@@ -117,10 +125,25 @@ public final class FolderMap {
         map.keySet().removeAll(removeKeys);
     }
 
+    /**
+     * Put if absent.
+     * 
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder putIfAbsent(final String treeId, final Folder folder) {
         return putIfAbsent(folder.getID(), treeId, folder);
     }
 
+    /**
+     * Put if absent.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder putIfAbsent(final String folderId, final String treeId, final Folder folder) {
         final Wrapper wrapper = wrapperOf(folder);
         final Key key = keyOf(folderId, treeId);
@@ -142,18 +165,42 @@ public final class FolderMap {
         return prev.getValue();
     }
 
+    /**
+     * Size.
+     * 
+     * @return The int
+     */
     public int size() {
         return map.size();
     }
 
+    /**
+     * Checks if empty flag is set.
+     * 
+     * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
+     */
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    /**
+     * Contains.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @return <code>true</code> if successful; otherwsie <code>false</code>
+     */
     public boolean contains(final String folderId, final String treeId) {
         return map.containsKey(keyOf(folderId, treeId));
     }
 
+    /**
+     * Gets the folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @return The folder
+     */
     public Folder get(final String folderId, final String treeId) {
         final Key key = keyOf(folderId, treeId);
         final Wrapper wrapper = map.get(key);
@@ -178,10 +225,25 @@ public final class FolderMap {
         threadPool.submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders)), AbortBehavior.getInstance());
     }
 
+    /**
+     * Puts specified folder.
+     * 
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder put(final String treeId, final Folder folder) {
         return put(folder.getID(), treeId, folder);
     }
 
+    /**
+     * Puts specified folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder put(final String folderId, final String treeId, final Folder folder) {
         final Key key = keyOf(folderId, treeId);
         final Wrapper wrapper = map.put(key, wrapperOf(folder));
@@ -196,6 +258,13 @@ public final class FolderMap {
         return wrapper.getValue();
     }
 
+    /**
+     * Removes the folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @return The folder
+     */
     public Folder remove(final String folderId, final String treeId) {
         final Wrapper wrapper = map.remove(keyOf(folderId, treeId));
         if (null == wrapper) {
@@ -212,6 +281,9 @@ public final class FolderMap {
         return ret;
     }
 
+    /**
+     * Clears this map.
+     */
     public void clear() {
         map.clear();
     }
