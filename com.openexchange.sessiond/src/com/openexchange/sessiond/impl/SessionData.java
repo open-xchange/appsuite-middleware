@@ -302,7 +302,7 @@ final class SessionData {
                 while (iter.hasNext()) {
                     final SessionControl control = iter.next();
                     final Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
+                    if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
                         iter.remove();
                         retval.add(control);
                     }
@@ -319,7 +319,7 @@ final class SessionData {
         try {
             for (final SessionContainer container : sessionList) {
                 final SessionControl control = container.getAnySessionByUser(userId, contextId);
-                if ( control != null ) {
+                if (control != null) {
                     return control;
                 }
             }
@@ -334,7 +334,7 @@ final class SessionData {
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 for (final SessionControl control : longTermMap.values()) {
                     final Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
+                    if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
                         return control;
                     }
                 }
@@ -350,7 +350,7 @@ final class SessionData {
         try {
             for (final SessionContainer container : sessionList) {
                 final SessionControl control = container.getAnySessionByUser(userId, contextId);
-                if ( control != null && matcher.accepts(control.getSession())) {
+                if ((control != null) && matcher.accepts(control.getSession())) {
                     return control.getSession();
                 }
             }
