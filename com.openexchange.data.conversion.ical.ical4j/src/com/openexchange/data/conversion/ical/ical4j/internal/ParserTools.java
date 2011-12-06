@@ -49,24 +49,17 @@
 
 package com.openexchange.data.conversion.ical.ical4j.internal;
 
-import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
-import java.util.TreeMap;
-
-import org.apache.commons.collections.BidiMap;
-import org.apache.commons.collections.DoubleOrderedMap;
-import org.apache.commons.collections.bidimap.TreeBidiMap;
-
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.property.DateProperty;
+import org.apache.commons.collections.BidiMap;
+import org.apache.commons.collections.bidimap.TreeBidiMap;
 
 public final class ParserTools {
 

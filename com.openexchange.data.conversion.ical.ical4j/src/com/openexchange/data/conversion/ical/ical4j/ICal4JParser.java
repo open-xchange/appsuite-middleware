@@ -91,7 +91,6 @@ import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
-
 import edu.emory.mathcs.backport.java.util.Arrays;
 
 /**
