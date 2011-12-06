@@ -861,7 +861,7 @@ public final class IMAPException extends OXException {
         /**
          * IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user=%3$s, context=%3$s)
          */
-        INVALID_MESSAGE_EXT("IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user=%3$s, context=%3$s)", INVALID_MESSAGE),
+        INVALID_MESSAGE_EXT("IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user=%3$s, context=%4$s)", INVALID_MESSAGE),
 
         ;
 

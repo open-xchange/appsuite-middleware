@@ -51,17 +51,20 @@ package com.openexchange.messaging.smslmms;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.messaging.ConfigProvidingMessagingService;
 import com.openexchange.messaging.MessagingAccountAccess;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingAccountTransport;
 import com.openexchange.messaging.MessagingAction;
 import com.openexchange.messaging.MessagingPermission;
-import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.smslmms.api.SMSAccess;
 import com.openexchange.messaging.smslmms.api.SMSConfiguration;
 import com.openexchange.messaging.smslmms.api.SMSService;
@@ -73,7 +76,7 @@ import com.openexchange.session.Session;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SMSMessagingService implements MessagingService, SMSService {
+public class SMSMessagingService implements ConfigProvidingMessagingService, SMSService {
 
     private static final List<MessagingAction> ACTIONS = Collections.unmodifiableList(Arrays.asList(
         new MessagingAction(SMSMessagingConstants.TYPE_REPLY_TO, MessagingAction.Type.STORAGE, SMSMessagingConstants.TYPE_NEW),
@@ -88,13 +91,38 @@ public class SMSMessagingService implements MessagingService, SMSService {
     /**
      * Initializes a new {@link SMSMessagingService}.
      * 
-     * @param smsService THE SMS/MMS service
+     * @param smsService The SMS/MMS service
      */
     public SMSMessagingService(final SMSService smsService) {
         super();
         this.smsService = smsService;
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
+    }
+
+    @Override
+    public Map<String, Object> getConfiguration(final int accountId, final Session session) throws OXException {
+        final SMSConfiguration smsConfiguration = smsService.getSMSConfiguration(accountId, session);
+        final Map<String, Object> map = new HashMap<String, Object>(16);
+
+        map.put(SMSConfiguration.PROP_ADDRESSES, smsConfiguration.getAddresses());
+        map.put(SMSConfiguration.PROP_DISPLAY_STRING, smsConfiguration.getDisplayString());
+        map.put(SMSConfiguration.PROP_ENABLED, Boolean.valueOf(smsConfiguration.isEnabled()));
+        map.put(SMSConfiguration.PROP_FOLDER_STORAGE, Boolean.valueOf(smsConfiguration.supportsFolderStorage()));
+        map.put(SMSConfiguration.PROP_LENGTH, Integer.valueOf(smsConfiguration.getLength()));
+        map.put(SMSConfiguration.PROP_MMS, Boolean.valueOf(smsConfiguration.isMMS()));
+        map.put(SMSConfiguration.PROP_MULTI_SMS, Boolean.valueOf(smsConfiguration.getMultiSMS()));
+        map.put(SMSConfiguration.PROP_SMS_ACCESS, Boolean.valueOf(smsConfiguration.supportsAccess()));
+        map.put(SMSConfiguration.PROP_UPSELL_LINK, smsConfiguration.getUpsellLink());
+
+        for (final Entry<String,Object> entry : smsConfiguration.getConfiguration().entrySet()) {
+            final String propName = entry.getKey();
+            if (!map.containsKey(propName)) {
+                map.put(propName, entry.getValue());
+            }
+        }
+
+        return map;
     }
 
     @Override

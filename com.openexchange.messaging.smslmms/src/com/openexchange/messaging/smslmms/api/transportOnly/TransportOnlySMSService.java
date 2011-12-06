@@ -49,6 +49,8 @@
 
 package com.openexchange.messaging.smslmms.api.transportOnly;
 
+import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.smslmms.api.AbstractSMSService;
@@ -83,7 +85,7 @@ public abstract class TransportOnlySMSService extends AbstractSMSService {
 
     @Override
     public SMSConfiguration getSMSConfiguration(final int accountId, final Session session) throws OXException {
-        return getSMSConfigurationInternal(accountId, session);
+        return new AccessLessSMSConfiguration(getSMSConfigurationInternal(accountId, session));
     }
 
     /**
@@ -95,5 +97,71 @@ public abstract class TransportOnlySMSService extends AbstractSMSService {
      * @throws OXException If configuration cannot be returned
      */
     protected abstract SMSConfiguration getSMSConfigurationInternal(int accountId, Session session) throws OXException;
+
+    private static final class AccessLessSMSConfiguration implements SMSConfiguration {
+
+        private final SMSConfiguration smsConfiguration;
+
+        protected AccessLessSMSConfiguration(final SMSConfiguration smsConfiguration) {
+            super();
+            this.smsConfiguration = smsConfiguration;
+        }
+
+        @Override
+        public Map<String, Object> getConfiguration() {
+            return smsConfiguration.getConfiguration();
+        }
+
+        @Override
+        public List<String> getAddresses() {
+            return smsConfiguration.getAddresses();
+        }
+
+        @Override
+        public String getDisplayString() {
+            return smsConfiguration.getDisplayString();
+        }
+
+        @Override
+        public int getLength() {
+            return smsConfiguration.getLength();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return smsConfiguration.isEnabled();
+        }
+
+        @Override
+        public boolean isCaptcha() {
+            return smsConfiguration.isCaptcha();
+        }
+
+        @Override
+        public boolean getMultiSMS() {
+            return smsConfiguration.getMultiSMS();
+        }
+
+        @Override
+        public boolean isMMS() {
+            return smsConfiguration.isMMS();
+        }
+
+        @Override
+        public boolean supportsFolderStorage() {
+            return false;
+        }
+
+        @Override
+        public boolean supportsAccess() {
+            return false;
+        }
+
+        @Override
+        public String getUpsellLink() {
+            return smsConfiguration.getUpsellLink();
+        }
+
+    }
 
 }

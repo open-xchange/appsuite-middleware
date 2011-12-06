@@ -47,65 +47,28 @@
  *
  */
 
-package com.openexchange.messaging.smslmms.api.transportOnly;
+package com.openexchange.messaging;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingFolder;
-import com.openexchange.messaging.MessagingFolderAccess;
-import com.openexchange.messaging.smslmms.api.SMSAccess;
-import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link EmptySMSAccess} - The SMS/MMS service providing an empty message/folder storage access.
- * 
+ * {@link ConfigProvidingMessagingService} - Extends {@link MessagingService} by {@link #getConfiguration(int, Session)}.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class EmptySMSAccess implements SMSAccess {
-
-    private final int accountId;
-
-    private final int userId;
-
-    private final int contextId;
+public interface ConfigProvidingMessagingService extends MessagingService {
 
     /**
-     * Initializes a new {@link EmptySMSAccess}.
+     * Gets this account's configuration.
+     *
+     * @param accountId The account identifier
+     * @param session The session providing needed user data
+     * @return The configuration as a {@link Map}
+     * @throws OXException If configuration cannot be returned
      */
-    public EmptySMSAccess(final int accountId, final int userId, final int contextId) {
-        super();
-        this.accountId = accountId;
-        this.userId = userId;
-        this.contextId = contextId;
-    }
-
-    @Override
-    public void connectAccess() throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void closeAccess() {
-        // Nope
-    }
-
-    @Override
-    public int getAccountId() {
-        return accountId;
-    }
-
-    @Override
-    public SMSMessageAccess getSMSMessageAccess() throws OXException {
-        return new EmptySMSMessageAccess(accountId, userId, contextId);
-    }
-
-    @Override
-    public MessagingFolderAccess getFolderAccess() throws OXException {
-        return new EmptySMSFolderAccess(accountId, userId, contextId);
-    }
-
-    @Override
-    public MessagingFolder getRootFolder() throws OXException {
-        return getFolderAccess().getRootFolder();
-    }
+    public Map<String, Object> getConfiguration(int accountId, Session session) throws OXException;
 
 }

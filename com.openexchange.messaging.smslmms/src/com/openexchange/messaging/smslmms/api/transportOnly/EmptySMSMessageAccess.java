@@ -64,7 +64,7 @@ import com.openexchange.messaging.smslmms.api.SMSMessageAccess;
 import com.openexchange.messaging.smslmms.api.SMSService;
 
 /**
- * {@link EmptySMSMessageAccess}
+ * {@link EmptySMSMessageAccess} - The empty SMS/MMS message access.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
