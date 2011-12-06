@@ -50,6 +50,8 @@
 package com.openexchange.groupware.tools.iterator;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
@@ -346,7 +348,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         final boolean prefetchEnabled = ServerConfig.getBoolean(Property.PrefetchEnabled);
         try {
             if (this.rs.next()) {
-                next = createFolderObjectFromSelectedEntry();
+                next = createFolderObjectFromSelectedEntry(true);
             } else if (!prefetchEnabled) {
                 closeResources();
             }
@@ -359,13 +361,18 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
              * ResultSet prefetch is enabled. Fill iterator with whole ResultSet's content
              */
             try {
+                final TIntList tmp = new TIntArrayList();
                 while (this.rs.next()) {
-                    FolderObject fo = createFolderObjectFromSelectedEntry();
+                    FolderObject fo = createFolderObjectFromSelectedEntry(false);
                     while ((fo == null) && rs.next()) {
-                        fo = createFolderObjectFromSelectedEntry();
+                        fo = createFolderObjectFromSelectedEntry(false);
                     }
-                    prefetchQueue.offer(fo);
+                    if (null != fo) {
+                        prefetchQueue.offer(fo);
+                        tmp.add(fo.getObjectID());
+                    }
                 }
+                permissionLoader.submitPermissionsFor(ctx.getContextId(), tmp.toArray());
                 if (future != null) {
                     prefetchQueue.offer(future);
                     future = null;
@@ -393,7 +400,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     /**
      * @return a <code>FolderObject</code> from current <code>ResultSet.next()</code> data
      */
-    private final FolderObject createFolderObjectFromSelectedEntry() throws SQLException, OXException {
+    private final FolderObject createFolderObjectFromSelectedEntry(final boolean submitPermissions) throws SQLException, OXException {
         // fname, fuid, module, type, creator
         final int folderId = rs.getInt(1);
         final FolderObject fo;
@@ -438,10 +445,12 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * Read & set permissions
              */
-            if (null == permissionLoader) {
-                fo.setPermissionsAsArray(loadFolderPermissions(folderId, ctx.getContextId(), readCon));
-            } else {
-                permissionLoader.submitPermissionsFor(folderId, ctx.getContextId());
+            if (submitPermissions) {
+                if (null == permissionLoader) {
+                    fo.setPermissionsAsArray(loadFolderPermissions(folderId, ctx.getContextId(), readCon));
+                } else {
+                    permissionLoader.submitPermissionsFor(ctx.getContextId(), folderId);
+                }
             }
         }
         return fo;
@@ -574,9 +583,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                  * Select next from underlying ResultSet
                  */
                 if (rs.next()) {
-                    next = createFolderObjectFromSelectedEntry();
+                    next = createFolderObjectFromSelectedEntry(true);
                     while ((next == null) && rs.next()) {
-                        next = createFolderObjectFromSelectedEntry();
+                        next = createFolderObjectFromSelectedEntry(true);
                     }
                     if (next == null) {
                         close();
@@ -743,9 +752,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
                 return retval;
             }
             while (rs.next()) {
-                FolderObject fo = createFolderObjectFromSelectedEntry();
+                FolderObject fo = createFolderObjectFromSelectedEntry(true);
                 while ((fo == null) && rs.next()) {
-                    fo = createFolderObjectFromSelectedEntry();
+                    fo = createFolderObjectFromSelectedEntry(true);
                 }
                 if (fo != null) {
                     retval.offer(prepareFolderObject(fo));
