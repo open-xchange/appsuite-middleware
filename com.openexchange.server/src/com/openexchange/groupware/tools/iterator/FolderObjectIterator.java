@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tools.iterator;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
@@ -66,15 +65,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
@@ -85,13 +75,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
 
 /**
  * {@link FolderObjectIterator} - A {@link SearchIterator} especially for instances of {@link FolderObject}.
@@ -178,7 +165,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private FolderObject future;
 
-    private final PermissionLoader permissionLoader;
+    private final PermissionLoaderService permissionLoader;
 
     private static final String[] selectFields = {
         "fuid", "parent", "fname", "module", "type", "creating_date", "created_from", "changing_date", "changed_from", "permission_flag",
@@ -351,7 +338,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         if (containsPermissions) {
             permissionLoader = null;
         } else {
-            permissionLoader = new PermissionLoader(ctx);
+            permissionLoader = PermissionLoaderService.getInstance();
         }
         /*
          * Set next to first result set entry
@@ -454,7 +441,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (null == permissionLoader) {
                 fo.setPermissionsAsArray(loadFolderPermissions(folderId, ctx.getContextId(), readCon));
             } else {
-                permissionLoader.submitPermissionsFor(folderId);
+                permissionLoader.submitPermissionsFor(folderId, ctx.getContextId());
             }
         }
         return fo;
@@ -523,12 +510,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
     }
 
     private final void closeResources() throws OXException {
-        /*
-         * Stop permission loader, but don't set to null
-         */
-        if (null != permissionLoader) {
-            permissionLoader.stopWhenEmpty();
-        }
         OXException error = null;
         /*
          * Close ResultSet
@@ -630,7 +611,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * No permissions set, yet
              */
-            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissionsFor(folderId, 2);
+            final OCLPermission[] permissions = null == permissionLoader ? null : permissionLoader.pollPermissions(folderId, ctx.getContextId());
             fo.setPermissionsAsArray(null == permissions ? getFolderPermissions(folderId) : permissions);
         }
         /*
@@ -691,9 +672,6 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
         if (null != folders) {
             folders.clear();
-        }
-        if (null != permissionLoader) {
-            permissionLoader.close();
         }
         isClosed = true;
     }
@@ -795,181 +773,14 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             if (null != folders) {
                 folders.clear();
             }
-            if (null != permissionLoader) {
-                permissionLoader.close();
-            }
             isClosed = true;
         }
     }
 
-    private static final class SetableFutureTask extends FutureTask<OCLPermission[]> {
-
-        private static final Callable<OCLPermission[]> DUMMY = new Callable<OCLPermission[]>() {
-
-            @Override
-            public OCLPermission[] call() throws Exception {
-                return null;
-            }
-        };
-
-        /**
-         * Initializes a new {@link SetableFutureTask}.
-         */
-        public SetableFutureTask() {
-            super(DUMMY);
-        }
-
-        @Override
-        public void set(final OCLPermission[] v) {
-            super.set(v);
-        }
-
-        @Override
-        public void setException(final Throwable t) {
-            super.setException(t);
-        }
-
-    }
-
-    private static final class PermissionLoader implements Callable<Object> {
-
-        private final Context ctx;
-
-        private final ConcurrentTIntObjectHashMap<SetableFutureTask> permsMap;
-
-        private final BlockingQueue<Integer> queue;
-
-        private final Future<Object> mainFuture;
-
-        private final AtomicBoolean flag;
-
-        public PermissionLoader(final Context ctx) throws OXException {
-            super();
-            this.ctx = ctx;
-            this.flag = new AtomicBoolean(true);
-            this.permsMap = new ConcurrentTIntObjectHashMap<SetableFutureTask>();
-            this.queue = new LinkedBlockingQueue<Integer>();
-            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-            mainFuture = tps.submit(ThreadPools.task(this, PermissionLoader.class.getSimpleName()), CallerRunsBehavior.<Object> getInstance());
-        }
-
-        private final void waitForIDs(final List<Integer> ids) throws InterruptedException {
-            if (queue.isEmpty()) {
-                /*
-                 * Wait for an ID to become available
-                 */
-                ids.add(queue.take());
-            }
-            /*
-             * Gather possibly available IDs but don't wait
-             */
-            queue.drainTo(ids);
-        }
-
-        @Override
-        public Object call() throws Exception {
-            // try {
-                final Connection readCon = Database.get(ctx, false);
-                try {
-                    /*
-                     * Stay active as long as flag is true
-                     */
-                    final List<Integer> ids = new ArrayList<Integer>();
-                    final int cid = ctx.getContextId();
-                    while (flag.get()) {
-                        /*
-                         * Wait for IDs
-                         */
-                        ids.clear();
-                        waitForIDs(ids);
-                        /*
-                         * Fill future(s) from concurrent map
-                         */
-                        for (final Integer id : ids) {
-                            final int fuid = id.intValue();
-                            permsMap.get(fuid).set(loadFolderPermissions(fuid, cid, readCon));
-                        }
-                    }
-                } finally {
-                    Database.back(ctx, false, readCon);
-                }
-                /*
-                 * Return
-                 */
-                return null;
-            // } catch (final InterruptedException e) {
-            // throw e;
-            // }
-        }
-
-        public void close() {
-            flag.set(false);
-            mainFuture.cancel(true);
-            queue.clear();
-            permsMap.clear();
-        }
-
-        public void stopWhenEmpty() {
-            final ThreadPoolService tps = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-            if (null == tps) {
-                while (!queue.isEmpty()) {
-                    // Nope
-                }
-                flag.set(false);
-                mainFuture.cancel(true);
-            } else {
-                final BlockingQueue<Integer> q = queue;
-                final Future<Object> f = mainFuture;
-                final AtomicBoolean fl = flag;
-                tps.submit(ThreadPools.task(new Callable<Object>() {
-
-                    @Override
-                    public Object call() throws Exception {
-                        while (!q.isEmpty()) {
-                            // Nope
-                        }
-                        fl.set(false);
-                        f.cancel(true);
-                        return null;
-                    }
-
-                }), CallerRunsBehavior.<Object> getInstance());
-            }
-        }
-
-        public void submitPermissionsFor(final int folderId) {
-            permsMap.put(folderId, new SetableFutureTask());
-            queue.offer(Integer.valueOf(folderId));
-        }
-
-        public OCLPermission[] pollPermissionsFor(final int folderId, final int timeoutSec) throws OXException {
-            final Future<OCLPermission[]> f = permsMap.get(folderId);
-            if (null == f) {
-                return null;
-            }
-            try {
-                return f.get(timeoutSec, TimeUnit.SECONDS);
-            } catch (final InterruptedException e) {
-                /*
-                 * Wait was interrupted
-                 */
-                return null;
-            } catch (final ExecutionException e) {
-                throw new OXException(ThreadPools.launderThrowable(e, OXException.class));
-            } catch (final TimeoutException e) {
-                /*
-                 * Wait timed out
-                 */
-                return null;
-            }
-        }
-
-    } // End of PermissionLoader
-
     private static final String SQL_LOAD_P =
         "SELECT permission_id, fp, orp, owp, odp, admin_flag, group_flag, system FROM oxfolder_permissions WHERE cid = ? AND fuid = ?";
 
-    static final OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException {
+    private static final OCLPermission[] loadFolderPermissions(final int folderId, final int cid, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
