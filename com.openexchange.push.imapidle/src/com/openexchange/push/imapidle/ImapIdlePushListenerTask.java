@@ -78,7 +78,12 @@ public final class ImapIdlePushListenerTask implements Runnable {
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(listener.getContextId(), listener.getUserId());
+            final ImapIdlePushListenerRegistry registry = ImapIdlePushListenerRegistry.getInstance();
+            try {
+                registry.removePushListener(listener.getContextId(), listener.getUserId());
+            } catch (final Exception e) {
+                registry.purgeUserPushListener(listener.getContextId(), listener.getUserId());
+            }
         }
     }
 
