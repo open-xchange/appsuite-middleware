@@ -373,6 +373,7 @@ public final class ImapIdlePushListener implements PushListener {
      */
     public boolean checkNewMail() throws OXException {
         if (shutdown) {
+            LOG.info("IDLE: Listener was requested to shut-down for associated user " + userId + " in context " + contextId + ". Abort...");
             return false;
         }
         if (!running.compareAndSet(false, true)) {
