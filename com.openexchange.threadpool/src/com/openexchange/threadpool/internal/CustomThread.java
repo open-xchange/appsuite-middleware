@@ -163,12 +163,19 @@ public final class CustomThread extends Thread implements ThreadRenamer {
     }
 
     /**
-     * Gets the stack trace of the thread that invoked {@link #interrupt()}.
+     * Clears the stack trace of the thread that lastly invoked {@link #interrupt()}.
+     */
+    public void clearInterruptorStack() {
+        interruptorStack = null;
+    }
+
+    /**
+     * Gets the stack trace of the thread that lastly invoked {@link #interrupt()}.
      * 
-     * @return The stack trace of the interrupting thread or <code>null</code>
+     * @return The stack trace of the interrupting thread or <code>null</code> if this thread is not in interrupted state
      */
     public StackTraceElement[] getInterruptorStack() {
-        return interruptorStack;
+        return isInterrupted() ? interruptorStack : null;
     }
 
     @Override

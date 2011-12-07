@@ -744,6 +744,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
 
                 Thread.interrupted(); // clear interrupt status on entry
+                ((CustomThread) Thread.currentThread()).clearInterruptorStack();
                 boolean ran = false;
                 beforeExecute(thread, task);
                 try {
