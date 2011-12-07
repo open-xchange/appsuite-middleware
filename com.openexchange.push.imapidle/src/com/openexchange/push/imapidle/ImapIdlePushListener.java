@@ -374,7 +374,11 @@ public final class ImapIdlePushListener implements PushListener {
      */
     public boolean checkNewMail() throws OXException {
         if (shutdown) {
-            LOG.info("IDLE: Listener was requested to shut-down for associated user " + userId + " in context " + contextId + ". Abort...");
+            if (isDebugEnabled()) {
+                LOG.info("IDLE: Listener was requested to shut-down for associated user " + userId + " in context " + contextId + ". Abort...", new Throwable());
+            } else {
+                LOG.info("IDLE: Listener was requested to shut-down for associated user " + userId + " in context " + contextId + ". Abort...");
+            }
             return false;
         }
         if (!running.compareAndSet(false, true)) {
@@ -483,6 +487,9 @@ public final class ImapIdlePushListener implements PushListener {
                 inbox.close(false);
             }
         } catch (final OXException e) {
+            if ("PUSH".equals(e.getPrefix())) {
+                throw e;
+            }
             // throw new PushException(e);
             if ("ACC".equalsIgnoreCase(e.getPrefix()) && MailAccountExceptionCodes.NOT_FOUND.getNumber() == e.getCode()) {
                 /*
