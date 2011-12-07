@@ -72,6 +72,20 @@ import com.openexchange.tools.Collections;
  */
 public final class ImapIdlePushListenerRegistry {
 
+    private static volatile Boolean DEBUG_ENABLED;
+    
+    /**
+     * @param debugEnabled the debugEnabled to set
+     */
+    public static final void setDebugEnabled(final boolean debugEnabled) {
+        DEBUG_ENABLED = Boolean.valueOf(debugEnabled);
+    }
+
+    private static boolean isDebugEnabled(final Log logger) {
+        final Boolean debug = DEBUG_ENABLED;
+        return null == debug ? logger.isDebugEnabled() : debug.booleanValue();
+    }
+
     private static final ImapIdlePushListenerRegistry instance = new ImapIdlePushListenerRegistry();
 
     /**
@@ -195,7 +209,12 @@ public final class ImapIdlePushListenerRegistry {
         });
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImapIdlePushListenerRegistry.class));
         if (null == session) {
-            logger.info("Found no other valid & active session for user " + userId + " in context " + contextId  + ". Therefore shutting down associated IMAP IDLE push listener.");
+            final String message = "Found no other valid & active session for user " + userId + " in context " + contextId  + ". Therefore shutting down associated IMAP IDLE push listener.";
+            if (isDebugEnabled(logger)) {
+                logger.info(message, new Throwable());
+            } else {
+                logger.info(message);
+            }
             return removeListener(key);
         }
         logger.info("Found another valid & active session for user " + userId + " in context " + contextId  + ". Reactivating IMAP IDLE push listener.");

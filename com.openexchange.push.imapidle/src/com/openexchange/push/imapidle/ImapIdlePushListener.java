@@ -120,6 +120,7 @@ public final class ImapIdlePushListener implements PushListener {
      */
     public static final void setDebugEnabled(final boolean debugEnabled) {
         DEBUG_ENABLED = Boolean.valueOf(debugEnabled);
+        ImapIdlePushListenerRegistry.setDebugEnabled(debugEnabled);
     }
 
     private static boolean isDebugEnabled() {
