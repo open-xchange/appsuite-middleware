@@ -70,6 +70,7 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -79,7 +80,7 @@ import com.sun.mail.imap.IMAPStore;
 /**
  * {@link ImapIdlePushListener} - The IMAP IDLE {@link PushListener}.
  */
-public final class ImapIdlePushListener implements PushListener {
+public final class ImapIdlePushListener implements PushListener, Runnable {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImapIdlePushListener.class));
 
@@ -349,7 +350,7 @@ public final class ImapIdlePushListener implements PushListener {
                 access.close(true);
             }
         }
-        imapIdleFuture = threadPoolService.submit(ThreadPools.task(new ImapIdlePushListenerTask(this)));
+        imapIdleFuture = threadPoolService.submit(ThreadPools.task(this));
     }
 
     /**
@@ -364,6 +365,57 @@ public final class ImapIdlePushListener implements PushListener {
         if (null != imapIdleFuture) {
             imapIdleFuture.cancel(true);
             imapIdleFuture = null;
+        }
+    }
+
+    @Override
+    public void run() {
+        /*
+         * Periodically invoke #checkNewMail() unless not shut-down
+         */
+        try {
+            while (!shutdown) {
+                while (checkNewMail()) {
+                    // Nothing...
+                }
+                if (shutdown) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.info("IDLE: Listener has been shut down for user " + userId + " in context " + contextId);
+                    }
+                    return;
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.info("IDLE: Orderly left checkNewMail() method for user " + userId + " in context " + contextId);
+                }
+                /*
+                 * Bind ImapIdlePushListener to another session
+                 */
+                final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+                final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+
+                    @Override
+                    public boolean accepts(final Session tmp) {
+                        return PushUtility.allowedClient(tmp.getClient());
+                    }
+
+                });
+                if (null == session) {
+                    final String message =
+                        "IDLE: Found no other valid & active session for user " + userId + " in context " + contextId + ". Therefore shutting down associated IMAP IDLE push listener.";
+                    if (isDebugEnabled()) {
+                        LOG.info(message, new Throwable());
+                    } else {
+                        LOG.info(message);
+                    }
+                    return;
+                }
+                LOG.info("IDLE: Found another valid & active session for user " + userId + " in context " + contextId + ". Reactivating IMAP IDLE push listener.");
+                sessionRef.set(session);
+            }
+        } catch (final Exception e) {
+            LOG.error("IDLE: Unexpectedly left run() method for user " + userId + " in context " + contextId, e);
+        } finally {
+            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(contextId, userId);
         }
     }
 
