@@ -58,11 +58,16 @@ import com.openexchange.threadpool.ThreadRenamer;
  */
 public final class CustomThread extends Thread implements ThreadRenamer {
 
-    private String originalName;
+    private volatile String originalName;
 
-    private String appendix;
+    private volatile String appendix;
 
-    private boolean changed;
+    private volatile boolean changed;
+
+    /**
+     * The stack trace of the thread that invoked {@link #interrupt()} on this {@link CustomThread} instance.
+     */
+    private volatile StackTraceElement[] interruptorStack;
 
     /**
      * Initializes a new {@link CustomThread}.
@@ -155,6 +160,21 @@ public final class CustomThread extends Thread implements ThreadRenamer {
         } else {
             appendix = null;
         }
+    }
+
+    /**
+     * Gets the stack trace of the thread that invoked {@link #interrupt()}.
+     * 
+     * @return The stack trace of the interrupting thread or <code>null</code>
+     */
+    public StackTraceElement[] getInterruptorStack() {
+        return interruptorStack;
+    }
+
+    @Override
+    public void interrupt() {
+        this.interruptorStack = new Throwable().getStackTrace();
+        super.interrupt();
     }
 
     /**
