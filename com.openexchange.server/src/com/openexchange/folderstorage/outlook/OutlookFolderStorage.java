@@ -1359,6 +1359,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final List<SortableId> sortedIDs = f.get();
             return sortedIDs.toArray(new SortableId[sortedIDs.size()]);
         } catch (final InterruptedException e) {
+            ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
@@ -1496,6 +1497,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             final List<SortableId> sortedIDs = f.get();
             return sortedIDs.isEmpty() ? new SortableId[0] : sortedIDs.toArray(new SortableId[sortedIDs.size()]);
         } catch (final InterruptedException e) {
+            ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final ExecutionException e) {
             final Throwable cause = e.getCause();
