@@ -79,6 +79,22 @@ public final class ThreadPools {
     }
 
     /**
+     * Handles specified unexpectedly interrupted thread.
+     * 
+     * @param t The unexpectedly interrupted thread
+     */
+    public static void unexpectedlyInterrupted(final Thread t) {
+        if (t instanceof InterruptorAware) {
+            final StackTraceElement[] interruptorStack = ((InterruptorAware) t).getInterruptorStack();
+            if (null != interruptorStack) {
+                final StringBuilder sb = new StringBuilder(256).append("Thread interrupted unexpectedly at:\n");
+                appendStackTrace(interruptorStack, sb);
+                LOG.error(sb.toString());
+            }
+        }
+    }
+
+    /**
      * Appends specified stack trace to given {@link StringBuilder} instance.
      * 
      * @param trace The stack trace
