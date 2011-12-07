@@ -2181,12 +2181,33 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         final Set<String> loginMappings = ctx.getLoginMappings();
         loginMappings.remove(ctx.getIdAsString()); // Deny change of mapping cid<->cid
+
+        // add always the context name
+        if (ctx.getName() != null) {
+           // a new context Name has been specified 
+           loginMappings.add(ctx.getName());
+        } else {
+            // try to read context name from database
+            ResultSet rs = null;
+            PreparedStatement stmt = null;
+            try {
+                stmt = con.prepareStatement("SELECT name FROM context WHERE cid=?");
+                stmt.setInt(1, i(ctx.getId()));
+                rs = stmt.executeQuery();
+                if (rs.next()) {
+                   loginMappings.add(rs.getString(1));
+                }
+            } finally {
+                closeSQLStuff(rs, stmt);
+            }
+        }
+
         // first delete all mappings excluding default mapping from cid <-> cid
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=? AND login_info!=?");
+            stmt = con.prepareStatement("DELETE FROM login2context WHERE cid=? AND login_info NOT LIKE ?");
             stmt.setInt(1, ctx.getId().intValue());
-            stmt.setInt(2, ctx.getId().intValue());
+            stmt.setString(2, ctx.getIdAsString());
             stmt.executeUpdate();
             stmt.close();
         } finally {
