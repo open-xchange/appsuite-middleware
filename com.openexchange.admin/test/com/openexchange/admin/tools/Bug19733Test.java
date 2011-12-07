@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,26 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.tools;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.admin.rmi.AdminCoreTest;
-import com.openexchange.admin.rmi.GroupTest;
-import com.openexchange.admin.rmi.ResourceTest;
-import com.openexchange.admin.rmi.TaskMgmtTest;
-import com.openexchange.admin.rmi.UserTest;
-import com.openexchange.admin.tools.NetUtilTest;
-import com.openexchange.admin.tools.Bug19733Test;
+import org.junit.Test;
+import com.openexchange.admin.rmi.dataobjects.User;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
-      AdminCoreTest.class,
-      UserTest.class,
-      GroupTest.class,
-      ResourceTest.class,
-      TaskMgmtTest.class,
-      NetUtilTest.class,
-      Bug19733Test.class
-})
-public class AdminTestSuite {
-    
-    // the class remains completely empty, 
-    // being used only as a holder for the above annotations
+/**
+ * {@link Bug19733Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ */
+public final class Bug19733Test {
 
-    private AdminTestSuite() {
+    public Bug19733Test() {
         super();
+    }
+
+    @Test
+    public void testGetImapPort() {
+        final User user = new User();
+        user.setImapServer("21a7:a92c:2323::1");
+        final int port = user.getImapPort();
     }
 }
