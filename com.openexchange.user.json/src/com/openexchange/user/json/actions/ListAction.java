@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.actions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -65,7 +66,9 @@ import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -138,7 +141,46 @@ public final class ListAction extends AbstractUserAction {
             /*
              * Get users/contacts
              */
-            final User[] users = userService.getUser(session.getContext(), userIdArray);
+            User[] users;
+            try {
+                users = userService.getUser(session.getContext(), userIdArray);
+            } catch (final OXException e) {
+                if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                final Context context = session.getContext();
+                {
+                    final Object[] excArgs = e.getLogArgs();
+                    if (excArgs != null && excArgs.length >= 2) {
+                        try {
+                            userService.invalidateUser(context, ((Integer) excArgs[0]).intValue());
+                        } catch (final Exception ignore) {
+                            // Ignore
+                        }
+                    } else {
+                        for (final int userId : userIdArray) {
+                            try {
+                                userService.invalidateUser(context, userId);
+                            } catch (final Exception ignore) {
+                                // Ignore
+                            }
+                        }
+                    }
+                }
+                // Load one-by-one
+                final int length = userIdArray.length;
+                final List<User> list = new ArrayList<User>(length);
+                for (int i = 0; i < length; i++) {
+                    try {
+                        list.add(userService.getUser(userIdArray[i], context));
+                    } catch (final OXException ue) {
+                        if (!UserExceptionCode.USER_NOT_FOUND.equals(ue)) {
+                            throw ue;
+                        }
+                    }
+                }
+                users = list.toArray(new User[list.size()]);
+            }
             final Contact[] contacts = contactInterface.getUsersById(userIdArray, false);
             /*
              * Determine max. last-modified time stamp

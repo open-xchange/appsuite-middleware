@@ -62,6 +62,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.messaging.json.Enabled;
 import com.openexchange.messaging.json.GUI;
+import com.openexchange.messaging.json.ManagedFileInputStreamRegistry;
 import com.openexchange.messaging.json.MessagingMessageParser;
 import com.openexchange.messaging.json.MessagingMessageWriter;
 import com.openexchange.messaging.json.actions.accounts.AccountActionFactory;
@@ -90,6 +91,8 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
 
     private boolean cacheConfigured;
 
+    private ManagedFileInputStreamRegistry fileInputStreamRegistry;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED_SERVICES;
@@ -97,7 +100,11 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
-        register();
+        try {
+            register();
+        } catch (final Exception e) {
+            LOG.error(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -115,53 +122,53 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         try {
             parser = new MessagingMessageParser();
-
+    
             rememberTracker(new ContentParserTracker(context, parser));
             rememberTracker(new HeaderParserTracker(context, parser));
-
+    
             writer = new MessagingMessageWriter();
             rememberTracker(new ContentWriterTracker(context, writer));
             rememberTracker(new HeaderWriterTracker(context, writer));
             track(I18nService.class, new I18nServiceCustomizer(context));
-
+    
             openTrackers();
-
+    
+            fileInputStreamRegistry = ManagedFileInputStreamRegistry.getInstance();
+            fileInputStreamRegistry.start(context);
+    
             register();
-        } catch (final Throwable x) {
+        } catch (final Exception x) {
             LOG.error(x.getMessage(), x);
+            throw x;
         }
     }
 
-    private void register() {
-        try {
-            boolean initializeFacs = false;
-            if (cacheService == null) {
-                cacheService = getService(CacheService.class);
-                initializeFacs = true;
-            }
-            if (registry == null) {
-                registry = getService(MessagingServiceRegistry.class);
-                initializeFacs = true;
-            }
+    private void register() throws Exception {
+        boolean initializeFacs = false;
+        if (cacheService == null) {
+            cacheService = getService(CacheService.class);
+            initializeFacs = true;
+        }
+        if (registry == null) {
+            registry = getService(MessagingServiceRegistry.class);
+            initializeFacs = true;
+        }
 
-            if (!allAvailable()) {
-                return;
-            }
+        if (!allAvailable()) {
+            return;
+        }
 
-            if (initializeFacs) {
-                AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
-                MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
-                ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
-            }
-            if (!hasRegisteredServices()) {
-                registerModule(AccountActionFactory.INSTANCE, "messaging/account");
-                registerModule(MessagingActionFactory.INSTANCE, "messaging/message");
-                registerModule(ServicesActionFactory.INSTANCE, "messaging/service");
-                registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
-                registerService(PreferencesItemService.class, new GUI());
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
+        if (initializeFacs) {
+            AccountActionFactory.INSTANCE = new AccountActionFactory(registry);
+            MessagingActionFactory.INSTANCE = new MessagingActionFactory(registry, writer, parser, getCache());
+            ServicesActionFactory.INSTANCE = new ServicesActionFactory(registry);
+        }
+        if (!hasRegisteredServices()) {
+            registerModule(AccountActionFactory.INSTANCE, "messaging/account");
+            registerModule(MessagingActionFactory.INSTANCE, "messaging/message");
+            registerModule(ServicesActionFactory.INSTANCE, "messaging/service");
+            registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)));
+            registerService(PreferencesItemService.class, new GUI());
         }
     }
 
@@ -182,6 +189,10 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            if (null != fileInputStreamRegistry) {
+                fileInputStreamRegistry.stop();
+                ManagedFileInputStreamRegistry.dropInstance();
+            }
             cleanUp();
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);

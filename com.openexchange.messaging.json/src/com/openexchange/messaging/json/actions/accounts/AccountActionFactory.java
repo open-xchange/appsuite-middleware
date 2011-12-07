@@ -74,6 +74,7 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
         actions.put("all", new AllAction(registry));
         actions.put("delete", new DeleteAction(registry));
         actions.put("get", new GetAction(registry));
+        actions.put("getconfig", new GetConfigAction(registry));
         actions.put("new", new NewAction(registry));
         actions.put("update", new UpdateAction(registry));
 

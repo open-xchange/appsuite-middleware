@@ -55,6 +55,8 @@ import static com.openexchange.mail.mime.utils.MIMEMessageUtility.getFileName;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.hasAttachments;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.unfold;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -82,6 +84,8 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -98,6 +102,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -105,6 +110,7 @@ import com.openexchange.mail.mime.dataobjects.MIMEMailMessage;
 import com.openexchange.mail.mime.dataobjects.MIMEMailPart;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.sun.mail.pop3.POP3Folder;
@@ -274,6 +280,32 @@ public final class MIMEMessageConverter {
     }
 
     /**
+     * Converts given instances of {@link MailMessage} into JavaMail-conform {@link Message} objects.
+     * <p>
+     * <b>Note</b>: This is just a convenience method that invokes {@link #convertMailMessage(MailMessage)} for each instance of
+     * {@link MailMessage}
+     *
+     * @param mails The source instances of {@link MailMessage}
+     * @param behavior Provides the behavior bits
+     * @return JavaMail-conform {@link Message} objects.
+     * @throws OXException If conversion fails
+     * @see #BEHAVIOR_CLONE
+     * @see #BEHAVIOR_STREAM2FILE
+     */
+    public static Message[] convertMailMessages(final MailMessage[] mails, final int behavior) throws OXException {
+        if (null == mails) {
+            return null;
+        }
+        final Message[] retval = new Message[mails.length];
+        for (int i = 0; i < retval.length; i++) {
+            if (null != mails[i]) {
+                retval[i] = convertMailMessage(mails[i], behavior);
+            }
+        }
+        return retval;
+    }
+
+    /**
      * Converts given instance of {@link MailMessage} into a JavaMail-conform {@link Message} object.
      *
      * @param mail The source instance of {@link MailMessage}
@@ -293,19 +325,70 @@ public final class MIMEMessageConverter {
      * @throws OXException If conversion fails
      */
     public static Message convertMailMessage(final MailMessage mail, final boolean clone) throws OXException {
+        return convertMailMessage(mail, clone ? BEHAVIOR_CLONE : 0);
+    }
+
+    /**
+     * Indicates to clone passed mail.
+     */
+    public static final int BEHAVIOR_CLONE = 1;
+
+    /**
+     * Indicates to stream content to a (managed) file.
+     */
+    public static final int BEHAVIOR_STREAM2FILE = 1 << 1;
+
+    /**
+     * Converts given instance of {@link MailMessage} into a JavaMail-conform {@link Message} object.
+     *
+     * @param mail The source instance of {@link MailMessage}
+     * @param behavior Provides the behavior bits
+     * @return A JavaMail-conform {@link Message} object
+     * @throws OXException If conversion fails
+     * @see #BEHAVIOR_CLONE
+     * @see #BEHAVIOR_STREAM2FILE
+     */
+    public static Message convertMailMessage(final MailMessage mail, final int behavior) throws OXException {
         if (mail instanceof ComposedMailMessage) {
             return convertComposedMailMessage((ComposedMailMessage) mail);
         }
         try {
             final int size = (int) mail.getSize();
+            final boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
+            final boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
             final MimeMessage mimeMessage;
             if (!clone && (mail instanceof MIMEMailMessage)) {
                 mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
             } else {
-                final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-                mail.writeTo(out);
-                mimeMessage =
-                    new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                final ManagedFileManagement fileManagement;
+                if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
+                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
+                    mail.writeTo(out);
+                    mimeMessage =
+                        new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+                } else {
+                    FileOutputStream fos = null;
+                    try {
+                        final File newTempFile = fileManagement.newTempFile();
+                        fos = new FileOutputStream(newTempFile);
+                        mail.writeTo(fos);
+                        fos.flush();
+                        fos.close();
+                        fos = null;
+                        final ManagedFile managedFile = fileManagement.createManagedFile(newTempFile);
+                        mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), managedFile);
+                    } catch (final IOException e) {
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                    } finally {
+                        if (null != fos) {
+                            try {
+                                fos.close();
+                            } catch (final IOException e) {
+                                // Ignore
+                            }
+                        }
+                    }
+                }
             }
             if (mail.containsFlags()) {
                 parseMimeFlags(mail.getFlags(), mimeMessage);

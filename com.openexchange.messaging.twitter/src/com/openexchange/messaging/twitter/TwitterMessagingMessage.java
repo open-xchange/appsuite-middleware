@@ -232,7 +232,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
     }
 
     private static Collection<MessagingHeader> getSimpleHeader(final String name, final String value) {
-        return wrap(new StringMessageHeader(name, value));
+        return Collections.<MessagingHeader> singletonList(new StringMessageHeader(name, value));
     }
 
     @Override

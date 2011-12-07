@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry exported="true" kind="lib" path="lib/jsoup-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsoup-1.6.1.jar" sourcepath="lib/jsoup-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/htmlcleaner-2.2.jar" sourcepath="lib/htmlcleaner-2.2-all.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/kxml.jar" sourcepath="lib/kxml.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jTidy.jar" sourcepath="lib/jTidy.jar"/>

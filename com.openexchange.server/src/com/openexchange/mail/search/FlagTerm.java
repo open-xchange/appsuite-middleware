@@ -81,6 +81,11 @@ public final class FlagTerm extends SearchTerm<Integer> {
         this.set = set;
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * Gets the flags pattern: Either a positive integer if enabled or a negative integer if disabled
      *

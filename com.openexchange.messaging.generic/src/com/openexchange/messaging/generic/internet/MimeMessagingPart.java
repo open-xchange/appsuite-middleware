@@ -72,6 +72,7 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.datasource.StreamDataSource;
 import com.openexchange.messaging.BinaryContent;
 import com.openexchange.messaging.ContentType;
+import com.openexchange.messaging.ManagedFileContent;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingHeader;
@@ -145,6 +146,50 @@ public class MimeMessagingPart implements MessagingPart {
         }
 
     } // End of BinaryContentISP class
+
+    /**
+     * An {@link StreamDataSource.InputStreamProvider} backed by a {@link BinaryContent}.
+     */
+    private static final class ManagedFileContentISP implements StreamDataSource.InputStreamProvider {
+
+        private final ManagedFileContent fileContent;
+
+        ManagedFileContentISP(final ManagedFileContent fileContent) {
+            super();
+            this.fileContent = fileContent;
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            try {
+                return fileContent.getData();
+            } catch (final OXException e) {
+                final Throwable cause = e.getCause();
+                if (cause instanceof IOException) {
+                    throw (IOException) cause;
+                }
+                if (cause instanceof javax.mail.MessagingException) {
+                    final javax.mail.MessagingException me = (javax.mail.MessagingException) cause;
+                    final Exception nextException = me.getNextException();
+                    if (nextException instanceof IOException) {
+                        throw (IOException) nextException;
+                    }
+                    final IOException ioException = new IOException(me.getMessage());
+                    ioException.initCause(me);
+                    throw ioException;
+                }
+                final IOException ioException = new IOException(e.getMessage());
+                ioException.initCause(e);
+                throw ioException;
+            }
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+    } // End of ManagedFileContentISP class
 
     /**
      * Adds an appropriate {@link MessagingHeader} to a collection.
@@ -643,6 +688,8 @@ public class MimeMessagingPart implements MessagingPart {
             } else if (content instanceof SimpleContent<?>) {
                 if (content instanceof BinaryContent) {
                     part.setDataHandler(new DataHandler(new StreamDataSource(new BinaryContentISP((BinaryContent) content), type)));
+                } else if (content instanceof ManagedFileContent) {
+                    part.setDataHandler(new DataHandler(new StreamDataSource(new ManagedFileContentISP((ManagedFileContent) content), type)));
                 } else if (content instanceof StringContent) {
                     final MimeContentType mct = new MimeContentType(type);
                     part.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType());

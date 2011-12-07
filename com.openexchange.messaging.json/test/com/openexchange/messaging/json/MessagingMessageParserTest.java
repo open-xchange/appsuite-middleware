@@ -64,6 +64,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.BinaryContent;
+import com.openexchange.messaging.ContentType;
 import com.openexchange.messaging.MessagingBodyPart;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingField;
@@ -102,7 +103,7 @@ public class MessagingMessageParserTest extends TestCase {
         messageJSON.put("folder", "niceFolder17");
         messageJSON.put("picture", "http://somesite.invalid/somepic.png");
 
-        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null, null);
 
         assertNotNull(message);
 
@@ -141,7 +142,7 @@ public class MessagingMessageParserTest extends TestCase {
 
         messageJSON.put("headers", headers);
 
-        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null, null);
 
         assertNotNull(message);
 
@@ -174,7 +175,7 @@ public class MessagingMessageParserTest extends TestCase {
         final MessagingMessageParser parser = new MessagingMessageParser();
 
         parser.addHeaderParser(new InvertedHeaderParser());
-        final MessagingMessage message = parser.parse(messageJSON, null);
+        final MessagingMessage message = parser.parse(messageJSON, null, null);
 
         assertNotNull(message);
 
@@ -187,7 +188,7 @@ public class MessagingMessageParserTest extends TestCase {
         final String date = "Sun, 7 Feb 2010 19:20:40 +0100 (CET)";
         final JSONObject messageJSON = new JSONObject("{'to':[{'address':'to.clark.kent@dailyplanet.com'}],'flags':0,'subject':'Subject-Value','bcc':[{'address':'bcc.clark.kent@dailyplanet.com'}],'contentType':{'params':{},'type':'text/plain'},'from':[{'address':'from.clark.kent@dailyplanet.com'}],'size':0,'threadLevel':0,'dispositionNotificationTo':[{'address':'disp.notification.to.clark.kent@dailyplanet.com'}],'priority':'12','sentDate':'"+date+"','cc':[{'address':'cc.clark.kent@dailyplanet.com'}]}");
 
-        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null, null);
         assertNotNull(message);
 
         final MessagingMessageGetSwitch get = new MessagingMessageGetSwitch();
@@ -214,7 +215,7 @@ public class MessagingMessageParserTest extends TestCase {
         headers.put("content-type", "text/plain");
         messageJSON.put("headers", headers);
 
-        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null, null);
 
         assertNotNull(message);
 
@@ -245,7 +246,7 @@ public class MessagingMessageParserTest extends TestCase {
         headers.put("content-type", "application/octet-stream");
         messageJSON.put("headers", headers);
 
-        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null, null);
 
         assertNotNull(message);
 
@@ -269,7 +270,7 @@ public class MessagingMessageParserTest extends TestCase {
 
         final SimInputStreamRegistry registry = new SimInputStreamRegistry();
 
-        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, registry);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, registry, null);
 
         assertEquals("12", registry.getId());
         assertNotNull(message);
@@ -295,7 +296,7 @@ public class MessagingMessageParserTest extends TestCase {
 
         messageJSON.put("body", multipartJSON);
 
-        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null);
+        final MessagingMessage message = new MessagingMessageParser().parse(messageJSON, null, null);
 
         assertNotNull(message);
 
@@ -329,7 +330,8 @@ public class MessagingMessageParserTest extends TestCase {
 
         @Override
         public boolean handles(final MessagingBodyPart partlyParsedMessage, final Object content) throws OXException {
-            return partlyParsedMessage.getContentType().getBaseType().equals("text/plain");
+            final ContentType contentType = partlyParsedMessage.getContentType();
+            return null != contentType && "text/plain".equals(contentType.getBaseType());
         }
 
         @Override
@@ -350,7 +352,7 @@ public class MessagingMessageParserTest extends TestCase {
 
         final MessagingMessageParser parser = new MessagingMessageParser();
         parser.addContentParser(new ReversedContentParser());
-        final MessagingMessage message = parser.parse(messageJSON, null);
+        final MessagingMessage message = parser.parse(messageJSON, null, null);
 
         assertNotNull(message);
 
@@ -381,6 +383,11 @@ public class MessagingMessageParserTest extends TestCase {
 
         public Object getId() {
             return id;
+        }
+
+        @Override
+        public Object getRegistryEntry(final Object id) throws OXException {
+            return "Mock value";
         }
 
     }

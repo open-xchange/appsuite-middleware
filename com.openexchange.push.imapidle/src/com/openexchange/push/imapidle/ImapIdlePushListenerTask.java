@@ -72,10 +72,18 @@ public final class ImapIdlePushListenerTask implements Runnable {
             while (listener.checkNewMail()) {
                 // Nothing...
             }
+            if (LOG.isDebugEnabled()) {
+                LOG.info("Left checkNewMail() method for user " + listener.getUserId() + " in context " + listener.getContextId());
+            }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(listener.getContextId(), listener.getUserId());
+            final ImapIdlePushListenerRegistry registry = ImapIdlePushListenerRegistry.getInstance();
+            try {
+                registry.removePushListener(listener.getContextId(), listener.getUserId());
+            } catch (final Exception e) {
+                registry.purgeUserPushListener(listener.getContextId(), listener.getUserId());
+            }
         }
     }
 

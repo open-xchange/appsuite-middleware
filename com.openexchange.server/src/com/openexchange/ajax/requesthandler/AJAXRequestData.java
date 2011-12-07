@@ -111,6 +111,8 @@ public class AJAXRequestData {
 
     private String hostname;
 
+    private String remoteAddress;
+
     private String servletRequestUri;
 
     /**
@@ -684,6 +686,24 @@ public class AJAXRequestData {
      */
     public String getRoute() {
         return route;
+    }
+
+    /**
+     * Gets the remote address
+     *
+     * @return The remote address
+     */
+    public String getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    /**
+     * Sets the remote address
+     *
+     * @param remoteAddress The remote address to set
+     */
+    public void setRemoteAddress(final String remoteAddress) {
+        this.remoteAddress = remoteAddress;
     }
 
     /**

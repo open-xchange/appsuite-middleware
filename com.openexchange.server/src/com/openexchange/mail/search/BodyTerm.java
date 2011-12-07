@@ -96,6 +96,11 @@ public final class BodyTerm extends SearchTerm<String> {
     }
 
     @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
     public void addMailField(final Collection<MailField> col) {
         col.add(MailField.BODY);
     }

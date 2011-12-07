@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
+import com.openexchange.mail.text.HTMLProcessing;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -121,9 +122,13 @@ public class FilteredHTMLPreviewResultConverter extends AbstractPreviewResultCon
             content = htmlService.filterWhitelist(content);
             final boolean[] modified = new boolean[1];
             content = htmlService.filterExternalImages(content, modified);
+            /*
+             * Replace CSS classes
+             */
+            content = HTMLProcessing.saneCss(content, htmlService);
             sanitizedHtml = content;
         }
-        // TODO: Replace CSS classes
+        // Return
         result.setResultObject(new SanitizedPreviewDocument(metaData, sanitizedHtml, previewDocument.getThumbnail()), FORMAT);
     }
 

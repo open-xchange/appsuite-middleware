@@ -49,8 +49,10 @@
 
 package com.openexchange.i18n.tools;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -84,17 +86,18 @@ public final class RenderMap implements Cloneable {
     }
 
     /**
-     * Checks if any of the contained {@link TemplateReplacement}s is marked as changed.
+     * Gets those {@link TemplateReplacement}s that are marked as changed.
      *
-     * @return <code>true</code> if any of the contained {@link TemplateReplacement}s is marked as changed; otherwise <code>false</code>
+     * @return The changed {@link TemplateReplacement}s
      */
-    public boolean containsChanges() {
+    public List<TemplateReplacement> getChanges() {
+        final List<TemplateReplacement> changes = new ArrayList<TemplateReplacement>(map.size() >> 1);
         for (final TemplateReplacement templateReplacement : map.values()) {
             if (templateReplacement.changed()) {
-                return true;
+                changes.add(templateReplacement);
             }
         }
-        return false;
+        return changes;
     }
 
     /**

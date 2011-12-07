@@ -84,6 +84,11 @@ public final class NOTTerm extends SearchTerm<SearchTerm<?>> {
         this.term = term;
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * Gets the search terms that should be linked with an OR as an array of {@link SearchTerm} with length <code>2</code>.
      *

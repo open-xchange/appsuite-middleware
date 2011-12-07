@@ -76,6 +76,11 @@ public class MimeMultipartContent implements MultipartContent {
     private String sectionId;
 
     /**
+     * The sub-type.
+     */
+    private final String subtype;
+
+    /**
      * Initializes a new {@link MimeMultipartContent}.
      */
     public MimeMultipartContent() {
@@ -89,7 +94,22 @@ public class MimeMultipartContent implements MultipartContent {
      */
     public MimeMultipartContent(final String subtype) {
         super();
+        this.subtype = subtype;
         mimeMultipart = new MimeMultipart(subtype);
+    }
+
+    @Override
+    public String getSubType() {
+        return subtype;
+    }
+
+    /**
+     * Gets this multipart's content type.
+     * 
+     * @return The content type
+     */
+    public String getContentType() {
+        return mimeMultipart.getContentType();
     }
 
     /**
@@ -117,6 +137,18 @@ public class MimeMultipartContent implements MultipartContent {
      */
     protected MimeMultipartContent(final MimeMultipart mimeMultipart) {
         super();
+        final String contentType = mimeMultipart.getContentType();
+        if (contentType.startsWith("multipart/mixed", 0)) {
+            this.subtype = "mixed";
+        } else if (contentType.startsWith("multipart/alternative", 0)) {
+            this.subtype = "alternative";
+        } else if (contentType.startsWith("multipart/related", 0)) {
+            this.subtype = "related";
+        } else {
+            final int spos = contentType.indexOf('/');
+            final int epos = contentType.indexOf(';');
+            this.subtype = (epos < 0 ? contentType.substring(spos + 1) : contentType.substring(spos + 1, epos)).trim();
+        }
         this.mimeMultipart = mimeMultipart;
     }
 

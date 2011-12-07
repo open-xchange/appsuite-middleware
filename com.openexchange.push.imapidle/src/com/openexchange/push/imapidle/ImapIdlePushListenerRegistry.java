@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
@@ -142,7 +144,7 @@ public final class ImapIdlePushListenerRegistry {
             return;
         }
         for (final Iterator<ImapIdlePushListener> i = map.values().iterator(); i.hasNext();) {
-            ImapIdlePushListener l = i.next();
+            final ImapIdlePushListener l = i.next();
             try {
                 l.open();
             } catch (final OXException e) {
@@ -181,24 +183,30 @@ public final class ImapIdlePushListenerRegistry {
      */
     public boolean removePushListener(final int contextId, final int userId) throws OXException {
         final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
         // Bind ImapIdlePushListener to another session because of password change issues.
-        Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+        final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
 
             @Override
-            public boolean accepts(Session tmp) {
+            public boolean accepts(final Session tmp) {
                 return PushUtility.allowedClient(tmp.getClient());
             }
 
         });
-        if (null != session) {
-            removeListener(key);
-            final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);
-            final ImapIdlePushListener removed = map.putIfAbsent(key, pushListener);
-            pushListener.open();
-            return null == removed;
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImapIdlePushListenerRegistry.class));
+        if (null == session) {
+            logger.info("Found no other valid & active sessions for user " + userId + " in context " + contextId  + ". Therefore shutting down associated IMAP IDLE push listener.");
+            return removeListener(key);
         }
-        return removeListener(key);
+        logger.info("Found another valid & active session for user " + userId + " in context " + contextId  + ". Reactivating IMAP IDLE push listener.");
+        removeListener(key);
+        final ImapIdlePushListener pushListener = ImapIdlePushListener.newInstance(session);
+        if (null == map.putIfAbsent(key, pushListener)) {
+            pushListener.open();
+            logger.info("Reactivated IMAP IDLE push listener for user " + userId + " in context " + contextId);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -226,7 +234,7 @@ public final class ImapIdlePushListenerRegistry {
     }
 
     private boolean removeListener(final SimpleKey key) {
-        ImapIdlePushListener listener = map.remove(key);
+        final ImapIdlePushListener listener = map.remove(key);
         if (null != listener) {
             listener.close();
         }

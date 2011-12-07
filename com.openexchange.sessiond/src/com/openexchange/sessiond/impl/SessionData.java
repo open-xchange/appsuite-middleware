@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -137,6 +138,67 @@ final class SessionData {
             longTermUserGuardian.clear();
         } finally {
             longTermLock.unlock();
+        }
+    }
+
+    void checkEmAll() {
+        // Long-term list
+        longTermLock.lock();
+        try {
+            final long lifeTime = SessionHandler.config.getLongLifeTime();
+            for (final SessionContainer container : sessionList) {
+                final long stamp = System.currentTimeMillis() - lifeTime;
+                for (final SessionControl sessionControl : container.getSessionControls()) {
+                    final long lastAccessed = sessionControl.getLastAccessed();
+                    if (lastAccessed < stamp) {
+                        container.removeSessionById(sessionControl.getSession().getSessionID());
+                    }
+                }
+            }
+        } finally {
+            longTermLock.unlock();
+        }
+        // Short-term list
+        rlock.lock();
+        try {
+            final long lifeTime = SessionHandler.config.getLifeTime();
+            for (final SessionContainer container : sessionList) {
+                final long stamp = System.currentTimeMillis() - lifeTime;
+                for (final SessionControl sessionControl : container.getSessionControls()) {
+                    long lastAccessed = sessionControl.getLastAccessed();
+                    if (lastAccessed < stamp) {
+                        // Upgrade lock
+                        rlock.unlock();
+                        wlock.lock();
+                        try {
+                            // Re-check
+                            lastAccessed = sessionControl.getLastAccessed();
+                            if (lastAccessed < stamp) {
+                                // Remove from short-term list
+                                final SessionImpl session = sessionControl.getSession();
+                                container.removeSessionById(session.getSessionID());
+                                if (autoLogin) {
+                                    // Add to long-term list
+                                    longTermLock.lock();
+                                    try {
+                                        final Map<String, SessionControl> first = longTermList.getFirst();
+                                        first.put(session.getSessionID(), sessionControl);
+                                        longTermUserGuardian.add(new UserKey(session.getUserId(), session.getContextId()));
+                                    } finally {
+                                        longTermLock.unlock();
+                                    }
+                                }
+                            }
+                        } finally {
+                            // Down-grade lock
+                            rlock.lock();
+                            wlock.unlock();
+                        }
+                    }
+                }
+            }
+        } finally {
+            rlock.unlock();
         }
     }
 
@@ -240,7 +302,7 @@ final class SessionData {
                 while (iter.hasNext()) {
                     final SessionControl control = iter.next();
                     final Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
+                    if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
                         iter.remove();
                         retval.add(control);
                     }
@@ -257,7 +319,7 @@ final class SessionData {
         try {
             for (final SessionContainer container : sessionList) {
                 final SessionControl control = container.getAnySessionByUser(userId, contextId);
-                if ( control != null ) {
+                if (control != null) {
                     return control;
                 }
             }
@@ -272,7 +334,7 @@ final class SessionData {
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 for (final SessionControl control : longTermMap.values()) {
                     final Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
+                    if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
                         return control;
                     }
                 }
@@ -288,7 +350,7 @@ final class SessionData {
         try {
             for (final SessionContainer container : sessionList) {
                 final SessionControl control = container.getAnySessionByUser(userId, contextId);
-                if ( control != null && matcher.accepts(control.getSession())) {
+                if ((control != null) && matcher.accepts(control.getSession())) {
                     return control.getSession();
                 }
             }
@@ -636,9 +698,7 @@ final class SessionData {
     /**
      * Map to remember if there is already a task that should move the session to the first container.
      */
-    private final Map<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
-
-    private final Lock tasksLock = new ReentrantLock();
+    private final ConcurrentMap<String, Move2FirstContainerTask> tasks = new ConcurrentHashMap<String, Move2FirstContainerTask>();
 
     private ThreadPoolService threadPoolService;
 
@@ -651,24 +711,27 @@ final class SessionData {
     }
 
     private void scheduleTask2MoveSession2FirstContainer(final String sessionId, final boolean longTerm) {
-        final Move2FirstContainerTask task;
-        tasksLock.lock();
-        try {
-            if (tasks.containsKey(sessionId)) {
+        Move2FirstContainerTask task = tasks.get(sessionId);
+        if (null != task) {
+            LOG.trace("Found an already existing task to move session to first container.");
+            return;
+        }
+        {
+            final Move2FirstContainerTask ntask = new Move2FirstContainerTask(sessionId, longTerm);
+            task = tasks.putIfAbsent(sessionId, ntask);
+            if (null != task) {
                 LOG.trace("Found an already existing task to move session to first container.");
                 return;
             }
-            task = new Move2FirstContainerTask(sessionId, longTerm);
-            tasks.put(sessionId, task);
-        } finally {
-            tasksLock.unlock();
+            task = ntask;
         }
         if (null == threadPoolService) {
+            final Move2FirstContainerTask tmp = task;
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        task.call();
+                        tmp.call();
                     } catch (final Exception e) {
                         LOG.error("Moving session to first container failed.", e);
                     }
@@ -680,14 +743,9 @@ final class SessionData {
     }
 
     private void unscheduleTask2MoveSession2FirstContainer(final String sessionId) {
-        tasksLock.lock();
-        try {
-            final Move2FirstContainerTask task = tasks.remove(sessionId);
-            if (null != task) {
-                task.deactivate();
-            }
-        } finally {
-            tasksLock.unlock();
+        final Move2FirstContainerTask task = tasks.remove(sessionId);
+        if (null != task) {
+            task.deactivate();
         }
     }
 

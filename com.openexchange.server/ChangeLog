@@ -1,7 +1,54 @@
+* 2011-12-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20927: Introduced separate permission loader service which is bound to bundle life cycle
+
+* 2011-12-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20872: Clearing foreign caches on context deletion
+ - Fix for bug 19250: Consider thrown exception classes in try-catch clause to ensure proper transaction roll-back
+ - Fix for bug 20918: Don't append file extension according to Content-Type header if an extension is already present
+
+* 2011-12-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20879: Improved error message if E-Mail import into IMAP server fails
+
+* 2011-12-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20913: Suppressing notification mail if only folder has changed
+ - Fix for bug 20916: Temporarily storing content in a managed file when appending messages
+
+* 2011-12-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20892: Safe loading of users
+ - Fix for bug 20887: Recursively checking for SMIME messages
+
+* 2011-12-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20868: Checking for possible null dereference when composing folder query
+ - Fix for bug 20871: Sanitizing parsing of Content-Type
+ - Fix for bug 20857: Preserve context id during contact updates
+ - Fix for bug 20905: Proper replacement in file names
+
+* 2011-11-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20883: No validation check on account creation for POP3 accounts
+
+* 2011-11-29 - jan.bauerdick@open-xchange.com
+
+ - Replace CSS classes in e-mail
+
+* 2011-11-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20876: Disabled to track errors in JSoup library/Fixed infinite loop in JSoup library if HTML contains non-terminated comment
+ - Fix for bug 20882: Checking for possibly passed null reference when checking folder name
+
+* 2011-11-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20866: Don't overwrite settings when checking for contact-collector folder
+
 * 2011-11-26 - thorben.betten@open-xchange.com
 
  - Fix for bug 20837: Properly setting "hasSubscribedSubfolders" flag
- - Fix for bug 20802: Passing proper folder name to equally-named-folder check routine
 
 * 2011-11-25 - thorben.betten@open-xchange.com
 

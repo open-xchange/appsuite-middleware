@@ -89,6 +89,11 @@ public final class ReceivedDateTerm extends SearchTerm<ComparablePattern<java.ut
         };
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * @return The sent date to match
      */

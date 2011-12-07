@@ -211,7 +211,7 @@ public final class ImapIdlePushListener implements PushListener {
 
     private MailService mailService;
 
-    private boolean shutdown;
+    private volatile boolean shutdown;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -310,6 +310,7 @@ public final class ImapIdlePushListener implements PushListener {
      * @throws OXException If listener cannot be opened
      */
     public void open() throws OXException {
+        shutdown = false;
         final ThreadPoolService threadPoolService;
         {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);

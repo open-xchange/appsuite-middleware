@@ -126,6 +126,26 @@ public final class ManagedMimeMessage extends MimeMessage {
     }
 
     /**
+     * Initializes a new {@link ManagedMimeMessage}.
+     *
+     * @param session The session
+     * @param sourceBytes The RFC822 source bytes
+     * @param maxInMemorySize The max. in-memory size in bytes
+     * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    public ManagedMimeMessage(final Session session, final ManagedFile managedFile) throws MessagingException, IOException {
+        super(session);
+        this.managedFile = managedFile;
+        final SharedFileInputStream sis = new SharedFileInputStream(managedFile.getFile(), DEFAULT_MAX_INMEMORY_SIZE);
+        flags = new Flags(); // empty Flags object
+        headers = createInternetHeaders(sis);
+        contentStream = sis.newStream(sis.getPosition(), -1);
+        modified = false;
+        saved = true;
+    }
+
+    /**
      * Cleans up this managed MIME message.
      *
      * @throws MessagingException If a messaging error occurs

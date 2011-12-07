@@ -133,6 +133,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return randomTokenTimeout;
     }
 
+    @Override
     public long getLongLifeTime() {
         return longLifeTime;
     }
@@ -147,7 +148,7 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
         return autoLogin;
     }
 
-    public static int parseProperty(ConfigurationService prop, String name, int value) {
+    public static int parseProperty(final ConfigurationService prop, final String name, final int value) {
         final String tmp = prop.getProperty(name, "");
         if (tmp.trim().length() > 0) {
             try {

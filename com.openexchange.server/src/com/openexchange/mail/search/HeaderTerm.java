@@ -79,6 +79,11 @@ public final class HeaderTerm extends SearchTerm<String[]> {
         hdr = new String[] { headerName, headerValue };
     }
 
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
+
     /**
      * Gets the header pattern: An array of {@link String} with length <code>2</code> with header name and header name-
      *

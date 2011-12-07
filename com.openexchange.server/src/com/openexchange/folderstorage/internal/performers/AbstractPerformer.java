@@ -174,7 +174,7 @@ public abstract class AbstractPerformer {
      * @throws FolderException If name look-up fails
      */
     protected void checkForDuplicate(final String name, final String treeId, final String parentId, final java.util.Collection<FolderStorage> openedStorages) throws OXException {
-        if (!check4Duplicates) {
+        if (!check4Duplicates || null == name) {
             return;
         }
         /*

@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
+import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -71,6 +72,7 @@ import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
+// TODO: Auto-generated Javadoc
 /**
  * {@link FolderMap} - An in-memory folder map with LRU eviction policy.
  *
@@ -86,6 +88,10 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
+     * 
+     * @param maxCapacity the max capacity
+     * @param maxLifeUnits the max life units
+     * @param unit the unit
      */
     public FolderMap(final int maxCapacity, final int maxLifeUnits, final TimeUnit unit) {
         super();
@@ -96,6 +102,9 @@ public final class FolderMap {
 
     /**
      * Initializes a new {@link FolderMap}.
+     * 
+     * @param maxCapacity the max capacity
+     * @param maxLifeMillis the max life millis
      */
     public FolderMap(final int maxCapacity, final int maxLifeMillis) {
         this(maxCapacity, maxLifeMillis, TimeUnit.MILLISECONDS);
@@ -113,15 +122,28 @@ public final class FolderMap {
                 removeKeys.add(entry.getKey());
             }
         }
-        for (final Key key : removeKeys) {
-            map.remove(key);
-        }
+        map.keySet().removeAll(removeKeys);
     }
 
+    /**
+     * Put if absent.
+     * 
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder putIfAbsent(final String treeId, final Folder folder) {
         return putIfAbsent(folder.getID(), treeId, folder);
     }
 
+    /**
+     * Put if absent.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder putIfAbsent(final String folderId, final String treeId, final Folder folder) {
         final Wrapper wrapper = wrapperOf(folder);
         final Key key = keyOf(folderId, treeId);
@@ -143,18 +165,42 @@ public final class FolderMap {
         return prev.getValue();
     }
 
+    /**
+     * Size.
+     * 
+     * @return The int
+     */
     public int size() {
         return map.size();
     }
 
+    /**
+     * Checks if empty flag is set.
+     * 
+     * @return <code>true</code> if empty flag is set; otherwise <code>false</code>
+     */
     public boolean isEmpty() {
         return map.isEmpty();
     }
 
+    /**
+     * Contains.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @return <code>true</code> if successful; otherwsie <code>false</code>
+     */
     public boolean contains(final String folderId, final String treeId) {
         return map.containsKey(keyOf(folderId, treeId));
     }
 
+    /**
+     * Gets the folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @return The folder
+     */
     public Folder get(final String folderId, final String treeId) {
         final Key key = keyOf(folderId, treeId);
         final Wrapper wrapper = map.get(key);
@@ -168,22 +214,36 @@ public final class FolderMap {
                 return null;
             }
             final Folder folder = wrapper.getValue();
-            reloadFolder(folderId, treeId);
+            reloadFolder(folderId, treeId, wrapper.loadSubfolders);
             return folder;
         }
         return wrapper.getValue();
     }
 
-    private void reloadFolder(final String folderId, final String treeId) {
-        final Runnable task = new RunnableImpl(folderId, treeId);
+    private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
         final ThreadPoolService threadPool = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
-        threadPool.submit(ThreadPools.task(task), AbortBehavior.getInstance());
+        threadPool.submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders)), AbortBehavior.getInstance());
     }
 
+    /**
+     * Puts specified folder.
+     * 
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder put(final String treeId, final Folder folder) {
         return put(folder.getID(), treeId, folder);
     }
 
+    /**
+     * Puts specified folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @param folder the folder
+     * @return The folder
+     */
     public Folder put(final String folderId, final String treeId, final Folder folder) {
         final Key key = keyOf(folderId, treeId);
         final Wrapper wrapper = map.put(key, wrapperOf(folder));
@@ -198,6 +258,13 @@ public final class FolderMap {
         return wrapper.getValue();
     }
 
+    /**
+     * Removes the folder.
+     * 
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @return The folder
+     */
     public Folder remove(final String folderId, final String treeId) {
         final Wrapper wrapper = map.remove(keyOf(folderId, treeId));
         if (null == wrapper) {
@@ -209,11 +276,14 @@ public final class FolderMap {
          */
         if (wrapper.removeAfterAccess) {
             // Reload actively removed folder
-            reloadFolder(folderId, treeId);
+            reloadFolder(folderId, treeId, wrapper.loadSubfolders);
         }
         return ret;
     }
 
+    /**
+     * Clears this map.
+     */
     public void clear() {
         map.clear();
     }
@@ -239,11 +309,19 @@ public final class FolderMap {
 
         protected final boolean removeAfterAccess;
 
+        protected final boolean loadSubfolders;
+
         public Wrapper(final Folder value) {
             super();
             this.value = value;
             this.stamp = System.currentTimeMillis();
-            removeAfterAccess = (value instanceof RemoveAfterAccessFolder);
+            if (value instanceof RemoveAfterAccessFolder) {
+                removeAfterAccess = true;
+                loadSubfolders = ((RemoveAfterAccessFolder) value).loadSubfolders();
+            } else {
+                removeAfterAccess = false;
+                loadSubfolders = false;
+            }
         }
 
         public long getStamp() {
@@ -337,10 +415,12 @@ public final class FolderMap {
 
         private final String folderId;
         private final String treeId;
+        private final boolean loadSubfolders;
 
-        protected RunnableImpl(final String folderId, final String treeId) {
+        protected RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders) {
             this.folderId = folderId;
             this.treeId = treeId;
+            this.loadSubfolders = loadSubfolders;
         }
 
         @Override
@@ -351,6 +431,7 @@ public final class FolderMap {
                     return;
                 }
                 final StorageParameters params = new StorageParametersImpl(session);
+                params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
                 final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
                 lock.lock();
                 try {
@@ -358,11 +439,13 @@ public final class FolderMap {
                     Folder loaded = folderStorage.loadFolder(treeId, folderId, StorageType.WORKING, params);
                     folderStorage.putFolder(loaded, treeId, params);
                     // Check for subfolders
-                    final String[] subfolderIDs = loaded.getSubfolderIDs();
-                    if (null != subfolderIDs) {
-                        for (final String subfolderId : subfolderIDs) {
-                            loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
-                            folderStorage.putFolder(loaded, treeId, params);
+                    if (loadSubfolders) {
+                        final String[] subfolderIDs = loaded.getSubfolderIDs();
+                        if (null != subfolderIDs) {
+                            for (final String subfolderId : subfolderIDs) {
+                                loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
+                                folderStorage.putFolder(loaded, treeId, params);
+                            }
                         }
                     }
                 } finally {

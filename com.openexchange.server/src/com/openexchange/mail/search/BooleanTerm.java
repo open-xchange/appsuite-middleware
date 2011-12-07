@@ -109,6 +109,11 @@ public final class BooleanTerm extends SearchTerm<Boolean> {
         super();
         this.value = value;
     }
+    
+    @Override
+    public void accept(SearchTermVisitor visitor) {
+        visitor.visit(this);
+    }
 
     /*
      * (non-Javadoc)

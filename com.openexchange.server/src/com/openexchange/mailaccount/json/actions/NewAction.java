@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -118,15 +119,22 @@ public final class NewAction extends AbstractMailAccountAction {
 
             // List for possible warnings
             final List<OXException> warnings = new ArrayList<OXException>(2);
-            session.setParameter("mail-account.validate.type", "create");
-            try {
-                if (!ValidateAction.actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
-                    final OXException warning = MIMEMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
-                    warning.setCategory(Category.CATEGORY_WARNING);
-                    warnings.add(0, warning);
+
+            {
+                // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
+                final boolean pop3 = accountDescription.getMailProtocol().toLowerCase(Locale.ENGLISH).startsWith("pop3");
+                if (!pop3) {
+                    session.setParameter("mail-account.validate.type", "create");
+                    try {
+                        if (!ValidateAction.actionValidateBoolean(accountDescription, session, warnings).booleanValue()) {
+                            final OXException warning = MIMEMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                            warning.setCategory(Category.CATEGORY_WARNING);
+                            warnings.add(0, warning);
+                        }
+                    } finally {
+                        session.setParameter("mail-account.validate.type", null);
+                    }
                 }
-            } finally {
-                session.setParameter("mail-account.validate.type", null);
             }
 
             final int cid = session.getContextId();

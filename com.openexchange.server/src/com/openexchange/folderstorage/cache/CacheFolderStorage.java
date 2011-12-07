@@ -100,6 +100,7 @@ import com.openexchange.folderstorage.internal.performers.SessionStorageParamete
 import com.openexchange.folderstorage.internal.performers.StorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatesPerformer;
+import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -107,6 +108,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -260,43 +262,90 @@ public final class CacheFolderStorage implements FolderStorage {
             }
             final String realTreeId = this.realTreeId;
             if (realTreeId.equals(treeId)) {
-                final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
-                final ServiceRegistry serviceRegistry = CacheServiceRegistry.getServiceRegistry();
-                final Runnable task = new Runnable() {
-                    
-                    @Override
-                    public void run() {
-                        try {
-                            final StorageParameters params = newStorageParameters(storageParameters);
-                            if (session.getUserConfiguration().isMultipleMailAccounts()) {
-                                final MailAccountStorageService storageService = serviceRegistry.getService(MailAccountStorageService.class, true);
-                                final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
-                                for (final MailAccount mailAccount : accounts) {
-                                    final int accountId = mailAccount.getId();
-                                    if (accountId != MailAccount.DEFAULT_ID) {
-                                        try {
-                                            final String folderId =
-                                                MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
-                                            final Folder rootFolder = getFolder(realTreeId, folderId, params);
-                                            final String[] subfolderIDs = rootFolder.getSubfolderIDs();
-                                            if (null != subfolderIDs) {
-                                                for (final String subfolderId : subfolderIDs) {
-                                                    getFolder(realTreeId, subfolderId, params);
+                try {
+                    final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
+                    final ServiceRegistry serviceRegistry = CacheServiceRegistry.getServiceRegistry();
+                    final ThreadPoolService threadPool = serviceRegistry.getService(ThreadPoolService.class);
+                    final RefusedExecutionBehavior<Object> behavior = AbortBehavior.getInstance();
+                    final Log log = LOG;
+                    final boolean debugEnabled = log.isDebugEnabled();
+                    final Runnable task = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            try {
+                                final long st = debugEnabled ? System.currentTimeMillis() : 0L;
+                                final StorageParameters params = newStorageParameters(storageParameters);
+                                params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
+                                if (session.getUserConfiguration().isMultipleMailAccounts()) {
+                                    final MailAccountStorageService storageService =
+                                        serviceRegistry.getService(MailAccountStorageService.class, true);
+                                    final MailAccount[] accounts =
+                                        storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+                                    for (final MailAccount mailAccount : accounts) {
+                                        final int accountId = mailAccount.getId();
+                                        if (accountId != MailAccount.DEFAULT_ID) {
+                                            final Runnable mailAccountTask = new Runnable() {
+
+                                                @Override
+                                                public void run() {
+                                                    try {
+                                                        final long st2 = debugEnabled ? System.currentTimeMillis() : 0L;
+                                                        final String folderId =
+                                                            MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
+                                                        /*
+                                                         * Check if already present
+                                                         */
+                                                        Folder rootFolder = getRefFromCache(realTreeId, folderId, params);
+                                                        if (null != rootFolder) {
+                                                            return;
+                                                        }
+                                                        /*
+                                                         * Load it
+                                                         */
+                                                        rootFolder = loadFolder(realTreeId, folderId, StorageType.WORKING, params);
+                                                        putFolder(rootFolder, realTreeId, params);
+                                                        final String[] subfolderIDs = rootFolder.getSubfolderIDs();
+                                                        if (null != subfolderIDs) {
+                                                            for (final String subfolderId : subfolderIDs) {
+                                                                final Folder folder =
+                                                                    loadFolder(realTreeId, subfolderId, StorageType.WORKING, params);
+                                                                putFolder(folder, realTreeId, params);
+                                                            }
+                                                        }
+                                                        if (debugEnabled) {
+                                                            final StringBuilder tmp = new StringBuilder(64);
+                                                            tmp.append("CacheFolderStorage.checkConsistency(): ");
+                                                            tmp.append("Loading external root folder \"");
+                                                            tmp.append(mailAccount.generateMailServerURL()).append("\" took ");
+                                                            tmp.append((System.currentTimeMillis() - st2)).append("msec");
+                                                            log.debug(tmp.toString());
+                                                        }
+                                                    } catch (final Exception e) {
+                                                        // Pre-Accessing external account folder failed.
+                                                        LOG.debug(e.getMessage(), e);
+                                                    }
                                                 }
-                                            }
-                                        } catch (final Exception e) {
-                                            // Pre-Accessing external account folder failed.
-                                            LOG.debug(e.getMessage(), e);
+                                            };
+                                            threadPool.submit(ThreadPools.task(mailAccountTask), behavior);
                                         }
                                     }
                                 }
+                                if (debugEnabled) {
+                                    final StringBuilder tmp = new StringBuilder(64);
+                                    tmp.append("CacheFolderStorage.checkConsistency(): Submitting loading external root folders took ");
+                                    tmp.append((System.currentTimeMillis() - st)).append("msec");
+                                    log.debug(tmp.toString());
+                                }
+                            } catch (final Exception e) {
+                                LOG.debug(e.getMessage(), e);
                             }
-                        } catch (final Exception e) {
-                            LOG.debug(e.getMessage(), e);
                         }
-                    }
-                };
-                serviceRegistry.getService(ThreadPoolService.class).submit(ThreadPools.task(task), AbortBehavior.getInstance());
+                    };
+                    threadPool.submit(ThreadPools.task(task), behavior);
+                } catch (final Exception e) {
+                    LOG.debug(e.getMessage(), e);
+                }
             }
         } finally {
             lock.unlock();
@@ -1079,6 +1128,19 @@ public final class CacheFolderStorage implements FolderStorage {
     }
 
     private Folder getCloneFromCache(final String treeId, final String folderId, final StorageParameters storageParameters) {
+        final Folder folder = getRefFromCache(treeId, folderId, storageParameters);
+        return null == folder ? null : (Folder) folder.clone();
+    }
+
+    /**
+     * Gets the folder reference from cache.
+     * 
+     * @param treeId The tree identifier
+     * @param folderId The fodler identifier
+     * @param storageParameters The storage parameters
+     * @return The folder or <code>null</code> on cache miss
+     */
+    protected Folder getRefFromCache(final String treeId, final String folderId, final StorageParameters storageParameters) {
         final int contextId = storageParameters.getContextId();
         /*
          * Try global cache key
@@ -1088,7 +1150,7 @@ public final class CacheFolderStorage implements FolderStorage {
             /*
              * Return a cloned version from global cache
              */
-            return (Folder) folder.clone();
+            return folder;
         }
         /*
          * Try user cache key
@@ -1103,7 +1165,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Locally loaded folder " + folderId + " from context " + contextId + " for user " + storageParameters.getUserId());
                 }
-                return (Folder) folder.clone();
+                return folder;
             }
         }
         /*

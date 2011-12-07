@@ -61,6 +61,13 @@ import com.openexchange.exception.OXException;
 public interface MultipartContent extends MessagingContent {
 
     /**
+     * Gets this multipart's sub-type; e.g <code>"mixed"</code>.
+     * 
+     * @return The sub-type
+     */
+    public String getSubType();
+
+    /**
      * Gets the number of enclosed {@link MessagingBodyPart parts}.
      *
      * @return The number of enclosed parts

@@ -365,9 +365,9 @@ public enum MailExceptionCode implements OXExceptionCode {
      */
     NON_SECURE_CREATION("Your account has been created but will not use a secure connection.", Category.CATEGORY_WARNING, 81),
     /**
-     * Your mail has been successfully sent, but original mail could not flagged as replied and/or forwarded.
+     * Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as "replied" and/or "forwarded".
      */
-    FLAG_FAIL("Your mail has been successfully sent, but original mail could not flagged as replied and/or forwarded.", Category.CATEGORY_WARNING, 82),
+    FLAG_FAIL("Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as \"replied\" and/or \"forwarded\".", Category.CATEGORY_WARNING, 82),
 
     ;
 

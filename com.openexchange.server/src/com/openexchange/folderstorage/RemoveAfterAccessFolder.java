@@ -59,6 +59,11 @@ package com.openexchange.folderstorage;
  */
 public interface RemoveAfterAccessFolder extends Folder {
 
-    // Marker interface
+    /**
+     * Whether to load subfolders.
+     * 
+     * @return <code>true</code> to load subfolders; otherwise <code>false</code>
+     */
+    boolean loadSubfolders();
 
 }

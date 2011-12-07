@@ -253,6 +253,9 @@ public class ContentType extends ParameterizedHeader {
     private static final String EMPTY = "";
 
     private static String clearWhitespaces(final String str) {
+        if (null == str) {
+            return null;
+        }
         return PATTERN_WHITESPACE.matcher(str).replaceAll(EMPTY);
     }
 
@@ -263,7 +266,7 @@ public class ContentType extends ParameterizedHeader {
      */
     private static final char DELIMITER = '/';
 
-    // private static final String DEFAULT_PRIMTYPE = "APPLICATION";
+    private static final String DEFAULT_PRIMTYPE = "APPLICATION";
 
     private static final String DEFAULT_SUBTYPE = "OCTET-STREAM";
 
@@ -374,13 +377,24 @@ public class ContentType extends ParameterizedHeader {
             if (ctMatcher.start() != 0) {
                 throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
             }
-            primaryType = clearWhitespaces(decodeMultiEncodedHeader(ctMatcher.group(1)));
+            {
+                final String pt = ctMatcher.group(1);
+                final String decoded = clearWhitespaces(decodeMultiEncodedHeader(pt));
+                primaryType = null == decoded ? pt : decoded;
+                if ((primaryType == null) || (primaryType.length() == 0)) {
+                    primaryType = DEFAULT_PRIMTYPE;
+                }
+            }
             pos = primaryType.indexOf(DELIMITER);
-            if (primaryType.indexOf(DELIMITER) >= 0) {
+            if (pos >= 0) {
                 subType = primaryType.substring(pos + 1);
                 primaryType = primaryType.substring(0, pos);
             } else {
-                subType = clearWhitespaces(decodeMultiEncodedHeader(ctMatcher.group(2)));
+                {
+                    final String st = ctMatcher.group(2);
+                    final String decoded = clearWhitespaces(decodeMultiEncodedHeader(st));
+                    subType = null == decoded ? st : decoded;
+                }
                 if ((subType == null) || (subType.length() == 0)) {
                     subType = DEFAULT_SUBTYPE;
                 }

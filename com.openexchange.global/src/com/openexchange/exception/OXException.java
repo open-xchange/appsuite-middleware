@@ -225,6 +225,8 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private String logMessage;
 
+    private Object[] logArgs;
+
     private String exceptionId;
 
     private String prefix;
@@ -466,6 +468,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         }
         try {
             this.logMessage = String.format(Locale.US, displayFormat, args);
+            logArgs = args;
         } catch (final NullPointerException e) {
             this.logMessage = null;
         } catch (final IllegalFormatException e) {
@@ -485,6 +488,16 @@ public class OXException extends Exception implements OXExceptionConstants {
      */
     public String getPlainLogMessage() {
         return logMessage;
+    }
+
+    /**
+     * Gets the arguments used to compose log message.
+     *
+     * @return The log arguments
+     * @see #getPlainLogMessage()
+     */
+    public Object[] getLogArgs() {
+        return logArgs;
     }
 
     /**

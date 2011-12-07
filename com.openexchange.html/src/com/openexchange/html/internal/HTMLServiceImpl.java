@@ -55,11 +55,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.PrettyXmlSerializer;
@@ -75,13 +80,14 @@ import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.Charsets;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
  * {@link HTMLServiceImpl}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class HTMLServiceImpl implements HTMLService {
@@ -110,7 +116,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Initializes a new {@link HTMLServiceImpl}.
-     *
+     * 
      * @param tidyConfiguration The jTidy configuration
      * @param htmlCharMap The HTML entity to string map
      * @param htmlEntityMap The string to HTML entity map
@@ -195,8 +201,10 @@ public final class HTMLServiceImpl implements HTMLService {
                      * Add proxy registration
                      */
                     final URL imageUrl = new URL(urlStr);
-                    final URI uri =
-                        proxyRegistry.register(new ProxyRegistration(imageUrl, sessionId, ImageContentTypeRestriction.getInstance()));
+                    final URI uri = proxyRegistry.register(new ProxyRegistration(
+                        imageUrl,
+                        sessionId,
+                        ImageContentTypeRestriction.getInstance()));
                     /*
                      * Compose replacement
                      */
@@ -347,7 +355,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Checks if specified URL needs to be converted to its ASCII form.
-     *
+     * 
      * @param url The URL to check
      * @return The checked URL
      * @throws MalformedURLException If URL is malformed
@@ -358,9 +366,8 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Get the host part of URL. Ensure scheme is present before creating a java.net.URL instance
          */
-        final String host =
-            new URL(
-                urlStr.startsWith("www.") || urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
+        final String host = new URL(
+            urlStr.startsWith("www.") || urlStr.startsWith("news.") ? new StringBuilder("http://").append(urlStr).toString() : urlStr).getHost();
         if (null != host && !isAscii(host)) {
             final String encodedHost = gnu.inet.encoding.IDNA.toASCII(host);
             urlStr = Pattern.compile(Pattern.quote(host)).matcher(urlStr).replaceFirst(Matcher.quoteReplacement(encodedHost));
@@ -394,7 +401,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Checks whether the specified string's characters are ASCII 7 bit
-     *
+     * 
      * @param s The string to check
      * @return <code>true</code> if string's characters are ASCII 7 bit; otherwise <code>false</code>
      */
@@ -473,7 +480,9 @@ public final class HTMLServiceImpl implements HTMLService {
         /*
          * Specify pattern & matcher
          */
-        final Pattern p = Pattern.compile(sb.append(Pattern.quote("<!--" + commentId + " ")).append("(.+?)").append(Pattern.quote("-->")).toString(), Pattern.DOTALL);
+        final Pattern p = Pattern.compile(
+            sb.append(Pattern.quote("<!--" + commentId + " ")).append("(.+?)").append(Pattern.quote("-->")).toString(),
+            Pattern.DOTALL);
         sb.setLength(0);
         final Matcher m = p.matcher(s);
         if (!m.find()) {
@@ -526,7 +535,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * <p>
      * This is just a convenience method which invokes <code>{@link #htmlFormat(String, boolean)}</code> with latter parameter set to
      * <code>true</code>.
-     *
+     * 
      * @param plainText The plain text
      * @return The properly escaped HTML content
      * @see #htmlFormat(String, boolean)
@@ -536,8 +545,7 @@ public final class HTMLServiceImpl implements HTMLService {
         return htmlFormat(plainText, true);
     }
 
-    private static final String REGEX_URL_SOLE =
-        "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
+    private static final String REGEX_URL_SOLE = "\\b(?:https?://|ftp://|mailto:|news\\.|www\\.)[-\\p{L}\\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\\p{L}\\p{Sc}0-9+&@#/%=~_()|]";
 
     /**
      * The regular expression to match URLs inside text:<br>
@@ -554,7 +562,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * <code>\(?\b(?:https?://|ftp://|mailto:|news\\.|www\.)[-\p{L}\p{Sc}0-9+&@#/%?=~_()|!:,.;]*[-\p{L}\p{Sc}0-9+&@#/%=~_()|]</code>
      * <p>
      * Parentheses, if present, are allowed in the URL -- The leading one is absorbed, too.
-     *
+     * 
      * <pre>
      * String s = matcher.group();
      * int mlen = s.length() - 1;
@@ -585,7 +593,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Maps specified HTML entity - e.g. <code>&amp;uuml;</code> - to corresponding unicode character.
-     *
+     * 
      * @param entity The HTML entity
      * @return The corresponding unicode character or <code>null</code>
      */
@@ -704,10 +712,12 @@ public final class HTMLServiceImpl implements HTMLService {
          * The <base> tag must be between the document's <head> tags. Also, there must be no more than one base element per document.
          */
         final Matcher m1 = PATTERN_BODY_START.matcher(htmlContent);
-        return checkBaseTag(htmlContent,externalImagesAllowed,  m1.find() ? m1.start() : htmlContent.length());
+        return checkBaseTag(htmlContent, externalImagesAllowed, m1.find() ? m1.start() : htmlContent.length());
     }
 
-    private static final Pattern PATTERN_BASE_TAG = Pattern.compile("<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BASE_TAG = Pattern.compile(
+        "<base[^>]*href=\\s*(?:\"|')(\\S*?)(?:\"|')[^>]*>(.*?</base>)?",
+        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static String checkBaseTag(final String htmlContent, final boolean externalImagesAllowed, final int end) {
         final Matcher m = PATTERN_BASE_TAG.matcher(htmlContent);
@@ -737,7 +747,8 @@ public final class HTMLServiceImpl implements HTMLService {
          */
         while (m.find() && m.end() < end) {
             mr.appendLiteralReplacement(sb, "");
-        };
+        }
+        ;
         mr.appendTail(sb);
         return sb.toString();
     }
@@ -751,7 +762,9 @@ public final class HTMLServiceImpl implements HTMLService {
         return dropScriptTagsInHeader(htmlContent, m1.find() ? m1.start() : htmlContent.length());
     }
 
-    private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile("<script[^>]*>" + ".*?" + "</script>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_SCRIPT_TAG = Pattern.compile(
+        "<script[^>]*>" + ".*?" + "</script>",
+        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static String dropScriptTagsInHeader(final String htmlContent, final int end) {
         final Matcher m = PATTERN_SCRIPT_TAG.matcher(htmlContent);
@@ -765,6 +778,48 @@ public final class HTMLServiceImpl implements HTMLService {
         } while (m.find() && m.end() < end);
         mr.appendTail(sb);
         return sb.toString();
+    }
+
+    private static final Pattern PATTERN_STYLESHEET_FILE = Pattern.compile(
+        "<link.*?(type=['\"]text/css['\"].*?href=['\"](.*?)['\"]|href=['\"](.*?)['\"].*?type=['\"]text/css['\"]).*?/>",
+        Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_STYLESHEET = Pattern.compile("<style.*?>(.*?)</style>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    @Override
+    public String getCSSFromHTMLHeader(final String htmlContent) {
+        final StringBuilder css = new StringBuilder(htmlContent.length() >> 1);
+        final Matcher mStyle = PATTERN_STYLESHEET.matcher(htmlContent);
+        while (mStyle.find()) {
+            css.append(mStyle.group(1));
+        }
+        final Matcher mStyleFile = PATTERN_STYLESHEET_FILE.matcher(htmlContent);
+        while (mStyleFile.find()) {
+            final String cssFile = mStyleFile.group(2);
+            final HttpClient client = new HttpClient();
+            final GetMethod get = new GetMethod(cssFile);
+            try {
+                final int statusCode = client.executeMethod(get);
+                if (statusCode != HttpStatus.SC_OK) {
+                    // throw new OXException(); //TODO: set exceptioncode
+                } else {
+                    final byte[] responseBody = get.getResponseBody();
+                    try {
+                        final String charSet = get.getResponseCharSet();
+                        css.append(new String(responseBody, null == charSet ? Charsets.ISO_8859_1 : Charsets.forName(charSet)));
+                    } catch (final UnsupportedCharsetException e) {
+                        css.append(new String(responseBody, Charsets.ISO_8859_1));
+                    }
+                }
+            } catch (final HttpException e) {
+                // throw new OXException(); //TODO: set exceptioncode
+            } catch (final IOException e) {
+                // throw new OXException(); //TODO: set exceptioncode
+            } finally {
+                get.releaseConnection();
+            }
+        }
+        return css.toString();
     }
 
     @Override
@@ -855,8 +910,9 @@ public final class HTMLServiceImpl implements HTMLService {
 
         final String commentStart = RegexUtility.group(RegexUtility.OR(RegexUtility.quote("<!--"), RegexUtility.quote("&lt;!--")), false);
 
-        final String commentEnd =
-            RegexUtility.concat(RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false), "\\s*");
+        final String commentEnd = RegexUtility.concat(
+            RegexUtility.group(RegexUtility.OR(RegexUtility.quote("-->"), RegexUtility.quote("--&gt;")), false),
+            "\\s*");
 
         final String group2 = RegexUtility.group(RegexUtility.concat(commentStart, ".*?", commentEnd), true);
 
@@ -879,7 +935,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
     /**
      * Removes unnecessary CDATA from CSS or JavaScript <code>style</code> elements:
-     *
+     * 
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * /*&lt;![CDATA[&#42;/
@@ -889,9 +945,9 @@ public final class HTMLServiceImpl implements HTMLService {
      * /*]]&gt;&#42;/
      * &lt;/style&gt;
      * </pre>
-     *
+     * 
      * is turned to
-     *
+     * 
      * <pre>
      * &lt;style type=&quot;text/css&quot;&gt;
      * &lt;!--
@@ -899,7 +955,7 @@ public final class HTMLServiceImpl implements HTMLService {
      * --&gt;
      * &lt;/style&gt;
      * </pre>
-     *
+     * 
      * @param htmlContent The (X)HTML content possibly containing CDATA in CSS or JavaScript <code>style</code> elements
      * @return The (X)HTML content with CDATA removed
      */
@@ -912,9 +968,8 @@ public final class HTMLServiceImpl implements HTMLService {
             StringBuilder tmp = null;
             do {
                 // Un-quote
-                final String match =
-                    Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll(
-                        "-->"));
+                final String match = Matcher.quoteReplacement(PATTERN_UNQUOTE2.matcher(
+                    PATTERN_UNQUOTE1.matcher(m.group(2)).replaceAll("<!--")).replaceAll("-->"));
                 // Check for additional HTML comments
                 if (PATTERN_XHTML_COMMENT.matcher(m.group(2)).replaceAll("").indexOf(endingComment) == -1) {
                     // No additional HTML comments
@@ -952,21 +1007,21 @@ public final class HTMLServiceImpl implements HTMLService {
      * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
      * adding dashes before and after each <code>if</code> statement tag to complete them as a valid HTML comment and leaves center code
      * open to rendering on non-IE browsers:
-     *
+     * 
      * <pre>
      * &lt;![if !IE]&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;![endif]&gt;
      * </pre>
-     *
+     * 
      * is turned to
-     *
+     * 
      * <pre>
      * &lt;!--[if !IE]&gt;--&gt;
      * &lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;non-ie.css&quot;&gt;
      * &lt;!--&lt;![endif]--&gt;
      * </pre>
-     *
+     * 
      * @param htmlContent The HTML content possibly containing downlevel-revealed conditional comments
      * @return The HTML content whose downlevel-revealed conditional comments contain valid HTML for non-IE browsers
      */
@@ -1002,7 +1057,7 @@ public final class HTMLServiceImpl implements HTMLService {
     /**
      * Validates specified HTML content with <a href="http://tidy.sourceforge.net/">tidy html</a> library and falls back using <a
      * href="http://htmlcleaner.sourceforge.net/">HtmlCleaner</a> if any error occurs.
-     *
+     * 
      * @param htmlContent The HTML content
      * @return The validated HTML content
      */
@@ -1040,11 +1095,11 @@ public final class HTMLServiceImpl implements HTMLService {
     /**
      * The white-list of permitted HTML elements for <a href="http://jsoup.org/">jsoup</a> library.
      */
-    //private static final Whitelist WHITELIST = Whitelist.relaxed();
+    // private static final Whitelist WHITELIST = Whitelist.relaxed();
 
     /**
      * Pre-process specified HTML content with <a href="http://jsoup.org/">jsoup</a> library.
-     *
+     * 
      * @param htmlContent The HTML content
      * @return The safe HTML content according to JSoup processing
      */

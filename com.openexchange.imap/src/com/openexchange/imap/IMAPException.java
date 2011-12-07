@@ -337,6 +337,10 @@ public final class IMAPException extends OXException {
          * Default folder %1$s must not be unsubscribed.
          */
         NO_DEFAULT_FOLDER_UNSUBSCRIBE(IMAPCode.NO_DEFAULT_FOLDER_UNSUBSCRIBE),
+        /**
+         * IMAP server refuses to import one or more E-Mails.
+         */
+        INVALID_MESSAGE(IMAPCode.INVALID_MESSAGE),
 
         ;
 
@@ -850,6 +854,14 @@ public final class IMAPException extends OXException {
          * Default folder %1$s must not be unsubscribed on server %2$s with login %3$s (user=%4$s, context=%5$s)
          */
         NO_DEFAULT_FOLDER_UNSUBSCRIBE_EXT("Default folder %1$s must not be unsubscribed on server %2$s with login %3$s (user=%4$s, context=%5$s)", NO_DEFAULT_FOLDER_UNSUBSCRIBE),
+        /**
+         * IMAP server refuses to import one or more E-Mails.
+         */
+        INVALID_MESSAGE("IMAP server refuses to import one or more E-Mails.", Category.CATEGORY_USER_INPUT, 2057),
+        /**
+         * IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user=%3$s, context=%3$s)
+         */
+        INVALID_MESSAGE_EXT("IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user=%3$s, context=%4$s)", INVALID_MESSAGE),
 
         ;
 

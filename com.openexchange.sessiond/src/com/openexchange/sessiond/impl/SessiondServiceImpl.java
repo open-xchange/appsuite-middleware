@@ -150,7 +150,7 @@ public class SessiondServiceImpl implements SessiondService {
             LOG.info("Session not found. ID: " + sessionId);
             return null;
         }
-        return sessionControl.getSession();
+        return sessionControl.touch().getSession();
     }
 
     @Override

@@ -88,6 +88,11 @@ public interface MultipleHandler {
     public static final String ROUTE = "__route";
 
     /**
+     * The constant for the key to get the remote address.
+     */
+    public static final String REMOTE_ADDRESS = "__remoteAddress";
+
+    /**
      * Performs the multiple request identified by specified action string.
      *
      * @param action The action string denoting the request to perform

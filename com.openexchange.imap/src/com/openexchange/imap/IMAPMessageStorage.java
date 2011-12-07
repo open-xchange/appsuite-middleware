@@ -79,6 +79,7 @@ import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParameterList;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.exception.OXException;
@@ -124,6 +125,7 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -302,7 +304,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 String content;
                 {
                     final byte[] bytes = new BodyFetchIMAPCommand(imapFolder, mailId, sequenceId, true).doCommand();
-                    content = readContent(bytes, bodystructure.cParams.get("charset"), bodystructure.encoding);
+                    final ParameterList cParams = bodystructure.cParams;
+                    content = readContent(bytes, null == cParams ? null : cParams.get("charset"), bodystructure.encoding);
                 }
                 if ("plain".equals(subtype)) {
                     if (UUEncodedMultiPart.isUUEncoded(content)) {
@@ -1573,6 +1576,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (null == mailMessages || mailMessages.length == 0) {
             return new long[0];
         }
+        Message[] msgs = null;
         try {
             /*
              * Open and check user rights on source folder
@@ -1596,7 +1600,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Convert messages to JavaMail message objects
              */
-            final Message[] msgs = MIMEMessageConverter.convertMailMessages(mailMessages, true);
+            msgs = MIMEMessageConverter.convertMailMessages(mailMessages, MIMEMessageConverter.BEHAVIOR_CLONE | MIMEMessageConverter.BEHAVIOR_STREAM2FILE);
             /*
              * Check if destination folder supports user flags
              */
@@ -1619,12 +1623,20 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             long[] retval = new long[0];
             final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
-            if (hasUIDPlus) {
-                // Perform append expecting APPENUID response code
-                retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
-            } else {
-                // Perform simple append
-                imapFolder.appendMessages(msgs);
+            try {
+                if (hasUIDPlus) {
+                    // Perform append expecting APPENUID response code
+                    retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(msgs));
+                } else {
+                    // Perform simple append
+                    imapFolder.appendMessages(msgs);
+                }
+            } catch (final MessagingException e) {
+                final Exception nextException = e.getNextException();
+                if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
+                    throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
+                }
+                throw e;
             }
             if (retval.length > 0) {
                 /*
@@ -1674,6 +1686,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
+        } finally {
+            if (null != msgs) {
+                for (final Message message : msgs) {
+                    if (message instanceof ManagedMimeMessage) {
+                        try {
+                            ((ManagedMimeMessage) message).cleanUp();
+                        } catch (final MessagingException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
         }
     }
 

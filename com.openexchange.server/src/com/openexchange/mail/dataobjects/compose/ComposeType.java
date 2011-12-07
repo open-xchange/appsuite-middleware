@@ -71,7 +71,13 @@ public enum ComposeType {
     /**
      * Draft-Edit
      */
-    DRAFT_EDIT(3);
+    DRAFT_EDIT(3),
+    /**
+     * Draft
+     */
+    DRAFT(4),
+
+    ;
 
     private final int type;
 
