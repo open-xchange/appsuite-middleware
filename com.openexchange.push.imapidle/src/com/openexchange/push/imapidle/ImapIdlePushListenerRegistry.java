@@ -195,7 +195,7 @@ public final class ImapIdlePushListenerRegistry {
         });
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImapIdlePushListenerRegistry.class));
         if (null == session) {
-            logger.info("Found no other valid & active sessions for user " + userId + " in context " + contextId  + ". Therefore shutting down associated IMAP IDLE push listener.");
+            logger.info("Found no other valid & active session for user " + userId + " in context " + contextId  + ". Therefore shutting down associated IMAP IDLE push listener.");
             return removeListener(key);
         }
         logger.info("Found another valid & active session for user " + userId + " in context " + contextId  + ". Reactivating IMAP IDLE push listener.");
