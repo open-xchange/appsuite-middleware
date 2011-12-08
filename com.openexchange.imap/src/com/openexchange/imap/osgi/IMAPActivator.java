@@ -146,6 +146,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                 registry.addService(SecretService.class, secretService = new WhiteboardSecretService(context));
                 secretService.open();
             }
+            IMAPStoreCache.initInstance();
             /*
              * Register IMAP mail provider
              */
@@ -218,6 +219,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             /*
              * Clear service registry
              */
+            IMAPStoreCache.shutDownInstance();
             getServiceRegistry().clearRegistry();
             if (secretService != null) {
                 secretService.close();
