@@ -243,7 +243,7 @@ public class ContentType extends ParameterizedHeader {
     /**
      * The regular expression that should match whole content type
      */
-    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?\"?)");
+    private static final Pattern PATTERN_CONTENT_TYPE = Pattern.compile("(?:\"?([\\p{ASCII}&&[^/;\\s\"]]+)(?:/([\\p{ASCII}&&[^;\\s\"]]+))?\"?)|(?:/([\\p{ASCII}&&[^;\\s\"]]+))");
 
     /**
      * The regular expression capturing whitespace characters.
@@ -377,30 +377,40 @@ public class ContentType extends ParameterizedHeader {
             if (ctMatcher.start() != 0) {
                 throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
             }
-            {
-                final String pt = ctMatcher.group(1);
-                final String decoded = clearWhitespaces(decodeMultiEncodedHeader(pt));
-                primaryType = null == decoded ? pt : decoded;
-                if ((primaryType == null) || (primaryType.length() == 0)) {
-                    primaryType = DEFAULT_PRIMTYPE;
+            final String alt = ctMatcher.group(3);
+            if (null != alt) {
+                primaryType = DEFAULT_PRIMTYPE;
+                final String decoded = clearWhitespaces(decodeMultiEncodedHeader(alt));
+                subType = null == decoded ? alt : decoded;
+                if ((subType == null) || (subType.length() == 0)) {
+                    subType = DEFAULT_SUBTYPE;
                 }
-            }
-            pos = primaryType.indexOf(DELIMITER);
-            if (pos >= 0) {
-                subType = primaryType.substring(pos + 1);
-                primaryType = primaryType.substring(0, pos);
             } else {
                 {
-                    final String st = ctMatcher.group(2);
-                    final String decoded = clearWhitespaces(decodeMultiEncodedHeader(st));
-                    subType = null == decoded ? st : decoded;
+                    final String pt = ctMatcher.group(1);
+                    final String decoded = clearWhitespaces(decodeMultiEncodedHeader(pt));
+                    primaryType = null == decoded ? pt : decoded;
+                    if ((primaryType == null) || (primaryType.length() == 0)) {
+                        primaryType = DEFAULT_PRIMTYPE;
+                    }
+                }
+                pos = primaryType.indexOf(DELIMITER);
+                if (pos >= 0) {
+                    subType = primaryType.substring(pos + 1);
+                    primaryType = primaryType.substring(0, pos);
+                } else {
+                    {
+                        final String st = ctMatcher.group(2);
+                        final String decoded = clearWhitespaces(decodeMultiEncodedHeader(st));
+                        subType = null == decoded ? st : decoded;
+                    }
+                    if ((subType == null) || (subType.length() == 0)) {
+                        subType = DEFAULT_SUBTYPE;
+                    }
                 }
                 if ((subType == null) || (subType.length() == 0)) {
                     subType = DEFAULT_SUBTYPE;
                 }
-            }
-            if ((subType == null) || (subType.length() == 0)) {
-                subType = DEFAULT_SUBTYPE;
             }
             baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
             if (paramList) {
