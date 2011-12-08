@@ -275,11 +275,18 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         if (null == session) {
             final SessiondService service = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
             if (invalidSessionIds.isEmpty()) {
-                session = service.getAnyActiveSessionForUser(userId, contextId);
+                session = service.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+
+                    @Override
+                    public boolean accepts(final Session tmp) {
+                        return PushUtility.allowedClient(tmp.getClient());
+                    }
+
+                });
             } else {
                 final Collection<Session> sessions = service.getSessions(userId, contextId);
                 for (final Session s : sessions) {
-                    if (!invalidSessionIds.containsKey(s.getSessionID())) {
+                    if (!invalidSessionIds.containsKey(s.getSessionID()) && PushUtility.allowedClient(s.getClient())) {
                         session = s;
                     }
                 }
@@ -357,6 +364,9 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * Closes this listener.
      */
     public void close() {
+        if (shutdown) {
+            return;
+        }
         if (isDebugEnabled()) {
             final Session session = getSession();
             LOG.info("stopping IDLE for Context: " + contextId + ", Login: " + (null == session ? "unknown" : session.getLoginName()));

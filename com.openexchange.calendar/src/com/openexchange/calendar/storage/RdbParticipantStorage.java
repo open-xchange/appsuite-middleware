@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -96,27 +98,32 @@ public class RdbParticipantStorage extends ParticipantStorage {
             for (final ExternalUserParticipant participant : participants) {
                 pos = 3;
                 final String emailAddress = participant.getEmailAddress();
-                if (!addresses.add(emailAddress)) {
+                if (addresses.add(emailAddress)) {
+                    stmt.setString(pos++, emailAddress);
+                    final String displayName = participant.getDisplayName();
+                    if (null == displayName) {
+                        stmt.setNull(pos++, Types.VARCHAR);
+                    } else {
+                        stmt.setString(pos++, displayName);
+                    }
+                    stmt.setInt(pos++, participant.getConfirm());
+                    final String message = participant.getMessage();
+                    if (null == message) {
+                        stmt.setNull(pos++, Types.VARCHAR);
+                    } else {
+                        stmt.setString(pos++, message);
+                    }
+                    stmt.addBatch();
+                } else {
                     /*
                      * Duplicate address
                      */
-                    throw OXCalendarExceptionCodes.DUPLICATE_EXTERNAL_PARTICIPANT.create(emailAddress);
+                    final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdbParticipantStorage.class));
+                    if (logger.isWarnEnabled()) {
+                        final OXException e = OXCalendarExceptionCodes.DUPLICATE_EXTERNAL_PARTICIPANT.create(emailAddress);
+                        logger.warn(e.getMessage());
+                    }
                 }
-                stmt.setString(pos++, emailAddress);
-                final String displayName = participant.getDisplayName();
-                if (null == displayName) {
-                    stmt.setNull(pos++, Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, displayName);
-                }
-                stmt.setInt(pos++, participant.getConfirm());
-                final String message = participant.getMessage();
-                if (null == message) {
-                    stmt.setNull(pos++, Types.VARCHAR);
-                } else {
-                    stmt.setString(pos++, message);
-                }
-                stmt.addBatch();
             }
             stmt.executeBatch();
             // TODO data truncation should be catched if some too long messages should be stored.

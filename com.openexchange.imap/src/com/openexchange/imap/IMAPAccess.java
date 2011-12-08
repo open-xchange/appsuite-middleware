@@ -191,6 +191,21 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private boolean connected;
 
     /**
+     * The server's host name.
+     */
+    private String server;
+
+    /**
+     * The server's port.
+     */
+    private int port;
+
+    /**
+     * The user's login name.
+     */
+    private String login;
+
+    /**
      * The IMAP config.
      */
     private volatile IMAPConfig imapConfig;
@@ -223,11 +238,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     public AccessedIMAPStore getIMAPStore() {
         return imapStore;
-    }
-
-    @Override
-    public boolean isCacheable() {
-        return true;
     }
 
     private void reset() {
@@ -289,13 +299,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             }
             if (imapStore != null) {
-                try {
-                    imapStore.close();
-                } catch (final MessagingException e) {
-                    LOG.error("Error while closing IMAP store.", e);
-                } catch (final RuntimeException e) {
-                    LOG.error("Error while closing IMAP store.", e);
-                }
+                IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login);
                 final IMAPConfig ic = getIMAPConfig();
                 if (null != ic) {
                     ic.dropImapStore();
@@ -439,7 +443,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get store
                  */
-                imapStore = connectIMAPStore(imapSession, config.getServer(), config.getPort(), config.getLogin(), tmpPass, null);
+                imapStore = connectIMAPStore(false, imapSession, config.getServer(), config.getPort(), config.getLogin(), tmpPass, null);
                 /*
                  * Add warning if non-secure
                  */
@@ -561,6 +565,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             try {
                 imapStore =
                     new AccessedIMAPStore(this, connectIMAPStore(
+                        true,
                         imapSession,
                         config.getServer(),
                         config.getPort(),
@@ -588,7 +593,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
                 throw e;
             }
-            connected = true;
+            this.server = config.getServer();
+            this.port = config.getPort();
+            this.login = user;
+            this.connected = true;
             /*
              * Register notifier task if enabled
              */
@@ -630,160 +638,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return Arrays.binarySearch(ids, accountId) >= 0;
     }
 
-    /**
-     * Connects specified <code>IMAPAccess</code> instance.
-     *
-     * @param imapAccess The <code>IMAPAccess</code> instance to connect
-     * @throws OXException If connect attempt fails
-     */
-    public static void connect(final IMAPAccess imapAccess) throws OXException {
-        if (imapAccess.connected) {
-            return;
-        }
-        final IMAPConfig config = imapAccess.getIMAPConfig();
-        try {
-            final IIMAPProperties imapConfProps = (IIMAPProperties) config.getMailProperties();
-            final boolean tmpDownEnabled = (imapConfProps.getImapTemporaryDown() > 0);
-            if (tmpDownEnabled) {
-                /*
-                 * Check if IMAP server is marked as being (temporary) down since connecting to it failed before
-                 */
-                imapAccess.checkTemporaryDown(imapConfProps);
-            }
-            String tmpPass = config.getPassword();
-            if (tmpPass != null) {
-                try {
-                    tmpPass = new String(tmpPass.getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
-                } catch (final UnsupportedCharsetException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-            }
-            final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
-            /*
-             * Check for already failed authentication
-             */
-            final String login = config.getLogin();
-            String user = login;
-            String proxyUser = null;
-            boolean isProxyAuth = false;
-            if (proxyDelimiter != null && login.contains(proxyDelimiter)) {
-                isProxyAuth = true;
-                proxyUser = login.substring(0, login.indexOf(proxyDelimiter));
-                user = login.substring(login.indexOf(proxyDelimiter) + proxyDelimiter.length(), login.length());
-            }
-            checkFailedAuths(user, tmpPass);
-            /*
-             * Get properties
-             */
-            final Properties imapProps = IMAPSessionProperties.getDefaultSessionProperties();
-            {
-                final Properties mailProperties = imapAccess.getMailProperties();
-                if ((null != mailProperties) && !mailProperties.isEmpty()) {
-                    imapProps.putAll(mailProperties);
-                }
-            }
-            if (isProxyAuth) {
-                imapProps.put("mail.imap.sasl.enable", "true");
-                imapProps.put("mail.imap.sasl.authorizationid", user);
-                imapProps.put("mail.imap.sasl.mechanisms", "PLAIN");
-            }
-            /*
-             * Get parameterized IMAP session
-             */
-            final javax.mail.Session imapSession =
-                imapAccess.imapSession =
-                    setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps);
-            /*
-             * Check if debug should be enabled
-             */
-            final boolean certainUser = false; // ("imap.googlemail.com".equals(config.getServer()) && 17 == session.getUserId());
-            if (certainUser || Boolean.parseBoolean(imapSession.getProperty(MIMESessionPropertyNames.PROP_MAIL_DEBUG))) {
-                imapSession.setDebug(true);
-                imapSession.setDebugOut(System.out);
-            }
-            /*
-             * Check if client IP address should be propagated
-             */
-            final Session session = imapAccess.session;
-            String clientIp = null;
-            final int accountId = imapAccess.accountId;
-            if (imapConfProps.isPropagateClientIPAddress() && imapAccess.isPropagateAccount(imapConfProps)) {
-                final String ip = session.getLocalIp();
-                if (!isEmpty(ip)) {
-                    clientIp = ip;
-                } else if (DEBUG) {
-                    LOG.debug(new StringBuilder(256).append("\n\n\tMissing client IP in session \"").append(session.getSessionID()).append(
-                        "\" of user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).append(".\n"));
-                }
-            } else if (DEBUG && MailAccount.DEFAULT_ID == accountId) {
-                LOG.debug(new StringBuilder(256).append("\n\n\tPropagating client IP address disabled on Open-Xchange server \"").append(
-                    IMAPServiceRegistry.getService(ConfigurationService.class).getProperty("AJP_JVM_ROUTE")).append("\"\n").toString());
-            }
-            /*
-             * Get connected store
-             */
-            try {
-                imapAccess.imapStore =
-                    new AccessedIMAPStore(imapAccess, connectIMAPStore(
-                        imapSession,
-                        config.getServer(),
-                        config.getPort(),
-                        isProxyAuth ? proxyUser : user,
-                        tmpPass,
-                        clientIp), imapSession);
-            } catch (final AuthenticationFailedException e) {
-                /*
-                 * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
-                 */
-                failedAuths.put(new LoginAndPass(user, tmpPass), new StampAndError(e, System.currentTimeMillis()));
-                throw e;
-            } catch (final MessagingException e) {
-                /*
-                 * Check for a SocketTimeoutException
-                 */
-                if (tmpDownEnabled) {
-                    final Exception nextException = e.getNextException();
-                    if (SocketTimeoutException.class.isInstance(nextException)) {
-                        /*
-                         * Remember a timed-out IMAP server on connect attempt
-                         */
-                        timedOutServers.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
-                    }
-                }
-                throw e;
-            }
-            imapAccess.connected = true;
-            /*
-             * Register notifier task if enabled
-             */
-            if (MailAccount.DEFAULT_ID == accountId && config.getIMAPProperties().notifyRecent()) {
-                /*
-                 * This call is re-invoked during IMAPNotifierTask's run
-                 */
-                if (IMAPNotifierRegistry.getInstance().addTaskFor(accountId, session) && INFO) {
-                    final StringBuilder tmp = new StringBuilder("\n\tStarted IMAP notifier for server \"").append(config.getServer());
-                    tmp.append("\" with login \"").append(user);
-                    tmp.append("\" (user=").append(session.getUserId());
-                    tmp.append(", context=").append(session.getContextId()).append(").");
-                    LOG.info(tmp.toString());
-                }
-            }
-            /*
-             * Add folder listener
-             */
-            // imapStore.addFolderListener(new ListLsubCacheFolderListener(accountId, session));
-            /*
-             * Add server's capabilities
-             */
-            config.initializeCapabilities(imapAccess.imapStore, session);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e, config, imapAccess.session);
-        }
-    }
-
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
 
-    private static IMAPStore connectIMAPStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException {
+    private IMAPStore connectIMAPStore(final boolean fromCache, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final String clientIp) throws MessagingException, OXException {
         /*
          * Propagate client IP address
          */
@@ -792,6 +649,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         /*
          * Get store...
+         */
+        if (fromCache) {
+            return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session);
+        }
+        /*
+         * Establish a new one...
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
         /*
@@ -896,6 +759,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     public boolean isConnectedUnsafe() {
         return connected;
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return false;
     }
 
     /**

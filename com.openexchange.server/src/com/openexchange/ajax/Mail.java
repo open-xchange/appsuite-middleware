@@ -53,6 +53,7 @@ import static com.openexchange.mail.json.parser.MessageParser.parseAddressKey;
 import static com.openexchange.tools.Collections.newHashMap;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -116,6 +117,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.contexts.Context;
@@ -156,6 +158,7 @@ import com.openexchange.mail.mime.MIMEDefaultSession;
 import com.openexchange.mail.mime.MIMEMailException;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MIMETypes;
+import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
@@ -3339,6 +3342,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     private final Response actionPutNewMail(final ServerSession session, final HttpServletRequest req, final ParamContainer paramContainer) {
         final Response response = new Response(session);
         JSONValue responseData = null;
+        ManagedMimeMessage managedMimeMessage = null;
         try {
             final String folder = paramContainer.getStringParam(PARAMETER_FOLDERID);
             final int flags;
@@ -3360,7 +3364,52 @@ public class Mail extends PermissionServlet implements UploadListener {
             final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), true);
             final PutNewMailData data;
             {
-                final MimeMessage message = new MimeMessage(MIMEDefaultSession.getDefaultSession(), req.getInputStream());
+                final MimeMessage message;
+                {
+                    final ManagedFileManagement fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+                    FileOutputStream fos = null;
+                    InputStream in = null;
+                    try {
+                        final java.io.File newTempFile = fileManagement.newTempFile();
+                        fos = new FileOutputStream(newTempFile);
+                        in = req.getInputStream();
+                        final byte[] buf = new byte[2048];
+                        for (int read; (read = in.read(buf, 0, 2048)) > 0;) {
+                            fos.write(buf, 0, read);
+                        }
+                        fos.flush();
+                        fos.close();
+                        fos = null;
+                        in.close();
+                        in = null;
+                        final ManagedFile managedFile = fileManagement.createManagedFile(newTempFile);
+                        message = managedMimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), managedFile);
+                    } catch (final IOException e) {
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                    } finally {
+                        if (null != fos) {
+                            try {
+                                fos.close();
+                            } catch (final IOException e) {
+                                // Ignore
+                            }
+                        }
+                        if (null != in) {
+                            try {
+                                in.close();
+                            } catch (final IOException e) {
+                                // Ignore
+                            }
+                        }
+                    }
+                }
+                /*
+                 * Drop special "x-original-headers" header
+                 */
+                message.removeHeader("x-original-headers");
+                /*
+                 * Proceed...
+                 */
                 final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
                 final InternetAddress fromAddress;
                 if (isEmpty(fromAddr)) {
@@ -3409,6 +3458,14 @@ public class Mail extends PermissionServlet implements UploadListener {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error(wrapper.getMessage(), wrapper);
             response.setException(wrapper);
+        } finally {
+            if (null != managedMimeMessage) {
+                try {
+                    managedMimeMessage.cleanUp();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
         }
         // Close response and flush print writer
         response.setData(responseData == null ? JSONObject.NULL : responseData);
