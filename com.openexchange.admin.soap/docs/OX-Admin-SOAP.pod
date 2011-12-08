@@ -1,0 +1,549 @@
+
+=head1 Open-Xchange Admin SOAP Interface documentation and examples
+
+This document describes the Open-Xchange Admin SOAP Interface and
+gives some brief examples on how to use it.
+
+=head2 Architecture
+
+The SOAP service communicates with the Admin Daemon using the RMI
+interface. In fact, the Admin SOAP service is just a mapper between
+RMI and SOAP.
+
+   --------------             --------------              -------------
+  |              |           |              |            |             |
+  | Admin Daemon | <- RMI -> | SOAP Service | <- SOAP -> | SOAP client |
+  |              |           |              |            |             |
+   --------------             --------------              -------------
+
+
+=head2 Installation and Configuration
+
+In order to use the SOAP Interface of the Open-Xchange Admin Daemon, you need
+to install the package C<open-xchange-admin-soap>. This package has a dependency
+to the Open-Xchange Server and the Axis2 bundle. The SOAP Interface is a
+service that must be deployed into the Axis2 Bundle.
+
+For more information about the Axis2 bundle, please refer to the
+Quick-OX-Axis2-Integration-Overview document, that ships with the
+Axis2 bundle.
+
+The default configuration of the Admin SOAP service expects the Admin
+Daemon to be accessible on localhost. To change this behaviour, the
+file
+C</opt/open-xchange/etc/admindaemon/plugin/open-xchange-admin-soap.properties>
+must changed accordingly. Just set C<RMI_HOSTNAME> to something
+different.
+
+=head2 How to check, if the SOAP service is installed and working?
+
+To check whether the Admin SOAP service is installed and working,
+point your browser to the URL
+http://localhost/servlet/axis2/services/OXContextService?wsdl
+
+It should display the WSDL (Web Services Description Language) file of
+the OXContextService. This file can also be used to find out what kind
+of SOAP calls exist for each of the modules.
+
+If that does not work, check the logfile of the Open-Xchange Server.
+
+=head2 What services do exist?
+
+=over
+
+=item OXContextService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXContext.html>Javadoc</A>
+</p>
+
+=end html
+
+Context related service.
+
+=item OXUtilService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXUtil.html>Javadoc</A>
+</p>
+
+=end html
+
+Util related service.
+
+=item OXUserService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXUser.html>Javadoc</A>
+</p>
+
+=end html
+
+User related service.
+
+=item OXGroupService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXGroup.html>Javadoc</A>
+</p>
+
+=end html
+
+Group related service.
+
+=item OXResourceService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXResource.html>Javadoc</A>
+</p>
+
+=end html
+
+Resource related service.
+
+=item OXTaskMgmtService
+
+=begin html
+
+<p>
+See <A HREF=javadoc/com/openexchange/admin/soap/OXTaskMgmt.html>Javadoc</A>
+</p>
+
+=end html
+
+TaskMgmt related service.
+
+=back
+
+For an explanation of these services, refer to the RMI javadoc
+documentation as shipped with the Open-Xchange Admin Daemon and the
+Open-Xchange Hosting Plugin (packages C<open-xchange-admin-doc> and
+C<open-xchange-admin-plugin-hosting-doc>).
+
+=head2 perl Programming examples using C<SOAP::Lite>
+
+All examples just line out the operation specific code that has to be
+written. A working example ships with the SOAP Bundle (refer to
+C<perl-example.pl>).
+
+The examples are using the C<SOAP::Lite> perl module. Documentation
+specific to that module can be found within this module or online at
+http://www.soaplite.com/.
+
+All examples require a credential object, where we need to
+differentiate between so called I<master credentials> and I<context
+credentials>. The master credentials SOAP objects will be named
+C<$masterCreds> and the context credential objects will be named
+C<$ctxCreds> in this document and within the example code.
+
+In addition, all code examples commonly use C<$nameSpace> and
+C<$baseURL>, which are required to create a SOAP client object.
+
+ my $baseURL     = "http://localhost/servlet/axis2/services/";
+ my $nameSpace   = "http://soap.admin.openexchange.com";
+
+ my $adminmaster = "oxadminmaster";
+ my $masterpw    = "secret";
+
+ my $ctxadmin    = "oxadmin";
+ my $ctxadmpw    = "secret";
+
+ # object holding the credentials of the OX Admin Master account
+ my $masterCreds = SOAP::Data->type("Credentials")->value(
+		                    \SOAP::Data->value(
+				      SOAP::Data->name("login" => $adminmaster),
+				      SOAP::Data->name("password" => $masterpw)
+				      )
+				    );
+
+ # object holding the credentials of the OX Context Admin account
+ my $ctxCreds    = SOAP::Data->type("Credentials")->value(
+		                    \SOAP::Data->value(
+				      SOAP::Data->name("login" => $ctxadmin),
+				      SOAP::Data->name("password" => $ctxadmpw)
+				      )
+				    );
+
+=head3 registering server, database and filestore
+
+=head4 creating SOAP client object
+
+ my $soclt = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXUtilService" );
+
+=head4 register a server
+
+=over
+
+=item defining variables
+
+ my $serverName = "myoxserver";
+
+=item executing SOAP operation and error handling
+
+ my $result = $soclt->registerServer(
+ 			    SOAP::Data->value("Server")->value(
+                              \SOAP::Data->value(
+ 			       SOAP::Data->name("name" => $serverName)
+ 			       )
+                              ),
+ 			    $masterCreds
+ 			    );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head4 register a database
+
+=over
+
+=item defining variables
+
+ my $dbname   = "mydb";
+ my $ismaster = "true";
+ my $maxctx   = 42042;
+ my $weight   = 100;
+ my $dbuser   = "openexchange";
+ my $dbpasswd = "secret";
+
+=item executing SOAP operation and error handling
+
+ $result = $soclt->registerDatabase(
+    	      SOAP::Data->value("Database")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $dbname),
+    	           SOAP::Data->name("master" => $ismaster),
+    	           SOAP::Data->name("maxUnits" => $maxctx),
+    	           SOAP::Data->name("clusterWeight" => $weight),
+    	           SOAP::Data->name("login" => $dbuser),
+    	           SOAP::Data->name("password" => $dbpasswd)
+    	           )),
+    	      $masterCreds
+    	      );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head4 register a filestore
+
+=over
+
+=item defining variables
+
+ my $storepath = "/tmp/filestore";
+ my $storeurl  = "file://$storepath";
+ my $size      = 123456;
+ my $maxctx    = 420;
+
+=item executing SOAP operation and error handling
+
+B<Important:> It's up to you to take care, that the directory
+containing the filestore already exists!
+
+ # create filestore if it does not exist
+ if( ! -d $storepath ) {
+   mkdir($storepath) || die "unable to mkdir $storepath";
+ }
+
+ $result = $soclt->registerFilestore(
+    	      SOAP::Data->value("Filestore")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("url" => $storeurl),
+    	           SOAP::Data->name("size" => $size),
+    	           SOAP::Data->name("maxContexts" => $maxctx)
+    	           )),
+    	      $masterCreds
+    	      );
+
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head3 creating a context
+
+=head4 creating SOAP client object
+
+ my $soclt = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXContextService" );
+
+=over
+
+=item defining variables
+
+ # mandatory user data for the context admin
+ my $displayname = "Context Admin";
+ my $surname     = "Admin";
+ my $gname       = "Context";
+ my $email       = "oxadmin\@example.com";
+ my $lang        = "de_DE";
+ my $timezone    = "Europe/Berlin";
+ # context quota
+ my $ctxid       = 424242;
+ my $ctxname     = "mycontext";
+ my $ctxquota    = 500;
+
+ # create a context SOAP object
+ my $context = SOAP::Data->type("Context")->value(
+			     \SOAP::Data->value(
+                              SOAP::Data->name("id" => $ctxid),
+			      SOAP::Data->name("name" => $ctxname),
+			      SOAP::Data->name("maxQuota" => $ctxquota)));
+
+
+=item executing SOAP operation and error handling
+
+ $result = $soclt->create($context,
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("name" => $ctxadmin),
+			SOAP::Data->name("password" => $ctxadmpw),
+			SOAP::Data->name("display_name" => $displayname),
+			SOAP::Data->name("sur_name" => $surname),
+			SOAP::Data->name("given_name" => $gname),
+			SOAP::Data->name("primaryEmail" => $email),
+			SOAP::Data->name("language" => $lang),
+			SOAP::Data->name("timezone" => $timezone)
+			)),
+		  $masterCreds
+		 );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head3 creating users, groups and resources
+
+=head4 creating SOAP client object
+
+ my $souserclt     = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXUserService" );
+ my $sogroupclt    = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXGroupService" );
+ my $soresourceclt = SOAP::Lite->ns( $nameSpace )->proxy( $baseURL."OXResourceService" );
+
+
+=head4 creating a user
+
+=over
+
+=item defining variables
+
+ # mandatory user data
+ my $uname    = "john";
+ my $password = "secret";
+ $displayname = "John Doe";
+ $surname     = "Doe";
+ $gname       = "John";
+ $email       = "john\@example.com";
+ $lang        = "de_DE";
+ $timezone    = "Europe/Berlin";
+ $imapserver  = "imap://example.com:143";
+ my $birthday = "1900-01-01";
+ my @aliases = ("test1\@example.com","test2\@example.com");
+
+=item special parameters
+
+Parameters containing dates must have a special syntax as documented
+in the Axis2 source code:
+
+ the lexical form of the date is '-'? yyyy '-' mm '-' dd zzzzzz?
+
+see org.apache.axis2.databinding.utils.ConverterUtil.java as shipped
+with the Axis2 source code for more details, method convertToDate.
+
+The user object contains two paramaters representing dates,
+C<birthday> and C<anniversary>. Both parameters only require year,
+month and day to be set.
+
+Another special case is the handling of the guiPreferences setting, for this
+the setting guiPreferencesForSoap has to be used, see the example below.
+
+In all other cases the Java-RMI documentation is the reference, especially
+for the user object.
+
+=begin html
+
+See <A HREF=javadoc/com/openexchange/admin/soap/OXUser.html>Javadoc</A>
+
+=end html
+
+So for imap and smtp servers the attribute takes the whole url, see example
+below. The port and schema fields cannot be set as the setters in Java are
+missing, SOAP and WSDL just have no mechanism to represent read-only and
+write-only fields.
+
+If you want to read the imap and smtp server settings, you have to use
+the three fields schema, port and server and combine them to get the whole
+url. So the imapServer field on a getData call will contain only the
+hostname and not the url.
+
+=item executing SOAP operation and error handling
+
+ $result = 
+    $souserclt->create($context,
+		  SOAP::Data->name("User" => \SOAP::Data->value(
+			SOAP::Data->name("name" => $uname),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname),
+			SOAP::Data->name("sur_name" => $surname),
+			SOAP::Data->name("given_name" => $gname),
+			SOAP::Data->name("primaryEmail" => $email),
+			SOAP::Data->name("email1" => $email),
+			SOAP::Data->name("language" => $lang),
+			SOAP::Data->name("timezone" => $timezone),
+			SOAP::Data->name("birthday" => $birthday),
+			SOAP::Data->name("aliases" => @aliases),
+			SOAP::Data->name("imapServer" => $imapserver),
+			SOAP::Data->name("guiPreferencesForSoap" => \SOAP::Data->value(
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("value" => '{"calendar":' .
+'{"view":"calendar/calendar/day","day":{"numberofappointments":4},"workweek":' .
+'{"countdays":5,"startday":1,"numberofappointments":2},"starttime":8,' .
+'"allfolders":true,"custom":{"countdays":3,"numberofappointments":3},' .
+'"endtime":18,"interval":30},"FolderTreeState":{},"contacts":{"view":' .
+'"contacts/cards","cardsToViewPerColumn":"auto","gridsort":"asc"},"theme":' .
+'{"path":"default","name":"Default"},"portal":{"infobox":true,' .
+'"internalcontents":[{"params":{"limit":5},"header":"E-Mail","visible":true,' .
+'"adj":{"hw":1,"ww":1,"y":0,"x":1},"external":false,"module":"mail"}],' .
+'"tooltip":false,"externalcontents":[],"minicalendar":true},"infostore":{' .
+'"view":"infostore/split"},"effects":{"hover":{"calendar":true,"speed":3,' .
+'"contacts":true,"portal":true,"infostore":true,"mail":false,"tasks":true},' .
+'"global":false,"fading":false},"mail":{"view":"mail/hsplit/unthreaded",' .
+'"formatmessage":"ALTERNATIVE","notifyacknoledge":true,"autocomplete":true,' .
+'"auto_save_drafts":3,"signatures":[],"fullmailheader":true,"htmlmessage":' .
+'true},"tasks":{"view":"tasks/split","gridsort":"asc","interval":30},"menu":' .
+'{"menuiteration":4},"private_categories":"","global":{"autorefresh":10,' .
+'"save":1,"confirmpopup":true}}'),
+						SOAP::Data->name("key" => "/gui")
+					)
+				),
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("value" => "{}"),
+						SOAP::Data->name("key" => "/fastgui")
+					)
+				)
+			))
+          )),
+		  $ctxCreds
+		 );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head4 creating a group
+
+
+=over
+
+=item defining variables
+
+ $gname       = "testgroup";
+ $displayname = "a testgroup";
+ $email       = "testgroup\@example.com";
+
+Already add some members (can also be done later with a change or
+addMember call) we already know/assume, that context admin has id 2
+and John Doe has id 3.
+
+ my @members;
+ push(@members, SOAP::Data->name( members => 2 ));
+ push(@members, SOAP::Data->name( members => 3 ));
+
+=item executing SOAP operation and error handling
+
+ $result =
+      $sogroupclt->create($context,
+    	      SOAP::Data->value("Group")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $gname),
+    	           SOAP::Data->name("displayname" => $displayname),
+    	           SOAP::Data->name("email" => $email),
+    	           SOAP::Data->name("members" => @members )
+    	           )),
+    	      $ctxCreds
+    	     );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head4 creating a resource
+
+=over
+
+=item defining variables
+
+ my $rname    = "testresource";
+ $displayname = "a testresource";
+ $email       = "testresource\@example.com";
+
+=item executing SOAP operation and error handling
+
+ $result =
+      $soresourceclt->create($context,
+    	      SOAP::Data->value("Resource")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("name" => $rname),
+    	           SOAP::Data->name("displayname" => $displayname),
+    	           SOAP::Data->name("email" => $email)
+   	           )),
+    	      $ctxCreds
+    	     );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+=back
+
+=head3 changing data
+
+To change data B<only> the data to be changed must be send to the
+server. The reference to the entry is either it's numerical ID or it's
+name.
+
+=head4 changing user data
+
+Changing display name and password of the user with name "john".
+
+ $ /opt/open-xchange/sbin/listuser -A oxadmin -P secret -c 424242
+ Id Name    Displayname   Email
+  2 oxadmin Context Admin oxadmin@example.com
+  3 john    Dr. John Doe  john@example.com
+
+
+ # new display name and password
+ $uname       = "john";
+ $displayname = "Dr. John Doe";
+ $password    = "verysecret";
+
+ $result =
+    $souserclt->change($context,
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("name" => $uname),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname)
+   	          )),
+		  $ctxCreds
+		 );
+
+ die "Error: ".$result->faultstring()."\n $@" if $result->fault();
+
+We could also use the ID of the user to reference it:
+
+ $result =
+    $souserclt->change($context,
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("id" => 3),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname)
+   	          )),
+		  $ctxCreds
+		 );
+
+=cut

@@ -1,0 +1,49 @@
+* 2011-12-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19733: Catching NumberFormatException when trying to get IMAP port.
+
+* 2011-11-23 - choeger@open-xchange.com
+
+ - SoftwareChange_Request-841/Bugfix #20308: axis2 generated wsdl expects talks
+   about Date but expects DateTime.
+
+* 2011-10-18 - choeger@open-xchange.com
+
+ - SoftwareChange_Request-860: Stabilized SOAP API
+   This change does NOT introduce any changes to users using the API with perl or php.
+   However, users using the WSDL to generate code must regenerate the code!
+
+* 2011-10-05 - choeger@open-xchange.com
+
+ - Bugfix #20456 - [L3] SOAP interface broken (all ModuleAccess functions)
+
+* 2011-08-08 - choeger@open-xchange.com
+
+ - Bugfix #20032 - SOAP api breaks when userAttributesForSOAP are set within user object
+
+* 2011-03-25 - choeger@open-xchange.com
+
+ - Bugfix #18761 - [L3] SOAP interface broken (most User and Context operations)
+ 
+* 2011-03-01 - marcus.klein@open-xchange.com
+
+ - Bugfix #18465: Compiling sources everywhere to Java5 compatible class files.
+
+* 2010-12-15 - dennis.sieben@open-xchange.com
+
+ - Bugfix #17824: [L3] Operation with two or more SOAP Client leads to race condition errors
+   - Added config option to define lock wait time
+
+* 2009-11-12 - dennis.sieben@open-xchange.com
+
+ - Bugfix #14846: deletecontext call via soap sends "reconnect to rmi service" failed error
+   - removed throw line
+
+* 2009-07-27 - marcus.klein@open-xchange.com
+
+ - Bugfix #14213: Setting configuration file permissions to reduce readability to OX processes.
+
+* 2009-06-02 - dennis.sieben@open-xchange.com
+
+ - Bugfix #13796: soap interface throws error "reconnect to rmi service" on first call .
+     Implemented a second call after the reconnect

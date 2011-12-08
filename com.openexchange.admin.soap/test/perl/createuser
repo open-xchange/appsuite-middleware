@@ -1,0 +1,117 @@
+#!/usr/bin/perl
+package Createuser;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Createuser();
+$test->doRequest();
+
+sub new {
+  my ($inPkg) = @_;
+  my $self = BasicCommandlineOptions->new();
+	
+  bless $self, $inPkg;
+  return $self;
+}
+
+sub doRequest {
+  my $inSelf = shift;
+  my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUserService" );
+    
+  my $name = "testuser";
+  my $password = "secret";
+  my $displayname = "testuser";
+  my $surname = "user";
+  my $gname = "test";
+  my $email = "testuser\@bla.de";
+  my $lang = "de_DE";
+  my $timezone = "Europe/Berlin";
+  my @aliases = ("test1\@example.com","test2\@example.com");
+  my $birthday = "1900-01-01";
+  my $pwmech = "{CRYPT}";
+
+# userAttribute
+  my $uattr = SOAP::Data->name("entries" =>
+		\SOAP::Data->value(
+                     SOAP::Data->name("value" => "testval"),
+                     SOAP::Data->name("key" => "soap/test/is/this")));
+
+  my $som_entry = 
+    $soap->create($inSelf->{'Context'},
+		  SOAP::Data->name("User" => \SOAP::Data->value(
+			SOAP::Data->name("name" => $name),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("display_name" => $displayname),
+			SOAP::Data->name("sur_name" => $surname),
+			SOAP::Data->name("given_name" => $gname),
+			SOAP::Data->name("primaryEmail" => $email),
+			SOAP::Data->name("email1" => $email),
+			SOAP::Data->name("language" => $lang),
+			SOAP::Data->name("timezone" => $timezone),
+			SOAP::Data->name("birthday" => $birthday),
+			SOAP::Data->name("passwordMech" => $pwmech),
+			SOAP::Data->name("aliases" => @aliases),
+			SOAP::Data->name("passwordMech" => $pwmech),
+			SOAP::Data->name("guiPreferencesForSoap" => \SOAP::Data->value(
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("value" => '{"calendar":' .
+'{"view":"calendar/calendar/day","day":{"numberofappointments":4},"workweek":' .
+'{"countdays":5,"startday":1,"numberofappointments":2},"starttime":8,' .
+'"allfolders":true,"custom":{"countdays":3,"numberofappointments":3},' .
+'"endtime":18,"interval":30},"FolderTreeState":{},"contacts":{"view":' .
+'"contacts/cards","cardsToViewPerColumn":"auto","gridsort":"asc"},"theme":' .
+'{"path":"default","name":"Default"},"portal":{"infobox":true,' .
+'"internalcontents":[{"params":{"limit":5},"header":"E-Mail","visible":true,' .
+'"adj":{"hw":1,"ww":1,"y":0,"x":1},"external":false,"module":"mail"}],' .
+'"tooltip":false,"externalcontents":[],"minicalendar":true},"infostore":{' .
+'"view":"infostore/split"},"effects":{"hover":{"calendar":true,"speed":3,' .
+'"contacts":true,"portal":true,"infostore":true,"mail":false,"tasks":true},' .
+'"global":false,"fading":false},"mail":{"view":"mail/hsplit/unthreaded",' .
+'"formatmessage":"ALTERNATIVE","notifyacknoledge":true,"autocomplete":true,' .
+'"auto_save_drafts":3,"signatures":[],"fullmailheader":true,"htmlmessage":' .
+'true},"tasks":{"view":"tasks/split","gridsort":"asc","interval":30},"menu":' .
+'{"menuiteration":4},"private_categories":"","global":{"autorefresh":10,' .
+'"save":1,"confirmpopup":true}}'),
+						SOAP::Data->name("key" => "/gui")
+					)
+				),
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("value" => "{}"),
+						SOAP::Data->name("key" => "/fastgui")
+					)
+				)
+			)),
+			SOAP::Data->name("userAttributes" => \SOAP::Data->value(
+				SOAP::Data->name("entries" =>
+					\SOAP::Data->value(
+						SOAP::Data->name("key" => "config"),
+						SOAP::Data->name("value" => \SOAP::Data->value($uattr)),
+					)
+				)
+			)),
+			SOAP::Data->name("uploadFileSizeLimit" => "100"),
+			SOAP::Data->name("uploadFileSizeLimitPerFile" => "100"),
+			SOAP::Data->name("gui_spam_filter_enabled" => "true")->type("xsd:boolean")
+   	          )),
+		  $inSelf->{'creds'}
+		 );
+    
+  if ( $som_entry->fault() ) {
+    $inSelf->fault_output($som_entry);
+    exit(1);
+  } else {
+    print "Fine\n";
+  }
+
+}
+
+exit;
+

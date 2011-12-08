@@ -1,0 +1,30 @@
+#! /usr/bin/php
+<?php
+include ("ox-soap.php");
+
+try {
+	srand(microtime()*1000000);
+	$random_id = rand(1, 99999);
+
+	$store_dir = "/tmp/ox_tests_mount_".$random_id;
+	// create the dir temporary and delete a the end
+	mkdir($store_dir, 0700);
+	
+	$store = new Filestore();
+	$store->name = "store_".$random_id;
+	$store->url = "file://".$store_dir;
+	$store->size = 10000;
+	$store->maxContexts = 1337;
+
+	$result = getUtilClient($SOAPHOST)->registerFilestore($store, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+
+	if (!is_soap_fault($result)) {
+		printFilestore($result->id);
+	}
+	 rmdir  ($store_dir);
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+} 
+?>

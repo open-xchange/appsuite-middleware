@@ -1,0 +1,152 @@
+<project name="open-xchange-admin" default="jar" basedir=".">
+
+
+    <!-- Customizable values -->
+	<property name="destdir" value=""/>
+    <property name="prefix" value="/opt/open-xchange"/>
+
+    <!-- Constants -->
+    <property name="version" value="6.20.1.0"/>
+	<property name="service.name"   value="open-xchange-admin-soap" />
+	<property name="composite.name" value="${service.name}-${version}" />
+
+	
+    <property name="bundlesdir"   value="${prefix}/bundles"/>
+    <property name="commonBundle" value="com.openexchange.common"/>
+    <property name="axis2Bundle"  value="com.openexchange.axis2"/>
+    <property name="libdir"       value="${prefix}/lib"/>
+    <property name="configdir"    value="${prefix}/etc/admindaemon/plugin"/>
+    <property name="configfile"   value="open-xchange-admin-soap.properties"/>
+	<property name="axis2dir"     value="${bundlesdir}/${axis2Bundle}"/>
+
+    <!-- required osgi bundles -->
+	<property name="commonsloggingbundle" value="org.apache.commons.logging_1.0.4.v200706111724.jar"/>
+
+	<!-- non-osgi jars -->
+	<property name="adminRMI"        value="ox_admin_rmiclient.jar"/>
+	<property name="adminHostingRMI" value="ox_admin_hosting_rmiclient.jar"/>
+	
+	<!-- doc defaults work for Debian -->
+	<property name="doccorelink"     value="/usr/share/doc/open-xchange-admin-doc/javadoc/doc"/>
+	<property name="dochostinglink"  value="/usr/share/doc/open-xchange-admin-plugin-hosting-doc/javadoc/doc"/>
+	
+	<path id="project.classpath">
+		<pathelement location="${libdir}/${adminRMI}"/>
+		<pathelement location="${libdir}/${adminHostingRMI}"/>
+		<pathelement location="${bundlesdir}/${commonsloggingbundle}"/>
+    </path>
+
+	<!--                    TARGETS                      -->
+
+	<target name="manifest">
+		<manifest file="META-INF/MANIFEST.MF">
+			<attribute name="Class-Path"  value="${libdir}/${adminRMI} ${libdir}/${adminHostingRMI} ${libdir}/soaprmimapper.jar"/>
+			<attribute name="Config-File" value="${configdir}/${configfile}"/>
+		</manifest>
+	</target>
+
+	<target name="compile">
+        <mkdir dir="classes"/>
+        <javac srcdir="src" destdir="classes" debug="true" debuglevel="lines,vars,source" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+            <classpath>
+                <path refid="project.classpath"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="mapperjar" depends="compile">
+    	<mkdir dir="jar"/>
+        <jar jarfile="jar/soaprmimapper.jar"
+        	includes="com/openexchange/admin/soap/OXSOAPRMIMapper**,com/openexchange/admin/soap/dataobjects/**,com/openexchange/admin/soap/SOAPUtils**"
+        	basedir="classes"/>
+    </target>
+
+	<target name="jar" depends="compile,manifest,mapperjar">
+		<mkdir dir="classes/META-INF"/>
+    	<copy todir="classes/META-INF">
+			<fileset dir="META-INF"/>
+		</copy>
+    	<mkdir dir="jar"/>
+        <jar jarfile="jar/${service.name}.aar"
+        	manifest="META-INF/MANIFEST.MF"
+        	excludes="com/openexchange/admin/soap/OXSOAPRMIMapper*"
+        	basedir="classes"/>
+    </target>
+
+	<target name="doc">
+		<exec executable="pod2html">
+			<arg value="--infile=docs/OX-Admin-SOAP.pod"/>
+			<arg value="--outfile=docs/OX-Admin-SOAP.html"/>
+		</exec>
+		<replace dir="docs" token="@doccorelink@" value="${doccorelink}">
+		    <include name="OX-Admin-SOAP.html"/>
+	    </replace>
+        <javadoc
+            failonerror="true"
+			sourcepath="src"
+        	destdir="docs/javadoc"
+            author="true"
+            public="true"
+            Windowtitle="SOAP service interface">
+        	<Header><![CDATA[<img src="{@docRoot}/../OX_Logo.jpg">]]></Header>
+            <fileset dir="src/com/openexchange/admin/soap" defaultexcludes="yes">
+            	<exclude name="OXSOAPRMIMapper.java"/>
+            </fileset>
+        	<classpath>
+                <path refid="project.classpath"/>
+        	</classpath>
+        	<link href="http://java.sun.com/j2se/1.5.0/docs/api/"/>
+        	<link href="${doccorelink}"/>
+        	<link href="${dochostinglink}"/>
+        </javadoc>
+	</target>
+
+    <target name="clean">
+		<delete file="META-INF/MANIFEST.MF"/>
+    	<delete dir="classes"/>
+        <delete dir="jar"/>
+    	<delete dir="docs/javadoc"/>
+    	<delete>
+    		<fileset dir="." includes="*.tmp,docs/*.html"/>
+        </delete>
+    </target>
+	
+    <target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package"/>
+    	<delete dir="${dist-package}"/>
+        <mkdir dir="${dist-package}/${composite.name}"/>
+        <copy todir="${dist-package}/${composite.name}">
+            <fileset dir=".">
+                <exclude name="**${dist-package}/**"/>
+                <exclude name="**debian/**"/>
+                <exclude name="**CVS/**"/>
+                <exclude name="Todo"/>
+            </fileset>
+        </copy>
+        <tar destfile="../${composite.name}.tar.gz"
+        basedir="${dist-package}"
+        includes="${composite.name}/"
+        compression="gzip"/>
+    	<delete dir="${dist-package}"/>
+    </target>
+
+    <target name="install" depends="jar">
+        <mkdir dir="${destdir}/${axis2dir}/services"/>
+        <mkdir dir="${destdir}/${configdir}"/>
+    	<copy todir="${destdir}/${axis2dir}/services" overwrite="true">
+            <fileset file="jar/${service.name}.aar"/>
+        </copy>
+    	<copy todir="${destdir}${libdir}" overwrite="true">
+    		<fileset file="jar/soaprmimapper.jar"/>
+    	</copy>
+    	<copy todir="${destdir}/${configdir}" overwrite="true">
+            <fileset file="conf/${configfile}"/>
+        </copy>
+        <!-- <chmod perm="640">
+            <fileset dir="${destdir}/${configdir}">
+                <include name="**"/>
+            </fileset>
+        </chmod>-->
+    </target>
+	
+</project>
