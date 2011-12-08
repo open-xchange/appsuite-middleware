@@ -71,6 +71,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -165,6 +166,11 @@ public final class DatabaseFolderConverter {
         super();
     }
 
+    private static int getContactCollectorFolder(final int userId, final int contextId, final Connection con) throws OXException {
+        final Integer folderId = ServerUserSetting.getInstance(con).getContactCollectionFolder(contextId, userId);
+        return null == folderId ? -1 : folderId.intValue();
+    }
+
     /**
      * Converts specified {@link FolderObject} instance to a {@link DatabaseFolder} instance.
      *
@@ -219,6 +225,9 @@ public final class DatabaseFolderConverter {
                 } else {
                     retval = new DatabaseFolder(fo);
                 }
+            } else if (fo.getObjectID() == getContactCollectorFolder(user.getId(), ctx.getContextId(), con)) {
+                retval = new LocalizedDatabaseFolder(fo);
+                retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
             } else {
                 retval = new DatabaseFolder(fo);
             }
