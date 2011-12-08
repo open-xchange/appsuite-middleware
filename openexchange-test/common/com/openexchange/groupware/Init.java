@@ -130,6 +130,7 @@ import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.i18n.parsing.Translations;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.IMAPStoreCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.config.MailProperties;
@@ -575,7 +576,7 @@ public final class Init {
             imapServiceRegistry.addService(UnifiedINBOXManagement.class, services.get(UnifiedINBOXManagement.class));
             imapServiceRegistry.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
             imapServiceRegistry.addService(TimerService.class, services.get(TimerService.class));
-
+            IMAPStoreCache.initInstance();
             /*
              * Register IMAP bundle
              */
@@ -772,6 +773,7 @@ public final class Init {
 
     public static void stopMailBundle() {
         IMAPServiceRegistry.getServiceRegistry().removeService(TimerService.class);
+        IMAPStoreCache.shutDownInstance();
     }
 
     public static void stopDatabaseBundle() {
