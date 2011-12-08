@@ -2337,7 +2337,11 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         if (this.smtpServer != null) {
             final Matcher matcher = URL_PATTERN.matcher(this.smtpServer);
             if (matcher.matches() && null != matcher.group(4)) {
-                return Integer.parseInt(matcher.group(4));
+                try {
+                    return Integer.parseInt(matcher.group(4));
+                } catch (final NumberFormatException e) {
+                    return 25;
+                }
             }
         }
         return 25;

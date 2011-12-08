@@ -458,7 +458,7 @@ public class OXUser extends OXSOAPRMIMapper {
      * @throws StorageException
      * @throws InvalidDataException
      * @throws DuplicateExtensionException
-     */
+     *//*
     public User getContextAdmin(Context ctx, Credentials auth) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException, DuplicateExtensionException {
         reconnect();
         try {
@@ -467,6 +467,6 @@ public class OXUser extends OXSOAPRMIMapper {
             reconnect(true);
             return new User(((OXUserInterface)rmistub).getContextAdmin(SOAPUtils.soapContext2Context(ctx), auth));
         }
-    }
+    }*/
 
 }
