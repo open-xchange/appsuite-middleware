@@ -367,11 +367,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         if (shutdown) {
             return;
         }
+        shutdown = true;
         if (isDebugEnabled()) {
             final Session session = getSession();
             LOG.info("stopping IDLE for Context: " + contextId + ", Login: " + (null == session ? "unknown" : session.getLoginName()));
         }
-        shutdown = true;
         if (null != imapIdleFuture) {
             imapIdleFuture.cancel(true);
             imapIdleFuture = null;
