@@ -69,7 +69,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class AccessedIMAPStore extends IMAPStore {
 
-    private final IMAPStore imapStore;
+    private IMAPStore imapStore;
 
     private final IMAPAccess imapAccess;
 
@@ -84,6 +84,17 @@ public final class AccessedIMAPStore extends IMAPStore {
         super(imapSession, imapStore.getURLName());
         this.imapAccess = imapAccess;
         this.imapStore = imapStore;
+    }
+
+    /**
+     * Drops & returns the underlying IMAP store.
+     * 
+     * @return The IMAP store
+     */
+    public IMAPStore dropAndGetImapStore() {
+        final IMAPStore store = imapStore;
+        imapStore = null;
+        return store;
     }
 
     /**
@@ -207,6 +218,9 @@ public final class AccessedIMAPStore extends IMAPStore {
 
     @Override
     public void close() throws MessagingException {
+        if (null == imapStore) {
+            return;
+        }
         imapStore.close();
     }
 

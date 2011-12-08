@@ -61,6 +61,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.imap.IMAPStoreCache;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
@@ -193,6 +194,7 @@ public final class IMAPActivator extends HousekeepingActivator {
                             final SessiondService service = IMAPServiceRegistry.getService(SessiondService.class);
                             if (null != service && service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
                                 ListLsubCache.dropFor(session);
+                                IMAPStoreCache.getInstance().dropFor(session.getUserId(), session.getContextId());
                             }
                         } catch (final Exception e) {
                             // Failed handling session

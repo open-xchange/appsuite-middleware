@@ -47,90 +47,82 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.imap.util;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * {@link IMAPStoreMarker} - Marker for IMAP store.
- *
+ * {@link LockProvidingBlockingQueue}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPStoreMarker {
+public final class LockProvidingBlockingQueue<E> {
 
-    private volatile long stamp;
+    private final boolean bounded;
 
-    private final AtomicBoolean inUse;
+    private final BlockingQueue<E> blockingQueue;
 
-    private volatile boolean pooled;
+    private final Lock lock;
+
+    private volatile CountingCondition condition;
 
     /**
-     * Initializes a new {@link IMAPStoreMarker}.
+     * Initializes a new {@link LockProvidingBlockingQueue}.
      */
-    public IMAPStoreMarker() {
+    public LockProvidingBlockingQueue(final int capacity) {
         super();
-        inUse = new AtomicBoolean();
+        bounded = capacity > 0;
+        blockingQueue = bounded ? new ArrayBlockingQueue<E>(capacity) : new LinkedBlockingQueue<E>();
+        lock = new ReentrantLock(true);
     }
 
     /**
-     * Gets the pooled flag
-     *
-     * @return The pooled flag
+     * Checks if this queue has capacity restrictions.
+     * 
+     * @return <code>true</code> if this queue has capacity restrictions; otherwise <code>false</code>
      */
-    public boolean isPooled() {
-        return pooled;
+    public boolean isBounded() {
+        return bounded;
     }
 
     /**
-     * Sets the pooled flag
-     *
-     * @param pooled The pooled flag
+     * Gets the condition.
+     * 
+     * @return The condition
      */
-    public void setPooled() {
-        pooled = true;
+    public CountingCondition getCondition() {
+        CountingCondition tmp = condition;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = condition;
+                if (null == tmp) {
+                    tmp = condition = new CountingCondition(lock.newCondition());
+                }
+            }
+        }
+        return tmp;
     }
 
     /**
-     * Gets the stamp
-     *
-     * @return The stamp
+     * Gets the blocking queue.
+     * 
+     * @return The blocking queue
      */
-    public long getStamp() {
-        return stamp;
+    public BlockingQueue<E> getBlockingQueue() {
+        return blockingQueue;
     }
 
     /**
-     * Sets the stamp
-     *
-     * @param stamp The stamp to set
+     * Gets the lock.
+     * 
+     * @return The lock
      */
-    public void setStamp(final long stamp) {
-        this.stamp = stamp;
-    }
-
-    /**
-     * Gets the in-use flag.
-     *
-     * @return The in-use flag
-     */
-    public boolean isInUse() {
-        return inUse.get();
-    }
-
-    /**
-     * Tries to set the in-use flag.
-     *
-     * @return <code>true</code> for success; otherwise <code>false</code>
-     */
-    public boolean markInUse() {
-        return inUse.compareAndSet(false, true);
-    }
-
-    /**
-     * Unsets the in-use flag.
-     */
-    public void unmarkInUse() {
-        inUse.set(false);
+    public Lock getLock() {
+        return lock;
     }
 
 }
