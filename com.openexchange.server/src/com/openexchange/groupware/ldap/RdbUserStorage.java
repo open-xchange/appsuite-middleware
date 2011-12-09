@@ -714,7 +714,14 @@ public class RdbUserStorage extends UserStorage {
                 }
                 if (size != lines) {
                     // Ignoring the failed update of a clients login timestamp. This only happens if a parallel login with the same client took place.
-                    if (changed.size() != 1 || !changed.keySet().iterator().next().startsWith("client:")) {
+                    boolean onlyLogins = true;
+                    for (final String name : changed.keySet()) {
+                        if (!name.startsWith("client:")) {
+                            onlyLogins = false;
+                            break;
+                        }
+                    }
+                    if (!onlyLogins) {
                         final OXException e = UserExceptionCode.UPDATE_ATTRIBUTES_FAILED.create(I(contextId), I(userId));
                         LOG.error(String.format("Old: %1$s, New: %2$s, Added: %3$s, Removed: %4$s, Changed: %5$s.", oldAttributes, attributes, added, removed, toString(changed)), e);
                         throw e;

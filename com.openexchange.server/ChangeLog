@@ -1,3 +1,7 @@
+* 2011-12-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20933: Ignoring not updated login timestamps when updating user attributes.
+
 * 2011-12-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 20924: Load setting from database
