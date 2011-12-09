@@ -49,23 +49,26 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.Category;
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Calendar;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
 import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.calendar.CalendarSql;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Tools;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.CalendarField;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -74,9 +77,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.calendar.CalendarSql;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.Tools;
 
 public class ICalImportTest extends AbstractICalImportTest {
 
@@ -205,7 +205,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
     @Test
     public void test12177() throws OXException, SQLException, OXException, OXException, UnsupportedEncodingException {
-        StringBuilder icalText = new StringBuilder(1500);
+        final StringBuilder icalText = new StringBuilder(1500);
         icalText.append("BEGIN:VCALENDAR\n");
         icalText.append("VERSION:2.0").append('\n');
         icalText.append("PRODID:OPEN-XCHANGE").append('\n');
@@ -225,13 +225,13 @@ public class ICalImportTest extends AbstractICalImportTest {
         try {
             assertNotNull(res.getException());
 
-            List<ConversionWarning> warnings = res.getWarnings();
+            final List<ConversionWarning> warnings = res.getWarnings();
             assertNotNull(warnings);
             assertEquals(Integer.valueOf(1), Integer.valueOf(warnings.size()));
 
         } finally {
             final AppointmentSQLInterface appointments = new CalendarSql(sessObj);
-            CalendarDataObject appointment = new CalendarDataObject();
+            final CalendarDataObject appointment = new CalendarDataObject();
             appointment.setObjectID(Integer.parseInt(res.getObjectId()));
             appointment.setParentFolderID(Integer.parseInt(res.getFolder()));
             appointment.setContext(sessObj.getContext());
@@ -275,14 +275,14 @@ public class ICalImportTest extends AbstractICalImportTest {
     @Test
     public void test7473() throws SQLException, UnsupportedEncodingException, OXException, OXException, OXException {
         final int alarm = 180;
-        Calendar c = TimeTools.createCalendar(TimeZone.getTimeZone(sessObj.getUser().getTimeZone()));
+        final Calendar c = TimeTools.createCalendar(TimeZone.getTimeZone(sessObj.getUser().getTimeZone()));
         // Must be in the future to have the alarm not to be rejected.
         c.add(Calendar.DATE, 1);
         c.set(Calendar.HOUR_OF_DAY, 15);
-        String start = Tools.formatForICal(c.getTime());
+        final String start = Tools.formatForICal(c.getTime());
         c.add(Calendar.HOUR, 1);
         c.add(Calendar.MINUTE, 30);
-        String end = Tools.formatForICal(c.getTime());
+        final String end = Tools.formatForICal(c.getTime());
         final String ical =
             "BEGIN:VCALENDAR\n" +
             "VERSION:2.0\n" +
@@ -375,7 +375,7 @@ public class ICalImportTest extends AbstractICalImportTest {
 
     @Test
     public void test16895() throws Exception{
-       	String ical = "BEGIN:VCALENDAR\n"
+       	final String ical = "BEGIN:VCALENDAR\n"
 			+ "PRODID:Zimbra-Calendar-Provider\n"
 			+ "VERSION:2.0\n"
 			+ "CALSCALE:GREGORIAN\n"
