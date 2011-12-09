@@ -68,6 +68,7 @@ import java.util.TimeZone;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -296,15 +297,16 @@ public class ICal4JParser implements ICalParser {
 
     private static final TimeZone chooseTimeZone(final DateProperty dateProperty, final TimeZone defaultTZ) {
         TimeZone tz = defaultTZ;
-        if(dateProperty.getParameter("TZID") == null 
-        || dateProperty.getParameter("TZID").getValue() == null){
-        	return tz;
+        if (dateProperty.getParameter("TZID") == null 
+        || dateProperty.getParameter("TZID").getValue() == null){ 
+                return defaultTZ;
         }
-        if (dateProperty.isUtc()) {
-            tz = TimeZone.getTimeZone("UTC");
+        if(dateProperty.isUtc()) {
+        	tz = TimeZone.getTimeZone("UTC");
         }
-        String tzidName = dateProperty.getParameter("TZID").getValue();
-		TimeZone inTZID = (null != dateProperty.getParameter("TZID")) ? TimeZone.getTimeZone(tzidName) : null;
+        Parameter tzid = dateProperty.getParameter("TZID");
+		String tzidName = tzid.getValue();
+		TimeZone inTZID = (null != tzid) ? TimeZone.getTimeZone(tzidName) : null;
 		
         /* now, if the Java core devs had been smart, they'd made TimeZone.getTimeZone(name,fallback) public. But they did not, so have to do this: */
 		if(inTZID.getID().equals("GMT") && ! tzidName.equals("GMT")){

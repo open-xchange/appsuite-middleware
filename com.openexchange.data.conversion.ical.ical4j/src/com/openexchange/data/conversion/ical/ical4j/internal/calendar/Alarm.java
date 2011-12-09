@@ -51,6 +51,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Dur;
@@ -61,6 +62,8 @@ import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Description;
 import net.fortuna.ical4j.model.property.Trigger;
+
+import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -75,13 +78,11 @@ import com.openexchange.groupware.tasks.Task;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Alarm<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
-    @Override
     public boolean isSet(final U calendar) {
         return true;
     }
 
-    @Override
-    public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
+    public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         if(Task.class.isAssignableFrom(calendar.getClass())) {
             emitTaskAlarm((Task)calendar, (VToDo) component, warnings);
         }  else if ( Appointment.class.isAssignableFrom(calendar.getClass())) {
@@ -133,13 +134,11 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
     }
 
 
-    @Override
     public boolean hasProperty(final T t) {
         return true; // Not strictly true, but to inlcude the warning we have to enter #parse always
     }
 
-    @Override
-    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
+    public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
        final VAlarm alarm = getAlarm(index, component, warnings);
        boolean useDuration = false;
         if(alarm == null) {
@@ -153,27 +152,27 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
         Date remindOn = null;
         int temp = 0;
-
+        
         if(null == icaldate) {
             final Dur duration = alarm.getTrigger().getDuration();
             if(!duration.isNegative()) {
                 return;
             }
-            temp = ((((duration.getWeeks() * 7) * 24 + duration.getDays()) * 60 + duration.getMinutes()) * 60 + duration.getSeconds()) * 1000;
+            temp = ((((duration.getWeeks() * 7+ duration.getDays()) * 24  + duration.getHours() ) * 60 + duration.getMinutes()) * 60 + duration.getSeconds());  
             useDuration = true;
         } else {
             remindOn = ParserTools.recalculateAsNeeded(icaldate, alarm.getTrigger(), timeZone);
         }
 
-        final int delta = useDuration ? temp  : (int) (cObj.getStartDate().getTime() - remindOn.getTime());
+        final int delta = useDuration ? temp  : (int) ((cObj.getStartDate().getTime() - remindOn.getTime())/1000);
 
         if(Appointment.class.isAssignableFrom(cObj.getClass())) {
             final Appointment appObj = (Appointment) cObj;
-            appObj.setAlarm(delta / 60000);
+            appObj.setAlarm(delta / 60);
             appObj.setAlarmFlag(true); // bugfix: 7473
         } else {
             final Task taskObj = (Task) cObj;
-            taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - delta));
+            taskObj.setAlarm(new Date(taskObj.getStartDate().getTime() - delta * 1000));
             taskObj.setAlarmFlag(true); // bugfix: 7473
         }
     }

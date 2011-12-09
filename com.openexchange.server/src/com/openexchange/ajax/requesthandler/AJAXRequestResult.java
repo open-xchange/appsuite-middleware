@@ -340,7 +340,7 @@ public final class AJAXRequestResult {
      * @return This request result with specified warnings added
      */
     public AJAXRequestResult addWarnings(final Collection<OXException> warnings) {
-        if (null == warnings) {
+        if (null == warnings || warnings.isEmpty()) {
             return this;
         }
         if (null == this.warnings) {

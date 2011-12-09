@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chat.Chat;
 import com.openexchange.chat.ChatAccess;
 import com.openexchange.chat.ChatDescription;
+import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.ChatService;
 import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.ChatUser;
@@ -71,6 +73,7 @@ import com.openexchange.chat.json.conversation.ChatConversationAJAXRequest;
 import com.openexchange.chat.json.conversation.ConversationID;
 import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.chat.json.conversation.JSONConversationWriter;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
@@ -116,14 +119,8 @@ public final class NewAction extends AbstractChatConversationAction {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
-        String serviceId = req.getParameter("serviceId");
-        if (null == serviceId) {
-            serviceId = ChatService.DEFAULT_SERVICE;
-        }
-        String accountId = req.getParameter("accountId");
-        if (null == accountId) {
-            accountId = ChatService.DEFAULT_ACCOUNT;
-        }
+        final String serviceId = req.checkParameter("serviceId");
+        final String accountId = req.checkParameter("accountId");
         /*
          * Get service
          */
@@ -171,9 +168,17 @@ public final class NewAction extends AbstractChatConversationAction {
              * Subject
              */
             final String subject = chatDescription.getSubject();
+            final Collection<OXException> warnings = req.getWarnings();
             if (null != subject) {
                 final ChatDescription desc = new ChatDescription(newChat.getChatId());
-                desc.setSubject(subject);
+                if (subject.length() > 256) {
+                    desc.setSubject(subject.substring(0, 256));
+                    final OXException warning = ChatExceptionCodes.SUBJECT_TOO_LONG.create();
+                    warning.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(warning);
+                } else {
+                    desc.setSubject(subject);
+                }
                 access.updateChat(desc);
                 /*
                  * Reload
@@ -188,7 +193,7 @@ public final class NewAction extends AbstractChatConversationAction {
             /*
              * Return appropriate result
              */
-            return new AJAXRequestResult(jsonChat, "json");
+            return new AJAXRequestResult(jsonChat, "json").addWarnings(warnings);
         } finally {
             if (null != access) {
                 access.disconnect();
