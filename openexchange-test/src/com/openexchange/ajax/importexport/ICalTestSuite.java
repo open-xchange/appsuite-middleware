@@ -89,6 +89,7 @@ public final class ICalTestSuite {
 		tests.addTestSuite(Bug20498Test_ReminderJumpsAnHour.class);
 		tests.addTestSuite(Bug20715Test_UidIsNotcaseSensitive.class);
 		tests.addTestSuite(Bug20718Test_JumpDuringDstCrossing.class);
+		tests.addTestSuite(Bug20945Test_UnexpectedError26.class);
 		return tests;
 	}
 }
