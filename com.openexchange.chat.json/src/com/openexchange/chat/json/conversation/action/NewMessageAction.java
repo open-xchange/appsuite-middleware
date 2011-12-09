@@ -63,6 +63,7 @@ import com.openexchange.chat.json.conversation.JSONConversationParser;
 import com.openexchange.chat.util.ChatUserImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -90,7 +91,11 @@ public final class NewMessageAction extends AbstractChatConversationAction {
          * Get service
          */
         final ChatServiceRegistry registry = getService(ChatServiceRegistry.class);
-        final ConversationID conversationID = ConversationID.valueOf(req.getParameter("id"));
+        final String conId = req.getParameter("id");
+        if (null == conId) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
+        }
+        final ConversationID conversationID = ConversationID.valueOf(conId);
         final ChatService chatService = registry.getChatService(conversationID.getServiceId(), session.getUserId(), session.getContextId());
         ChatAccess access = null;
         try {
