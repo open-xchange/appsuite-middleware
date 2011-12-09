@@ -2180,7 +2180,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             return;
         }
         final Set<String> loginMappings = ctx.getLoginMappings();
-        loginMappings.remove(ctx.getIdAsString()); // Deny change of mapping cid<->cid
 
         // add always the context name
         if (ctx.getName() != null) {
@@ -2201,6 +2200,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 closeSQLStuff(rs, stmt);
             }
         }
+        loginMappings.remove(ctx.getIdAsString()); // Deny change of mapping cid<->cid
 
         // first delete all mappings excluding default mapping from cid <-> cid
         PreparedStatement stmt = null;

@@ -132,7 +132,7 @@ public class Context extends ExtendableDataObject implements NameAndIdObject {
     public Context(final Integer id) {
         super();
         init();
-        this.id = id;
+        setId(id);
     }
 
     /**

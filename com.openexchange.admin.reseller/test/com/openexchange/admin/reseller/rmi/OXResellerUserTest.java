@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.reseller.rmi;
 
 import static org.junit.Assert.assertTrue;
@@ -89,23 +90,13 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         oxctx = (OXContextInterface)Naming.lookup(getRMIHostUrl() + OXContextInterface.RMI_NAME);
         oxresell.initDatabaseRestrictions(creds);
     }
-    
-    @AfterClass
-    public static void cleanup() throws MalformedURLException, RemoteException, NotBoundException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
-        final Credentials creds = DummyMasterCredentials();
 
-        final Context[] ctxs = oxctx.list("*", creds);
-        for(final Context ctx : ctxs) {
-            oxctx.delete(ctx, creds);
-        }
-        
-        final ResellerAdmin[] adms = oxresell.list("*", creds);
-        for(final ResellerAdmin adm : adms) {
-            oxresell.delete(adm, creds);
-        }
+    @AfterClass
+    public static void cleanup() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchContextException, DatabaseUpdateException, OXResellerException {
+        final Credentials creds = DummyMasterCredentials();
         oxresell.removeDatabaseRestrictions(creds);
     }
-    
+
     @Test
     public void testCreateTooManyOverallUser() throws MalformedURLException, RemoteException, NotBoundException, InvalidDataException, StorageException, InvalidCredentialsException, OXResellerException, ContextExistsException, NoSuchContextException, DatabaseUpdateException {
         final Credentials creds = DummyMasterCredentials();
@@ -115,33 +106,36 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
         res.add(MaxOverallUserRestriction(6));
         adm.setRestrictions(res);
         oxresell.create(adm, creds);
-
-        Stack<Context> ctxstack = new Stack<Context>();
-        // create 3 contexts with 1 user -> 6 user total
-        for(final Context ctx : new Context[]{createContext(ResellerFooCredentials()),
-                createContext(ResellerFooCredentials()), createContext(ResellerFooCredentials())} ){
-            ctxstack.push(ctx);
-            Credentials ctxauth = new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword());
-            for(int i=1; i<2; i++) {
-                System.out.println("creating user " + i + " in Context " + ctx.getId());
-                createUser(ctx, ctxauth);
-            }
-        }
-
-        // 7th user must fail
-        boolean createFailed = false;
         try {
-            createUser(ctxstack.firstElement(), new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword()));
-        } catch (StorageException e) {
-            createFailed = true;
+            Stack<Context> ctxstack = new Stack<Context>();
+            try {
+                // create 3 contexts with 1 user -> 6 user total
+                for(final Context ctx : new Context[]{createContext(ResellerFooCredentials()),
+                        createContext(ResellerFooCredentials()), createContext(ResellerFooCredentials())} ){
+                    ctxstack.push(ctx);
+                    Credentials ctxauth = new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword());
+                    for(int i=1; i<2; i++) {
+                        System.out.println("creating user " + i + " in Context " + ctx.getId());
+                        createUser(ctx, ctxauth);
+                    }
+                }
+        
+                // 7th user must fail
+                boolean createFailed = false;
+                try {
+                    createUser(ctxstack.firstElement(), new Credentials(ContextAdmin().getName(),ContextAdmin().getPassword()));
+                } catch (StorageException e) {
+                    createFailed = true;
+                }
+                assertTrue("Create user must fail",createFailed);
+            } finally {
+                for(final Context ctx : ctxstack ){
+                    deleteContext(ctx, ResellerFooCredentials());
+                }
+            }
+        } finally {
+            oxresell.delete(FooAdminUser(), DummyMasterCredentials());
         }
-        assertTrue("Create user must fail",createFailed);
-
-        for(final Context ctx : ctxstack ){
-            deleteContext(ctx, ResellerFooCredentials());
-        }
-
-        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
     }
 
     @Test
@@ -150,36 +144,40 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
-
-        Context ctx = createContext(creds);
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(MaxUserPerContextRestriction());
         try {
-            ctx.addExtension(new OXContextExtensionImpl(res));
-        } catch (final DuplicateExtensionException e1) {
-            // Because the context is newly created this exception cannot occur
-            e1.printStackTrace();
-        }
-        // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
-        // this can be done directly with the create call
-        oxctx.change(ctx, creds);
-        
-        User oxadmin = ContextAdmin();
-        Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
-        createUser(ctx, ctxadmcreds);
-        createUser(ctx, ctxadmcreds);
+            Context ctx = createContext(creds);
+            try {
+                HashSet<Restriction> res = new HashSet<Restriction>();
+                res.add(MaxUserPerContextRestriction());
+                try {
+                    ctx.addExtension(new OXContextExtensionImpl(res));
+                } catch (final DuplicateExtensionException e1) {
+                    // Because the context is newly created this exception cannot occur
+                    e1.printStackTrace();
+                }
+                // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
+                // this can be done directly with the create call
+                oxctx.change(ctx, creds);
 
-        // 3rd user must fail
-        boolean createFailed = false;
-        try {
-            createUser(ctx, ctxadmcreds);
-        } catch (StorageException e) {
-            createFailed = true;
-        }
-        assertTrue("Create user must fail",createFailed);
+                User oxadmin = ContextAdmin();
+                Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
+                createUser(ctx, ctxadmcreds);
+                createUser(ctx, ctxadmcreds);
 
-        deleteContext(ctx, creds);
-        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+                // 3rd user must fail
+                boolean createFailed = false;
+                try {
+                    createUser(ctx, ctxadmcreds);
+                } catch (StorageException e) {
+                    createFailed = true;
+                }
+                assertTrue("Create user must fail", createFailed);
+            } finally {
+                deleteContext(ctx, creds);
+            }
+        } finally {
+            oxresell.delete(FooAdminUser(), DummyMasterCredentials());
+        }
     }
 
     /*
@@ -192,67 +190,71 @@ public class OXResellerUserTest extends OXResellerAbstractTest {
 
         ResellerAdmin adm = FooAdminUser();
         oxresell.create(adm, DummyMasterCredentials());
-
-        Context ctx = createContext(creds);
-        HashSet<Restriction> res = new HashSet<Restriction>();
-        res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"webmail_plus","2"));
-        res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX+"premium","2"));
         try {
-            ctx.addExtension(new OXContextExtensionImpl(res));
-        } catch (DuplicateExtensionException e1) {
-            // Because the context is newly created this exception cannot occur
-            e1.printStackTrace();
+            Context ctx = createContext(creds);
+            try {
+                HashSet<Restriction> res = new HashSet<Restriction>();
+                res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX + "webmail_plus", "2"));
+                res.add(new Restriction(Restriction.MAX_USER_PER_CONTEXT_BY_MODULEACCESS_PREFIX + "premium", "2"));
+                try {
+                    ctx.addExtension(new OXContextExtensionImpl(res));
+                } catch (DuplicateExtensionException e1) {
+                    // Because the context is newly created this exception cannot occur
+                    e1.printStackTrace();
+                }
+                // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
+                // this can be done directly with the create call
+                oxctx.change(ctx, creds);
+
+                // webmail test (default perms)
+                User oxadmin = ContextAdmin();
+                Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
+                createUser(ctx, ctxadmcreds);
+
+                // 3rd user must fail
+                boolean createFailed = false;
+                try {
+                    createUser(ctx, ctxadmcreds);
+                } catch (StorageException e) {
+                    createFailed = true;
+                }
+                assertTrue("Create user must fail", createFailed);
+
+                // premium test
+                // premium=contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,
+                // readcreatesharedfolders,ical,vcard,webdav,webdavxml
+                final UserModuleAccess access = new UserModuleAccess();
+                access.disableAll();
+                access.setContacts(true);
+                access.setWebmail(true);
+                access.setCalendar(true);
+                access.setDelegateTask(true);
+                access.setTasks(true);
+                access.setEditPublicFolders(true);
+                access.setInfostore(true);
+                access.setReadCreateSharedFolders(true);
+                access.setIcal(true);
+                access.setVcard(true);
+                access.setWebdav(true);
+                access.setWebdavXml(true);
+                access.setGlobalAddressBookDisabled(false);
+
+                createUser(ctx, access, ctxadmcreds);
+                createUser(ctx, access, ctxadmcreds);
+
+                // 3rd user must fail
+                createFailed = false;
+                try {
+                    createUser(ctx, access, ctxadmcreds);
+                } catch (StorageException e) {
+                    createFailed = true;
+                }
+                assertTrue("Create user must fail", createFailed);
+            } finally {
+                deleteContext(ctx, creds);
+            }
+        } finally {
+            oxresell.delete(FooAdminUser(), DummyMasterCredentials());
         }
-        // TODO Here we call change context to apply the restrictions if the create call is ready to handle extensions
-        // this can be done directly with the create call
-        oxctx.change(ctx, creds);
-        
-        // webmail test (default perms)
-        User oxadmin = ContextAdmin();
-        Credentials ctxadmcreds = new Credentials(oxadmin.getName(), oxadmin.getPassword());
-        createUser(ctx, ctxadmcreds);
-
-        // 3rd user must fail
-        boolean createFailed = false;
-        try {
-            createUser(ctx, ctxadmcreds);
-        } catch (StorageException e) {
-            createFailed = true;
-        }
-        assertTrue("Create user must fail",createFailed);
-
-        // premium test
-        // premium=contacts,webmail,calendar,delegatetask,tasks,editpublicfolders,infostore,
-        // readcreatesharedfolders,ical,vcard,webdav,webdavxml
-        final UserModuleAccess access = new UserModuleAccess();
-        access.disableAll();
-        access.setContacts(true);
-        access.setWebmail(true);
-        access.setCalendar(true);
-        access.setDelegateTask(true);
-        access.setTasks(true);
-        access.setEditPublicFolders(true);
-        access.setInfostore(true);
-        access.setReadCreateSharedFolders(true);
-        access.setIcal(true);
-        access.setVcard(true);
-        access.setWebdav(true);
-        access.setWebdavXml(true);
-        access.setGlobalAddressBookDisabled(false);
-        
-        createUser(ctx, access, ctxadmcreds);
-        createUser(ctx, access, ctxadmcreds);
-
-        // 3rd user must fail
-        createFailed = false;
-        try {
-            createUser(ctx, access, ctxadmcreds);
-        } catch (StorageException e) {
-            createFailed = true;
-        }
-        assertTrue("Create user must fail",createFailed);
-
-        deleteContext(ctx, creds);
-        oxresell.delete(FooAdminUser(), DummyMasterCredentials());
     }
 }
