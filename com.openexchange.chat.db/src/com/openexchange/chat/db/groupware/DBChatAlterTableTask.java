@@ -173,8 +173,8 @@ public class DBChatAlterTableTask extends UpdateTaskAdapter {
                     if (Tools.existsIndex(con, TABLE_CHAT_MESSAGE, new String[]{"cid", "chatId", "chunkId"}) == null) {
                         Tools.createIndex(con, TABLE_CHAT_MESSAGE, "chunkMessage", new String[]{"cid", "chatId", "chunkId"}, false);
                     }
-                    if (Tools.existsIndex(con, TABLE_CHAT_MESSAGE, new String[] { "cid", "chatId", "user"}) == null) {
-                        Tools.createIndex(con, TABLE_CHAT_MESSAGE, "userMessage", new String[] {"cid", "chatId", "user"}, false);
+                    if (Tools.existsIndex(con, TABLE_CHAT_MESSAGE, new String[] { "cid", "user", "chatId"}) == null) {
+                        Tools.createIndex(con, TABLE_CHAT_MESSAGE, "userMessage", new String[] {"cid", "user", "chatId"}, false);
                     }
                 }
             } else {
