@@ -224,51 +224,53 @@ public final class MailStoragesConsistencyTest extends AbstractMailTest {
                 final String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
 
                 final int numTrashedMails = getMessageCount(mailAccess, trashFullname);
-                MailMessage[] trashed = mailAccess.getMessageStorage().getAllMessages(
-                    trashFullname,
-                    IndexRange.NULL,
-                    MailSortField.RECEIVED_DATE,
-                    OrderDirection.ASC,
-                    FIELDS_ID);
-                assertTrue("Size mismatch: " + trashed.length + " but should be " + numTrashedMails, trashed.length == numTrashedMails);
-                final Set<Long> oldIds = new HashSet<Long>(numTrashedMails);
-                for (int i = 0; i < trashed.length; i++) {
-                    oldIds.add(Long.valueOf(trashed[i].getMailId()));
-                }
-
-                /*
-                 * Alter trash's content through clearing temporary folder by folder storage
-                 */
-                mailAccess.getFolderStorage().clearFolder(fullname);
-
-                /*
-                 * Check if folder storage's modification has been reported to message storage
-                 */
-                if (!getUserSettingMail().isHardDeleteMsgs()) {
-                    final int expectedMsgCount = numTrashedMails + uids.length;
-                    assertEquals("Mails not completely moved to trash", expectedMsgCount, getMessageCount(mailAccess, trashFullname));
-                    trashed = mailAccess.getMessageStorage().getAllMessages(
-                        trashFullname,
-                        IndexRange.NULL,
-                        MailSortField.RECEIVED_DATE,
-                        OrderDirection.ASC,
-                        FIELDS_ID);
-                    assertTrue(
-                        "Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
-                        trashed.length == expectedMsgCount);
-
-                    final Set<String> newIds = new HashSet<String>(numTrashedMails);
+                if (numTrashedMails >= 0) {
+                    MailMessage[] trashed =
+                        mailAccess.getMessageStorage().getAllMessages(
+                            trashFullname,
+                            IndexRange.NULL,
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.ASC,
+                            FIELDS_ID);
+                    assertTrue("Size mismatch: " + trashed.length + " but should be " + numTrashedMails, trashed.length == numTrashedMails);
+                    final Set<Long> oldIds = new HashSet<Long>(numTrashedMails);
                     for (int i = 0; i < trashed.length; i++) {
-                        newIds.add(trashed[i].getMailId());
+                        oldIds.add(Long.valueOf(trashed[i].getMailId()));
                     }
-                    newIds.removeAll(oldIds);
+                    /*
+                     * Alter trash's content through clearing temporary folder by folder storage
+                     */
+                    mailAccess.getFolderStorage().clearFolder(fullname);
+                    /*
+                     * Check if folder storage's modification has been reported to message storage
+                     */
+                    if (!getUserSettingMail().isHardDeleteMsgs()) {
+                        final int expectedMsgCount = numTrashedMails + uids.length;
+                        assertEquals("Mails not completely moved to trash", expectedMsgCount, getMessageCount(mailAccess, trashFullname));
+                        trashed =
+                            mailAccess.getMessageStorage().getAllMessages(
+                                trashFullname,
+                                IndexRange.NULL,
+                                MailSortField.RECEIVED_DATE,
+                                OrderDirection.ASC,
+                                FIELDS_ID);
+                        assertTrue(
+                            "Size mismatch: " + trashed.length + " but should be " + expectedMsgCount,
+                            trashed.length == expectedMsgCount);
 
-                    trashedIds = new String[newIds.size()];
-                    int i = 0;
-                    for (final String id : newIds) {
-                        trashedIds[i++] = id;
+                        final Set<String> newIds = new HashSet<String>(numTrashedMails);
+                        for (int i = 0; i < trashed.length; i++) {
+                            newIds.add(trashed[i].getMailId());
+                        }
+                        newIds.removeAll(oldIds);
+
+                        trashedIds = new String[newIds.size()];
+                        int i = 0;
+                        for (final String id : newIds) {
+                            trashedIds[i++] = id;
+                        }
+                        assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
                     }
-                    assertTrue("Number of new trash mails does not match trashed mails", trashedIds.length == uids.length);
                 }
 
             } finally {

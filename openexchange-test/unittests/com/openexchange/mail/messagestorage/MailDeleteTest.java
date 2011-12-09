@@ -49,10 +49,10 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
@@ -142,50 +142,52 @@ public final class MailDeleteTest extends MessageStorageTest {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, false);
 
             // trash = mailAccess.getFolderStorage().getFolder(trashFullname);
-            assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount + uids.length == getMessageCount(mailAccess, trashFullname));
-
-            trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
-            assertTrue("Size mismatch: " + trashed.length + " but should be " + getMessageCount(mailAccess, trashFullname), trashed.length == getMessageCount(mailAccess, trashFullname));
-            final Set<String> ids = new HashSet<String>(getMessageCount(mailAccess, trashFullname));
-            for (final MailMessage mail : trashed) {
-                ids.add(mail.getMailId());
-            }
-            ids.removeAll(prevIds);
-            assertTrue("Size mismatch: " + ids.size() + " but should be " + uids.length, ids.size() == uids.length);
-
-            trashedIDs = new String[uids.length];
-            {
-                int k = 0;
-                for (final String id : ids) {
-                    trashedIDs[k++] = id;
+            final boolean countCap = getMessageCount(mailAccess, trashFullname) >= 0;
+            if (countCap) {
+                assertTrue("Trash's number of message has not been increased appropriately", prevMessageCount + uids.length == getMessageCount(mailAccess, trashFullname));
+    
+                trashed = mailAccess.getMessageStorage().getAllMessages(trashFullname, IndexRange.NULL, MailSortField.RECEIVED_DATE, OrderDirection.DESC, FIELDS_ID);
+                assertTrue("Size mismatch: " + trashed.length + " but should be " + getMessageCount(mailAccess, trashFullname), trashed.length == getMessageCount(mailAccess, trashFullname));
+                final Set<String> ids = new HashSet<String>(getMessageCount(mailAccess, trashFullname));
+                for (final MailMessage mail : trashed) {
+                    ids.add(mail.getMailId());
+                }
+                ids.removeAll(prevIds);
+                assertTrue("Size mismatch: " + ids.size() + " but should be " + uids.length, ids.size() == uids.length);
+    
+                trashedIDs = new String[uids.length];
+                {
+                    int k = 0;
+                    for (final String id : ids) {
+                        trashedIDs[k++] = id;
+                    }
+                }
+    
+                trashed = mailAccess.getMessageStorage().getMessages(trashFullname, trashedIDs, FIELDS_EVEN_MORE);
+                assertTrue("No matching trashed messages found: "
+                    + (null == trashed ? "null" : String.valueOf(trashed.length))
+                    + " IDs: "
+                    + Arrays.toString(trashedIDs), trashed != null && trashed.length == uids.length);
+                for (int i = 0; i < trashed.length; i++) {
+                    assertFalse("Missing mail ID", trashed[i].getMailId() == null);
+                    assertTrue("Missing content type", trashed[i].containsContentType());
+                    assertTrue("Missing flags", trashed[i].containsFlags());
+                    assertTrue("Missing From", trashed[i].containsFrom());
+                    assertTrue("Missing To", trashed[i].containsTo());
+                    assertTrue("Missing Disposition-Notification-To", trashed[i].containsDispositionNotification());
+                    assertTrue("Missing color label", trashed[i].containsColorLabel());
+                    assertTrue("Missing headers", trashed[i].containsHeaders());
+                    assertTrue("Missing subject", trashed[i].containsSubject());
+                    assertTrue("Missing thread level", trashed[i].containsThreadLevel());
+                    assertTrue("Missing size", trashed[i].containsSize());
+                    assertTrue("Missing priority", trashed[i].containsPriority());
+                    assertTrue("Missing sent date", trashed[i].containsSentDate());
+                    assertTrue("Missing received date", trashed[i].containsReceivedDate());
+                    assertTrue("Missing Cc", trashed[i].containsCc());
+                    assertTrue("Missing Bcc", trashed[i].containsBcc());
+                    assertTrue("Missing folder fullname", trashed[i].containsFolder());
                 }
             }
-
-            trashed = mailAccess.getMessageStorage().getMessages(trashFullname, trashedIDs, FIELDS_EVEN_MORE);
-            assertTrue("No matching trashed messages found: "
-                + (null == trashed ? "null" : String.valueOf(trashed.length))
-                + " IDs: "
-                + Arrays.toString(trashedIDs), trashed != null && trashed.length == uids.length);
-            for (int i = 0; i < trashed.length; i++) {
-                assertFalse("Missing mail ID", trashed[i].getMailId() == null);
-                assertTrue("Missing content type", trashed[i].containsContentType());
-                assertTrue("Missing flags", trashed[i].containsFlags());
-                assertTrue("Missing From", trashed[i].containsFrom());
-                assertTrue("Missing To", trashed[i].containsTo());
-                assertTrue("Missing Disposition-Notification-To", trashed[i].containsDispositionNotification());
-                assertTrue("Missing color label", trashed[i].containsColorLabel());
-                assertTrue("Missing headers", trashed[i].containsHeaders());
-                assertTrue("Missing subject", trashed[i].containsSubject());
-                assertTrue("Missing thread level", trashed[i].containsThreadLevel());
-                assertTrue("Missing size", trashed[i].containsSize());
-                assertTrue("Missing priority", trashed[i].containsPriority());
-                assertTrue("Missing sent date", trashed[i].containsSentDate());
-                assertTrue("Missing received date", trashed[i].containsReceivedDate());
-                assertTrue("Missing Cc", trashed[i].containsCc());
-                assertTrue("Missing Bcc", trashed[i].containsBcc());
-                assertTrue("Missing folder fullname", trashed[i].containsFolder());
-            }
-
         } finally {
             mailAccess.getMessageStorage().deleteMessages("INBOX", uids, true);
 
