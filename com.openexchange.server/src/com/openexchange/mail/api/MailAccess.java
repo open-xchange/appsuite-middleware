@@ -304,11 +304,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         /*
          * Occupy free slot
          */
-        final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
         if (mailAccess != null) {
             return mailAccess;
         }
+        final MailProvider mailProvider = MailProviderRegistry.getMailProviderBySession(session, accountId);
         return mailProvider.createNewMailAccess(session, accountId).setProvider(mailProvider);
     }
 
