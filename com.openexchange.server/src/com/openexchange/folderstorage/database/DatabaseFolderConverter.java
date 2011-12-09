@@ -236,10 +236,10 @@ public final class DatabaseFolderConverter {
                 } else {
                     retval = new DatabaseFolder(fo);
                 }
-            } else if (fo.getObjectID() == getContactCollectorFolder(user.getId(), ctx.getContextId(), con)) {
+            } else if (folderId == getContactCollectorFolder(user.getId(), ctx.getContextId(), con)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-            } else if (fo.getObjectID() == getPublishedMailAttachmentsFolder(session)) {
+            } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {

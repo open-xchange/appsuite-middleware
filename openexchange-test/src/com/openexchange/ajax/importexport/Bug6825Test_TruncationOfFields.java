@@ -49,11 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
-import static com.openexchange.java.Autoboxing.I;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
@@ -63,7 +60,7 @@ import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug6825Test_TruncationOfFields extends ManagedAppointmentTest {
 
-	public Bug6825Test_TruncationOfFields(String name) {
+	public Bug6825Test_TruncationOfFields(final String name) {
 		super(name);
 	}
 	
@@ -85,15 +82,15 @@ public class Bug6825Test_TruncationOfFields extends ManagedAppointmentTest {
         	"END:VEVENT\n" +
         	"END:VCALENDAR";
 
-        ICalImportResponse importresponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
+        final ICalImportResponse importresponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
 
-        ImportResult imported = importresponse.getImports()[0];
-		Appointment appointment = calendarManager.get(I(imported.getFolder()), I(imported.getObjectId()));
+        final ImportResult imported = importresponse.getImports()[0];
+		final Appointment appointment = calendarManager.get(Integer.parseInt(imported.getFolder()), Integer.parseInt(imported.getObjectId()));
 
         
 		assertTrue("Should have participants", appointment.containsParticipants());
 
-		Participant[] participants = appointment.getParticipants();
+		final Participant[] participants = appointment.getParticipants();
         assertEquals("Should have two participants", 2, participants.length);
         assertTrue(
             "One user is " + testMailAddress + " (external user)",
@@ -109,9 +106,9 @@ public class Bug6825Test_TruncationOfFields extends ManagedAppointmentTest {
         final String stringTooLong = "zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... zwanzig zeichen.... ";
         final String ical = "BEGIN:VCALENDAR\nVERSION:2.0\nPRODID:OPEN-XCHANGE\nBEGIN:VEVENT\nCLASS:PUBLIC\nCREATED:20060519T120300Z\nDTSTART:20060519T110000Z\nDTSTAMP:20070423T063205Z\nSUMMARY:" + stringTooLong + "\nDTEND:20060519T120000Z\nATTENDEE:mailto:" + testMailAddress + "\nEND:VEVENT\nEND:VCALENDAR";
 
-        ICalImportResponse importresponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
+        final ICalImportResponse importresponse = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
         assertTrue(importresponse.hasError());
-        JSONObject data = ((JSONArray) importresponse.getData()).getJSONObject(0);
+        final JSONObject data = ((JSONArray) importresponse.getData()).getJSONObject(0);
         assertTrue(data.has("truncated"));
     }
 
