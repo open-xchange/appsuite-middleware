@@ -71,7 +71,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -171,6 +173,14 @@ public final class DatabaseFolderConverter {
         return null == folderId ? -1 : folderId.intValue();
     }
 
+    private static int getPublishedMailAttachmentsFolder(final Session session) {
+        if (null == session) {
+            return -1;
+        }
+        final Integer i = (Integer) session.getParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID());
+        return null == i ? -1 : i.intValue();
+    }
+
     /**
      * Converts specified {@link FolderObject} instance to a {@link DatabaseFolder} instance.
      *
@@ -178,11 +188,12 @@ public final class DatabaseFolderConverter {
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
+     * @param session The user sessin
      * @param con The connection
      * @return The converted {@link DatabaseFolder} instance
      * @throws OXException If conversion fails
      */
-    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Connection con) throws OXException {
+    public static DatabaseFolder convert(final FolderObject fo, final User user, final UserConfiguration userConfiguration, final Context ctx, final Session session, final Connection con) throws OXException {
         try {
             final int folderId = fo.getObjectID();
             if (FolderObject.SYSTEM_SHARED_FOLDER_ID == folderId) {
@@ -228,6 +239,9 @@ public final class DatabaseFolderConverter {
             } else if (fo.getObjectID() == getContactCollectorFolder(user.getId(), ctx.getContextId(), con)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+            } else if (fo.getObjectID() == getPublishedMailAttachmentsFolder(session)) {
+                retval = new LocalizedDatabaseFolder(fo);
+                retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {
                 retval = new DatabaseFolder(fo);
             }
