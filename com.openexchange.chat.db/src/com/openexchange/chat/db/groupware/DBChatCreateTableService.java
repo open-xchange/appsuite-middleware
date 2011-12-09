@@ -74,7 +74,6 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" createdAt BIGINT(64) DEFAULT NULL,\n" +
     		" PRIMARY KEY (cid, chatId),\n" +
     		" INDEX `user` (cid, user)\n" +
-    		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     private static final String CREATE_CHAT_MEMBER = "CREATE TABLE "+TABLE_CHAT_MEMBER+" (\n" +
@@ -85,8 +84,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" opMode INT4 unsigned NOT NULL,\n" +
     		" lastPoll BIGINT(64) DEFAULT NULL,\n" +
     		" PRIMARY KEY (cid, user, chatId, chunkId),\n" +
-    		" INDEX `user` (cid, user, chatId),\n" +
-    		" -- FOREIGN KEY (cid, user) REFERENCES user (cid, id)\n" +
+    		" INDEX `user` (cid, user, chatId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     private static final String CREATE_CHAT_MESSAGE = "CREATE TABLE "+TABLE_CHAT_MESSAGE+" (\n" +
@@ -99,7 +97,7 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" createdAt BIGINT(64) DEFAULT NULL,\n" +
     		" PRIMARY KEY (cid, chatId, messageId),\n" +
     		" INDEX `user` (cid, user),\n" +
-    		" INDEX `userMessage` (cid, user, chatId)\n" +
+    		" INDEX `userMessage` (cid, user, chatId),\n" +
     		" INDEX `chunkMessage` (cid, chatId, chunkId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
@@ -127,11 +125,9 @@ public final class DBChatCreateTableService extends AbstractCreateTableImpl {
     		" cid INT4 unsigned NOT NULL,\n" +
             " chatId INT4 unsigned NOT NULL,\n" +
     		" chunkId INT4 unsigned NOT NULL,\n" +
-    		" -- user INT4 unsigned NOT NULL,\n" +
     		" createdAt BIGINT(64) DEFAULT NULL,\n" +
     		" PRIMARY KEY (cid, chatId, chunkId),\n" +
     		" INDEX `chat` (cid, chatId)\n" +
-    		" -- INDEX `userMessage` (cid, user, chatId)\n" +
     		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**

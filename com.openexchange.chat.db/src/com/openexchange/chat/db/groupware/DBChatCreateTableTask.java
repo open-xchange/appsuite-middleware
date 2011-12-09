@@ -54,6 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.chat.ChatExceptionCodes;
 import com.openexchange.chat.db.DBChatServiceLookup;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -61,6 +62,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DBChatCreateTableTask}
@@ -88,6 +90,7 @@ public class DBChatCreateTableTask extends UpdateTaskAdapter {
         final Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;
         try {
+            writeCon.setAutoCommit(false); // BEGIN
             final String[] tableNames = DBChatCreateTableService.getTablesToCreate();
             final String[] createStmts = DBChatCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -101,8 +104,16 @@ public class DBChatCreateTableTask extends UpdateTaskAdapter {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
+            writeCon.commit(); // COMMIT
+        } catch (final OXException e) {
+            DBUtils.rollback(writeCon);
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(writeCon);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+            DBUtils.autocommit(writeCon);
             dbService.backForUpdateTask(contextId, writeCon);
         }
     }
