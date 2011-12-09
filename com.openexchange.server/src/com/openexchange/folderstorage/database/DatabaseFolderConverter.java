@@ -188,7 +188,7 @@ public final class DatabaseFolderConverter {
      * @param user The user
      * @param userConfiguration The user configuration
      * @param ctx The context
-     * @param session The user sessin
+     * @param session The user session
      * @param con The connection
      * @return The converted {@link DatabaseFolder} instance
      * @throws OXException If conversion fails
@@ -236,10 +236,10 @@ public final class DatabaseFolderConverter {
                 } else {
                     retval = new DatabaseFolder(fo);
                 }
-            } else if (fo.getObjectID() == getContactCollectorFolder(user.getId(), ctx.getContextId(), con)) {
+            } else if (folderId == getContactCollectorFolder(user.getId(), ctx.getContextId(), con)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
-            } else if (fo.getObjectID() == getPublishedMailAttachmentsFolder(session)) {
+            } else if (folderId == getPublishedMailAttachmentsFolder(session)) {
                 retval = new LocalizedDatabaseFolder(fo);
                 retval.setName(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
             } else {
