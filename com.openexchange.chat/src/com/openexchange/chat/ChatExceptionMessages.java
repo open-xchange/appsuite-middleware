@@ -101,6 +101,9 @@ public final class ChatExceptionMessages implements LocalizableStrings {
     // Posted message is too long.
     public static final String MESSAGE_TOO_LONG_MSG = "Posted message is too long.";
 
+    // Subject is too long and is therefore truncated.
+    public static final String SUBJECT_TOO_LONG_MSG = "Subject is too long and is therefore truncated.";
+
     /**
      * Prevent instantiation.
      */

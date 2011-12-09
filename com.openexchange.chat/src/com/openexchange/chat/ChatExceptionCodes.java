@@ -116,7 +116,11 @@ public enum ChatExceptionCodes implements OXExceptionCode {
     /**
      * Posted message is too long.
      */
-    MESSAGE_TOO_LONG(ChatExceptionMessages.MESSAGE_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14)
+    MESSAGE_TOO_LONG(ChatExceptionMessages.MESSAGE_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14),
+    /**
+     * Subject is too long and is therefore truncated.
+     */
+    SUBJECT_TOO_LONG(ChatExceptionMessages.SUBJECT_TOO_LONG_MSG, Category.CATEGORY_USER_INPUT, 14)
 
     ;
 
