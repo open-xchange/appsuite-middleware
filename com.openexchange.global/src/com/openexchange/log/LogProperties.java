@@ -149,6 +149,19 @@ public final class LogProperties {
     }
 
     /**
+     * Gets the thread-local log property associated with specified name.
+     * 
+     * @param name The property name
+     * @return The log property or <code>null</code> if absent
+     */
+    @SuppressWarnings("unchecked")
+    public static <V> V getLogProperty(final String name) {
+        final Thread thread = Thread.currentThread();
+        final Map<String, Object> map = THREAD_LOCAL.get(thread);
+        return (V) (null == map ? null : map.get(name));
+    }
+
+    /**
      * Puts specified log property. A <code>null</code> value removes the property.
      *
      * @param name The property name
