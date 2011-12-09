@@ -74,9 +74,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.calendar.CalendarSql;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.Tools;
 
 public class ICalImportTest extends AbstractICalImportTest {
 
