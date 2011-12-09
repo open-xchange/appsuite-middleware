@@ -195,29 +195,32 @@ public final class PermissionLoaderService implements Runnable {
      */
     public void startUp() throws OXException {
         final BundleContext context = ServerActivator.getContext();
-        final ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService> customizer = new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
-
-            @Override
-            public ThreadPoolService addingService(final ServiceReference<ThreadPoolService> reference) {
-                final ThreadPoolService service = context.getService(reference);
-                threadPool = service;
-                return service;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
-                // Nope
-            }
-
-            @Override
-            public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
-                threadPool = null;
-                context.ungetService(reference);
-            }
-        };
-        poolTracker = new ServiceTracker<ThreadPoolService, ThreadPoolService>(context, ThreadPoolService.class, customizer);
-        poolTracker.open();
-
+        if(context == null){
+        	threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        } else {
+	        final ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService> customizer = new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
+	
+	            @Override
+	            public ThreadPoolService addingService(final ServiceReference<ThreadPoolService> reference) {
+	                final ThreadPoolService service = context.getService(reference);
+	                threadPool = service;
+	                return service;
+	            }
+	
+	            @Override
+	            public void modifiedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
+	                // Nope
+	            }
+	
+	            @Override
+	            public void removedService(final ServiceReference<ThreadPoolService> reference, final ThreadPoolService service) {
+	                threadPool = null;
+	                context.ungetService(reference);
+	            }
+	        };
+	        poolTracker = new ServiceTracker<ThreadPoolService, ThreadPoolService>(context, ThreadPoolService.class, customizer);
+	        poolTracker.open();
+        }
         future = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
         permsMap = new TimeoutConcurrentMap<Pair, OCLPermission[]>(20, true);
         pooledCons = new TimeoutConcurrentMap<Integer, Connection>(1, false);
