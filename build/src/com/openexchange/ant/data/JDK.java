@@ -73,6 +73,7 @@ public class JDK {
         exports.add("javax.management.remote.rmi");
         exports.add("javax.naming");
         exports.add("javax.naming.directory");
+        exports.add("javax.naming.ldap");
         exports.add("javax.net");
         exports.add("javax.net.ssl");
         exports.add("javax.security.auth");
