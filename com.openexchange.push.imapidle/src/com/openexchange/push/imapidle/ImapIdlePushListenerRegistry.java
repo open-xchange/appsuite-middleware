@@ -258,6 +258,22 @@ public final class ImapIdlePushListenerRegistry {
         return removeListener(SimpleKey.valueOf(contextId, userId));
     }
 
+   /**
+    * Purges specified user's push listener.
+    *
+    * @param listener The push listener to purge from registry
+    * @return <code>true</code> if exactly that push listener was found and purged; otherwise <code>false</code>
+    */
+   public boolean purgeUserPushListener(final ImapIdlePushListener listener) {
+       final int userId = listener.getUserId();
+       final int contextId = listener.getContextId();
+       if (map.remove(SimpleKey.valueOf(contextId, userId), listener)) {
+           listener.close();
+           return true;
+       }
+       return false;
+   }
+
     /**
      * Purges all listeners and their data.
      *
