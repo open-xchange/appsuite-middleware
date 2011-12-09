@@ -345,7 +345,7 @@ public final class IMAPStoreCache {
                 if (null != imapStore) {
                     if (checkConnected && !imapStore.isConnected()) {
                         /*
-                         * How is that possible?!?
+                         * How is that possible? Check IMAPStore.finalize()
                          */
                         try {
                             imapStore.connect(server, port, login, pw);
