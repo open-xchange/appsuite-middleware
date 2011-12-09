@@ -5,7 +5,7 @@
 * 2011-12-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 20924: Load setting from database
- - Fix for bug 20958: Fixed NPE during IAMP IDLE push
+ - Fix for bug 20958: Fixed NPE during IMAP IDLE push
 
 * 2011-12-08 - thorben.betten@open-xchange.com
 
