@@ -1,15 +1,12 @@
 package com.openexchange.ajax.importexport;
 
-import com.openexchange.ajax.appointment.action.ConflictObject;
 import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
 import com.openexchange.ajax.importexport.actions.ICalImportRequest;
 import com.openexchange.ajax.importexport.actions.ICalImportResponse;
-import com.openexchange.groupware.AbstractOXException;
-import com.openexchange.groupware.importexport.ImportResult;
 
 public class Bug20945Test_UnexpectedError26 extends ManagedAppointmentTest {
 
-	public Bug20945Test_UnexpectedError26(String name) {
+	public Bug20945Test_UnexpectedError26(final String name) {
 		super(name);
 	}
 	
@@ -39,7 +36,7 @@ public class Bug20945Test_UnexpectedError26 extends ManagedAppointmentTest {
 			"END:VCALENDAR";
 	
 	public void testIt() throws Exception {
-		ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
+		final ICalImportResponse response = getClient().execute(new ICalImportRequest(folder.getObjectID(), ical));
 		
 		assertFalse(response.hasConflicts() || response.hasError());
 	}
