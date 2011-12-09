@@ -3,10 +3,12 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.ajp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.authentication.database"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.authentication.ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.authorization.standard"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.caldav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.calendar"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.calendar.printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.carddav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.charset"/>
@@ -53,10 +55,13 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.http.deferrer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.imap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.index"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.langdetect"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.filter"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mdns"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging"/>
@@ -104,6 +109,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sso"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.tasks.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.templating.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.textxtraction"/>
