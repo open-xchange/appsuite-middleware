@@ -182,7 +182,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * @return A new {@link ImapIdlePushListener}.
      */
     public static ImapIdlePushListener newInstance(final Session session) {
-        return newInstance(session.getUserId(), session.getContextId());
+        return new ImapIdlePushListener(session);
     }
 
     /**
@@ -215,6 +215,21 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private MailService mailService;
 
     private volatile boolean shutdown;
+
+    /**
+     * Initializes a new {@link ImapIdlePushListener}.
+     */
+    private ImapIdlePushListener(final Session session) {
+        super();
+        running = new AtomicBoolean();
+        sessionRef = new AtomicReference<Session>(session);
+        invalidSessionIds = new ConcurrentHashMap<String, String>(2);
+        userId = session.getUserId();
+        contextId = session.getContextId();
+        mailService = null;
+        errordelay = 1000;
+        shutdown = false;
+    }
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -375,7 +390,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         shutdown = true;
         if (isDebugEnabled()) {
             final Session session = getSession();
-            LOG.info("stopping IDLE for Context: " + contextId + ", Login: " + (null == session ? "unknown" : session.getLoginName()));
+            LOG.info("stopping IDLE for Context: " + contextId + ", Login: " + (null == session ? "unknown" : session.getLoginName()), new Throwable("Closing IMAP IDLE push listener"));
         }
         if (null != imapIdleFuture) {
             imapIdleFuture.cancel(true);
@@ -389,9 +404,38 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
          * Periodically invoke #checkNewMail() unless not shut-down
          */
         try {
-            while (!shutdown) {
-                while (checkNewMail()) {
-                    // Nothing...
+            Run: while (!shutdown) {
+                try {
+                    while (checkNewMail()) {
+                        // Nothing...
+                    }
+                } catch (final MissingSessionException e) {
+                    LOG.info(e.getMessage());
+                    /*
+                     * Bind ImapIdlePushListener to another session
+                     */
+                    final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+                    final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
+
+                        @Override
+                        public boolean accepts(final Session tmp) {
+                            return PushUtility.allowedClient(tmp.getClient());
+                        }
+
+                    });
+                    if (null == session) {
+                        final String message =
+                            "IDLE: Found no other valid & active session for user " + userId + " in context " + contextId + ". Therefore shutting down associated IMAP IDLE push listener.";
+                        if (isDebugEnabled()) {
+                            LOG.info(message, new Throwable());
+                        } else {
+                            LOG.info(message);
+                        }
+                        return;
+                    }
+                    LOG.info("IDLE: Found another valid & active session for user " + userId + " in context " + contextId + ". Reactivating IMAP IDLE push listener.");
+                    sessionRef.set(session);
+                    continue Run;
                 }
                 if (shutdown) {
                     if (LOG.isDebugEnabled()) {
@@ -402,35 +446,17 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 if (LOG.isDebugEnabled()) {
                     LOG.info("IDLE: Orderly left checkNewMail() method for user " + userId + " in context " + contextId);
                 }
-                /*
-                 * Bind ImapIdlePushListener to another session
-                 */
-                final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-                final Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
-
-                    @Override
-                    public boolean accepts(final Session tmp) {
-                        return PushUtility.allowedClient(tmp.getClient());
-                    }
-
-                });
-                if (null == session) {
-                    final String message =
-                        "IDLE: Found no other valid & active session for user " + userId + " in context " + contextId + ". Therefore shutting down associated IMAP IDLE push listener.";
-                    if (isDebugEnabled()) {
-                        LOG.info(message, new Throwable());
-                    } else {
-                        LOG.info(message);
-                    }
-                    return;
-                }
-                LOG.info("IDLE: Found another valid & active session for user " + userId + " in context " + contextId + ". Reactivating IMAP IDLE push listener.");
-                sessionRef.set(session);
             }
         } catch (final Exception e) {
             LOG.error("IDLE: Unexpectedly left run() method for user " + userId + " in context " + contextId, e);
         } finally {
-            ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(contextId, userId);
+            if (ImapIdlePushListenerRegistry.getInstance().purgeUserPushListener(this)) {
+                try {
+                    ImapIdlePushListenerRegistry.getInstance().removePushListener(contextId, userId);
+                } catch (final Exception e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
         }
     }
 
@@ -438,6 +464,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * Check for new mails
      *
      * @throws OXException If check for new mails fails
+     * @throws MissingSessionException If session is <code>null</code>
      */
     public boolean checkNewMail() throws OXException {
         if (shutdown) {
@@ -463,8 +490,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             final Session session = getSession();
             if (null == session) {
                 // No active session found for associated user. Abort...
-                LOG.info("IDLE: No active session found for associated user " + userId + " in context " + contextId + ". Abort...");
-                return false;
+                throw new MissingSessionException("IDLE: No active session found for associated user " + userId + " in context " + contextId + ". Abort...");
             }
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
             mailAccess.connect(false);
@@ -619,6 +645,21 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     @Override
     public void notifyNewMail() throws OXException {
         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), getSession());
+    }
+
+    private static final class MissingSessionException extends RuntimeException {
+
+        private static final long serialVersionUID = -6008627356112015806L;
+
+        /**
+         * Initializes a new {@link MissingSessionException}.
+         * 
+         * @param message The message
+         */
+        public MissingSessionException(final String message) {
+            super(message);
+        }
+
     }
 
 }

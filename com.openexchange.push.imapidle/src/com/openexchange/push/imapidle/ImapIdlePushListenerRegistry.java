@@ -189,6 +189,33 @@ public final class ImapIdlePushListenerRegistry {
     /**
      * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
      * user-associated session identifiers are present.
+     * 
+     * @param session The session
+     * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
+     * @throws OXException 
+     */
+    public boolean removePushListener(final Session session) throws OXException {
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        final ImapIdlePushListener currentListener = map.get(key);
+        if (null != currentListener) {
+            final Session ses = currentListener.getSession();
+            final SessiondService sessiondService = ImapIdleServiceRegistry.getServiceRegistry().getService(SessiondService.class);
+            if ((session.equals(ses)) || (null != ses) && ((null != sessiondService.getSession(ses.getSessionID())) || session.getSessionID().equals(
+                ses.getSessionID()))) {
+                /*
+                 * Listener's session is still valid; ignore this request for stopping listener
+                 */
+                return false;
+            }
+        }
+        return removePushListener(contextId, userId);
+    }
+
+    /**
+     * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
+     * user-associated session identifiers are present.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
@@ -257,6 +284,22 @@ public final class ImapIdlePushListenerRegistry {
     public boolean purgeUserPushListener(final int contextId, final int userId) {
         return removeListener(SimpleKey.valueOf(contextId, userId));
     }
+
+   /**
+    * Purges specified user's push listener.
+    *
+    * @param listener The push listener to purge from registry
+    * @return <code>true</code> if exactly that push listener was found and purged; otherwise <code>false</code>
+    */
+   public boolean purgeUserPushListener(final ImapIdlePushListener listener) {
+       final int userId = listener.getUserId();
+       final int contextId = listener.getContextId();
+       if (map.remove(SimpleKey.valueOf(contextId, userId), listener)) {
+           listener.close();
+           return true;
+       }
+       return false;
+   }
 
     /**
      * Purges all listeners and their data.

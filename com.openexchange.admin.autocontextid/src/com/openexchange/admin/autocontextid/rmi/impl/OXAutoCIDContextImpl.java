@@ -68,151 +68,84 @@ public class OXAutoCIDContextImpl implements OXContextPluginInterface {
 
     private final OXAutoCIDStorageInterface oxautocid;
 
-    /**
-     * @throws StorageException
-     */
     public OXAutoCIDContextImpl() throws StorageException {
+        super();
         oxautocid = OXAutoCIDStorageInterface.getInstance();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#change(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void change(final Context ctx, final Credentials auth) throws PluginException {
+    public void change(final Context ctx, final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#changeModuleAccess(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials auth) throws PluginException {
+    public void changeModuleAccess(final Context ctx, final UserModuleAccess access, final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#changeModuleAccess(com.openexchange.admin.rmi.dataobjects.Context,
-     * java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials auth) throws PluginException {
+    public void changeModuleAccess(final Context ctx, final String access_combination_name, final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) throws PluginException {
+    public Context postCreate(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials auth) {
         return ctx;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#create(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.User, java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     public Context preCreate(final Context ctx, final User admin_user, final Credentials auth) throws PluginException {
         try {
-            int id = oxautocid.generateContextId();
-            ctx.setId(id);
+            if (!ctx.isIdset()) {
+                int id = oxautocid.generateContextId();
+                ctx.setId(Integer.valueOf(id));
+            }
             return ctx;
         } catch (StorageException e) {
             throw new PluginException(e);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#delete(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void delete(final Context ctx, final Credentials auth) throws PluginException {
+    public void delete(final Context ctx, final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#disable(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void disable(final Context ctx, final Credentials auth) throws PluginException {
+    public void disable(final Context ctx, final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#disableAll(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void disableAll(final Credentials auth) throws PluginException {
+    public void disableAll(final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#downgrade(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void downgrade(final Context ctx, final Credentials auth) throws PluginException {
+    public void downgrade(final Context ctx, final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#enable(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void enable(final Context ctx, final Credentials auth) throws PluginException {
+    public void enable(final Context ctx, final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#enableAll(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public void enableAll(final Credentials auth) throws PluginException {
+    public void enableAll(final Credentials auth) {
+        // Nothing to do.
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#getAccessCombinationName(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public String getAccessCombinationName(final Context ctx, final Credentials auth) throws PluginException {
+    public String getAccessCombinationName(final Context ctx, final Credentials auth) {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#getData(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public List<OXCommonExtension> getData(final List<Context> ctxs, final Credentials auth) throws PluginException {
+    public List<OXCommonExtension> getData(final List<Context> ctxs, final Credentials auth) {
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#getModuleAccess(com.openexchange.admin.rmi.dataobjects.Context,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) throws PluginException {
+    public UserModuleAccess getModuleAccess(final Context ctx, final Credentials auth) {
         return null;
     }
 
-    /**
-     *
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#list(java.lang.String,
-     * com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public Filter<Context, Context> list(final String search_pattern, final Credentials auth) throws PluginException {
+    public Filter<Context, Context> list(final String search_pattern, final Credentials auth) {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.plugins.OXContextPluginInterface#filter(com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
-    public Filter<Integer, Integer> filter(final Credentials auth) throws PluginException {
+    public Filter<Integer, Integer> filter(final Credentials auth) {
         return null;
     }
 
-    public Boolean checkMandatoryMembersContextCreate(Context ctx) throws PluginException {
+    public Boolean checkMandatoryMembersContextCreate(Context ctx) {
         return new Boolean(true);
     }
 }
