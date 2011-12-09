@@ -173,7 +173,7 @@ public final class NewAction extends AbstractChatConversationAction {
             final String subject = chatDescription.getSubject();
             if (null != subject) {
                 final ChatDescription desc = new ChatDescription(newChat.getChatId());
-                desc.setSubject(subject);
+                desc.setSubject(subject.length() > 256 ? subject.substring(0, 256) : subject);
                 access.updateChat(desc);
                 /*
                  * Reload
