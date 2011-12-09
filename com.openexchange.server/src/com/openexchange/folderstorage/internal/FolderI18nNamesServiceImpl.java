@@ -112,6 +112,7 @@ public final class FolderI18nNamesServiceImpl implements FolderI18nNamesService 
         identifiers.add(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
         identifiers.add(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME);
         identifiers.add(FolderStrings.DEFAULT_TASK_FOLDER_NAME);
+        identifiers.add(FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_GLOBAL_FOLDER_NAME);
         identifiers.add(FolderStrings.SYSTEM_INFOSTORE_FOLDER_NAME);
