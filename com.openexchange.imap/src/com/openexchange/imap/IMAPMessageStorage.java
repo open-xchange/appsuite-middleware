@@ -1602,6 +1602,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             msgs = MIMEMessageConverter.convertMailMessages(mailMessages, MIMEMessageConverter.BEHAVIOR_CLONE | MIMEMessageConverter.BEHAVIOR_STREAM2FILE);
             /*
+             * Drop special "x-original-headers" header
+             */
+            for (final Message message : msgs) {
+                message.removeHeader("x-original-headers");
+            }
+            /*
              * Check if destination folder supports user flags
              */
             final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);

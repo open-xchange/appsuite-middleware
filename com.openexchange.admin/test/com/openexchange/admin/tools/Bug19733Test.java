@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,26 @@
  *
  */
 
-package com.openexchange.push.imapidle;
+package com.openexchange.admin.tools;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.junit.Test;
+import com.openexchange.admin.rmi.dataobjects.User;
 
 /**
- * Simple {@link Runnable} to trigger a listener's {@link ImapIdlePushListener#checkNewMail()} method.
+ * {@link Bug19733Test}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ImapIdlePushListenerTask implements Runnable {
+public final class Bug19733Test {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImapIdlePushListenerTask.class));
-
-    private final ImapIdlePushListener listener;
-
-    public ImapIdlePushListenerTask(final ImapIdlePushListener listener) {
+    public Bug19733Test() {
         super();
-        this.listener = listener;
     }
 
-    @Override
-    public void run() {
-        try {
-            while (listener.checkNewMail()) {
-                // Nothing...
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.info("Left checkNewMail() method for user " + listener.getUserId() + " in context " + listener.getContextId());
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-        } finally {
-            final ImapIdlePushListenerRegistry registry = ImapIdlePushListenerRegistry.getInstance();
-            try {
-                registry.removePushListener(listener.getContextId(), listener.getUserId());
-            } catch (final Exception e) {
-                registry.purgeUserPushListener(listener.getContextId(), listener.getUserId());
-            }
-        }
+    @Test
+    public void testGetImapPort() {
+        final User user = new User();
+        user.setImapServer("21a7:a92c:2323::1");
+        final int port = user.getImapPort();
     }
-
 }

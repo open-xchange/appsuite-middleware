@@ -193,7 +193,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 imapFolder.close(false);
             }
         } catch (final IllegalStateException e) {
-            LOG.warn("Invoked close() on a closed folder", e);
+            LOG.debug("Invoked close() on a closed folder", e);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } finally {

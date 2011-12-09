@@ -57,6 +57,7 @@ import com.openexchange.admin.rmi.ResourceTest;
 import com.openexchange.admin.rmi.TaskMgmtTest;
 import com.openexchange.admin.rmi.UserTest;
 import com.openexchange.admin.tools.NetUtilTest;
+import com.openexchange.admin.tools.Bug19733Test;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
@@ -65,7 +66,8 @@ import com.openexchange.admin.tools.NetUtilTest;
       GroupTest.class,
       ResourceTest.class,
       TaskMgmtTest.class,
-      NetUtilTest.class
+      NetUtilTest.class,
+      Bug19733Test.class
 })
 public class AdminTestSuite {
     

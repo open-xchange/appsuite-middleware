@@ -1,0 +1,30 @@
+#! /usr/bin/php
+<?php
+
+include("ox-soap.php");
+
+try {
+	$client = getUserClient($SOAPHOST);
+	$creds = getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS);
+	$result = $client->list(getContextObject($CONTEXT_ID),"*", $creds);
+	
+	if (!is_soap_fault($result)) {
+		if (is_array($result)) {
+			foreach ($result['return'] as $val_obj) {
+				$tmp_user = getUserObject($val_obj->id);				
+				$tmp_user_data = $client->getData(getContextObject($CONTEXT_ID),$tmp_user,$creds);
+				printUser($tmp_user_data);
+			}
+		} else {
+			$tmp_user = getUserObject($result->id);				
+			$tmp_user_data = $client->getData(getContextObject($CONTEXT_ID),$tmp_user,$creds);
+			printUser($tmp_user_data);
+		}
+	}
+	
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+}
+?>

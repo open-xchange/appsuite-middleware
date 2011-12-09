@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+package Createcontext;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Createcontext();
+$test->doRequest();
+
+sub new {
+  my ($inPkg) = @_;
+  my $self = BasicCommandlineOptions->new();
+	
+  bless $self, $inPkg;
+  return $self;
+}
+
+sub doRequest {
+  my $inSelf = shift;
+  my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXContextService" );
+ 
+  my $admin = "oxadmin";
+  my $adminpass = $ENV{"MASTERPW"} || "secret";
+  my $displayname = "admin user";
+  my $surname = "admin";
+  my $gname = "OX";
+  my $email = "admin\@bla.de";
+  my $lang = "de_DE";
+  my $timezone = "Europe/Berlin";
+  my $quota = 500;
+  my $access_combi_name = "all";
+    
+  my $som_entry = 
+    $soap->createModuleAccessByName($inSelf->{'Context'},
+		  SOAP::Data->value("User")->value(\SOAP::Data->value(
+			SOAP::Data->name("name" => $admin),
+			SOAP::Data->name("password" => $adminpass),
+			SOAP::Data->name("display_name" => $displayname),
+			SOAP::Data->name("sur_name" => $surname),
+			SOAP::Data->name("given_name" => $gname),
+			SOAP::Data->name("primaryEmail" => $email),
+			SOAP::Data->name("email1" => $email),
+			SOAP::Data->name("language" => $lang),
+			SOAP::Data->name("timezone" => $timezone)
+			)),
+		  SOAP::Data->type("string")->value($access_combi_name),
+		  $inSelf->{'mastercreds'}
+		 );
+    
+  if ( $som_entry->fault() ) {
+    $inSelf->fault_output($som_entry);
+    exit(1);
+  } else {
+    print "Fine\n";
+  }
+
+}
+
+exit;
+

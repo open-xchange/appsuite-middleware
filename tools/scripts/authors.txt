@@ -1,0 +1,17 @@
+marcus=Marcus Klein <marcus.klein@open-xchange.com>
+choeger=Carsten Hoeger <carsten.hoeger@open-xchange.com>
+dennis=Dennis Sieben <dennis.sieben@open-xchange.com>
+cutmasta=Manuel Kraft <manuel.kraft@open-xchange.com>
+thorben=Thorben Betten <thorben.betten@open-xchange.com>
+francisco=Francisco Laguna <francisco.laguna@open-xchange.com>
+martin=Martin Herfurth <martin.herfurth@open-xchange.com>
+benni=Benjamin Otterbach <benjamin.otterbach@open-xchange.com>
+tierlieb=Tobias Prinz <tobias.prinz@open-xchange.com>
+karsten=Karsten Will <karsten.will@open-xchange.com>
+wolfgang=Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>
+fred=Benjamin Frederik Pahne <ben.pahne@open-xchange.com>
+koty=Sebastian Kotyrba <sebastian.kotyrba@open-xchange.com>
+markus=Markus Wagner <markus.wagner@open-xchange.com>
+bishoph=Martin Kauss <martin.kauss@open-xchange.com>
+braun=Martin Braun <martin.braun@open-xchange.com>
+jan=Jan Finsel <jan.finsel@open-xchange.com>

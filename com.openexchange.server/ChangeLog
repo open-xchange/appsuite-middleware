@@ -1,3 +1,18 @@
+* 2011-12-09 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20933: Ignoring not updated login timestamps when updating user attributes.
+
+* 2011-12-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20924: Load setting from database
+
+* 2011-12-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20938: Ignoring duplicate participants on appointment creation
+ - Fix for bug 20831: Proper translation for "Collected addresses" folder
+ - Fix for bug 20879: Ignoring special OLOX header "x-original-headers" on mail import
+ - Fix for bug 20951: Dealing with missing primary type in "Content-Type" header value
+
 * 2011-12-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 20927: Introduced separate permission loader service which is bound to bundle life cycle

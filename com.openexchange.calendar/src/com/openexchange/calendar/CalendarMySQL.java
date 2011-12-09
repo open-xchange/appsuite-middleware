@@ -3270,6 +3270,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     calc_date.getTime(),
                                     end_date.getTime(),
                                     0);
+                                if(recurringResults == null)
+                                	break;
                                 for (int i = 0; i < recurringResults.size(); i++) {
                                     final RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
                                     if (recurringResult.getStart() > new Date().getTime()) {

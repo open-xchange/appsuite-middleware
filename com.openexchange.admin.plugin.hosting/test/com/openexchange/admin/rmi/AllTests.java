@@ -59,12 +59,11 @@ public class AllTests {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite(AllTests.class.getName());
-        //$JUnit-BEGIN$
+        final TestSuite suite = new TestSuite(AllTests.class.getName());
         suite.addTest(ContextTest.suite());
         suite.addTest(Bug16865Test.suite());
+        suite.addTest(Bug19379Test.suite());
         suite.addTest(UtilTest.suite());
-        //$JUnit-END$
         return suite;
     }
 }

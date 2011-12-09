@@ -1,3 +1,7 @@
+* 2011-12-07 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19379: More proper handling of context login mappings when changing them.
+
 * 2011-11-10 - marcus.klein@open-xchange.com
 
  - Fix for bug 20369: Removing publicFolderEditable permissions for non context administrator users.

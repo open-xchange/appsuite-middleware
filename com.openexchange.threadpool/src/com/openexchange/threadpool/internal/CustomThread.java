@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.internal;
 
+import com.openexchange.threadpool.InterruptorAware;
 import com.openexchange.threadpool.ThreadRenamer;
 
 /**
@@ -56,13 +57,18 @@ import com.openexchange.threadpool.ThreadRenamer;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CustomThread extends Thread implements ThreadRenamer {
+public final class CustomThread extends Thread implements ThreadRenamer, InterruptorAware {
 
-    private String originalName;
+    private volatile String originalName;
 
-    private String appendix;
+    private volatile String appendix;
 
-    private boolean changed;
+    private volatile boolean changed;
+
+    /**
+     * The stack trace of the thread that invoked {@link #interrupt()} on this {@link CustomThread} instance.
+     */
+    private volatile StackTraceElement[] interruptorStack;
 
     /**
      * Initializes a new {@link CustomThread}.
@@ -155,6 +161,29 @@ public final class CustomThread extends Thread implements ThreadRenamer {
         } else {
             appendix = null;
         }
+    }
+
+    /**
+     * Clears the stack trace of the thread that lastly invoked {@link #interrupt()}.
+     */
+    public void clearInterruptorStack() {
+        interruptorStack = null;
+    }
+
+    /**
+     * Gets the stack trace of the thread that lastly invoked {@link #interrupt()}.
+     * 
+     * @return The stack trace of the interrupting thread or <code>null</code> if this thread is not in interrupted state
+     */
+    @Override
+    public StackTraceElement[] getInterruptorStack() {
+        return isInterrupted() ? interruptorStack : null;
+    }
+
+    @Override
+    public void interrupt() {
+        this.interruptorStack = new Throwable().getStackTrace();
+        super.interrupt();
     }
 
     /**

@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,6 +98,7 @@ public final class PUTAction extends AbstractConfigAction {
         {
             final Setting setting = ConfigTree.getInstance().getSettingByPath(path);
             setting.setSingleValue(value);
+            UserSettingMailStorage.getInstance().removeUserSettingMail(session.getUserId(), session.getContext());
             saveSettingWithSubs(stor, setting);
         }
         return getJSONNullResult();

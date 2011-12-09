@@ -1,0 +1,27 @@
+#! /usr/bin/php
+<?php
+include ("ox-soap.php");
+
+try {
+	
+	srand(microtime() * 1000000);
+	$random_id = rand(1, 99999);
+
+	$server = new Server();
+	$server->name = "server_soap_test_".$random_id;
+	
+	// register server first
+	$result = getUtilClient($SOAPHOST)->registerServer($server, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+
+	if (!is_soap_fault($result)) {
+		$server->id = $result->id;
+		// then unregister the created server
+		$result = getUtilClient($SOAPHOST)->unregisterServer($server, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+	}
+
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+}
+?>

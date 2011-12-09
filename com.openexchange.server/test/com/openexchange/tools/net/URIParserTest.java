@@ -57,10 +57,11 @@ import java.net.URISyntaxException;
 import org.junit.Test;
 
 /**
- * {@link URIParserTest}
+ * Verifies that the {@link URIParser} is able to handle all possible types of declaring a host for a backend connection.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
+@SuppressWarnings("static-method")
 public class URIParserTest {
 
     private static final boolean WARN = true;
