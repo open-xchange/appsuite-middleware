@@ -85,9 +85,7 @@ public final class ImapIdlePushManagerService implements PushManagerService {
 
     @Override
     public boolean stopListener(final Session session) throws OXException {
-        return ImapIdlePushListenerRegistry.getInstance().removePushListener(
-            session.getContextId(),
-            session.getUserId());
+        return ImapIdlePushListenerRegistry.getInstance().removePushListener(session);
     }
 
     @Override
