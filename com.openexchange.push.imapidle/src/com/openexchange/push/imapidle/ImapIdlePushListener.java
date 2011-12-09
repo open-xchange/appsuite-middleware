@@ -65,6 +65,7 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.push.PushClientWhitelist;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
@@ -324,10 +325,14 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         {
             threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
             mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
+            final Session session = getSession();
+            if (null == session) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Cannot find an appropriate session with a client identifier matching pattern(s): " + PushClientWhitelist.getInstance().getPatterns());
+            }
             /*
              * Get access
              */
-            final MailAccess<?, ?> access = mailService.getMailAccess(getSession(), MailAccount.DEFAULT_ID);
+            final MailAccess<?, ?> access = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             /*
              * Check protocol
              */
