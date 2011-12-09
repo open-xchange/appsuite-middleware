@@ -130,7 +130,7 @@ public final class IMAPDefaultFolderChecker {
      */
     public IMAPDefaultFolderChecker(final int accountId, final Session session, final Context ctx, final AccessedIMAPStore imapStore, final IMAPConfig imapConfig) {
         super();
-        retry = false;
+        retry = true;
         this.accountId = accountId;
         this.session = session;
         this.imapStore = imapStore;
