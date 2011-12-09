@@ -563,6 +563,10 @@ public final class SMTPTransport extends MailTransport {
                     throw SMTPExceptionCode.MISSING_RECIPIENTS.create();
                 }
                 smtpFiller.setSendHeaders(composedMail, smtpMessage);
+                /*
+                 * Drop special "x-original-headers" header
+                 */
+                smtpMessage.removeHeader("x-original-headers");
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(new StringBuilder(128).append("SMTP mail prepared for transport in ").append(
                         System.currentTimeMillis() - startPrep).append("msec").toString());

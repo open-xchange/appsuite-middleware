@@ -610,6 +610,10 @@ public final class MessageParser {
             final int offset = timeZone.getOffset(date.getTime());
             mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
         }
+        /*
+         * Drop special "x-original-headers" header
+         */
+        mail.removeHeader("x-original-headers");
     }
 
     /**
