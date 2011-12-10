@@ -61,6 +61,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.event.FolderEvent;
@@ -138,6 +139,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * Whether debug logging is enabled for this class.
      */
     private static final boolean DEBUG = LOG.isDebugEnabled();
+
+    /**
+     * The flag indicating whether to use IMAPStoreCache.
+     */
+    private static final AtomicBoolean USE_IMAP_STORE_CACHE = new AtomicBoolean(true);
 
     /**
      * Remembers timed out servers for {@link IIMAPProperties#getImapTemporaryDown()} milliseconds. Any further attempts to connect to such
@@ -299,7 +305,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             }
             if (imapStore != null) {
-                IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login);
+                if (USE_IMAP_STORE_CACHE.get()) {
+                    IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login);
+                } else {
+                    try {
+                        imapStore.close();
+                    } catch (final MessagingException e) {
+                        LOG.error("Error while closing IMAP store.", e);
+                    } catch (final RuntimeException e) {
+                        LOG.error("Error while closing IMAP store.", e);
+                    }
+                }
+                // Drop in associated IMAPConfig instance
                 final IMAPConfig ic = getIMAPConfig();
                 if (null != ic) {
                     ic.dropImapStore();
@@ -650,7 +667,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Get store...
          */
-        if (fromCache) {
+        if (fromCache && USE_IMAP_STORE_CACHE.get()) {
             return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session);
         }
         /*
@@ -763,7 +780,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isCacheable() {
-        return false;
+        return !USE_IMAP_STORE_CACHE.get();
     }
 
     /**
@@ -782,6 +799,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         MBoxEnabledCache.init();
         ACLExtensionInit.getInstance().start();
         Entity2ACLInit.getInstance().start();
+
+        final ConfigurationService confService = IMAPServiceRegistry.getService(ConfigurationService.class);
+        final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
+        USE_IMAP_STORE_CACHE.set(useIMAPStoreCache);
     }
 
     private static synchronized void initMaps() {
@@ -830,6 +851,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     protected void shutdown() throws OXException {
+        USE_IMAP_STORE_CACHE.set(true);
         Entity2ACLInit.getInstance().stop();
         ACLExtensionInit.getInstance().stop();
         IMAPCapabilityAndGreetingCache.tearDown();
