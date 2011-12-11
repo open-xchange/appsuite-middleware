@@ -49,7 +49,6 @@
 
 package com.openexchange.mail;
 
-import com.openexchange.exception.OXException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FilenameFilter;
@@ -62,6 +61,7 @@ import javax.mail.Session;
 import javax.mail.internet.MimeMessage;
 import junit.framework.TestCase;
 import com.openexchange.configuration.MailConfig;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
@@ -165,17 +165,15 @@ public abstract class AbstractMailTest extends TestCase {
      */
     protected int getMessageCount(final int accountId, final String fullName) throws OXException {
         final MailFolderStorage folderStorage = new MailFolderStorage();
-        final StorageParametersImpl storageParameters;
-           storageParameters = new StorageParametersImpl(new ServerSessionAdapter(getSession()));
-        final boolean started;
-
-            started = folderStorage.startTransaction(storageParameters, false);
+        final StorageParametersImpl storageParameters = new StorageParametersImpl(new ServerSessionAdapter(getSession()));
+        final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
             final Folder folder = folderStorage.getFolder(MailFolderStorage.REAL_TREE_ID, MailFolderUtility.prepareFullname(accountId, fullName), storageParameters);
+            final int total = folder.getTotal();
             if (started) {
                 folderStorage.commitTransaction(storageParameters);
             }
-            return folder.getTotal();
+            return total;
         } catch (final OXException e) {
             if (started) {
                 folderStorage.rollback(storageParameters);
