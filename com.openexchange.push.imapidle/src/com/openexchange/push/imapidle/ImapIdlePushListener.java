@@ -618,6 +618,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     LOG.error("ERROR in IDLE'ing: " + e1.getMessage(), e1);
                 }
             }
+        } catch (final MissingSessionException e) {
+            throw e;
         } catch (final RuntimeException e) {
             dropSessionRef(false);
             LOG.info("Interrupted while IDLE'ing: " + e.getMessage() + ", sleeping for " + errordelay + "ms", e);
