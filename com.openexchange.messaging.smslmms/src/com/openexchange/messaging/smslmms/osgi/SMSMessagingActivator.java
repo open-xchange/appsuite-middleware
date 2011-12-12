@@ -103,7 +103,7 @@ public final class SMSMessagingActivator extends HousekeepingActivator {
 
             @Override
             public void added(final ServiceReference<SMSService> ref, final SMSService service) {
-                if (null != getService(SMSMessagingService.class)) {
+                if (null != getService(SMSService.class)) {
                     logger.error("Detected multiple SMS/MMS services!");
                     return;
                 }
