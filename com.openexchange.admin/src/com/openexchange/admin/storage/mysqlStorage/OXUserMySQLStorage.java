@@ -1507,6 +1507,15 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     @Override
     public User[] list(final Context ctx, final String search_pattern) throws StorageException {
+        return listInternal(ctx, search_pattern, false);
+    }
+
+    @Override
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException {
+        return listInternal(ctx, search_pattern, true);
+    }
+
+    private User[] listInternal(final Context ctx, final String search_pattern, final boolean ignoreCase) throws StorageException {
         Connection read_ox_con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1514,21 +1523,25 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         if (null != search_pattern) {
             new_search_pattern = search_pattern.replace('*', '%');
         }
-        final int context_id = ctx.getId();
+        final int context_id = ctx.getId().intValue();
         try {
             final ArrayList<User> retval = new ArrayList<User>();
             read_ox_con = cache.getConnectionForContext(context_id);
-            stmt = read_ox_con.prepareStatement("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid WHERE con.cid = ? AND (lu.uid LIKE ? OR con.field01 LIKE ?);");
+            String sql = "SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid WHERE con.cid = ? AND ";
+            if (ignoreCase) {
+                sql += "(lower(lu.uid) LIKE lower(?) OR lower(con.field01) LIKE lower(?))";
+            } else {
+                sql += "(lu.uid LIKE ? OR con.field01 LIKE ?)";
+            }
+            stmt = read_ox_con.prepareStatement(sql);
 
             stmt.setInt(1, context_id);
             stmt.setString(2, new_search_pattern);
             stmt.setString(3, new_search_pattern);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                final int user_id = rs.getInt("userid");
-                retval.add(new User(user_id));
+                retval.add(new User(rs.getInt(1)));
             }
-
             return retval.toArray(new User[retval.size()]);
         } catch (final SQLException e) {
             log.error("SQL Error", e);

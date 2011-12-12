@@ -52,7 +52,6 @@ package com.openexchange.admin.console.user;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -79,14 +78,12 @@ public class List extends ListCore {
     }
 
     @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final User[] allusers = oxusr.list(ctx, search_pattern, auth);            
+    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        final User[] allusers = ignoreCase ? oxusr.listCaseInsensitive(ctx, search_pattern, auth) : oxusr.list(ctx, search_pattern, auth); 
         if( allusers.length == 0 ) {
-            User []users = new User[0];
-            return users;
-        } else {
-            return oxusr.getData(ctx, allusers, auth);
+            return new User[0];
         }
+        return oxusr.getData(ctx, allusers, auth);
     }
 
     @Override

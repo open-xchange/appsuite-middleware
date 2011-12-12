@@ -50,16 +50,15 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.rmi.RemoteException;
 import java.sql.Connection;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 
@@ -226,6 +225,15 @@ public abstract class OXUserStorageInterface {
      *
      */
     public abstract User[] list(final Context ctx, final String search_pattern) throws StorageException;
+
+    /**
+     * Retrieve all user objects for a given context, that match (case insensitive) the given search_pattern
+     *
+     * @param ctx The context
+     * @return User[] containing user identifier
+     * @throws StorageException
+     */
+    public abstract User[] listCaseInsensitive(final Context ctx, final String search_pattern) throws StorageException;
     
     /**
      * Delete an user or multiple from given context in given connection

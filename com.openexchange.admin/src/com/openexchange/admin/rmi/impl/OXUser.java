@@ -647,7 +647,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log.error("No such user(s) " + Arrays.toString(users) + " in context " + ctx.getId(), noSuchUserException);
                 throw noSuchUserException;
             }
-            Set<Integer> dubCheck = new HashSet<Integer>();
+            final Set<Integer> dubCheck = new HashSet<Integer>();
             for (final User user : users) {
                 if (dubCheck.contains(user.getId())) {
                     throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
@@ -1033,6 +1033,28 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         checkContextAndSchema(ctx);
 
         final User[] retval =  oxu.list(ctx, search_pattern);
+
+        return retval;
+    }
+
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        auth = auth == null ? new Credentials("","") : auth;
+        try {
+            doNullCheck(ctx,search_pattern);
+        } catch (final InvalidDataException e1) {
+            log.error("One of the given arguments for list is null", e1);
+            throw e1;
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug(ctx + " - " + auth);
+        }
+
+        basicauth.doAuthentication(auth,ctx);
+
+        checkContextAndSchema(ctx);
+
+        final User[] retval =  oxu.listCaseInsensitive(ctx, search_pattern);
 
         return retval;
     }

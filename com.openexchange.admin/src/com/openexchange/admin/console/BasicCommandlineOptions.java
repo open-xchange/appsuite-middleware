@@ -151,6 +151,8 @@ public abstract class BasicCommandlineOptions {
     protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="Admin username";
     protected static final String OPT_NAME_SEARCHPATTERN_LONG = "searchpattern";
     protected static final char OPT_NAME_SEARCHPATTERN = 's';
+    protected static final String OPT_NAME_IGNORECASE_LONG = "ignorecase";
+    protected static final char OPT_NAME_IGNORECASE = 'i';
 
     protected static final String OPT_NAME_CSVOUTPUT_LONG = "csv";
     protected static final String OPT_NAME_CSVOUTPUT_DESCRIPTION = "Format output to csv";
@@ -169,6 +171,7 @@ public abstract class BasicCommandlineOptions {
     protected CLIOption adminUserOption = null;
     protected CLIOption adminPassOption = null;
     protected CLIOption searchOption = null;
+    protected CLIOption ignoreCaseOption = null;
     protected CLIOption csvOutputOption = null;
 
     // Used for right error output
@@ -442,6 +445,10 @@ public abstract class BasicCommandlineOptions {
 
     protected final void setSearchPatternOption(final AdminParser admp){
         this.searchOption = setShortLongOpt(admp,OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing", true, NeededQuadState.notneeded);
+    }
+
+    protected final void setIgnoreCaseOption(final AdminParser admp){
+        this.ignoreCaseOption = setShortLongOpt(admp,OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", true, NeededQuadState.notneeded);
     }
 
     protected final int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {

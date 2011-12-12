@@ -48,6 +48,8 @@
  */
 package com.openexchange.admin.rmi;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -55,12 +57,9 @@ import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-
-import java.rmi.Remote;
-import java.rmi.RemoteException;
 
 /**
  * This class defines the Open-Xchange API Version 2 for creating and
@@ -478,6 +477,26 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      */
     public User[] list(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
+     * Retrieve all users for a given context.
+     * 
+     * @param ctx
+     *            Context object.
+     * @param search_pattern
+     *            A pattern to search for
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @return User[] with currently ONLY id set in each User.
+     * 
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     * @throws DatabaseUpdateException
+     */
+    public User[] listCaseInsensitive(final Context ctx, final String search_pattern, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
 
     /**
      * Retrieve all users for a given context. The same as calling list with a search_pattern of "*"

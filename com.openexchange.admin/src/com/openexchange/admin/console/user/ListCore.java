@@ -85,6 +85,7 @@ public abstract class ListCore extends UserAbstraction {
 
         setCSVOutputOption(parser);
         this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, NeededQuadState.notneeded);
+        this.ignoreCaseOption = setShortLongOpt(parser, OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", true, NeededQuadState.notneeded);
         setFurtherOptions(parser);
     }
 
@@ -105,12 +106,16 @@ public abstract class ListCore extends UserAbstraction {
             final OXUserInterface oxusr = getUserInterface();
 
             String pattern = (String) parser.getOptionValue(this.searchOption);
-
             if (null == pattern) {
                 pattern = "*";
             }
 
-            final User[] allusers = maincall(parser, oxusr, pattern, ctx, auth);
+            Boolean ignoreCase = (Boolean) parser.getOptionValue(this.ignoreCaseOption);
+            if (null == ignoreCase) {
+                ignoreCase = Boolean.FALSE;
+            }
+
+            final User[] allusers = maincall(parser, oxusr, pattern, ignoreCase.booleanValue(), ctx, auth);
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 // map user data to corresponding module access
@@ -131,7 +136,7 @@ public abstract class ListCore extends UserAbstraction {
         }
     }
 
-    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
+    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
 
     /**
      * This method is used to define how a date value is transferred to string
