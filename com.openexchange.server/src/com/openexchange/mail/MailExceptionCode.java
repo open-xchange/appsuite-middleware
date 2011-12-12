@@ -192,7 +192,7 @@ public enum MailExceptionCode implements OXExceptionCode {
     /**
      * Message has been successfully sent, but a copy could not be placed in your sent folder
      */
-    COPY_TO_SENT_FOLDER_FAILED("Message has been successfully sent, but a copy could not be placed in your sent folder.", Category.CATEGORY_CAPACITY, 43),
+    COPY_TO_SENT_FOLDER_FAILED("Message has been successfully sent, but a copy could not be placed in your sent folder.", Category.CATEGORY_WARNING, 43),
     /**
      * No provider could be found for protocol/URL "%1$s"
      */
