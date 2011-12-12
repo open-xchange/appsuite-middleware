@@ -59,9 +59,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -69,7 +72,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -77,7 +84,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
-import com.openexchange.concurrent.TimeoutListener;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -88,6 +94,8 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 
 /**
@@ -173,7 +181,9 @@ public final class PermissionLoaderService implements Runnable {
 
     protected volatile ThreadPoolService threadPool;
 
-    private volatile TimeoutConcurrentMap<Integer, Connection> pooledCons;
+    protected volatile ConcurrentMap<Integer, ConWrapper> pooledCons;
+
+    private volatile ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link PermissionLoaderService}.
@@ -223,7 +233,31 @@ public final class PermissionLoaderService implements Runnable {
         }
         future = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
         permsMap = new TimeoutConcurrentMap<Pair, OCLPermission[]>(20, true);
-        pooledCons = new TimeoutConcurrentMap<Integer, Connection>(1, false);
+        pooledCons = new ConcurrentHashMap<Integer, ConWrapper>();
+        final Runnable task = new Runnable() {
+            
+            @Override
+            public void run() {
+                try {
+                    final boolean debug = LOG.isDebugEnabled();
+                    final long stamp = System.currentTimeMillis() - 1000;
+                    for (final Iterator<ConWrapper> it = pooledCons.values().iterator(); it.hasNext();) {
+                        final ConWrapper vw = it.next();
+                        final Connection connection = vw.readyForRemoval(stamp);
+                        if (connection != null) {
+                            it.remove();
+                            Database.backNoTimeout(vw.contextId, false, connection);
+                            if (debug) {
+                                LOG.debug("Closed \"shared\" connection.");
+                            }
+                        }
+                    }
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        };
+        timerTask = ServerServiceRegistry.getInstance().getService(TimerService.class).scheduleWithFixedDelay(task, 1000, 1000);
         gate.open();
     }
 
@@ -243,9 +277,17 @@ public final class PermissionLoaderService implements Runnable {
         } catch (final TimeoutException e) {
             future.cancel(true);
         } finally {
-            if (null != permsMap) {
-                permsMap.dispose();
-                permsMap = null;
+            if (null != timerTask) {
+                timerTask.cancel(false);
+                timerTask = null;
+                for (final Iterator<ConWrapper> it = pooledCons.values().iterator(); it.hasNext();) {
+                    final ConWrapper vw = it.next();
+                    final Connection connection = vw.con;
+                    if (connection != null) {
+                        Database.backNoTimeout(vw.contextId, false, connection);
+                    }
+                }
+                pooledCons.clear();
             }
             if (null != poolTracker) {
                 poolTracker.close();
@@ -496,21 +538,12 @@ public final class PermissionLoaderService implements Runnable {
             /*
              * Get read-only connection
              */
-            Connection readCon = pooledCons.get(key);
-            if (null == readCon) {
-                final TimeoutListener<Connection> listener = new TimeoutListener<Connection>() {
-
-                    @Override
-                    public void onTimeout(final Connection con) {
-                        Database.backNoTimeout(contextId, false, con);
-                        if (debug) {
-                            LOG.debug("Released \"shared\" connection.");
-                        }
-                    }
-                };
+            ConWrapper readConWrapper = pooledCons.get(key);
+            if (null == readConWrapper) {
                 final Connection newReadCon = Database.getNoTimeout(contextId, false);
-                readCon = pooledCons.putIfAbsent(key, newReadCon, 1, listener);
-                if (null != readCon) {
+                final ConWrapper nw = new ConWrapper(newReadCon, contextId);
+                readConWrapper = pooledCons.putIfAbsent(key, nw);
+                if (null != readConWrapper) {
                     // Wasn't able to put connection; work with newly fetched connection
                     if (debug) {
                         LOG.debug("Using \"un-shared\" connection.");
@@ -529,15 +562,29 @@ public final class PermissionLoaderService implements Runnable {
                     return;
                 }
                 // "Shared" connection
-                readCon = newReadCon;
+                readConWrapper = nw;
             } else if (debug) {
                 LOG.debug("Using \"shared\" connection.");
             }
             // Working with "shared" connection
-            synchronized (readCon) {
-                for (final Pair pair : pairsChunk) {
-                    permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, readCon), 60);
+            final Lock rlock = readConWrapper.rlock;
+            rlock.lock();
+            boolean dec = false;
+            try {
+                if (readConWrapper.obtain()) {
+                    dec = true;
+                    final Connection con = readConWrapper.con;
+                    synchronized (con) {
+                        for (final Pair pair : pairsChunk) {
+                            permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, con), 60);
+                        }
+                    }
                 }
+            } finally {
+                if (dec) {
+                    readConWrapper.release();
+                }
+                rlock.unlock();
             }
         } catch (final OXException e) {
             LOG.error("Failed loading permissions.", e);
@@ -743,6 +790,58 @@ public final class PermissionLoaderService implements Runnable {
             }
         }
 
+    }
+
+    private static final class ConWrapper {
+        protected final int contextId;
+        protected volatile Connection con;
+        protected volatile long lastAccessed;
+        protected final AtomicInteger counter;
+        protected final Lock rlock;
+        protected final Lock wlock;
+
+        protected ConWrapper(final Connection con, final int contextId) {
+            super();
+            this.contextId = contextId;
+            final ReadWriteLock rwlock = new ReentrantReadWriteLock();
+            rlock = rwlock.readLock();
+            wlock = rwlock.writeLock();
+            this.con = con;
+            counter = new AtomicInteger();
+            lastAccessed = System.currentTimeMillis();
+        }
+
+        protected boolean obtain() {
+            // Holding read lock
+            if (null == con) {
+                return false;
+            }
+            counter.incrementAndGet();
+            return true;
+        }
+
+        protected void release() {
+            // Holding read lock
+            counter.decrementAndGet();
+            lastAccessed = System.currentTimeMillis();
+        }
+
+        protected Connection readyForRemoval(final long stamp) {
+            if (!wlock.tryLock()) {
+                // Occupied
+                return null;
+            }
+            try {
+                if ((lastAccessed < stamp) && ((null == con) || (0 == counter.get()))) {
+                    final Connection c = con;
+                    con = null;
+                    return c;
+                }
+                return null;
+            } finally {
+                wlock.unlock();
+            }
+        }
     }
 
 }

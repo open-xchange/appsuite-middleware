@@ -137,6 +137,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         }
     };
 
+    private final boolean dbGrouping = OXFolderProperties.isEnableDBGrouping();
+
+    private final FolderCacheManager cache;
+
     private final Queue<FolderObject> prefetchQueue;
 
     private boolean isClosed;
@@ -256,6 +260,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      */
     FolderObjectIterator() {
         super();
+        FolderCacheManager manager;
+        try {
+            manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
+        } catch (final OXException e) {
+            manager = null;
+        }
+        cache = manager;
         closeCon = false;
         resideInCache = false;
         containsPermissions = false;
@@ -275,6 +286,13 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      */
     public FolderObjectIterator(final Collection<FolderObject> col, final boolean resideInCache) {
         super();
+        FolderCacheManager manager;
+        try {
+            manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
+        } catch (final OXException e) {
+            manager = null;
+        }
+        cache = manager;
         folderIds = null;
         folders = null;
         warnings = new ArrayList<OXException>(2);
@@ -323,11 +341,18 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
      */
     public FolderObjectIterator(final ResultSet rs, final Statement stmt, final boolean resideInCache, final boolean containsPermissions, final Context ctx, final Connection readCon, final boolean closeCon) throws OXException {
         super();
-        if (OXFolderProperties.isEnableDBGrouping()) {
+        if (dbGrouping) {
             folderIds = null;
         } else {
             folderIds = new TIntHashSet();
         }
+        FolderCacheManager manager;
+        try {
+            manager = FolderCacheManager.isInitialized() ? FolderCacheManager.getInstance() : null;
+        } catch (final OXException e) {
+            manager = null;
+        }
+        cache = manager;
         folders = containsPermissions ? new LinkedHashMap<Integer, FolderObject>(32) : null;
         warnings = new ArrayList<OXException>(2);
         this.rs = rs;
@@ -389,7 +414,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private final ElementAttributes getEternalAttributes() throws OXException {
         if (attribs == null) {
-            attribs = FolderCacheManager.getInstance().getDefaultFolderObjectAttributes();
+            attribs = cache.getDefaultFolderObjectAttributes();
             attribs.setIdleTime(-1); // eternal
             attribs.setMaxLifeSeconds(-1); // eternal
             attribs.setIsEternal(true);
@@ -419,7 +444,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             }
             fo = current;
         } else {
-            if (!OXFolderProperties.isEnableDBGrouping()) {
+            if (!dbGrouping) {
                 if (folderIds.contains(folderId)) {
                     return null;
                 }
@@ -428,14 +453,10 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             /*
              * Look up cache
              */
-            if (FolderCacheManager.isInitialized()) {
-                try {
-                    final FolderObject fld = FolderCacheManager.getInstance().getFolderObject(folderId, ctx);
-                    if (fld != null) {
-                        return fld;
-                    }
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
+            if (null != cache) {
+                final FolderObject fld = cache.getFolderObject(folderId, ctx);
+                if (fld != null) {
+                    return fld;
                 }
             }
             /*
@@ -626,9 +647,9 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
         /*
          * Determine if folder object should be put into cache or not
          */
-        if (null != ctx && FolderCacheManager.isInitialized()) {
+        if (null != ctx && null != cache) {
             try {
-                FolderCacheManager.getInstance().putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
+                cache.putIfAbsent(fo, ctx, resideInCache ? getEternalAttributes() : null);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
             }
