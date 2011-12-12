@@ -71,58 +71,38 @@ public final class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getUserAttribute(String name, int userId, Context context) throws OXException {
-        try {
-            return UserStorage.getInstance().getUserAttribute(name, userId, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    public String getUserAttribute(final String name, final int userId, final Context context) throws OXException {
+        return UserStorage.getInstance().getUserAttribute(name, userId, context);
     }
 
     @Override
-    public void setUserAttribute(String name, String value, int userId, Context context) throws OXException {
-        try {
-            UserStorage.getInstance().setUserAttribute(name, value, userId, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    public void setUserAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
+        UserStorage.getInstance().setUserAttribute(name, value, userId, context);
     }
 
     @Override
-    public void setAttribute(String name, String value, int userId, Context context) throws OXException {
-        try {
-            UserStorage.getInstance().setAttribute(name, value, userId, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
+        UserStorage.getInstance().setAttribute(name, value, userId, context);
     }
 
     @Override
-    public User getUser(int uid, Context context) throws OXException {
-        try {
-            return UserStorage.getInstance().getUser(uid, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+    public User getUser(final int uid, final Context context) throws OXException {
+        return UserStorage.getInstance().getUser(uid, context);
     }
 
     @Override
-    public User[] getUser(Context context, int[] userIds) throws OXException {
+    public User[] getUser(final Context context, final int[] userIds) throws OXException {
         return UserStorage.getInstance().getUser(context, userIds);
     }
 
     @Override
-    public User[] getUser(Context context) throws OXException {
+    public User[] getUser(final Context context) throws OXException {
         return UserStorage.getInstance().getUser(context);
     }
 
     @Override
     public int getUserId(final String loginInfo, final Context context) throws OXException {
-        try {
-            return UserStorage.getInstance().getUserId(loginInfo, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserStorage.getInstance().getUserId(loginInfo, context);
     }
 
     @Override
@@ -137,11 +117,7 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public int[] listModifiedUser(final Date modifiedSince, final Context context) throws OXException {
-        try {
-            return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserStorage.getInstance().listModifiedUser(modifiedSince, context);
     }
 
     @Override
@@ -151,20 +127,17 @@ public final class UserServiceImpl implements UserService {
 
     @Override
     public User searchUser(final String email, final Context context) throws OXException {
-        try {
-            return UserStorage.getInstance().searchUser(email, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        return UserStorage.getInstance().searchUser(email, context);
+    }
+
+    @Override
+    public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
+        return UserStorage.getInstance().searchUserByName(name, context, searchType);
     }
 
     @Override
     public void updateUser(final User user, final Context context) throws OXException {
-        try {
-            UserStorage.getInstance().updateUser(user, context);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
+        UserStorage.getInstance().updateUser(user, context);
     }
 
     /**

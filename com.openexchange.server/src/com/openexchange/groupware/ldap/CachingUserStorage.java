@@ -254,6 +254,12 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
+    public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
+        // Caching doesn't make any sense here.
+        return delegate.searchUserByName(name, context, searchType);
+    }
+
+    @Override
     public int[] listAllUser(final Context ctx) throws OXException {
         return delegate.listAllUser(ctx);
     }
