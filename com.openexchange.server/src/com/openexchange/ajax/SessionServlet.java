@@ -76,6 +76,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -127,6 +128,8 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private static volatile boolean checkIP = true;
 
+    private static volatile ClientWhitelist ipCheckWhitelist;
+
     private static volatile CookieHashSource hashSource;
 
     private static volatile boolean rangesLoaded;
@@ -146,6 +149,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (INITIALIZED.compareAndSet(false, true)) {
             checkIP = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
             hashSource = CookieHashSource.parse(config.getInitParameter(Property.COOKIE_HASH.getPropertyName()));
+            ipCheckWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
         }
         initRanges(config);
     }
@@ -335,7 +339,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     private void checkIP(final Session session, final String actual) throws OXException {
-        checkIP(checkIP, getRanges(), session, actual);
+        checkIP(checkIP, getRanges(), session, actual, ipCheckWhitelist);
     }
 
     private Queue<IPRange> getRanges() {
@@ -391,10 +395,11 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param ranges The white-list ranges
      * @param session session object
      * @param actual IP address of the current request.
+     * @param ipCheckWhitelist The optional IP check whitelist (by client identifier)
      * @throws OXException if the IP addresses don't match.
      */
-    public static void checkIP(final boolean checkIP, final Queue<IPRange> ranges, final Session session, final String actual) throws OXException {
-        if (null == actual || (!isWhitelistedFromIPCheck(actual, ranges) && !actual.equals(session.getLocalIp()))) {
+    public static void checkIP(final boolean checkIP, final Queue<IPRange> ranges, final Session session, final String actual, final ClientWhitelist ipCheckWhitelist) throws OXException {
+        if (null == actual || (!actual.equals(session.getLocalIp()) && !isWhitelistedFromIPCheck(actual, ranges) && !isWhitelistedClient(session, ipCheckWhitelist))) {
             if (checkIP) {
                 if (INFO) {
                     final StringBuilder sb = new StringBuilder(96);
@@ -420,6 +425,10 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.debug(sb.toString());
             }
         }
+    }
+
+    private static boolean isWhitelistedClient(final Session session, final ClientWhitelist ipCheckWhitelist) {
+        return null != ipCheckWhitelist && !ipCheckWhitelist.isEmpty() && ipCheckWhitelist.isAllowed(session.getClient());
     }
 
     public static boolean isWhitelistedFromIPCheck(final String actual, final Queue<IPRange> ranges) {

@@ -85,6 +85,7 @@ import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigTools;
+import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
@@ -149,10 +150,11 @@ public class Login extends AJAXServlet {
         protected final boolean insecure;
         protected final boolean cookieForceHTTPS;
         protected final boolean ipCheck;
+        protected final ClientWhitelist ipCheckWhitelist;
         volatile boolean redirectIPChangeAllowed;
         protected final Queue<IPRange> ranges;
 
-        protected LoginConfiguration(final String uiWebPath, final boolean sessiondAutoLogin, final CookieHashSource hashSource, final String httpAuthAutoLogin, final String defaultClient, final String clientVersion, final String errorPageTemplate, final int cookieExpiry, final boolean cookieForceHTTPS, final boolean insecure, final boolean ipCheck, final boolean redirectIPChangeAllowed, final Queue<IPRange> ranges) {
+        protected LoginConfiguration(final String uiWebPath, final boolean sessiondAutoLogin, final CookieHashSource hashSource, final String httpAuthAutoLogin, final String defaultClient, final String clientVersion, final String errorPageTemplate, final int cookieExpiry, final boolean cookieForceHTTPS, final boolean insecure, final boolean ipCheck, final ClientWhitelist ipCheckWhitelist, final boolean redirectIPChangeAllowed, final Queue<IPRange> ranges) {
             super();
             this.uiWebPath = uiWebPath;
             this.sessiondAutoLogin = sessiondAutoLogin;
@@ -165,6 +167,7 @@ public class Login extends AJAXServlet {
             this.cookieForceHTTPS = cookieForceHTTPS;
             this.insecure = insecure;
             this.ipCheck = ipCheck;
+            this.ipCheckWhitelist = ipCheckWhitelist;
             this.redirectIPChangeAllowed = redirectIPChangeAllowed;
             this.ranges = ranges;
         }
@@ -185,6 +188,7 @@ public class Login extends AJAXServlet {
             this.cookieForceHTTPS = false;
             this.insecure = false;
             this.ipCheck = false;
+            this.ipCheckWhitelist = null;
             this.redirectIPChangeAllowed = true;
             this.ranges = null;
         }
@@ -269,7 +273,7 @@ public class Login extends AJAXServlet {
                     final Session session = LoginPerformer.getInstance().lookupSession(sessionId);
                     if (session != null) {
                         final LoginConfiguration conf = confReference.get();
-                        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
+                        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr(), conf.ipCheckWhitelist);
                         final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
 
                         if (secret == null || !session.getSecret().equals(secret)) {
@@ -409,7 +413,7 @@ public class Login extends AJAXServlet {
                     final Session session = sessiondService.getSession(sessionId);
                     final LoginConfiguration conf = confReference.get();
                     if (session != null) {
-                        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
+                        SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr(), conf.ipCheckWhitelist);
                         final String secret = SessionServlet.extractSecret(conf.hashSource, req, session.getHash(), session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
                             if (INFO && null != secret) {
@@ -581,7 +585,7 @@ public class Login extends AJAXServlet {
                                     updateIPAddress(req.getRemoteAddr(), session);
                                 } else {
                                     final String newIP = req.getRemoteAddr();
-                                    SessionServlet.checkIP(true, conf.ranges, session, newIP);
+                                    SessionServlet.checkIP(true, conf.ranges, session, newIP, conf.ipCheckWhitelist);
                                     // IP check passed: update IP address if necessary
                                     updateIPAddress(newIP, session);
                                 }
@@ -701,6 +705,7 @@ public class Login extends AJAXServlet {
         final boolean cookieForceHTTPS = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.COOKIE_FORCE_HTTPS.getPropertyName())) || Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.FORCE_HTTPS.getPropertyName()));
         final boolean insecure = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.INSECURE.getPropertyName()));
         final boolean ipCheck = Boolean.parseBoolean(config.getInitParameter(ServerConfig.Property.IP_CHECK.getPropertyName()));
+        final ClientWhitelist ipCheckWhitelist = new ClientWhitelist().add(config.getInitParameter(Property.IP_CHECK_WHITELIST.getPropertyName()));
         final boolean redirectIPChangeAllowed = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.REDIRECT_IP_CHANGE_ALLOWED.getPropertyName()));
         final Queue<IPRange> ranges = new ConcurrentLinkedQueue<IPRange>();
         final String tmp = config.getInitParameter(ConfigurationProperty.NO_IP_CHECK_RANGE.getPropertyName());
@@ -713,7 +718,7 @@ public class Login extends AJAXServlet {
                 }
             }
         }
-        confReference.set(new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, redirectIPChangeAllowed, ranges));
+        confReference.set(new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges));
     }
 
     @Override
@@ -810,7 +815,7 @@ public class Login extends AJAXServlet {
         }
         final Session session = SessionServlet.getSession(conf.hashSource, req, sessionId, sessiond);
         try {
-            SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr());
+            SessionServlet.checkIP(conf.ipCheck, conf.ranges, session, req.getRemoteAddr(), conf.ipCheckWhitelist);
             if (type == CookieType.SESSION) {
                 writeSessionCookie(resp, session, session.getHash(), req.isSecure());
             } else {

@@ -95,6 +95,8 @@ public final class ServerConfig {
 
     private Boolean checkIP;
 
+    private final ClientWhitelist clientWhitelist;
+
     private String uiWebPath;
 
     private int cookieTTL;
@@ -107,6 +109,7 @@ public final class ServerConfig {
 
     private ServerConfig() {
         super();
+        clientWhitelist = new ClientWhitelist();
     }
 
     public static ServerConfig getInstance() {
@@ -167,8 +170,13 @@ public final class ServerConfig {
         // JMX port
         jmxPort = Integer.parseInt(getPropertyInternal(Property.JMX_PORT));
         // JMX bind address
-        jmxBindAddress = getProperty(Property.JMX_BIND_ADDRESS);
+        jmxBindAddress = getPropertyInternal(Property.JMX_BIND_ADDRESS);
+        // Check IP
         checkIP = Boolean.valueOf(getPropertyInternal(Property.IP_CHECK));
+        // IP check whitelist
+        clientWhitelist.clear();
+        clientWhitelist.add(getPropertyInternal(Property.IP_CHECK_WHITELIST));
+        // UI web path
         uiWebPath = getPropertyInternal(Property.UI_WEB_PATH);
         cookieTTL = (int) ConfigTools.parseTimespan(getPropertyInternal(Property.COOKIE_TTL));
         cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
@@ -190,6 +198,68 @@ public final class ServerConfig {
      */
     private static String getProperty(final String key) {
         return SINGLETON.props.getProperty(key);
+    }
+
+    /**
+     * @param property
+     *            wanted property.
+     * @return the value of the property.
+     */
+    @SuppressWarnings("unchecked")
+    public static <V> V getPropertyObject(final Property property) {
+        try {
+            final Object value;
+            switch (property) {
+            case UploadDirectory:
+                value = SINGLETON.uploadDirectory;
+                break;
+            case MaxFileUploadSize:
+                value = Integer.valueOf(SINGLETON.maxFileUploadSize);
+                break;
+            case MaxUploadIdleTimeMillis:
+                value = Integer.valueOf(SINGLETON.maxUploadIdleTimeMillis);
+                break;
+            case PrefetchEnabled:
+                value = Boolean.valueOf(SINGLETON.prefetchEnabled);
+                break;
+            case DefaultEncoding:
+                value = SINGLETON.defaultEncoding;
+                break;
+            case JMX_PORT:
+                value = Integer.valueOf(SINGLETON.jmxPort);
+                break;
+            case JMX_BIND_ADDRESS:
+                value = SINGLETON.jmxBindAddress;
+                break;
+            case UI_WEB_PATH:
+                value = SINGLETON.uiWebPath;
+                break;
+            case COOKIE_TTL:
+                value = Integer.valueOf(SINGLETON.cookieTTL);
+                break;
+            case COOKIE_HTTP_ONLY:
+                value = Boolean.valueOf(SINGLETON.cookieHttpOnly);
+                break;
+            case IP_CHECK:
+                value = SINGLETON.checkIP;
+                break;
+            case IP_CHECK_WHITELIST:
+                value = SINGLETON.clientWhitelist;
+                break;
+            case MAX_BODY_SIZE:
+                value = Integer.valueOf(SINGLETON.maxBodySize);
+                break;
+            case DEFAULT_MAX_CONCURRENT_AJAX_REQUESTS:
+                value = Integer.valueOf(SINGLETON.defaultMaxConcurrentAJAXRequests);
+                break;
+            default:
+                value = getProperty(property.getPropertyName());
+            }
+            return (V) value;
+        } catch (final ClassCastException e) {
+            LOG.debug(e.getMessage(), e);
+            return null;
+        }
     }
 
     /**
@@ -384,6 +454,10 @@ public final class ServerConfig {
          * Setting this parameter to <code>false</code> will only log the different client IP addresses with debug level.
          */
         IP_CHECK("com.openexchange.IPCheck", Boolean.TRUE.toString()),
+        /**
+         * The comma-separated list of client patterns that do bypass IP check
+         */
+        IP_CHECK_WHITELIST("com.openexchange.IPCheckWhitelist", ""),
         /**
          * Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The
          * default conforms to the path where the UI is installed by the standard packages on the web server.
