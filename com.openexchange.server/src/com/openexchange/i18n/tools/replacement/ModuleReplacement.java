@@ -101,6 +101,11 @@ public final class ModuleReplacement implements TemplateReplacement {
     }
 
     @Override
+    public boolean relevantChange() {
+        return changed();
+    }
+
+    @Override
     public TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;

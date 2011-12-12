@@ -846,8 +846,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         return createParticipantMessage0(session, cal, p, true, title, actionRepl, state, locale, renderMap, isUpdate, b);
     }
 
-    private static final Set<Class<? extends TemplateReplacement>> IRRELEVANT = Collections.unmodifiableSet(new HashSet<Class<? extends TemplateReplacement>>(Arrays.asList(FolderReplacement.class)));
-
     private static final Pattern PATTERN_PREFIX_MODIFIED = Pattern.compile("(^|\r?\n)" + Pattern.quote(TemplateReplacement.PREFIX_MODIFIED));
 
     private static MailMessage createParticipantMessage0(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
@@ -930,13 +928,16 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                          */
                         return null;
                     }
-                    final Set<Class<? extends TemplateReplacement>> classes = new HashSet<Class<? extends TemplateReplacement>>(changes.size());
-                    for (final TemplateReplacement repl : changes) {
-                        classes.add(repl.getClass());
+                    boolean relevantChanges = false;
+                    for (final TemplateReplacement templateReplacement : changes) {
+                        if (templateReplacement.relevantChange()) {
+                            relevantChanges = true;
+                            break;
+                        }
                     }
-                    if (classes.removeAll(IRRELEVANT) && classes.isEmpty()) {
+                    if (!relevantChanges) {
                         /*
-                         * No relevant changes to notify about...
+                         * No element contains relevant changes to notify about...
                          */
                         return null;
                     }

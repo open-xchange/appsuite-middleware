@@ -111,6 +111,28 @@ public final class ParticipantsReplacement implements TemplateReplacement {
     }
 
     @Override
+    public boolean relevantChange() {
+        if (!changed) {
+            return false;
+        }
+        for (final Iterator<EmailableParticipant> iter = participantsSet.iterator(); iter.hasNext();) {
+            final EmailableParticipant participant = iter.next();
+            if (participant.state == EmailableParticipant.STATE_NEW) {
+                /*
+                 * Participant was newly added
+                 */
+                return true;
+            } else if (participant.state == EmailableParticipant.STATE_REMOVED) {
+                /*
+                 * Participant was removed
+                 */
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String getReplacement() {
         if (participantsSet.isEmpty()) {
             return "";

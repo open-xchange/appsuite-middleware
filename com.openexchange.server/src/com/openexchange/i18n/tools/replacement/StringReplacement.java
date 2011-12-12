@@ -49,6 +49,7 @@
 
 package com.openexchange.i18n.tools.replacement;
 
+import java.util.EnumSet;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.i18n.tools.TemplateReplacement;
@@ -117,6 +118,13 @@ public class StringReplacement implements TemplateReplacement {
     @Override
     public boolean changed() {
         return changed;
+    }
+
+    private static final EnumSet<TemplateToken> IRRELEVANT = EnumSet.of(TemplateToken.FOLDER_ID, TemplateToken.FOLDER_NAME, TemplateToken.LINK, TemplateToken.UI_WEB_PATH);
+
+    @Override
+    public boolean relevantChange() {
+        return !IRRELEVANT.contains(token);
     }
 
     @Override

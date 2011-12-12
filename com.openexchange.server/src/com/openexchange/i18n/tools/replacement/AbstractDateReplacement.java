@@ -129,6 +129,11 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
     }
 
     @Override
+    public boolean relevantChange() {
+        return changed();
+    }
+
+    @Override
     public final TemplateReplacement setChanged(final boolean changed) {
         this.changed = changed;
         return this;

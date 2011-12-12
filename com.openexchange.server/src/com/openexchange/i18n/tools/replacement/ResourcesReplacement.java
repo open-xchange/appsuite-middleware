@@ -110,6 +110,28 @@ public final class ResourcesReplacement implements TemplateReplacement {
     }
 
     @Override
+    public boolean relevantChange() {
+        if (!changed) {
+            return false;
+        }
+        for (final Iterator<EmailableParticipant> iter = resourcesSet.iterator(); iter.hasNext();) {
+            final EmailableParticipant participant = iter.next();
+            if (participant.state == EmailableParticipant.STATE_NEW) {
+                /*
+                 * Resource was newly added
+                 */
+                return true;
+            } else if (participant.state == EmailableParticipant.STATE_REMOVED) {
+                /*
+                 * Resource was removed
+                 */
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public String getReplacement() {
         if (resourcesSet.isEmpty()) {
             return getStringHelper().getString(Notifications.NO_RESOURCES);

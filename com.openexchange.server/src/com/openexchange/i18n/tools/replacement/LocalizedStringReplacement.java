@@ -112,6 +112,11 @@ public abstract class LocalizedStringReplacement implements TemplateReplacement 
     }
 
     @Override
+    public boolean relevantChange() {
+        return changed();
+    }
+
+    @Override
     public String getReplacement() {
         return getStringHelper().getString(replacement);
     }
