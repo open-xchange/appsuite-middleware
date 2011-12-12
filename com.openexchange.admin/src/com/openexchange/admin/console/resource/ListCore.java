@@ -50,7 +50,6 @@ package com.openexchange.admin.console.resource;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXResourceInterface;

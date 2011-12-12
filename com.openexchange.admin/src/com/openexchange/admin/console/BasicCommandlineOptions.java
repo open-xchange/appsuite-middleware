@@ -448,7 +448,7 @@ public abstract class BasicCommandlineOptions {
     }
 
     protected final void setIgnoreCaseOption(final AdminParser admp){
-        this.ignoreCaseOption = setShortLongOpt(admp,OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", true, NeededQuadState.notneeded);
+        this.ignoreCaseOption = setShortLongOpt(admp,OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", false, NeededQuadState.notneeded);
     }
 
     protected final int testStringAndGetIntOrDefault(final String test, final int defaultvalue) throws NumberFormatException {
