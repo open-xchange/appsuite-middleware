@@ -88,9 +88,9 @@ public final class ModifyCharsetStandardProvider {
         /*
          * Initialize new standard charset provider
          */
-        final JapaneseReplacementCharsetProvider jpCharsetProvider;
+        CharsetProvider charsetProvider = null;
         try {
-            jpCharsetProvider = new JapaneseReplacementCharsetProvider(backupCharsetProvider);
+            charsetProvider = new JapaneseReplacementCharsetProvider(backupCharsetProvider);
         } catch (final UnsupportedCharsetException e) {
             /*
              * Leave unchanged since fall-back charset "CP50220" is not support by JVM
@@ -98,13 +98,25 @@ public final class ModifyCharsetStandardProvider {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
                 new StringBuilder("Charset \"CP50220\" is not support by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\". Japanese encoding \"ISO-2022-JP\" not supported ! ! !").toString());
+        }
+        try {
+            charsetProvider = new ISOReplacementCharsetProvider(null == charsetProvider ? backupCharsetProvider : charsetProvider);
+        } catch (final UnsupportedCharsetException e) {
+            /*
+             * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
+             */
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+                new StringBuilder("Charset \"WINDOWS-1252\" is not support by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
+                    System.getProperty("java.vm.version")).append("\".").toString());
+        }
+        if (null == charsetProvider) {
             return null;
         }
         /*
          * Reinitialize field
          */
-        standardProviderField.set(null, jpCharsetProvider);
-        return new CharsetProvider[] { backupCharsetProvider, jpCharsetProvider };
+        standardProviderField.set(null, charsetProvider);
+        return new CharsetProvider[] { backupCharsetProvider, charsetProvider };
     }
 
     /**

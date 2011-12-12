@@ -1,3 +1,8 @@
+* 2011-12-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20909: Using "windows-1252" instead of "iso-8859-1" charset
+ - Fix for bug 20913: Suppressing notification mails for irrelevant changes
+
 * 2011-12-09 - marcus.klein@open-xchange.com
 
  - Fix for bug 20933: Ignoring not updated login timestamps when updating user attributes.

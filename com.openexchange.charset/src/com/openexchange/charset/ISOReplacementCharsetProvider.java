@@ -47,114 +47,79 @@
  *
  */
 
-package com.openexchange.i18n.tools.replacement;
+package com.openexchange.charset;
 
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.nio.charset.spi.CharsetProvider;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Locale;
-import java.util.TimeZone;
-import com.openexchange.i18n.tools.TemplateReplacement;
-import com.openexchange.i18n.tools.TemplateToken;
+import java.util.Set;
 
 /**
- * {@link ModuleReplacement}
+ * {@link ISOReplacementCharsetProvider} - A charset provider which returns the "WINDOWS-1252" charset when "ISO-8859-1" is requested.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public final class ModuleReplacement implements TemplateReplacement {
+public final class ISOReplacementCharsetProvider extends CharsetProvider {
 
-    private final static String[] MODULES = { "calendar", "task" };
+    private final Set<String> aliases;
 
-    public static final int MODULE_UNKNOWN = -1;
+    private final CharsetProvider standardProvider;
 
-    public static final int MODULE_CALENDAR = 0;
+    private final Charset windows1252;
 
-    public static final int MODULE_TASK = 1;
-
-    private String repl;
-
-    private boolean changed;
+    private final Locale english;
 
     /**
-     * Initializes a new {@link ModuleReplacement}
+     * Initializes a new {@link ISOReplacementCharsetProvider}.
      *
-     * @param module The module; supposed to be either {@link #MODULE_CALENDAR}
-     *            or {@link #MODULE_TASK}
+     * @throws UnsupportedCharsetException If "WINDOWS-1252" charset cannot be found
      */
-    public ModuleReplacement(final int module) {
+    public ISOReplacementCharsetProvider(final CharsetProvider standardProvider) {
         super();
-        repl = module < 0 || module >= MODULES.length ? "unknown" : MODULES[module];
-    }
+        this.standardProvider = standardProvider;
+        windows1252 = Charset.forName("WINDOWS-1252");
 
-    @Override
-    public String getReplacement() {
-        return repl;
-    }
-
-    @Override
-    public TemplateToken getToken() {
-        return TemplateToken.MODULE;
-    }
-
-    @Override
-    public boolean changed() {
-        return changed;
-    }
-
-    @Override
-    public boolean relevantChange() {
-        return changed();
-    }
-
-    @Override
-    public TemplateReplacement setChanged(final boolean changed) {
-        this.changed = changed;
-        return this;
-    }
-
-    @Override
-    public TemplateReplacement setLocale(final Locale locale) {
-        return this;
-    }
-
-    @Override
-    public TemplateReplacement setTimeZone(final TimeZone timeZone) {
-        return this;
-    }
-
-    @Override
-    public Object clone() throws CloneNotSupportedException {
-        return super.clone();
-    }
-
-    @Override
-    public TemplateReplacement getClone() throws CloneNotSupportedException {
-        return (TemplateReplacement) clone();
-    }
-
-    @Override
-    public boolean merge(final TemplateReplacement other) {
-        if (!ModuleReplacement.class.isInstance(other)) {
-            /*
-             * Class mismatch or null
-             */
-            return false;
+        final Charset iso_8859_1 = Charset.forName("ISO-8859-1");
+        english = Locale.ENGLISH;
+        aliases = new HashSet<String>(16);
+        aliases.add("ISO-8859-1");
+        for (final String alias : iso_8859_1.aliases()) {
+            aliases.add(alias.toUpperCase(english));
         }
-        if (!getToken().equals(other.getToken())) {
-            /*
-             * Token mismatch
-             */
-            return false;
-        }
-        if (!other.changed()) {
-            /*
-             * Other replacement does not reflect a changed value; leave
-             * unchanged
-             */
-            return false;
-        }
-        final ModuleReplacement o = (ModuleReplacement) other;
-        this.repl = o.repl;
-        this.changed = true;
-        return true;
     }
+
+    @Override
+    public int hashCode() {
+        return standardProvider.hashCode();
+    }
+
+    @Override
+    public Iterator<Charset> charsets() {
+        return standardProvider.charsets();
+    }
+
+    @Override
+    public Charset charsetForName(final String charsetName) {
+        if (aliases.contains(charsetName.toUpperCase(english))) {
+            return windows1252;
+        }
+        /*
+         * Delegate to standard provider
+         */
+        return standardProvider.charsetForName(charsetName);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return standardProvider.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return standardProvider.toString();
+    }
+
 }

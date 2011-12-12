@@ -69,4 +69,9 @@ public final class FolderReplacement extends FormatLocalizedStringReplacement {
         super(TemplateToken.FOLDER_NAME, Notifications.FORMAT_FOLDER, folderName);
     }
 
+    @Override
+    public boolean relevantChange() {
+        return false;
+    }
+    
 }
