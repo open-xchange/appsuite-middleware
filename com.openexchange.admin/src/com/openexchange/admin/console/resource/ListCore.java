@@ -70,7 +70,7 @@ public abstract class ListCore extends ResourceAbstraction {
         setDefaultCommandLineOptions(parser);
         // we need csv output , so we add this option
         setCSVOutputOption(parser);
-        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, NeededQuadState.notneeded);
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", false, NeededQuadState.notneeded);
     }
 
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
