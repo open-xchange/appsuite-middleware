@@ -59,6 +59,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -646,7 +647,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 log.error("No such user(s) " + Arrays.toString(users) + " in context " + ctx.getId(), noSuchUserException);
                 throw noSuchUserException;
             }
+            Set<Integer> dubCheck = new HashSet<Integer>();
             for (final User user : users) {
+                if (dubCheck.contains(user.getId())) {
+                    throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
+                }
+                dubCheck.add(user.getId());
                 if (tool.isContextAdmin(ctx, user.getId().intValue())) {
                     throw new InvalidDataException("Admin delete not supported");
                 }
