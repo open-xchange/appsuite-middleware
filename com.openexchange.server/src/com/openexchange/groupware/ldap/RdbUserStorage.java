@@ -59,6 +59,8 @@ import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -78,6 +80,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
@@ -803,14 +806,77 @@ public class RdbUserStorage extends UserStorage {
     }
 
     @Override
+    public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
+        if (0 == searchType) {
+            return new User[0];
+        }
+        final Connection con = DBPool.pickup(context);
+        try {
+            final String pattern = StringCollection.prepareForSearch(name, false, true);
+            final int contextId = context.getContextId();
+            final TIntSet userIds = new TIntHashSet();
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            final boolean searchLoginName = (searchType & SEARCH_LOGIN_NAME) > 0;
+            final boolean searchDisplayName = (searchType & SEARCH_DISPLAY_NAME) > 0;
+            if (searchDisplayName && searchLoginName) {
+                try {
+                    stmt = con.prepareStatement("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id AND con.cid = lu.cid WHERE con.cid = ? AND (lu.uid LIKE ? OR con.field01 LIKE ?)");
+                    stmt.setInt(1, contextId);
+                    stmt.setString(2, pattern);
+                    stmt.setString(3, pattern);
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        userIds.add(result.getInt(1));
+                    }
+                } catch (final SQLException e) {
+                    throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
+            } else {
+                if (searchLoginName) {
+                    try {
+                        stmt = con.prepareStatement("SELECT id FROM login2user WHERE cid=? AND uid LIKE ?");
+                        stmt.setInt(1, contextId);
+                        stmt.setString(2, pattern);
+                        result = stmt.executeQuery();
+                        while (result.next()) {
+                            userIds.add(result.getInt(1));
+                        }
+                    } catch (final SQLException e) {
+                        throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                    } finally {
+                        closeSQLStuff(result, stmt);
+                    }
+                }
+                if (searchDisplayName) {
+                    try {
+                        stmt = con.prepareStatement("SELECT userid FROM prg_contacts WHERE cid=? AND fid=? AND userid IS NOT NULL AND field01 LIKE ?");
+                        stmt.setInt(1, contextId);
+                        stmt.setInt(2, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                        stmt.setString(3, pattern);
+                        result = stmt.executeQuery();
+                        while (result.next()) {
+                            userIds.add(result.getInt(1));
+                        }
+                    } catch (final SQLException e) {
+                        throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+                    } finally {
+                        closeSQLStuff(result, stmt);
+                    }
+                }
+            }
+            return getUser(context, userIds.toArray());
+        } finally {
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+
+    @Override
     public User searchUser(final String email, final Context context) throws OXException {
         String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
-        Connection con;
-        try {
-            con = DBPool.pickup(context);
-        } catch (final OXException e) {
-            throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
-        }
+        final Connection con = DBPool.pickup(context);
         try {
             final String pattern = StringCollection.prepareForSearch(email, false, true);
             PreparedStatement stmt = null;
@@ -851,8 +917,6 @@ public class RdbUserStorage extends UserStorage {
             } finally {
                 closeSQLStuff(result, stmt);
             }
-        } catch (final OXException e) {
-            throw new OXException(e);
         } finally {
             DBPool.closeReaderSilent(context, con);
         }
