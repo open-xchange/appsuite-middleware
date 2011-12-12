@@ -89,7 +89,7 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
         if (failOnError && response.hasError()) {
             final OXException exception = response.getException();
             if (null != exception) {
-                assertFalse(exception.getMessage(), !Category.CATEGORY_WARNING.getType().equals(exception.getCategory().getType()));
+                assertTrue(exception.getMessage(), Category.CATEGORY_WARNING.getType().equals(exception.getCategory().getType()));
             }
         }
         return response;
