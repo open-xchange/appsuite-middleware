@@ -123,26 +123,32 @@ public class RdbContextStorage extends ContextStorage {
         return contextId;
     }
 
-    private int getAdmin(final Context ctx) throws OXException {
+    private static int getAdmin(final Context ctx) throws OXException {
         final Connection con = DBPool.pickup(ctx);
+        try {
+            return getAdmin(con, ctx.getContextId());
+        } finally {
+            DBPool.closeReaderSilent(ctx, con);
+        }
+    }
+
+    public static final int getAdmin(final Connection con, final int ctxId) throws OXException {
         int identifier = -1;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement(GET_MAILADMIN);
-            final int contextId = ctx.getContextId();
-            stmt.setInt(1, contextId);
+            stmt.setInt(1, ctxId);
             result = stmt.executeQuery();
             if (result.next()) {
                 identifier = result.getInt(1);
             } else {
-                throw ContextExceptionCodes.NO_MAILADMIN.create(Integer.valueOf(contextId));
+                throw ContextExceptionCodes.NO_MAILADMIN.create(Integer.valueOf(ctxId));
             }
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(ctx, con);
         }
         return identifier;
     }

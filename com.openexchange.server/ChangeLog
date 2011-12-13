@@ -3,6 +3,10 @@
  - Removed count of unread messages from messages-array
  - Created methods to get count of unread messages
 
+* 2011-12-13 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20036: Wrote update task to consolidate permissions on the public root folder in a background update task.
+
 * 2011-12-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 20960: Propagating changed full names with OSGi event admin
