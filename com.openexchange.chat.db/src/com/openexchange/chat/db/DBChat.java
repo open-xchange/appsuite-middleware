@@ -1250,6 +1250,57 @@ public final class DBChat implements Chat {
     }
 
     @Override
+    public int getUnreadCount(final ChatUser chatUser) throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final Connection con = databaseService.getReadOnly(contextId);
+        try {
+            con.setAutoCommit(false);
+            final int count = getUnreadCount(con, chatUser);
+            con.commit();
+            return count;
+        } catch (final SQLException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            DBUtils.rollback(con);
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backReadOnly(context, con);
+        }
+    }
+
+    private int getUnreadCount(Connection con, ChatUser chatUser) throws OXException {
+        final int chatUserId = DBChatUtility.parseUnsignedInt(chatUser.getId());
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int count = 0;
+        try {
+            int pos = 1;
+            stmt = con.prepareStatement("SELECT user, messageId, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT cm.chunkId FROM chatMember AS cm WHERE cm.cid = ? AND cm.user = ? AND cm.chatId = ?) AND createdAt > (SELECT MAX(lastPoll) FROM chatMember AS cm WHERE cm.cid = ? AND cm.user = ? AND cm.chatId = ?) ORDER BY createdAt");
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatUserId);
+            stmt.setInt(pos++, chatId);
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, chatUserId);
+            stmt.setInt(pos, chatId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+            return count;
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
     public List<Message> pollMessages(final Date since, final ChatUser chatUser) throws OXException {
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getWritable(contextId);
