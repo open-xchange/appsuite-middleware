@@ -117,7 +117,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
     private static final String HTTPS = "https";
 
     private static enum Stage {
-        STAGE_AWAIT, STAGE_PREPARE, STAGE_SERVICE, STAGE_ENDED;
+        STAGE_AWAIT, STAGE_PREPARE, STAGE_SERVICE, STAGE_SERVICE_ENDED, STAGE_ENDED;
     }
 
     /**
@@ -863,6 +863,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     if (longRunningAccepted) {
                         AjpLongRunningRegistry.getInstance().deregisterLongRunning(request);
                     }
+                    stage = Stage.STAGE_SERVICE_ENDED;
                 }
             }
             /*
