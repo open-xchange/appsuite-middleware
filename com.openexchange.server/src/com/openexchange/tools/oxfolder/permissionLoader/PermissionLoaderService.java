@@ -528,8 +528,8 @@ public final class PermissionLoaderService implements Runnable {
         if (pairsChunk.isEmpty()) {
             return;
         }
-        final long st = debug ? System.currentTimeMillis() : 0L;
         try {
+            final long st = debug ? System.currentTimeMillis() : 0L;
             /*
              * Handle fillers in chunks
              */
@@ -579,6 +579,9 @@ public final class PermissionLoaderService implements Runnable {
                             permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, con), 60);
                         }
                     }
+                } else {
+                    handlePairsSublist(pairsChunk, threadDesc, debug);
+                    return;
                 }
             } finally {
                 if (dec) {
@@ -586,11 +589,6 @@ public final class PermissionLoaderService implements Runnable {
                 }
                 rlock.unlock();
             }
-        } catch (final OXException e) {
-            LOG.error("Failed loading permissions.", e);
-        } catch (final RuntimeException e) {
-            LOG.error("Failed loading permissions.", e);
-        } finally {
             if (debug) {
                 final long dur = System.currentTimeMillis() - st;
                 final StringBuilder tmp = new StringBuilder(64).append("Handled ").append(pairsChunk.size()).append(" pairs");
@@ -600,6 +598,11 @@ public final class PermissionLoaderService implements Runnable {
                 tmp.append(" in ").append(dur).append("msec.");
                 LOG.debug(tmp.toString());
             }
+        } catch (final OXException e) {
+            LOG.error("Failed loading permissions.", e);
+        } catch (final RuntimeException e) {
+            LOG.error("Failed loading permissions.", e);
+        } finally {
             if (null != placeHolder) {
                 synchronized (placeHolder) {
                     placeHolder.notifyAll();
