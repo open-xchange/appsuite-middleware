@@ -54,6 +54,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -82,7 +83,7 @@ public final class MailFolderStorageActivator extends DeferredActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailAccountStorageService.class, UnifiedINBOXManagement.class };
+        return new Class<?>[] { MailAccountStorageService.class, UnifiedINBOXManagement.class, EventAdmin.class };
     }
 
     @Override

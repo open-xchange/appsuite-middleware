@@ -69,9 +69,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
@@ -1173,8 +1176,10 @@ public final class MailFolderStorage implements FolderStorage {
                     newFullname.append(mfd.containsName() ? mfd.getName() : oldName);
                     if (!newParent.equals(oldParent)) { // move & rename
                         final Map<String, Map<?, ?>> subfolders = subfolders(fullname, mailAccess);
+                        final String oldFullName = fullname;
                         fullname = mailAccess.getFolderStorage().moveFolder(fullname, newFullname.toString());
                         folder.setID(prepareFullname(accountId, fullname));
+                        postChangedId(fullname, oldFullName, Character.toString(separator), session);
                         postEvent4Subfolders(accountId, subfolders, storageParameters);
                         postEvent(accountId, newParent, false, storageParameters);
                         movePerformed = true;
@@ -1240,8 +1245,10 @@ public final class MailFolderStorage implements FolderStorage {
             if (!movePerformed && mfd.containsName()) {
                 final String newName = mfd.getName();
                 if (!newName.equals(oldName)) { // rename
+                    final String oldFullName = fullname;
                     fullname = mailAccess.getFolderStorage().renameFolder(fullname, newName);
                     folder.setID(prepareFullname(accountId, fullname));
+                    postChangedId(fullname, oldFullName, Character.toString(separator), session);
                     postEvent(accountId, fullname, false, storageParameters);
                 }
             }
@@ -1436,6 +1443,22 @@ public final class MailFolderStorage implements FolderStorage {
                 subfoldersRecursively(fullname, subMap, mailAccess);
             }
             m.put(parent, subMap);
+        }
+    }
+
+    private static void postChangedId(final String newId, final String oldId, final String delim, final Session session) {
+        final EventAdmin eventAdmin = MailServiceRegistry.getServiceRegistry().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Map<String, Object> properties = new HashMap<String, Object>(6);
+            properties.put(FolderEventConstants.PROPERTY_SESSION, session);
+            properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(session.getContextId()));
+            properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(session.getUserId()));
+            properties.put(FolderEventConstants.PROPERTY_OLD_IDENTIFIER, oldId);
+            properties.put(FolderEventConstants.PROPERTY_NEW_IDENTIFIER, newId);
+            properties.put(FolderEventConstants.PROPERTY_DELIMITER, delim);
+            properties.put(FolderEventConstants.PROPERTY_IMMEDIATELY, Boolean.TRUE);
+            final Event event = new Event(FolderEventConstants.TOPIC_IDENTIFIERS, properties);
+            eventAdmin.postEvent(event);
         }
     }
 

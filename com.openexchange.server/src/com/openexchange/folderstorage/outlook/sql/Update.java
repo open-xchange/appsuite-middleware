@@ -52,7 +52,11 @@ package com.openexchange.folderstorage.outlook.sql;
 import static com.openexchange.folderstorage.outlook.sql.Utility.debugSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
@@ -71,6 +75,109 @@ public final class Update {
      */
     private Update() {
         super();
+    }
+
+    /**
+     * Updates identifiers.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param newId The new identifier
+     * @param oldId The old identifier
+     * @param delim The delimiter
+     * @throws OXException If an error occurs
+     */
+    public static void updateIds(final int cid, final int tree, final int user, final String newId, final String oldId, final String delim) throws OXException {
+        final DatabaseService databaseService = Utility.getDatabaseService();
+        // Get a connection
+        final Connection con;
+        try {
+            con = databaseService.getWritable(cid);
+            con.setAutoCommit(false); // BEGIN
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        }
+        try {
+            updateIds(cid, tree, user, newId, oldId, delim, con);
+            con.commit(); // COMMIT
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw e;
+        } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.autocommit(con);
+            databaseService.backWritable(cid, con);
+        }
+    }
+
+    /**
+     * Updates identifiers.
+     * 
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param newId The new identifier
+     * @param oldId The old identifier
+     * @param delim The delimiter
+     * @param con The connection to use
+     * @throws OXException If an error occurs
+     */
+    public static void updateIds(final int cid, final int tree, final int user, final String newId, final String oldId, final String delim, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("UPDATE virtualTree SET parentId = ? WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?");
+            stmt.setString(1, newId);
+            stmt.setInt(2, cid);
+            stmt.setInt(3, tree);
+            stmt.setInt(4, user);
+            stmt.setString(5, oldId);
+            stmt.executeUpdate();
+            DBUtils.closeSQLStuff(stmt);
+
+            final StringBuilder tmp = new StringBuilder();
+            final String prefix = tmp.append(oldId).append(delim).toString();
+            stmt = con.prepareStatement("SELECT parentId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND SUBSTRING(parentId,1,"+prefix.length()+") = ?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, tree);
+            stmt.setInt(3, user);
+            stmt.setString(4, prefix);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                final Map<String, String> parentIds = new HashMap<String, String>();
+                do {
+                    final String oldS = rs.getString(1);
+                    final String tail = oldS.substring(prefix.length() + 1);
+                    tmp.setLength(0);
+                    final String newS = tmp.append(newId).append(delim).append(tail).toString();
+
+                    parentIds.put(newS, oldS);
+                } while (rs.next());
+                DBUtils.closeSQLStuff(rs, stmt);
+
+                stmt = con.prepareStatement("UPDATE virtualTree SET parentId = ? WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?");
+                for (final Entry<String, String> entry : parentIds.entrySet()) {
+                    stmt.setString(1, entry.getKey());
+                    stmt.setInt(2, cid);
+                    stmt.setInt(3, tree);
+                    stmt.setInt(4, user);
+                    stmt.setString(5, entry.getValue());
+                    stmt.addBatch();
+                }
+                stmt.executeBatch();
+            }
+        } catch (final SQLException e) {
+            debugSQL(stmt);
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
     }
 
     /**

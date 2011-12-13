@@ -74,11 +74,16 @@ public final class FolderEventConstants {
     public static final String TOPIC_ATTR = "com/openexchange/folderstorage/attributes";
 
     /**
+     * The topic of folder storage events for changed identifiers.
+     */
+    public static final String TOPIC_IDENTIFIERS = "com/openexchange/folderstorage/identifiers";
+
+    /**
      * An array of {@link String string} including all known topics.
      * <p>
      * Needed on event handler registration to a bundle context.
      */
-    private static final String[] TOPICS = { TOPIC, TOPIC_ATTR };
+    private static final String[] TOPICS = { TOPIC, TOPIC_ATTR, TOPIC_IDENTIFIERS };
 
     /**
      * Gets an array of {@link String string} including all known topics.
@@ -123,5 +128,20 @@ public final class FolderEventConstants {
      * Force an immediate delivery of the associated event.
      */
     public static final String PROPERTY_IMMEDIATELY = "com.openexchange.folderstorage.immediately";
+
+    /**
+     * The old identifier.
+     */
+    public static final String PROPERTY_OLD_IDENTIFIER = "com.openexchange.folderstorage.oldIdentifier";
+
+    /**
+     * The new identifier.
+     */
+    public static final String PROPERTY_NEW_IDENTIFIER = "com.openexchange.folderstorage.newIdentifier";
+
+    /**
+     * The delimiter string.
+     */
+    public static final String PROPERTY_DELIMITER = "com.openexchange.folderstorage.delimiter";
 
 }

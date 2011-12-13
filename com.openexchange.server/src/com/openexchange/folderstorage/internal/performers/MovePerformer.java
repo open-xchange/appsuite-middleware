@@ -84,6 +84,10 @@ import com.openexchange.tools.session.ServerSession;
  */
 final class MovePerformer extends AbstractPerformer {
 
+    private static final String MAIL_DEFAULT_ID = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+
+    private static final String MAIL = MailContentType.getInstance().toString();
+
     private static final class FolderInfo {
 
         final String id;
@@ -137,6 +141,8 @@ final class MovePerformer extends AbstractPerformer {
             return false;
         }
     }
+
+    private final String realTreeId = FolderStorage.REAL_TREE_ID;
 
     /**
      * Initializes a new {@link MovePerformer} from given session.
@@ -201,26 +207,26 @@ final class MovePerformer extends AbstractPerformer {
         /*
          * Get subfolders
          */
-        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
+        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(realTreeId, folder.getID());
         if (null == realStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folder.getID());
         }
         checkOpenedStorage(realStorage, openedStorages);
         /*
          * Special handling for mail folders on root level
          */
         boolean flag = true;
-        if (FolderStorage.PRIVATE_ID.equals(folder.getParentID()) && MailContentType.getInstance().toString().equals(storageFolder.getContentType().toString())) {
+        if (FolderStorage.PRIVATE_ID.equals(folder.getParentID()) && MAIL.equals(storageFolder.getContentType().toString())) {
             /*
              * Perform the move in real storage
              */
-            final String rootId = MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
+            final String rootId = MAIL_DEFAULT_ID;
             /*
              * Check if create is allowed
              */
             final Permission rootPermission;
             {
-                final Folder rootFolder = realStorage.getFolder(FolderStorage.REAL_TREE_ID, rootId, storageParameters);
+                final Folder rootFolder = realStorage.getFolder(realTreeId, rootId, storageParameters);
                 final List<ContentType> contentTypes = Collections.<ContentType> emptyList();
                 if (null == getSession()) {
                     rootPermission = CalculatePermission.calculate(rootFolder, getUser(), getContext(), contentTypes);
@@ -234,7 +240,7 @@ final class MovePerformer extends AbstractPerformer {
                  */
                 final Folder clone4Real = (Folder) folder.clone();
                 clone4Real.setParentID(rootId);
-                clone4Real.setTreeID(FolderStorage.REAL_TREE_ID);
+                clone4Real.setTreeID(realTreeId);
                 realStorage.updateFolder(clone4Real, storageParameters);
                 virtualStorage.deleteFolder(folder.getTreeID(), folder.getID(), storageParameters);
                 folder.setID(clone4Real.getID());
@@ -245,7 +251,7 @@ final class MovePerformer extends AbstractPerformer {
                 try {
                     realStorage.updateLastModified(
                         System.currentTimeMillis(),
-                        FolderStorage.REAL_TREE_ID,
+                        realTreeId,
                         folder.getParentID(),
                         storageParameters);
                     if (started) {
@@ -363,7 +369,7 @@ final class MovePerformer extends AbstractPerformer {
                 final Folder clone4Real = (Folder) folder.clone();
                 clone4Real.setName(nonExistingName(
                     clone4Real.getName(),
-                    FolderStorage.REAL_TREE_ID,
+                    realTreeId,
                     clone4Real.getParentID(),
                     openedStorages));
                 realStorage.updateFolder(clone4Real, storageParameters);
@@ -404,20 +410,20 @@ final class MovePerformer extends AbstractPerformer {
                          */
                         throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(
                             realStorage.getDefaultContentType(),
-                            FolderStorage.REAL_TREE_ID);
+                            realTreeId);
                     }
                     // TODO: Check permission for obtained default folder ID?
                     /*
                      * Is real folder already located below default folder localtion?
                      */
                     final String realParentID =
-                        realStorage.getFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters).getParentID();
+                        realStorage.getFolder(realTreeId, folder.getID(), storageParameters).getParentID();
                     if (!defaultParentId.equals(realParentID)) {
                         final Folder clone4Real = (Folder) folder.clone();
                         clone4Real.setParentID(defaultParentId);
                         clone4Real.setName(nonExistingName(
                             clone4Real.getName(),
-                            FolderStorage.REAL_TREE_ID,
+                            realTreeId,
                             defaultParentId,
                             openedStorages));
                         realStorage.updateFolder(clone4Real, storageParameters);

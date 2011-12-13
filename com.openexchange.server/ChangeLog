@@ -1,3 +1,7 @@
+* 2011-12-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20960: Propagating changed full names with OSGi event admin
+
 * 2011-12-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 20909: Using "windows-1252" instead of "iso-8859-1" charset

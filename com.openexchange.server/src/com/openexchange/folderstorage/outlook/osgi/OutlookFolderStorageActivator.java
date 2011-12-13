@@ -71,6 +71,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.OutlookServiceRegistry;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
+import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
@@ -90,7 +91,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class OutlookFolderStorageActivator extends DeferredActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageActivator.class));
+    static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(OutlookFolderStorageActivator.class));
 
     private List<ServiceRegistration<?>> serviceRegistrations;
 
@@ -190,12 +191,32 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
             {
                 final EventHandler folderEventHandler = new EventHandler() {
 
+                    private final int tree = Integer.parseInt(OutlookFolderStorage.OUTLOOK_TREE_ID);
+
                     @Override
                     public void handleEvent(final Event event) {
-                        // final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
-                        // final String folderId = (String) event.getProperty(FolderEventConstants.PROPERTY_FOLDER);
-                        // final Boolean contentRelated = (Boolean) event.getProperty(FolderEventConstants.PROPERTY_CONTENT_RELATED);
                         OutlookFolderStorage.clearTCM();
+                        if (FolderEventConstants.TOPIC_IDENTIFIERS.equals(event.getTopic())) {
+                            final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
+                            final String newId = (String) event.getProperty(FolderEventConstants.PROPERTY_NEW_IDENTIFIER);
+                            final String oldId = (String) event.getProperty(FolderEventConstants.PROPERTY_OLD_IDENTIFIER);
+                            final String delim = (String) event.getProperty(FolderEventConstants.PROPERTY_DELIMITER);
+
+                            try {
+                                Update.updateIds(session.getContextId(), tree, session.getUserId(), newId, oldId, delim);
+                            } catch (final Exception e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+
+                            final MemoryTable memoryTable = MemoryTable.optMemoryTableFor(session);
+                            if (null != memoryTable) {
+                                try {
+                                    memoryTable.initializeTree(tree, session.getUserId(), session.getContextId());
+                                } catch (final Exception e) {
+                                    LOG.error(e.getMessage(), e);
+                                }
+                            }
+                        }
                     }
                 };
                 final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
