@@ -266,4 +266,10 @@ public interface ContactFields extends CommonFields {
 
     String YOMI_COMPANY = "yomiCompany";
 
+    String ADDRESS_HOME = "addressHome";
+
+    String ADDRESS_BUSINESS = "addressBusiness";
+
+    String ADDRESS_OTHER = "addressOther";
+
 }

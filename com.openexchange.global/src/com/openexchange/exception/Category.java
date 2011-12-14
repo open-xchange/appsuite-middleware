@@ -225,7 +225,7 @@ public interface Category extends Comparable<Category> {
 
         @Override
         public LogLevel getLogLevel() {
-            return LogLevel.ERROR;
+            return LogLevel.DEBUG;
         }
 
         @Override
@@ -252,7 +252,7 @@ public interface Category extends Comparable<Category> {
 
         @Override
         public LogLevel getLogLevel() {
-            return LogLevel.ERROR;
+            return LogLevel.DEBUG;
         }
 
         @Override

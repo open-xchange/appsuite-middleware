@@ -406,6 +406,9 @@ public final class InternalList {
         new VirtualFolderAddSortNumTask(),
 
         // Restores the initial permissions on the public root folder.
-        new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask()
+        new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask(),
+
+        // Adds Outlook address fields to contact tables
+        new com.openexchange.groupware.update.tasks.ContactAddOutlookAddressFieldsTask()
     };
 }
