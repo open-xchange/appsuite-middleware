@@ -480,7 +480,7 @@ public final class IMAPFolderConverter {
                     OCLPermission.NO_PERMISSIONS,
                     OCLPermission.NO_PERMISSIONS,
                     OCLPermission.NO_PERMISSIONS);
-                ownPermission.setFolderAdmin(true);
+                ownPermission.setFolderAdmin(false);
                 ownRights = ACLPermission.permission2Rights(ownPermission, imapConfig);
             }
         } else {
