@@ -928,154 +928,146 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * @param param The action parameter
      */
     public void action(final ActionCode actionCode, final Object param) {
-        if (actionCode == ActionCode.COMMIT) {
-            if (response.isCommitted()) {
-                return;
-            }
+        switch (actionCode) {
+        case COMMIT:
+            {
+                if (response.isCommitted()) {
+                    return;
+                }
 
-            // Validate and write response headers
-            try {
-                prepareResponse();
-            } catch (final IOException e) {
-                // Set error flag
-                error = true;
-            }
-        } else if (actionCode == ActionCode.CLIENT_FLUSH) {
-            if (!response.isCommitted()) {
                 // Validate and write response headers
                 try {
                     prepareResponse();
                 } catch (final IOException e) {
                     // Set error flag
                     error = true;
-                    return;
                 }
             }
-            softLock.lock();
-            try {
-                /*
-                 * Write empty SEND-BODY-CHUNK package
-                 */
-                output.write(flushMessageArray);
-                lastWriteAccess = System.currentTimeMillis();
-                // output.flush();
-            } catch (final IOException e) {
-                // Set error flag
-                error = true;
-            } finally {
-                softLock.unlock();
-            }
-        } else if (actionCode == ActionCode.CLIENT_PING) {
-            final Lock hardLock = mainLock.writeLock();
-            hardLock.lock();
-            try {
-                if (response.isCommitted()) {
+            break;
+        case CLIENT_FLUSH:
+            {
+                if (!response.isCommitted()) {
+                    // Validate and write response headers
+                    try {
+                        prepareResponse();
+                    } catch (final IOException e) {
+                        // Set error flag
+                        error = true;
+                        return;
+                    }
+                }
+                softLock.lock();
+                try {
                     /*
                      * Write empty SEND-BODY-CHUNK package
                      */
                     output.write(flushMessageArray);
                     lastWriteAccess = System.currentTimeMillis();
                     // output.flush();
-                    if (DEBUG) {
-                        LOG.debug("Performed keep-alive through a flush package.");
-                    }
-                } else {
-                    /*
-                     * Not committed, yet. Write an empty GET-BODY-CHUNK package.
-                     */
-                    output.write(AJPv13Response.getGetBodyChunkBytes(0));
-                    output.flush();
-                    lastWriteAccess = System.currentTimeMillis();
-                    /*
-                     * Receive empty body chunk
-                     */
-                    receive();
-                    if (DEBUG) {
-                        LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
-                    }
+                } catch (final IOException e) {
+                    // Set error flag
+                    error = true;
+                } finally {
+                    softLock.unlock();
                 }
-            } catch (final IOException e) {
-                // Set error flag
-                error = true;
-            } catch (final AJPv13Exception e) {
-                // Cannot occur
-            } finally {
-                hardLock.unlock();
             }
-        } else if (actionCode == ActionCode.CLOSE) {
-            // Close
-
-            // End the processing of the current request, and stop any further
-            // transactions with the client
-            try {
-                /*
-                 * Write END-RESPONSE package
-                 */
-                final Boolean reuseFlag = (param instanceof Boolean) ? ((Boolean) param) : Boolean.TRUE;
-                finish(reuseFlag.booleanValue());
-            } catch (final IOException e) {
-                // Set error flag
-                error = true;
-            }
-        } else if (actionCode == ActionCode.START) {
-            started = true;
-        } else if (actionCode == ActionCode.STOP) {
-            started = false;
-        }
-        /*-
-         *
-        else if (actionCode == ActionCode.ACTION_REQ_SSL_ATTRIBUTE) {
-
-            if (!certificates.isNull()) {
-                final ByteChunk certData = certificates.getByteChunk();
-                X509Certificate jsseCerts[] = null;
-                final ByteArrayInputStream bais = new ByteArrayInputStream(certData.getBytes(), certData.getStart(), certData.getLength());
-                // Fill the elements.
+            break;
+        case CLIENT_PING:
+            {
+                final Lock hardLock = mainLock.writeLock();
+                hardLock.lock();
                 try {
-                    final CertificateFactory cf = CertificateFactory.getInstance("X.509");
-                    while (bais.available() > 0) {
-                        final X509Certificate cert = (X509Certificate) cf.generateCertificate(bais);
-                        if (jsseCerts == null) {
-                            jsseCerts = new X509Certificate[1];
-                            jsseCerts[0] = cert;
-                        } else {
-                            final X509Certificate[] temp = new X509Certificate[jsseCerts.length + 1];
-                            System.arraycopy(jsseCerts, 0, temp, 0, jsseCerts.length);
-                            temp[jsseCerts.length] = cert;
-                            jsseCerts = temp;
+                    if (response.isCommitted()) {
+                        /*
+                         * Write empty SEND-BODY-CHUNK package
+                         */
+                        output.write(flushMessageArray);
+                        lastWriteAccess = System.currentTimeMillis();
+                        // output.flush();
+                        if (DEBUG) {
+                            LOG.debug("Performed keep-alive through a flush package.");
+                        }
+                    } else {
+                        /*
+                         * Not committed, yet. Write an empty GET-BODY-CHUNK package.
+                         */
+                        output.write(AJPv13Response.getGetBodyChunkBytes(0));
+                        output.flush();
+                        lastWriteAccess = System.currentTimeMillis();
+                        /*
+                         * Receive empty body chunk
+                         */
+                        receive();
+                        if (DEBUG) {
+                            LOG.debug("Performed keep-alive through an empty get-body-chunk package (and received that empty chunk).");
                         }
                     }
-                } catch (final java.security.cert.CertificateException e) {
-                    log.error(sm.getString("ajpprocessor.certs.fail"), e);
-                    return;
+                } catch (final IOException e) {
+                    // Set error flag
+                    error = true;
+                } catch (final AJPv13Exception e) {
+                    // Cannot occur
+                } finally {
+                    hardLock.unlock();
                 }
-                request.setAttribute(JIoEndpoint.CERTIFICATE_KEY, jsseCerts);
             }
+            break;
+        case CLOSE:
+            {
+                // Close
 
-        }
-         *
-         */
-        else if (actionCode == ActionCode.REQ_HOST_ATTRIBUTE) {
-            // Get remote host name using a DNS resolution
-            if (request.getRemoteHost() == null) {
+                // End the processing of the current request, and stop any further
+                // transactions with the client
                 try {
-                    request.setRemoteHost(InetAddress.getByName(request.getRemoteAddr().toString()).getHostName());
-                } catch (final IOException iex) {
-                    // Ignore
+                    /*
+                     * Write END-RESPONSE package
+                     */
+                    final Boolean reuseFlag = (param instanceof Boolean) ? ((Boolean) param) : Boolean.TRUE;
+                    finish(reuseFlag.booleanValue());
+                } catch (final IOException e) {
+                    // Set error flag
+                    error = true;
                 }
             }
-        } else if (actionCode == ActionCode.REQ_LOCAL_ADDR_ATTRIBUTE) {
-            // Copy from local name for now, which should simply be an address
-            request.setLocalAddr(request.getLocalName().toString());
-        } else if (actionCode == ActionCode.REQ_SET_BODY_REPLAY) {
-            // Set the given bytes as the content
-            final ByteChunk bc = (ByteChunk) param;
-            final int length = bc.getLength();
-            bodyBytes.setBytes(bc.getBytes(), bc.getStart(), length);
-            request.setContentLength(length);
-            first = false;
-            empty = false;
-            replay = true;
+            break;
+        case START:
+            started = true;
+            break;
+        case STOP:
+            started = false;
+            break;
+        case REQ_HOST_ATTRIBUTE:
+            {
+                // Get remote host name using a DNS resolution
+                if (request.getRemoteHost() == null) {
+                    try {
+                        request.setRemoteHost(InetAddress.getByName(request.getRemoteAddr().toString()).getHostName());
+                    } catch (final IOException iex) {
+                        // Ignore
+                    }
+                }
+            }
+            break;
+        case REQ_LOCAL_ADDR_ATTRIBUTE:
+            {
+                // Copy from local name for now, which should simply be an address
+                request.setLocalAddr(request.getLocalName().toString());
+            }
+            break;
+        case REQ_SET_BODY_REPLAY:
+            {
+                // Set the given bytes as the content
+                final ByteChunk bc = (ByteChunk) param;
+                final int length = bc.getLength();
+                bodyBytes.setBytes(bc.getBytes(), bc.getStart(), length);
+                request.setContentLength(length);
+                first = false;
+                empty = false;
+                replay = true;
+            }
+            break;
+        default:
+            break;
         }
     }
 
