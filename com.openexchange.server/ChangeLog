@@ -1,3 +1,9 @@
+* 2011-12-14 - jan.bauerdick@open-xchange.com
+
+ - Fixed bug in AllMessagesAction, caused by removed field "unread"
+ - Action to get count of unread messages
+ - Fixed ChatChunkTest
+
 * 2011-12-14 - thorben.betten@open-xchange.com
 
  - Fix for bug 20968: Improved html2text conversion (keeping '&' characters in URLs)

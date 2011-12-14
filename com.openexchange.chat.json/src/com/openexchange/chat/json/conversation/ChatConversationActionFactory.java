@@ -87,7 +87,8 @@ public class ChatConversationActionFactory implements AJAXActionServiceFactory {
         actions.put("deleteMessages",   new com.openexchange.chat.json.conversation.action.DeleteMessagesAction(services));
         actions.put("updateMessage",    new com.openexchange.chat.json.conversation.action.UpdateMessageAction(services));
         actions.put("newMessage",       new com.openexchange.chat.json.conversation.action.NewMessageAction(services));
-        actions.put("join", new com.openexchange.chat.json.conversation.action.JoinAction(services));
+        actions.put("join",             new com.openexchange.chat.json.conversation.action.JoinAction(services));
+        actions.put("getUnread",        new com.openexchange.chat.json.conversation.action.GetUnreadAction(services));
     }
 
     @Override

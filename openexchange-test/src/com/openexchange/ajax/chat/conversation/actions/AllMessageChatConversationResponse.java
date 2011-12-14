@@ -84,7 +84,7 @@ public final class AllMessageChatConversationResponse extends AbstractAJAXRespon
         final JSONArray jsonArray = (JSONArray) getData();
         final int length = jsonArray.length();
         final List<JSONMessage> list = new ArrayList<JSONMessage>(length);
-        for (int i = 0; i < length - 1; i++) {
+        for (int i = 0; i < length; i++) {
             list.add(JSONMessage.valueOf(jsonArray.getJSONObject(i), timeZone));
         }
         return list;
