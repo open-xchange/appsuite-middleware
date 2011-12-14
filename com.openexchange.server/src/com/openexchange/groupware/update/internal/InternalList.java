@@ -408,6 +408,9 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 7.0.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Add "replyTo" column to mail/transport account table
-        new MailAccountAddReplyToTask()
+        new MailAccountAddReplyToTask(),
+
+        // Adds Outlook address fields to contact tables
+        new com.openexchange.groupware.update.tasks.ContactAddOutlookAddressFieldsTask()
     };
 }

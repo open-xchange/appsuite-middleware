@@ -10,6 +10,7 @@
  - Fix for bug 20960: Properly removing subfolders from cache on folder deletion
  - Fix for bug 20970: Not setting admin permission on prohibited \NoSelect IMAP folders
  - Fix for bug 20983: Awaiting possible attachments
+ - Back-end part to fix bug 19827: Introduced additional contact fields to support Outlook address fields
 
 * 2011-12-13 - jan.bauerdick@open-xchange.com
 

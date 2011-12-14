@@ -1129,6 +1129,36 @@ public class ContactParser extends CommonParser {
             public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setYomiCompany(parseString(jsonobject, ContactFields.YOMI_COMPANY));
             }
+        },
+        new JSONAttributeMapper() {
+            @Override
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.ADDRESS_HOME);
+            }
+            @Override
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setAddressHome(parseString(jsonobject, ContactFields.ADDRESS_HOME));
+            }
+        },
+        new JSONAttributeMapper() {
+            @Override
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.ADDRESS_BUSINESS);
+            }
+            @Override
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setAddressBusiness(parseString(jsonobject, ContactFields.ADDRESS_BUSINESS));
+            }
+        },
+        new JSONAttributeMapper() {
+            @Override
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.ADDRESS_OTHER);
+            }
+            @Override
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setAddressOther(parseString(jsonobject, ContactFields.ADDRESS_OTHER));
+            }
         }
     };
 }

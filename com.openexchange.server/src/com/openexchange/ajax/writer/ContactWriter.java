@@ -218,9 +218,6 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.USERFIELD19, contact.getUserField19(), json);
         writeParameter(ContactFields.USERFIELD20, contact.getUserField20(), json);
         writeParameter(ContactFields.USER_ID, contact.getInternalUserId(), json);
-        writeParameter(ContactFields.YOMI_LAST_NAME, contact.getYomiLastName(), json);
-        writeParameter(ContactFields.YOMI_FIRST_NAME, contact.getYomiFirstName(), json);
-        writeParameter(ContactFields.YOMI_COMPANY, contact.getYomiCompany(), json);
         writeParameter(
             ContactFields.MARK_AS_DISTRIBUTIONLIST,
             contact.getMarkAsDistribtuionlist(),
@@ -231,6 +228,9 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.YOMI_FIRST_NAME, contact.getYomiFirstName(), json);
         writeParameter(ContactFields.YOMI_LAST_NAME, contact.getYomiLastName(), json);
         writeParameter(ContactFields.YOMI_COMPANY, contact.getYomiCompany(), json);
+        writeParameter(ContactFields.ADDRESS_BUSINESS, contact.getAddressBusiness(), json);
+        writeParameter(ContactFields.ADDRESS_HOME, contact.getAddressHome(), json);
+        writeParameter(ContactFields.ADDRESS_OTHER, contact.getAddressOther(), json);
 
         final JSONArray jsonLinkArray = getLinksAsJSONArray(contact);
         if (jsonLinkArray != null) {
@@ -386,6 +386,30 @@ public class ContactWriter extends CommonWriter {
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getYomiFirstName(), jsonArray);
+            }
+        });
+
+        m.put(Contact.ADDRESS_BUSINESS, new ContactFieldWriter() {
+
+            @Override
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getAddressBusiness(), jsonArray);
+            }
+        });
+
+        m.put(Contact.ADDRESS_HOME, new ContactFieldWriter() {
+
+            @Override
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getAddressHome(), jsonArray);
+            }
+        });
+
+        m.put(Contact.ADDRESS_OTHER, new ContactFieldWriter() {
+
+            @Override
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getAddressOther(), jsonArray);
             }
         });
 

@@ -308,6 +308,13 @@ public class Contact extends CommonObject implements Serializable {
     public static final int YOMI_LAST_NAME = 611;
     public static final int YOMI_COMPANY = 612;
 
+    /**
+     * Additional fields for Outlook address fields.
+     */
+    public static final int ADDRESS_HOME = 613;
+    public static final int ADDRESS_BUSINESS = 614;
+    public static final int ADDRESS_OTHER = 615;
+
     public static final int[] CONTENT_COLUMNS = {
         DISPLAY_NAME, GIVEN_NAME, SUR_NAME, MIDDLE_NAME, SUFFIX, TITLE, STREET_HOME, POSTAL_CODE_HOME, CITY_HOME, STATE_HOME, COUNTRY_HOME,
         BIRTHDAY, MARITAL_STATUS, NUMBER_OF_CHILDREN, PROFESSION, NICKNAME, SPOUSE_NAME, ANNIVERSARY, NOTE, DEPARTMENT, POSITION,
@@ -319,7 +326,8 @@ public class Contact extends CommonObject implements Serializable {
         TELEPHONE_RADIO, TELEPHONE_TELEX, TELEPHONE_TTYTDD, INSTANT_MESSENGER1, INSTANT_MESSENGER2, TELEPHONE_IP, TELEPHONE_ASSISTANT,
         COMPANY, IMAGE1, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08,
         USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
-        USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY
+        USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY, ADDRESS_BUSINESS, ADDRESS_HOME,
+        ADDRESS_OTHER
     };
     public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
         // From ContactObject itself
@@ -552,6 +560,12 @@ public class Contact extends CommonObject implements Serializable {
 
     protected String yomiCompany;
 
+    protected String addressHome;
+
+    protected String addressBusiness;
+
+    protected String addressOther;
+
     protected boolean b_display_name;
 
     protected boolean b_given_name;
@@ -775,6 +789,12 @@ public class Contact extends CommonObject implements Serializable {
     protected boolean b_yomiLastName;
 
     protected boolean b_yomiCompany;
+
+    protected boolean b_addressHome;
+
+    protected boolean b_addressBusiness;
+
+    protected boolean b_addressOther;
 
     protected DistributionListEntryObject[] dlists;
 
@@ -1239,6 +1259,18 @@ public class Contact extends CommonObject implements Serializable {
         return yomiCompany;
     }
 
+    public String getAddressBusiness() {
+        return addressBusiness;
+    }
+
+    public String getAddressHome() {
+        return addressHome;
+    }
+
+    public String getAddressOther() {
+        return addressOther;
+    }
+    
     // SET METHODS
     public void setDisplayName(final String display_name) {
         this.display_name = display_name;
@@ -1792,6 +1824,21 @@ public class Contact extends CommonObject implements Serializable {
         b_yomiCompany = true;
     }
 
+    public void setAddressBusiness(final String addressBusiness) {
+        this.addressBusiness = addressBusiness;
+        b_addressBusiness = true;
+    }
+
+    public void setAddressHome(final String addressHome) {
+        this.addressHome = addressHome;
+        b_addressHome = true;
+    }
+
+    public void setAddressOther(final String addressOther) {
+        this.addressOther = addressOther;
+        b_addressOther = true;
+    }
+
     // REMOVE METHODS
     public void removeDisplayName() {
         display_name = null;
@@ -2330,6 +2377,21 @@ public class Contact extends CommonObject implements Serializable {
         b_yomiCompany = false;
     }
 
+    public void removeAddressHome() {
+        addressHome = null;
+        b_addressHome = false;
+    }
+
+    public void removeAddressBusiness() {
+        addressBusiness = null;
+        b_addressBusiness = false;
+    }
+
+    public void removeAddressOther() {
+        addressOther = null;
+        b_addressOther = false;
+    }
+
     // CONTAINS METHODS
     public boolean containsDisplayName() {
         return b_display_name;
@@ -2762,6 +2824,18 @@ public class Contact extends CommonObject implements Serializable {
 
     public boolean containsYomiCompany() {
         return b_yomiCompany;
+    }
+
+    public boolean containsAddressHome() {
+        return b_addressHome;
+    }
+
+    public boolean containsAddressBusiness() {
+        return b_addressBusiness;
+    }
+
+    public boolean containsAddressOther() {
+        return b_addressOther;
     }
 
     @Override
@@ -3289,6 +3363,21 @@ public class Contact extends CommonObject implements Serializable {
             differingFields.add(I(YOMI_COMPANY));
         }
 
+        if ((!containsAddressBusiness() && other.containsAddressBusiness()) || (containsAddressBusiness() && other.containsAddressBusiness() && getAddressBusiness() != other.getAddressBusiness() && (getAddressBusiness() == null || !getAddressBusiness().equals(
+            other.getAddressBusiness())))) {
+            differingFields.add(I(ADDRESS_BUSINESS));
+        }
+
+        if ((!containsAddressHome() && other.containsAddressHome()) || (containsAddressHome() && other.containsAddressHome() && getAddressHome() != other.getAddressHome() && (getAddressHome() == null || !getAddressHome().equals(
+            other.getAddressHome())))) {
+            differingFields.add(I(ADDRESS_HOME));
+        }
+
+        if ((!containsAddressOther() && other.containsAddressOther()) || (containsAddressOther() && other.containsAddressOther() && getAddressOther() != other.getAddressOther() && (getAddressOther() == null || !getAddressOther().equals(
+            other.getAddressOther())))) {
+            differingFields.add(I(ADDRESS_OTHER));
+        }
+
         return differingFields;
     }
 
@@ -3620,6 +3709,15 @@ public class Contact extends CommonObject implements Serializable {
         case YOMI_COMPANY:
             setCompany((String) value);
             break;
+        case ADDRESS_BUSINESS:
+            setAddressBusiness((String) value);
+            break;
+        case ADDRESS_HOME:
+            setAddressHome((String) value);
+            break;
+        case ADDRESS_OTHER:
+            setAddressOther((String) value);
+            break;
         default:
             super.set(field, value);
 
@@ -3843,6 +3941,12 @@ public class Contact extends CommonObject implements Serializable {
             return getYomiLastName();
         case YOMI_COMPANY:
             return getYomiCompany();
+        case ADDRESS_BUSINESS:
+            return getAddressBusiness();
+        case ADDRESS_HOME:
+            return getAddressHome();
+        case ADDRESS_OTHER:
+            return getAddressOther();
         default:
             return super.get(field);
 
@@ -4066,6 +4170,12 @@ public class Contact extends CommonObject implements Serializable {
             return containsYomiLastName();
         case YOMI_COMPANY:
             return containsYomiCompany();
+        case ADDRESS_BUSINESS:
+            return containsAddressBusiness();
+        case ADDRESS_HOME:
+            return containsAddressHome();
+        case ADDRESS_OTHER:
+            return containsAddressOther();
         default:
             return super.contains(field);
 
@@ -4392,6 +4502,15 @@ public class Contact extends CommonObject implements Serializable {
             break;
         case YOMI_COMPANY:
             removeYomiCompany();
+            break;
+        case ADDRESS_BUSINESS:
+            removeAddressBusiness();
+            break;
+        case ADDRESS_HOME:
+            removeAddressHome();
+            break;
+        case ADDRESS_OTHER:
+            removeAddressOther();
             break;
         default:
             super.remove(field);
