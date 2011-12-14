@@ -239,6 +239,12 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
                 @Override
                 public void handleEvent(final Event event) {
+                    if (FolderEventConstants.TOPIC_IDENTIFIERS.equals(event.getTopic())) {
+                        final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
+                        final String oldFolder = (String) event.getProperty(FolderEventConstants.PROPERTY_OLD_IDENTIFIER);
+                        tmp.removeSingleFromCache(sanitizeFolderId(oldFolder), FolderStorage.REAL_TREE_ID, session.getUserId(), session.getContextId(), true);
+                        return;
+                    }
                     final Session session = ((Session) event.getProperty(FolderEventConstants.PROPERTY_SESSION));
                     final Integer contextId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_CONTEXT));
                     final Integer userId = ((Integer) event.getProperty(FolderEventConstants.PROPERTY_USER));
