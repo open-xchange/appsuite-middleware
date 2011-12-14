@@ -1,3 +1,7 @@
+* 2011-12-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20968: Improved html2text conversion (keeping '&' characters in URLs)
+
 * 2011-12-13 - jan.bauerdick@open-xchange.com
 
  - Removed count of unread messages from messages-array

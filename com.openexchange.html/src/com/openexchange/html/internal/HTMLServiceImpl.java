@@ -61,6 +61,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.HttpStatus;
@@ -75,7 +78,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.parser.HTMLParser;
-import com.openexchange.html.internal.parser.handler.HTML2TextHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
@@ -451,9 +453,11 @@ public final class HTMLServiceImpl implements HTMLService {
 
     @Override
     public String html2text(final String htmlContent, final boolean appendHref) {
-        final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
-        HTMLParser.parse(htmlContent, handler);
-        return handler.getText();
+//        final HTML2TextHandler handler = new HTML2TextHandler(this, htmlContent.length(), appendHref);
+//        HTMLParser.parse(htmlContent, handler);
+//        return handler.getText();
+
+        return new Renderer(new Segment(new Source(htmlContent), 0, htmlContent.length())).toString();
     }
 
     private static final String HTML_BR = "<br />";

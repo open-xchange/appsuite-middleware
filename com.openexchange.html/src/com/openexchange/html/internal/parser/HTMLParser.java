@@ -95,7 +95,7 @@ public final class HTMLParser {
         final XmlPullParser parser = new KXmlParser();
         try {
             parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
-            parser.setFeature(FEATURE_PRESERVE_TEXT, true);
+            // parser.setFeature(FEATURE_PRESERVE_TEXT, true);
             parser.setFeature(FEATURE_RELAXED, true);
             parser.setInput(new StringReader(html));
             int event = XmlPullParser.END_DOCUMENT;
