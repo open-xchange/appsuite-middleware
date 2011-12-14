@@ -1,3 +1,7 @@
+* 2011-12-14 - choeger@open-xchange.com
+
+ - Fix for bug 20731: Unregistering a slave database host does not remove the master anymore.
+
 * 2011-12-07 - marcus.klein@open-xchange.com
 
  - Fix for bug 19379: More proper handling of context login mappings when changing them.

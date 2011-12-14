@@ -297,7 +297,7 @@ public abstract class OXUtilStorageInterface {
      *            a database id which is unregistered
      * @throws StorageException
      */
-    public abstract void unregisterDatabase(final int db_id) throws StorageException;
+    public abstract void unregisterDatabase(final int db_id, final boolean isMaster) throws StorageException;
 
     /**
      * Unregister a server from configdb

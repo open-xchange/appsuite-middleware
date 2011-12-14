@@ -49,15 +49,14 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.i;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -394,30 +393,27 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
         return sr;
     }
 
-    public void unregisterDatabase(final Database database, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public void unregisterDatabase(final Database database, final Credentials auth) throws StorageException, InvalidCredentialsException, InvalidDataException {
         try{
             doNullCheck(database);
-        } catch (final InvalidDataException e1) {            
-            log.error("Invalid data sent by client!", e1);
-            throw e1;
+        } catch (final InvalidDataException e) {            
+            log.error("Invalid data sent by client!", e);
+            throw e;
         }
-        
-        basicauth.doAuthentication(auth);
+        basicauth.doAuthentication(null == auth ? new Credentials("","") : auth);
 
         log.debug(database);
-
         setIdOrGetIDFromNameAndIdObject(null, database);
-        if (!tool.existsDatabase(database.getId())) {
+        if (!tool.existsDatabase(i(database.getId()))) {
             throw new InvalidDataException("No such database " + database);
         }
-        if (tool.poolInUse(database.getId())) {
+        if (tool.poolInUse(i(database.getId()))) {
             throw new StorageException("Pool is in use " + database);
         }
 
-        oxutil.unregisterDatabase(database.getId());
+        oxutil.unregisterDatabase(i(database.getId()), tool.isMasterDatabase(i(database.getId())));
     }
 
-  
     public void unregisterServer(final Server server, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         try{
             doNullCheck(server);
