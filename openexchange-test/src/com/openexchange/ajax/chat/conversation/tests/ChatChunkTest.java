@@ -192,7 +192,7 @@ public class ChatChunkTest extends AbstractAJAXSession {
         {
             AllMessageChatConversationRequest allMsg = new AllMessageChatConversationRequest();
             allMsg.setConversationId(cid);
-            allMsg.setSince(null, tz);
+            allMsg.setSince(new Date(0), tz);
             AllMessageChatConversationResponse allMsgRes = client.execute(allMsg);
             List<JSONMessage> res = allMsgRes.getMessages(tz);
             assertNotNull("Response was null.", res);
