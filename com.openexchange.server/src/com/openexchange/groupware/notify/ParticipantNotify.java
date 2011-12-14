@@ -324,6 +324,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         } catch (final OXException e) {
             e.log(LOG);
         }
+        /*
+         * Await attachments
+         */
+        try {
+            Thread.sleep(3000);
+        } catch (final InterruptedException e) {
+            // Ignore, but keep interrupted state
+            Thread.currentThread().interrupt();
+        }
         sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
             AppointmentActionReplacement.ACTION_NEW), folderOwner == session.getUserId() ? Notifications.APPOINTMENT_CREATE_MAIL : Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF, State.Type.NEW), false, false, false);
     }
@@ -1128,6 +1137,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                                 bodyPart.setHeader(
                                     MessageHeaders.HDR_CONTENT_DISPOSITION,
                                     MIMEMessageUtility.foldContentDisposition(cd.toString()));
+                            }
+                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+                            if (DEBUG) {
+                                LOG.debug("Added file attachment to notification message: " + fileName);
                             }
                             /*
                              * Append body part
