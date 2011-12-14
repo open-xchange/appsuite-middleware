@@ -660,8 +660,8 @@ public final class PermissionLoaderService implements Runnable {
         return map;
     }
 
-    protected static void await(final long millis, final boolean nonBlocking) throws InterruptedException {
-        if (!nonBlocking) {
+    protected static void await(final long millis, final boolean blocking) throws InterruptedException {
+        if (blocking) {
             Thread.sleep(millis);
             return;
         }
