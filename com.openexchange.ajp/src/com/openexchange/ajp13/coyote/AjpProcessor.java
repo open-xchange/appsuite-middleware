@@ -864,7 +864,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     if (longRunningAccepted) {
                         AjpLongRunningRegistry.getInstance().deregisterLongRunning(request);
                     }
-                    stage = Stage.STAGE_SERVICE_ENDED;
                 }
             }
             /*
