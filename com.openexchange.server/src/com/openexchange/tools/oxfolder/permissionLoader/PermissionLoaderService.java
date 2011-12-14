@@ -405,7 +405,7 @@ public final class PermissionLoaderService implements Runnable {
                         }
                         list.add(next);
                         // Await possible more
-                        Thread.sleep(50);
+                        await(100, true);
                     }
                     queue.drainTo(list);
                     final boolean quit = list.remove(POISON);
@@ -658,6 +658,18 @@ public final class PermissionLoaderService implements Runnable {
             set.add(pair);
         }
         return map;
+    }
+
+    protected static void await(final long millis, final boolean nonBlocking) throws InterruptedException {
+        if (!nonBlocking) {
+            Thread.sleep(millis);
+            return;
+        }
+        final long time0 = System.currentTimeMillis();
+        long time1;
+        do {
+            time1 = System.currentTimeMillis();
+        } while ((time1 - time0) < millis);
     }
 
     private static Pair newPair(final int folderid, final int contextId) {
