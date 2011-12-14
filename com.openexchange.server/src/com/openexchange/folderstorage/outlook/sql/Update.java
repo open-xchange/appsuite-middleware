@@ -57,10 +57,14 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.mail.MailServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -169,6 +173,9 @@ public final class Update {
                     stmt.setInt(4, user);
                     stmt.setString(5, entry.getValue());
                     stmt.addBatch();
+
+                    // Post event
+                    postChangedId(entry.getValue(), user, cid);
                 }
                 stmt.executeBatch();
             }
@@ -389,6 +396,20 @@ public final class Update {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static void postChangedId(final String folderId, final int userId, final int contextId) {
+        final EventAdmin eventAdmin = MailServiceRegistry.getServiceRegistry().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            final Map<String, Object> properties = new HashMap<String, Object>(6);
+            properties.put(FolderEventConstants.PROPERTY_CONTEXT, Integer.valueOf(contextId));
+            properties.put(FolderEventConstants.PROPERTY_USER, Integer.valueOf(userId));
+            properties.put(FolderEventConstants.PROPERTY_CONTENT_RELATED, Boolean.FALSE);
+            properties.put(FolderEventConstants.PROPERTY_FOLDER, folderId);
+            properties.put(FolderEventConstants.PROPERTY_IMMEDIATELY, Boolean.TRUE);
+            final Event event = new Event(FolderEventConstants.TOPIC, properties);
+            eventAdmin.postEvent(event);
         }
     }
 
