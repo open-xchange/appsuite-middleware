@@ -123,9 +123,6 @@ public final class JSONConversationWriter {
         for (final Message message : messages) {
             jsonMessages.put(writeMessage(message, timeZone));
         }
-        JSONObject unread = new JSONObject();
-        unread.put("unread", messages.size());
-        jsonMessages.put(unread);
         return jsonMessages;
     }
 

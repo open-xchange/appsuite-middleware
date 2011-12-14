@@ -404,5 +404,8 @@ public final class InternalList {
 
         // Add "sortNum" column to virtual folder table.
         new VirtualFolderAddSortNumTask(),
+
+        // Restores the initial permissions on the public root folder.
+        new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask()
     };
 }

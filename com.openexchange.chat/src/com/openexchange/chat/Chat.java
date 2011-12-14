@@ -107,6 +107,15 @@ public interface Chat extends ChatGroup {
     void post(Packet packet) throws OXException;
 
     /**
+     * Get count of unread messages since last poll
+     *
+     * @param chatUser The chat user for whom the messages are requested
+     * @return Count of unread messages
+     * @throws OXException If counting unread messages fails
+     */
+    int getUnreadCount(ChatUser chatUser) throws OXException;
+
+    /**
      * Polls all messages from this chat that were posted after specified date.
      *
      * @param since The date or <code>null</code> to poll whole chat's time line
