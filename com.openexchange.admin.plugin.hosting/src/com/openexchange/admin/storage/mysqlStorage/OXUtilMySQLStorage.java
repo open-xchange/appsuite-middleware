@@ -54,6 +54,7 @@ import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.l;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -78,6 +79,7 @@ import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.tools.arrays.Collections;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author d7
@@ -1125,52 +1127,58 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public void unregisterDatabase(final int db_id) throws StorageException {
-        Connection con = null;
-        PreparedStatement stmt = null;
+    public void unregisterDatabase(final int dbId, final boolean isMaster) throws StorageException {
+        final Connection con;
         try {
-
             con = cache.getConnectionForConfigDB();
-            con.setAutoCommit(false);
-            stmt = con.prepareStatement("DELETE FROM db_cluster WHERE read_db_pool_id = ? OR write_db_pool_id = ?");
-            stmt.setInt(1, db_id);
-            stmt.setInt(2, db_id);
-            stmt.executeUpdate();
-            stmt.close();
-
-            stmt = con.prepareStatement("DELETE FROM db_pool WHERE db_pool_id = ?");
-            stmt.setInt(1, db_id);
-            stmt.executeUpdate();
-            stmt.close();
-
-            con.commit();
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
-        } catch (final SQLException ecp) {
-            LOG.error("SQL Error", ecp);
-            try {
-                if (con != null && !con.getAutoCommit()) {
-                    con.rollback();
+        }
+        PreparedStatement stmt = null;
+        try {
+            DBUtils.startTransaction(con);
+            if (isMaster) {
+                try {
+                    stmt = con.prepareStatement("DELETE db_pool FROM db_pool JOIN db_cluster WHERE db_pool.db_pool_id=db_cluster.read_db_pool_id AND db_cluster.write_db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
                 }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of ox connection!", exp);
+                try {
+                    stmt = con.prepareStatement("DELETE FROM db_cluster WHERE write_db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            } else {
+                try {
+                    stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
+                    stmt.setInt(1, dbId);
+                    stmt.executeUpdate();
+                } finally {
+                    closeSQLStuff(stmt);
+                }
             }
-            throw new StorageException(ecp);
+            try {
+                stmt = con.prepareStatement("DELETE FROM db_pool WHERE db_pool_id=?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+            } finally {
+                closeSQLStuff(stmt);
+            }
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
         } finally {
             try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
-            if (con != null) {
-                try {
-                    cache.pushConnectionForConfigDB(con);
-                } catch (final PoolException exp) {
-                    LOG.error("Error pushing configdb connection to pool!", exp);
-                }
+                cache.pushConnectionForConfigDB(con);
+            } catch (final PoolException e) {
+                LOG.error("Error pushing configdb connection to pool!", e);
             }
         }
     }
