@@ -399,14 +399,16 @@ public final class InternalList {
         // Corrects field90 aka fileAs in contacts to have proper contact names in card view of Outlook OXtender 2.
         new CorrectFileAsInContacts(),
 
-        // Add "replyTo" column to mail/transport account table
-        new MailAccountAddReplyToTask(),
-
         // Add "sortNum" column to virtual folder table.
         new VirtualFolderAddSortNumTask(),
 
         // Restores the initial permissions on the public root folder.
         new com.openexchange.groupware.update.tasks.DropIndividualUserPermissionsOnPublicFolderTask(),
+
+        // +++++++++++++++++++++++++++++++++ Version 7.0.0 starts here. +++++++++++++++++++++++++++++++++
+
+        // Add "replyTo" column to mail/transport account table
+        new MailAccountAddReplyToTask(),
 
         // Adds Outlook address fields to contact tables
         new com.openexchange.groupware.update.tasks.ContactAddOutlookAddressFieldsTask()
