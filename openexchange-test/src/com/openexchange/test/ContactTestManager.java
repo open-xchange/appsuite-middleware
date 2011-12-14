@@ -115,7 +115,7 @@ public class ContactTestManager implements TestManager {
     private int sleep = 500;
 
     @Override
-    public void setFailOnError(boolean failOnError) {
+    public void setFailOnError(final boolean failOnError) {
         this.failOnError = failOnError;
     }
 
@@ -124,7 +124,7 @@ public class ContactTestManager implements TestManager {
         return failOnError;
     }
 
-    public void setCreatedEntities(List<Contact> createdEntities) {
+    public void setCreatedEntities(final List<Contact> createdEntities) {
         this.createdEntities = createdEntities;
     }
 
@@ -132,7 +132,7 @@ public class ContactTestManager implements TestManager {
         return createdEntities;
     }
 
-    public void setClient(AJAXClient client) {
+    public void setClient(final AJAXClient client) {
         this.client = client;
     }
 
@@ -140,7 +140,7 @@ public class ContactTestManager implements TestManager {
         return client;
     }
 
-    private void setTimeZone(TimeZone timezone) {
+    private void setTimeZone(final TimeZone timezone) {
         this.timeZone = timezone;
     }
 
@@ -148,7 +148,7 @@ public class ContactTestManager implements TestManager {
         return this.timeZone;
     }
 
-    public void setContactParser(ContactParser contactParser) {
+    public void setContactParser(final ContactParser contactParser) {
         this.contactParser = contactParser;
     }
 
@@ -156,7 +156,7 @@ public class ContactTestManager implements TestManager {
         return contactParser;
     }
 
-    public ContactTestManager(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
+    public ContactTestManager(final AJAXClient client) throws OXException, IOException, SAXException, JSONException {
         this.setClient(client);
         this.setTimeZone(client.getValues().getTimeZone());
         setCreatedEntities(new LinkedList<Contact>());
@@ -164,17 +164,17 @@ public class ContactTestManager implements TestManager {
     }
 
     public static Contact generateContact() {
-        Contact contact = generateContact(666);
+        final Contact contact = generateContact(666);
         contact.removeParentFolderID();
         return contact;
     }
 
-    public static Contact generateContact(int folderId){
+    public static Contact generateContact(final int folderId){
     	return generateContact(folderId, "surname");
     }
 
-    public static Contact generateContact(int folderId, String lastname){
-        Contact contact = new Contact();
+    public static Contact generateContact(final int folderId, final String lastname){
+        final Contact contact = new Contact();
         contact.setGivenName("givenname");
         contact.setSurName(lastname);
         contact.setMiddleName("middlename");
@@ -198,18 +198,18 @@ public class ContactTestManager implements TestManager {
      * Warning: objectID is being set, too. You might want to change
      * that for all but the most basic tests.
      */
-    public static Contact generateFullContact(int folderID){
-    	Contact contact = new Contact();
-    	for(int field: Contact.ALL_COLUMNS){
+    public static Contact generateFullContact(final int folderID){
+    	final Contact contact = new Contact();
+    	for(final int field: Contact.ALL_COLUMNS){
     		try {
     			contact.set(field, new Integer(field));
-    		} catch(ClassCastException e1) {
+    		} catch(final ClassCastException e1) {
     			try {
         			contact.set(field, String.valueOf(field));
-        		} catch(ClassCastException e2) {
+        		} catch(final ClassCastException e2) {
         			try {
             			contact.set(field, new Date(field));
-            		} catch(ClassCastException e3) {
+            		} catch(final ClassCastException e3) {
             			//don't
             		}
         		}
@@ -227,14 +227,14 @@ public class ContactTestManager implements TestManager {
      * Creates a contact via HTTP-API and updates it with new id, timestamp and all other information that is updated after such requests.
      * Remembers this contact for cleanup later.
      */
-    public Contact newAction(Contact contactToCreate) {
-        InsertRequest request = new InsertRequest(contactToCreate, getFailOnError());
+    public Contact newAction(final Contact contactToCreate) {
+        final InsertRequest request = new InsertRequest(contactToCreate, getFailOnError());
         InsertResponse response = null;
         try {
             response = getClient().execute(request, getSleep());
             response.fillObject(contactToCreate);
             lastResponse = response;
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "NewRequest");
         }
         getCreatedEntities().add(contactToCreate);
@@ -244,7 +244,7 @@ public class ContactTestManager implements TestManager {
     /**
      * Create multiple contacts via the HTTP-API at once
      */
-    public void newAction(Contact... contacts) {
+    public void newAction(final Contact... contacts) {
         for (int i = 0; i < contacts.length; i++) {
             this.newAction(contacts[i]);
         }
@@ -253,13 +253,13 @@ public class ContactTestManager implements TestManager {
     /**
      * Updates a contact via HTTP-API and returns the same contact for convenience
      */
-    public Contact updateAction(Contact contact) {
-        UpdateRequest request = new UpdateRequest(contact);
+    public Contact updateAction(final Contact contact) {
+        final UpdateRequest request = new UpdateRequest(contact);
         try {
             lastResponse = getClient().execute(request, getSleep());
             contact.setLastModified(lastResponse.getTimestamp());
             remember(contact);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "UpdateRequest for folder " + contact.getParentFolderID() + " and object " + contact.getObjectID());
         }
         return contact;
@@ -268,14 +268,14 @@ public class ContactTestManager implements TestManager {
     /**
      * Deletes a contact via HTTP-API
      */
-    public void deleteAction(Contact contactToDelete) {
-        boolean oldValue = this.getFailOnError();
+    public void deleteAction(final Contact contactToDelete) {
+        final boolean oldValue = this.getFailOnError();
         this.setFailOnError(failOnError);
         try {
             contactToDelete.setLastModified(new Date(Long.MAX_VALUE));
-            DeleteRequest request = new DeleteRequest(contactToDelete, getFailOnError());
+            final DeleteRequest request = new DeleteRequest(contactToDelete, getFailOnError());
             lastResponse = getClient().execute(request, getSleep());
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(
                 e,
                 "DeleteRequest for folder " + contactToDelete.getParentFolderID() + " and object " + contactToDelete.getObjectID());
@@ -288,7 +288,7 @@ public class ContactTestManager implements TestManager {
     /**
      * Get a contact via HTTP-API with an existing ContactObject
      */
-    public Contact getAction(Contact contact) {
+    public Contact getAction(final Contact contact) {
         return getAction(contact.getParentFolderID(), contact.getObjectID());
     }
 
@@ -297,15 +297,16 @@ public class ContactTestManager implements TestManager {
      */
     public Contact getAction(final int folderId, final int objectId) {
         Contact returnedContact = null;
-        GetRequest request = new GetRequest(folderId, objectId, getTimeZone(), false);
+        final GetRequest request = new GetRequest(folderId, objectId, getTimeZone(), false);
         GetResponse response = null;
         try {
             response = getClient().execute(request, getSleep());
             lastResponse = response;
-            if (response.hasError() && getFailOnError())
+            if (response.hasError() && getFailOnError()) {
                 throw response.getException();
+            }
             returnedContact = response.getContact();
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "GetRequest for folder " + folderId + " and object " + objectId);
             return null;
         }
@@ -317,37 +318,37 @@ public class ContactTestManager implements TestManager {
      */
     @Override
     public void cleanUp() {
-        for (Contact contact : new Vector<Contact>(getCreatedEntities())) {
-            boolean old = getFailOnError();
+        for (final Contact contact : new Vector<Contact>(getCreatedEntities())) {
+            final boolean old = getFailOnError();
             setFailOnError(false);
             deleteAction(contact);
             setFailOnError(old);
         }
     }
 
-    public Contact[] allAction(int folderId, int[] columns, int orderBy, Order order, String collation) {
+    public Contact[] allAction(final int folderId, final int[] columns, final int orderBy, final Order order, final String collation) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        AllRequest request = new AllRequest(folderId, columns, orderBy, order, collation);
+        final AllRequest request = new AllRequest(folderId, columns, orderBy, order, collation);
         try {
-            CommonAllResponse response = getClient().execute(request, getSleep());
+            final CommonAllResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
         return allContacts.toArray(new Contact[]{});
     }
 
-    public Contact[] allAction(int folderId, int[] columns) {
+    public Contact[] allAction(final int folderId, final int[] columns) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        AllRequest request = new AllRequest(folderId, columns);
+        final AllRequest request = new AllRequest(folderId, columns);
         try {
-            CommonAllResponse response = getClient().execute(request, getSleep());
+            final CommonAllResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "AllRequest for folder " + folderId);
         }
         return allContacts.toArray(new Contact[]{});
@@ -357,7 +358,7 @@ public class ContactTestManager implements TestManager {
 	/**
      * get all contacts in one folder via the HTTP-API
      */
-    public Contact[] allAction(int folderId) {
+    public Contact[] allAction(final int folderId) {
         return allAction(folderId, Contact.ALL_COLUMNS);
     }
 
@@ -366,13 +367,13 @@ public class ContactTestManager implements TestManager {
      */
     public Contact[] listAction(final int[]... folderAndObjectIds) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        ListRequest request = new ListRequest(ListIDs.l(folderAndObjectIds), Contact.ALL_COLUMNS, true);
+        final ListRequest request = new ListRequest(ListIDs.l(folderAndObjectIds), Contact.ALL_COLUMNS, true);
         try {
-            CommonListResponse response = getClient().execute(request, getSleep());
+            final CommonListResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "ListRequest");
         }
         return allContacts.toArray(new Contact[]{});
@@ -381,24 +382,24 @@ public class ContactTestManager implements TestManager {
     /**
      * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
      */
-    public Contact[] searchAction(String pattern, int folderId) {
+    public Contact[] searchAction(final String pattern, final int folderId) {
     	return searchAction(pattern, folderId, Contact.ALL_COLUMNS);
     }
 
-    public Contact[] searchAction(String pattern, int folderId, int... columns) {
+    public Contact[] searchAction(final String pattern, final int folderId, final int... columns) {
     	return searchAction(pattern, folderId, -1, null, null, Contact.ALL_COLUMNS);
     }
-    public Contact[] searchAction(String pattern, int folderId, int orderBy, Order order, String collation, int... columns) {
+    public Contact[] searchAction(final String pattern, final int folderId, final int orderBy, final Order order, final String collation, final int... columns) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        String orderDir = order == null ? "ASC" : order.equals(Order.ASCENDING) ? "ASC" : "DESC";
+        final String orderDir = order == null ? "ASC" : order.equals(Order.ASCENDING) ? "ASC" : "DESC";
 
-        SearchRequest request = new SearchRequest(pattern, false, folderId, columns, orderBy, orderDir, collation, failOnError);
+        final SearchRequest request = new SearchRequest(pattern, false, folderId, columns, orderBy, orderDir, collation, failOnError);
         try {
-            SearchResponse response = getClient().execute(request, getSleep());
+            final SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with pattern: " + pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
@@ -407,15 +408,15 @@ public class ContactTestManager implements TestManager {
     }
 
 
-    public Contact[] searchFirstletterAction(String firstLetter, int folderId) {
+    public Contact[] searchFirstletterAction(final String firstLetter, final int folderId) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        SearchRequest request = new SearchRequest(firstLetter, true, folderId, Contact.ALL_COLUMNS, -1, null, true);
+        final SearchRequest request = new SearchRequest(firstLetter, true, folderId, Contact.ALL_COLUMNS, -1, null, true);
         try {
-            SearchResponse response = getClient().execute(request, getSleep());
+            final SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with first letter: " + firstLetter + ", in folder: " + Integer.toString(folderId) + e.getMessage());
@@ -423,23 +424,23 @@ public class ContactTestManager implements TestManager {
         return allContacts.toArray(new Contact[]{});
     }
 
-    public Contact[] searchAction(ContactSearchObject search) {
+    public Contact[] searchAction(final ContactSearchObject search) {
     	return searchAction(search, Contact.ALL_COLUMNS);
     }
 
-    public Contact[] searchAction(ContactSearchObject search, int[] columns) {
+    public Contact[] searchAction(final ContactSearchObject search, final int[] columns) {
     	return searchAction(search, columns, -1, null, null);
     }
 
-    public Contact[] searchAction(ContactSearchObject search, int[] columns, int orderBy, Order order, String collation) {
+    public Contact[] searchAction(final ContactSearchObject search, final int[] columns, final int orderBy, final Order order, final String collation) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        SearchRequest request = new SearchRequest(search, columns, orderBy, order, collation, getFailOnError());
+        final SearchRequest request = new SearchRequest(search, columns, orderBy, order, collation, getFailOnError());
         try {
-            SearchResponse response = getClient().execute(request, getSleep());
+            final SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data, columns);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with search-object: " +  search + ": " + e.getMessage());
@@ -450,15 +451,15 @@ public class ContactTestManager implements TestManager {
     /**
      * Search for contacts in a folder via the HTTP-EnumAPI. Use "-1" as folderId to search all available folders
      */
-    public Contact[] searchAction(String pattern, int folderId, boolean initialSearch) {
+    public Contact[] searchAction(final String pattern, final int folderId, final boolean initialSearch) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
+        final SearchRequest request = new SearchRequest(pattern, folderId, Contact.ALL_COLUMNS, true);
         try {
-            SearchResponse response = getClient().execute(request, getSleep());
+            final SearchResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(
                 e,
                 "searching for contacts with pattern: " + pattern + ", in folder: " + Integer.toString(folderId) + e.getMessage());
@@ -466,15 +467,15 @@ public class ContactTestManager implements TestManager {
         return allContacts.toArray(new Contact[]{});
     }
 
-    public Contact[] searchAction(JSONObject filter, int[] columns, int orderBy, Order order){
+    public Contact[] searchAction(final JSONObject filter, final int[] columns, final int orderBy, final Order order){
         List<Contact> contacts = new LinkedList<Contact>();
-		AdvancedSearchRequest request = new AdvancedSearchRequest(filter, columns, orderBy, order == Order.DESCENDING ? "DESC" : "ASC");
+		final AdvancedSearchRequest request = new AdvancedSearchRequest(filter, columns, orderBy, order == Order.DESCENDING ? "DESC" : "ASC");
 		try {
-			CommonSearchResponse response = getClient().execute(request, getSleep());
+			final CommonSearchResponse response = getClient().execute(request, getSleep());
 			lastResponse = response;
-            JSONArray data = (JSONArray) response.getResponse().getData();
+            final JSONArray data = (JSONArray) response.getResponse().getData();
             contacts = transform(data, columns);
-		} catch (Exception e) {
+		} catch (final Exception e) {
             doExceptionHandling(e,"searching for contacts with term: \n" + filter.toString() );
         }
         return contacts.toArray(new Contact[]{});
@@ -483,45 +484,45 @@ public class ContactTestManager implements TestManager {
     /**
      * Get contacts in a folder that were updated since a specific date via the HTTP-API
      */
-    public Contact[] updatesAction(int folderId, Date lastModified) {
+    public Contact[] updatesAction(final int folderId, final Date lastModified) {
         List<Contact> allContacts = new LinkedList<Contact>();
-        UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
+        final UpdatesRequest request = new UpdatesRequest(folderId, Contact.ALL_COLUMNS, -1, null, lastModified);
         try {
-            ContactUpdatesResponse response = getClient().execute(request, getSleep());
+            final ContactUpdatesResponse response = getClient().execute(request, getSleep());
             lastResponse = response;
             final JSONArray data = (JSONArray) response.getResponse().getData();
             allContacts = transform(data);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             doExceptionHandling(e, "UpdateRequest");
         }
         return allContacts.toArray(new Contact[]{});
     }
 
-    protected void doExceptionHandling(Exception exception, String action) {
+    protected void doExceptionHandling(final Exception exception, final String action) {
         try {
             lastException = exception;
             throw exception;
-        } catch (OXException e) {
+        } catch (final OXException e) {
             if (getFailOnError()){
             	e.printStackTrace();
                 fail("AjaxException occured during " + action + ": " + e.getMessage());
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             if (getFailOnError()){
             	e.printStackTrace();
                 fail("IOException occured during " + action + ": " + e.getMessage());
             }
-        } catch (SAXException e) {
+        } catch (final SAXException e) {
             if (getFailOnError()){
             	e.printStackTrace();
                 fail("SAXException occured during " + action + ": " + e.getMessage());
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             if (getFailOnError()){
             	e.printStackTrace();
                 fail("JSONException occured during " + action + ": " + e.getMessage());
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             if (getFailOnError()){
             	e.printStackTrace();
                 fail("Unexpected exception occured during " + action + ": " + e.getMessage());
@@ -529,14 +530,15 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    protected void doJanitorialTasks(AbstractAJAXResponse response) throws OXException{
+    protected void doJanitorialTasks(final AbstractAJAXResponse response) throws OXException{
         lastResponse = response;
-        if(response.hasError() && failOnError)
+        if(response.hasError() && failOnError) {
             throw response.getException();
+        }
     }
 
-    private void remember(Contact contact) {
-        for (Contact tempContact : getCreatedEntities()) {
+    private void remember(final Contact contact) {
+        for (final Contact tempContact : getCreatedEntities()) {
             if (tempContact.getObjectID() == contact.getObjectID()) {
                 getCreatedEntities().set(getCreatedEntities().indexOf(tempContact), contact);
             } else {
@@ -545,24 +547,24 @@ public class ContactTestManager implements TestManager {
         }
     }
 
-    private List<Contact> transform(JSONArray data) throws JSONException, OXException, OXException {
+    private List<Contact> transform(final JSONArray data) throws JSONException, OXException, OXException {
     	return transform(data, Contact.ALL_COLUMNS);
     }
 
-    private List<Contact> transform(JSONArray data, int[] columns) throws JSONException, OXException, OXException {
-        List<Contact> contacts = new LinkedList<Contact>();
+    private List<Contact> transform(final JSONArray data, final int[] columns) throws JSONException, OXException, OXException {
+        final List<Contact> contacts = new LinkedList<Contact>();
         for (int i = 0; i < data.length(); i++) {
             final JSONArray jsonArray = data.getJSONArray(i);
-            JSONObject jsonObject = new JSONObject();
+            final JSONObject jsonObject = new JSONObject();
             for (int a = 0; a < jsonArray.length(); a++) {
                 if (!"null".equals(jsonArray.getString(a))) {
-                    String fieldname = ContactMapping.columnToFieldName(columns[a]);
+                    final String fieldname = ContactMapping.columnToFieldName(columns[a]);
                     if (fieldname != null) {
                         jsonObject.put(fieldname, jsonArray.get(a));
                     }
                 }
             }
-            Contact contactObject = new Contact();
+            final Contact contactObject = new Contact();
             getContactParser().parse(contactObject, jsonObject);
             contacts.add(contactObject);
         }
@@ -589,7 +591,7 @@ public class ContactTestManager implements TestManager {
         return lastException != null;
     }
 
-	public void setSleep(int sleep) {
+	public void setSleep(final int sleep) {
 		this.sleep = sleep;
 	}
 
@@ -726,24 +728,29 @@ final class ContactMapping extends TestCase {
             put(ContactFields.YOMI_FIRST_NAME, Contact.YOMI_FIRST_NAME);
             put(ContactFields.YOMI_LAST_NAME, Contact.YOMI_LAST_NAME);
 
-        } catch (Exception e) {
+            put(ContactFields.ADDRESS_BUSINESS, Contact.ADDRESS_BUSINESS);
+            put(ContactFields.ADDRESS_HOME, Contact.ADDRESS_HOME);
+            put(ContactFields.ADDRESS_OTHER, Contact.ADDRESS_OTHER);
+
+        } catch (final Exception e) {
             fail(e.getMessage());
         }
     }
 
-    private static void put(String fieldname, int column) throws Exception {
+    private static void put(final String fieldname, final int column) throws Exception {
         if (!fields2columns.containsKey(fieldname) && !columns2fields.containsKey(I(column))) {
             fields2columns.put(fieldname, I(column));
             columns2fields.put(I(column), fieldname);
-        } else
+        } else {
             throw (new Exception("One Part of this combination is also mapped to something else!"));
+        }
     }
 
-    public static String columnToFieldName(int column) {
+    public static String columnToFieldName(final int column) {
         return columns2fields.get(I(column));
     }
 
-    public static int fieldNameToColumn(String fieldname) {
+    public static int fieldNameToColumn(final String fieldname) {
         return (fields2columns.get(fieldname)).intValue();
     }
 }

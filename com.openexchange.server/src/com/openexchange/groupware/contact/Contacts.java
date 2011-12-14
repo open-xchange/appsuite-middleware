@@ -1779,8 +1779,9 @@ public final class Contacts {
                 if (DEBUG) {
                     LOG.debug(new StringBuilder("INSERT LINKAGE ").append(getStatementString(ps)));
                 }
-                ps.execute();
+                ps.addBatch();
             }
+            ps.executeBatch();
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
@@ -7796,6 +7797,138 @@ public final class Contacts {
             @Override
             public String getReadableTitle() {
                 return "Yomi Company";
+            }
+        };
+        /** ************** * Home address * * ************ */
+        mapping[Contact.ADDRESS_HOME] = new Mapper() {
+
+            @Override
+            public String getDBFieldName() {
+                return "homeAddress";
+            }
+
+            @Override
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final String t = rs.getString(pos);
+                if (!rs.wasNull()) {
+                    co.setAddressHome(t);
+                }
+            }
+
+            @Override
+            public boolean containsElement(final Contact co) {
+                return co.containsAddressHome();
+            }
+
+            @Override
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+                ps.setString(pos, co.getAddressHome());
+            }
+
+            @Override
+            public boolean compare(final Contact co, final Contact original) {
+                final String x = co.getAddressHome();
+                final String y = original.getAddressHome();
+
+                return areEqual(x, y);
+            }
+
+            @Override
+            public String getValueAsString(final Contact co) {
+                return co.getAddressHome();
+            }
+
+            @Override
+            public String getReadableTitle() {
+                return "Home Address";
+            }
+        };
+        /** ************** * Business address * * ************ */
+        mapping[Contact.ADDRESS_BUSINESS] = new Mapper() {
+
+            @Override
+            public String getDBFieldName() {
+                return "businessAddress";
+            }
+
+            @Override
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final String t = rs.getString(pos);
+                if (!rs.wasNull()) {
+                    co.setAddressBusiness(t);
+                }
+            }
+
+            @Override
+            public boolean containsElement(final Contact co) {
+                return co.containsAddressBusiness();
+            }
+
+            @Override
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+                ps.setString(pos, co.getAddressBusiness());
+            }
+
+            @Override
+            public boolean compare(final Contact co, final Contact original) {
+                final String x = co.getAddressBusiness();
+                final String y = original.getAddressBusiness();
+
+                return areEqual(x, y);
+            }
+
+            @Override
+            public String getValueAsString(final Contact co) {
+                return co.getAddressBusiness();
+            }
+
+            @Override
+            public String getReadableTitle() {
+                return "Business Address";
+            }
+        };
+        /** ************** * Other address * * ************ */
+        mapping[Contact.ADDRESS_OTHER] = new Mapper() {
+
+            @Override
+            public String getDBFieldName() {
+                return "otherAddress";
+            }
+
+            @Override
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final String t = rs.getString(pos);
+                if (!rs.wasNull()) {
+                    co.setAddressOther(t);
+                }
+            }
+
+            @Override
+            public boolean containsElement(final Contact co) {
+                return co.containsAddressOther();
+            }
+
+            @Override
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+                ps.setString(pos, co.getAddressOther());
+            }
+
+            @Override
+            public boolean compare(final Contact co, final Contact original) {
+                final String x = co.getAddressOther();
+                final String y = original.getAddressOther();
+
+                return areEqual(x, y);
+            }
+
+            @Override
+            public String getValueAsString(final Contact co) {
+                return co.getAddressOther();
+            }
+
+            @Override
+            public String getReadableTitle() {
+                return "Other Address";
             }
         };
     }
