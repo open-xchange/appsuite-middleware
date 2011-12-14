@@ -62,7 +62,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.databaseold.Database;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.RdbContextStorage;
 import com.openexchange.groupware.update.Attributes;
@@ -88,6 +88,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
         super();
     }
 
+    @Override
     public String[] getDependencies() {
         return new String[] { "com.openexchange.groupware.update.tasks.GlobalAddressBookPermissionsResolverTask" };
     }
@@ -97,7 +98,8 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
         return new Attributes(UpdateConcurrency.BACKGROUND, WorkingLevel.SCHEMA);
     }
 
-    public void perform(PerformParameters params) throws AbstractOXException {
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
         final int ctxId = params.getContextId();
         final ProgressState progress = params.getProgressState();
         final Connection con = Database.getNoTimeout(ctxId, true);
@@ -110,7 +112,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
             for (final int contextId : contextIds) {
                 progress.setState(pos++);
                 try {
-                    List<OCLPermission> permissions = getPermissions(con, contextId);
+                    final List<OCLPermission> permissions = getPermissions(con, contextId);
                     final int contextAdminId = RdbContextStorage.getAdmin(con, contextId);
                     correctGroupZero(con, contextId, permissions);
                     correctContextAdmin(con, contextId, permissions, contextAdminId);
@@ -140,7 +142,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
     }
 
     private boolean isGroupZeroCorrect(final List<OCLPermission> permissions) {
-        for (OCLPermission permission : permissions) {
+        for (final OCLPermission permission : permissions) {
             if (OCLPermission.ALL_GROUPS_AND_USERS == permission.getEntity()) {
                 return !permission.isFolderAdmin() && OCLPermission.CREATE_SUB_FOLDERS == permission.getFolderPermission() && OCLPermission.NO_PERMISSIONS == permission.getReadPermission() && OCLPermission.NO_PERMISSIONS == permission.getWritePermission() && OCLPermission.NO_PERMISSIONS == permission.getDeletePermission();
             }
@@ -186,7 +188,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
     }
     
     private boolean isContained(final List<OCLPermission> permissions, final int adminId) {
-        for (OCLPermission permission : permissions) {
+        for (final OCLPermission permission : permissions) {
             if (adminId == permission.getEntity()) {
                 return true;
             }
@@ -195,7 +197,7 @@ public class DropIndividualUserPermissionsOnPublicFolderTask extends UpdateTaskA
     }
 
     private boolean isContextAdminWrong(final List<OCLPermission> permissions, final int adminId) {
-        for (OCLPermission permission : permissions) {
+        for (final OCLPermission permission : permissions) {
             if (adminId == permission.getEntity()) {
                 return !permission.isFolderAdmin();
             }
