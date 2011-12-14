@@ -60,9 +60,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
@@ -778,11 +780,18 @@ public final class CacheFolderStorage implements FolderStorage {
             final String realParentId;
             final boolean cacheable;
             final boolean global;
-            final String sContextId = String.valueOf(storageParameters.getContextId());
+            final int contextId = storageParameters.getContextId();
+            final int userId = storageParameters.getUserId();
+            final String sContextId = String.valueOf(contextId);
+            final String[] subfolderIDs;
             {
                 final Folder deleteMe;
                 try {
                     deleteMe = getFolder(treeId, folderId, storageParameters);
+                    /*
+                     * Load all subfolders
+                     */
+                    subfolderIDs = loadAllSubfolders(treeId, deleteMe, false, storageParameters);
                 } catch (final OXException e) {
                     /*
                      * Obviously folder does not exist
@@ -796,8 +805,6 @@ public final class CacheFolderStorage implements FolderStorage {
                     return;
                 }
                 {
-                    final int contextId = storageParameters.getContextId();
-                    final int userId = storageParameters.getUserId();
                     final FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
                     for (final Permission permission : deleteMe.getPermissions()) {
                         if (!permission.isGroup()) {
@@ -864,6 +871,14 @@ public final class CacheFolderStorage implements FolderStorage {
                 removeFromSubfolders(treeId, parentId, sContextId, session);
                 if (null != realParentId) {
                     removeFromSubfolders(realTreeId, realParentId, sContextId, session);
+                }
+            }
+            /*
+             * Drop subfolders from cache
+             */
+            {
+                for (final String subfolderId : subfolderIDs) {
+                    removeSingleFromCache(subfolderId, treeId, userId, contextId, true);
                 }
             }
             /*
@@ -1692,6 +1707,65 @@ public final class CacheFolderStorage implements FolderStorage {
                 storage.rollback(storageParameters);
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private String[] loadAllSubfolders(final String treeId, final Folder folder, final boolean readWrite, final StorageParameters storageParameters) throws OXException {
+        final Set<FolderStorage> openedStorages = new HashSet<FolderStorage>(2);
+        final Set<String> ids = new HashSet<String>(16);
+        try {
+            final String[] subfolderIds = folder.getSubfolderIDs();
+            if (null == subfolderIds) {
+                loadAllSubfolders(treeId, folder.getID(), readWrite, storageParameters, ids, openedStorages);
+            } else {
+                ids.addAll(Arrays.asList(subfolderIds));
+                for (final String subfolderId : subfolderIds) {
+                    loadAllSubfolders(treeId, subfolderId, readWrite, storageParameters, ids, openedStorages);
+                }
+            }
+            for (final FolderStorage fs : openedStorages) {
+                fs.commitTransaction(storageParameters);
+            }
+        } catch (final OXException e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final RuntimeException e) {
+            for (final FolderStorage fs : openedStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        return ids.toArray(new String[ids.size()]);
+    }
+
+    private void loadAllSubfolders(final String treeId, final String folderId, final boolean readWrite, final StorageParameters storageParameters, final Set<String> ids, final Set<FolderStorage> openedStorages) throws OXException {
+        final FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+        if (null == storage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+        }
+        checkOpenedStorage(storage, readWrite, openedStorages, storageParameters);
+        try {
+            final SortableId[] subfolders = storage.getSubfolders(treeId, folderId, storageParameters);
+            for (final SortableId sortableId : subfolders) {
+                final String id = sortableId.getId();
+                loadAllSubfolders(treeId, id, readWrite, storageParameters, ids, openedStorages);
+                ids.add(id);
+            }
+        } catch (final RuntimeException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    protected void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages, final StorageParameters storageParameters) throws OXException {
+        if (openedStorages.contains(checkMe)) {
+            // Passed storage is already opened
+            return;
+        }
+        // Passed storage has not been opened before. Open now and add to collection
+        if (checkMe.startTransaction(storageParameters, modify)) {
+            openedStorages.add(checkMe);
         }
     }
 
