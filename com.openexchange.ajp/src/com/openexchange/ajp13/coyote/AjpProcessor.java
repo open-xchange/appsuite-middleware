@@ -921,8 +921,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
 
     // ----------------------------------------------------- ActionHook Methods
 
-    private static final int MAX_PING_COUNT = 0;
-
     /**
      * Send an action to the connector.
      *
@@ -971,14 +969,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             final Lock hardLock = mainLock.writeLock();
             hardLock.lock();
             try {
-                final int maxPingCount = MAX_PING_COUNT;
-                if (maxPingCount > 0 && ++pingCount > maxPingCount) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Max. keep-alive count reached. Canceling...");
-                    }
-                    cancel();
-                    return;
-                }
                 if (response.isCommitted()) {
                     /*
                      * Write empty SEND-BODY-CHUNK package
