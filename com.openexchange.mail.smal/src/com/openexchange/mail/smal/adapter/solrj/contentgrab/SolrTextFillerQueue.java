@@ -158,7 +158,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * Starts consuming from queue.
      */
     public void start() {
-        future = SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
+        future = SMALServiceLookup.getThreadPool().submit(ThreadPools.task(this, simpleName));
     }
 
     /**
@@ -291,7 +291,7 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
      * @throws InterruptedException If thread is interrupted
      */
     protected void handleFillers(final List<TextFiller> groupedFillers) throws InterruptedException {
-        final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
+        final ThreadPoolService poolService = SMALServiceLookup.getThreadPool();
         final int size = groupedFillers.size();
         final int configuredBlockSize = MAX_FILLER_CHUNK;
         final long st = DEBUG ? System.currentTimeMillis() : 0L;

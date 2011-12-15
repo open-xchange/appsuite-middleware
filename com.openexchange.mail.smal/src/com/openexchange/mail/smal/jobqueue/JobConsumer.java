@@ -216,7 +216,7 @@ final class JobConsumer extends AbstractTask<Object> {
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
                     {
-                        final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
+                        final ThreadPoolService threadPool = SMALServiceLookup.getThreadPool();
                         for (final Job job : jobs) {
                             performJob(job, threadPool);
                         }

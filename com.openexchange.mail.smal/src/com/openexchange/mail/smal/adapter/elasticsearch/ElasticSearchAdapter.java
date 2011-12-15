@@ -245,7 +245,7 @@ public final class ElasticSearchAdapter implements IndexAdapter {
             /*
              * Safe start-up in separate thread
              */
-            final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
+            final ThreadPoolService threadPool = SMALServiceLookup.getThreadPool();
             final TransportClient transportClient = client;
             final Future<Object> elasticSearchStartup = threadPool.submit(ThreadPools.task(new Runnable() {
 

@@ -86,7 +86,7 @@ public final class JobQueue {
             synchronized (JobQueue.class) {
                 tmp = instance;
                 if (null == tmp) {
-                    instance = tmp = new JobQueue(SMALServiceLookup.getServiceStatic(ThreadPoolService.class));
+                    instance = tmp = new JobQueue(SMALServiceLookup.getThreadPool());
                 }
             }
         }
