@@ -91,15 +91,13 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
         if (isEmpty(notifierFullNames)) {
             fullNames = null;
         } else {
-            fullNames = SPLIT.split(notifierFullNames);
+            fullNames = Pattern.compile(" *, *").split(notifierFullNames);
         }
     }
 
     /*-
      * --------------------------------- Member stuff ----------------------------------
      */
-
-    private static final Pattern SPLIT = Pattern.compile(" *, *");
 
     @Override
     public boolean addTaskFor(final int accountId, final Session session) {
