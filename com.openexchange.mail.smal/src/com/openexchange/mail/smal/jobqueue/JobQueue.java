@@ -123,6 +123,8 @@ public final class JobQueue {
         identifiers = new ConcurrentHashMap<String, Job>(CAPACITY);
         consumer = new JobConsumer(queue, identifiers, false);
         consumerFuture = threadPool.submit(consumer, AbortBehavior.getInstance());
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobQueue.class));
+        logger.info("\n\tSMAL JobQueue orderly started.");
     }
 
     /**
