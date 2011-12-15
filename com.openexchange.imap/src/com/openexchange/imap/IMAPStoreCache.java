@@ -58,6 +58,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
+import javax.mail.NoSuchProviderException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
@@ -307,10 +308,10 @@ public final class IMAPStoreCache {
         /*
          * Return connected IMAP store
          */
-        return connectedIMAPStore(false, getBlockingQueue(accountId, server, port, login, session), accountId, imapSession, server, port, login, pw);
+        return connectedIMAPStore(false, getBlockingQueue(accountId, server, port, login, session), imapSession, server, port, login, pw);
     }
 
-    private IMAPStore connectedIMAPStore(final boolean await, final LockProvidingBlockingQueue<IMAPStoreWrapper> queue, final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException, OXException {
+    private IMAPStore connectedIMAPStore(final boolean await, final LockProvidingBlockingQueue<IMAPStoreWrapper> queue, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException, OXException {
         final Lock queueLock = queue.getLock();
         queueLock.lock();
         try {
@@ -340,47 +341,40 @@ public final class IMAPStoreCache {
              * Check for available IMAP store
              */
             final BlockingQueue<IMAPStoreWrapper> daQueue = queue.getBlockingQueue();
-            for (final IMAPStoreWrapper wrapper : daQueue) {
-                IMAPStore imapStore = wrapper.markOccupied();
-                if (null != imapStore) {
-                    if (checkConnected && !imapStore.isConnected()) {
-                        /*
-                         * How is that possible? Check IMAPStore.finalize()
-                         */
-                        try {
-                            imapStore.connect(server, port, login, pw);
-                        } catch (final AuthenticationFailedException e) {
-                            /*
-                             * Retry connect with AUTH=PLAIN disabled
-                             */
-                            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-                            imapStore = (IMAPStore) imapSession.getStore(name);
-                            imapStore.connect(server, port, login, pw);
-                        }
-                        if (null != debugBuilder) {
-                            debugBuilder.setLength(0);
-                            LOG.debug(debugBuilder.append("\n--- /!\\ --- Re-connected cached IMAP store for: imap://").append(login).append(
-                                '@').append(server).append(':').append(port).append("--- /!\\ ---\n").toString());
-                        }
-                    }
-                    if (null != debugBuilder) {
-                        debugBuilder.setLength(0);
-                        LOG.debug(debugBuilder.append(
-                            "Using cached " + (imapStore.isConnected() ? "connected" : "UNCONNECTED") + " IMAP store for: imap://").append(
-                            login).append('@').append(server).append(':').append(port).toString());
-                    }
-                    return imapStore;
+            {
+                final IMAPStore occupiedStore = occupyStore(imapSession, server, port, login, pw, debugBuilder, daQueue);
+                if (null != occupiedStore) {
+                    return occupiedStore;
                 }
             }
             /*
              * Check if space available
              */
             final IMAPStoreWrapper newWrapper = newWrapper();
-            if (!daQueue.offer(newWrapper)) {
+            while (!daQueue.offer(newWrapper)) {
                 /*
-                 * No space available
+                 * No space available, await for space to become available
                  */
-                return connectedIMAPStore(true, queue, accountId, imapSession, server, port, login, pw);
+                try {
+                    if (null != debugBuilder) {
+                        debugBuilder.setLength(0);
+                        LOG.debug(debugBuilder.append("Awaiting free IMAP store for: imap://").append(login).append('@').append(server).append(
+                            ':').append(port).toString());
+                    }
+                    final CountingCondition condition = queue.getCondition();
+                    condition.await();
+                } catch (final InterruptedException e) {
+                    // Should not occur
+                    ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+                    throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+                }
+                /*
+                 * Re-check if a free store is available
+                 */
+                final IMAPStore occupiedStore = occupyStore(imapSession, server, port, login, pw, debugBuilder, daQueue);
+                if (null != occupiedStore) {
+                    return occupiedStore;
+                }
             }
             try {
                 /*
@@ -422,6 +416,42 @@ public final class IMAPStoreCache {
         } finally {
             queueLock.unlock();
         }
+    }
+
+    private IMAPStore occupyStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final StringBuilder debugBuilder, final BlockingQueue<IMAPStoreWrapper> daQueue) throws MessagingException, NoSuchProviderException {
+        for (final IMAPStoreWrapper wrapper : daQueue) {
+            IMAPStore imapStore = wrapper.markOccupied();
+            if (null != imapStore) {
+                if (checkConnected && !imapStore.isConnected()) {
+                    /*
+                     * How is that possible? Check IMAPStore.finalize()
+                     */
+                    try {
+                        imapStore.connect(server, port, login, pw);
+                    } catch (final AuthenticationFailedException e) {
+                        /*
+                         * Retry connect with AUTH=PLAIN disabled
+                         */
+                        imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
+                        imapStore = (IMAPStore) imapSession.getStore(name);
+                        imapStore.connect(server, port, login, pw);
+                    }
+                    if (null != debugBuilder) {
+                        debugBuilder.setLength(0);
+                        LOG.debug(debugBuilder.append("\n--- /!\\ --- Re-connected cached IMAP store for: imap://").append(login).append(
+                            '@').append(server).append(':').append(port).append("--- /!\\ ---\n").toString());
+                    }
+                }
+                if (null != debugBuilder) {
+                    debugBuilder.setLength(0);
+                    LOG.debug(debugBuilder.append(
+                        "Using cached " + (imapStore.isConnected() ? "connected" : "UNCONNECTED") + " IMAP store for: imap://").append(
+                        login).append('@').append(server).append(':').append(port).toString());
+                }
+                return imapStore;
+            }
+        }
+        return null;
     }
 
     /**
