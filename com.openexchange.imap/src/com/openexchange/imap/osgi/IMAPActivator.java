@@ -157,7 +157,11 @@ public final class IMAPActivator extends HousekeepingActivator {
              * Register IMAP notifier registry
              */
             if (IMAPProperties.getInstance().notifyRecent()) {
-                registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
+                final ConfigurationService service = getService(ConfigurationService.class);
+                final boolean register = service.getBoolProperty("com.openexchange.imap.registerIMAPNotifierRegistryService", false);
+                if (register) {
+                    registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
+                }
             }
             /*
              * Register event handle
