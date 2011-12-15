@@ -119,6 +119,8 @@ public final class ListAction extends AbstractChatConversationAction {
                  * Get chat
                  */
                 final Chat chat = access.getChat(conversationID.getChatId());
+                final ChatUser currentChatUser = access.getUser();
+                final int unreadMessages = chat.getUnreadCount(currentChatUser);
                 final List<String> memberIds = chat.getMembers();
                 final List<ChatUser> chatUsers = new ArrayList<ChatUser>(memberIds.size());
                 final List<Presence> presences = new ArrayList<Presence>(memberIds.size());
@@ -138,6 +140,7 @@ public final class ListAction extends AbstractChatConversationAction {
                  */
                 final JSONObject jsonChat = JSONConversationWriter.writeChat(chat, chatUsers, presences, session.getUser().getTimeZone());
                 jsonChat.put("id", conversationID.toString());
+                jsonChat.put("unread", unreadMessages);
                 json.put(jsonChat);
             }
             /*
