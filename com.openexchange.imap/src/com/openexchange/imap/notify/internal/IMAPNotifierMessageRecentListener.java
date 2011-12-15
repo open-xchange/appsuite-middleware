@@ -253,7 +253,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                     accountId).append(" for user ").append(session.getUserId()).append(" in context ").append(session.getContextId()).toString());
             }
         } catch (final OXException e) {
-            com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierMessageRecentListener.class)).warn("Couldn't notofy about possible recent message.", e);
+            com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPNotifierMessageRecentListener.class)).warn("Couldn't notify about possible recent message.", e);
         }
     }
 
