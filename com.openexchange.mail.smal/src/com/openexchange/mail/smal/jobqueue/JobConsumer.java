@@ -75,7 +75,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 final class JobConsumer extends AbstractTask<Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobConsumer.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobConsumer.class));
 
     /**
      * The poison element.
@@ -202,6 +202,7 @@ final class JobConsumer extends AbstractTask<Object> {
         try {
             final List<Job> jobs = new ArrayList<Job>(16);
             while (keepgoing.get()) {
+                final boolean debug = LOG.isDebugEnabled();
                 try {
                     if (queue.isEmpty()) {
                         /*
@@ -218,7 +219,7 @@ final class JobConsumer extends AbstractTask<Object> {
                     {
                         final ThreadPoolService threadPool = SMALServiceLookup.getThreadPool();
                         for (final Job job : jobs) {
-                            performJob(job, threadPool);
+                            performJob(job, threadPool, debug);
                         }
                     }
                     jobs.clear();
@@ -242,12 +243,15 @@ final class JobConsumer extends AbstractTask<Object> {
         return null;
     }
 
-    protected void performJob(final Job job, final ThreadPoolService threadPool) throws InterruptedException {
+    protected void performJob(final Job job, final ThreadPoolService threadPool, final boolean debug) throws InterruptedException {
         /*
          * Check if canceled in the meantime
          */
         if (job.isCanceled()) {
             identifiers.remove(job.getIdentifier());
+            if (debug) {
+                LOG.debug("Aborted execution of canceled job: " + job.getIdentifier());
+            }
             return;
         }
         if (job.isPaused()) {
@@ -256,17 +260,20 @@ final class JobConsumer extends AbstractTask<Object> {
              */
             job.proceed();
             queue.offer(job);
+            if (debug) {
+                LOG.debug("Re-enqueued temporarily paused job: " + job.getIdentifier());
+            }
             return;
         }
         try {
             if (consumerMayPerformTasks) {
                 if (semaphore.tryAcquire()) {
                     // Further concurrent worker allowed
-                    final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
+                    final Future<Object> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.getInstance());
                     job.future = future;
                 } else {
                     // Execute with "Job-Consumer" thread
-                    final JobWrapper jobWrapper = wrapperFor(job, false);
+                    final JobWrapper jobWrapper = wrapperFor(job, false, debug);
                     boolean ran = false;
                     jobWrapper.beforeExecute(Thread.currentThread());
                     try {
@@ -284,9 +291,12 @@ final class JobConsumer extends AbstractTask<Object> {
                     }
                 }
             } else {
+                if (debug) {
+                    LOG.debug("Awaiting free worker thread to execute job: " + job.getIdentifier());
+                }
                 semaphore.acquire();
                 // Free worker
-                final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
+                final Future<Object> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.getInstance());
                 job.future = future;
             }
         } finally {
@@ -297,8 +307,8 @@ final class JobConsumer extends AbstractTask<Object> {
         }
     }
 
-    private JobWrapper wrapperFor(final Job job, final boolean releasePermit) {
-        return new JobWrapper(job, releasePermit);
+    private JobWrapper wrapperFor(final Job job, final boolean releasePermit, final boolean debug) {
+        return new JobWrapper(job, releasePermit, debug);
     }
 
     private final class JobWrapper implements Task<Object> {
@@ -307,10 +317,13 @@ final class JobConsumer extends AbstractTask<Object> {
 
         private final boolean releasePermit;
 
-        protected JobWrapper(final Job job, final boolean releasePermit) {
+        private final boolean debug;
+
+        protected JobWrapper(final Job job, final boolean releasePermit, final boolean debug) {
             super();
             this.releasePermit = releasePermit;
             this.job = job;
+            this.debug = debug;
         }
 
         @Override
@@ -335,7 +348,12 @@ final class JobConsumer extends AbstractTask<Object> {
 
         @Override
         public Object call() throws Exception {
-            return job.call();
+            if (!debug) {
+                return job.call();
+            }
+            job.call();
+            LOG.debug("Job successfully performed: " + job.getIdentifier());
+            return null; // Job always returns null
         }
 
     }

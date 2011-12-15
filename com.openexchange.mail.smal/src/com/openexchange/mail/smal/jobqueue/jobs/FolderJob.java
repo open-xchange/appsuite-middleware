@@ -286,8 +286,12 @@ public final class FolderJob extends AbstractMailSyncJob {
 
     @Override
     public void perform() {
+        final boolean debug = LOG.isDebugEnabled();
         if (error) {
             cancel();
+            if (debug) {
+                LOG.debug("Canceled folder job: " + identifier);
+            }
             return;
         }
         int state;
@@ -295,6 +299,9 @@ public final class FolderJob extends AbstractMailSyncJob {
             state = gate.get();
             if (GATE_PERFORM == state) {
                 // Already performed?
+                if (debug) {
+                    LOG.debug("Folder job already performed: " + identifier);
+                }
                 return;
             }
         } while (state != GATE_OPEN || !gate.compareAndSet(state, GATE_PERFORM));
@@ -305,6 +312,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                 final long now = System.currentTimeMillis();
                 try {
                     if ((span > 0 ? !shouldSync(fullName, now, span) : false) || !wasAbleToSetSyncFlag(fullName, now)) {
+                        if (debug) {
+                            LOG.debug("Folder job should not yet be performed or wasn't able to acquire 'sync' flag: " + identifier);
+                        }
                         return;
                     }
                 } catch (final OXException e) {
@@ -317,6 +327,9 @@ public final class FolderJob extends AbstractMailSyncJob {
             final long st = DEBUG ? System.currentTimeMillis() : 0L;
             boolean unset = true;
             try {
+                if (debug) {
+                    LOG.debug("Starting folder job: " + identifier);
+                }
                 /*
                  * Get the mails from storage
                  */
@@ -368,6 +381,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                             storageMap.put(mailMessage.getMailId(), mailMessage);
                         }
                     }
+                    if (debug) {
+                        LOG.debug(storageMap.size() + " mails from storage; folder job: " + identifier);
+                    }
                 }
                 /*
                  * Get the mails from index
@@ -386,6 +402,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                         for (final MailMessage mailMessage : indexedMails) {
                             indexMap.put(mailMessage.getMailId(), mailMessage);
                         }
+                    }
+                    if (debug) {
+                        LOG.debug(indexMap.size() + " mails from index; folder job: " + identifier);
                     }
                 }
                 /*
@@ -453,6 +472,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                  */
                 if (!deletedIds.isEmpty()) {
                     indexAdapter.deleteMessages(deletedIds, fullName, accountId, getSession());
+                    if (debug) {
+                        LOG.debug(deletedIds.size() + " mails deleted from index; folder job: " + identifier);
+                    }
                 }
                 deletedIds = null;
                 /*
@@ -460,6 +482,9 @@ public final class FolderJob extends AbstractMailSyncJob {
                  */
                 if (!changedMails.isEmpty()) {
                     indexAdapter.change(changedMails, getSession());
+                    if (debug) {
+                        LOG.debug(changedMails.size() + " mails changed (flags) in index; folder job: " + identifier);
+                    }
                 }
                 changedMails = null;
                 /*
@@ -479,7 +504,7 @@ public final class FolderJob extends AbstractMailSyncJob {
                     }
                     reEnqueued = (numAdded < ids.size());
                 } else if (DEBUG) {
-                    LOG.debug("Folder job \"" + identifier + "\" detected no new messages in folder " + fullName + " in account " + accountId);
+                    LOG.debug("Folder job \"" + identifier + "\" detected no NEW messages in folder " + fullName + " in account " + accountId);
                 }
                 setTimestampAndUnsetSyncFlag(fullName, System.currentTimeMillis());
                 unset = false;
