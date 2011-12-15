@@ -77,7 +77,11 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
         return INSTANCE;
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
     private final ConcurrentMap<Key, ConcurrentMap<Integer, IMAPNotifierTask>> map;
+
+    private final String[] fullNames;
 
     /**
      * Initializes a new {@link IMAPNotifierRegistry}.
@@ -85,26 +89,25 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
     private IMAPNotifierRegistry() {
         super();
         map = new ConcurrentHashMap<Key, ConcurrentMap<Integer, IMAPNotifierTask>>();
+        final String notifierFullNames = IMAPProperties.getInstance().getNotifyFullNames();
+        if (isEmpty(notifierFullNames)) {
+            fullNames = null;
+        } else {
+            fullNames = SPLIT.split(notifierFullNames);
+        }
     }
 
     /*-
      * --------------------------------- Member stuff ----------------------------------
      */
 
-    private static final Pattern SPLIT = Pattern.compile(" *, *");
-
     @Override
     public boolean addTaskFor(final int accountId, final Session session) {
         /*
          * Check for available full names
          */
-        final String[] fullNames;
-        {
-            final String notifierFullNames = IMAPProperties.getInstance().getNotifyFullNames();
-            if (isEmpty(notifierFullNames)) {
-                return false;
-            }
-            fullNames = SPLIT.split(notifierFullNames);
+        if (null == fullNames) {
+            return false;
         }
         /*
          * Thread-safe start-up of a _single_ notifier task
