@@ -287,11 +287,11 @@ public abstract class SessionServlet extends AJAXServlet {
             ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
                 final Map<String, Object> properties = LogProperties.getLogProperties();
-                properties.put("com.openexchange.session.sessionId", null);
-                properties.put("com.openexchange.session.userId", null);
-                properties.put("com.openexchange.session.contextId", null);
-                properties.put("com.openexchange.session.clientId", null);
-                properties.put("com.openexchange.session.session", null);
+                properties.remove("com.openexchange.session.sessionId");
+                properties.remove("com.openexchange.session.userId");
+                properties.remove("com.openexchange.session.contextId");
+                properties.remove("com.openexchange.session.clientId");
+                properties.remove("com.openexchange.session.session");
             }
             if (null != counter) {
                 counter.getAndDecrement();
@@ -368,10 +368,11 @@ public abstract class SessionServlet extends AJAXServlet {
             } finally {
                 if (LogProperties.isEnabled()) {
                     final Map<String, Object> properties = LogProperties.getLogProperties();
-                    properties.put("com.openexchange.session.sessionId", null);
-                    properties.put("com.openexchange.session.userId", null);
-                    properties.put("com.openexchange.session.contextId", null);
-                    properties.put("com.openexchange.session.clientId", null);
+                    properties.remove("com.openexchange.session.sessionId");
+                    properties.remove("com.openexchange.session.userId");
+                    properties.remove("com.openexchange.session.contextId");
+                    properties.remove("com.openexchange.session.clientId");
+                    properties.remove("com.openexchange.session.session");
                 }
             }
         }
