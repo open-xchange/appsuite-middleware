@@ -1,3 +1,7 @@
+* 2011-12-16 - jan.bauerdick@open-xchange.com
+
+ - Replaced DeferredActivator by HousekeepingActivator
+
 * 2011-12-14 - jan.bauerdick@open-xchange.com
 
  - Fixed bug in AllMessagesAction, caused by removed field "unread"
