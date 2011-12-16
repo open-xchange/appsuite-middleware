@@ -54,8 +54,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
@@ -64,7 +62,7 @@ import com.openexchange.log.LogPropertyName.LogLevel;
 import com.openexchange.log.LogService;
 import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
@@ -77,11 +75,7 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ThreadPoolActivator extends DeferredActivator {
-
-    private List<ServiceRegistration> registrations;
-
-    private List<ServiceTracker> trackers;
+public final class ThreadPoolActivator extends HousekeepingActivator {
 
     private ThreadPoolServiceImpl threadPool;
 
@@ -132,21 +126,14 @@ public final class ThreadPoolActivator extends DeferredActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker>(1);
-            trackers.add(new ServiceTracker(context, ManagementService.class.getName(), new ManagementServiceTrackerCustomizer(
-                context,
-                threadPool)));
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
+            track(ManagementService.class, new ManagementServiceTrackerCustomizer(context, threadPool));
+            openTrackers();
             /*
              * Register
              */
-            registrations = new ArrayList<ServiceRegistration>(2);
-            registrations.add(context.registerService(ThreadPoolService.class.getName(), threadPool, null));
-            registrations.add(context.registerService(TimerService.class.getName(), new CustomThreadPoolExecutorTimerService(
-                threadPool.getThreadPoolExecutor()), null));
-            registrations.add(context.registerService(LogService.class.getName(), logService, null));
+            registerService(ThreadPoolService.class, threadPool, null);
+            registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()), null);
+            registerService(LogService.class, logService, null);
         } catch (final Exception e) {
             LOG.error("Failed start-up of bundle com.openexchange.threadpool: " + e.getMessage(), e);
             throw e;
@@ -204,26 +191,7 @@ public final class ThreadPoolActivator extends DeferredActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.threadpool");
             }
-            /*
-             * Unregister
-             */
-            if (null != registrations) {
-                for (final ServiceRegistration registration : registrations) {
-                    registration.unregister();
-                }
-                registrations.clear();
-                registrations = null;
-            }
-            /*
-             * Close trackers
-             */
-            if (null != trackers) {
-                for (final ServiceTracker tracker : trackers) {
-                    tracker.close();
-                }
-                trackers.clear();
-                trackers = null;
-            }
+            cleanUp();
             /*
              * Stop thread pool
              */

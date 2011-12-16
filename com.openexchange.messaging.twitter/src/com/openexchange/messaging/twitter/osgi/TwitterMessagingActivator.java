@@ -50,14 +50,10 @@
 package com.openexchange.messaging.twitter.osgi;
 
 import static com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.twitter.TwitterMessagingService;
@@ -68,23 +64,18 @@ import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.twitter.TwitterService;
-
 
 /**
  * {@link TwitterMessagingActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMessagingActivator extends DeferredActivator {
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private List<ServiceRegistration<?>> registrations;
+public final class TwitterMessagingActivator extends HousekeepingActivator {
 
     private WhiteboardSecretService secretService;
 
@@ -138,27 +129,20 @@ public final class TwitterMessagingActivator extends DeferredActivator {
                 secretService.open();
                 registry.addService(SecretService.class, secretService);
             }
-            /*
-             * Trackers
-             */
-            trackers = new ArrayList<ServiceTracker<?,?>>();
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
 
-            registrations = new ArrayList<ServiceRegistration<?>>(2);
-            registrations.add(context.registerService(MessagingService.class, new TwitterMessagingService(), null));
+            registerService(MessagingService.class, new TwitterMessagingService(), null);
             /*
              * Register event handler to detect removed sessions
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class, new TwitterEventHandler(), serviceProperties));
-
-            registrations.add(context.registerService(OAuthAccountDeleteListener.class, new TwitterOAuthAccountDeleteListener(), null));
-            registrations.add(context.registerService(OAuthAccountInvalidationListener.class, new TwitterOAuthAccountDeleteListener(), null));
+            registerService(EventHandler.class, new TwitterEventHandler(), serviceProperties);
+            registerService(OAuthAccountDeleteListener.class, new TwitterOAuthAccountDeleteListener(), null);
+            registerService(OAuthAccountInvalidationListener.class, new TwitterOAuthAccountDeleteListener(), null);
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(
+                e.getMessage(),
+                e);
             throw e;
         }
     }
@@ -166,27 +150,18 @@ public final class TwitterMessagingActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if(secretService != null) {
+            if (secretService != null) {
                 secretService.close();
             }
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */
             getServiceRegistry().clearRegistry();
         } catch (final Exception e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(e.getMessage(), e);
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMessagingActivator.class)).error(
+                e.getMessage(),
+                e);
             throw e;
         }
     }

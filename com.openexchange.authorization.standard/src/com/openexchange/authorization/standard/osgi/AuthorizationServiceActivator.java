@@ -51,20 +51,17 @@ package com.openexchange.authorization.standard.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.authorization.standard.DefaultAuthorizationImpl;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link AuthorizationServiceActivator}
  *
  */
-public class AuthorizationServiceActivator extends DeferredActivator {
+public class AuthorizationServiceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthorizationServiceActivator.class));
-
-    private ServiceRegistration<AuthorizationService> registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -98,7 +95,7 @@ public class AuthorizationServiceActivator extends DeferredActivator {
                 if (LOG.isInfoEnabled()) {
                     LOG.info("starting bundle: com.openexchange.authorization.standard");
                 }
-                registration = context.registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
+                registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -109,10 +106,7 @@ public class AuthorizationServiceActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != registration) {
-                registration.unregister();
-                registration = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */

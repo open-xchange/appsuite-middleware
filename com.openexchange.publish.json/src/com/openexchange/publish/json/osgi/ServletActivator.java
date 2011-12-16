@@ -50,9 +50,7 @@
 package com.openexchange.publish.json.osgi;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
@@ -62,17 +60,15 @@ import com.openexchange.publish.json.PublicationServlet;
 import com.openexchange.publish.json.PublicationTargetMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationTargetServlet;
 import com.openexchange.publish.json.types.EntityMap;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.service.SessionServletRegistration;
 
-public class ServletActivator extends DeferredActivator {
+public class ServletActivator extends HousekeepingActivator {
 
     private static final String TARGET_ALIAS = "ajax/publicationTargets";
     private static final String PUB_ALIAS = "ajax/publications";
 
     List<SessionServletRegistration> servletRegistrations = new ArrayList<SessionServletRegistration>(2);
-
-    private final List<ServiceRegistration<?>> serviceRegistrations = new LinkedList<ServiceRegistration<?>>();
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -99,8 +95,8 @@ public class ServletActivator extends DeferredActivator {
         final PublicationMultipleHandlerFactory publicationHandlerFactory = new PublicationMultipleHandlerFactory(discovery, new EntityMap(), config);
         final PublicationTargetMultipleHandlerFactory publicationTargetHandlerFactory = new PublicationTargetMultipleHandlerFactory(discovery);
 
-        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class, publicationHandlerFactory, null));
-        serviceRegistrations.add(context.registerService(MultipleHandlerFactoryService.class, publicationTargetHandlerFactory, null));
+        registerService(MultipleHandlerFactoryService.class, publicationHandlerFactory, null);
+        registerService(MultipleHandlerFactoryService.class, publicationTargetHandlerFactory, null);
 
         PublicationServlet.setFactory(publicationHandlerFactory);
         PublicationTargetServlet.setFactory(publicationTargetHandlerFactory);
@@ -122,10 +118,7 @@ public class ServletActivator extends DeferredActivator {
         PublicationServlet.setFactory(null);
         PublicationTargetServlet.setFactory(null);
 
-        for(final ServiceRegistration<?> registration : serviceRegistrations) {
-            registration.unregister();
-        }
-        serviceRegistrations.clear();
+        cleanUp();
 
         for (final SessionServletRegistration reg : servletRegistrations) {
             reg.close();

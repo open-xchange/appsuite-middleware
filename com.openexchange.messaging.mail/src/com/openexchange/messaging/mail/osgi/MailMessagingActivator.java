@@ -50,15 +50,11 @@
 package com.openexchange.messaging.mail.osgi;
 
 import static com.openexchange.messaging.mail.services.MailMessagingServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.mail.MailMessageService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -67,11 +63,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18
  */
-public final class MailMessagingActivator extends DeferredActivator {
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private List<ServiceRegistration<?>> registrations;
+public final class MailMessagingActivator extends HousekeepingActivator {
 
     // private ScheduledTimerTask scheduledTimerTask;
 
@@ -124,15 +116,10 @@ public final class MailMessagingActivator extends DeferredActivator {
                 }
             }
 
-            trackers = new ArrayList<ServiceTracker<?,?>>();
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(2);
-            registrations.add(context.registerService(MessagingService.class, MailMessageService.newInstance(), null));
+            registerService(MessagingService.class, MailMessageService.newInstance(), null);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MailMessagingActivator.class)).error(e.getMessage(), e);
             throw e;
@@ -142,18 +129,7 @@ public final class MailMessagingActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */

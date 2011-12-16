@@ -52,13 +52,12 @@ package com.openexchange.management.osgi;
 import static com.openexchange.management.services.ManagementServiceRegistry.getServiceRegistry;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -66,11 +65,9 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagementActivator extends DeferredActivator {
+public final class ManagementActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementActivator.class));
-
-    private ServiceRegistration<ManagementService> serviceRegistration;
 
     /**
      * Initializes a new {@link ManagementActivator}
@@ -147,14 +144,11 @@ public final class ManagementActivator extends DeferredActivator {
         /*
          * Register management service
          */
-        serviceRegistration = context.registerService(ManagementService.class, ManagementAgentImpl.getInstance(), null);
+        registerService(ManagementService.class, ManagementAgentImpl.getInstance(), null);
     }
 
     private void stopInternal() throws OXException {
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
+        cleanUp();
         if (ManagementInit.getInstance().isStarted()) {
             ManagementInit.getInstance().stop();
         }

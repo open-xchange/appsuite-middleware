@@ -52,10 +52,9 @@ package com.openexchange.spamhandler.defaultspamhandler.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.defaultspamhandler.ConfigurationServiceSupplier;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
@@ -66,14 +65,12 @@ import com.openexchange.spamhandler.defaultspamhandler.MailServiceSupplier;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DefaultSpamHandlerActivator extends DeferredActivator {
+public final class DefaultSpamHandlerActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DefaultSpamHandlerActivator.class));
 
     private final Dictionary<String, String> dictionary;
-
-    private ServiceRegistration<SpamHandler> serviceRegistration;
 
     /**
      * Initializes a new {@link DefaultSpamHandlerActivator}
@@ -108,7 +105,7 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
         try {
             MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
             ConfigurationServiceSupplier.getInstance().setConfigurationService(getService(ConfigurationService.class));
-            serviceRegistration = context.registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
+            registerService(SpamHandler.class, DefaultSpamHandler.getInstance(), dictionary);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -119,10 +116,7 @@ public final class DefaultSpamHandlerActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
+            cleanUp();
             MailServiceSupplier.getInstance().setMailService(null);
             ConfigurationServiceSupplier.getInstance().setConfigurationService(null);
         } catch (final Throwable t) {

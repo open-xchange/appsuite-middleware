@@ -3,24 +3,21 @@ package com.openexchange.recaptcha.osgi;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.recaptcha.ReCaptchaService;
 import com.openexchange.recaptcha.ReCaptchaServlet;
 import com.openexchange.recaptcha.impl.ReCaptchaServiceImpl;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
-public class Activator extends DeferredActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private static final String ALIAS = "/ajax/recaptcha";
 
     private ReCaptchaServlet servlet;
-
-    private ServiceRegistration<ReCaptchaService> serviceRegistration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -53,7 +50,7 @@ public class Activator extends DeferredActivator {
         final Properties props = config.getFile("recaptcha.properties");
         final Properties options = config.getFile("recaptcha_options.properties");
         final ReCaptchaServiceImpl reCaptchaService = new ReCaptchaServiceImpl(props, options);
-        serviceRegistration = context.registerService(ReCaptchaService.class, reCaptchaService, null);
+        registerService(ReCaptchaService.class, reCaptchaService, null);
         registry.addService(ReCaptchaService.class, reCaptchaService);
 
         registerServlet();
@@ -62,10 +59,7 @@ public class Activator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
 
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
+        cleanUp();
 
         unregisterServlet();
         ReCaptchaServiceRegistry.getInstance().clearRegistry();

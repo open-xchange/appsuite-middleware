@@ -50,10 +50,7 @@
 package com.openexchange.push.mail.notify.osgi;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Future;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -68,7 +65,7 @@ import com.openexchange.push.mail.notify.MailNotifyPushMailAccountDeleteListener
 import com.openexchange.push.mail.notify.MailNotifyPushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushUdpSocketListener;
 import com.openexchange.push.mail.notify.services.PushServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -78,7 +75,7 @@ import com.openexchange.threadpool.ThreadPools;
  * {@link PushActivator} - The push activator.
  *
  */
-public final class PushActivator extends DeferredActivator {
+public final class PushActivator extends HousekeepingActivator {
 
     private static final String CRLF = "\r\n";
 
@@ -95,8 +92,6 @@ public final class PushActivator extends DeferredActivator {
     private static final String PROP_USE_OX_LOGIN = "com.openexchange.push.mail.notify.use_ox_login";
 
     private static final String PROP_USE_EMAIL_ADDRESS = "com.openexchange.push.mail.notify.use_full_email_address";
-
-    private List<ServiceRegistration<?>> serviceRegistrations;
 
     private boolean multicast;
 
@@ -161,13 +156,9 @@ public final class PushActivator extends DeferredActivator {
             /*
              * Register push manager
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(3);
-            serviceRegistrations.add(context.registerService(PushManagerService.class, new MailNotifyPushManagerService(useOXLogin, useEmailAddress), null));
-            serviceRegistrations.add(context.registerService(
-                MailAccountDeleteListener.class,
-                new MailNotifyPushMailAccountDeleteListener(),
-                null));
-            serviceRegistrations.add(context.registerService(DeleteListener.class, new MailNotifyPushDeleteListener(), null));
+            registerService(PushManagerService.class, new MailNotifyPushManagerService(useOXLogin, useEmailAddress), null);
+            registerService(MailAccountDeleteListener.class, new MailNotifyPushMailAccountDeleteListener(), null);
+            registerService(DeleteListener.class, new MailNotifyPushDeleteListener(), null);
             startUdpListener();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -182,12 +173,7 @@ public final class PushActivator extends DeferredActivator {
             /*
              * Unregister push manager
              */
-            if (null != serviceRegistrations) {
-                while (!serviceRegistrations.isEmpty()) {
-                    serviceRegistrations.remove(0).unregister();
-                }
-                serviceRegistrations = null;
-            }
+            cleanUp();
             /*
              * Shut down
              */

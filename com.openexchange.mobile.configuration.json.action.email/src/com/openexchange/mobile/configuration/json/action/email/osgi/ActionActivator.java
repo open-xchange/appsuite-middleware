@@ -57,13 +57,13 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
 import com.openexchange.mobile.configuration.json.action.email.impl.ActionEmail;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * @author Benjamin Otterbach
  */
-public class ActionActivator extends DeferredActivator {
+public class ActionActivator extends HousekeepingActivator {
 
 	private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ActionActivator.class));
 
@@ -114,7 +114,7 @@ public class ActionActivator extends DeferredActivator {
 
 	        final Hashtable<String, ActionTypes> ht = new Hashtable<String, ActionTypes>();
 	        ht.put("action", ActionTypes.EMAIL);
-	        context.registerService(ActionService.class.getName(), new ActionEmail(), ht);
+	        registerService(ActionService.class, new ActionEmail(), ht);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -125,6 +125,7 @@ public class ActionActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
+		    cleanUp();
             /*
              * Clear service registry
              */

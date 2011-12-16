@@ -54,26 +54,23 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.audit.impl.AuditEventHandler;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * @author Benjamin Otterbach
  */
-public class AuditActivator extends DeferredActivator {
+public class AuditActivator extends HousekeepingActivator {
 
 	private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuditActivator.class));
 
 	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class } ;
 
 	final Dictionary<String,Object> serviceProperties;
-
-	private ServiceRegistration<EventHandler> auditServiceRegistration;
 
 	public AuditActivator() {
 		super();
@@ -120,7 +117,7 @@ public class AuditActivator extends DeferredActivator {
 					}
 				}
 			}
-			auditServiceRegistration = context.registerService(EventHandler.class, AuditEventHandler.getInstance(), serviceProperties);
+			registerService(EventHandler.class, AuditEventHandler.getInstance(), serviceProperties);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -131,14 +128,8 @@ public class AuditActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-            if (null != auditServiceRegistration) {
-            	auditServiceRegistration.unregister();
-            	auditServiceRegistration = null;
-            }
-            /*
-             * Clear service registry
-             */
-			getServiceRegistry().clearRegistry();
+		    cleanUp();
+		    getServiceRegistry().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);

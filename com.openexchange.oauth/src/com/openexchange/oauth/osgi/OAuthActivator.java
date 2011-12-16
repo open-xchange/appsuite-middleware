@@ -49,11 +49,7 @@
 
 package com.openexchange.oauth.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
@@ -69,7 +65,7 @@ import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.services.ServiceRegistry;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.session.SessionHolder;
 
@@ -78,11 +74,7 @@ import com.openexchange.tools.session.SessionHolder;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OAuthActivator extends DeferredActivator {
-
-    private List<ServiceRegistration<?>> registrations;
-
-    private List<ServiceTracker<?,?>> trackers;
+public final class OAuthActivator extends HousekeepingActivator {
 
     private OSGiDelegateServiceMap delegateServices;
 
@@ -147,17 +139,12 @@ public final class OAuthActivator extends DeferredActivator {
             /*
              * Start other trackers
              */
-            trackers = new ArrayList<ServiceTracker<?,?>>(4);
-            trackers.add(new ServiceTracker<OAuthAccountDeleteListener,OAuthAccountDeleteListener>(context, OAuthAccountDeleteListener.class, new DeleteListenerServiceTracker(context)));
-            trackers.add(new ServiceTracker<OAuthAccountInvalidationListener,OAuthAccountInvalidationListener>(context, OAuthAccountInvalidationListener.class, new InvalidationListenerServiceTracker(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            track(OAuthAccountDeleteListener.class);
+            track(OAuthAccountInvalidationListener.class);
+            openTrackers();
             /*
              * Register
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(2);
-
             delegateServices = new OSGiDelegateServiceMap();
             delegateServices.put(DBProvider.class, new OSGiDatabaseServiceDBProvider().start(context));
             delegateServices.put(ContextService.class, new OSGiContextService().start(context));
@@ -169,10 +156,10 @@ public final class OAuthActivator extends DeferredActivator {
                 delegateServices.get(IDGeneratorService.class),
                 registry,
                 delegateServices.get(ContextService.class));
-            registrations.add(context.registerService(OAuthService.class.getName(), oauthService, null));
-            registrations.add(context.registerService(OAuthServiceMetaDataRegistry.class.getName(), registry, null));
-            registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), oauthService, null));
-            registrations.add(context.registerService(SecretMigrator.class.getName(), oauthService, null));
+            registerService(OAuthService.class, oauthService, null);
+            registerService(OAuthServiceMetaDataRegistry.class, registry, null);
+            registerService(SecretConsistencyCheck.class, oauthService, null);
+            registerService(SecretMigrator.class, oauthService, null);
 
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);
@@ -187,18 +174,7 @@ public final class OAuthActivator extends DeferredActivator {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.oauth");
             }
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
             if (null != delegateServices) {
                 delegateServices.clear();
                 delegateServices = null;

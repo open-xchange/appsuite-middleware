@@ -55,7 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.external.ExternalSubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.microformats.OXMFParserFactoryService;
@@ -69,7 +69,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ExternalSourcesActivator extends DeferredActivator {
+public class ExternalSourcesActivator extends HousekeepingActivator {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ExternalSourcesActivator.class));
 
@@ -119,7 +119,7 @@ public class ExternalSourcesActivator extends DeferredActivator {
                 final ExternalSubscriptionSourceDiscoveryService discoveryService =
                     new ExternalSubscriptionSourceDiscoveryService(source, oxmfParserFactory, formParser);
                 services.add(discoveryService);
-                context.registerService(SubscriptionSourceDiscoveryService.class, discoveryService, null);
+                registerService(SubscriptionSourceDiscoveryService.class, discoveryService, null);
             }
 
             timer.scheduleAtFixedRate(new Runnable() {

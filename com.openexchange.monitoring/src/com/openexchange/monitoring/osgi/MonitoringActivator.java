@@ -49,17 +49,13 @@
 
 package com.openexchange.monitoring.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
 import com.openexchange.monitoring.services.MonitoringServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 
@@ -69,13 +65,9 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MonitoringActivator extends DeferredActivator {
+public final class MonitoringActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MonitoringActivator.class));
-
-    private ServiceRegistration<MonitorService> serviceRegistration;
-
-    private List<ServiceTracker<?,?>> trackers;
 
     /**
      * Initializes a new {@link MonitoringActivator}
@@ -123,17 +115,14 @@ public final class MonitoringActivator extends DeferredActivator {
 
             MonitoringInit.getInstance().start();
 
-            trackers = new ArrayList<ServiceTracker<?,?>>(2);
-            trackers.add(new MailCounterServiceTracker(context));
-            trackers.add(new MailIdleCounterServiceTracker(context));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            track(MailCounterServiceTracker.class);
+            track(MailIdleCounterServiceTracker.class);
+            openTrackers();
 
             /*
              * Register monitor service
              */
-            serviceRegistration = context.registerService(MonitorService.class, new MonitorImpl(), null);
+            registerService(MonitorService.class, new MonitorImpl(), null);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -143,16 +132,7 @@ public final class MonitoringActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
+            cleanUp();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);

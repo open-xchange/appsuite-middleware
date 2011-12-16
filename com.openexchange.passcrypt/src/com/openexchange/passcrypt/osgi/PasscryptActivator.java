@@ -50,17 +50,13 @@
 package com.openexchange.passcrypt.osgi;
 
 import static com.openexchange.passcrypt.PasscryptServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.passcrypt.PasswordCrypter;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -68,11 +64,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PasscryptActivator extends DeferredActivator {
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private List<ServiceRegistration<?>> registrations;
+public final class PasscryptActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link PasscryptActivator}.
@@ -122,21 +114,12 @@ public final class PasscryptActivator extends DeferredActivator {
                 }
             }
             /*
-             * Some init stuff
-             */
-            trackers = new ArrayList<ServiceTracker<?,?>>(1);
-            // trackers.add(new ServiceTracker(context, I18nService.class.getName(), new I18nCustomizer(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
-            /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(4);
             final PasswordCrypter passwordCrypter = new PasswordCrypter(getService(ConfigurationService.class));
-            registrations.add(context.registerService(LoginHandlerService.class, passwordCrypter, null));
-            registrations.add(context.registerService(SecretConsistencyCheck.class, passwordCrypter, null));
-            registrations.add(context.registerService(SecretMigrator.class, passwordCrypter, null));
+            registerService(LoginHandlerService.class, passwordCrypter, null);
+            registerService(SecretConsistencyCheck.class, passwordCrypter, null);
+            registerService(SecretMigrator.class, passwordCrypter, null);
         } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasscryptActivator.class)).error(e.getMessage(), e);
             throw e;
@@ -146,18 +129,7 @@ public final class PasscryptActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */

@@ -51,7 +51,6 @@ package com.openexchange.publish.online.infostore.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -59,16 +58,15 @@ import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.online.infostore.InfostoreDocumentPublicationService;
 import com.openexchange.publish.online.infostore.InfostorePublicationServlet;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
-public class Activator extends DeferredActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
     private static final String ALIAS = InfostoreDocumentPublicationService.PREFIX+"*";
-    private ServiceRegistration<PublicationService> serviceRegistration;
     private InfostorePublicationServlet servlet;
 
 
@@ -91,7 +89,7 @@ public class Activator extends DeferredActivator {
     protected void startBundle() throws Exception {
         final InfostoreDocumentPublicationService infostorePublisher = new InfostoreDocumentPublicationService();
         InfostorePublicationServlet.setInfostoreDocumentPublicationService(infostorePublisher);
-        serviceRegistration = context.registerService(PublicationService.class, infostorePublisher, null);
+        registerService(PublicationService.class, infostorePublisher, null);
 
         registerServlet();
 
@@ -99,7 +97,7 @@ public class Activator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         InfostorePublicationServlet.setInfostoreDocumentPublicationService(null);
-        serviceRegistration.unregister();
+        cleanUp();
 
         unregisterServlet();
     }

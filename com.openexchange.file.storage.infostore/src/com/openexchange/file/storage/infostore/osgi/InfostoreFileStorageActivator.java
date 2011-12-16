@@ -49,12 +49,11 @@
 
 package com.openexchange.file.storage.infostore.osgi;
 
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 
 /**
@@ -62,9 +61,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFileStorageActivator extends DeferredActivator {
-
-    private ServiceRegistration<FileStorageService> registration;
+public class InfostoreFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -83,7 +80,7 @@ public class InfostoreFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registration = context.registerService(FileStorageService.class, new InfostoreFileStorageService() {
+        registerService(FileStorageService.class, new InfostoreFileStorageService() {
             @Override
             public InfostoreFacade getInfostore() {
                 return getService(InfostoreFacade.class);
@@ -98,9 +95,7 @@ public class InfostoreFileStorageActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        if(registration != null) {
-            registration.unregister();
-        }
+        cleanUp();
     }
 
 }
