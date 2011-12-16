@@ -95,4 +95,5 @@ public interface ICalEmitter {
      */
     public void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
 
+	public void flush(ICalSession session, OutputStream stream) throws ConversionError;
 }

@@ -60,7 +60,7 @@ import com.openexchange.data.conversion.ical.ZoneInfo;
  */
 public final class ICal4jSession implements ICalSession {
 
-    private final Calendar calendar = new Calendar();
+    private Calendar calendar = new Calendar();
     private final Mode mode;
     private int index;
 
@@ -82,7 +82,7 @@ public final class ICal4jSession implements ICalSession {
     public ZoneInfo getZoneInfo() {
         return mode.getZoneInfo();
     }
-
+    
     /**
      * @return the calendar
      */
@@ -90,6 +90,11 @@ public final class ICal4jSession implements ICalSession {
         return calendar;
     }
 
+    public void setCalendar(Calendar cal) {
+        calendar = cal;
+        index = 0;
+    }
+    
     /**
      * Counts the number of elements already parsed for error messages
      * @return

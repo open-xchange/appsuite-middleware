@@ -49,9 +49,13 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.List;
+import java.util.regex.Pattern;
+
 import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
@@ -293,4 +297,39 @@ public class ICal4JEmitter implements ICalEmitter {
         }
         return ((ICal4jSession) session).getAndIncreaseIndex();
     }
+    
+    public void flush(final ICalSession session, final OutputStream stream) throws ConversionError {
+        final Calendar calendar = getCalendar(session);
+        final CalendarOutputter outputter = new CalendarOutputter(false);
+        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+        try {
+            outputter.output(calendar, temp);
+            String icalPart = removeTimezoneData(new String(temp.toByteArray()));
+            PrintWriter writer = new PrintWriter(stream);
+            writer.write("\n");
+            writer.write(icalPart);
+            writer.write("\n");
+            writer.flush();
+        } catch (final IOException e) {
+            throw new ConversionError(-1, Code.WRITE_PROBLEM, e);
+        } catch (final ValidationException e) {
+            throw new ConversionError(-1, Code.VALIDATION, e);
+        }
+        
+        if (!(session instanceof ICal4jSession)) {
+        	throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
+        }
+        Calendar newCal = new Calendar();
+        ((ICal4jSession) session).setCalendar(newCal);
+    }
+    
+
+    private String removeTimezoneData(String string) {
+		return Pattern
+			.compile("\n?BEGIN:VTIMEZONE.+?\nEND:VTIMEZONE\n?", 
+				  Pattern.CASE_INSENSITIVE 
+				| Pattern.DOTALL 
+				| Pattern.MULTILINE)
+			.matcher(string).replaceAll("");
+	}
 }
