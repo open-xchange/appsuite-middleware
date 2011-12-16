@@ -85,6 +85,7 @@ import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
@@ -192,6 +193,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private transient javax.mail.Session imapSession;
 
     /**
+     * The IMAP protocol.
+     */
+    private final Protocol protocol;
+
+    /**
+     * The max. connection count.
+     */
+    private int maxCount;
+
+    /**
      * The connected flag.
      */
     private boolean connected;
@@ -224,6 +235,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected IMAPAccess(final Session session) {
         super(session);
         setMailProperties((Properties) System.getProperties().clone());
+        maxCount = -1;
+        protocol = IMAPProvider.PROTOCOL_IMAP;
     }
 
     /**
@@ -235,6 +248,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     protected IMAPAccess(final Session session, final int accountId) {
         super(session, accountId);
         setMailProperties((Properties) System.getProperties().clone());
+        maxCount = -1;
+        protocol = IMAPProvider.PROTOCOL_IMAP;
     }
 
     /**
@@ -579,10 +594,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get connected store
              */
+            maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
             try {
                 imapStore =
                     new AccessedIMAPStore(this, connectIMAPStore(
-                        true,
+                        maxCount > 0,
                         imapSession,
                         config.getServer(),
                         config.getPort(),
@@ -780,7 +796,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isCacheable() {
-        return !USE_IMAP_STORE_CACHE.get();
+        return (maxCount <= 0) || (!USE_IMAP_STORE_CACHE.get());
     }
 
     /**

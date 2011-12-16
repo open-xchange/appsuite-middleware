@@ -85,6 +85,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         this.server = server;
     }
 
+    @Override
     public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
         /*
          * Retrieve and remove the head of this queue
@@ -97,29 +98,36 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         return imapStore;
     }
 
+    @Override
     public void backStore(final IMAPStore imapStore) {
         if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
         }
     }
 
+    @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
         for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
             final IMAPStoreWrapper imapStoreWrapper = iter.next();
             if (imapStoreWrapper.lastAccessed >= stamp) {
-                iter.remove();
-                if (null == debugBuilder) {
-                    closeSafe(imapStoreWrapper.imapStore);
-                } else {
-                    final String info = imapStoreWrapper.imapStore.toString();
-                    closeSafe(imapStoreWrapper.imapStore);
-                    debugBuilder.setLength(0);
-                    LOG.debug(debugBuilder.append("Closed elapsed IMAP store: ").append(info).toString());
+                try {
+                    iter.remove();
+                    if (null == debugBuilder) {
+                        closeSafe(imapStoreWrapper.imapStore);
+                    } else {
+                        final String info = imapStoreWrapper.imapStore.toString();
+                        closeSafe(imapStoreWrapper.imapStore);
+                        debugBuilder.setLength(0);
+                        LOG.debug(debugBuilder.append("Closed elapsed IMAP store: ").append(info).toString());
+                    }
+                } catch (final IllegalStateException e) {
+                    // Ignore
                 }
             }
         }
     }
 
+    @Override
     public void clear() {
         for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
             final IMAPStoreWrapper imapStoreWrapper = iter.next();
