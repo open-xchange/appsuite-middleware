@@ -95,6 +95,7 @@ import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.file.SaveFileWithQuotaAction;
+import com.openexchange.tools.file.external.QuotaFileStorageExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
@@ -148,6 +149,9 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             try {
                 fileId = saveFile(data, attachment, ctx);
             } catch (final OXException e) {
+                if (QuotaFileStorageExceptionCodes.STORE_FULL.getNumber() == e.getCode()) {
+                    throw AttachmentExceptionCodes.OVER_LIMIT.create(e);
+                }
                 throw AttachmentExceptionCodes.SAVE_FAILED.create(e);
             }
         } else {

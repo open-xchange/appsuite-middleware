@@ -58,6 +58,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class AttachmentExceptionMessages implements LocalizableStrings {
 
+    public static final String OVER_LIMIT_MSG = "Attachment cannot be saved. File store limit is exceeded.";
+
     public static final String SQL_PROBLEM_MSG = "Invalid SQL Query: %s";
 
     public static final String SAVE_FAILED_MSG = "Could not save file to the file store.";

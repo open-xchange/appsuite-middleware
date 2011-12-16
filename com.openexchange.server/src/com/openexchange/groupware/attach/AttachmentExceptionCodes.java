@@ -63,6 +63,8 @@ import com.openexchange.groupware.EnumComponent;
  */
 public enum AttachmentExceptionCodes implements OXExceptionCode {
 
+    /** Attachment cannot be saved. File store limit is exceeded. */
+    OVER_LIMIT(OVER_LIMIT_MSG, CATEGORY_CAPACITY, 1),
     /** Invalid SQL Query: %s */
     SQL_PROBLEM(SQL_PROBLEM_MSG, CATEGORY_ERROR, 100),
     /** Could not save file to the file store. */
@@ -98,8 +100,7 @@ public enum AttachmentExceptionCodes implements OXExceptionCode {
     /** Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number. */
     INVALID_REQUEST_PARAMETER(INVALID_REQUEST_PARAMETER_MSG, CATEGORY_USER_INPUT, 701),
     /** Conflicting services registered for context %1$i and folder %2$i */
-    SERVICE_CONFLICT(SERVICE_CONFLICT_MSG, CATEGORY_CONFIGURATION, 900),
-    ;
+    SERVICE_CONFLICT(SERVICE_CONFLICT_MSG, CATEGORY_CONFIGURATION, 900);
 
     private final String message;
     private final Category category;

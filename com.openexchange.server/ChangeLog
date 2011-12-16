@@ -1,3 +1,7 @@
+* 2011-12-16 - marcus.klein@open-xchange.com
+
+ - Partly fix for bug 20962: Giving user good error message if the file storage quota is exceeded on saving an attachment. 
+
 * 2011-12-14 - jan.bauerdick@open-xchange.com
 
  - Fixed bug in AllMessagesAction, caused by removed field "unread"
