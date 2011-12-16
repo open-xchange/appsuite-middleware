@@ -2110,9 +2110,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                      */
                     final ListLsubEntry rootEntry = ListLsubCache.getCachedLISTEntry("", accountId, imapStore, session);
                     final List<ListLsubEntry> children = rootEntry.getChildren();
+                    final String prefix = "[G";
                     for (final ListLsubEntry child : children) {
                         final String fullName = child.getFullName();
-                        if (fullName.startsWith("[G")) {
+                        if (fullName.startsWith(prefix)) {
                             return fullName + child.getSeparator();
                         }
                     }
