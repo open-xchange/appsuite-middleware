@@ -51,13 +51,9 @@ package com.openexchange.push.malpoll.osgi;
 
 import static com.openexchange.push.malpoll.services.MALPollServiceRegistry.getServiceRegistry;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Executor;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -78,7 +74,7 @@ import com.openexchange.push.malpoll.MALPollPushListenerRunnable;
 import com.openexchange.push.malpoll.MALPollPushManagerService;
 import com.openexchange.push.malpoll.UpdateTaskPublisher;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -89,11 +85,9 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MALPollActivator extends DeferredActivator {
+public final class MALPollActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MALPollActivator.class));
-
-    private List<ServiceRegistration<?>> serviceRegistrations;
 
     private ScheduledTimerTask scheduledTimerTask;
 
@@ -104,8 +98,6 @@ public final class MALPollActivator extends DeferredActivator {
     private boolean global;
 
     private boolean concurrentGlobal;
-
-    private ServiceTracker<SessiondService, SessiondService> sessiondTracker;
 
     /**
      * Initializes a new {@link MALPollActivator}.
@@ -171,8 +163,7 @@ public final class MALPollActivator extends DeferredActivator {
             {
                 final ServiceTrackerCustomizer<SessiondService,SessiondService> trackerCustomizer =
                     new RegistryServiceTrackerCustomizer<SessiondService>(context, getServiceRegistry(), SessiondService.class);
-                sessiondTracker = new ServiceTracker<SessiondService,SessiondService>(context, SessiondService.class, trackerCustomizer);
-                sessiondTracker.open();
+                track(SessiondService.class, trackerCustomizer);
             }
             /*
              * Read configuration
@@ -225,15 +216,11 @@ public final class MALPollActivator extends DeferredActivator {
             /*
              * Register push manager
              */
-            serviceRegistrations = new ArrayList<ServiceRegistration<?>>(6);
-            serviceRegistrations.add(context.registerService(CreateTableService.class, new MALPollCreateTableTask(), null));
-            serviceRegistrations.add(context.registerService(UpdateTaskProviderService.class, new UpdateTaskPublisher(), null));
-            serviceRegistrations.add(context.registerService(PushManagerService.class, new MALPollPushManagerService(), null));
-            serviceRegistrations.add(context.registerService(
-                MailAccountDeleteListener.class,
-                new MALPollMailAccountDeleteListener(),
-                null));
-            serviceRegistrations.add(context.registerService(DeleteListener.class, new MALPollDeleteListener(), null));
+            registerService(CreateTableService.class, new MALPollCreateTableTask(), null);
+            registerService(UpdateTaskProviderService.class, new UpdateTaskPublisher(), null);
+            registerService(PushManagerService.class, new MALPollPushManagerService(), null);
+            registerService(MailAccountDeleteListener.class, new MALPollMailAccountDeleteListener(), null);
+            registerService(DeleteListener.class, new MALPollDeleteListener(), null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -243,22 +230,7 @@ public final class MALPollActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            /*
-             * Unregister push manager
-             */
-            if (null != serviceRegistrations) {
-                while (!serviceRegistrations.isEmpty()) {
-                    serviceRegistrations.remove(0).unregister();
-                }
-                serviceRegistrations = null;
-            }
-            /*
-             * Close tracker
-             */
-            if (null != sessiondTracker) {
-                sessiondTracker.close();
-                sessiondTracker = null;
-            }
+            cleanUp();
             /*
              * Clear all running listeners
              */

@@ -50,13 +50,9 @@
 package com.openexchange.pop3.osgi;
 
 import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -68,7 +64,7 @@ import com.openexchange.pop3.Enabled;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.storage.POP3StorageProvider;
 import com.openexchange.pop3.storage.mailaccount.MailAccountPOP3StorageProvider;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
@@ -79,19 +75,15 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class POP3Activator extends DeferredActivator {
+public final class POP3Activator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(POP3Activator.class));
 
     private final Dictionary<String, String> dictionary;
 
-    private List<ServiceTracker<?,?>> trackers;
-
     private POP3StorageProviderServiceTrackerCustomizer customizer;
 
     private MailAccountPOP3StorageProvider builtInProvider;
-
-    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link POP3Activator}
@@ -144,27 +136,22 @@ public final class POP3Activator extends DeferredActivator {
                     }
                 }
             }
-            registrations = new ArrayList<ServiceRegistration<?>>(2);
-            registrations.add(context.registerService(MailProvider.class, POP3Provider.getInstance(), dictionary));
-            /*
-             * Service tracker for possible POP3 storage provider
-             */
-            trackers = new ArrayList<ServiceTracker<?,?>>(2);
-            customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
-            trackers.add(new ServiceTracker<POP3StorageProvider,POP3StorageProvider>(context, POP3StorageProvider.class, customizer));
-            trackers.add(new ServiceTracker(context, SessiondService.class, new SessiondServiceServiceTrackerCustomizer(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            registerService(MailProvider.class, POP3Provider.getInstance(), dictionary);
             /*
              * Add built-in mail account POP3 storage provider
              */
+            customizer = new POP3StorageProviderServiceTrackerCustomizer(context);
             builtInProvider = new MailAccountPOP3StorageProvider();
             customizer.addPOP3StorageProvider(builtInProvider);
             /*
+             * Service tracker for possible POP3 storage provider
+             */
+            track(POP3StorageProvider.class, customizer);
+            track(SessiondService.class);
+            /*
              * Register
              */
-            registrations.add(context.registerService(PreferencesItemService.class.getName(), new Enabled(getService(ConfigViewFactory.class)), null));
+            registerService(PreferencesItemService.class, new Enabled(getService(ConfigViewFactory.class)), null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -179,25 +166,7 @@ public final class POP3Activator extends DeferredActivator {
             builtInProvider = null;
             // Customizer shut-down
             customizer.dropAllRegistrations();
-            if (null != trackers) {
-                /*
-                 * Close trackers
-                 */
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            customizer = null;
-            /*
-             * Unregister service
-             */
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */

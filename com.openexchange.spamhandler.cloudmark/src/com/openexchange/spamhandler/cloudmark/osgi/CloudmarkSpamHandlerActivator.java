@@ -52,9 +52,8 @@ package com.openexchange.spamhandler.cloudmark.osgi;
 import static com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
@@ -65,12 +64,10 @@ import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  *
  */
-public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
+public final class CloudmarkSpamHandlerActivator extends HousekeepingActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(CloudmarkSpamHandlerActivator.class);
-
-	private ServiceRegistration<SpamHandler> serviceRegistration;
 
 	/**
 	 * Initializes a new {@link CloudmarkSpamHandlerActivator}
@@ -127,7 +124,7 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 
 			final Dictionary<String, String> dictionary = new Hashtable<String, String>();
 	        dictionary.put("name", CloudmarkSpamHandler.getInstance().getSpamHandlerName());
-			serviceRegistration = context.registerService(SpamHandler.class, CloudmarkSpamHandler.getInstance(), dictionary);
+	        registerService(SpamHandler.class, CloudmarkSpamHandler.getInstance(), dictionary);
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -143,10 +140,7 @@ public final class CloudmarkSpamHandlerActivator extends DeferredActivator {
 	@Override
 	protected void stopBundle() throws Exception {
 		try {
-			if (null != serviceRegistration) {
-				serviceRegistration.unregister();
-				serviceRegistration = null;
-			}
+			cleanUp();
 			getServiceRegistry().clearRegistry();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);

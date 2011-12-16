@@ -49,18 +49,14 @@
 
 package com.openexchange.spamhandler.spamassassin.osgi;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;
@@ -71,7 +67,7 @@ import com.openexchange.spamhandler.spamassassin.property.PropertyHandler;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
+public final class SpamAssassinSpamHandlerActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpamAssassinSpamHandlerActivator.class));
 
@@ -81,16 +77,11 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
 
     private final Dictionary<String, String> dictionary;
 
-    private final List<ServiceTracker> serviceTrackerList;
-
-    private ServiceRegistration serviceRegistration;
-
     /**
      * Initializes a new {@link SpamAssassinSpamHandlerActivator}
      */
     public SpamAssassinSpamHandlerActivator() {
         super();
-        serviceTrackerList = new ArrayList<ServiceTracker>();
         dictionary = new Hashtable<String, String>();
         dictionary.put("name", SpamAssassinSpamHandler.getInstance().getSpamHandlerName());
     }
@@ -151,14 +142,9 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
             instance.loadProperties();
 
 //            MailServiceSupplier.getInstance().setMailService(getService(MailService.class));
-            serviceRegistration = context.registerService(SpamHandler.class.getName(), SpamAssassinSpamHandler.getInstance(), dictionary);
-
-            serviceTrackerList.add(new ServiceTracker(context, SpamdService.class.getName(), new SpamdInstallationServiceListener(context)));
-
-            // Open service trackers
-            for (final ServiceTracker tracker : serviceTrackerList) {
-                tracker.open();
-            }
+            registerService(SpamHandler.class, SpamAssassinSpamHandler.getInstance(), dictionary);
+            track(SpamdService.class);
+            openTrackers();
             thisBundle = context.getBundle();
         } catch (final Throwable t) {
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -169,19 +155,7 @@ public final class SpamAssassinSpamHandlerActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
-
-            /*
-             * Close service trackers
-             */
-            for (final ServiceTracker tracker : serviceTrackerList) {
-                tracker.close();
-            }
-            serviceTrackerList.clear();
-
+            cleanUp();
             /*
              * Clear service registry
              */

@@ -49,12 +49,11 @@
 
 package com.openexchange.secret.recovery.mail.osgi;
 
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.secret.recovery.SecretConsistencyCheck;
 import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -62,10 +61,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MailSecretRecoveryActivator extends DeferredActivator {
-
-    private ServiceRegistration<SecretConsistencyCheck> consistencyReg;
-    private ServiceRegistration<SecretMigrator> migratorReg;
+public class MailSecretRecoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -85,8 +81,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
-
-        consistencyReg = context.registerService(SecretConsistencyCheck.class, new SecretConsistencyCheck() {
+        registerService(SecretConsistencyCheck.class, new SecretConsistencyCheck() {
 
             @Override
             public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
@@ -94,8 +89,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
             }
 
         }, null);
-
-        migratorReg = context.registerService(SecretMigrator.class, new SecretMigrator() {
+        registerService(SecretMigrator.class, new SecretMigrator() {
 
             @Override
             public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
@@ -107,13 +101,7 @@ public class MailSecretRecoveryActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        if(consistencyReg != null) {
-            consistencyReg.unregister();
-        }
-
-        if(migratorReg != null) {
-            migratorReg.unregister();
-        }
+        cleanUp();
     }
 
 }

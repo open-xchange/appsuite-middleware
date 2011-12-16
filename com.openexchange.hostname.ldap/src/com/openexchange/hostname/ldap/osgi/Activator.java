@@ -51,7 +51,6 @@ package com.openexchange.hostname.ldap.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -61,14 +60,12 @@ import com.openexchange.hostname.ldap.LDAPHostnameService;
 import com.openexchange.hostname.ldap.configuration.LDAPHostnameProperties;
 import com.openexchange.hostname.ldap.configuration.Property;
 import com.openexchange.hostname.ldap.services.HostnameLDAPServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
-public class Activator extends DeferredActivator {
+public class Activator extends HousekeepingActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private ServiceRegistration<HostnameService> hostnameRegistration;
 
     private LDAPHostnameService hostnameservice;
 
@@ -123,7 +120,7 @@ public class Activator extends DeferredActivator {
 
             LDAPHostnameCache.getInstance().outputSettings();
 
-            hostnameRegistration = context.registerService(HostnameService.class, hostnameservice, null);
+            registerService(HostnameService.class, hostnameservice, null);
 
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
@@ -136,10 +133,7 @@ public class Activator extends DeferredActivator {
     protected void stopBundle() throws Exception {
         try {
             // stop hostname service
-            if (hostnameRegistration != null) {
-                hostnameRegistration.unregister();
-                hostnameservice = null;
-            }
+            cleanUp();
 
             deactivateCaching();
 

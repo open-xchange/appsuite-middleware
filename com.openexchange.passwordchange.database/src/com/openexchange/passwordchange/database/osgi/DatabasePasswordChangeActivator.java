@@ -50,10 +50,9 @@
 package com.openexchange.passwordchange.database.osgi;
 
 import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.database.impl.DatabasePasswordChange;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
@@ -62,9 +61,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabasePasswordChangeActivator extends DeferredActivator {
-
-    private ServiceRegistration<PasswordChangeService> serviceRegistration;
+public final class DatabasePasswordChangeActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link DatabasePasswordChangeActivator}
@@ -106,17 +103,12 @@ public final class DatabasePasswordChangeActivator extends DeferredActivator {
                 }
             }
         }
-        if (serviceRegistration == null) {
-            serviceRegistration = context.registerService(PasswordChangeService.class, new DatabasePasswordChange(), null);
-        }
+        registerService(PasswordChangeService.class, new DatabasePasswordChange(), null);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
+        cleanUp();
         /*
          * Clear service registry
          */

@@ -51,11 +51,11 @@ package com.openexchange.contacts.ldap.osgi;
 
 import java.util.Hashtable;
 import java.util.Map.Entry;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contacts.ldap.contacts.LdapContactInterfaceProvider;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator;
 import com.openexchange.contacts.ldap.folder.LdapGlobalFolderCreator.FolderIDAndAdminID;
+import com.openexchange.contacts.ldap.folder.LdapUserFolderCreator;
 import com.openexchange.contacts.ldap.property.ContextProperties;
 import com.openexchange.contacts.ldap.property.FolderProperties;
 import com.openexchange.contacts.ldap.property.PropertyHandler;
@@ -63,7 +63,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceProvider;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.login.LoginHandlerService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -72,11 +73,9 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  *
  */
-public final class LdapActivator extends DeferredActivator {
+public final class LdapActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(LdapActivator.class));
-
-    private ServiceRegistration<?> registryFolderCreator;
 
     /**
      * Initializes a new {@link LdapActivator}
@@ -137,7 +136,7 @@ public final class LdapActivator extends DeferredActivator {
                 LOG.info("A temporary absent service is available again");
                 return;
             }
-//            registryFolderCreator = context.registerService(LoginHandlerService.class.getName(), new LdapUserFolderCreator(), null);
+            registerService(LoginHandlerService.class, new LdapUserFolderCreator(), null);
 
             final PropertyHandler instance = PropertyHandler.getInstance();
             instance.loadProperties();
@@ -153,7 +152,7 @@ public final class LdapActivator extends DeferredActivator {
                     /*
                      * Register LDAP contact interface provider for current context-ID/folder-ID pair
                      */
-                    context.registerService(ContactInterfaceProvider.class, new LdapContactInterfaceProvider(
+                    registerService(ContactInterfaceProvider.class, new LdapContactInterfaceProvider(
                         folderprop,
                         createGlobalFolder.getAdminid(),
                         folderid,
@@ -172,20 +171,13 @@ public final class LdapActivator extends DeferredActivator {
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
-        } finally {
-            if (null != registryFolderCreator) {
-                registryFolderCreator.unregister();
-            }
         }
     }
 
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != registryFolderCreator) {
-                registryFolderCreator.unregister();
-                registryFolderCreator = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */
