@@ -65,7 +65,10 @@ import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.RefusedExecutionBehavior;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.sun.mail.imap.IMAPStore;
@@ -124,6 +127,26 @@ public final class IMAPStoreCache {
     /*-
      * -------------------------------------- Runnable stuff --------------------------------------
      */
+
+    private final class ContainerCloseElapsedRunnable implements Runnable {
+
+        private final IMAPStoreContainer container;
+
+        private final long stamp;
+
+        private final boolean debug;
+
+        protected ContainerCloseElapsedRunnable(final IMAPStoreContainer container, final long stamp, final boolean debug) {
+            this.container = container;
+            this.stamp = stamp;
+            this.debug = debug;
+        }
+
+        @Override
+        public void run() {
+            container.closeElapsed(stamp, debug ? new StringBuilder(64) : null);
+        }
+    }
 
     private final class CloseElapsedRunnable implements Runnable {
 
@@ -206,15 +229,17 @@ public final class IMAPStoreCache {
     /**
      * Close elapsed {@link IMAPStore} instances.
      */
-    public void closeElapsed() {
+    protected void closeElapsed() {
         final Iterator<IMAPStoreContainer> containers = map.values().iterator();
         if (containers.hasNext()) {
-            final StringBuilder debugBuilder = LOG.isDebugEnabled() ? new StringBuilder(64) : null;
+            final boolean debug = LOG.isDebugEnabled();
+            final ThreadPoolService threadPool = IMAPServiceRegistry.getService(ThreadPoolService.class);
+            final RefusedExecutionBehavior<Object> behavior = CallerRunsBehavior.getInstance();
             final long stamp = System.currentTimeMillis() - IDLE_MILLIS;
             do {
                 final IMAPStoreContainer container = containers.next();
                 if (null != container) {
-                    container.closeElapsed(stamp, debugBuilder);
+                    threadPool.submit(ThreadPools.task(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
                 }
             } while (containers.hasNext());
         }
