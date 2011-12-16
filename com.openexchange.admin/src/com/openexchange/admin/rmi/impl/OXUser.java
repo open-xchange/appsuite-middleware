@@ -93,6 +93,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 
@@ -605,6 +606,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 final Cache mailAccountCache = cacheService.getCache("MailAccount");
                 mailAccountCache.invalidateGroup(ctx.getId().toString());
+
+                final Cache globalFolderCache = cacheService.getCache("GlobalFolderCache");
+                CacheKey cacheKey = cacheService.newCacheKey(1, "0", Integer.toString(FolderObject.SYSTEM_LDAP_FOLDER_ID));
+                globalFolderCache.removeFromGroup(cacheKey, ctx.getId().toString());
+
+                final Cache folderCache = cacheService.getCache("OXFolderCache");
+                cacheKey = cacheService.newCacheKey(ctx.getId().intValue(), FolderObject.SYSTEM_LDAP_FOLDER_ID);
+                folderCache.remove(cacheKey);
             } catch (final OXException e) {
                 log.error(e.getMessage(), e);
             } finally {

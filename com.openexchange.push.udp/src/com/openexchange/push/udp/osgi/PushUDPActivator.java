@@ -50,22 +50,17 @@
 package com.openexchange.push.udp.osgi;
 
 import static com.openexchange.push.udp.registry.PushServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.push.udp.PushHandler;
 import com.openexchange.push.udp.PushInit;
-import com.openexchange.push.udp.registry.RegistryCustomizer;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.timer.TimerService;
 
@@ -74,20 +69,15 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
  */
-public class PushUDPActivator extends DeferredActivator {
+public class PushUDPActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushUDPActivator.class));
-
-    private ServiceRegistration<EventHandler> registration;
-
-    private final List<ServiceTracker<?,?>> serviceTrackers;
 
     /**
      * Initializes a new {@link PushUDPActivator}.
      */
     public PushUDPActivator() {
         super();
-        serviceTrackers = new ArrayList<ServiceTracker<?,?>>(4);
     }
 
     @Override
@@ -139,15 +129,9 @@ public class PushUDPActivator extends DeferredActivator {
             /*
              * Service trackers
              */
-            serviceTrackers.add(new ServiceTracker<EventFactoryService,EventFactoryService>(
-                context,
-                EventFactoryService.class,
-                new RegistryCustomizer<EventFactoryService>(context, EventFactoryService.class)));
-            serviceTrackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerCustomizer(context)));
-            // Open service trackers
-            for (final ServiceTracker<?,?> tracker : serviceTrackers) {
-                tracker.open();
-            }
+            track(EventFactoryService.class);
+            track(TimerService.class);
+            openTrackers();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -160,14 +144,10 @@ public class PushUDPActivator extends DeferredActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker<?,?> tracker : serviceTrackers) {
-                tracker.close();
-            }
-            serviceTrackers.clear();
+            cleanUp();
             /*
              * Shut-down
              */
-            dropRegisterService();
             PushInit.getInstance().stop();
             /*
              * Clear service registry
@@ -183,14 +163,7 @@ public class PushUDPActivator extends DeferredActivator {
         final String[] topics = new String[] { EventConstants.EVENT_TOPIC, "com/openexchange/*" };
         final Hashtable<String, Object> ht = new Hashtable<String, Object>(1);
         ht.put(EventConstants.EVENT_TOPIC, topics);
-        registration = context.registerService(EventHandler.class, new PushHandler(), ht);
-    }
-
-    protected void dropRegisterService() {
-        if (null != registration) {
-            registration.unregister();
-            registration = null;
-        }
+        registerService(EventHandler.class, new PushHandler(), ht);
     }
 
 }

@@ -54,7 +54,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -66,7 +65,7 @@ import com.openexchange.publish.microformats.ContactPictureServlet;
 import com.openexchange.publish.microformats.InfostoreFileServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OnlinePublicationServlet;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -76,11 +75,9 @@ import com.openexchange.userconf.UserConfigurationService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ServletActivator extends DeferredActivator {
+public class ServletActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletActivator.class));
-
-    private ServiceTracker tracker;
 
     private final PublicationServicesActivator activator = new PublicationServicesActivator();
 
@@ -111,17 +108,14 @@ public class ServletActivator extends DeferredActivator {
     protected void startBundle() throws Exception {
         activator.start(context);
         customizer = new I18nServiceTrackerCustomizer(context);
-        tracker = new ServiceTracker(context, I18nService.class.getName(), customizer );
-        tracker.open();
+        track(I18nService.class, customizer);
+        openTrackers();
         registerServlet();
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (null != tracker) {
-            tracker.close();
-            tracker = null;
-        }
+        cleanUp();
         activator.stop(context);
         unregisterServlet();
     }

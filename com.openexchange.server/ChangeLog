@@ -2,6 +2,10 @@
 
  - Partly fix for bug 20962: Giving user good error message if the file storage quota is exceeded on saving an attachment. 
 
+* 2011-12-16 - jan.bauerdick@open-xchange.com
+
+ - Replaced DeferredActivator by HousekeepingActivator
+
 * 2011-12-14 - jan.bauerdick@open-xchange.com
 
  - Fixed bug in AllMessagesAction, caused by removed field "unread"
@@ -15,6 +19,7 @@
  - Fix for bug 20970: Not setting admin permission on prohibited \NoSelect IMAP folders
  - Fix for bug 20983: Awaiting possible attachments
  - Back-end part to fix bug 19827: Introduced additional contact fields to support Outlook address fields
+ - Fix for bug 20833: Dropping cached global address book folder on user creation
 
 * 2011-12-13 - jan.bauerdick@open-xchange.com
 

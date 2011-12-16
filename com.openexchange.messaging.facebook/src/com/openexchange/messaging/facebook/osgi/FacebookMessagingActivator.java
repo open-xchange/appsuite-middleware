@@ -50,14 +50,10 @@
 package com.openexchange.messaging.facebook.osgi;
 
 import static com.openexchange.messaging.facebook.services.FacebookMessagingServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.html.HTMLService;
@@ -73,7 +69,7 @@ import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
@@ -84,11 +80,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FacebookMessagingActivator extends DeferredActivator {
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private List<ServiceRegistration<?>> registrations;
+public final class FacebookMessagingActivator extends HousekeepingActivator {
 
     private WhiteboardSecretService secretService;
 
@@ -153,24 +145,20 @@ public final class FacebookMessagingActivator extends DeferredActivator {
             FacebookConstants.init();
             FacebookConfiguration.getInstance().configure(getService(ConfigurationService.class));
 
-            trackers = new ArrayList<ServiceTracker<?,?>>(1);
-            trackers.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nCustomizer(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            track(I18nService.class, new I18nCustomizer(context));
+            openTrackers();
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(3);
-            registrations.add(context.registerService(MessagingService.class, new FacebookMessagingService(), null));
+            registerService(MessagingService.class, new FacebookMessagingService(), null);
             /*
              * Register event handler to detect removed sessions
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registrations.add(context.registerService(EventHandler.class.getName(), new FacebookEventHandler(), serviceProperties));
-            registrations.add(context.registerService(OAuthAccountDeleteListener.class.getName(), new FacebookOAuthAccountDeleteListener(), null));
-            registrations.add(context.registerService(OAuthAccountInvalidationListener.class.getName(), new FacebookOAuthAccountDeleteListener(), null));
+            registerService(EventHandler.class, new FacebookEventHandler(), serviceProperties);
+            registerService(OAuthAccountDeleteListener.class, new FacebookOAuthAccountDeleteListener(), null);
+            registerService(OAuthAccountInvalidationListener.class, new FacebookOAuthAccountDeleteListener(), null);
             try {
                 // new StartUpTest().test();
             } catch (final Exception e) {
@@ -186,21 +174,7 @@ public final class FacebookMessagingActivator extends DeferredActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
-            if(secretService != null) {
-                secretService.close();
-            }
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
 
             FacebookConstants.drop();
             FacebookConfiguration.getInstance().drop();

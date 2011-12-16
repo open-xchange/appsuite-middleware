@@ -52,19 +52,19 @@ package com.openexchange.mail.smal.jobqueue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
@@ -75,7 +75,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
  */
 final class JobConsumer extends AbstractTask<Object> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobConsumer.class));
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobConsumer.class));
 
     /**
      * The poison element.
@@ -130,17 +130,17 @@ final class JobConsumer extends AbstractTask<Object> {
 
     protected final Semaphore semaphore;
 
-    protected final Queue<Job> currentJobs;
+    private final AtomicInteger jobCounter;
 
     /**
      * Initializes a new {@link JobConsumer}.
      */
-    protected JobConsumer(final BlockingQueue<Job> queue, final ConcurrentMap<String, Job> identifiers, final boolean consumerMayPerformTasks) {
+    protected JobConsumer(final BlockingQueue<Job> queue, final ConcurrentMap<String, Job> identifiers, final boolean consumerMayPerformTasks, final AtomicInteger jobCounter) {
         super();
         keepgoing = new AtomicBoolean(true);
         this.queue = queue;
+        this.jobCounter = jobCounter;
         this.identifiers = identifiers;
-        currentJobs = new ConcurrentLinkedQueue<Job>();
         semaphore = new Semaphore(NUM_OF_MAX_CONCURRENT_WORKERS);
         this.consumerMayPerformTasks = consumerMayPerformTasks;
     }
@@ -200,12 +200,48 @@ final class JobConsumer extends AbstractTask<Object> {
     @Override
     public Object call() throws Exception {
         try {
+            final class JobPerformerTask implements Runnable {
+                
+                private volatile List<Job> jobs;
+
+                protected JobPerformerTask() {
+                    super();
+                }
+
+                protected void setJobs2Perform(final List<Job> jobs) {
+                    this.jobs = new ArrayList<Job>(jobs);
+                }
+                
+                @Override
+                public void run() {
+                    try {
+                        final boolean debug = LOG.isDebugEnabled();
+                        final ThreadPoolService threadPool = SMALServiceLookup.getThreadPool();
+                        final List<Job> tmp = jobs;
+                        for (final Job job : tmp) {
+                            performJob(job, threadPool, debug);
+                        }
+                        if (debug) {
+                            LOG.debug("Performed " + tmp.size() + " jobs");
+                        }
+                    } catch (final InterruptedException e) {
+                        // Consumer interrupted... Keep interrupted flag
+                        Thread.currentThread().interrupt();
+                        LOG.info("Job performer task interrupted.", e);
+                    } catch (final RuntimeException e) {
+                        // Consumer run failed...
+                        LOG.info("Job performer run terminated with unchecked error.", e);
+                    }
+                }
+            }
+            final JobPerformerTask jobPerformerTask = new JobPerformerTask();
+            final Task<Object> task = ThreadPools.task(jobPerformerTask);
             final List<Job> jobs = new ArrayList<Job>(16);
             while (keepgoing.get()) {
                 try {
                     if (queue.isEmpty()) {
                         /*
-                         * Blocking wait for at least 1 job to arrive.
+                         * Blocking wait for at least one job to arrive.
                          */
                         final Job job = queue.take();
                         if (POISON == job) {
@@ -215,19 +251,16 @@ final class JobConsumer extends AbstractTask<Object> {
                     }
                     queue.drainTo(jobs);
                     final boolean quit = jobs.remove(POISON);
-                    {
-                        final ThreadPoolService threadPool = SMALServiceLookup.getInstance().getService(ThreadPoolService.class);
-                        for (final Job job : jobs) {
-                            performJob(job, threadPool);
-                        }
-                    }
-                    jobs.clear();
-                    identifiers.clear();
+                    jobPerformerTask.setJobs2Perform(jobs);
+                    SMALServiceLookup.getThreadPool().submit(task, CallerRunsBehavior.getInstance());
                     if (quit) {
                         return null;
                     }
+                    jobs.clear();
+                    // TODO: identifiers.clear();
                 } catch (final RuntimeException e) {
                     // Consumer run failed...
+                    LOG.info("Job consumer run terminated with unchecked error.", e);
                 }
             }
             LOG.info("Job consumer terminated.");
@@ -242,12 +275,24 @@ final class JobConsumer extends AbstractTask<Object> {
         return null;
     }
 
-    protected void performJob(final Job job, final ThreadPoolService threadPool) throws InterruptedException {
+    /**
+     * Performs specified job.
+     * 
+     * @param job The job to perform
+     * @param threadPool The thread pool to delegate execution to
+     * @param debug Whether debug logging is enabled
+     * @throws InterruptedException If job execution is interrupted
+     */
+    protected void performJob(final Job job, final ThreadPoolService threadPool, final boolean debug) throws InterruptedException {
         /*
          * Check if canceled in the meantime
          */
         if (job.isCanceled()) {
             identifiers.remove(job.getIdentifier());
+            decrementJobCount();
+            if (debug) {
+                LOG.debug("Aborted execution of canceled job: " + job.getIdentifier());
+            }
             return;
         }
         if (job.isPaused()) {
@@ -256,17 +301,20 @@ final class JobConsumer extends AbstractTask<Object> {
              */
             job.proceed();
             queue.offer(job);
+            if (debug) {
+                LOG.debug("Re-enqueued temporarily paused job: " + job.getIdentifier());
+            }
             return;
         }
         try {
             if (consumerMayPerformTasks) {
                 if (semaphore.tryAcquire()) {
                     // Further concurrent worker allowed
-                    final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
+                    final Future<Object> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.getInstance());
                     job.future = future;
                 } else {
                     // Execute with "Job-Consumer" thread
-                    final JobWrapper jobWrapper = wrapperFor(job, false);
+                    final JobWrapper jobWrapper = wrapperFor(job, false, debug);
                     boolean ran = false;
                     jobWrapper.beforeExecute(Thread.currentThread());
                     try {
@@ -284,9 +332,12 @@ final class JobConsumer extends AbstractTask<Object> {
                     }
                 }
             } else {
+                if (debug) {
+                    LOG.debug("Awaiting free worker thread to execute job: " + job.getIdentifier());
+                }
                 semaphore.acquire();
                 // Free worker
-                final Future<Object> future = threadPool.submit(wrapperFor(job, true), CallerRunsBehavior.getInstance());
+                final Future<Object> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.getInstance());
                 job.future = future;
             }
         } finally {
@@ -294,11 +345,22 @@ final class JobConsumer extends AbstractTask<Object> {
              * Last, but not least, remove from known identifiers if done
              */
             identifiers.remove(job.getIdentifier());
+            decrementJobCount();
         }
     }
 
-    private JobWrapper wrapperFor(final Job job, final boolean releasePermit) {
-        return new JobWrapper(job, releasePermit);
+    private void decrementJobCount() {
+        int cur;
+        do {
+            cur = jobCounter.get();
+            if (cur <= 0) {
+                return;
+            }
+        } while (!jobCounter.compareAndSet(cur, cur - 1));
+    }
+
+    private JobWrapper wrapperFor(final Job job, final boolean releasePermit, final boolean debug) {
+        return new JobWrapper(job, releasePermit, debug);
     }
 
     private final class JobWrapper implements Task<Object> {
@@ -307,10 +369,13 @@ final class JobConsumer extends AbstractTask<Object> {
 
         private final boolean releasePermit;
 
-        protected JobWrapper(final Job job, final boolean releasePermit) {
+        private final boolean debug;
+
+        protected JobWrapper(final Job job, final boolean releasePermit, final boolean debug) {
             super();
             this.releasePermit = releasePermit;
             this.job = job;
+            this.debug = debug;
         }
 
         @Override
@@ -335,7 +400,12 @@ final class JobConsumer extends AbstractTask<Object> {
 
         @Override
         public Object call() throws Exception {
-            return job.call();
+            if (!debug) {
+                return job.call();
+            }
+            job.call();
+            LOG.debug("Job successfully performed: " + job.getIdentifier());
+            return null; // Job always returns null
         }
 
     }

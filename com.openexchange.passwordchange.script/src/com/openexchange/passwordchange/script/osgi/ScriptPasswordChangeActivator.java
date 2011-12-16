@@ -50,11 +50,10 @@
 package com.openexchange.passwordchange.script.osgi;
 
 import static com.openexchange.passwordchange.script.services.SPWServiceRegistry.getServiceRegistry;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.impl.ScriptPasswordChange;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
@@ -63,9 +62,7 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:manuel.kraft@open-xchange.com">Manuel Kraft</a>
  */
-public final class ScriptPasswordChangeActivator extends DeferredActivator {
-
-    private ServiceRegistration<PasswordChangeService> serviceRegistration;
+public final class ScriptPasswordChangeActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link ScriptPasswordChangeActivator}
@@ -107,17 +104,12 @@ public final class ScriptPasswordChangeActivator extends DeferredActivator {
                 }
             }
         }
-        if (serviceRegistration == null) {
-            serviceRegistration = context.registerService(PasswordChangeService.class, new ScriptPasswordChange(), null);
-        }
+        registerService(PasswordChangeService.class, new ScriptPasswordChange(), null);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
-            serviceRegistration = null;
-        }
+        cleanUp();
         /*
          * Clear service registry
          */

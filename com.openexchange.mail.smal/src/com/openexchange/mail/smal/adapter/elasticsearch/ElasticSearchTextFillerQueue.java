@@ -185,7 +185,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * Starts consuming from queue.
      */
     public void start() {
-        future = SMALServiceLookup.getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
+        future = SMALServiceLookup.getThreadPool().submit(ThreadPools.task(this, simpleName));
     }
 
     /**
@@ -275,7 +275,7 @@ public final class ElasticSearchTextFillerQueue implements Runnable {
      * @param threadDesc The thread description
      */
     protected void handleFillers(final List<TextFiller> groupedFillers) {
-        final ThreadPoolService poolService = SMALServiceLookup.getServiceStatic(ThreadPoolService.class);
+        final ThreadPoolService poolService = SMALServiceLookup.getThreadPool();
         final int size = groupedFillers.size();
         final int configuredBlockSize = Constants.MAX_FILLER_CHUNK;
         if (size <= configuredBlockSize) {

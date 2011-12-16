@@ -51,26 +51,24 @@ package com.openexchange.imap;
 
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.imap.util.CountingCondition;
-import com.openexchange.imap.util.LockProvidingBlockingQueue;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.RefusedExecutionBehavior;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.sun.mail.imap.IMAPStore;
@@ -130,6 +128,26 @@ public final class IMAPStoreCache {
      * -------------------------------------- Runnable stuff --------------------------------------
      */
 
+    private final class ContainerCloseElapsedRunnable implements Runnable {
+
+        private final IMAPStoreContainer container;
+
+        private final long stamp;
+
+        private final boolean debug;
+
+        protected ContainerCloseElapsedRunnable(final IMAPStoreContainer container, final long stamp, final boolean debug) {
+            this.container = container;
+            this.stamp = stamp;
+            this.debug = debug;
+        }
+
+        @Override
+        public void run() {
+            container.closeElapsed(stamp, debug ? new StringBuilder(64) : null);
+        }
+    }
+
     private final class CloseElapsedRunnable implements Runnable {
 
         protected CloseElapsedRunnable() {
@@ -151,11 +169,11 @@ public final class IMAPStoreCache {
      * -------------------------------------- Member stuff --------------------------------------
      */
 
-    protected final Protocol protocol;
+    private final Protocol protocol;
 
-    protected final String name;
+    private final String name;
 
-    protected final ConcurrentMap<Key, LockProvidingBlockingQueue<IMAPStoreWrapper>> map;
+    private final ConcurrentMap<Key, IMAPStoreContainer> map;
 
     private final ConcurrentMap<User, Queue<Key>> keys;
 
@@ -171,8 +189,8 @@ public final class IMAPStoreCache {
         this.checkConnected = checkConnected;
         protocol = IMAPProvider.PROTOCOL_IMAP;
         name = protocol.getName();
-        map = new ConcurrentHashMap<Key, LockProvidingBlockingQueue<IMAPStoreWrapper>>();
-        keys = new ConcurrentHashMap<User, Queue<Key>>();
+        map = new ConcurrentHashMap<Key, IMAPStoreContainer>();
+        keys = new ConcurrentHashMap<IMAPStoreCache.User, Queue<Key>>();
     }
 
     private void init() {
@@ -200,19 +218,9 @@ public final class IMAPStoreCache {
         final Queue<Key> keyQueue = keys.remove(new User(userId, contextId));
         if (null != keyQueue) {
             for (final Key key : keyQueue) {
-                final LockProvidingBlockingQueue<IMAPStoreWrapper> queue = map.remove(key);
-                final Lock queueLock = queue.getLock();
-                queueLock.lock();
-                try {
-                    for (final Iterator<IMAPStoreWrapper> iter = queue.getBlockingQueue().iterator(); iter.hasNext();) {
-                        final IMAPStore imapStore = iter.next().getIMAPStore();
-                        if (null != imapStore) {
-                            iter.remove();
-                            closeSafe(imapStore);
-                        }
-                    }
-                } finally {
-                    queueLock.unlock();
+                final IMAPStoreContainer container = map.remove(key);
+                if (null != container) {
+                    container.clear();
                 }
             }
         }
@@ -221,45 +229,23 @@ public final class IMAPStoreCache {
     /**
      * Close elapsed {@link IMAPStore} instances.
      */
-    public void closeElapsed() {
-        final Iterator<LockProvidingBlockingQueue<IMAPStoreWrapper>> queues = map.values().iterator();
-        if (queues.hasNext()) {
-            final StringBuilder debugBuilder = LOG.isDebugEnabled() ? new StringBuilder(64) : null;
+    protected void closeElapsed() {
+        final Iterator<IMAPStoreContainer> containers = map.values().iterator();
+        if (containers.hasNext()) {
+            final boolean debug = LOG.isDebugEnabled();
+            final ThreadPoolService threadPool = IMAPServiceRegistry.getService(ThreadPoolService.class);
+            final RefusedExecutionBehavior<Object> behavior = CallerRunsBehavior.getInstance();
             final long stamp = System.currentTimeMillis() - IDLE_MILLIS;
             do {
-                final LockProvidingBlockingQueue<IMAPStoreWrapper> queue = queues.next();
-                final Lock queueLock = queue.getLock();
-                queueLock.lock();
-                try {
-                    for (final Iterator<IMAPStoreWrapper> iter = queue.getBlockingQueue().iterator(); iter.hasNext();) {
-                        final IMAPStore imapStore = iter.next().getIfElapsed(stamp);
-                        if (null != imapStore) {
-                            iter.remove();
-                            final String info = null == debugBuilder ? null : imapStore.toString();
-                            closeSafe(imapStore);
-                            if (null != debugBuilder) {
-                                debugBuilder.setLength(0);
-                                LOG.debug(debugBuilder.append("Closed elapsed IMAP store: ").append(info).toString());
-                            }
-                            // Signal
-                            if (queue.isBounded()) {
-                                final CountingCondition condition = queue.getCondition();
-                                condition.signalAll();
-                                if (null != debugBuilder) {
-                                    debugBuilder.setLength(0);
-                                    LOG.debug(debugBuilder.append("Signaled available cached IMAP store for: ").append(info).toString());
-                                }
-                            }
-                        }
-                    }
-                } finally {
-                    queueLock.unlock();
+                final IMAPStoreContainer container = containers.next();
+                if (null != container) {
+                    threadPool.submit(ThreadPools.task(new ContainerCloseElapsedRunnable(container, stamp, debug)), behavior);
                 }
-            } while (queues.hasNext());
+            } while (containers.hasNext());
         }
     }
 
-    private LockProvidingBlockingQueue<IMAPStoreWrapper> getBlockingQueue(final int accountId, final String server, final int port, final String login, final Session session) throws OXException {
+    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final String pw, final Session session) throws OXException {
         /*
          * Check for a cached one
          */
@@ -267,13 +253,19 @@ public final class IMAPStoreCache {
         /*
          * Get queue
          */
-        LockProvidingBlockingQueue<IMAPStoreWrapper> blockingQueue = map.get(key);
-        if (null == blockingQueue) {
+        IMAPStoreContainer container = map.get(key);
+        if (null == container) {
             final int maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
-            final LockProvidingBlockingQueue<IMAPStoreWrapper> newQueue = new LockProvidingBlockingQueue<IMAPStoreWrapper>(maxCount);
-            blockingQueue = map.putIfAbsent(key, newQueue);
-            if (null == blockingQueue) {
-                blockingQueue = newQueue;
+            final IMAPStoreContainer newContainer =
+                maxCount > 0 ? new BoundedIMAPStoreContainer(name, server, port, login, pw, maxCount) : new UnboundedIMAPStoreContainer(
+                    name,
+                    server,
+                    port,
+                    login,
+                    pw);
+            container = map.putIfAbsent(key, newContainer);
+            if (null == container) {
+                container = newContainer;
                 // Remember key
                 final User uk = new User(session.getUserId(), session.getContextId());
                 Queue<Key> keyQueue = keys.get(uk);
@@ -287,7 +279,7 @@ public final class IMAPStoreCache {
                 keyQueue.offer(key);
             }
         }
-        return blockingQueue;
+        return container;
     }
 
     /**
@@ -301,126 +293,18 @@ public final class IMAPStoreCache {
      * @param pw The password
      * @return The connected IMAP store
      * @throws MessagingException If connecting IMAP store fails
-     * @throws MailException If a mail error occurs
+     * @throws OXException If a mail error occurs
      */
     public IMAPStore borrowIMAPStore(final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final Session session) throws MessagingException, OXException {
         /*
          * Return connected IMAP store
          */
-        return connectedIMAPStore(false, getBlockingQueue(accountId, server, port, login, session), accountId, imapSession, server, port, login, pw);
-    }
-
-    private IMAPStore connectedIMAPStore(final boolean await, final LockProvidingBlockingQueue<IMAPStoreWrapper> queue, final int accountId, final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException, OXException {
-        final Lock queueLock = queue.getLock();
-        queueLock.lock();
         try {
-            /*
-             * Check for available IMAP store
-             */
-            final StringBuilder debugBuilder = LOG.isDebugEnabled() ? new StringBuilder(64) : null;
-            if (queue.isBounded() && (await || (queue.getCondition().getCount() > 0))) {
-                /*
-                 * Requested to await or other threads already waiting
-                 */
-                try {
-                    if (null != debugBuilder) {
-                        debugBuilder.setLength(0);
-                        LOG.debug(debugBuilder.append("Awaiting free IMAP store for: imap://").append(login).append('@').append(server).append(
-                            ':').append(port).toString());
-                    }
-                    final CountingCondition condition = queue.getCondition();
-                    condition.await();
-                } catch (final InterruptedException e) {
-                    // Should not occur
-                    ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
-                    throw MailExceptionCode.INTERRUPT_ERROR.create(e);
-                }
-            }
-            /*
-             * Check for available IMAP store
-             */
-            final BlockingQueue<IMAPStoreWrapper> daQueue = queue.getBlockingQueue();
-            for (final IMAPStoreWrapper wrapper : daQueue) {
-                IMAPStore imapStore = wrapper.markOccupied();
-                if (null != imapStore) {
-                    if (checkConnected && !imapStore.isConnected()) {
-                        /*
-                         * How is that possible? Check IMAPStore.finalize()
-                         */
-                        try {
-                            imapStore.connect(server, port, login, pw);
-                        } catch (final AuthenticationFailedException e) {
-                            /*
-                             * Retry connect with AUTH=PLAIN disabled
-                             */
-                            imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-                            imapStore = (IMAPStore) imapSession.getStore(name);
-                            imapStore.connect(server, port, login, pw);
-                        }
-                        if (null != debugBuilder) {
-                            debugBuilder.setLength(0);
-                            LOG.debug(debugBuilder.append("\n--- /!\\ --- Re-connected cached IMAP store for: imap://").append(login).append(
-                                '@').append(server).append(':').append(port).append("--- /!\\ ---\n").toString());
-                        }
-                    }
-                    if (null != debugBuilder) {
-                        debugBuilder.setLength(0);
-                        LOG.debug(debugBuilder.append(
-                            "Using cached " + (imapStore.isConnected() ? "connected" : "UNCONNECTED") + " IMAP store for: imap://").append(
-                            login).append('@').append(server).append(':').append(port).toString());
-                    }
-                    return imapStore;
-                }
-            }
-            /*
-             * Check if space available
-             */
-            final IMAPStoreWrapper newWrapper = newWrapper();
-            if (!daQueue.offer(newWrapper)) {
-                /*
-                 * No space available
-                 */
-                return connectedIMAPStore(true, queue, accountId, imapSession, server, port, login, pw);
-            }
-            try {
-                /*
-                 * Get new store...
-                 */
-                IMAPStore imapStore = (IMAPStore) imapSession.getStore(name);
-                /*
-                 * ... and connect it
-                 */
-                try {
-                    imapStore.connect(server, port, login, pw);
-                } catch (final AuthenticationFailedException e) {
-                    /*
-                     * Retry connect with AUTH=PLAIN disabled
-                     */
-                    imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
-                    imapStore = (IMAPStore) imapSession.getStore(name);
-                    imapStore.connect(server, port, login, pw);
-                }
-                /*
-                 * Done
-                 */
-                newWrapper.setOccupiedIMAPStore(imapStore);
-                if (null != debugBuilder) {
-                    debugBuilder.setLength(0);
-                    LOG.debug(debugBuilder.append("Using newly established (cached) IMAP store for: imap://").append(login).append('@').append(
-                        server).append(':').append(port).toString());
-                }
-                return imapStore;
-            } catch (final MessagingException e) {
-                // Establishing a new IMAP store failed
-                daQueue.remove(newWrapper);
-                throw e;
-            } catch (final RuntimeException e) {
-                // Establishing a new IMAP store failed
-                daQueue.remove(newWrapper);
-                throw e;
-            }
-        } finally {
-            queueLock.unlock();
+            return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+        } catch (final InterruptedException e) {
+            // Should not occur
+            ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e);
         }
     }
 
@@ -440,86 +324,12 @@ public final class IMAPStoreCache {
         /*
          * Get queue
          */
-        final LockProvidingBlockingQueue<IMAPStoreWrapper> queue = map.get(newKey(server, port, login));
-        if (null == queue) {
+        final IMAPStoreContainer container = map.get(newKey(server, port, login));
+        if (null == container) {
             closeSafe(imapStore);
             return;
         }
-        final StringBuilder debugBuilder = LOG.isDebugEnabled() ? new StringBuilder(64) : null;
-        final Lock queueLock = queue.getLock();
-        queueLock.lock();
-        try {
-            /*
-             * Orderly return to pool
-             */
-            final BlockingQueue<IMAPStoreWrapper> daQueue = queue.getBlockingQueue();
-            {
-                IMAPStoreWrapper wrapper = null;
-                for (final IMAPStoreWrapper cur : daQueue) {
-                    if (cur.clearOccupiedIfEqual(imapStore)) {
-                        wrapper = cur;
-                        break;
-                    }
-                }
-                if (null != wrapper) { // Associated wrapper found in queue
-                    if (checkConnected && !imapStore.isConnected()) {
-                        // Already closed
-                        daQueue.remove(wrapper);
-                    }
-                    if (null != debugBuilder) {
-                        debugBuilder.setLength(0);
-                        LOG.debug(debugBuilder.append(
-                            "Returned cached " + (imapStore.isConnected() ? "connected" : "UNCONNECTED") + " IMAP store for: imap://").append(
-                            login).append('@').append(server).append(':').append(port).toString());
-                    }
-                    return;
-                }
-            }
-            if (null != debugBuilder) {
-                debugBuilder.setLength(0);
-                LOG.debug(debugBuilder.append("Couldn't return cached IMAP store for: imap://").append(login).append('@').append(server).append(
-                    ':').append(port).toString());
-            }
-            if (checkConnected && !imapStore.isConnected()) {
-                // Already closed
-                return;
-            }
-            /*
-             * Check if space available
-             */
-            final IMAPStoreWrapper newWrapper = newWrapper();
-            if (!daQueue.offer(newWrapper)) {
-                /*
-                 * No space available
-                 */
-                closeSafe(imapStore);
-                return;
-            }
-            newWrapper.setIMAPStore(imapStore);
-            if (null != debugBuilder) {
-                debugBuilder.setLength(0);
-                LOG.debug(debugBuilder.append("Return uncached IMAP store for: imap://").append(login).append('@').append(server).append(
-                    ':').append(port).toString());
-            }
-        } finally {
-            if (queue.isBounded()) {
-                try {
-                    final CountingCondition condition = queue.getCondition();
-                    condition.signalAll();
-                    if (null != debugBuilder) {
-                        debugBuilder.setLength(0);
-                        LOG.debug(debugBuilder.append("Signaled available cached IMAP store for: imap://").append(login).append('@').append(
-                            server).append(':').append(port).toString());
-                    }
-                } catch (final Exception e) {
-                    LOG.error(
-                        new StringBuilder("Failed signaling available cached IMAP store for: imap://").append(login).append('@').append(
-                            server).append(':').append(port).toString(),
-                        e);
-                }
-            }
-            queueLock.unlock();
-        }
+        container.backStore(imapStore);
     }
 
     private static void closeSafe(final IMAPStore imapStore) {
@@ -530,68 +340,6 @@ public final class IMAPStoreCache {
                 // Ignore
             }
         }
-    }
-
-    private static IMAPStoreWrapper newWrapper() {
-        return new IMAPStoreWrapper();
-    }
-
-    private static final class IMAPStoreWrapper {
-
-        private IMAPStore value;
-        private long lastAccessed;
-        private boolean occupied;
-
-        protected IMAPStoreWrapper() {
-            super();
-            value = null;
-            occupied = false;
-        }
-
-        protected IMAPStore getIMAPStore() {
-            return value;
-        }
-
-        protected IMAPStore getIfElapsed(final long stamp) {
-            if (occupied || (null == value) || (lastAccessed >= stamp)) {
-                return null;
-            }
-            // Elapsed
-            final IMAPStore ret = value;
-            value = null; // Release reference
-            return ret;
-        }
-
-        protected void setIMAPStore(final IMAPStore value) {
-            this.value = value;
-            lastAccessed = System.currentTimeMillis();
-        }
-
-        protected void setOccupiedIMAPStore(final IMAPStore value) {
-            this.occupied = true;
-            this.value = value;
-            lastAccessed = System.currentTimeMillis();
-        }
-
-        protected boolean clearOccupiedIfEqual(final IMAPStore candidate) {
-            if (candidate.equals(value)) {
-                occupied = false;
-                lastAccessed = System.currentTimeMillis();
-                return true;
-            }
-            // False
-            return false;
-        }
-
-        protected IMAPStore markOccupied() {
-            if (occupied || (null == value)) {
-                return null;
-            }
-            occupied = true;
-            lastAccessed = System.currentTimeMillis();
-            return value;
-        }
-
     }
 
     private static Key newKey(final String host, final int port, final String user) {
@@ -655,8 +403,11 @@ public final class IMAPStoreCache {
     }
 
     private static final class User {
+
         private final int userId;
+
         private final int contextId;
+
         private final int hash;
 
         public User(final int userId, final int contextId) {

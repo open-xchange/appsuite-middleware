@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,41 @@
  *
  */
 
-package com.openexchange.authorization.standard.osgi;
+package com.openexchange.imap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.authorization.AuthorizationService;
-import com.openexchange.authorization.standard.DefaultAuthorizationImpl;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import java.util.concurrent.Semaphore;
+import javax.mail.MessagingException;
+import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link AuthorizationServiceActivator}
- *
+ * {@link BoundedIMAPStoreContainer} - The bounded {@link IMAPStoreContainer}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AuthorizationServiceActivator extends HousekeepingActivator {
+public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuthorizationServiceActivator.class));
+    private final Semaphore semaphore;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { };
+    /**
+     * Initializes a new {@link BoundedIMAPStoreContainer}.
+     */
+    public BoundedIMAPStoreContainer(final String name, final String server, final int port, final String login, final String pw, final int maxCount) {
+        super(name, server, port, login, pw);
+        semaphore = new Semaphore(maxCount, true);
     }
 
     @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        /*
-         * Never stop the server even if a needed service is absent
-         */
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Absent service: " + clazz.getName());
-        }
+    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        semaphore.acquire();
+        return super.getStore(imapSession);
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Re-available service: " + clazz.getName());
-        }
-    }
-
-    @Override
-    public void startBundle() throws Exception {
+    public void backStore(final IMAPStore imapStore) {
         try {
-            /*
-             * (Re-)Initialize service registry with available services
-             */
-            {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("starting bundle: com.openexchange.authorization.standard");
-                }
-                registerService(AuthorizationService.class, DefaultAuthorizationImpl.getInstance(), null);
-            }
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        try {
-            cleanUp();
-            /*
-             * Clear service registry
-             */
-            // getServiceRegistry().clearRegistry();
-        } catch (final Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw e;
+            super.backStore(imapStore);
+        } finally {
+            semaphore.release();
         }
     }
 

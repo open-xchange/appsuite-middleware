@@ -50,20 +50,16 @@
 package com.openexchange.unifiedinbox.osgi;
 
 import static com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.unifiedinbox.UnifiedINBOXProvider;
@@ -75,13 +71,9 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXActivator extends DeferredActivator {
+public final class UnifiedINBOXActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXActivator.class));
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private ServiceRegistration<MailProvider> providerRegistration;
 
     /**
      * Initializes a new {@link UnifiedINBOXActivator}
@@ -133,17 +125,14 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
             /*
              * Create & open trackers
              */
-            trackers = new ArrayList<ServiceTracker<?,?>>(1);
-            trackers.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nCustomizer(context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            track(I18nService.class, new I18nCustomizer(context));
+            openTrackers();
             /*
              * Register service(s)
              */
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX.toString());
-            providerRegistration = context.registerService(MailProvider.class, UnifiedINBOXProvider.getInstance(), dictionary);
+            registerService(MailProvider.class, UnifiedINBOXProvider.getInstance(), dictionary);
             /*
              * Detect what SynchronousQueue to use
              */
@@ -171,16 +160,7 @@ public final class UnifiedINBOXActivator extends DeferredActivator {
     public void stopBundle() throws Exception {
         try {
             UnifiedINBOXSynchronousQueueProvider.releaseInstance();
-            if (null != providerRegistration) {
-                providerRegistration.unregister();
-                providerRegistration = null;
-            }
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
+            cleanUp();
             /*
              * Clear service registry
              */

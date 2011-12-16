@@ -49,16 +49,13 @@
 
 package com.openexchange.file.storage.config.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAccountParser;
 import com.openexchange.file.storage.config.services.ConfigFileStorageServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -67,9 +64,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public final class ConfigFileStorageActivator extends DeferredActivator {
-
-    private List<ServiceRegistration<?>> registrations;
+public final class ConfigFileStorageActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link ConfigFileStorageActivator}.
@@ -133,11 +128,7 @@ public final class ConfigFileStorageActivator extends DeferredActivator {
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(4);
-            registrations.add(context.registerService(
-                FileStorageAccountManagerProvider.class,
-                new ConfigFileStorageAccountManagerProvider(),
-                null));
+            registerService(FileStorageAccountManagerProvider.class, new ConfigFileStorageAccountManagerProvider(), null);
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.file.storage.config\" failed.", e);
             throw e;
@@ -151,12 +142,7 @@ public final class ConfigFileStorageActivator extends DeferredActivator {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.file.storage.config");
             }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            cleanUp();
             dropFileStorageProperties();
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage.config\" failed.", e);

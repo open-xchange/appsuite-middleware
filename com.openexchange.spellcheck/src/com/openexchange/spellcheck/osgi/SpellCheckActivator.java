@@ -51,9 +51,8 @@ package com.openexchange.spellcheck.osgi;
 
 import static com.openexchange.spellcheck.services.SpellCheckServiceRegistry.getServiceRegistry;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.internal.SpellCheckInit;
@@ -66,12 +65,10 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class SpellCheckActivator extends DeferredActivator {
+public final class SpellCheckActivator extends HousekeepingActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SpellCheckActivator.class);
-
-	private ServiceRegistration spellCheckServiceRegistration;
 
 	/**
 	 * Initializes a new {@link SpellCheckActivator}
@@ -139,8 +136,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 			/*
 			 * Register its service
 			 */
-			spellCheckServiceRegistration = context.registerService(SpellCheckService.class.getName(),
-					new SpellCheckServiceImpl(), null);
+			registerService(SpellCheckService.class, new SpellCheckServiceImpl(), null);
 			if (LOG.isInfoEnabled()) {
 				LOG.info("Spell check service successfully started");
 			}
@@ -162,10 +158,7 @@ public final class SpellCheckActivator extends DeferredActivator {
 			/*
 			 * Unregister its service
 			 */
-			if (null != spellCheckServiceRegistration) {
-				spellCheckServiceRegistration.unregister();
-				spellCheckServiceRegistration = null;
-			}
+			cleanUp();
 			/*
 			 * Stop spell check
 			 */

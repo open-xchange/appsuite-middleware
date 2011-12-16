@@ -153,8 +153,15 @@ public final class IMAPActivator extends HousekeepingActivator {
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("protocol", IMAPProvider.PROTOCOL_IMAP.toString());
             registerService(MailProvider.class, IMAPProvider.getInstance(), dictionary);
+            /*
+             * Register IMAP notifier registry
+             */
             if (IMAPProperties.getInstance().notifyRecent()) {
-                registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
+                final ConfigurationService service = getService(ConfigurationService.class);
+                final boolean register = service.getBoolProperty("com.openexchange.imap.registerIMAPNotifierRegistryService", false);
+                if (register) {
+                    registerService(IMAPNotifierRegistryService.class, IMAPNotifierRegistry.getInstance());
+                }
             }
             /*
              * Register event handle

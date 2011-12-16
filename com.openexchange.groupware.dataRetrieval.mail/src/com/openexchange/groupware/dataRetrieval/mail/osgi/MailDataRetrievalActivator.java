@@ -49,11 +49,10 @@
 
 package com.openexchange.groupware.dataRetrieval.mail.osgi;
 
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.mail.MailAttachmentDataProvider;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 
 /**
@@ -61,10 +60,9 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MailDataRetrievalActivator extends DeferredActivator {
+public class MailDataRetrievalActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES = new Class<?>[]{MailService.class};
-    private ServiceRegistration registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -83,14 +81,12 @@ public class MailDataRetrievalActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registration = context.registerService(DataProvider.class.getName(), new MailAttachmentDataProvider(getService(MailService.class)), null);
+        registerService(DataProvider.class, new MailAttachmentDataProvider(getService(MailService.class)), null);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if(registration != null) {
-            registration.unregister();
-        }
+        cleanUp();
     }
 
 }

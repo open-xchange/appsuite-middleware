@@ -56,16 +56,12 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.w3c.tidy.Report;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
@@ -73,21 +69,17 @@ import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.proxy.ProxyRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link HTMLServiceActivator} - Activator for JSON folder interface.
+ * {@link HTMLServiceActivator} - Activator for HTML interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HTMLServiceActivator extends DeferredActivator {
+public class HTMLServiceActivator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(HTMLServiceActivator.class));
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private ServiceRegistration<HTMLService> registration;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -114,14 +106,11 @@ public class HTMLServiceActivator extends DeferredActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker<?,?>>(2);
-            trackers.add(new ServiceTracker<ProxyRegistry,ProxyRegistry>(context, ProxyRegistry.class, new ProxyRegistryCustomizer(context)));
+            track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
             /*
              * Open trackers
              */
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            openTrackers();
             /*
              * Other start-up stuff
              */
@@ -142,15 +131,7 @@ public class HTMLServiceActivator extends DeferredActivator {
             /*
              * Close trackers
              */
-            if (null != trackers) {
-                /*
-                 * Close trackers
-                 */
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
+            cleanUp();
             /*
              * Restore
              */
@@ -190,8 +171,7 @@ public class HTMLServiceActivator extends DeferredActivator {
         /*
          * Register HTML service
          */
-        registration =
-            context.registerService(HTMLService.class, new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
+        registerService(HTMLService.class, new HTMLServiceImpl(properties, htmlCharMap, htmlEntityMap), null);
     }
 
     public static Object[] getHTMLEntityMaps(final String htmlEntityFilename) {
@@ -508,10 +488,7 @@ public class HTMLServiceActivator extends DeferredActivator {
     }
 
     private void restore() {
-        if (null != registration) {
-            registration.unregister();
-            registration = null;
-        }
+        cleanUp();
         ServiceRegistry.getInstance().removeService(ConfigurationService.class);
     }
 

@@ -49,11 +49,10 @@
 
 package com.openexchange.groupware.dataRetrieval.attachments.osgi;
 
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.attachments.PIMAttachmentDataProvider;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 
 /**
@@ -61,9 +60,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class PIMAttachmentDataRetrievalActivator extends DeferredActivator {
-
-    private ServiceRegistration<DataProvider> registration;
+public class PIMAttachmentDataRetrievalActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -82,14 +79,12 @@ public class PIMAttachmentDataRetrievalActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registration = context.registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
+        registerService(DataProvider.class, new PIMAttachmentDataProvider(getService(AttachmentBase.class)), null);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        if(registration != null) {
-            registration.unregister();
-        }
+        cleanUp();
     }
 
 }

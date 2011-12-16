@@ -53,14 +53,13 @@ import static com.openexchange.mail.twitter.services.TwitterServiceRegistry.getS
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.twitter.TwitterProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.twitter.TwitterService;
@@ -71,11 +70,9 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterMailActivator extends DeferredActivator {
+public final class TwitterMailActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterMailActivator.class));
-
-    private ServiceRegistration<MailProvider> twitterServiceRegistration;
 
     /**
      * Initializes a new {@link TwitterMailActivator}
@@ -129,7 +126,7 @@ public final class TwitterMailActivator extends DeferredActivator {
             }
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("protocol", TwitterProvider.PROTOCOL_TWITTER.toString());
-            twitterServiceRegistration = context.registerService(MailProvider.class, new TwitterProvider(), dictionary);
+            registerService(MailProvider.class, new TwitterProvider(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -139,10 +136,7 @@ public final class TwitterMailActivator extends DeferredActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            if (null != twitterServiceRegistration) {
-                twitterServiceRegistration.unregister();
-                twitterServiceRegistration = null;
-            }
+           cleanUp();
             /*
              * Clear service registry
              */

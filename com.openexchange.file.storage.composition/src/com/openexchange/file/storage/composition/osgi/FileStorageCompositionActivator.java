@@ -50,14 +50,13 @@
 package com.openexchange.file.storage.composition.osgi;
 
 import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.session.Session;
 
 
@@ -66,9 +65,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileStorageCompositionActivator extends DeferredActivator {
-
-    private ServiceRegistration<IDBasedFileAccessFactory> registration;
+public class FileStorageCompositionActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -87,7 +84,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registration = context.registerService(IDBasedFileAccessFactory.class, new IDBasedFileAccessFactory() {
+        registerService(IDBasedFileAccessFactory.class, new IDBasedFileAccessFactory() {
 
             @Override
             public IDBasedFileAccess createAccess(final Session session) {
@@ -111,13 +108,7 @@ public class FileStorageCompositionActivator extends DeferredActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        if(registration != null) {
-            registration.unregister();
-        }
+        cleanUp();
     }
-
-
-
-
 
 }

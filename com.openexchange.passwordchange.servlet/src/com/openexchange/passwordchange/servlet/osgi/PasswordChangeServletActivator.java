@@ -57,7 +57,7 @@ import org.osgi.service.http.NamespaceException;
 import com.openexchange.context.ContextService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.servlet.PasswordChangeServlet;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
@@ -65,7 +65,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PasswordChangeServletActivator extends DeferredActivator {
+public final class PasswordChangeServletActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PasswordChangeServletActivator.class));
 

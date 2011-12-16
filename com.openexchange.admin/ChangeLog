@@ -1,3 +1,7 @@
+* 2011-12-14 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20833: Dropping cached global address book folder on user creation
+
 * 2011-12-12 - marcus.klein@open-xchange.com
 
  - Fix for bug 19764: Added a check if the client sent duplicate users for the delete multiple user request.

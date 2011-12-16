@@ -50,33 +50,27 @@
 package com.openexchange.upsell.multiple.osgi;
 
 import static com.openexchange.upsell.multiple.osgi.MyServiceRegistry.getServiceRegistry;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.tools.service.SessionServletRegistration;
 import com.openexchange.upsell.multiple.api.UpsellURLService;
 import com.openexchange.upsell.multiple.impl.MyServlet;
 import com.openexchange.user.UserService;
 
-public class MyActivator extends DeferredActivator {
+public class MyActivator extends HousekeepingActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MyActivator.class));
-
-    private final List<ServiceTracker<?,?>> serviceTrackerList;
 
     private SessionServletRegistration servletRegistration;
 
     public MyActivator() {
         super();
-        serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
     }
 
     @Override
@@ -124,12 +118,9 @@ public class MyActivator extends DeferredActivator {
 			// register the http info/sso servlet
 			servletRegistration = new SessionServletRegistration(context, new MyServlet(), getFromConfig("com.openexchange.upsell.multiple.servlet"));
 			servletRegistration.open();
-            serviceTrackerList.add(new ServiceTracker<UpsellURLService,UpsellURLService>(context, UpsellURLService.class, new UrlServiceInstallationServiceListener(context)));
 
             // Open service trackers
-            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
-                tracker.open();
-            }
+			track(UpsellURLService.class, new UrlServiceInstallationServiceListener(context));
 
 
 		} catch (final Throwable t) {
@@ -151,10 +142,7 @@ public class MyActivator extends DeferredActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
-                tracker.close();
-            }
-            serviceTrackerList.clear();
+            cleanUp();
 
             // stop info/sso servlet
             if(servletRegistration != null) {
