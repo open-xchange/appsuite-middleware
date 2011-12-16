@@ -49,10 +49,7 @@
 
 package com.openexchange.imap;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Semaphore;
 import javax.mail.MessagingException;
 import com.sun.mail.imap.IMAPStore;
 
@@ -63,61 +60,28 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {
 
-    private final AtomicInteger counter;
-
-    private final int max;
-
-    private final Lock lock;
-
-    private final Condition condition;
+    private final Semaphore semaphore;
 
     /**
      * Initializes a new {@link BoundedIMAPStoreContainer}.
      */
     public BoundedIMAPStoreContainer(final String name, final String server, final int port, final String login, final String pw, final int maxCount) {
         super(name, server, port, login, pw);
-        max = maxCount;
-        counter = new AtomicInteger();
-        lock = new ReentrantLock();
-        condition = lock.newCondition();
-    }
-
-    private void check() throws InterruptedException {
-        int cur;
-        do {
-            cur = counter.get();
-            while (cur >= max) {
-                // Await
-                lock.lock();
-                try {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(new StringBuilder(64).append("Awaiting free IMAP store for: imap://").append(login).append('@').append(
-                            server).append(':').append(port).toString());
-                    }
-                    condition.await();
-                } finally {
-                    lock.unlock();
-                }
-                cur = counter.get();
-            }
-        } while (!counter.compareAndSet(cur, cur + 1));
+        semaphore = new Semaphore(maxCount, true);
     }
 
     @Override
     public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
-        check();
+        semaphore.acquire();
         return super.getStore(imapSession);
     }
 
     @Override
     public void backStore(final IMAPStore imapStore) {
-        super.backStore(imapStore);
-        counter.decrementAndGet();
-        lock.lock();
         try {
-            condition.signalAll();
+            super.backStore(imapStore);
         } finally {
-            lock.unlock();
+            semaphore.release();
         }
     }
 
