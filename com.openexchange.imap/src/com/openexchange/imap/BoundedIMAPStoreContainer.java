@@ -47,82 +47,78 @@
  *
  */
 
-package com.openexchange.imap.util;
+package com.openexchange.imap;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.mail.MessagingException;
+import com.sun.mail.imap.IMAPStore;
 
 /**
- * {@link LockProvidingBlockingQueue}
+ * {@link BoundedIMAPStoreContainer} - The bounded {@link IMAPStoreContainer}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LockProvidingBlockingQueue<E> {
+public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {
 
-    private final boolean bounded;
+    private final AtomicInteger counter;
 
-    private final BlockingQueue<E> blockingQueue;
+    private final int max;
 
     private final Lock lock;
 
-    private volatile CountingCondition condition;
+    private final Condition condition;
 
     /**
-     * Initializes a new {@link LockProvidingBlockingQueue}.
+     * Initializes a new {@link BoundedIMAPStoreContainer}.
      */
-    public LockProvidingBlockingQueue(final int capacity) {
-        super();
-        bounded = capacity > 0;
-        blockingQueue = bounded ? new ArrayBlockingQueue<E>(capacity) : new LinkedBlockingQueue<E>();
-        lock = new ReentrantLock(true);
+    public BoundedIMAPStoreContainer(final String name, final String server, final int port, final String login, final String pw, final int maxCount) {
+        super(name, server, port, login, pw);
+        max = maxCount;
+        counter = new AtomicInteger();
+        lock = new ReentrantLock();
+        condition = lock.newCondition();
     }
 
-    /**
-     * Checks if this queue has capacity restrictions.
-     * 
-     * @return <code>true</code> if this queue has capacity restrictions; otherwise <code>false</code>
-     */
-    public boolean isBounded() {
-        return bounded;
-    }
-
-    /**
-     * Gets the condition.
-     * 
-     * @return The condition
-     */
-    public CountingCondition getCondition() {
-        CountingCondition tmp = condition;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = condition;
-                if (null == tmp) {
-                    tmp = condition = new CountingCondition(lock.newCondition());
+    private void check() throws InterruptedException {
+        int cur;
+        do {
+            cur = counter.get();
+            while (cur >= max) {
+                // Await
+                lock.lock();
+                try {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(new StringBuilder(64).append("Awaiting free IMAP store for: imap://").append(login).append('@').append(
+                            server).append(':').append(port).toString());
+                    }
+                    condition.await();
+                } finally {
+                    lock.unlock();
                 }
+                cur = counter.get();
             }
+        } while (!counter.compareAndSet(cur, cur + 1));
+    }
+
+    @Override
+    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        check();
+        return super.getStore(imapSession);
+    }
+
+    @Override
+    public void backStore(final IMAPStore imapStore) {
+        super.backStore(imapStore);
+        counter.decrementAndGet();
+        lock.lock();
+        try {
+            condition.signalAll();
+        } finally {
+            lock.unlock();
         }
-        return tmp;
-    }
-
-    /**
-     * Gets the blocking queue.
-     * 
-     * @return The blocking queue
-     */
-    public BlockingQueue<E> getBlockingQueue() {
-        return blockingQueue;
-    }
-
-    /**
-     * Gets the lock.
-     * 
-     * @return The lock
-     */
-    public Lock getLock() {
-        return lock;
     }
 
 }
