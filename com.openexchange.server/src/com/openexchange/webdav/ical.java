@@ -49,9 +49,9 @@
 
 package com.openexchange.webdav;
 
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TObjectProcedure;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
@@ -63,14 +63,11 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceException;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -98,7 +95,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.login.Interface;
-import com.openexchange.server.ServiceExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -118,10 +115,6 @@ public final class ical extends PermissionServlet {
      */
     private static final long serialVersionUID = 8198514314235297665L;
 
-    /**
-     * Determines how often data is flushed into the output stream
-     */
-    public static final int BATCH_SIZE = 100;
     /**
      * Logger.
      */
@@ -182,32 +175,112 @@ public final class ical extends PermissionServlet {
 
             int calendarfolderId = getCalendarFolderID(req);
             int taskfolderId = getTaskFolderID(req);
-            boolean doTasks = taskfolderId != 0;
-            boolean doAppointments = calendarfolderId != 0;
-                        
             if (calendarfolderId == 0 && taskfolderId == 0) {
                 final OXFolderAccess oAccess = new OXFolderAccess(context);
                 calendarfolderId = oAccess.getDefaultFolder(user.getId(), FolderObject.CALENDAR).getObjectID();
                 taskfolderId = oAccess.getDefaultFolder(user.getId(), FolderObject.TASK).getObjectID();
-                doTasks = doAppointments = true;
             }
 
             final String user_agent = getUserAgent(req);
             final String principalS = user_agent + '_' + sessionObj.getUserId();
             Principal principal = loadPrincipal(context, principalS);
 
+            // final Mapping mapping;
+            // final Map<String, Integer> entriesApp = new HashMap<String, Integer>();
+            // final Map<String, Integer> entriesTask = new HashMap<String, Integer>();
+            // if (null != principal) {
+            // mapping = loadDBEntriesNew(context, principal);
+            // } else {
+            // mapping = new Mapping();
+            // }
+
             final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
             if (null == emitter) {
-            	throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ICalEmitter.class.getName());
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalEmitter.class.getName());
             }
             final ICalSession iSession = emitter.createSession();
             final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
             final List<ConversionError> errors = new ArrayList<ConversionError>();
-            if(doAppointments) {
-	            doAppointments(sessionObj, context, user, calendarfolderId,	emitter, iSession, warnings, errors, resp);
+
+            final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
+            final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+            SearchIterator<Appointment> iter = null;
+            try {
+                final TIntObjectMap<SeriesUIDPatcher> patchers = new TIntObjectHashMap<SeriesUIDPatcher>();
+                iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0));
+                while (iter.hasNext()) {
+                    final Appointment appointment = iter.next();
+                    if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
+                        if (!appointment.containsTimezone()) {
+                            appointment.setTimezone(user.getTimeZone());
+                        }
+                        recColl.replaceDatesWithFirstOccurence(appointment);
+                    }
+                    final ICalItem item = emitter.writeAppointment(iSession, appointment, context, errors, warnings);
+                    // // First check if the appointment has been synchronized before.
+                    // final int appId = appointment.getObjectID();
+                    // String clientId = mapping.getClientAppId(appId);
+                    // if (null == clientId) {
+                    // clientId = item.getUID();
+                    // entriesApp.put(clientId, Integer.valueOf(appId));
+                    // } else {
+                    // item.setUID(clientId);
+                    // }
+                    // Patch UID if change exceptions to be the same ID as of the series.
+                    if (appointment.isMaster() || appointment.isException()) {
+                        final int recurrenceId = appointment.getRecurrenceID();
+                        SeriesUIDPatcher patcher = patchers.get(recurrenceId);
+                        if (null == patcher) {
+                            patcher = new SeriesUIDPatcher();
+                            patchers.put(recurrenceId, patcher);
+                        }
+                        if (appointment.isMaster()) {
+                            patcher.setSeries(item);
+                        } else if (appointment.isException()) {
+                            patcher.addChangeException(item);
+                        }
+                    }
+                }
+                patchers.forEachValue(PATCH_PROCEDURE);
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                if (null != iter) {
+                    try {
+                        iter.close();
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
             }
-            if(doTasks) {
-	            doTasks(sessionObj, context, taskfolderId, emitter, iSession, warnings, errors, resp);
+            final TasksSQLInterface taskInterface = new TasksSQLImpl(sessionObj);
+            SearchIterator<Task> itTask = null;
+            try {
+                itTask = taskInterface.getModifiedTasksInFolder(taskfolderId, TASK_FIELDS, new Date(0));
+                while (itTask.hasNext()) {
+                    final Task task = itTask.next();
+                    emitter.writeTask(iSession, task, context, errors, warnings);
+                    // final ICalItem item = emitter.writeTask(iSession, task,
+                    // context, errors, warnings);
+                    // final int taskId = task.getObjectID();
+                    // String clientId = mapping.getClientTaskId(taskId);
+                    // if (null == clientId) {
+                    // clientId = item.getUID();
+                    // entriesTask.put(clientId, Integer.valueOf(taskId));
+                    // } else {
+                    // item.setUID(clientId);
+                    // }
+                }
+            } catch (final OXException e) {
+                LOG.error(e.getMessage(), e);
+            } finally {
+                if (null != itTask) {
+                    try {
+                        itTask.close();
+                    } catch (final OXException e) {
+                        LOG.error(e.getMessage(), e);
+                    }
+                }
             }
 
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -221,7 +294,6 @@ public final class ical extends PermissionServlet {
             if (null == principal) {
                 principal = new Principal(0, principalS, calendarfolderId, taskfolderId);
                 insertPrincipal(context, principal);
-
             } else {
                 if (principal.getCalendarFolder() != calendarfolderId || principal.getTaskFolder() != taskfolderId) {
                     principal.setCalendarFolder(calendarfolderId);
@@ -240,72 +312,6 @@ public final class ical extends PermissionServlet {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
     }
-
-	private void doTasks(final Session sessionObj, final Context context,
-			int taskfolderId, final ICalEmitter emitter,
-			final ICalSession iSession, final List<ConversionWarning> warnings,
-			final List<ConversionError> errors, HttpServletResponse resp) throws OXException {
-		final TasksSQLInterface taskInterface = new TasksSQLImpl(sessionObj);
-		SearchIterator<Task> itTask = null;
-		try {
-		    itTask = taskInterface.getModifiedTasksInFolder(taskfolderId, TASK_FIELDS, new Date(0));
-		    while (itTask.hasNext()) {
-		        final Task task = itTask.next();
-		        emitter.writeTask(iSession, task, context, errors, warnings);
-		    }
-		} finally {
-		    if (null != itTask) {
-	            itTask.close();
-		    }
-		}
-	}
-
-	private void doAppointments(final Session sessionObj,
-			final Context context, final User user, int calendarfolderId,
-			final ICalEmitter emitter, final ICalSession iSession,
-			final List<ConversionWarning> warnings,
-			final List<ConversionError> errors, HttpServletResponse resp) throws IOException, OXException {
-		final AppointmentSQLInterface appointmentSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(sessionObj);
-		final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-		SearchIterator<Appointment> iter = null;
-		int elements = 0;
-		try {
-		    final TIntObjectHashMap<SeriesUIDPatcher> patchers = new TIntObjectHashMap<SeriesUIDPatcher>();
-		    iter = appointmentSql.getModifiedAppointmentsInFolder(calendarfolderId, APPOINTMENT_FIELDS, new Date(0));
-		    while (iter.hasNext()) {
-		        final Appointment appointment = iter.next();
-		        if (CalendarObject.NO_RECURRENCE != appointment.getRecurrenceType()) {
-		            if (!appointment.containsTimezone()) {
-		                appointment.setTimezone(user.getTimeZone());
-		            }
-		            recColl.replaceDatesWithFirstOccurence(appointment);
-		        }
-		        final ICalItem item = emitter.writeAppointment(iSession, appointment, context, errors, warnings);
-		        if (appointment.isMaster() || appointment.isException()) {
-		            final int recurrenceId = appointment.getRecurrenceID();
-		            SeriesUIDPatcher patcher = patchers.get(recurrenceId);
-		            if (null == patcher) {
-		                patcher = new SeriesUIDPatcher();
-		                patchers.put(recurrenceId, patcher);
-		            }
-		            if (appointment.isMaster()) {
-		                patcher.setSeries(item);
-		            } else if (appointment.isException()) {
-		                patcher.addChangeException(item);
-		            }
-		        }
-		        if(elements > 0 && elements % BATCH_SIZE == 0){
-		        	emitter.flush(iSession, resp.getOutputStream());
-		        }
-		        elements++;
-		    }
-		    patchers.forEachValue(PATCH_PROCEDURE);
-		} finally {
-		    if (null != iter) {
-	            iter.close();
-		    }
-		}
-	}
 
     private static final TObjectProcedure<SeriesUIDPatcher> PATCH_PROCEDURE = new TObjectProcedure<SeriesUIDPatcher>() {
 
