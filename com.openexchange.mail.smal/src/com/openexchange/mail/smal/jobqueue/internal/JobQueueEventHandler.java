@@ -54,12 +54,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
@@ -69,7 +66,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.smal.SMALMailAccess;
 import com.openexchange.mail.smal.SMALServiceLookup;
 import com.openexchange.mail.smal.jobqueue.Constants;
-import com.openexchange.mail.smal.jobqueue.Job;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.jobs.ElapsedFolderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.MailAccountJob;
@@ -177,16 +173,6 @@ public final class JobQueueEventHandler implements EventHandler {
 
     private void handleDroppedSession(final Session session) {
         try {
-            @SuppressWarnings("unchecked")
-            final Queue<Job> jobs = (Queue<Job>) session.getParameter("com.openexchange.mail.smal.jobqueue.jobs");
-            if (null != jobs) {
-                while (!jobs.isEmpty()) {
-                    final Job job = jobs.poll();
-                    if (!job.isDone()) {
-                        job.cancel();
-                    }
-                }
-            }
             final SessiondService sessiondService = SMALServiceLookup.getServiceStatic(SessiondService.class);
             if (null != sessiondService && sessiondService.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) != null) {
                 dropForLast(session);
@@ -194,8 +180,6 @@ public final class JobQueueEventHandler implements EventHandler {
         } catch (final Exception e) {
             // Failed handling session
             LOG.warn("Failed handling tracked removed session.", e);
-        } finally {
-            session.setParameter("com.openexchange.mail.smal.jobqueue.jobs", null);
         }
     }
 
@@ -207,7 +191,6 @@ public final class JobQueueEventHandler implements EventHandler {
             final MailAccountStorageService storageService = SMALServiceLookup.getServiceStatic(MailAccountStorageService.class);
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
-            final Queue<Job> jobs = getJobsFrom(session);
             final long start = System.currentTimeMillis() + Constants.HOUR_MILLIS;
             final JobQueue jobQueue = JobQueue.getInstance();
             final Set<String> filter = new HashSet<String>(8);
@@ -254,9 +237,7 @@ public final class JobQueueEventHandler implements EventHandler {
                  */
                 final MailAccountJob maj = new MailAccountJob(accountId, userId, contextId, filter);
                 filter.clear();
-                if (jobQueue.addJob(maj)) {
-                    jobs.offer(maj);
-                }
+                jobQueue.addJob(maj);
                 /*
                  * Add periodic job
                  */
@@ -282,31 +263,6 @@ public final class JobQueueEventHandler implements EventHandler {
         } finally {
             SMALMailAccess.closeUnwrappedInstance(mailAccess);
         }
-    }
-
-    private static Queue<Job> getJobsFrom(final Session session) {
-        final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
-        if (null == lock) {
-            synchronized (session) {
-                return getJobsFrom0(session);
-            }
-        }
-        lock.lock();
-        try {
-            return getJobsFrom0(session);
-        } finally {
-            lock.unlock();
-        }
-    }
-
-    private static Queue<Job> getJobsFrom0(final Session session) {
-        @SuppressWarnings("unchecked")
-        Queue<Job> jobs = (Queue<Job>) session.getParameter("com.openexchange.mail.smal.jobqueue.jobs");
-        if (null == jobs) {
-            jobs = new ConcurrentLinkedQueue<Job>();
-            session.setParameter("com.openexchange.mail.smal.jobqueue.jobs", jobs);
-        }
-        return jobs;
     }
 
     private static final class PeriodicRunnable implements Runnable {

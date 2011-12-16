@@ -50,8 +50,8 @@
 package com.openexchange.imap;
 
 import java.util.Iterator;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import javax.mail.MessagingException;
 import com.sun.mail.imap.IMAPStore;
 
@@ -63,7 +63,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
-    protected final Queue<IMAPStoreWrapper> queue;
+    protected final BlockingQueue<IMAPStoreWrapper> queue;
 
     protected final String server;
 
@@ -78,13 +78,14 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      */
     public UnboundedIMAPStoreContainer(final String name, final String server, final int port, final String login, final String pw) {
         super(name);
-        queue = new ConcurrentLinkedQueue<IMAPStoreWrapper>();
+        queue = new PriorityBlockingQueue<IMAPStoreWrapper>();
         this.login = login;
         this.port = port;
         this.pw = pw;
         this.server = server;
     }
 
+    @Override
     public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
         /*
          * Retrieve and remove the head of this queue
@@ -97,29 +98,36 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         return imapStore;
     }
 
+    @Override
     public void backStore(final IMAPStore imapStore) {
         if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
         }
     }
 
+    @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
         for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
             final IMAPStoreWrapper imapStoreWrapper = iter.next();
             if (imapStoreWrapper.lastAccessed >= stamp) {
-                iter.remove();
-                if (null == debugBuilder) {
-                    closeSafe(imapStoreWrapper.imapStore);
-                } else {
-                    final String info = imapStoreWrapper.imapStore.toString();
-                    closeSafe(imapStoreWrapper.imapStore);
-                    debugBuilder.setLength(0);
-                    LOG.debug(debugBuilder.append("Closed elapsed IMAP store: ").append(info).toString());
+                try {
+                    iter.remove();
+                    if (null == debugBuilder) {
+                        closeSafe(imapStoreWrapper.imapStore);
+                    } else {
+                        final String info = imapStoreWrapper.imapStore.toString();
+                        closeSafe(imapStoreWrapper.imapStore);
+                        debugBuilder.setLength(0);
+                        LOG.debug(debugBuilder.append("Closed elapsed IMAP store: ").append(info).toString());
+                    }
+                } catch (final IllegalStateException e) {
+                    // Ignore
                 }
             }
         }
     }
 
+    @Override
     public void clear() {
         for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
             final IMAPStoreWrapper imapStoreWrapper = iter.next();

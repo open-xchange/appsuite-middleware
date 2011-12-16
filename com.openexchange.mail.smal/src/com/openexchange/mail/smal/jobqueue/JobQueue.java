@@ -58,6 +58,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.mail.smal.SMALServiceLookup;
@@ -108,6 +109,8 @@ public final class JobQueue {
 
     private final BlockingQueue<Job> queue;
 
+    private final AtomicInteger jobCounter;
+    
     private final ConcurrentMap<String, Job> identifiers;
 
     private final Future<Object> consumerFuture;
@@ -120,8 +123,9 @@ public final class JobQueue {
     private JobQueue(final ThreadPoolService threadPool) {
         super();
         queue = new PriorityBlockingQueue<Job>(CAPACITY);
+        jobCounter = new AtomicInteger();
         identifiers = new ConcurrentHashMap<String, Job>(CAPACITY);
-        consumer = new JobConsumer(queue, identifiers, false);
+        consumer = new JobConsumer(queue, identifiers, false, jobCounter);
         consumerFuture = threadPool.submit(consumer, AbortBehavior.getInstance());
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(JobQueue.class));
         logger.info("\n\tSMAL JobQueue orderly started.");
@@ -157,7 +161,7 @@ public final class JobQueue {
      * @return <code>true</code> if job could be added; otherwise <code>false</code>
      */
     public boolean addJob(final Job job) {
-        if (null == job || queue.size() >= CAPACITY) {
+        if (null == job || !checkCount()) {
             return false;
         }
         final String identifier = job.getIdentifier();
@@ -168,10 +172,15 @@ public final class JobQueue {
              */
             if (!queue.offer(job)) {
                 identifiers.remove(identifier);
+                decrementJobCount();
                 return false;
             }
             return true;
         }
+        /*
+         * Either replace or deny
+         */
+        decrementJobCount();
         if (prev.getRanking() < job.getRanking()) {
             /*
              * Replace
@@ -180,6 +189,28 @@ public final class JobQueue {
             return true;
         }
         return false;
+    }
+
+    private boolean checkCount() {
+        final int max = CAPACITY;
+        int cur;
+        do {
+            cur = jobCounter.get();
+            if (cur >= max) {
+                return false;
+            }
+        } while (!jobCounter.compareAndSet(cur, cur + 1));
+        return true;
+    }
+
+    private void decrementJobCount() {
+        int cur;
+        do {
+            cur = jobCounter.get();
+            if (cur <= 0) {
+                return;
+            }
+        } while (!jobCounter.compareAndSet(cur, cur - 1));
     }
 
     /**
