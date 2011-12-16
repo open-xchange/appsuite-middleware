@@ -121,7 +121,6 @@ public class JDK {
         exports.add("javax.xml.ws.http");
         exports.add("javax.xml.ws.soap");
         exports.add("javax.xml.ws.spi");
-        exports.add("javax.xml.ws.spi.http");
         exports.add("javax.xml.ws.wsaddressing");
         exports.add("javax.xml.xpath");
         exports.add("org.w3c.dom.css");
