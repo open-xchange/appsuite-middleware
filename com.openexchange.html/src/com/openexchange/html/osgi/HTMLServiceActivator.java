@@ -77,7 +77,7 @@ import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
- * {@link HTMLServiceActivator} - Activator for JSON folder interface.
+ * {@link HTMLServiceActivator} - Activator for HTML interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
