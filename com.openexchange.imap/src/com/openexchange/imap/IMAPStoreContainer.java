@@ -47,82 +47,46 @@
  *
  */
 
-package com.openexchange.imap.util;
+package com.openexchange.imap;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import javax.mail.MessagingException;
+import com.sun.mail.imap.IMAPStore;
+
 
 /**
- * {@link LockProvidingBlockingQueue}
- * 
+ * {@link IMAPStoreContainer} - A container for connected {@link IMAPStore} instances.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class LockProvidingBlockingQueue<E> {
-
-    private final boolean bounded;
-
-    private final BlockingQueue<E> blockingQueue;
-
-    private final Lock lock;
-
-    private volatile CountingCondition condition;
+public interface IMAPStoreContainer {
 
     /**
-     * Initializes a new {@link LockProvidingBlockingQueue}.
-     */
-    public LockProvidingBlockingQueue(final int capacity) {
-        super();
-        bounded = capacity > 0;
-        blockingQueue = bounded ? new ArrayBlockingQueue<E>(capacity) : new LinkedBlockingQueue<E>();
-        lock = new ReentrantLock(true);
-    }
-
-    /**
-     * Checks if this queue has capacity restrictions.
+     * Gets a connected IMAP store.
      * 
-     * @return <code>true</code> if this queue has capacity restrictions; otherwise <code>false</code>
+     * @param imapSession The IMAP session
+     * @return The connected IMAP store
+     * @throws MessagingException If returning a connected IMAP store fails
+     * @throws InterruptedException If thread is interrupted when possibly waiting for free resources
      */
-    public boolean isBounded() {
-        return bounded;
-    }
+    IMAPStore getStore(javax.mail.Session imapSession) throws MessagingException, InterruptedException;
 
     /**
-     * Gets the condition.
+     * Returns specified IMAP store to container.
      * 
-     * @return The condition
+     * @param imapStore The IMAP store to return
      */
-    public CountingCondition getCondition() {
-        CountingCondition tmp = condition;
-        if (null == tmp) {
-            synchronized (this) {
-                tmp = condition;
-                if (null == tmp) {
-                    tmp = condition = new CountingCondition(lock.newCondition());
-                }
-            }
-        }
-        return tmp;
-    }
+    void backStore(IMAPStore imapStore);
 
     /**
-     * Gets the blocking queue.
+     * Close elapsed {@link IMAPStore} instances.
      * 
-     * @return The blocking queue
+     * @param stamp The stamp to check against
+     * @param debugBuilder The optional debug builder
      */
-    public BlockingQueue<E> getBlockingQueue() {
-        return blockingQueue;
-    }
+    void closeElapsed(long stamp, StringBuilder debugBuilder);
 
     /**
-     * Gets the lock.
-     * 
-     * @return The lock
+     * Orderly clears this container.
      */
-    public Lock getLock() {
-        return lock;
-    }
-
+    void clear();
 }
