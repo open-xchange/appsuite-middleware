@@ -166,7 +166,7 @@ public interface UserService {
      * 
      * @param name The login/display name of the user.
      * @param context The context.
-     * @param searchType The search type; e.g. <code>{@link UserService#SEARCH_DISPLAY_NAME SEARCH_DISPLAY_NAME} |Ê{@link UserService#SEARCH_LOGIN_NAME SEARCH_LOGIN_NAME}</code>
+     * @param searchType The search type; e.g. <code>{@link UserService#SEARCH_DISPLAY_NAME SEARCH_DISPLAY_NAME} | {@link UserService#SEARCH_LOGIN_NAME SEARCH_LOGIN_NAME}</code>
      * @return The matching users
      * @throws OXException If an error occurs.
      * @see #SEARCH_DISPLAY_NAME
