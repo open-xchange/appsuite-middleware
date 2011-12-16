@@ -125,7 +125,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
     /**
      * Tiny wrapper class
      */
-    protected static class IMAPStoreWrapper {
+    protected static class IMAPStoreWrapper implements Comparable<IMAPStoreWrapper> {
         protected final IMAPStore imapStore;
         protected final long lastAccessed;
 
@@ -133,6 +133,13 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
             super();
             this.imapStore = imapStore;
             lastAccessed = System.currentTimeMillis();
+        }
+
+        @Override
+        public int compareTo(final IMAPStoreWrapper other) {
+            final long thisVal = this.lastAccessed;
+            final long anotherVal = other.lastAccessed;
+            return (thisVal<anotherVal ? 1 : (thisVal==anotherVal ? 0 : -1));
         }
     }
 

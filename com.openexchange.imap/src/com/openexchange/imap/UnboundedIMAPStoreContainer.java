@@ -50,8 +50,8 @@
 package com.openexchange.imap;
 
 import java.util.Iterator;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import javax.mail.MessagingException;
 import com.sun.mail.imap.IMAPStore;
 
@@ -63,7 +63,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
-    protected final Queue<IMAPStoreWrapper> queue;
+    protected final BlockingQueue<IMAPStoreWrapper> queue;
 
     protected final String server;
 
@@ -78,7 +78,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      */
     public UnboundedIMAPStoreContainer(final String name, final String server, final int port, final String login, final String pw) {
         super(name);
-        queue = new ConcurrentLinkedQueue<IMAPStoreWrapper>();
+        queue = new PriorityBlockingQueue<IMAPStoreWrapper>();
         this.login = login;
         this.port = port;
         this.pw = pw;
