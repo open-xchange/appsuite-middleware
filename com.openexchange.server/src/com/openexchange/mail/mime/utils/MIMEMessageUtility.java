@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -932,24 +933,38 @@ public final class MIMEMessageUtility {
         try {
             addrs = QuotedInternetAddress.parse(al, strict);
         } catch (final AddressException e) {
-            if (failOnError) {
-                final String[] sAddrs = SPLIT.split(al, 0);
+            // Retry with single parse
+            final String[] sAddrs = SPLIT.split(al, 0);
+            try {
+                final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.length);
                 for (final String sAddr : sAddrs) {
                     final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
                     if (TRACE) {
                         LOG.trace(tmp);
                     }
+                    addrList.add(tmp);
                 }
                 // Hm... single parse did not fail, throw original exception instead
-                throw e;
+                return addrList.toArray(new InternetAddress[0]);
+            } catch (final AddressException e1) {
+                if (failOnError) {
+                    for (final String sAddr : sAddrs) {
+                        final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
+                        if (TRACE) {
+                            LOG.trace(tmp);
+                        }
+                    }
+                    // Hm... single parse did not fail, throw original exception instead
+                    throw e;
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(
+                        new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
+                            "using plain addresses' string representation instead.").toString(),
+                        e);
+                }
+                addrs = PlainTextAddress.getAddresses(al.split(" *, *"));
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(
-                    new StringBuilder(128).append("Internet addresses could not be properly parsed, ").append(
-                        "using plain addresses' string representation instead.").toString(),
-                    e);
-            }
-            addrs = PlainTextAddress.getAddresses(al.split(" *, *"));
         }
         try {
             for (int i = 0; i < addrs.length; i++) {

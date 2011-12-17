@@ -49,8 +49,11 @@
 
 package com.openexchange.mail.mime;
 
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
 import javax.mail.internet.AddressException;
@@ -618,11 +621,19 @@ public final class QuotedInternetAddress extends InternetAddress {
      * domain-literals properly (but no one uses them)
      */
     private static void checkAddress(final String addr, final boolean routeAddr, final boolean validate) throws AddressException {
+        checkAddress(new StringBuilder(addr), routeAddr, validate, false);
+    }
+
+    /**
+     * Check that the address is a valid "mailbox" per RFC822. (We also allow simple names.) XXX - much more to check XXX - doesn't handle
+     * domain-literals properly (but no one uses them)
+     */
+    private static void checkAddress(final StringBuilder addr, final boolean routeAddr, final boolean validate, final boolean suppressControlOrWhitespace) throws AddressException {
         int i, start = 0;
 
         final int len = addr.length();
         if (len == 0) {
-            throw new AddressException("Empty address", addr);
+            throw new AddressException("Empty address", addr.toString());
         }
 
         /*
@@ -634,7 +645,7 @@ public final class QuotedInternetAddress extends InternetAddress {
              */
             for (start = 0; (i = indexOfAny(addr, ",:", start)) >= 0; start = i + 1) {
                 if (addr.charAt(start) != '@') {
-                    throw new AddressException("Illegal route-addr", addr);
+                    throw new AddressException("Illegal route-addr", addr.toString());
                 }
                 if (addr.charAt(i) == ':') {
                     // end of route-addr
@@ -652,6 +663,7 @@ public final class QuotedInternetAddress extends InternetAddress {
         char c = (char) -1;
         char lastc = (char) -1;
         boolean inquote = false;
+        final TIntSet invalids = suppressControlOrWhitespace ? new TIntHashSet(8) : null;
         for (i = start; i < len; i++) {
             lastc = c;
             c = addr.charAt(i);
@@ -664,12 +676,12 @@ public final class QuotedInternetAddress extends InternetAddress {
                 if (inquote) {
                     // peek ahead, next char must be "@"
                     if (validate && i + 1 < len && addr.charAt(i + 1) != '@') {
-                        throw new AddressException("Quote not at end of local address", addr);
+                        throw new AddressException("Quote not at end of local address", addr.toString());
                     }
                     inquote = false;
                 } else {
                     if (validate && i != 0) {
-                        throw new AddressException("Quote not at start of local address", addr);
+                        throw new AddressException("Quote not at start of local address", addr.toString());
                     }
                     inquote = true;
                 }
@@ -680,19 +692,22 @@ public final class QuotedInternetAddress extends InternetAddress {
             }
             if (c == '@') {
                 if (i == 0) {
-                    throw new AddressException("Missing local name", addr);
+                    throw new AddressException("Missing local name", addr.toString());
                 }
                 break; // done with local part
             }
             if (c <= 040 || c >= 0177) {
-                throw new AddressException("Local address contains control or whitespace", addr);
+                if (null == invalids) {
+                    throw new AddressException("Local address contains control or whitespace", addr.toString());
+                }
+                invalids.add(i);
             }
             if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
-                throw new AddressException("Local address contains illegal character", addr);
+                throw new AddressException("Local address contains illegal character", addr.toString());
             }
         }
         if (inquote) {
-            throw new AddressException("Unterminated quote", addr);
+            throw new AddressException("Unterminated quote", addr.toString());
         }
 
         /*
@@ -704,7 +719,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
         if (c != '@') {
             if (validate) {
-                throw new AddressException("Missing final '@domain'", addr);
+                throw new AddressException("Missing final '@domain'", addr.toString());
             }
             return;
         }
@@ -713,11 +728,11 @@ public final class QuotedInternetAddress extends InternetAddress {
 
         start = i + 1;
         if (start >= len) {
-            throw new AddressException("Missing domain", addr);
+            throw new AddressException("Missing domain", addr.toString());
         }
 
         if (addr.charAt(start) == '.') {
-            throw new AddressException("Domain starts with dot", addr);
+            throw new AddressException("Domain starts with dot", addr.toString());
         }
         for (i = start; i < len; i++) {
             c = addr.charAt(i);
@@ -725,18 +740,30 @@ public final class QuotedInternetAddress extends InternetAddress {
                 return; // domain literal, don't validate
             }
             if (c <= 040 || c >= 0177) {
-                throw new AddressException("Domain contains control or whitespace", addr);
+                throw new AddressException("Domain contains control or whitespace", addr.toString());
             }
             if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
-                throw new AddressException("Domain contains illegal character", addr);
+                throw new AddressException("Domain contains illegal character", addr.toString());
             }
             if (c == '.' && lastc == '.') {
-                throw new AddressException("Domain contains dot-dot", addr);
+                throw new AddressException("Domain contains dot-dot", addr.toString());
             }
             lastc = c;
         }
         if (lastc == '.') {
-            throw new AddressException("Domain ends with dot", addr);
+            throw new AddressException("Domain ends with dot", addr.toString());
+        }
+        if (null != invalids) {
+            // Drop invalid characters
+            dropChars(invalids, addr);
+        }
+    }
+
+    private static void dropChars(final TIntSet invalids, final StringBuilder sb) {
+        final int[] indexes = invalids.toArray();
+        Arrays.sort(indexes);
+        for (int i = indexes.length - 1; i >= 0; i--) {
+            sb.deleteCharAt(indexes[i]);
         }
     }
 
@@ -852,6 +879,37 @@ public final class QuotedInternetAddress extends InternetAddress {
                 checkAddress(this.address, true, true);
             }
         }
+    }
+
+    /**
+     * Initializes a new {@link QuotedInternetAddress}.
+     * <p>
+     * Parse the given string and create an InternetAddress. If strict is <code>false</code>, the detailed syntax of the address isn't
+     * checked. toACE
+     *
+     * @param address The address in RFC822 format
+     * @param strict <code>true</code> enforce RFC822 syntax; otherwise <code>false</code>
+     * @param suppressControlOrWhitespace Whether to suppress control or whitespace characters possibly contained in given address string
+     * @throws AddressException If parsing the address fails
+     */
+    public QuotedInternetAddress(final String address, final boolean strict, final boolean suppressControlOrWhitespace) throws AddressException {
+        this(init(address, suppressControlOrWhitespace));
+        if (strict) {
+            if (isGroup()) {
+                getGroup(true); // throw away the result
+            } else {
+                checkAddress(this.address, true, true);
+            }
+        }
+    }
+
+    private static String init(final String address, final boolean suppressControlOrWhitespace) throws AddressException {
+        if (!suppressControlOrWhitespace) {
+            return address;
+        }
+        final StringBuilder sb = new StringBuilder(address);
+        checkAddress(sb, false, false, true);
+        return sb.toString();
     }
 
     /**
@@ -1053,11 +1111,11 @@ public final class QuotedInternetAddress extends InternetAddress {
     /**
      * Return the first index of any of the characters in "any" in "s", or -1 if none are found. This should be a method on String.
      */
-    private static int indexOfAny(final String s, final String any) {
+    private static int indexOfAny(final CharSequence s, final String any) {
         return indexOfAny(s, any, 0);
     }
 
-    private static int indexOfAny(final String s, final String any, final int start) {
+    private static int indexOfAny(final CharSequence s, final String any, final int start) {
         try {
             final int len = s.length();
             for (int i = start; i < len; i++) {
