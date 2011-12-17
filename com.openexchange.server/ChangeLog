@@ -1,6 +1,7 @@
 * 2011-12-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 21014: Fixed converting <blockquote> tags to text quotes
+ - Fix for bug 20985: Suppressing control and whitespace characters when parsing internet address
 
 * 2011-12-16 - marcus.klein@open-xchange.com
 
