@@ -1,3 +1,7 @@
+* 2011-12-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21014: Fixed converting <blockquote> tags to text quotes
+
 * 2011-12-16 - marcus.klein@open-xchange.com
 
  - Partly fix for bug 20962: Giving user good error message if the file storage quota is exceeded on saving an attachment. 
