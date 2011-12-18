@@ -502,7 +502,7 @@ public final class MessageParser {
             final Iterator<String> iter = obj.keys();
             for (int i = 0; i < size; i++) {
                 final String key = iter.next();
-                if (isCustomHeader(key)) {
+                if (isCustomHeader(key) && !key.equalsIgnoreCase("x-original-headers")) {
                     headers.addHeader(key, obj.getString(key));
                 }
             }
