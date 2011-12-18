@@ -513,7 +513,7 @@ public final class HTMLServiceImpl implements HTMLService {
         final StringBuffer sb = new StringBuffer(html.length());
         do {
             final String surrounded = BLOCKQUOTE_MARKER+m.group(1)+BLOCKQUOTE_MARKER_END;
-            m.appendReplacement(sb, insertBlockquoteMarker(surrounded));
+            m.appendReplacement(sb, Matcher.quoteReplacement(insertBlockquoteMarker(surrounded)));
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();

@@ -1,6 +1,7 @@
 * 2011-12-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 20856: Volatile caching of free-busy queries with a short idle time (3 seconds).
+ - Fix for bug 19388: Changed setting in notification.properties to use 'defaultSenderAddress'
 
 * 2011-12-17 - thorben.betten@open-xchange.com
 
