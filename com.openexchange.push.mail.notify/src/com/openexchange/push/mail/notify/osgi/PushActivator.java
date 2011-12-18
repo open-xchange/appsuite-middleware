@@ -257,7 +257,7 @@ public final class PushActivator extends HousekeepingActivator {
     }
 
     private void startUdpListener() throws OXException, IOException {
-        final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
+        final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
         udpThread = threadPoolService.submit(ThreadPools.task(new MailNotifyPushUdpSocketListener(udpListenHost, udpListenPort, imapLoginDelimiter, multicast)));
     }
 

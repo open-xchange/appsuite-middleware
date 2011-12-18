@@ -206,7 +206,7 @@ public final class PermissionLoaderService implements Runnable {
     public void startUp() throws OXException {
         final BundleContext context = ServerActivator.getContext();
         if(context == null){
-        	threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        	threadPool = ThreadPools.getThreadPool();
         } else {
 	        final ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService> customizer = new ServiceTrackerCustomizer<ThreadPoolService, ThreadPoolService>() {
 	
@@ -231,7 +231,7 @@ public final class PermissionLoaderService implements Runnable {
 	        poolTracker = new ServiceTracker<ThreadPoolService, ThreadPoolService>(context, ThreadPoolService.class, customizer);
 	        poolTracker.open();
         }
-        future = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(ThreadPools.task(this, simpleName));
+        future = ThreadPools.getThreadPool().submit(ThreadPools.task(this, simpleName));
         permsMap = new TimeoutConcurrentMap<Pair, OCLPermission[]>(20, true);
         pooledCons = new ConcurrentHashMap<Integer, ConWrapper>();
         final Runnable task = new Runnable() {

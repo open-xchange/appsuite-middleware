@@ -267,7 +267,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
                     }
                     enableInternalUsersEdit = false;
                 }
-                final ThreadPoolService pool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                final ThreadPoolService pool = ThreadPools.getThreadPool();
                 if (null == pool) {
                     // Run in this thread
                     updatePermissions();

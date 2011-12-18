@@ -235,7 +235,7 @@ public final class IMAPStoreCache {
         final Iterator<IMAPStoreContainer> containers = map.values().iterator();
         if (containers.hasNext()) {
             final boolean debug = LOG.isDebugEnabled();
-            final ThreadPoolService threadPool = IMAPServiceRegistry.getService(ThreadPoolService.class);
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
             final long stamp = System.currentTimeMillis() - IDLE_MILLIS;
             do {
                 final IMAPStoreContainer container = containers.next();

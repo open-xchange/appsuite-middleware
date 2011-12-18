@@ -338,7 +338,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         shutdown = false;
         final ThreadPoolService threadPoolService;
         {
-            threadPoolService = ImapIdleServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class, true);
+            threadPoolService = ThreadPools.getThreadPool();
             mailService = ImapIdleServiceRegistry.getServiceRegistry().getService(MailService.class, true);
             final Session session = getSession();
             if (null == session) {

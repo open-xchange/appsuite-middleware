@@ -142,7 +142,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.Task;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -724,8 +723,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                                         final MessagingAccount ma = messagingAccounts.get(i);
                                         tasks.add(new MessagingRootFolderWriter(arrays, session, logger, ma, columns, index++));
                                     }
-                                    completionFuture =
-                                        ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
+                                    completionFuture = ThreadPools.getThreadPool().invoke(tasks);
                                 }
                                 /*
                                  * Wait for completion
@@ -1625,7 +1623,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             final MessagingAccount ma = messagingAccounts.get(i);
                             tasks.add(new MessagingRootFolderWriter(arrays, session, logger, ma, columns, i));
                         }
-                        completionFuture = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class).invoke(tasks);
+                        completionFuture = ThreadPools.getThreadPool().invoke(tasks);
                     }
                     // Wait for completion
                     try {

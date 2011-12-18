@@ -49,7 +49,6 @@
 
 package com.openexchange.push.internal;
 
-import static com.openexchange.push.internal.ServiceRegistry.getInstance;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Iterator;
@@ -89,7 +88,7 @@ public final class PushEventHandler implements EventHandler {
         /*
          * Delegate to thread pool if present
          */
-        final ThreadPoolService threadPoolService = getInstance().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
         if (null == threadPoolService) {
             r.run();
         } else {

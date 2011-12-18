@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.Log;
@@ -76,6 +77,8 @@ import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ThreadPoolActivator extends HousekeepingActivator {
+
+    public static final AtomicReference<ThreadPoolService> REF = new AtomicReference<ThreadPoolService>();
 
     private ThreadPoolServiceImpl threadPool;
 
@@ -132,6 +135,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              * Register
              */
             registerService(ThreadPoolService.class, threadPool, null);
+            REF.set(threadPool);
             registerService(TimerService.class, new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor()), null);
             registerService(LogService.class, logService, null);
         } catch (final Exception e) {
@@ -192,6 +196,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
                 LOG.info("stopping bundle: com.openexchange.threadpool");
             }
             cleanUp();
+            REF.set(null);
             /*
              * Stop thread pool
              */

@@ -82,6 +82,7 @@ import com.openexchange.preview.Quality;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 
 /**
@@ -207,7 +208,7 @@ public class ThirdwingPreviewService implements InternalPreviewService {
         final StreamProvider streamProvider = new StreamProvider(serviceLookup, session);
         final TransformationObservationTask observationTask = new TransformationObservationTask(streamProvider, session);
 
-        final ThreadPoolService poolService = serviceLookup.getService(ThreadPoolService.class);
+        final ThreadPoolService poolService = ThreadPools.getThreadPool();
         final Future<String> future = poolService.submit(observationTask);
         IOUnit unit;
         FileInputStream fis = null;

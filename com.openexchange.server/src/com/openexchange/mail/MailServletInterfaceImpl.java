@@ -2228,7 +2228,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         /*
          * Check if timer service is available to delegate execution
          */
-        final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
         if (null == threadPool) {
             // Execute in this thread
             r.run();

@@ -195,7 +195,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final Map<Integer, Map<String, List<String>>> parsed = UnifiedINBOXUtility.parseMailIDs(mailIds);
             final int size = parsed.size();
             // Create completion service for simultaneous access
-            final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+            final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<GetMessagesResult> completionService =
                 new UnifiedINBOXCompletionService<GetMessagesResult>(executor);
             // Iterate parsed map and submit a task for each iteration
@@ -395,7 +395,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             final MailField[] checkedFields = mfs.toArray();
             // Create completion service for simultaneous access
             final int length = accounts.size();
-            final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+            final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedINBOXCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
@@ -513,7 +513,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 accounts = l.toArray(new MailAccount[l.size()]);
             }
             final int length = accounts.length;
-            final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+            final Executor executor = ThreadPools.getThreadPool().getExecutor();
             final TrackingCompletionService<List<MailMessage>> completionService =
                 new UnifiedINBOXCompletionService<List<MailMessage>>(executor);
             for (final MailAccount mailAccount : accounts) {
@@ -639,7 +639,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+            final ThreadPoolService executor = ThreadPools.getThreadPool();
             try {
                 // Invoke all and wait for being executed
                 if (DEBUG) {
@@ -743,7 +743,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+            final ThreadPoolService executor = ThreadPools.getThreadPool();
             try {
                 // Invoke all and wait for being executed
                 if (DEBUG) {
@@ -823,7 +823,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 });
             }
-            final ThreadPoolService executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+            final ThreadPoolService executor = ThreadPools.getThreadPool();
             try {
                 // Invoke all and wait for being executed
                 if (DEBUG) {

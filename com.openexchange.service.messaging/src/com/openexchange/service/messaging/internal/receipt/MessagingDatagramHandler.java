@@ -61,13 +61,12 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.service.messaging.Message;
 import com.openexchange.exception.OXException;
+import com.openexchange.service.messaging.Message;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessageHandlerTracker;
 import com.openexchange.service.messaging.internal.MessageHandlerWrapper;
-import com.openexchange.service.messaging.services.ServiceRegistry;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -114,7 +113,7 @@ public class MessagingDatagramHandler {
      * @param datagramPacket The received datagram packet
      */
     public void handle(final DatagramPacket datagramPacket) {
-        final ThreadPoolService threadPool = ServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
         if (null == threadPool) {
             new MSSocketHandlerTask(datagramPacket, handlers, null, truncated, locks, LOG).call();
         } else {

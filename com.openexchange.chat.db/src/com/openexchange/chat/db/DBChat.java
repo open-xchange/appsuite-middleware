@@ -90,7 +90,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -260,7 +259,7 @@ public final class DBChat implements Chat {
                             }
                         }
                     };
-                    DBChatServiceLookup.getService(ThreadPoolService.class).submit(ThreadPools.task(subtask));
+                    ThreadPools.getThreadPool().submit(ThreadPools.task(subtask));
                 }
             };
 
@@ -1270,7 +1269,7 @@ public final class DBChat implements Chat {
         }
     }
 
-    private int getUnreadCount(Connection con, ChatUser chatUser) throws OXException {
+    private int getUnreadCount(final Connection con, final ChatUser chatUser) throws OXException {
         final int chatUserId = DBChatUtility.parseUnsignedInt(chatUser.getId());
         PreparedStatement stmt = null;
         ResultSet rs = null;

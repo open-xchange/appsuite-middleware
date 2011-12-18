@@ -63,6 +63,7 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link AbstractSMALStorage}
@@ -145,7 +146,7 @@ public abstract class AbstractSMALStorage {
      * @throws OXException If completion service cannot be created due to absent {@link ThreadPoolService service}
      */
     protected static <V> CancelableCompletionService<V> newCompletionService() throws OXException {
-        final ThreadPoolService threadPool = getServiceStatic(ThreadPoolService.class);
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
         if (null == threadPool) {
             throw ServiceExceptionCodes.SERVICE_UNAVAILABLE.create(ThreadPoolService.class.getName());
         }
