@@ -1,3 +1,7 @@
+* 2011-12-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20856: Volatile caching of free-busy queries with a short idle time (3 seconds).
+
 * 2011-12-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 21014: Fixed converting <blockquote> tags to text quotes
