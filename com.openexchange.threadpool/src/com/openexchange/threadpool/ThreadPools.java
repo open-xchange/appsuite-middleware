@@ -84,6 +84,8 @@ public final class ThreadPools {
      * @param t The unexpectedly interrupted thread
      */
     public static void unexpectedlyInterrupted(final Thread t) {
+        // Keep interrupted flag
+        t.interrupt();
         if (t instanceof InterruptorAware) {
             final StackTraceElement[] interruptorStack = ((InterruptorAware) t).getInterruptorStack();
             if (null != interruptorStack) {
