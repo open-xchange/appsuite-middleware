@@ -1735,6 +1735,7 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Obtain external mail accounts with running thread
          */
         final List<String> accountSubfolderIDs;
+        int unifiedMailIndex = -1;
         if (userConfiguration.isMultipleMailAccounts()) {
             final MailAccountStorageService mass = OutlookServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class);
             if (null == mass) {
@@ -1769,6 +1770,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                                         accountSubfolderIDs.add(MailFolderUtility.prepareFullname(
                                             mailAccount.getId(),
                                             MailFolder.DEFAULT_FOLDER_ID));
+                                        unifiedMailIndex = accountSubfolderIDs.size() - 1;
                                     }
                                 } catch (final OXException e) {
                                     LOG.error(e.getMessage(), e);
@@ -1913,6 +1915,9 @@ public final class OutlookFolderStorage implements FolderStorage {
         /*
          * Add external mail accounts
          */
+        if (unifiedMailIndex >= 0) {
+            sortedIDs.add(0, accountSubfolderIDs.remove(unifiedMailIndex));
+        }
         sortedIDs.addAll(accountSubfolderIDs);
         /*
          * Add external messaging accounts/file storage accounts

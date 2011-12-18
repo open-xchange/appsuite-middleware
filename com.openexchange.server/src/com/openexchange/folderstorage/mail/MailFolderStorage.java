@@ -226,15 +226,16 @@ public final class MailFolderStorage implements FolderStorage {
             Collections.sort(folders, new SimpleMailFolderComparator(storageParameters.getUser().getLocale()));
             final int size = folders.size();
             final List<SortableId> list = new ArrayList<SortableId>(size);
-            for (int j = 0; j < size; j++) {
-                final MailFolder tmp = folders.get(j);
-                list.add(new MailId(prepareFullname(mailAccess.getAccountId(), tmp.getFullname()), j).setName(tmp.getName()));
-            }
             /*
              * Add external account root folders
              */
             final FolderServiceDecorator decorator = storageParameters.getDecorator();
-            if (null != decorator) {
+            if (null == decorator) {
+                for (int j = 0; j < size; j++) {
+                    final MailFolder mf = folders.get(j);
+                    list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mf.getFullname()), j).setName(mf.getName()));
+                }
+            } else {
                 final Object property = decorator.getProperty("mailRootFolders");
                 if (property != null && Boolean.parseBoolean(property.toString()) && session.getUserConfiguration().isMultipleMailAccounts()) {
                     final MailAccountStorageService mass = MailServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
@@ -253,9 +254,19 @@ public final class MailFolderStorage implements FolderStorage {
                         final UnifiedINBOXManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);
                         if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
                             tmp.remove(0);
+                        } else {
+                            // Add Unified Mail root folder at first position
+                            final MailAccount unifiedMailAccount = tmp.remove(0);
+                            list.add(0, new MailId(prepareFullname(unifiedMailAccount.getId(), MailFolder.DEFAULT_FOLDER_ID), 0).setName(MailFolder.DEFAULT_FOLDER_NAME));
                         }
                     }
+                    // Add primary account's folders
                     int start = list.size();
+                    for (int j = 0; j < size; j++) {
+                        final MailFolder mf = folders.get(j);
+                        list.add(new MailId(prepareFullname(mailAccess.getAccountId(), mf.getFullname()), start++).setName(mf.getName()));
+                    }
+                    // Add root folders for external accounts
                     final int sz = tmp.size();
                     for (int j = 0; j < sz; j++) {
                         list.add(new MailId(prepareFullname(tmp.get(j).getId(), MailFolder.DEFAULT_FOLDER_ID), start++).setName(MailFolder.DEFAULT_FOLDER_NAME));
