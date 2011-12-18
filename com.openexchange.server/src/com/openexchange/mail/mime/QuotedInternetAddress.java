@@ -740,7 +740,10 @@ public final class QuotedInternetAddress extends InternetAddress {
                 return; // domain literal, don't validate
             }
             if (c <= 040 || c >= 0177) {
-                throw new AddressException("Domain contains control or whitespace", addr.toString());
+                if (null == invalids) {
+                    throw new AddressException("Domain contains control or whitespace", addr.toString());
+                }
+                invalids.add(i);
             }
             if (SPECIALS_NO_DOT.indexOf(c) >= 0) {
                 throw new AddressException("Domain contains illegal character", addr.toString());
