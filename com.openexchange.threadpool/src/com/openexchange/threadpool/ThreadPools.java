@@ -61,6 +61,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
+import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 
 /**
  * {@link ThreadPools} - Utility methods for {@link ThreadPoolService} and {@link Task}.
@@ -76,6 +77,15 @@ public final class ThreadPools {
      */
     private ThreadPools() {
         super();
+    }
+
+    /**
+     * Gets registered thread pool.
+     * 
+     * @return The thread pool or <code>null</code>
+     */
+    public static ThreadPoolService getThreadPool() {
+        return ThreadPoolActivator.REF.get();
     }
 
     /**
