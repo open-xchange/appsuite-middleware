@@ -1071,7 +1071,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         boolean close_connection = true;
         final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
         final CalendarSqlImp calendarsqlimp = CalendarSql.getCalendarSqlImplementation();
-        PreparedStatement private_folder_information = null;
+        SearchIterator<List<Integer>> private_folder_information = null;
         try {
             if (!userConfig.hasFreeBusy()) {
                 return SearchIteratorAdapter.emptyIterator();
@@ -1267,19 +1267,19 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public List<Appointment> getAppointmentsWithExternalParticipantBetween(String email, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
-        List<Appointment> appointments = new ArrayList<Appointment>();
+    public List<Appointment> getAppointmentsWithExternalParticipantBetween(final String email, int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException {
+        final List<Appointment> appointments = new ArrayList<Appointment>();
         cols = addColumnIfNecessary(cols, CalendarObject.PARTICIPANTS);
         SearchIterator<Appointment> searchIterator;
         try {
             searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
         while (searchIterator.hasNext()) {
-            Appointment app = searchIterator.next();
-            Participant[] participants = app.getParticipants();
-            for (Participant participant : participants) {
+            final Appointment app = searchIterator.next();
+            final Participant[] participants = app.getParticipants();
+            for (final Participant participant : participants) {
                 if (participant.getType() == Participant.EXTERNAL_USER && participant.getEmailAddress().equals(email)) {
                     appointments.add(app);
                     break;
@@ -1291,19 +1291,19 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
-    public List<Appointment> getAppointmentsWithUserBetween(User user, int[] cols, Date start, Date end, int orderBy, Order order) throws OXException {
-        List<Appointment> appointments = new ArrayList<Appointment>();
+    public List<Appointment> getAppointmentsWithUserBetween(final User user, int[] cols, final Date start, final Date end, final int orderBy, final Order order) throws OXException {
+        final List<Appointment> appointments = new ArrayList<Appointment>();
         cols = addColumnIfNecessary(cols, CalendarObject.USERS);
         SearchIterator<Appointment> searchIterator;
         try {
             searchIterator = getModifiedAppointmentsBetween(session.getUserId(), start, end, cols, null, orderBy, order);
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
         }
         while (searchIterator.hasNext()) {
-            Appointment app = searchIterator.next();
-            UserParticipant[] users = app.getUsers();
-            for (UserParticipant userParticipant : users) {
+            final Appointment app = searchIterator.next();
+            final UserParticipant[] users = app.getUsers();
+            for (final UserParticipant userParticipant : users) {
                 if (userParticipant.getIdentifier() == user.getId()) {
                     appointments.add(app);
                     break;
@@ -1314,14 +1314,15 @@ public class CalendarSql implements AppointmentSQLInterface {
         return appointments;
     }
 
-    private int[] addColumnIfNecessary(int[] cols, int participants) {
+    private int[] addColumnIfNecessary(final int[] cols, final int participants) {
 
-        ArrayList<Integer> columns = new ArrayList<Integer>();
-        for (int c : cols) {
+        final ArrayList<Integer> columns = new ArrayList<Integer>();
+        for (final int c : cols) {
             columns.add(c);
         }
-        if (!columns.contains(participants))
+        if (!columns.contains(participants)) {
             columns.add(participants);
+        }
 
         return I2i(columns);
     }
