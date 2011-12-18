@@ -65,8 +65,8 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
     /**
      * Initializes a new {@link BoundedIMAPStoreContainer}.
      */
-    public BoundedIMAPStoreContainer(final String name, final String server, final int port, final String login, final String pw, final int maxCount) {
-        super(name, server, port, login, pw);
+    public BoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
+        super(server, port, login, pw);
         semaphore = new Semaphore(maxCount, true);
     }
 

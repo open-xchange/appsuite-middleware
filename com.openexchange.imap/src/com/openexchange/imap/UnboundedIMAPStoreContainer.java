@@ -76,8 +76,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     /**
      * Initializes a new {@link UnboundedIMAPStoreContainer}.
      */
-    public UnboundedIMAPStoreContainer(final String name, final String server, final int port, final String login, final String pw) {
-        super(name);
+    public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
+        super();
         queue = new PriorityBlockingQueue<IMAPStoreWrapper>();
         this.login = login;
         this.port = port;

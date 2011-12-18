@@ -70,9 +70,9 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
     /**
      * Initializes a new {@link AbstractIMAPStoreContainer}.
      */
-    protected AbstractIMAPStoreContainer(final String name) {
+    protected AbstractIMAPStoreContainer() {
         super();
-        this.name = name;
+        name = PROTOCOL_NAME;
     }
 
     /**
