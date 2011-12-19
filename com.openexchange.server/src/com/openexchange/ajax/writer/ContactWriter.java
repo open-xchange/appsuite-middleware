@@ -231,6 +231,7 @@ public class ContactWriter extends CommonWriter {
         writeParameter(ContactFields.ADDRESS_BUSINESS, contact.getAddressBusiness(), json);
         writeParameter(ContactFields.ADDRESS_HOME, contact.getAddressHome(), json);
         writeParameter(ContactFields.ADDRESS_OTHER, contact.getAddressOther(), json);
+        writeParameter(ContactFields.UID, contact.getUid(), json);
 
         final JSONArray jsonLinkArray = getLinksAsJSONArray(contact);
         if (jsonLinkArray != null) {
@@ -410,6 +411,14 @@ public class ContactWriter extends CommonWriter {
             @Override
             public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
                 writeValue(contactObject.getAddressOther(), jsonArray);
+            }
+        });
+
+        m.put(Contact.UID, new ContactFieldWriter() {
+
+            @Override
+            public void write(final Contact contactObject, final JSONArray jsonArray, final Session session) {
+                writeValue(contactObject.getUid(), jsonArray);
             }
         });
 

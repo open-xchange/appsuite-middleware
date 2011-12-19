@@ -315,6 +315,11 @@ public class Contact extends CommonObject implements Serializable {
     public static final int ADDRESS_BUSINESS = 614;
     public static final int ADDRESS_OTHER = 615;
 
+    /**
+     * UID field.
+     */
+    public static final int UID = 616;
+
     public static final int[] CONTENT_COLUMNS = {
         DISPLAY_NAME, GIVEN_NAME, SUR_NAME, MIDDLE_NAME, SUFFIX, TITLE, STREET_HOME, POSTAL_CODE_HOME, CITY_HOME, STATE_HOME, COUNTRY_HOME,
         BIRTHDAY, MARITAL_STATUS, NUMBER_OF_CHILDREN, PROFESSION, NICKNAME, SPOUSE_NAME, ANNIVERSARY, NOTE, DEPARTMENT, POSITION,
@@ -327,7 +332,7 @@ public class Contact extends CommonObject implements Serializable {
         COMPANY, IMAGE1, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08,
         USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
         USERFIELD19, USERFIELD20, LINKS, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY, ADDRESS_BUSINESS, ADDRESS_HOME,
-        ADDRESS_OTHER
+        ADDRESS_OTHER, UID
     };
     public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
         // From ContactObject itself
@@ -565,6 +570,10 @@ public class Contact extends CommonObject implements Serializable {
     protected String addressBusiness;
 
     protected String addressOther;
+
+    protected String uid;
+
+    protected boolean b_uid;
 
     protected boolean b_display_name;
 
@@ -1270,8 +1279,18 @@ public class Contact extends CommonObject implements Serializable {
     public String getAddressOther() {
         return addressOther;
     }
+
+    public String getUid() {
+        return uid;
+    }
     
     // SET METHODS
+
+    public void setUid(final String uid) {
+        this.uid = uid;
+        b_uid = true;
+    }
+
     public void setDisplayName(final String display_name) {
         this.display_name = display_name;
         b_display_name = true;
@@ -1840,6 +1859,11 @@ public class Contact extends CommonObject implements Serializable {
     }
 
     // REMOVE METHODS
+    public void removeUid() {
+        uid = null;
+        b_uid = false;
+    }
+
     public void removeDisplayName() {
         display_name = null;
         b_display_name = false;
@@ -2393,6 +2417,10 @@ public class Contact extends CommonObject implements Serializable {
     }
 
     // CONTAINS METHODS
+    public boolean containsUid() {
+        return b_uid;
+    }
+
     public boolean containsDisplayName() {
         return b_display_name;
     }
@@ -3378,6 +3406,11 @@ public class Contact extends CommonObject implements Serializable {
             differingFields.add(I(ADDRESS_OTHER));
         }
 
+        if ((!containsUid() && other.containsUid()) || (containsUid() && other.containsUid() && getUid() != other.getUid() && (getUid() == null || !getUid().equals(
+            other.getUid())))) {
+            differingFields.add(I(UID));
+        }
+
         return differingFields;
     }
 
@@ -3718,6 +3751,9 @@ public class Contact extends CommonObject implements Serializable {
         case ADDRESS_OTHER:
             setAddressOther((String) value);
             break;
+        case UID:
+            setUid((String) value);
+            break;
         default:
             super.set(field, value);
 
@@ -3947,6 +3983,8 @@ public class Contact extends CommonObject implements Serializable {
             return getAddressHome();
         case ADDRESS_OTHER:
             return getAddressOther();
+        case UID:
+            return getUid();
         default:
             return super.get(field);
 
@@ -4176,6 +4214,8 @@ public class Contact extends CommonObject implements Serializable {
             return containsAddressHome();
         case ADDRESS_OTHER:
             return containsAddressOther();
+        case UID:
+            return containsUid();
         default:
             return super.contains(field);
 
@@ -4511,6 +4551,9 @@ public class Contact extends CommonObject implements Serializable {
             break;
         case ADDRESS_OTHER:
             removeAddressOther();
+            break;
+        case UID:
+            removeUid();
             break;
         default:
             super.remove(field);

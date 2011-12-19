@@ -1159,6 +1159,16 @@ public class ContactParser extends CommonParser {
             public void setObject(final Contact contactobject, final JSONObject jsonobject) {
                 contactobject.setAddressOther(parseString(jsonobject, ContactFields.ADDRESS_OTHER));
             }
+        },
+        new JSONAttributeMapper() {
+            @Override
+            public boolean jsonObjectContains(final JSONObject jsonobject) {
+                return jsonobject.has(ContactFields.UID);
+            }
+            @Override
+            public void setObject(final Contact contactobject, final JSONObject jsonobject) {
+                contactobject.setUid(parseString(jsonobject, ContactFields.UID));
+            }
         }
     };
 }
