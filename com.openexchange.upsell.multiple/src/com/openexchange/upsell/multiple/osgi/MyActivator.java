@@ -121,6 +121,7 @@ public class MyActivator extends HousekeepingActivator {
 
             // Open service trackers
 			track(UpsellURLService.class, new UrlServiceInstallationServiceListener(context));
+			openTrackers();
 
 
 		} catch (final Throwable t) {
