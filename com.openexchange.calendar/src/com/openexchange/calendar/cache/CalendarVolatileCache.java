@@ -91,6 +91,26 @@ public final class CalendarVolatileCache {
     }
 
     /**
+     * Initializes cache instance with given cache.
+     * <p>
+     * <b>For testing only.</b>
+     * 
+     * @param cache The cache
+     */
+    public static void initInstance(final Cache cache) {
+        final AtomicReference<CalendarVolatileCache> ref = INSTANCE_REF;
+        CalendarVolatileCache tmp;
+        do {
+            tmp = ref.get();
+            if (null != tmp) {
+                return;
+            }
+        } while (!ref.compareAndSet(null, new CalendarVolatileCache()));
+        tmp = ref.get();
+        tmp.startUp(cache);
+    }
+
+    /**
      * Drops the instance.
      */
     public static void dropInstance() {
@@ -127,6 +147,10 @@ public final class CalendarVolatileCache {
      */
     private CalendarVolatileCache() {
         super();
+    }
+
+    private void startUp(final Cache cache) {
+        this.cache = cache;
     }
 
     private void startUp(final BundleContext context) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.spi.CharsetProvider;
@@ -72,6 +73,7 @@ import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.charset.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
@@ -323,10 +325,10 @@ public final class Init {
         startAndInjectThreadPoolBundle();
         startAndInjectBasicServices();
         startAndInjectHTMLService();
-        startAndInjectCalendarServices();
         startAndInjectServerConfiguration();
         startAndInjectNotification();
         startAndInjectCache();
+        startAndInjectCalendarServices();
         startAndInjectDatabaseBundle();
         startAndInjectFileStorage();
         startAndInjectDatabaseUpdate();
@@ -462,6 +464,41 @@ public final class Init {
             ServerServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
             ServerServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
             TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
+
+            if (null == CalendarVolatileCache.getInstance()) {
+                try {
+                    /*
+                     * Important cache configuration constants
+                     */
+                    final String regionName = CalendarVolatileCache.REGION;
+                    final int maxObjects = 10000000;
+                    final int maxLifeSeconds = 300;
+                    final int idleTimeSeconds = 180;
+                    final int shrinkerIntervalSeconds = 60;
+                    /*
+                     * Compose cache configuration
+                     */
+                    final byte[] ccf = ("jcs.region."+regionName+"=LTCP\n" +
+                            "jcs.region."+regionName+".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" +
+                            "jcs.region."+regionName+".cacheattributes.MaxObjects="+maxObjects+"\n" +
+                            "jcs.region."+regionName+".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" +
+                            "jcs.region."+regionName+".cacheattributes.UseMemoryShrinker=true\n" +
+                            "jcs.region."+regionName+".cacheattributes.MaxMemoryIdleTimeSeconds="+idleTimeSeconds+"\n" +
+                            "jcs.region."+regionName+".cacheattributes.ShrinkerIntervalSeconds="+shrinkerIntervalSeconds+"\n" +
+                            "jcs.region."+regionName+".elementattributes=org.apache.jcs.engine.ElementAttributes\n" +
+                            "jcs.region."+regionName+".elementattributes.IsEternal=false\n" +
+                            "jcs.region."+regionName+".elementattributes.MaxLifeSeconds="+maxLifeSeconds+"\n" +
+                            "jcs.region."+regionName+".elementattributes.IdleTime="+idleTimeSeconds+"\n" +
+                            "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
+                            "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
+                            "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
+                    final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+                    cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
+                    CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
+                } catch (final OXException e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            }
         }
     }
 
