@@ -224,6 +224,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private String login;
 
     /**
+     * The user's password.
+     */
+    private String password;
+
+    /**
+     * The client IP.
+     */
+    private String clientIp;
+
+    /**
      * The IMAP config.
      */
     private volatile IMAPConfig imapConfig;
@@ -618,17 +628,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             this.server = config.getServer();
             this.port = config.getPort();
+            this.login = isProxyAuth ? proxyUser : user;
+            this.password = tmpPass;
+            this.clientIp = clientIp;
             maxCount = getMaxCount();
             try {
-                imapStore =
-                    new AccessedIMAPStore(this, connectIMAPStore(
-                        maxCount > 0,
-                        imapSession,
-                        server,
-                        port,
-                        isProxyAuth ? proxyUser : user,
-                        tmpPass,
-                        clientIp), imapSession);
+                imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount > 0), imapSession);
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
@@ -650,7 +655,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
                 throw e;
             }
-            this.login = user;
             this.connected = true;
             /*
              * Register notifier task if enabled
@@ -691,6 +695,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         final int[] ids = storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
         return Arrays.binarySearch(ids, accountId) >= 0;
+    }
+
+    /**
+     * Gets a connected IMAP store
+     * 
+     * @param fromCache <code>true</code> from cache; otherwise <code>false</code>
+     * @return The connected IMAP store
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If another error occurs
+     */
+    public IMAPStore connectIMAPStore(final boolean fromCache) throws MessagingException, OXException {
+        return connectIMAPStore(fromCache, imapSession, server, port, login, password, clientIp);
     }
 
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();

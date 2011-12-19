@@ -1,7 +1,7 @@
 * 2011-12-19 - thorben.betten@open-xchange.com
 
- - Fix for bug #21024: Allow mime-encoded (RFC 2047, Section 6.1) Content-Disposition header
- - Fix for bug 21025: Added log4j library obviously internally used by Jerich library
+ - Fix for bug 21024: Allow mime-encoded (RFC 2047, Section 6.1) Content-Disposition header
+ - Fix for bug 21025: Added log4j library obviously internally used by Jericho library
 
 * 2011-12-18 - thorben.betten@open-xchange.com
 

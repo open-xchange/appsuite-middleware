@@ -58,6 +58,7 @@ import javax.mail.URLName;
 import javax.mail.event.ConnectionListener;
 import javax.mail.event.FolderListener;
 import javax.mail.event.StoreListener;
+import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPStore;
@@ -231,7 +232,19 @@ public final class AccessedIMAPStore extends IMAPStore {
 
     @Override
     public Folder getFolder(final String name) throws MessagingException {
-        return imapStore.getFolder(name);
+        try {
+            return imapStore.getFolder(name);
+        } catch (final IllegalStateException e) {
+            if (!"Not connected".equals(e.getMessage())) {
+                throw e;
+            }
+            try {
+                imapStore = imapAccess.connectIMAPStore(false);
+            } catch (final OXException ignore) {
+                // Cannot occur since not borrowed from cache
+            }
+            return imapStore.getFolder(name);
+        }
     }
 
     @Override
