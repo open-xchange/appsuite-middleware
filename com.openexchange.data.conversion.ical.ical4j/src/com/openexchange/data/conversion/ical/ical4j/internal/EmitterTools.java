@@ -75,9 +75,6 @@ public final class EmitterTools {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EmitterTools.class));
     private static CalendarCollectionService calendarCollection;
 
-    private static final TimeZoneRegistry fullRegistry = TimeZoneRegistryFactory.getInstance().createRegistry();
-    private static final TimeZoneRegistry outlookRegistry = new OutlookTimeZoneRegistryFactory().createRegistry();
-
     private final TimeZoneRegistry registry;
 
     public EmitterTools(ZoneInfo zoneInfo) {
@@ -89,11 +86,11 @@ public final class EmitterTools {
         final TimeZoneRegistry retval;
         switch (zoneInfo) {
         case OUTLOOK:
-            retval = outlookRegistry;
+            retval = new OutlookTimeZoneRegistryFactory().createRegistry();
             break;
         case FULL:
         default:
-            retval = fullRegistry;
+            retval = TimeZoneRegistryFactory.getInstance().createRegistry();
             break;
         }
         return retval;

@@ -1,3 +1,8 @@
+* 2011-12-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19295, 18699: Removed caching of time zone information from iCal4J to have always the correct time zone information for
+   export and for invitations.
+
 * 2011-12-16 - marcus.klein@open-xchange.com
 
  - Partly fix for bug 20962: Giving user good error message if the file storage quota is exceeded on saving an attachment. 
