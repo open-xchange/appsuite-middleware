@@ -2,6 +2,7 @@
 
  - Fix for bug 19295, 18699: Removed caching of time zone information from iCal4J to have always the correct time zone information for
    export and for invitations.
+ - Fix for bug 18841: Surrounding comments of an InfoStore document with <pre> tags to preserve text formattings.
 
 * 2011-12-19 - thorben.betten@open-xchange.com
 
