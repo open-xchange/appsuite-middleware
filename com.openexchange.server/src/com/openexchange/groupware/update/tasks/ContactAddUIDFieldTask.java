@@ -113,6 +113,6 @@ public final class ContactAddUIDFieldTask extends UpdateTaskAdapter {
     }
 
     protected Column[] getColumns() {
-        return new Column[] { new Column("uid", "uid VARCHAR(255) collate utf8_unicode_ci default NULL") };
+        return new Column[] { new Column("uid", "VARCHAR(255) collate utf8_unicode_ci default NULL") };
     }
 }
