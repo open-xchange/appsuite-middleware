@@ -921,11 +921,7 @@ public class Login extends AJAXServlet {
             appendModules(result.getSession(), json, req);
             response.setData(json);
         } catch (final OXException e) {
-            if (Category.CATEGORY_USER_INPUT == e.getCategory()) {
-                LOG.debug(e.getMessage(), e);
-            } else {
-                LOG.error(e.getMessage(), e);
-            }
+            LOG.error(e.getMessage(), e);
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
