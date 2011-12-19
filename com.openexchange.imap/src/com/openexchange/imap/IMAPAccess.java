@@ -61,6 +61,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
@@ -223,9 +224,24 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     private String login;
 
     /**
+     * The user's password.
+     */
+    private String password;
+
+    /**
+     * The client IP.
+     */
+    private String clientIp;
+
+    /**
      * The IMAP config.
      */
     private volatile IMAPConfig imapConfig;
+
+    /**
+     * A simple cache for max. count values per server.
+     */
+    private static volatile ConcurrentMap<String, Integer> maxCountCache;
 
     /**
      * Initializes a new {@link IMAPAccess IMAP access} for default IMAP account.
@@ -250,6 +266,22 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         setMailProperties((Properties) System.getProperties().clone());
         maxCount = -1;
         protocol = IMAPProvider.PROTOCOL_IMAP;
+    }
+
+    private int getMaxCount() throws OXException {
+        final ConcurrentMap<String, Integer> cache = maxCountCache;
+        if (null == cache) {
+            return protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
+        }
+        Integer maxCount = cache.get(server);
+        if (null == maxCount) {
+            final Integer i = Integer.valueOf(protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId));
+            maxCount = cache.putIfAbsent(server, i);
+            if (null == maxCount) {
+                maxCount = i;
+            }
+        }
+        return maxCount.intValue();
     }
 
     /**
@@ -594,17 +626,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Get connected store
              */
-            maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
+            this.server = config.getServer();
+            this.port = config.getPort();
+            this.login = isProxyAuth ? proxyUser : user;
+            this.password = tmpPass;
+            this.clientIp = clientIp;
+            maxCount = getMaxCount();
             try {
-                imapStore =
-                    new AccessedIMAPStore(this, connectIMAPStore(
-                        maxCount > 0,
-                        imapSession,
-                        config.getServer(),
-                        config.getPort(),
-                        isProxyAuth ? proxyUser : user,
-                        tmpPass,
-                        clientIp), imapSession);
+                imapStore = new AccessedIMAPStore(this, connectIMAPStore(maxCount > 0), imapSession);
             } catch (final AuthenticationFailedException e) {
                 /*
                  * Remember failed authentication's credentials (for a short amount of time) to quicken subsequent connect trials
@@ -626,9 +655,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
                 throw e;
             }
-            this.server = config.getServer();
-            this.port = config.getPort();
-            this.login = user;
             this.connected = true;
             /*
              * Register notifier task if enabled
@@ -669,6 +695,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         final int[] ids = storageService.getByHostNames(imapConfProps.getPropagateHostNames(), session.getUserId(), session.getContextId());
         return Arrays.binarySearch(ids, accountId) >= 0;
+    }
+
+    /**
+     * Gets a connected IMAP store
+     * 
+     * @param fromCache <code>true</code> from cache; otherwise <code>false</code>
+     * @return The connected IMAP store
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If another error occurs
+     */
+    public IMAPStore connectIMAPStore(final boolean fromCache) throws MessagingException, OXException {
+        return connectIMAPStore(fromCache, imapSession, server, port, login, password, clientIp);
     }
 
     private static final String PROTOCOL = IMAPProvider.PROTOCOL_IMAP.getName();
@@ -826,6 +864,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         MBoxEnabledCache.init();
         ACLExtensionInit.getInstance().start();
         Entity2ACLInit.getInstance().start();
+        maxCountCache = new ConcurrentHashMap<String, Integer>(16);
 
         final ConfigurationService confService = IMAPServiceRegistry.getService(ConfigurationService.class);
         final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
@@ -879,6 +918,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
     @Override
     protected void shutdown() throws OXException {
         USE_IMAP_STORE_CACHE.set(true);
+        maxCountCache = null;
         Entity2ACLInit.getInstance().stop();
         ACLExtensionInit.getInstance().stop();
         IMAPCapabilityAndGreetingCache.tearDown();

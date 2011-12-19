@@ -66,13 +66,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.service.messaging.Message;
-import com.openexchange.exception.OXException;
 import com.openexchange.service.messaging.MessagingServiceExceptionCodes;
 import com.openexchange.service.messaging.internal.Constants;
 import com.openexchange.service.messaging.internal.MessagingRemoteServerProvider;
-import com.openexchange.service.messaging.services.ServiceRegistry;
 import com.openexchange.threadpool.RefusedExecutionBehavior;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -126,7 +125,7 @@ public final class MessagingDatagramPoster {
              * Don't post to local host
              */
             if (!ownAddress.equals(server.getAddress())) {
-                final ThreadPoolService pool = ServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                final ThreadPoolService pool = ThreadPools.getThreadPool();
                 if (null == pool) {
                     new PosterCallable(chunks, server, datagramSocket).call();
                 } else {

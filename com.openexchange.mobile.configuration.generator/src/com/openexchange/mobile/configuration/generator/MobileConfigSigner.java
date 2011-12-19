@@ -18,6 +18,7 @@ import com.openexchange.mobile.configuration.generator.configuration.Property;
 import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 
 
@@ -65,7 +66,7 @@ public class MobileConfigSigner extends Writer {
     @Override
     public void close() throws IOException {
         this.output.close();
-        final ThreadPoolService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+        final ThreadPoolService service = ThreadPools.getThreadPool();
         final Future<Integer> submit = service.submit(new AbstractTask<Integer>() {
 
             public Integer call() throws Exception {
@@ -110,7 +111,7 @@ public class MobileConfigSigner extends Writer {
     }
 
     @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
+    public void write(final char[] cbuf, final int off, final int len) throws IOException {
         if (null == process) {
             // First run, init
             init();

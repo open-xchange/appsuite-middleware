@@ -68,7 +68,6 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
 import com.openexchange.unifiedinbox.UnifiedINBOXUID;
-import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
 import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
 
 /**
@@ -147,7 +146,7 @@ public final class UnifiedINBOXMessageCopier {
             callable.addIdAndIndex(tmp.getId(), i);
         }
         // Perform callables
-        final ThreadPoolService threadPoolService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
         performCallables(callableMap.values(), threadPoolService);
         // Delete messages on move
         if (move) {
@@ -203,7 +202,7 @@ public final class UnifiedINBOXMessageCopier {
             }
         }
         // Perform callables
-        final ThreadPoolService threadPoolService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
         performCallables(callableMap.values(), threadPoolService);
         performCallables(otherCallableMap.values(), threadPoolService);
         return retval;

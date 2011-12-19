@@ -61,7 +61,6 @@ import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.log.LogProperties;
@@ -221,7 +220,7 @@ public final class FolderMap {
     }
 
     private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
-        final ThreadPoolService threadPool = CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
         threadPool.submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders)), AbortBehavior.getInstance());
     }
 

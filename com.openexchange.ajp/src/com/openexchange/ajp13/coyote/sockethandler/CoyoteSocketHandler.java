@@ -63,6 +63,7 @@ import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CoyoteSocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP
@@ -146,7 +147,7 @@ public final class CoyoteSocketHandler implements IAJPv13SocketHandler {
         if (!started) {
             synchronized (this) {
                 if (!started) {
-                    pool = AJPv13ServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                    pool = ThreadPools.getThreadPool();
                     watcher = new AJPv13TaskWatcher(pool);
                     behavior = new CoyoteRefusedExecutionBehavior(watcher);
                     AJPv13Monitors.setListenerMonitor(listenerMonitor);

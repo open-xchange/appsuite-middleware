@@ -64,6 +64,7 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -77,13 +78,13 @@ public interface CalendarSqlImp {
 
     PreparedStatement getConflicts(Context c, Date d1, Date d2, Date d3, Date d4, Connection readcon, String member_sql_in, boolean free_busy_select) throws SQLException;
 
-    PreparedStatement getAllPrivateAppointmentAndFolderIdsForUser(Context c, int id, Connection readcon) throws SQLException;
+    SearchIterator<List<Integer>> getAllPrivateAppointmentAndFolderIdsForUser(Context c, int id, Connection readcon) throws SQLException;
 
     PreparedStatement getSharedAppointmentFolderQuery(Context c, CalendarFolderObject cfo, Connection con) throws SQLException;
 
     PreparedStatement getResourceConflicts(Context c, Date d1, Date d2, Date d3, Date d4, Connection readcon, String resource_sql_in) throws SQLException;
 
-    PreparedStatement getResourceConflictsPrivateFolderInformation(Context c, Date d1, Date d2, Date d3, Date d4, Connection readcon, String resource_sql_in) throws SQLException;
+    SearchIterator<List<Integer>> getResourceConflictsPrivateFolderInformation(Context c, Date d1, Date d2, Date d3, Date d4, Connection readcon, String resource_sql_in) throws SQLException;
 
     PreparedStatement getFreeBusy(int uid, Context c, Date d1, Date d2, Connection readcon) throws SQLException ;
 

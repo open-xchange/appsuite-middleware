@@ -125,7 +125,7 @@ public final class MemorizerWorker {
         readWriteLock = new ReentrantReadWriteLock();
         this.flag = new AtomicBoolean(true);
         this.queue = new LinkedBlockingQueue<MemorizerTask>();
-        final ThreadPoolService tps = CCServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+        final ThreadPoolService tps = ThreadPools.getThreadPool();
         mainFutureRef = new AtomicReference<Future<Object>>();
         mainFutureRef.set(tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue, readWriteLock.writeLock()), "ContactCollector"), CallerRunsBehavior.<Object> getInstance()));
     }
@@ -186,7 +186,7 @@ public final class MemorizerWorker {
                         /*
                          * Check if needed service is present
                          */
-                        final ThreadPoolService tps = CCServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+                        final ThreadPoolService tps = ThreadPools.getThreadPool();
                         /*
                          * Offer task
                          */

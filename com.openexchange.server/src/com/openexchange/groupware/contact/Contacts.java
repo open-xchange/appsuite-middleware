@@ -7931,5 +7931,49 @@ public final class Contacts {
                 return "Other Address";
             }
         };
+        /** ************** * UID * * ************ */
+        mapping[Contact.UID] = new Mapper() {
+
+            @Override
+            public String getDBFieldName() {
+                return "uid";
+            }
+
+            @Override
+            public void addToContactObject(final ResultSet rs, final int pos, final Contact co, final Connection readcon, final int user, final int[] group, final Context ctx, final UserConfiguration uc) throws SQLException {
+                final String t = rs.getString(pos);
+                if (!rs.wasNull()) {
+                    co.setUid(t);
+                }
+            }
+
+            @Override
+            public boolean containsElement(final Contact co) {
+                return co.containsUid();
+            }
+
+            @Override
+            public void fillPreparedStatement(final PreparedStatement ps, final int pos, final Contact co) throws SQLException {
+                ps.setString(pos, co.getUid());
+            }
+
+            @Override
+            public boolean compare(final Contact co, final Contact original) {
+                final String x = co.getUid();
+                final String y = original.getUid();
+
+                return areEqual(x, y);
+            }
+
+            @Override
+            public String getValueAsString(final Contact co) {
+                return co.getUid();
+            }
+
+            @Override
+            public String getReadableTitle() {
+                return "UID";
+            }
+        };
     }
 }

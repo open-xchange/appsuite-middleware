@@ -117,7 +117,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private int counter;
 
     private PrivateFolderInformationObject[] private_folder_array;
-    private final PreparedStatement private_folder_information;
+    private final SearchIterator<List<Integer>> private_folder_information;
 
     private final CalendarSqlImp calendarsqlimp;
 
@@ -141,11 +141,11 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         preFill();
     }*/
 
-    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp) throws OXException {
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final SearchIterator<List<Integer>> private_folder_information, final CalendarSqlImp calendarsqlimp) throws OXException {
     	this(rs, prep, c, uid, groups, uc, con, show_details, conflict_objects, private_folder_information, calendarsqlimp, 0, 0);
     }
 
-    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final PreparedStatement private_folder_information, final CalendarSqlImp calendarsqlimp, final long range_start, final long range_end) throws OXException {
+    public FreeBusyResults(final ResultSet rs, final PreparedStatement prep, final Context c, final int uid, final int groups[], final UserConfiguration uc, final Connection con, final boolean show_details, final Participant conflict_objects[], final SearchIterator<List<Integer>> private_folder_information, final CalendarSqlImp calendarsqlimp, final long range_start, final long range_end) throws OXException {
     	this.warnings =  new ArrayList<OXException>(2);
     	this.rs = rs;
         this.prep = prep;
@@ -360,7 +360,13 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     public final void myclose() {
         recColl.closeResultSet(rs);
         recColl.closePreparedStatement(prep);
-        recColl.closePreparedStatement(private_folder_information);
+        if (null != private_folder_information) {
+            try {
+                private_folder_information.close();
+            } catch (final OXException e) {
+                // Ignore
+            }
+        }
         if (con != null) {
             DBPool.push(c, con);
         }
@@ -498,23 +504,20 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         PreparedStatement shared_folder_info = null;
         try {
 
-
-            ResultSet result = private_folder_information.executeQuery();
-            while (result.next()) {
-                object_id = result.getInt(1);
-                pfid = result.getInt(2);
-                uid = result.getInt(3);
-                if (!result.wasNull()) {
-                    final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
-                    list.add(pfio);
-                }
+            for (final SearchIterator<List<Integer>> iter = private_folder_information; iter.hasNext();) {
+                final List<Integer> vals = iter.next();
+                object_id = vals.get(0).intValue();
+                pfid = vals.get(1).intValue();
+                uid = vals.get(2).intValue();
+                final PrivateFolderInformationObject pfio = new PrivateFolderInformationObject(object_id, pfid, uid);
+                list.add(pfio);
             }
-            result.close();
+
             // Add shared folders and check if there are such shared folders
             if (! cfo.getSharedFolderList().isEmpty()) {
                 shared_folder_info = calendarsqlimp.getSharedAppointmentFolderQuery(c, cfo, con);
 
-                result = shared_folder_info.executeQuery();
+                final ResultSet result = shared_folder_info.executeQuery();
                 while (result.next()) {
                     object_id = result.getInt(1);
                     pfid = result.getInt(2);
@@ -528,6 +531,8 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
             }
         } catch(final SQLException sqle) {
             LOG.error(sqle.getMessage(), sqle);
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
         } finally {
             if(shared_folder_info != null) {
                 try {

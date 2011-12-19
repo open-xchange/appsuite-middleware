@@ -61,6 +61,11 @@ import com.sun.mail.imap.IMAPStore;
 public interface IMAPStoreContainer {
 
     /**
+     * The IMAP protocol name: <code>"imap"</code>.
+     */
+    public static final String PROTOCOL_NAME = IMAPProvider.PROTOCOL_IMAP.getName();
+
+    /**
      * Gets a connected IMAP store.
      * 
      * @param imapSession The IMAP session

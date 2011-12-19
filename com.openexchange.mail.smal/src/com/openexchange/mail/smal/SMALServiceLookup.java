@@ -52,6 +52,7 @@ package com.openexchange.mail.smal;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link SMALServiceLookup}
@@ -77,8 +78,7 @@ public final class SMALServiceLookup implements ServiceLookup {
      * @return The thread pool or <code>null</code>
      */
     public static ThreadPoolService getThreadPool() {
-        final ServiceLookup serviceLookup = INSTANCE.serviceLookupReference.get();
-        return null == serviceLookup ? null : serviceLookup.getService(ThreadPoolService.class);
+        return ThreadPools.getThreadPool();
     }
 
     /**

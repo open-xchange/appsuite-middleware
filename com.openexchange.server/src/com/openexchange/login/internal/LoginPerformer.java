@@ -85,6 +85,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
@@ -292,7 +293,7 @@ public final class LoginPerformer {
     }
 
     private static void triggerLoginHandlers(final LoginResult login) {
-        final ThreadPoolService executor = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        final ThreadPoolService executor = ThreadPools.getThreadPool();
         if (null == executor) {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 try {
@@ -321,7 +322,7 @@ public final class LoginPerformer {
     }
 
     private static void triggerLogoutHandlers(final LoginResult logout) {
-        final ThreadPoolService executor = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        final ThreadPoolService executor = ThreadPools.getThreadPool();
         if (null == executor) {
             for (final Iterator<LoginHandlerService> it = LoginHandlerRegistry.getInstance().getLoginHandlers(); it.hasNext();) {
                 try {

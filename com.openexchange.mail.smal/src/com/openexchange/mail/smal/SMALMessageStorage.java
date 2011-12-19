@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.smal;
 
-import static com.openexchange.mail.smal.SMALServiceLookup.getServiceStatic;
 import static java.util.Arrays.asList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -82,7 +81,6 @@ import com.openexchange.mail.smal.jobqueue.jobs.FolderJob;
 import com.openexchange.mail.smal.jobqueue.jobs.RemoveByIDsJob;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.CancelableCompletionService;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -309,7 +307,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 }
             }
         };
-        getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(task));
+        ThreadPools.getThreadPool().submit(ThreadPools.task(task));
     }
 
     @Override
@@ -413,7 +411,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 }
             }
         };
-        getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(task));
+        ThreadPools.getThreadPool().submit(ThreadPools.task(task));
     }
 
     /**
@@ -434,7 +432,7 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                 }
             }
         };
-        getServiceStatic(ThreadPoolService.class).submit(ThreadPools.task(task));
+        ThreadPools.getThreadPool().submit(ThreadPools.task(task));
     }
 
     /**

@@ -51,13 +51,13 @@ package com.openexchange.ajp13.najp.threadpool;
 
 import java.net.Socket;
 import javax.management.NotCompliantMBeanException;
-import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.ajp13.najp.AJPv13Task;
 import com.openexchange.ajp13.najp.AJPv13TaskMonitor;
 import com.openexchange.ajp13.najp.IAJPv13SocketHandler;
 import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link AJPv13SocketHandler} - Handles accepted client sockets by {@link #handleSocket(Socket)} which hands-off to a dedicated AJP task.
@@ -107,15 +107,12 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         listenerMonitor = tmp;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#startUp()
-     */
     @Override
     public void startUp() {
         if (!started) {
             synchronized (this) {
                 if (!started) {
-                    pool = AJPv13ServiceRegistry.getInstance().getService(ThreadPoolService.class);
+                    pool = ThreadPools.getThreadPool();
                     watcher = new AJPv13TaskWatcher(pool);
                     behavior = new AJPv13RefusedExecutionBehavior(watcher);
                     AJPv13Monitors.setListenerMonitor(listenerMonitor);
@@ -125,9 +122,6 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#shutDownNow()
-     */
     @Override
     public void shutDownNow() {
         if (started) {
@@ -148,9 +142,6 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#shutDown()
-     */
     @Override
     public void shutDown() {
         if (started) {
@@ -187,9 +178,6 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         // }
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#isShutdown()
-     */
     @Override
     public boolean isShutdown() {
         if (!started) {
@@ -198,9 +186,6 @@ public final class AJPv13SocketHandler implements IAJPv13SocketHandler {
         return (null == watcher);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.ajp13.najp.threadpool.IAJPv13SocketHandler#handleSocket(java.net.Socket)
-     */
     @Override
     public void handleSocket(final Socket client) {
         final AJPv13Task task = AJPv13Task.newAJPTask(client, listenerMonitor, watcher);

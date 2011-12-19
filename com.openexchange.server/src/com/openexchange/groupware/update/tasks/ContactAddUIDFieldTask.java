@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,72 @@
  *
  */
 
-package com.openexchange.imap;
+package com.openexchange.groupware.update.tasks;
 
-import java.util.concurrent.Semaphore;
-import javax.mail.MessagingException;
-import com.sun.mail.imap.IMAPStore;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link BoundedIMAPStoreContainer} - The bounded {@link IMAPStoreContainer}.
- * 
+ * {@link ContactAddUIDFieldTask} - Add UID field to contact tables.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {
-
-    private final Semaphore semaphore;
+public final class ContactAddUIDFieldTask extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link BoundedIMAPStoreContainer}.
+     * Initializes a new {@link ContactAddUIDFieldTask}.
      */
-    public BoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
-        super(server, port, login, pw);
-        semaphore = new Semaphore(maxCount, true);
+    public ContactAddUIDFieldTask() {
+        super();
     }
 
     @Override
-    public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
-        semaphore.acquire();
-        return super.getStore(imapSession);
+    public int getPriority() {
+        @SuppressWarnings("deprecation")
+        final int priority = UpdateTask.UpdateTaskPriority.HIGH.priority;
+        return priority;
     }
 
     @Override
-    public void backStore(final IMAPStore imapStore) {
+    public String[] getDependencies() {
+        return new String[] { ContactAddOutlookAddressFieldsTask.class.getName() };
+    }
+
+    @Override
+    public void perform(final PerformParameters params) throws OXException {
+        final int cid = params.getContextId();
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final Connection con = dbService.getForUpdateTask(cid);
         try {
-            super.backStore(imapStore);
+            con.setAutoCommit(false);
+            Tools.checkAndAddColumns(con, "prg_contacts", getColumns());
+            Tools.checkAndAddColumns(con, "del_contacts", getColumns());
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            rollback(con);
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            semaphore.release();
+            autocommit(con);
+            Database.backNoTimeout(cid, true, con);
         }
     }
 
+    protected Column[] getColumns() {
+        return new Column[] { new Column("uid", "VARCHAR(255) collate utf8_unicode_ci default NULL") };
+    }
 }

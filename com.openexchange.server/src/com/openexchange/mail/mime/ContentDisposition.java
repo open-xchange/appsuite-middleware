@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.mail.mime.utils.MIMEMessageUtility.decodeMultiEncodedHeader;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -152,7 +153,7 @@ public final class ContentDisposition extends ParameterizedHeader {
             parameterList = new ParameterList();
             return;
         }
-        final String contentDisp = prepareParameterizedHeader(contentDispArg);
+        final String contentDisp = decodeMultiEncodedHeader(prepareParameterizedHeader(contentDispArg));
         final Matcher cdMatcher = PATTERN_CONTENT_DISP.matcher(contentDisp);
         if (!cdMatcher.find()) {
             disposition = INLINE;

@@ -82,6 +82,8 @@ public final class IMAPStoreCache {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(IMAPStoreCache.class));
 
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final int SHRINKER_MILLIS =
         (MailProperties.getInstance().getMailAccessCacheShrinkerSeconds() <= 0 ? 3 : MailProperties.getInstance().getMailAccessCacheShrinkerSeconds()) * 1000;
 
@@ -171,8 +173,6 @@ public final class IMAPStoreCache {
 
     private final Protocol protocol;
 
-    private final String name;
-
     private final ConcurrentMap<Key, IMAPStoreContainer> map;
 
     private final ConcurrentMap<User, Queue<Key>> keys;
@@ -181,14 +181,16 @@ public final class IMAPStoreCache {
 
     private volatile ScheduledTimerTask timerTask;
 
+    private final RefusedExecutionBehavior<Object> behavior;
+
     /**
      * Initializes a new {@link IMAPStoreCache}.
      */
     private IMAPStoreCache(final boolean checkConnected) {
         super();
+        behavior = CallerRunsBehavior.getInstance();
         this.checkConnected = checkConnected;
         protocol = IMAPProvider.PROTOCOL_IMAP;
-        name = protocol.getName();
         map = new ConcurrentHashMap<Key, IMAPStoreContainer>();
         keys = new ConcurrentHashMap<IMAPStoreCache.User, Queue<Key>>();
     }
@@ -233,8 +235,7 @@ public final class IMAPStoreCache {
         final Iterator<IMAPStoreContainer> containers = map.values().iterator();
         if (containers.hasNext()) {
             final boolean debug = LOG.isDebugEnabled();
-            final ThreadPoolService threadPool = IMAPServiceRegistry.getService(ThreadPoolService.class);
-            final RefusedExecutionBehavior<Object> behavior = CallerRunsBehavior.getInstance();
+            final ThreadPoolService threadPool = ThreadPools.getThreadPool();
             final long stamp = System.currentTimeMillis() - IDLE_MILLIS;
             do {
                 final IMAPStoreContainer container = containers.next();
@@ -256,13 +257,12 @@ public final class IMAPStoreCache {
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
             final int maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
-            final IMAPStoreContainer newContainer =
-                maxCount > 0 ? new BoundedIMAPStoreContainer(name, server, port, login, pw, maxCount) : new UnboundedIMAPStoreContainer(
-                    name,
-                    server,
-                    port,
-                    login,
-                    pw);
+            final IMAPStoreContainer newContainer;
+            if (maxCount > 0) {
+                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount);
+            } else {
+                newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw);
+            }
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -300,7 +300,14 @@ public final class IMAPStoreCache {
          * Return connected IMAP store
          */
         try {
-            return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+            if (!DEBUG) {
+                return getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+            }
+            final long st = System.currentTimeMillis();
+            final IMAPStore store = getContainer(accountId, server, port, login, pw, session).getStore(imapSession);
+            final long dur = System.currentTimeMillis() - st;
+            LOG.debug("IMAPStoreCache.borrowIMAPStore() took " + dur + "msec.");
+            return store;
         } catch (final InterruptedException e) {
             // Should not occur
             ThreadPools.unexpectedlyInterrupted(Thread.currentThread());

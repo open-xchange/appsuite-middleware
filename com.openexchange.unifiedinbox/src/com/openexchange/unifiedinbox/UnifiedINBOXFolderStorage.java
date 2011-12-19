@@ -73,7 +73,6 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.converters.UnifiedINBOXFolderConverter;
 import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
@@ -227,7 +226,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             accounts = l.toArray(new MailAccount[l.size()]);
         }
         final int nAccounts = accounts.length;
-        final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+        final Executor executor = ThreadPools.getThreadPool().getExecutor();
         final TrackingCompletionService<int[][]> completionService = new UnifiedINBOXCompletionService<int[][]>(executor);
         // Create a task for each account
         for (int i = 0; i < nAccounts; i++) {
@@ -269,7 +268,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
     private MailFolder[] getRootSubfoldersByFolder() throws OXException {
         final MailFolder[] retval = new MailFolder[5];
-        final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+        final Executor executor = ThreadPools.getThreadPool().getExecutor();
         final TrackingCompletionService<Retval> completionService = new UnifiedINBOXCompletionService<Retval>(executor);
         // Init names
         final String[][] names = new String[5][];
@@ -338,7 +337,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         final Session s = session;
         final int unifiedInboxAccountId = access.getAccountId();
         final int length = accounts.length;
-        final Executor executor = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+        final Executor executor = ThreadPools.getThreadPool().getExecutor();
         final TrackingCompletionService<MailFolder> completionService = new UnifiedINBOXCompletionService<MailFolder>(executor);
         for (final MailAccount mailAccount : accounts) {
             completionService.submit(new LoggingCallable<MailFolder>(session) {

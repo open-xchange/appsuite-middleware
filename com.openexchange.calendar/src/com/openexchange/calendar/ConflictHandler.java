@@ -199,7 +199,7 @@ public class ConflictHandler {
         SearchIterator<CalendarDataObject> si = null;
         ResultSet rs = null;
         PreparedStatement prep = null;
-        PreparedStatement private_folder_information = null;
+        SearchIterator<List<Integer>> private_folder_information = null;
         boolean close_connection = true;
         final Context ctx = Tools.getContext(so);
         final User user = Tools.getUser(so, ctx);
@@ -263,7 +263,13 @@ public class ConflictHandler {
                 }
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                recColl.closePreparedStatement(private_folder_information);
+                if (null != private_folder_information) {
+                    try {
+                        private_folder_information.close();
+                    } catch (final OXException e) {
+                        // Ignore
+                    }
+                }
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -319,7 +325,7 @@ public class ConflictHandler {
         SearchIterator<?> si = null;
         ResultSet rs = null;
         PreparedStatement prep  = null;
-        PreparedStatement private_folder_information = null;
+        SearchIterator<List<Integer>> private_folder_information = null;
         boolean close_connection = true;
         final Context ctx = Tools.getContext(so);
         final User user = Tools.getUser(so, ctx);
@@ -391,7 +397,13 @@ public class ConflictHandler {
                 }
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                recColl.closePreparedStatement(private_folder_information);
+                if (null != private_folder_information) {
+                    try {
+                        private_folder_information.close();
+                    } catch (final OXException e) {
+                        // Ignore
+                    }
+                }
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);
@@ -426,7 +438,7 @@ public class ConflictHandler {
         SearchIterator<CalendarDataObject> si = null;
         ResultSet rs = null;
         PreparedStatement prep  = null;
-        PreparedStatement private_folder_information = null;
+        SearchIterator<List<Integer>> private_folder_information = null;
         boolean close_connection = true;
         final Context ctx = Tools.getContext(so);
         final User user = Tools.getUser(so, ctx);
@@ -488,7 +500,13 @@ public class ConflictHandler {
                 }
                 recColl.closeResultSet(rs);
                 recColl.closePreparedStatement(prep);
-                recColl.closePreparedStatement(private_folder_information);
+                if (null != private_folder_information) {
+                    try {
+                        private_folder_information.close();
+                    } catch (final OXException e) {
+                        // Ignore
+                    }
+                }
             }
             if (close_connection && readcon != null) {
                 DBPool.push(ctx, readcon);

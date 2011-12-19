@@ -1270,7 +1270,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
 
     @Override
     public void addContents() throws OXException {
-        textFillerQueue.proceed();
+        //textFillerQueue.proceed();
     }
 
     @Override
@@ -1313,7 +1313,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             final int size = mails.size();
             final Thread thread = Thread.currentThread();
             try {
-                textFillerQueue.pause();
+                //textFillerQueue.pause();
                 int off = 0;
                 while (off < size) {
                     if (thread.isInterrupted()) {

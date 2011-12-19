@@ -59,6 +59,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.htmlparser.jericho.Renderer;
@@ -457,7 +458,65 @@ public final class HTMLServiceImpl implements HTMLService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
-        return new Renderer(new Segment(new Source(htmlContent), 0, htmlContent.length())).toString();
+        final String prepared = insertBlockquoteMarker(htmlContent);
+        return quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).toString());
+    }
+
+    private static final String CRLF = "\r\n";
+
+    private static final String SPECIAL = "=?";
+
+    private static final String END = "--";
+
+    private static final String BLOCKQUOTE_MARKER = SPECIAL+UUID.randomUUID().toString();
+
+    private static final String BLOCKQUOTE_MARKER_END = BLOCKQUOTE_MARKER + END;
+
+    private static String quoteText(final String text) {
+        if (text.indexOf(SPECIAL) < 0) {
+            return text;
+        }
+        final int len = BLOCKQUOTE_MARKER.length();
+        final String[] lines = text.split("\r?\n", 0);
+        final StringBuilder sb = new StringBuilder(text.length());
+        int quote = 0;
+        String prefix = "";
+        for (final String line : lines) {
+            if (line.startsWith(BLOCKQUOTE_MARKER)) {
+                quote = quote + (line.length() >= len && line.startsWith(END, len) ? -1 : 1);
+                prefix = getPrefixFor(quote);
+            } else {
+                sb.append(prefix).append(line).append(CRLF);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static String getPrefixFor(final int quote) {
+        if (quote <= 0) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(8);
+        for (int i = 0; i < quote; i++) {
+            sb.append("> ");
+        }
+        return sb.toString();
+    }
+
+    private static final Pattern PATTERN_GREEDY_BLOCKQUOTE = Pattern.compile("<blockquote.*?>(.*)</blockquote>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static String insertBlockquoteMarker(final String html) {
+        final Matcher m = PATTERN_GREEDY_BLOCKQUOTE.matcher(html);
+        if (!m.find()) {
+            return html;
+        }
+        final StringBuffer sb = new StringBuffer(html.length());
+        do {
+            final String surrounded = BLOCKQUOTE_MARKER+m.group(1)+BLOCKQUOTE_MARKER_END;
+            m.appendReplacement(sb, Matcher.quoteReplacement(insertBlockquoteMarker(surrounded)));
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final String HTML_BR = "<br />";

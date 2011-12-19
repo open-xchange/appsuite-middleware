@@ -272,4 +272,6 @@ public interface ContactFields extends CommonFields {
 
     String ADDRESS_OTHER = "addressOther";
 
+    String UID = "uid";
+
 }

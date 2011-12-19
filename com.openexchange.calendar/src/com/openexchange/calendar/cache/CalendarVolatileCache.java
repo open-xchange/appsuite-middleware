@@ -91,6 +91,26 @@ public final class CalendarVolatileCache {
     }
 
     /**
+     * Initializes cache instance with given cache.
+     * <p>
+     * <b>For testing only.</b>
+     * 
+     * @param cache The cache
+     */
+    public static void initInstance(final Cache cache) {
+        final AtomicReference<CalendarVolatileCache> ref = INSTANCE_REF;
+        CalendarVolatileCache tmp;
+        do {
+            tmp = ref.get();
+            if (null != tmp) {
+                return;
+            }
+        } while (!ref.compareAndSet(null, new CalendarVolatileCache()));
+        tmp = ref.get();
+        tmp.startUp(cache);
+    }
+
+    /**
      * Drops the instance.
      */
     public static void dropInstance() {
@@ -127,6 +147,10 @@ public final class CalendarVolatileCache {
      */
     private CalendarVolatileCache() {
         super();
+    }
+
+    private void startUp(final Cache cache) {
+        this.cache = cache;
     }
 
     private void startUp(final BundleContext context) {
@@ -204,9 +228,10 @@ public final class CalendarVolatileCache {
      * @param key The key
      * @return The value or <code>null</code> if absent
      */
-    public Object get(final Serializable key) {
+    @SuppressWarnings("unchecked")
+    public <V> V get(final Serializable key) {
         final Cache cache = this.cache;
-        return null == cache ? null : cache.get(key);
+        return (V) (null == cache ? null : cache.get(key));
     }
 
     /**
@@ -216,9 +241,10 @@ public final class CalendarVolatileCache {
      * @param group The group identifier
      * @return The value from group or <code>null</code> if absent
      */
-    public Object getFromGroup(final Serializable key, final String group) {
+    @SuppressWarnings("unchecked")
+    public <V> V getFromGroup(final Serializable key, final String group) {
         final Cache cache = this.cache;
-        return null == cache ? null : cache.getFromGroup(key, group);
+        return (V) (null == cache ? null : cache.getFromGroup(key, group));
     }
 
     /**
@@ -240,10 +266,10 @@ public final class CalendarVolatileCache {
      * @param obj The value
      * @throws OXException If put into cache fails
      */
-    public void put(final Serializable key, final Serializable obj) throws OXException {
+    public <V> void put(final Serializable key, final V obj) throws OXException {
         final Cache cache = this.cache;
         if (null != cache) {
-            cache.put(key, obj);
+            cache.put(key, (Serializable) obj);
         }
     }
 
@@ -255,14 +281,14 @@ public final class CalendarVolatileCache {
      * @param attributes The optional attributes
      * @throws OXException If put into cache fails
      */
-    public void put(final Serializable key, final Serializable obj, final Attribute<?>... attributes) throws OXException {
+    public <V> void put(final Serializable key, final V obj, final Attribute<?>... attributes) throws OXException {
         final Cache cache = this.cache;
         if (null != cache) {
             final ElementAttributes elementAttributes = cache.getDefaultElementAttributes();
             for (final Attribute<?> attribute : attributes) {
                 attribute.applyToElementAttaributes(elementAttributes);
             }
-            cache.put(key, obj, elementAttributes);
+            cache.put(key, (Serializable) obj, elementAttributes);
         }
     }
 
@@ -274,10 +300,10 @@ public final class CalendarVolatileCache {
      * @param value The value
      * @throws OXException If put into cache fails
      */
-    public void putInGroup(final Serializable key, final String group, final Serializable value) throws OXException {
+    public <V> void putInGroup(final Serializable key, final String group, final V value) throws OXException {
         final Cache cache = this.cache;
         if (null != cache) {
-            cache.putInGroup(key, group, value);
+            cache.putInGroup(key, group, (Serializable) value);
         }
     }
 
@@ -290,7 +316,7 @@ public final class CalendarVolatileCache {
      * @param attributes The optional attributes
      * @throws OXException If put into cache fails
      */
-    public void putInGroup(final Serializable key, final String group, final Serializable value, final Attribute<?>... attributes) throws OXException {
+    public <V> void putInGroup(final Serializable key, final String group, final V value, final Attribute<?>... attributes) throws OXException {
         final Cache cache = this.cache;
         if (null != cache) {
             final ElementAttributes elementAttributes = cache.getDefaultElementAttributes();

@@ -267,7 +267,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 try {
                     final ServerSession session = ServerSessionAdapter.valueOf(storageParameters.getSession());
                     final ServiceRegistry serviceRegistry = CacheServiceRegistry.getServiceRegistry();
-                    final ThreadPoolService threadPool = serviceRegistry.getService(ThreadPoolService.class);
+                    final ThreadPoolService threadPool = ThreadPools.getThreadPool();
                     final RefusedExecutionBehavior<Object> behavior = AbortBehavior.getInstance();
                     final Log log = LOG;
                     final boolean debugEnabled = log.isDebugEnabled();
@@ -1337,8 +1337,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     } else {
                         allSubfolderIds = new ArrayList<SortableId>(neededStorages.length * 8);
                         final CompletionService<java.util.List<SortableId>> completionService =
-                            new ThreadPoolCompletionService<java.util.List<SortableId>>(
-                                CacheServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class));
+                            new ThreadPoolCompletionService<java.util.List<SortableId>>(ThreadPools.getThreadPool());
                         /*
                          * Get all visible subfolders from each storage
                          */

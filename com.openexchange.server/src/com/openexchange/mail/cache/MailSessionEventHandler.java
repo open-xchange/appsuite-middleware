@@ -105,7 +105,7 @@ public final class MailSessionEventHandler implements EventHandler {
         /*
          * Delegate to thread pool if present
          */
-        final ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        final ThreadPoolService threadPoolService = ThreadPools.getThreadPool();
         if (null == threadPoolService) {
             r.run();
         } else {

@@ -68,7 +68,6 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
 import com.openexchange.unifiedinbox.UnifiedINBOXException;
@@ -265,7 +264,7 @@ public final class UnifiedINBOXFolderConverter {
         final int length = accounts.length;
         final Executor exec;
         if (executor == null) {
-            exec = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ThreadPoolService.class).getExecutor();
+            exec = ThreadPools.getThreadPool().getExecutor();
         } else {
             exec = executor;
         }
