@@ -164,6 +164,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;
 import com.openexchange.threadpool.internal.ThreadPoolServiceImpl;
+import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.timer.internal.CustomThreadPoolExecutorTimerService;
 import com.openexchange.tools.events.TestEventAdmin;
@@ -391,6 +392,7 @@ public final class Init {
                     props.getRefusedExecutionBehavior());
             services.put(ThreadPoolService.class, threadPool);
             ServerServiceRegistry.getInstance().addService(ThreadPoolService.class, threadPool);
+            ThreadPoolActivator.REF.set(threadPool);
             final TimerService timer = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             services.put(TimerService.class, timer);
             ServerServiceRegistry.getInstance().addService(TimerService.class, timer);
