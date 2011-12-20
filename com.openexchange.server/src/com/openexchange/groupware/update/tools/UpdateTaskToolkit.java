@@ -77,6 +77,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.SchemaExceptionCodes;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
+import com.openexchange.groupware.update.internal.UpdateProcess;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -155,6 +156,22 @@ public final class UpdateTaskToolkit {
                 }
             }
         }
+    }
+
+    public static void runUpdateOnAllSchemas() throws UpdateException {
+        synchronized (LOCK) {
+            // Get all available schemas
+            final Map<String, Set<Integer>> map = getSchemasAndContexts();
+            // ... and iterate them
+            final Iterator<Set<Integer>> iter = map.values().iterator();
+            while (iter.hasNext()) {
+                final Set<Integer> set = iter.next();
+                if (!set.isEmpty()) {
+                    final int contextId = set.iterator().next().intValue();
+                    new UpdateProcess(contextId).run();
+                }
+            }
+        }        
     }
 
     /**
