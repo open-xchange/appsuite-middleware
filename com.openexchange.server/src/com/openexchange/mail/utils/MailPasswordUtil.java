@@ -98,7 +98,10 @@ public final class MailPasswordUtil {
      */
     private static final String CIPHER_TYPE = ALGORITHM_DES + "/ECB/PKCS5Padding";
 
-    private static final SecretEncryptionStrategy<GenericProperty> STRATEGY = new SecretEncryptionStrategy<GenericProperty>() {
+    /**
+     * Mail account secret encryption strategy.
+     */
+    public static final SecretEncryptionStrategy<GenericProperty> STRATEGY = new SecretEncryptionStrategy<GenericProperty>() {
         
         @Override
         public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
@@ -125,6 +128,13 @@ public final class MailPasswordUtil {
             try {
                 stmt = con.prepareStatement("UPDATE user_mail_account SET password = ? WHERE cid = ? AND user = ? AND id = ?");
                 final Session session = customizationNote.session;
+                stmt.setString(1, recrypted);
+                stmt.setInt(2, session.getContextId());
+                stmt.setInt(3, session.getUserId());
+                stmt.setInt(4, customizationNote.accountId);
+                stmt.executeUpdate();
+                DBUtils.closeSQLStuff(stmt);
+                stmt = con.prepareStatement("UPDATE user_transport_account SET password = ? WHERE cid = ? AND user = ? AND id = ? AND (password IS NOT NULL AND password <> '')");
                 stmt.setString(1, recrypted);
                 stmt.setInt(2, session.getContextId());
                 stmt.setInt(3, session.getUserId());

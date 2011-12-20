@@ -101,7 +101,6 @@ import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
-import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -113,7 +112,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbMailAccountStorage implements MailAccountStorageService, SecretEncryptionStrategy<GenericProperty> {
+public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(RdbMailAccountStorage.class));
 
@@ -2128,46 +2127,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService, S
         }
     }
 
-    @Override
-    public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
-        final int contextId = customizationNote.session.getContextId();
-        final Connection con = Database.get(contextId, true);
-        try {
-            con.setAutoCommit(false);
-            update0(recrypted, customizationNote, con);
-            con.commit();
-        } catch (final SQLException e) {
-            rollback(con);
-            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            rollback(con);
-            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            autocommit(con);
-            Database.back(contextId, true, con);
-        }
-    }
-
-    private void update0(final String recrypted, final GenericProperty customizationNote, final Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE user_mail_account SET password = ? WHERE cid = ? AND user = ? AND id = ?");
-            final Session session = customizationNote.session;
-            stmt.setString(1, recrypted);
-            stmt.setInt(2, session.getContextId());
-            stmt.setInt(3, session.getUserId());
-            stmt.setInt(4, customizationNote.accountId);
-            stmt.executeUpdate();
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
     private String encrypt(final String toCrypt, final Session session) throws OXException {
         if (null == toCrypt) {
             return null;
         }
-        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(this);
+        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(MailPasswordUtil.STRATEGY);
         return encryptionService.encrypt(session, toCrypt);
     }
 
