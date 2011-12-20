@@ -92,13 +92,14 @@ public final class Tools {
      * Creates a dummy task for inserting into the deleted tables to tell clients that a task has been removed from some folder.
      *
      * @param identifier unique identifier of the task.
-     * @param createdBy user identifier that created the task.
-     * @param modifiedBy user identifier that moved the task.
+     * @param userId user identifier that created the task.
+     * @param uid universal identifier for that task
      * @return a dummy task.
      */
-    static Task createDummyTask(final int identifier, final int userId) {
+    static Task createDummyTask(final int identifier, final int userId, final String uid) {
         final Task retval = new Task();
         retval.setObjectID(identifier);
+        retval.setUid(uid);
         retval.setPrivateFlag(false);
         retval.setCreationDate(new Date());
         retval.setLastModified(new Date());

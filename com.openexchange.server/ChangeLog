@@ -1,3 +1,7 @@
+* 2011-12-20 - marcus.klein@open-xchange.com
+
+ - Fix for bug 19123: Added the column uid to tasks.
+
 * 2011-12-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 19295, 18699: Removed caching of time zone information from iCal4J to have always the correct time zone information for

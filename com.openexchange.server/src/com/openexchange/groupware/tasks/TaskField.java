@@ -79,7 +79,8 @@ public enum TaskField {
     TARGETDURATION(Task.TARGET_DURATION, "TargetDuration"),
     TRIPMETER(Task.TRIP_METER, "TripMeter"),
     RECURRENCETYPE(Task.RECURRENCE_TYPE, "RecurrenceType"),
-    LABEL(Task.COLOR_LABEL, "Label");
+    LABEL(Task.COLOR_LABEL, "Label"),
+    UID(Task.UID, "UID");
 
     private int taskID; // ID used in Task.*
 

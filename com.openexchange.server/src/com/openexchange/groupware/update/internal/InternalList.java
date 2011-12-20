@@ -417,6 +417,9 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.ContactAddUIDFieldTask(),
 
         // Add UIDs to contacts if missing
-        new com.openexchange.groupware.update.tasks.ContactAddUIDValueTask()
+        new com.openexchange.groupware.update.tasks.ContactAddUIDValueTask(),
+
+        // Adds UIDs to tasks.
+        new com.openexchange.groupware.update.tasks.TasksAddUidColumnTask()
     };
 }

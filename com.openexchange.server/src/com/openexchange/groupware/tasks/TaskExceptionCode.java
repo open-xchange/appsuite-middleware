@@ -111,7 +111,9 @@ public enum TaskExceptionCode implements OXExceptionCode {
     /** In order to accomplish the search, %1$d or more characters are required. */
     PATTERN_TOO_SHORT("In order to accomplish the search, %1$d or more characters are required.", Category.CATEGORY_USER_INPUT, 51),
     /** Group %1$d is empty. You can't add an empty group to a task. */
-    GROUP_IS_EMPTY("Group %1$d is empty. You can't add an empty group to a task.", Category.CATEGORY_USER_INPUT, 52);
+    GROUP_IS_EMPTY("Group %1$d is empty. You can't add an empty group to a task.", Category.CATEGORY_USER_INPUT, 52),
+    /** UID of tasks can not be changed. */
+    NO_UID_CHANGE("UID of tasks can not be changed.", Category.CATEGORY_USER_INPUT, 53);
 
     private final String message;
     private final Category category;
