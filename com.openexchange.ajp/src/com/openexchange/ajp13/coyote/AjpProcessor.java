@@ -864,6 +864,12 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                     if (longRunningAccepted) {
                         AjpLongRunningRegistry.getInstance().deregisterLongRunning(request);
                     }
+                    /*
+                     * Drop logging info
+                     */
+                    if (logPropsEnabled) {
+                        LogProperties.removeLogProperties();
+                    }
                 }
             }
             /*
@@ -885,12 +891,6 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             }
             stage = Stage.STAGE_AWAIT;
             recycle();
-            /*
-             * Drop logging info
-             */
-            if (logPropsEnabled) {
-                LogProperties.removeLogProperties();
-            }
         }
         /*
          * Terminate AJP connection

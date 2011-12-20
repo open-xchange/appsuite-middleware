@@ -178,8 +178,8 @@ public final class SessionHandler {
         return sessionData.getUserSessions(userId, contextId);
     }
 
-    public static SessionControl getAnyActiveSessionForUser(final int userId, final int contextId) {
-        return sessionData.getAnyActiveSessionForUser(userId, contextId);
+    public static SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
+        return sessionData.getAnyActiveSessionForUser(userId, contextId, includeLongTerm);
     }
 
     public static Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {

@@ -177,7 +177,7 @@ public class SessiondServiceImpl implements SessiondService {
                 return session;
             }
         }
-        final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId);
+        final SessionControl sessionControl = SessionHandler.getAnyActiveSessionForUser(userId, contextId, false);
         return null == sessionControl ? null: sessionControl.getSession();
     }
 

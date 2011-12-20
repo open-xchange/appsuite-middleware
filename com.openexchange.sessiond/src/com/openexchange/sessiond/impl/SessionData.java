@@ -314,7 +314,7 @@ final class SessionData {
         return retval.toArray(new SessionControl[retval.size()]);
     }
 
-    public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId) {
+    public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -326,21 +326,23 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        longTermLock.lock();
-        try {
-            if (!hasLongTermSession(userId, contextId)) {
-                return null;
-            }
-            for (final Map<String, SessionControl> longTermMap : longTermList) {
-                for (final SessionControl control : longTermMap.values()) {
-                    final Session session = control.getSession();
-                    if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
-                        return control;
+        if (includeLongTerm) {
+            longTermLock.lock();
+            try {
+                if (!hasLongTermSession(userId, contextId)) {
+                    return null;
+                }
+                for (final Map<String, SessionControl> longTermMap : longTermList) {
+                    for (final SessionControl control : longTermMap.values()) {
+                        final Session session = control.getSession();
+                        if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
+                            return control;
+                        }
                     }
                 }
+            } finally {
+                longTermLock.unlock();
             }
-        } finally {
-            longTermLock.unlock();
         }
         return null;
     }
