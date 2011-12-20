@@ -53,10 +53,23 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.internal.GenericProperty;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.SecretEncryptionService;
+import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MailPasswordUtil} - Utility class to encrypt/decrypt passwords with a key aka <b>p</b>assword <b>b</b>ased <b>e</b>ncryption
@@ -85,6 +98,44 @@ public final class MailPasswordUtil {
      */
     private static final String CIPHER_TYPE = ALGORITHM_DES + "/ECB/PKCS5Padding";
 
+    private static final SecretEncryptionStrategy<GenericProperty> STRATEGY = new SecretEncryptionStrategy<GenericProperty>() {
+        
+        @Override
+        public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
+            final int contextId = customizationNote.session.getContextId();
+            final Connection con = Database.get(contextId, true);
+            try {
+                con.setAutoCommit(false);
+                update0(recrypted, customizationNote, con);
+                con.commit();
+            } catch (final SQLException e) {
+                DBUtils.rollback(con);
+                throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                DBUtils.rollback(con);
+                throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.autocommit(con);
+                Database.back(contextId, true, con);
+            }
+        }
+
+        private void update0(final String recrypted, final GenericProperty customizationNote, final Connection con) throws SQLException {
+            PreparedStatement stmt = null;
+            try {
+                stmt = con.prepareStatement("UPDATE user_mail_account SET password = ? WHERE cid = ? AND user = ? AND id = ?");
+                final Session session = customizationNote.session;
+                stmt.setString(1, recrypted);
+                stmt.setInt(2, session.getContextId());
+                stmt.setInt(3, session.getUserId());
+                stmt.setInt(4, customizationNote.accountId);
+                stmt.executeUpdate();
+            } finally {
+                DBUtils.closeSQLStuff(stmt);
+            }
+        }
+    };
+
     /**
      * Encrypts specified password with given key.
      *
@@ -95,6 +146,20 @@ public final class MailPasswordUtil {
      */
     public static String encrypt(final String password, final String key) throws GeneralSecurityException {
         return encrypt(password, generateSecretKey(key));
+    }
+
+    /**
+     * Decrypts specified encrypted password with given key.
+     *
+     * @param encryptedPassword The Base64 encoded encrypted password
+     * @param session The session
+     * @return The decrypted password
+     * @throws GeneralSecurityException If password decryption fails
+     * @throws OXException 
+     */
+    public static String decrypt(final String encryptedPassword, final Session session, final int accountId, final String login, final String server) throws OXException {
+        final SecretEncryptionService<GenericProperty> encryptionService = ServerServiceRegistry.getInstance().getService(SecretEncryptionFactoryService.class).createService(STRATEGY);
+        return encryptionService.decrypt(session, encryptedPassword, new GenericProperty(accountId, session, login, server));
     }
 
     /**

@@ -163,12 +163,12 @@ public class SimSubscribeService implements SubscribeService {
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#checkSecretCanDecryptPasswords(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String)
+     * @see com.openexchange.subscribe.SubscribeService#hasAccounts(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User)
      */
     @Override
-    public String checkSecretCanDecryptPasswords(final Context context, final User user, final String secret) throws OXException {
+    public boolean hasAccounts(final Context context, final User user) throws OXException {
         // TODO Auto-generated method stub
-        return null;
+        return false;
     }
 
     /* (non-Javadoc)

@@ -211,27 +211,12 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     @Override
-    public String checkSecretCanDecryptPasswords(final Context context, final User user, final String secret) throws OXException {
+    public boolean hasAccounts(final Context ctx, final User user) throws OXException {
         final Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
         if (passwordFields.isEmpty()) {
-            return null;
+            return false;
         }
-        final List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
-
-        for (final Subscription subscription : allSubscriptions) {
-            try {
-                final Map<String, Object> configuration = subscription.getConfiguration();
-                for (final String passwordField : passwordFields) {
-                    final String password = (String) configuration.get(passwordField);
-                    if (password != null) {
-                        CRYPTO.decrypt(password, secret);
-                    }
-                }
-            } catch (final OXException x) {
-                return "Could not decode subscription passwords for subscription: "+subscription.getId()+" : "+subscription.getDisplayName();
-            }
-        }
-        return null;
+        return STORAGE.hasSubscriptions(ctx, user);
     }
 
     @Override

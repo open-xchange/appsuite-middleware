@@ -52,7 +52,7 @@ package com.openexchange.subscribe.secret;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -65,45 +65,43 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SubscriptionSecretHandling implements SecretConsistencyCheck, SecretMigrator {
+public class SubscriptionSecretHandling implements EncryptedItemDetectorService, SecretMigrator {
 
     private SubscriptionSourceDiscoveryService discovery = null;
 
-    public SubscriptionSecretHandling(SubscriptionSourceDiscoveryService discovery) {
+    public SubscriptionSecretHandling(final SubscriptionSourceDiscoveryService discovery) {
         super();
         this.discovery = discovery;
     }
 
     @Override
-    public String checkSecretCanDecryptStrings(ServerSession session, String secret) throws OXException {
-        List<SubscriptionSource> sources = discovery.getSources();
-        for (SubscriptionSource subscriptionSource : sources) {
-            Set<String> passwordFields = subscriptionSource.getPasswordFields();
+    public boolean hasEncryptedItems(final ServerSession session) throws OXException {
+        final List<SubscriptionSource> sources = discovery.getSources();
+        for (final SubscriptionSource subscriptionSource : sources) {
+            final Set<String> passwordFields = subscriptionSource.getPasswordFields();
             if(passwordFields.isEmpty()) {
                 continue;
             }
-
-            SubscribeService subscribeService = subscriptionSource.getSubscribeService();
-
-            String diagnosis = subscribeService.checkSecretCanDecryptPasswords(session.getContext(), session.getUser(), secret);
-            if(diagnosis != null) {
-                return diagnosis;
-            }
-
+            
+            final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+            
+            final boolean hasAccounts = subscribeService.hasAccounts(session.getContext(), session.getUser());
+            return hasAccounts;
+            
         }
-        return null;
+        return false;
     }
 
     @Override
-    public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException {
-        List<SubscriptionSource> sources = discovery.getSources();
-        for (SubscriptionSource subscriptionSource : sources) {
-            Set<String> passwordFields = subscriptionSource.getPasswordFields();
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
+        final List<SubscriptionSource> sources = discovery.getSources();
+        for (final SubscriptionSource subscriptionSource : sources) {
+            final Set<String> passwordFields = subscriptionSource.getPasswordFields();
             if(passwordFields.isEmpty()) {
                 continue;
             }
 
-            SubscribeService subscribeService = subscriptionSource.getSubscribeService();
+            final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
 
             subscribeService.migrateSecret(session.getContext(), session.getUser(), oldSecret, newSecret);
         }

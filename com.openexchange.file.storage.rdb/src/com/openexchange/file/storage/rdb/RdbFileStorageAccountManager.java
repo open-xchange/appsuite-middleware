@@ -117,8 +117,8 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
     }
 
     @Override
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
-        return CACHE.checkSecretCanDecryptStrings(service, session, secret);
+    public boolean hasEncryptedItems(final Session session) throws OXException {
+        return CACHE.hasEncryptedItems(service, session);
     }
 
     @Override

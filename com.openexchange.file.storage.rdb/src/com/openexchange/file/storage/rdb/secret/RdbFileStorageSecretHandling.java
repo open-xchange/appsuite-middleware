@@ -53,7 +53,7 @@ import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -62,7 +62,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class RdbFileStorageSecretHandling implements SecretConsistencyCheck, SecretMigrator {
+public abstract class RdbFileStorageSecretHandling implements EncryptedItemDetectorService, SecretMigrator {
 
     /**
      * Initializes a new {@link RdbFileStorageSecretHandling}.
@@ -72,15 +72,15 @@ public abstract class RdbFileStorageSecretHandling implements SecretConsistencyC
     }
 
     @Override
-    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
+    public boolean hasEncryptedItems(final ServerSession session) throws OXException {
         final Collection<FileStorageService> messagingServices = getFileStorageServices();
         for (final FileStorageService messagingService : messagingServices) {
             final FileStorageAccountManager accountManager = messagingService.getAccountManager();
-            if (!accountManager.checkSecretCanDecryptStrings(session, secret)) {
-                return "";
+            if (accountManager.hasEncryptedItems(session)) {
+                return true;
             }
         }
-        return null;
+        return false;
     }
 
     @Override

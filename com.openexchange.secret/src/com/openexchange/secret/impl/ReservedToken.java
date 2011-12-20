@@ -47,40 +47,82 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.secret.impl;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * Reserved tokens.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SubscribeService {
+public enum ReservedToken implements Token {
+    PASSWORD("password", new Token() {
 
-    public SubscriptionSource getSubscriptionSource();
+        @Override
+        public String getFrom(final Session session) {
+            return session.getPassword();
+        }
+    }),
+    USER_ID("user-id", new Token() {
 
-    public boolean handles(int folderModule);
+        @Override
+        public String getFrom(final Session session) {
+            return Integer.toString(session.getUserId(), 10);
+        }
+    }),
+    CONTEXT_ID("context-id", new Token() {
 
-    public void subscribe(Subscription subscription) throws OXException;
+        @Override
+        public String getFrom(final Session session) {
+            return Integer.toString(session.getContextId(), 10);
+        }
+    }),
+    RANDOM("random", new Token() {
 
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
+        @Override
+        public String getFrom(final Session session) {
+            return SessionSecretService.RANDOM.get();
+        }
+    }),
 
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
+    ;
 
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
+    private final Token impl;
 
-    public void unsubscribe(Subscription subscription) throws OXException;
+    private final String id;
 
-    public void update(Subscription subscription) throws OXException;
+    private ReservedToken(final String id, final Token impl) {
+        this.id = id;
+        this.impl = impl;
+    }
 
-    public Collection<?> getContent(Subscription subscription) throws OXException;
+    @Override
+    public String getFrom(final Session session) {
+        return impl.getFrom(session);
+    }
 
-    public boolean knows(Context context, int subscriptionId) throws OXException;
+    @Override
+    public String toString() {
+        return new StringBuilder(12).append('<').append(id).append('>').toString();
+    }
 
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
-
-    public boolean hasAccounts(Context context, User user) throws OXException;
+    /**
+     * Gets the reserved token for specified token name.
+     * 
+     * @param token The token name
+     * @return The reserved token or <code>null</code>
+     */
+    public static ReservedToken reservedTokenFor(final String token) {
+        if (token == null) {
+            return null;
+        }
+        for (final ReservedToken rt : values()) {
+            if (rt.id.equals(token)) {
+                return rt;
+            }
+        }
+        return null;
+    }
 
 }

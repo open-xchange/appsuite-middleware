@@ -93,104 +93,99 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
     }
 
     @Override
+    public boolean hasAccount(final Session session) throws OXException {
+        final MailAccountStorageService mass =
+            MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccount[] accounts = mass.getUserMailAccounts(session.getUserId(), session.getContextId());
+        return null != accounts && accounts.length > 0;
+    }
+
+    @Override
     public int addAccount(final MessagingAccount account, final Session session) throws OXException {
-        try {
-            final MailAccountStorageService mass =
-                MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService mass =
+            MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
 
-            final MailAccountDescription accountDescription = new MailAccountDescription();
-            accountDescription.setName(account.getDisplayName());
+        final MailAccountDescription accountDescription = new MailAccountDescription();
+        accountDescription.setName(account.getDisplayName());
 
-            final Map<String, Object> configuration = account.getConfiguration();
-            accountDescription.setLogin(getString(MailConstants.MAIL_LOGIN, configuration));
-            accountDescription.setPassword(getString(MailConstants.MAIL_PASSWORD, configuration));
+        final Map<String, Object> configuration = account.getConfiguration();
+        accountDescription.setLogin(getString(MailConstants.MAIL_LOGIN, configuration));
+        accountDescription.setPassword(getString(MailConstants.MAIL_PASSWORD, configuration));
 
-            accountDescription.setConfirmedHam(optString(MailConstants.MAIL_CONFIRMED_HAM, configuration));
-            accountDescription.setConfirmedHamFullname(optString(MailConstants.MAIL_CONFIRMED_HAM_FULLNAME, configuration));
+        accountDescription.setConfirmedHam(optString(MailConstants.MAIL_CONFIRMED_HAM, configuration));
+        accountDescription.setConfirmedHamFullname(optString(MailConstants.MAIL_CONFIRMED_HAM_FULLNAME, configuration));
 
-            accountDescription.setConfirmedSpam(optString(MailConstants.MAIL_CONFIRMED_SPAM, configuration));
-            accountDescription.setConfirmedSpamFullname(optString(MailConstants.MAIL_CONFIRMED_SPAM_FULLNAME, configuration));
+        accountDescription.setConfirmedSpam(optString(MailConstants.MAIL_CONFIRMED_SPAM, configuration));
+        accountDescription.setConfirmedSpamFullname(optString(MailConstants.MAIL_CONFIRMED_SPAM_FULLNAME, configuration));
 
-            accountDescription.setDrafts(optString(MailConstants.MAIL_DRAFTS, configuration));
-            accountDescription.setDraftsFullname(optString(MailConstants.MAIL_DRAFTS_FULLNAME, configuration));
+        accountDescription.setDrafts(optString(MailConstants.MAIL_DRAFTS, configuration));
+        accountDescription.setDraftsFullname(optString(MailConstants.MAIL_DRAFTS_FULLNAME, configuration));
 
-            accountDescription.setSent(optString(MailConstants.MAIL_SENT, configuration));
-            accountDescription.setSentFullname(optString(MailConstants.MAIL_SENT_FULLNAME, configuration));
+        accountDescription.setSent(optString(MailConstants.MAIL_SENT, configuration));
+        accountDescription.setSentFullname(optString(MailConstants.MAIL_SENT_FULLNAME, configuration));
 
-            accountDescription.setSpam(optString(MailConstants.MAIL_SPAM, configuration));
-            accountDescription.setSpamFullname(optString(MailConstants.MAIL_SPAM_FULLNAME, configuration));
+        accountDescription.setSpam(optString(MailConstants.MAIL_SPAM, configuration));
+        accountDescription.setSpamFullname(optString(MailConstants.MAIL_SPAM_FULLNAME, configuration));
 
-            accountDescription.setTrash(optString(MailConstants.MAIL_TRASH, configuration));
-            accountDescription.setTrashFullname(optString(MailConstants.MAIL_TRASH_FULLNAME, configuration));
+        accountDescription.setTrash(optString(MailConstants.MAIL_TRASH, configuration));
+        accountDescription.setTrashFullname(optString(MailConstants.MAIL_TRASH_FULLNAME, configuration));
 
-            accountDescription.setMailPort(getInt(MailConstants.MAIL_PORT, configuration));
-            accountDescription.setMailProtocol(getString(MailConstants.MAIL_PROTOCOL, configuration));
-            {
-                final Boolean mailSecure = optBoolean(MailConstants.MAIL_SECURE, configuration);
-                accountDescription.setMailSecure(null == mailSecure ? false : mailSecure.booleanValue());
-            }
-            accountDescription.setMailServer(getString(MailConstants.MAIL_SERVER, configuration));
-
-            accountDescription.setPersonal(optString(MailConstants.MAIL_PERSONAL, configuration));
-
-            accountDescription.setPrimaryAddress(getString(MailConstants.MAIL_PRIMARY_ADDRESS, configuration));
-
-            accountDescription.setTransportLogin(optString(MailConstants.TRANSPORT_LOGIN, configuration));
-            accountDescription.setTransportPassword(optString(MailConstants.TRANSPORT_PASSWORD, configuration));
-
-            accountDescription.setTransportPort(optInt(MailConstants.TRANSPORT_PORT, configuration));
-            accountDescription.setTransportProtocol(optString(MailConstants.TRANSPORT_PROTOCOL, configuration));
-            {
-                final Boolean transportSecure = optBoolean(MailConstants.TRANSPORT_SECURE, configuration);
-                accountDescription.setTransportSecure(null == transportSecure ? false : transportSecure.booleanValue());
-            }
-            accountDescription.setTransportServer(optString(MailConstants.TRANSPORT_SERVER, configuration));
-
-            {
-                final Boolean unifiedINBOXEnabled = optBoolean(MailConstants.UNIFIED_MAIL_ENABLED, configuration);
-                accountDescription.setUnifiedINBOXEnabled(null == unifiedINBOXEnabled ? false : unifiedINBOXEnabled.booleanValue());
-            }
-
-            for (final Entry<String, Object> entry : configuration.entrySet()) {
-                final String name = entry.getKey();
-                if (!MailConstants.ALL.contains(name)) {
-                    accountDescription.addProperty(name, entry.getValue().toString());
-                }
-            }
-
-            return mass.insertMailAccount(
-                accountDescription,
-                session.getUserId(),
-                getContext(session.getContextId()),
-                session.getPassword());
-        } catch (final OXException e) {
-            throw e;
+        accountDescription.setMailPort(getInt(MailConstants.MAIL_PORT, configuration));
+        accountDescription.setMailProtocol(getString(MailConstants.MAIL_PROTOCOL, configuration));
+        {
+            final Boolean mailSecure = optBoolean(MailConstants.MAIL_SECURE, configuration);
+            accountDescription.setMailSecure(null == mailSecure ? false : mailSecure.booleanValue());
         }
+        accountDescription.setMailServer(getString(MailConstants.MAIL_SERVER, configuration));
+
+        accountDescription.setPersonal(optString(MailConstants.MAIL_PERSONAL, configuration));
+
+        accountDescription.setPrimaryAddress(getString(MailConstants.MAIL_PRIMARY_ADDRESS, configuration));
+
+        accountDescription.setTransportLogin(optString(MailConstants.TRANSPORT_LOGIN, configuration));
+        accountDescription.setTransportPassword(optString(MailConstants.TRANSPORT_PASSWORD, configuration));
+
+        accountDescription.setTransportPort(optInt(MailConstants.TRANSPORT_PORT, configuration));
+        accountDescription.setTransportProtocol(optString(MailConstants.TRANSPORT_PROTOCOL, configuration));
+        {
+            final Boolean transportSecure = optBoolean(MailConstants.TRANSPORT_SECURE, configuration);
+            accountDescription.setTransportSecure(null == transportSecure ? false : transportSecure.booleanValue());
+        }
+        accountDescription.setTransportServer(optString(MailConstants.TRANSPORT_SERVER, configuration));
+
+        {
+            final Boolean unifiedINBOXEnabled = optBoolean(MailConstants.UNIFIED_MAIL_ENABLED, configuration);
+            accountDescription.setUnifiedINBOXEnabled(null == unifiedINBOXEnabled ? false : unifiedINBOXEnabled.booleanValue());
+        }
+
+        for (final Entry<String, Object> entry : configuration.entrySet()) {
+            final String name = entry.getKey();
+            if (!MailConstants.ALL.contains(name)) {
+                accountDescription.addProperty(name, entry.getValue().toString());
+            }
+        }
+
+        return mass.insertMailAccount(
+            accountDescription,
+            session.getUserId(),
+            getContext(session.getContextId()),
+            session.getPassword());
     }
 
     @Override
     public void deleteAccount(final MessagingAccount account, final Session session) throws OXException {
-        try {
-            final MailAccountStorageService mass =
-                MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccountStorageService mass =
+            MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
 
-            mass.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
-
-        } catch (final OXException e) {
-            throw e;
-        }
+        mass.deleteMailAccount(account.getId(), Collections.<String, Object> emptyMap(), session.getUserId(), session.getContextId());
     }
 
     @Override
     public MessagingAccount getAccount(final int id, final Session session) throws OXException {
-        try {
-            final MailAccountStorageService mass =
-                MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
-            final MailAccount mailAccount = mass.getMailAccount(id, session.getUserId(), session.getContextId());
-            return convert2MessagingAccount(mailAccount);
-        } catch (final OXException e) {
-            throw e;
-        }
+        final MailAccountStorageService mass =
+            MailMessagingServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+        final MailAccount mailAccount = mass.getMailAccount(id, session.getUserId(), session.getContextId());
+        return convert2MessagingAccount(mailAccount);
     }
 
     private MessagingAccountImpl convert2MessagingAccount(final MailAccount mailAccount) {
@@ -637,11 +632,6 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             this.messagingService = messagingService;
         }
 
-    }
-
-    @Override
-    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
-        return null; // Mail Accounts are handled elsewhere, this is just an adapter class between the mail system and the messaging system
     }
 
     @Override

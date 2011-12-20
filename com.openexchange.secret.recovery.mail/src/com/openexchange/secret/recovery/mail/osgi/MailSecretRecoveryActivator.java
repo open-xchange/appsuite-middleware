@@ -51,7 +51,7 @@ package com.openexchange.secret.recovery.mail.osgi;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.session.ServerSession;
@@ -81,11 +81,11 @@ public class MailSecretRecoveryActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final MailAccountStorageService mailAccountStorage = getService(MailAccountStorageService.class);
-        registerService(SecretConsistencyCheck.class, new SecretConsistencyCheck() {
+        registerService(EncryptedItemDetectorService.class, new EncryptedItemDetectorService() {
 
             @Override
-            public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
-                return mailAccountStorage.checkCanDecryptPasswords(session.getUserId(), session.getContextId(), secret);
+            public boolean hasEncryptedItems(final ServerSession session) throws OXException {
+                return mailAccountStorage.hasAccounts(session);
             }
 
         }, null);

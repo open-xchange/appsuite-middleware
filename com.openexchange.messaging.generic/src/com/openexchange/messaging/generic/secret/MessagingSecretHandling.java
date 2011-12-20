@@ -54,7 +54,7 @@ import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.MessagingService;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -64,20 +64,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMigrator {
-
-    @Override
-    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
-        final Collection<MessagingService> messagingServices = getMessagingServices();
-        for (final MessagingService messagingService : messagingServices) {
-            final MessagingAccountManager accountManager = messagingService.getAccountManager();
-            String reason = accountManager.checkSecretCanDecryptStrings(session, secret);
-            if( reason != null) {
-                return reason;
-            }
-        }
-        return null;
-    }
+public class MessagingSecretHandling implements EncryptedItemDetectorService, SecretMigrator {
 
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
@@ -91,6 +78,19 @@ public class MessagingSecretHandling implements SecretConsistencyCheck, SecretMi
     // Override me
     protected Collection<MessagingService> getMessagingServices() {
         return Collections.emptyList();
+    }
+
+    @Override
+    public boolean hasEncryptedItems(final ServerSession session) throws OXException {
+        final Collection<MessagingService> messagingServices = getMessagingServices();
+        for (final MessagingService messagingService : messagingServices) {
+            final MessagingAccountManager accountManager = messagingService.getAccountManager();
+            final boolean hasAccount = accountManager.hasAccount(session);
+            if (hasAccount) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

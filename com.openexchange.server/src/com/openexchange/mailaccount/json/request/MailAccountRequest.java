@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount.json.request;
 
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -281,42 +280,43 @@ public final class MailAccountRequest {
     private Object actionValidate(final JSONObject jsonObject) throws OXException, OXException, JSONException {
         final JSONObject jData = DataParser.checkJSONObject(jsonObject, AJAXServlet.PARAMETER_DATA);
 
-        try {
-            if (!session.getUserConfiguration().isMultipleMailAccounts()) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(session.getContextId()));
-            }
-
-            final MailAccountDescription accountDescription = new MailAccountDescription();
-            new MailAccountParser().parse(accountDescription, jData);
-
-            if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
-                /*
-                 * ID is delivered, but password not set. Thus load from storage version.
-                 */
-                final MailAccountStorageService storageService =
-                    ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-
-                final String encodedPassword =
-                    storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, getSecret(session)));
-            }
-
-            checkNeededFields(accountDescription);
-            if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-                // Deny validation of Unified INBOX account
-                throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
-            }
-            // Check for tree parameter
-            final boolean tree = jsonObject.hasAndNotNull("tree") ? jsonObject.getBoolean("tree") : false;
-            if (tree) {
-                return actionValidateTree(accountDescription);
-            }
-            return actionValidateBoolean(accountDescription);
-        } catch (final GeneralSecurityException e) {
-            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        if (!session.getUserConfiguration().isMultipleMailAccounts()) {
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
         }
+
+        final MailAccountDescription accountDescription = new MailAccountDescription();
+        new MailAccountParser().parse(accountDescription, jData);
+
+        if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
+            /*
+             * ID is delivered, but password not set. Thus load from storage version.
+             */
+            final MailAccountStorageService storageService =
+                ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+
+            final String password =
+                storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+            accountDescription.setPassword(MailPasswordUtil.decrypt(
+                password,
+                session,
+                accountDescription.getId(),
+                accountDescription.getLogin(),
+                accountDescription.getMailServer()));
+        }
+
+        checkNeededFields(accountDescription);
+        if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
+            // Deny validation of Unified INBOX account
+            throw MailAccountExceptionCodes.VALIDATION_FAILED.create();
+        }
+        // Check for tree parameter
+        final boolean tree = jsonObject.hasAndNotNull("tree") ? jsonObject.getBoolean("tree") : false;
+        if (tree) {
+            return actionValidateTree(accountDescription);
+        }
+        return actionValidateBoolean(accountDescription);
     }
 
     private JSONObject actionValidateTree(final MailAccountDescription accountDescription) throws OXException, OXException, JSONException, OXException {

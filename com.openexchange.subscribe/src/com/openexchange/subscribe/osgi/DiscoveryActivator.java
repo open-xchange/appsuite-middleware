@@ -70,7 +70,7 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -160,7 +160,7 @@ public class DiscoveryActivator implements BundleActivator {
         context.registerService(DeleteListener.class.getName(), listener, null);
 
         final SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
-        context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null);
+        context.registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null);
         context.registerService(SecretMigrator.class.getName(), secretHandling, null);
 
     }

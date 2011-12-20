@@ -176,6 +176,7 @@ import com.openexchange.report.internal.LastLoginRecorder;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.search.SearchService;
 import com.openexchange.search.internal.SearchServiceImpl;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
@@ -262,7 +263,7 @@ public final class ServerActivator extends DeferredActivator {
             TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class, AppointmentSqlFactoryService.class,
             CalendarCollectionService.class, TargetService.class, MessagingServiceRegistry.class, HTMLService.class, IDBasedFileAccessFactory.class,
             FileStorageServiceRegistry.class, CryptoService.class, HttpService.class, SystemNameService.class, FolderUpdaterRegistry.class,
-            ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class
+            ConfigViewFactory.class, StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class
         };
 
     private static volatile BundleContext CONTEXT;

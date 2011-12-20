@@ -75,7 +75,7 @@ import com.openexchange.messaging.generic.secret.MessagingSecretHandling;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -206,7 +206,7 @@ public class MessagingGenericActivator extends DeferredActivator {
                 };
 
 
-                registrations.add(context.registerService(SecretConsistencyCheck.class.getName(), secretHandling, null));
+                registrations.add(context.registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null));
                 registrations.add(context.registerService(SecretMigrator.class.getName(), secretHandling, null));
 
             }

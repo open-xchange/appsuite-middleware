@@ -51,37 +51,65 @@ package com.openexchange.secret.recovery.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.secret.SecretService;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
-public class SecretRecoveryActivator implements BundleActivator {
+/**
+ * {@link SecretRecoveryActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class SecretRecoveryActivator extends HousekeepingActivator {
 
-	private WhiteboardSecretInconsistencyDetector detector;
     private WhiteboardSecretMigrator migrator;
+    private WhiteboardSecretService secretService;
+    private WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-	    detector = new WhiteboardSecretInconsistencyDetector(context);
-	    migrator = new WhiteboardSecretMigrator(context);
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{CryptoService.class, UserService.class, SecretService.class};
+    }
 
-	    context.registerService(SecretInconsistencyDetector.class.getName(), detector, null);
-
-	    final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-	    properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
-
-	    context.registerService(SecretMigrator.class.getName(), migrator, properties);
-
-	    detector.open();
-	    migrator.open();
-	}
-
-	@Override
-    public void stop(final BundleContext context) throws Exception {
-	    detector.close();
-	    migrator.close();
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        migrator = new WhiteboardSecretMigrator(context);
+        
+        secretService = new WhiteboardSecretService(context);
+        whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
+        
+        final CryptoService cryptoService = getService(CryptoService.class);
+        final UserService userService = getService(UserService.class);
+        
+        final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
+        
+        registerService(SecretInconsistencyDetector.class, detector, null);
+        
+        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
+        
+        
+        registerService(SecretMigrator.class, migrator, properties);
+        registerService(SecretMigrator.class, detector); // Needs Migration as well
+   
+        secretService.open();
+        migrator.open();
+        whiteboardEncryptedItemDetector.open();
+        
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        secretService.close();
+        migrator.close();
+        whiteboardEncryptedItemDetector.close();
+    }
 
 }

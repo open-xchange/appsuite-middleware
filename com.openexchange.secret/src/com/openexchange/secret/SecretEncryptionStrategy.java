@@ -47,76 +47,25 @@
  *
  */
 
-package com.openexchange.secret.recovery;
+package com.openexchange.secret;
 
-import static org.junit.Assert.assertTrue;
-import org.junit.Before;
-import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.groupware.ldap.SimUser;
-import com.openexchange.secret.SimSecretService;
-import com.openexchange.secret.recovery.impl.DefaultSecretInconsistencyDetector;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.SimServerSession;
 
 /**
- * {@link SecretInconsistencyDetectorTest}
- *
+ * {@link SecretEncryptionStrategy}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SecretInconsistencyDetectorTest {
+public interface SecretEncryptionStrategy<T> {
 
-    private final DefaultSecretInconsistencyDetector detector = new DefaultSecretInconsistencyDetector();
-    private ServerSession session;
-
-    private final Context ctx = new SimContext(1);
-    private final SimUser user = new SimUser();
-
-    @Before
-    public void setUp() {
-        detector.setSecretService(new SimSecretService());
-    }
-
-    @Test
-    public void shouldDetectWhenSecretStringsCanNotBeDecrypted() throws OXException {
-        detector.addCheck(new PassingSecretConsistencyCheck());
-        detector.addCheck(new FailingSecretConsistencyCheck());
-
-        session = new SimServerSession(ctx, user, null);
-        final String diagnosis = detector.isSecretWorking(session);
-        assertTrue(diagnosis, diagnosis != null);
-    }
-
-    @Test
-    public void shouldDetectWhenAllIsWell() throws OXException {
-        detector.addCheck(new PassingSecretConsistencyCheck());
-        detector.addCheck(new PassingSecretConsistencyCheck());
-
-        session = new SimServerSession(ctx, user, null);
-        final String diagnosis = detector.isSecretWorking(session);
-        assertTrue(diagnosis, diagnosis == null);
-    }
-
-
-    private static final class FailingSecretConsistencyCheck implements SecretConsistencyCheck {
-
-        @Override
-        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
-            return "Kabooom, Baby!";
-        }
-
-    }
-
-    private static final class PassingSecretConsistencyCheck implements SecretConsistencyCheck {
-
-        @Override
-        public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
-            return null;
-        }
-
-    }
-
+    /**
+     * Updates using <code>recrypted</code>.
+     * 
+     * @param recrypted The re-crypted string
+     * @param customizationNote The optional customization note
+     * @throws OXException If update fails
+     */
+    void update(String recrypted, T customizationNote) throws OXException;
 
 }

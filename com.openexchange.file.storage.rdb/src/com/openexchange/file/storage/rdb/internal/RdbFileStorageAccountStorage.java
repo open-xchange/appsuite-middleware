@@ -653,4 +653,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage {
             throw e;
         }
     }
+
+    public boolean hasEncryptedItems(final FileStorageService service, final Session session) {
+        //TODO: Implement this (once this stuff is acutally used...)
+        return false;
+    }
+
 }

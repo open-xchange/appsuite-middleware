@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.DELETE;
 import com.openexchange.sql.grammar.EQUALS;
@@ -654,11 +655,11 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 	}
 
 	@Override
-    public Map<String, Boolean> hasSubscriptions(Context ctx,
-			List<String> folderIds) throws OXException {
+    public Map<String, Boolean> hasSubscriptions(final Context ctx,
+			final List<String> folderIds) throws OXException {
 
-		Map<String, Boolean> retval = new HashMap<String, Boolean>();
-		for (String folderId : folderIds) {
+		final Map<String, Boolean> retval = new HashMap<String, Boolean>();
+		for (final String folderId : folderIds) {
 			retval.put(folderId, false);
 		}
 
@@ -667,34 +668,34 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 		StatementBuilder builder = null;
 		try {
 			readConnection = dbProvider.getReadConnection(ctx);
-			ArrayList<Expression> placeholders = new ArrayList<Expression>(
+			final ArrayList<Expression> placeholders = new ArrayList<Expression>(
 					folderIds.size());
 			for (int i = 0; i < folderIds.size(); i++) {
 				placeholders.add(PLACEHOLDER);
 			}
 
-			SELECT select = new SELECT("folder_id").FROM(subscriptions).WHERE(
+			final SELECT select = new SELECT("folder_id").FROM(subscriptions).WHERE(
 					new EQUALS("cid", PLACEHOLDER).AND(new IN("folder_id",
 							new LIST(placeholders))));
 
-			List<Object> values = new ArrayList<Object>();
+			final List<Object> values = new ArrayList<Object>();
 			values.add(I(ctx.getContextId()));
 			values.addAll(folderIds);
 
 			builder = new StatementBuilder();
 			resultSet = builder.executeQuery(readConnection, select, values);
 			while (resultSet.next()) {
-				String folderId = resultSet.getString(1);
+				final String folderId = resultSet.getString(1);
 				retval.put(folderId, true);
 			}
-		} catch (SQLException e) {
+		} catch (final SQLException e) {
 			throw SQLException.create(e);
 		} finally {
 			try {
 				if (builder != null) {
 					builder.closePreparedStatement(null, resultSet);
 				}
-			} catch (SQLException e) {
+			} catch (final SQLException e) {
 				throw SQLException.create(e);
 			} finally {
 				dbProvider.releaseReadConnection(ctx, readConnection);
@@ -704,4 +705,36 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
 		return retval;
 
 	}
+
+	@Override
+    public boolean hasSubscriptions(final Context ctx, final User user) throws OXException {
+        
+        Connection readConnection = null;
+        ResultSet resultSet = null;
+        StatementBuilder builder = null;
+        try {
+            readConnection = dbProvider.getReadConnection(ctx);
+            final SELECT select = new SELECT("1").FROM(subscriptions).WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
+
+            final List<Object> values = new ArrayList<Object>();
+            values.add(I(ctx.getContextId()));
+            values.add(I(user.getId()));
+            
+            builder = new StatementBuilder();
+            resultSet = builder.executeQuery(readConnection, select, values);
+            return resultSet.next();
+        } catch (final SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            try {
+                if (builder != null) {
+                    builder.closePreparedStatement(null, resultSet);
+                }
+            } catch (final SQLException e) {
+                throw SQLException.create(e);
+            } finally {
+                dbProvider.releaseReadConnection(ctx, readConnection);
+            }
+        }
+    }
 }

@@ -6,7 +6,11 @@ Bundle-Version: 7.0.0.0
 Bundle-Activator: com.openexchange.secret.osgi.SecretActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.groupware,
+Import-Package: com.openexchange.config,
+ com.openexchange.crypto,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.server.osgiservice,
  com.openexchange.session,
  org.osgi.framework,
  org.osgi.util.tracker

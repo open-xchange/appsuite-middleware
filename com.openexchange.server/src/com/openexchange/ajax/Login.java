@@ -89,7 +89,6 @@ import com.openexchange.configuration.ClientWhitelist;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -918,6 +917,7 @@ public class Login extends AJAXServlet {
             final JSONObject json = new JSONObject();
             LoginWriter.write(result, json);
             // Append "config/modules"
+            LogProperties.putLogProperty("com.openexchange.session.session", result.getSession());
             appendModules(result.getSession(), json, req);
             response.setData(json);
         } catch (final OXException e) {
@@ -948,6 +948,8 @@ public class Login extends AJAXServlet {
             }
             LOG.error(RESPONSE_ERROR, e);
             sendError(resp);
+        } finally {
+            LogProperties.putLogProperty("com.openexchange.session.session", null);
         }
     }
 

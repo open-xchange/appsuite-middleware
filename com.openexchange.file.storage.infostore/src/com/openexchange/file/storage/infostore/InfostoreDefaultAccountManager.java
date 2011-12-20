@@ -100,11 +100,6 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     }
 
     @Override
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
-        return true;
-    }
-
-    @Override
     public void deleteAccount(final FileStorageAccount account, final Session session) throws OXException {
 
     }
@@ -130,6 +125,11 @@ public class InfostoreDefaultAccountManager implements FileStorageAccountManager
     @Override
     public void updateAccount(final FileStorageAccount account, final Session session) throws OXException {
 
+    }
+
+    @Override
+    public boolean hasEncryptedItems(final Session session) throws OXException {
+        return false;
     }
 
 }

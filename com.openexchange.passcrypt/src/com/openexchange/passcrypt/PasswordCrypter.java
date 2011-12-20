@@ -56,7 +56,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserAttributeAccess;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCheck, SecretMigrator {
+public class PasswordCrypter implements LoginHandlerService, EncryptedItemDetectorService, SecretMigrator {
 
     private static final String PASSCRYPT = "passcrypt";
 
@@ -115,9 +115,8 @@ public class PasswordCrypter implements LoginHandlerService, SecretConsistencyCh
         // Nothing to to.
     }
 
-    @Override
-    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
-        return null;
+    public boolean hasEncryptedItems(final ServerSession session) throws OXException {
+        return false;
     }
 
     @Override

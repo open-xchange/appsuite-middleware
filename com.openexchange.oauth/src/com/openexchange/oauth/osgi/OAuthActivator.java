@@ -51,7 +51,6 @@ package com.openexchange.oauth.osgi;
 
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.context.ContextService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.id.IDGeneratorService;
@@ -63,7 +62,8 @@ import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
 import com.openexchange.oauth.services.ServiceRegistry;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -87,7 +87,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, CryptoService.class, SessionHolder.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class };
     }
 
     @Override
@@ -158,7 +158,7 @@ public final class OAuthActivator extends HousekeepingActivator {
                 delegateServices.get(ContextService.class));
             registerService(OAuthService.class, oauthService, null);
             registerService(OAuthServiceMetaDataRegistry.class, registry, null);
-            registerService(SecretConsistencyCheck.class, oauthService, null);
+            registerService(EncryptedItemDetectorService.class, oauthService, null);
             registerService(SecretMigrator.class, oauthService, null);
 
         } catch (final Exception e) {

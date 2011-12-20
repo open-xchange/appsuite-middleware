@@ -61,6 +61,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
 
 /**
@@ -216,13 +217,13 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws OXException {
-        return storageService.checkCanDecryptPasswords(user, cid, secret);
+    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
+        storageService.migratePasswords(user, cid, oldSecret, newSecret);
     }
 
     @Override
-    public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
-        storageService.migratePasswords(user, cid, oldSecret, newSecret);
+    public boolean hasAccounts(final Session session) throws OXException {
+        return storageService.hasAccounts(session);
     }
 
 }

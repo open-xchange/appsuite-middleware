@@ -51,7 +51,6 @@ package com.openexchange.mailaccount.json.actions;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
@@ -122,11 +121,14 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
                     MailAccountStorageService.class,
                     true);
 
-                final String encodedPassword = storageService.getMailAccount(
+                final String password =
+                    storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
+                accountDescription.setPassword(MailPasswordUtil.decrypt(
+                    password,
+                    session,
                     accountDescription.getId(),
-                    session.getUserId(),
-                    session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(encodedPassword, getSecret(session)));
+                    accountDescription.getLogin(),
+                    accountDescription.getMailServer()));
             }
 
             checkNeededFields(accountDescription);
@@ -148,10 +150,6 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, warnings)).addWarnings(warnings);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
-        } catch (final GeneralSecurityException e) {
-            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(
-                e,
-                e.getMessage());
         }
     }
 

@@ -71,6 +71,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 
 /**
  * {@link CachingMailAccountStorage} - The caching implementation of mail account storage.
@@ -394,17 +395,17 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public String checkCanDecryptPasswords(final int user, final int cid, final String secret) throws OXException {
-        return delegate.checkCanDecryptPasswords(user, cid, secret);
-    }
-
-    @Override
     public void migratePasswords(final int user, final int cid, final String oldSecret, final String newSecret) throws OXException {
         delegate.migratePasswords(user, cid, oldSecret, newSecret);
         final int[] ids = delegate.getUserMailAccountIDs(user, cid);
         for (final int id : ids) {
             invalidateMailAccount(id, user, cid);
         }
+    }
+
+    @Override
+    public boolean hasAccounts(final Session session) throws OXException {
+        return delegate.hasAccounts(session);
     }
 
 }

@@ -97,7 +97,8 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.services.ServiceRegistry;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -114,7 +115,7 @@ import com.openexchange.tools.session.SessionHolder;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, SecretMigrator {
+public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<PWUpdate>, EncryptedItemDetectorService, SecretMigrator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OAuthServiceImpl.class));
 
@@ -791,90 +792,97 @@ public class OAuthServiceImpl implements OAuthService, SecretConsistencyCheck, S
     }
 
     @Override
-    public String checkSecretCanDecryptStrings(final ServerSession session, final String secret) throws OXException {
-        final Context context = session.getContext();
+    public void update(final String recrypted, final PWUpdate customizationNote) throws OXException {
+        final StringBuilder b = new StringBuilder();
+        b.append("UPDATE oauthAccount SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?");
+        
+        final Context context = getContext(customizationNote.cid);
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = getConnection(false, context);
+            stmt = con.prepareStatement(b.toString());
+            stmt.setString(1, recrypted);
+            stmt.setInt(2, customizationNote.cid);
+            stmt.setInt(3, customizationNote.id);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage());
+        } finally {
+            provider.releaseWriteConnection(context, con);
+        }
+        
+    }
+
+    @Override
+    public boolean hasEncryptedItems(final ServerSession session) throws OXException {
+        final int contextId = session.getContextId();
+        final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("SELECT 1 FROM oauthAccounts WHERE cid = ? AND user = ? LIMIT 1");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, session.getUserId());
+            return stmt.executeQuery().next();
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            provider.releaseReadConnection(context, con);
+        }
+    }
+
+    @Override
+    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
+        final CryptoService cryptoService = ServiceRegistry.getInstance().getService(CryptoService.class);
+        final int contextId = session.getContextId();
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(false, context);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
-            stmt.setInt(1, context.getContextId());
+            stmt.setInt(1, contextId);
             stmt.setInt(2, session.getUserId());
             rs = stmt.executeQuery();
-            while (rs.next()) {
-                final int id = rs.getInt(1);
-                try {
-                    decrypt(rs.getString(2), secret);
-                } catch (final OXException x) {
-                    return "oauthAccount: " + id + " accessToken";
-                }
-                try {
-                    decrypt(rs.getString(3), secret);
-                } catch (final OXException x) {
-                    return "oauthAccount: " + id + " accessSecret";
-                }
+            if (!rs.next()) {
+                return;
             }
+            final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
+            do {
+                final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                account.setId(rs.getInt(1));
+                try {
+                    // Try using the new secret. Maybe this account doesn't need the migration
+                    cryptoService.decrypt(rs.getString(2), newSecret);
+                    cryptoService.decrypt(rs.getString(3), newSecret);
+                } catch (final OXException e) {
+                    // Needs migration
+                    account.setToken(cryptoService.decrypt(rs.getString(2), oldSecret));
+                    account.setSecret(cryptoService.decrypt(rs.getString(3), oldSecret));
+                    accounts.add(account);
+                }
+            } while (rs.next());
+            closeSQLStuff(rs, stmt);
+            /*
+             * Update
+             */
+            stmt = con.prepareStatement("UPDATE oauthAccounts SET accessToken = ?, accessSecret = ? WHERE cid = ? AND user = ? AND id = ?");
+            stmt.setInt(3, contextId);
+            stmt.setInt(4, session.getUserId());
+            for (final OAuthAccount oAuthAccount : accounts) {
+                stmt.setString(1, cryptoService.encrypt(newSecret, oAuthAccount.getToken()));
+                stmt.setString(2, cryptoService.encrypt(newSecret, oAuthAccount.getSecret()));
+                stmt.setInt(5, oAuthAccount.getId());
+                stmt.addBatch();
+            }
+            stmt.executeBatch();
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(context, con);
-        }
-        return null;
-    }
-
-    @Override
-    public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-        final Context context = session.getContext();
-        final Connection con = getConnection(false, context);
-        PreparedStatement stmt = null;
-        PreparedStatement update = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT id, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ?");
-            stmt.setInt(1, context.getContextId());
-            stmt.setInt(2, session.getUserId());
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                try {
-                    final int id = rs.getInt(1);
-                    final String accessToken = rs.getString(2);
-                    final String accessSecret = rs.getString(3);
-                    try {
-                        decrypt(accessToken, newSecret);
-                    } catch (final OXException x) {
-                        final String newToken = encrypt(decrypt(accessToken, oldSecret), newSecret);
-                        update = con.prepareStatement("UPDATE oauthAccounts SET accessToken=? WHERE cid=? AND id=?");
-                        update.setString(1, newToken);
-                        update.setInt(2, context.getContextId());
-                        update.setInt(3, id);
-                        update.executeUpdate();
-                    }
-                    try {
-                        decrypt(accessSecret, newSecret);
-                    } catch (final OXException x) {
-                        final String newToken = encrypt(decrypt(accessSecret, oldSecret), newSecret);
-                        if (update != null) {
-                            update.close();
-                        }
-                        update = con.prepareStatement("UPDATE oauthAccounts SET accessSecret=? WHERE cid=? AND id=?");
-                        update.setString(1, newToken);
-                        update.setInt(2, context.getContextId());
-                        update.setInt(3, id);
-                        update.executeUpdate();
-                    }
-                } finally {
-                    if (update != null) {
-                        update.close();
-                    }
-                }
-            }
-        } catch (final SQLException e) {
-            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(rs, stmt);
-            closeSQLStuff(null, update);
-            provider.releaseWriteConnection(context, con);
         }
     }
 

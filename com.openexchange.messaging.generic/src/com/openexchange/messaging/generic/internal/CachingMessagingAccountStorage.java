@@ -230,4 +230,8 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         delegatee.migrateToNewSecret(parentService, oldSecret, newSecret, session);
     }
 
+    public boolean hasAccount(final MessagingService service, final Session session) throws OXException {
+        return delegatee.hasAccount(service, session);
+    }
+
 }

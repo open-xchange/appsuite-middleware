@@ -73,7 +73,9 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.DefaultMessagingAccount;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.secret.SecretService;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.SecretEncryptionService;
+import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -84,7 +86,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class RdbMessagingAccountStorage implements MessagingAccountStorage {
+public class RdbMessagingAccountStorage implements MessagingAccountStorage, SecretEncryptionStrategy<GenericProperty> {
 
     /**
      * The {@link DatabaseService} class.
@@ -156,7 +158,8 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             {
                 final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                 final Map<String, Object> configuration = new HashMap<String, Object>();
-                genericConfStorageService.fill(rc, getContext(session), rs.getInt(1), configuration);
+                final int confId = rs.getInt(1);
+                genericConfStorageService.fill(rc, getContext(session), confId, configuration);
                 /*
                  * Decrypt password fields for clear-text representation in account's configuration
                  */
@@ -166,7 +169,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
                         final String toDecrypt = (String) configuration.get(passwordElementName);
                         if (null != toDecrypt) {
                             try {
-                                final String decrypted = decrypt(toDecrypt, session);
+                                final String decrypted = decrypt(toDecrypt, session, confId, passwordElementName);
                                 configuration.put(passwordElementName, decrypted);
                             } catch (final OXException x) {
                                 // Must not be fatal
@@ -365,16 +368,22 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
         }
     }
 
-    private String encrypt(final String toCrypt, final Session session) throws OXException, OXException {
-        final CryptoService cryptoService = getService(CryptoService.class);
-        final SecretService secretService = getService(SecretService.class);
-        return cryptoService.encrypt(toCrypt, secretService.getSecret(session));
+    @Override
+    public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
+        final HashMap<String, Object> update = new HashMap<String, Object>();
+        update.put(customizationNote.propertyName, recrypted);
+        final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+        genericConfStorageService.update(getContext(customizationNote.session), customizationNote.confId, update);
     }
 
-    private String decrypt(final String toDecrypt, final Session session) throws OXException, OXException {
-        final CryptoService cryptoService = getService(CryptoService.class);
-        final SecretService secretService = getService(SecretService.class);
-        return cryptoService.decrypt(toDecrypt, secretService.getSecret(session));
+    private String encrypt(final String toCrypt, final Session session) throws OXException {
+        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(this);
+        return encryptionService.encrypt(session, toCrypt);
+    }
+
+    private String decrypt(final String toDecrypt, final Session session, final int confId, final String propertyName) throws OXException {
+        final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(this);
+        return encryptionService.decrypt(session, toDecrypt, new GenericProperty(confId, propertyName, session));
     }
 
     private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
@@ -656,4 +665,38 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage {
             throw e;
         }
     }
+
+    private static final String ACCOUNT_EXISTS = "SELECT 1 FROM messagingAccount WHERE cid = ? AND user = ? LIMIT 1";
+    
+    public boolean hasAccount(final MessagingService parentService, final Session session) throws OXException {
+        final Set<String> secretProperties = parentService.getSecretProperties();
+        if (secretProperties.isEmpty()) {
+            return false;
+        }
+        
+        final DatabaseService databaseService = getService(CLAZZ_DB);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Connection con = null;
+        try {
+            con = databaseService.getReadOnly(session.getContextId());
+            stmt = con.prepareStatement(ACCOUNT_EXISTS);
+            int pos = 1;
+            stmt.setInt(pos++, session.getContextId());
+            stmt.setInt(pos++, session.getUserId());
+
+            rs = stmt.executeQuery();
+            
+            return rs.next();
+
+        } catch (final SQLException e) {
+            throw MessagingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            if (con != null) {
+                databaseService.backReadOnly(session.getContextId(), con);
+            }
+        }
+    }
+
 }
