@@ -65,6 +65,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.event.impl.EventClient;
@@ -143,6 +144,12 @@ public final class TaskLogic {
      * @throws OXException if the check fails.
      */
     static void checkUpdateTask(final Task task, final Task oldTask, final User user, final UserConfiguration userConfig, final Set<TaskParticipant> newParts, final Set<TaskParticipant> oldParts) throws OXException {
+        if (task.containsUid()) {
+            if (!oldTask.getUid().equals(task.getUid())) {
+                throw TaskExceptionCode.NO_UID_CHANGE.create();
+            }
+            task.removeUid();
+        }
         if (!task.containsLastModified()) {
             task.setLastModified(new Date());
         }
@@ -176,6 +183,9 @@ public final class TaskLogic {
     private static void checkMissingAttributes(final Task task, final int userId) throws OXException {
         if (!task.containsParentFolderID()) {
             throw TaskExceptionCode.FOLDER_IS_MISSING.create();
+        }
+        if (!task.containsUid()) {
+            task.setUid(UUID.randomUUID().toString());
         }
         final Date timestamp = new Date();
         if (!task.containsCreationDate()) {
@@ -605,7 +615,7 @@ public final class TaskLogic {
         // If the end of recurrence information is changed from 'after x occurrences' to 'at *date*'
         // the field recurrence_count has explicitly to be unset.
         if (oldTask.containsOccurrence() && !task.containsOccurrence()) {
-            fields.add(Task.RECURRENCE_COUNT);
+            fields.add(I(Task.RECURRENCE_COUNT));
         }
 
         final int[] retval = new int[fields.size()];

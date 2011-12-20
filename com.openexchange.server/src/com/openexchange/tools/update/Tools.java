@@ -595,7 +595,7 @@ public final class Tools {
         }
     }
 
-    private static void addColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
+    public static void addColumns(final Connection con, final String tableName, final Column... cols) throws SQLException {
         final StringBuffer sql = new StringBuffer("ALTER TABLE ");
         sql.append(tableName);
         for (final Column column : cols) {

@@ -3,6 +3,7 @@
 CREATE TABLE task (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
+    uid VARCHAR(255) NOT NULL,
     private BOOLEAN NOT NULL,
     creating_date DATETIME NOT NULL,
     last_modified INT8 NOT NULL,
@@ -88,6 +89,7 @@ CREATE TABLE task_removedparticipant (
 CREATE TABLE del_task (
     cid INT4 UNSIGNED NOT NULL,
     id INT4 UNSIGNED NOT NULL,
+    uid VARCHAR(255) NOT NULL,
     private BOOLEAN NOT NULL,
     creating_date DATETIME NOT NULL,
     last_modified INT8 NOT NULL,

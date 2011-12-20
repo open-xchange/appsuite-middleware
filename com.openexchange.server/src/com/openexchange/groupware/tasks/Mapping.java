@@ -73,10 +73,10 @@ import com.openexchange.groupware.tasks.mapping.RecurrenceCount;
 import com.openexchange.groupware.tasks.mapping.Status;
 import com.openexchange.groupware.tasks.mapping.TargetCosts;
 import com.openexchange.groupware.tasks.mapping.TargetDuration;
+import com.openexchange.groupware.tasks.mapping.UID;
 
 /**
- * This class contains the methods for mapping object attributes to database+
- * columns and vice versa.
+ * This class contains the methods for mapping object attributes to database columns and vice versa.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Mapping {
@@ -92,6 +92,7 @@ public final class Mapping {
      * Mapping array for all object attributes.
      */
     public static final Mapper<? extends Object>[] MAPPERS = new Mapper<?>[] {
+        UID.SINGLETON,
         new Mapper<Boolean>() {
             @Override
             public int getId() {

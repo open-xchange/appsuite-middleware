@@ -658,7 +658,7 @@ class UpdateData {
                 getRemovedFolder(),
                 type);
             if (ACTIVE == type && isMove()) {
-                final Task dummy = Tools.createDummyTask(getTaskId(), getUserId());
+                final Task dummy = Tools.createDummyTask(getTaskId(), getUserId(), getOrigTask().getUid());
                 storage.insertTask(ctx, con, dummy, DELETED, true);
                 final Folder sourceFolder = FolderStorage.getFolder(getRemovedFolder(), getFolderId());
                 foldStor.insertFolder(ctx, con, getTaskId(), sourceFolder, DELETED);

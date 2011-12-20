@@ -106,6 +106,7 @@ public class TaskRequest extends CalendarRequest {
         CalendarObject.NOTE,
         CalendarObject.RECURRENCE_TYPE,
         CalendarObject.PARTICIPANTS,
+        CalendarObject.UID,
         Task.ACTUAL_COSTS,
         Task.ACTUAL_DURATION,
         Task.ALARM,
