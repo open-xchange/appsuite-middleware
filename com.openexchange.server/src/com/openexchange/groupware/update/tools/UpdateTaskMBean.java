@@ -148,6 +148,8 @@ public final class UpdateTaskMBean implements DynamicMBean {
             forceAllParams,
             "void",
             MBeanOperationInfo.ACTION));
+        // Run update on all database schemas
+        operations.add(new MBeanOperationInfo("runAllUpdate", "Runs the update on all schemas.", null, "void", MBeanOperationInfo.ACTION));
         try {
             // List executed update tasks
             final String[] taskTypeDescriptions = {
@@ -326,6 +328,22 @@ public final class UpdateTaskMBean implements DynamicMBean {
                 LOG.error(e.getMessage(), e);
                 throw e;
             }
+        } else if (actionName.equals("runAllUpdate")) {
+            try {
+                UpdateTaskToolkit.runUpdateOnAllSchemas();
+            } catch (final UpdateException e) {
+                LOG.error(e.getMessage(), e);
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
+            } catch (final RuntimeException e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
+            } catch (final Error e) {
+                LOG.error(e.getMessage(), e);
+                throw e;
+            }
+            // Void
+            return null;
         }
         final ReflectionException e = new ReflectionException(new NoSuchMethodException(actionName));
         LOG.error(e.getMessage(), e);
