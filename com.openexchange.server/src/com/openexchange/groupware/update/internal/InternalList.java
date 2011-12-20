@@ -414,6 +414,9 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.ContactAddOutlookAddressFieldsTask(),
 
         // Add UID field to contact tables.
-        new com.openexchange.groupware.update.tasks.ContactAddUIDFieldTask()
+        new com.openexchange.groupware.update.tasks.ContactAddUIDFieldTask(),
+
+        // Add UIDs to contacts if missing
+        new com.openexchange.groupware.update.tasks.ContactAddUIDValueTask()
     };
 }
