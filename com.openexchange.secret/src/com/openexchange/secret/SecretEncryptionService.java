@@ -47,40 +47,49 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.secret;
 
-import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link SecretEncryptionService} - The secret encryption/decryption service.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SubscribeService {
+public interface SecretEncryptionService<T> {
 
-    public SubscriptionSource getSubscriptionSource();
+    /**
+     * Encrypts specified string using given session data.
+     * 
+     * @param session The session providing data
+     * @param toEncrypt The string to encrypt
+     * @return The encrypted string
+     * @throws OXException If encryption fails
+     */
+    String encrypt(Session session, String toEncrypt) throws OXException;
 
-    public boolean handles(int folderModule);
+    /**
+     * Decrypts specified string using given session data.
+     * 
+     * @param session The session providing data
+     * @param toDecrypt The string to decrypt
+     * @return The decrypted string
+     * @throws OXException If decryption fails
+     */
+    String decrypt(Session session, String toDecrypt) throws OXException;
 
-    public void subscribe(Subscription subscription) throws OXException;
-
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
-
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
-
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
-
-    public void unsubscribe(Subscription subscription) throws OXException;
-
-    public void update(Subscription subscription) throws OXException;
-
-    public Collection<?> getContent(Subscription subscription) throws OXException;
-
-    public boolean knows(Context context, int subscriptionId) throws OXException;
-
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
-
-    public boolean hasAccounts(Context context, User user) throws OXException;
+    /**
+     * Decrypts specified string using given session data.
+     * 
+     * @param session The session providing data
+     * @param toDecrypt The string to decrypt
+     * @param customizationNote The optional customization note
+     * @return The decrypted string
+     * @throws OXException If decryption fails
+     */
+    String decrypt(Session session, String toDecrypt, T customizationNote) throws OXException;
 
 }

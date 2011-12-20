@@ -54,7 +54,6 @@ import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddr;
 import java.net.InetSocketAddress;
-import java.security.GeneralSecurityException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -72,7 +71,6 @@ import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -556,19 +554,8 @@ public abstract class MailConfig {
                 // Set to empty string
                 mailConfig.password = "";
             } else {
-                // Decrypt mail account's password using session password
-                try {
-                    final SecretService secretService = ServerServiceRegistry.getInstance().getService(SecretService.class);
-                    final String secret = secretService.getSecret(session);
-                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, secret);
-                } catch (final GeneralSecurityException e) {
-                    throw MailAccountExceptionCodes.PASSWORD_DECRYPTION_FAILED.create(
-                        e,
-                        mailConfig.login,
-                        mailAccount.getMailServer(),
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
-                }
+                // Mail account's password
+                mailConfig.password = mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, mailAccount.getId(), mailAccount.getLogin(), mailAccount.getMailServer());
             }
         }
     }

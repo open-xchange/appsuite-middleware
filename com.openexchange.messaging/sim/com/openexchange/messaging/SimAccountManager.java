@@ -157,20 +157,21 @@ public class SimAccountManager implements MessagingAccountManager {
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.messaging.MessagingAccountManager#checkSecretCanDecryptStrings(com.openexchange.session.Session, java.lang.String)
-     */
-    @Override
-    public String checkSecretCanDecryptStrings(final Session session, final String secret) {
-        return null;
-    }
-
-    /* (non-Javadoc)
      * @see com.openexchange.messaging.MessagingAccountManager#migrateToNewSecret(java.lang.String, java.lang.String, com.openexchange.session.Session)
      */
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
         // TODO Auto-generated method stub
 
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.messaging.MessagingAccountManager#hasAccount(com.openexchange.session.Session)
+     */
+    @Override
+    public boolean hasAccount(final Session session) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

@@ -49,27 +49,132 @@
 
 package com.openexchange.secret.impl;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link SessionSecretService}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessionSecretService implements SecretService {
+
+    /**
+     * The random.
+     */
+    public static final AtomicReference<String> RANDOM = new AtomicReference<String>();
+
+    private static final List<Token> DEFAULT_TOKEN_LIST = new CopyOnWriteArrayList<Token>(Arrays.<Token> asList(
+        ReservedToken.USER_ID,
+        new LiteralToken("@"),
+        ReservedToken.CONTEXT_ID));
+
+    private volatile SecretService impl;
 
     /**
      * Initializes a new {@link SessionSecretService}.
      */
     public SessionSecretService() {
         super();
+        final List<Token> tl = DEFAULT_TOKEN_LIST;
+        impl = new SecretService() {
+
+            @Override
+            public String getSecret(final Session session) {
+                final StringBuilder sb = new StringBuilder(16);
+                for (final Token token : tl) {
+                    sb.append(token.getFrom(session));
+                }
+                return sb.toString();
+            }
+        };
+    }
+
+    /**
+     * Initializes a new {@link SessionSecretService}.
+     */
+    public SessionSecretService(final List<Token> tokenList) {
+        super();
+        applyTokenList(tokenList);
+    }
+
+    /**
+     * Initializes a new {@link SessionSecretService}.
+     */
+    public SessionSecretService(final SecretService impl) {
+        super();
+        this.impl = impl;
+    }
+
+    /**
+     * Sets the token list
+     * 
+     * @param tokenList The token list to set
+     */
+    public void setTokenList(final List<Token> tokenList) {
+        applyTokenList(tokenList);
+    }
+
+    private void applyTokenList(final List<Token> tokenList) {
+        final List<Token> tl =
+            ((null == tokenList) || tokenList.isEmpty()) ? DEFAULT_TOKEN_LIST : new CopyOnWriteArrayList<Token>(tokenList);
+        final int size = tl.size();
+        if (1 == size) {
+            impl = new SecretService() {
+
+                private final Token token = tl.get(0);
+
+                @Override
+                public String getSecret(final Session session) {
+                    return token.getFrom(session);
+                }
+
+                @Override
+                public String toString() {
+                    return token.toString();
+                }
+            };
+        } else {
+            impl = new SecretService() {
+
+                @Override
+                public String getSecret(final Session session) {
+                    final StringBuilder sb = new StringBuilder(16);
+                    for (final Token token : tl) {
+                        sb.append(token.getFrom(session));
+                    }
+                    return sb.toString();
+                }
+
+                @Override
+                public String toString() {
+                    if (tl.isEmpty()) {
+                        return "<empty>";
+                    }
+                    final StringBuilder sb = new StringBuilder(32);
+                    sb.append(tl.get(0));
+                    for (int i = 1; i < size; i++) {
+                        sb.append(" + ").append(tl.get(i));
+                    }
+                    return sb.toString();
+                }
+            };
+        }
     }
 
     @Override
     public String getSecret(final Session session) {
-        return session.getPassword();
+        return impl.getSecret(session);
+    }
+
+    @Override
+    public String toString() {
+        return null == impl ? "<not-initialized>" : impl.toString();
     }
 
 }

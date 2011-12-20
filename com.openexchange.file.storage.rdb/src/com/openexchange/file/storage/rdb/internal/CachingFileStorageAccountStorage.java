@@ -243,8 +243,8 @@ public final class CachingFileStorageAccountStorage implements FileStorageAccoun
         invalidateFileStorageAccount(serviceId, Integer.parseInt(account.getId()), session.getUserId(), session.getContextId());
     }
 
-    public boolean checkSecretCanDecryptStrings(final FileStorageService parentService, final Session session, final String secret) throws OXException {
-        return delegatee.checkSecretCanDecryptStrings(parentService, session, secret);
+    public boolean hasEncryptedItems(final FileStorageService service, final Session session) {
+        return delegatee.hasEncryptedItems(service, session);
     }
 
     public void migrateToNewSecret(final FileStorageService parentService, final String oldSecret, final String newSecret, final Session session) throws OXException {

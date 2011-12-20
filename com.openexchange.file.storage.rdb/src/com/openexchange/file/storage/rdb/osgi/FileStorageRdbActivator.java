@@ -75,7 +75,7 @@ import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.secret.recovery.SecretConsistencyCheck;
+import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.server.osgiservice.ServiceRegistry;
@@ -212,7 +212,7 @@ public class FileStorageRdbActivator extends HousekeepingActivator {
                         return list;
                     }
                 };
-                registerService(SecretConsistencyCheck.class, secretHandling, null);
+                registerService(EncryptedItemDetectorService.class, secretHandling, null);
                 registerService(SecretMigrator.class, secretHandling, null);
             }
         } catch (final Exception e) {

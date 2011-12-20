@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -78,4 +79,6 @@ public interface SubscriptionStorage {
     public void deleteAllSubscriptionsWhereConfigMatches(Map<String, Object> query, String sourceId, Context ctx) throws OXException;
 
     public Map<String, Boolean> hasSubscriptions(Context ctx, List<String> folderIds) throws OXException;
+
+    public boolean hasSubscriptions(Context ctx, User user) throws OXException;
 }

@@ -47,40 +47,16 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.oauth.internal;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-
-/**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
- */
-public interface SubscribeService {
-
-    public SubscriptionSource getSubscriptionSource();
-
-    public boolean handles(int folderModule);
-
-    public void subscribe(Subscription subscription) throws OXException;
-
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
-
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
-
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
-
-    public void unsubscribe(Subscription subscription) throws OXException;
-
-    public void update(Subscription subscription) throws OXException;
-
-    public Collection<?> getContent(Subscription subscription) throws OXException;
-
-    public boolean knows(Context context, int subscriptionId) throws OXException;
-
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
-
-    public boolean hasAccounts(Context context, User user) throws OXException;
-
+final class PWUpdate {
+    public String field;
+    public int cid = -1;
+    public int id = -1;
+    
+    public PWUpdate(String field, int cid, int id) {
+        this.field = field;
+        this.cid = cid;
+        this.id = id;
+    }
 }

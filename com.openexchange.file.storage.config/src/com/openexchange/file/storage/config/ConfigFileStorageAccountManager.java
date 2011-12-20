@@ -147,13 +147,13 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
          * Set login/password if absent
          */
         {
-            String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
+            final String tmp = (String) configuration.get(CONF_PROPERTY_LOGIN);
             if (null == tmp) {
                 configuration.put(CONF_PROPERTY_LOGIN, session.getLogin());
             }
         }
         {
-            String tmp = (String) configuration.get(CONF_PROPERTY_PASSWORD);
+            final String tmp = (String) configuration.get(CONF_PROPERTY_PASSWORD);
             if (null == tmp) {
                 configuration.put(CONF_PROPERTY_PASSWORD, session.getPassword());
             }
@@ -162,13 +162,14 @@ public final class ConfigFileStorageAccountManager implements FileStorageAccount
     }
 
     @Override
-    public boolean checkSecretCanDecryptStrings(final Session session, final String secret) {
-        return true;
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
+        // Nothing to do
     }
 
     @Override
-    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) {
-        // Nothing to do
+    public boolean hasEncryptedItems(final Session session) throws OXException {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }

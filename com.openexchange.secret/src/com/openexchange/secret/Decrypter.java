@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,27 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.secret;
 
-import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
+
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link Decrypter} - An optional interface to decrypt a formerly encrypted string.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SubscribeService {
+public interface Decrypter {
 
-    public SubscriptionSource getSubscriptionSource();
-
-    public boolean handles(int folderModule);
-
-    public void subscribe(Subscription subscription) throws OXException;
-
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
-
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
-
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
-
-    public void unsubscribe(Subscription subscription) throws OXException;
-
-    public void update(Subscription subscription) throws OXException;
-
-    public Collection<?> getContent(Subscription subscription) throws OXException;
-
-    public boolean knows(Context context, int subscriptionId) throws OXException;
-
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
-
-    public boolean hasAccounts(Context context, User user) throws OXException;
-
+    /**
+     * Gets decrypted string.
+     * 
+     * @param session The session
+     * @param encrypted The encrypted string
+     * @return The decrypted string
+     * @throws OXException If operation fails
+     */
+    public String getDecrypted(Session session, String encrypted) throws OXException;
+    
 }

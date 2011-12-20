@@ -84,6 +84,11 @@ public final class EmptySMSAccountManager implements MessagingAccountManager {
     }
 
     @Override
+    public boolean hasAccount(final Session session) throws OXException {
+        return false;
+    }
+
+    @Override
     public int addAccount(final MessagingAccount account, final Session session) throws OXException {
         throw MessagingExceptionCodes.OPERATION_NOT_SUPPORTED.create(SMSService.DISPLAY_NAME);
     }
@@ -119,11 +124,6 @@ public final class EmptySMSAccountManager implements MessagingAccountManager {
     @Override
     public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
         // Nope
-    }
-
-    @Override
-    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
-        return null;
     }
 
 }

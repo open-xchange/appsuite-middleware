@@ -147,13 +147,13 @@ public class DefaultMessagingAccountManager implements MessagingAccountManager {
     }
 
     @Override
-    public String checkSecretCanDecryptStrings(final Session session, final String secret) throws OXException {
-        return CACHE.checkSecretCanDecryptStrings(service, session, secret);
+    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
+        CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
     }
 
     @Override
-    public void migrateToNewSecret(final String oldSecret, final String newSecret, final Session session) throws OXException {
-        CACHE.migrateToNewSecret(service, oldSecret, newSecret, session);
+    public boolean hasAccount(final Session session) throws OXException {
+        return CACHE.hasAccount(service, session);
     }
 
 }

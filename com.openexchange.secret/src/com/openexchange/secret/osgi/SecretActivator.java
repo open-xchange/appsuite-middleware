@@ -49,31 +49,121 @@
 
 package com.openexchange.secret.osgi;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import java.util.List;
 import org.osgi.framework.Constants;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.impl.CryptoSecretEncryptionFactoryService;
+import com.openexchange.secret.impl.LiteralToken;
+import com.openexchange.secret.impl.ReservedToken;
 import com.openexchange.secret.impl.SessionSecretService;
+import com.openexchange.secret.impl.Token;
+import com.openexchange.secret.impl.TokenList;
+import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link SecretActivator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SecretActivator implements BundleActivator {
+public class SecretActivator extends HousekeepingActivator {
 
-	@Override
-    public void start(final BundleContext context) throws Exception {
-	    final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
-	    properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
+    private volatile WhiteboardSecretService secretService;
 
-	    context.registerService(SecretService.class.getName(), new SessionSecretService(), properties);
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, CryptoService.class };
+    }
 
-	@Override
-    public void stop(final BundleContext context) throws Exception {
-	    // Nope
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        final ConfigurationService configurationService = getService(ConfigurationService.class);
+        /*
+         * Initialize plain SessionSecretService
+         */
+        final TokenList tokenList;
+        {
+            SessionSecretService.RANDOM.set(configurationService.getProperty("com.openexchange.secret.secretRandom", "unknown"));
+            /*
+             * Get pattern from configuration
+             */
+            String pattern = configurationService.getProperty("com.openexchange.secret.secretSource", "\"<list>\"");
+            if (pattern.charAt(0) == '"') {
+                pattern = pattern.substring(1);
+            }
+            if (pattern.charAt(pattern.length() - 1) == '"') {
+                pattern = pattern.substring(0, pattern.length() - 1);
+            }
+            if (pattern.charAt(0) == '<') {
+                pattern = pattern.substring(1);
+            }
+            if (pattern.charAt(pattern.length() - 1) == '>') {
+                pattern = pattern.substring(0, pattern.length() - 1);
+            }
+            /*
+             * Check for "list"
+             */
+            final SessionSecretService sessionSecretService;
+            if ("list".equals(pattern)) {
+                String text = configurationService.getText("secrets");
+                if (null == text) {
+                    text = "\"<user-id> + '-' +  <random> + '-' + <context-id>\"";
+                }
+                tokenList = TokenList.parseText(text);
+                sessionSecretService = new SessionSecretService(tokenList.peekLast());
+            } else {
+                final String[] tokens = pattern.split(" *\\+ *");
+                final List<Token> tl = new ArrayList<Token>(tokens.length);
+                for (String token : tokens) {
+                    token = token.trim();
+                    final boolean isReservedToken = ('<' == token.charAt(0));
+                    if (isReservedToken || ('\'' == token.charAt(0))) {
+                        token = token.substring(1);
+                        token = token.substring(0, token.length() - 1);
+                    }
+                    final ReservedToken rt = ReservedToken.reservedTokenFor(token);
+                    if (null == rt) {
+                        if (isReservedToken) {
+                            throw new IllegalStateException("Unknown reserved token: " + token);
+                        }
+                        tl.add(new LiteralToken(token));
+                    } else {
+                        tl.add(rt);
+                    }
+                }
+                sessionSecretService = new SessionSecretService(tl);
+                tokenList = TokenList.newInstance(Collections.singleton(tl));
+            }
+
+            final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
+            registerService(SecretService.class, sessionSecretService, properties);
+        }
+        /*
+         * Create & open whiteboard service
+         */
+        secretService = new WhiteboardSecretService(context);
+        secretService.open();
+        /*
+         * Register CryptoSecretEncryptionFactoryService
+         */
+        final CryptoService crypto = getService(CryptoService.class);
+        final CryptoSecretEncryptionFactoryService service = new CryptoSecretEncryptionFactoryService(crypto, secretService, tokenList);
+        registerService(SecretEncryptionFactoryService.class, service);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        SessionSecretService.RANDOM.set("unknown");
+        secretService.close();
+        super.stopBundle();
+    }
 
 }

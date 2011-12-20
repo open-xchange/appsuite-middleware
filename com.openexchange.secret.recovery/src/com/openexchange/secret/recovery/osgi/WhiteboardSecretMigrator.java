@@ -49,47 +49,46 @@
 
 package com.openexchange.secret.recovery.osgi;
 
+import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link WhiteboardSecretMigrator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class WhiteboardSecretMigrator extends ServiceTracker implements SecretMigrator {
+public class WhiteboardSecretMigrator extends ServiceTracker<SecretMigrator, SecretMigrator> implements SecretMigrator {
 
-	private static final Log LOG = LogFactory.getLog(WhiteboardSecretMigrator.class);
+    private static final Log LOG = LogFactory.getLog(WhiteboardSecretMigrator.class);
 
     public WhiteboardSecretMigrator(final BundleContext context) {
-        super(context, SecretMigrator.class.getName(), null);
+        super(context, SecretMigrator.class, null);
     }
 
     @Override
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
-        final Object[] services = getServices();
+        final Collection<SecretMigrator> services = getTracked().values();
         OXException exception = null;
-        for (final Object object : services) {
-            if(object == this) {
+        for (final SecretMigrator migrator : services) {
+            if (migrator == this) {
                 continue;
             }
-            final SecretMigrator migrator = (SecretMigrator) object;
             try {
                 migrator.migrate(oldSecret, newSecret, session);
-            } catch (OXException x) {
-            	exception = x;
-            	LOG.error(x.getMessage(), x);
+            } catch (final OXException x) {
+                exception = x;
+                LOG.error(x.getMessage(), x);
             }
         }
         if (exception != null) {
-        	throw exception;
+            throw exception;
         }
     }
 }

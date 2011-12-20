@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailAccountStorageService} - The storage service for mail accounts.
@@ -279,17 +280,6 @@ public interface MailAccountStorageService {
     public MailAccount getTransportAccountForID(int id, int user, int cid) throws OXException;
 
     /**
-     * Checks whether the given users passwords can be decrypted with the given secret key.
-     *
-     * @param user The user ID
-     * @param cid The context ID
-     * @param secret The secret to test
-     * @return A pointer at what could not be decrypted if the encrypted strings could not be decrypted, null otherwise
-     * @throws OXException
-     */
-    public String checkCanDecryptPasswords(int user, int cid, String secret) throws OXException;
-
-    /**
      * Decodes stored encrypted strings using the old secret and encode them again using the new secret.
      *
      * @param user The user ID
@@ -299,4 +289,9 @@ public interface MailAccountStorageService {
      * @throws OXException
      */
     public void migratePasswords(int user, int cid, String oldSecret, String newSecret) throws OXException;
+
+    /**
+     * Finds out whether the user has items that are encrypted
+     */
+    public boolean hasAccounts(Session session) throws OXException;
 }

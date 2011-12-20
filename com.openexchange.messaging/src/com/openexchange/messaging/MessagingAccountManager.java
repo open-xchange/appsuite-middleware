@@ -110,16 +110,6 @@ public interface MessagingAccountManager {
     public MessagingAccount getAccount(int id, Session session) throws OXException;
 
     /**
-     * Checks whether the given secret can be used to decrypt secret strings in this account.
-     *
-     * @param session The session providing needed user data
-     * @param secret The secret to use for decrypting
-     * @return true when all accounts could be decrypted, false otherwise
-     * @throws OXException
-     */
-    public String checkSecretCanDecryptStrings(Session session, String secret) throws OXException;
-
-    /**
      * Migrates all encrypted strings from an old secret to a new one.
      * @param oldSecret The old secret for decrypting stored secret strings
      * @param newSecret The new secret used for encrypting the secret strings
@@ -127,4 +117,9 @@ public interface MessagingAccountManager {
      * @throws OXException
      */
     public void migrateToNewSecret(String oldSecret, String newSecret, Session session) throws OXException;
+
+    /**
+     * Has the owner of this session an account?
+     */
+    public boolean hasAccount(Session session) throws OXException;
 }

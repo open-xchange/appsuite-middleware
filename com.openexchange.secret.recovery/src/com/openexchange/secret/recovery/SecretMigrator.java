@@ -52,12 +52,12 @@ package com.openexchange.secret.recovery;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link SecretMigrator}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface SecretMigrator {
+
     public void migrate(String oldSecret, String newSecret, ServerSession session) throws OXException;
 }

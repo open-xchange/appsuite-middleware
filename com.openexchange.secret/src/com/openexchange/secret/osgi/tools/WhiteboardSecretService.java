@@ -54,23 +54,21 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link WhiteboardSecretService} - Whiteboard pattern for {@link SecretService}.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class WhiteboardSecretService implements SecretService{
+public class WhiteboardSecretService implements SecretService {
 
     private final ServiceTracker<SecretService, SecretService> tracker;
 
     /**
      * Initializes a new {@link WhiteboardSecretService}.
-     *
+     * 
      * @param context The bundle context
      */
     public WhiteboardSecretService(final BundleContext context) {
-        super();
         tracker = new ServiceTracker<SecretService, SecretService>(context, SecretService.class, null);
     }
 

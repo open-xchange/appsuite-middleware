@@ -47,40 +47,57 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.secret.impl;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.crypto.CryptoService;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.SecretEncryptionService;
+import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.secret.SecretService;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * {@link CryptoSecretEncryptionFactoryService} - The factory.
+ * 
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SubscribeService {
+public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFactoryService {
 
-    public SubscriptionSource getSubscriptionSource();
+    private final CryptoService crypto;
 
-    public boolean handles(int folderModule);
+    private final TokenList tokenList;
 
-    public void subscribe(Subscription subscription) throws OXException;
+    private final SecretService secretService;
 
-    public Collection<Subscription> loadSubscriptions(Context context, String folderId, String secret) throws OXException;
+    /**
+     * Initializes a new {@link CryptoSecretEncryptionFactoryService}.
+     * 
+     * @param crypto The crypto service reference
+     * @param secretService The fall-back secret service
+     * @param patterns The patterns to parse
+     */
+    public CryptoSecretEncryptionFactoryService(final CryptoService crypto, final SecretService secretService, final String... patterns) {
+        this.crypto = crypto;
+        this.secretService = secretService;
+        this.tokenList = TokenList.parsePatterns(patterns);
+    }
 
-    public Collection<Subscription> loadSubscriptions(Context context, int userId, String secret) throws OXException;
+    /**
+     * Initializes a new {@link CryptoSecretEncryptionFactoryService}.
+     * 
+     * @param crypto The crypto service reference
+     * @param secretService The fall-back secret service
+     * @param tokenList The token list
+     */
+    public CryptoSecretEncryptionFactoryService(final CryptoService crypto, final SecretService secretService, final TokenList tokenList) {
+        this.crypto = crypto;
+        this.secretService = secretService;
+        this.tokenList = tokenList;
+    }
 
-    public Subscription loadSubscription(Context context, int subscriptionId, String secret) throws OXException;
-
-    public void unsubscribe(Subscription subscription) throws OXException;
-
-    public void update(Subscription subscription) throws OXException;
-
-    public Collection<?> getContent(Subscription subscription) throws OXException;
-
-    public boolean knows(Context context, int subscriptionId) throws OXException;
-
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
-
-    public boolean hasAccounts(Context context, User user) throws OXException;
+    @Override
+    public <T> SecretEncryptionService<T> createService(final SecretEncryptionStrategy<T> strategy) {
+        return new CryptoSecretEncryptionService<T>(crypto, secretService, strategy, tokenList);
+    }
 
 }
