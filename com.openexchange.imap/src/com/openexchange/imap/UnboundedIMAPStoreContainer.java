@@ -49,9 +49,15 @@
 
 package com.openexchange.imap;
 
+import java.util.AbstractQueue;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.mail.MessagingException;
 import com.sun.mail.imap.IMAPStore;
 
@@ -63,7 +69,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
-    protected final BlockingQueue<IMAPStoreWrapper> queue;
+    private final PriorityBlockingQueue queue;
 
     protected final String server;
 
@@ -78,7 +84,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      */
     public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
         super();
-        queue = new PriorityBlockingQueue<IMAPStoreWrapper>();
+        queue = new PriorityBlockingQueue();
         this.login = login;
         this.port = port;
         this.pw = pw;
@@ -114,24 +120,25 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
-        for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
-            final IMAPStoreWrapper imapStoreWrapper = iter.next();
-            if (imapStoreWrapper.lastAccessed >= stamp) {
-                try {
-                    iter.remove();
-                    if (null == debugBuilder) {
-                        closeSafe(imapStoreWrapper.imapStore);
-                    } else {
-                        final String info = imapStoreWrapper.imapStore.toString();
-                        closeSafe(imapStoreWrapper.imapStore);
-                        debugBuilder.setLength(0);
-                        LOG.debug(debugBuilder.append("IMAPStoreContainer.closeElapsed(): Closed elapsed IMAP store: ").append(info).toString());
-                    }
-                } catch (final IllegalStateException e) {
-                    // Ignore
-                }
+        IMAPStoreWrapper imapStoreWrapper;
+        do {
+            imapStoreWrapper = queue.pollIfElapsed(stamp);
+            if (null == imapStoreWrapper) {
+                break;
             }
-        }
+            try {
+                if (null == debugBuilder) {
+                    closeSafe(imapStoreWrapper.imapStore);
+                } else {
+                    final String info = imapStoreWrapper.imapStore.toString();
+                    closeSafe(imapStoreWrapper.imapStore);
+                    debugBuilder.setLength(0);
+                    LOG.debug(debugBuilder.append("IMAPStoreContainer.closeElapsed(): Closed elapsed IMAP store: ").append(info).toString());
+                }
+            } catch (final IllegalStateException e) {
+                // Ignore
+            }
+        } while (true);
     }
 
     @Override
@@ -142,5 +149,346 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             closeSafe(imapStoreWrapper.imapStore);
         }
     }
+
+    private static class PriorityBlockingQueue extends AbstractQueue<IMAPStoreWrapper> implements BlockingQueue<IMAPStoreWrapper>, java.io.Serializable {
+
+        private static final long serialVersionUID = 1337510919245408276L;
+
+        final transient PriorityQueue<IMAPStoreWrapper> q;
+
+        final ReentrantLock lock;
+
+        private final Condition notEmpty;
+
+        /**
+         * Creates a <tt>PriorityBlockingQueue</tt> with the default initial capacity (11) that orders its elements according to their
+         * {@linkplain Comparable natural ordering}.
+         */
+        public PriorityBlockingQueue() {
+            super();
+            q = new PriorityQueue<IMAPStoreWrapper>();
+            lock = new ReentrantLock(true);
+            notEmpty = lock.newCondition();
+        }
+
+        @Override
+        public boolean add(final IMAPStoreWrapper e) {
+            return offer(e);
+        }
+
+        @Override
+        public boolean offer(final IMAPStoreWrapper e) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                final boolean ok = q.offer(e);
+                assert ok;
+                notEmpty.signal();
+                return true;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void put(final IMAPStoreWrapper e) {
+            offer(e);
+        }
+
+        @Override
+        public boolean offer(final IMAPStoreWrapper e, final long timeout, final TimeUnit unit) {
+            return offer(e);
+        }
+
+        /**
+         * Retrieves and removes the head of this queue if elapsed compared to given time stamp, or returns <code>null</code> if this queue
+         * is empty or head is not elapsed.
+         * 
+         * @param stamp The time stamp
+         * @return The elapsed head of this queue
+         */
+        public IMAPStoreWrapper pollIfElapsed(final long stamp) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                final IMAPStoreWrapper e = q.peek();
+                if ((null != e) && (e.lastAccessed >= stamp)) {
+                    return q.poll();
+                }
+                return null;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public IMAPStoreWrapper poll() {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.poll();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public IMAPStoreWrapper take() throws InterruptedException {
+            final ReentrantLock lock = this.lock;
+            lock.lockInterruptibly();
+            try {
+                try {
+                    while (q.size() == 0) {
+                        notEmpty.await();
+                    }
+                } catch (final InterruptedException ie) {
+                    notEmpty.signal(); // propagate to non-interrupted thread
+                    throw ie;
+                }
+                final IMAPStoreWrapper x = q.poll();
+                assert x != null;
+                return x;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public IMAPStoreWrapper poll(final long timeout, final TimeUnit unit) throws InterruptedException {
+            long nanos = unit.toNanos(timeout);
+            final ReentrantLock lock = this.lock;
+            lock.lockInterruptibly();
+            try {
+                for (;;) {
+                    final IMAPStoreWrapper x = q.poll();
+                    if (x != null) {
+                        return x;
+                    }
+                    if (nanos <= 0) {
+                        return null;
+                    }
+                    try {
+                        nanos = notEmpty.awaitNanos(nanos);
+                    } catch (final InterruptedException ie) {
+                        notEmpty.signal(); // propagate to non-interrupted thread
+                        throw ie;
+                    }
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public IMAPStoreWrapper peek() {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.peek();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public int size() {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.size();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public int remainingCapacity() {
+            return Integer.MAX_VALUE;
+        }
+
+        @Override
+        public boolean remove(final Object o) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.remove(o);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public boolean contains(final Object o) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.contains(o);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public Object[] toArray() {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.toArray();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public String toString() {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.toString();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public int drainTo(final Collection<? super IMAPStoreWrapper> c) {
+            if (c == null) {
+                throw new NullPointerException();
+            }
+            if (c == this) {
+                throw new IllegalArgumentException();
+            }
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                int n = 0;
+                IMAPStoreWrapper e;
+                while ((e = q.poll()) != null) {
+                    c.add(e);
+                    ++n;
+                }
+                return n;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public int drainTo(final Collection<? super IMAPStoreWrapper> c, final int maxElements) {
+            if (c == null) {
+                throw new NullPointerException();
+            }
+            if (c == this) {
+                throw new IllegalArgumentException();
+            }
+            if (maxElements <= 0) {
+                return 0;
+            }
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                int n = 0;
+                IMAPStoreWrapper e;
+                while (n < maxElements && (e = q.poll()) != null) {
+                    c.add(e);
+                    ++n;
+                }
+                return n;
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public void clear() {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                q.clear();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public <T> T[] toArray(final T[] a) {
+            final ReentrantLock lock = this.lock;
+            lock.lock();
+            try {
+                return q.toArray(a);
+            } finally {
+                lock.unlock();
+            }
+        }
+
+        @Override
+        public Iterator<IMAPStoreWrapper> iterator() {
+            return new Itr(toArray());
+        }
+
+        /**
+         * Snapshot iterator that works off copy of underlying q array.
+         */
+        private class Itr implements Iterator<IMAPStoreWrapper> {
+
+            final Object[] array; // Array of all elements
+
+            int cursor; // index of next element to return;
+
+            int lastRet; // index of last element, or -1 if no such
+
+            Itr(final Object[] array) {
+                lastRet = -1;
+                this.array = array;
+            }
+
+            @Override
+            public boolean hasNext() {
+                return cursor < array.length;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public IMAPStoreWrapper next() {
+                if (cursor >= array.length) {
+                    throw new NoSuchElementException();
+                }
+                lastRet = cursor;
+                return (IMAPStoreWrapper) array[cursor++];
+            }
+
+            @Override
+            public void remove() {
+                if (lastRet < 0) {
+                    throw new IllegalStateException();
+                }
+                final Object x = array[lastRet];
+                lastRet = -1;
+                // Traverse underlying queue to find == element,
+                // not just a .equals element.
+                lock.lock();
+                try {
+                    for (final Iterator<IMAPStoreWrapper> it = q.iterator(); it.hasNext();) {
+                        if (it.next() == x) {
+                            it.remove();
+                            return;
+                        }
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            }
+        }
+
+        private void writeObject(final java.io.ObjectOutputStream s) throws java.io.IOException {
+            lock.lock();
+            try {
+                s.defaultWriteObject();
+            } finally {
+                lock.unlock();
+            }
+        }
+
+    } // End of class
 
 }
