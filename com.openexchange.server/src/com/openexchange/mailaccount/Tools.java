@@ -286,10 +286,10 @@ public final class Tools {
              * Update and return re-fetched account instance
              */
             if (null == con) {
-                storageService.updateMailAccount(mad, attributes, serverSession.getUserId(), serverSession.getContextId(), serverSession.getPassword());
+                storageService.updateMailAccount(mad, attributes, serverSession.getUserId(), serverSession.getContextId(), serverSession);
                 return storageService.getMailAccount(accountId, serverSession.getUserId(), serverSession.getContextId());
             }
-            storageService.updateMailAccount(mad, attributes, serverSession.getUserId(), serverSession.getContextId(), serverSession.getPassword(), con, false);
+            storageService.updateMailAccount(mad, attributes, serverSession.getUserId(), serverSession.getContextId(), serverSession, con, false);
             final MailAccount[] accounts = storageService.getUserMailAccounts(serverSession.getUserId(), serverSession.getContextId(), con);
             for (final MailAccount macc : accounts) {
                 if (macc.getId() == accountId) {

@@ -451,7 +451,6 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public IMAPStoreWrapper next() {
                 if (cursor >= array.length) {
                     throw new NoSuchElementException();

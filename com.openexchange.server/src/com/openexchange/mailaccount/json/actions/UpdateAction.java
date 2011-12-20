@@ -151,7 +151,7 @@ public final class UpdateAction extends AbstractMailAccountAction {
                 fieldsToUpdate,
                 session.getUserId(),
                 session.getContextId(),
-                getSecret(session));
+                session);
 
             if (fieldsToUpdate.removeAll(DEFAULT)) {
                 /*

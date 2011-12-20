@@ -148,7 +148,7 @@ public final class NewAction extends AbstractMailAccountAction {
             MailAccount newAccount = null;
             try {
                 con.setAutoCommit(false);
-                id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session), con);
+                id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, con);
                 // Check full names after successful creation
                 final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), cid, con);
                 for (final MailAccount mailAccount : accounts) {

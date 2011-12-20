@@ -264,7 +264,7 @@ public final class MailAccountRequest {
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
         final int id =
-            storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), getSecret(session));
+            storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session);
 
         final JSONObject jsonAccount =
             MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), session.getContextId()));
@@ -565,7 +565,7 @@ public final class MailAccountRequest {
             fieldsToUpdate,
             session.getUserId(),
             session.getContextId(),
-            getSecret(session));
+            session);
 
         if (fieldsToUpdate.removeAll(DEFAULT)) {
             /*

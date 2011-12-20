@@ -304,33 +304,33 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws OXException {
-        delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session) throws OXException {
+        delegate.updateMailAccount(mailAccount, attributes, user, cid, session);
         invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
-        delegate.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, changePrimary);
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
+        delegate.updateMailAccount(mailAccount, attributes, user, cid, session, con, changePrimary);
         invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws OXException {
-        delegate.updateMailAccount(mailAccount, user, cid, sessionPassword);
+    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Session session) throws OXException {
+        delegate.updateMailAccount(mailAccount, user, cid, session);
         invalidateMailAccount(mailAccount.getId(), user, cid);
     }
 
     @Override
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
-        final int id = delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword);
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session) throws OXException {
+        final int id = delegate.insertMailAccount(mailAccount, user, ctx, session);
         invalidateMailAccount(id, user, ctx.getContextId());
         return id;
     }
 
     @Override
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
-        final int id = delegate.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session, final Connection con) throws OXException {
+        final int id = delegate.insertMailAccount(mailAccount, user, ctx, session, con);
         invalidateMailAccount(id, user, ctx.getContextId());
         return id;
     }

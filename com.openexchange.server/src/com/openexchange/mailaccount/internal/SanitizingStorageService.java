@@ -139,28 +139,28 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws OXException {
-        storageService.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword);
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session) throws OXException {
+        storageService.updateMailAccount(mailAccount, attributes, user, cid, session);
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
-        storageService.updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, changePrimary);
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
+        storageService.updateMailAccount(mailAccount, attributes, user, cid, session, con, changePrimary);
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws OXException {
-        storageService.updateMailAccount(mailAccount, user, cid, sessionPassword);
+    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Session session) throws OXException {
+        storageService.updateMailAccount(mailAccount, user, cid, session);
     }
 
     @Override
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
-        return storageService.insertMailAccount(mailAccount, user, ctx, sessionPassword);
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session) throws OXException {
+        return storageService.insertMailAccount(mailAccount, user, ctx, session);
     }
 
     @Override
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
-        return storageService.insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session, final Connection con) throws OXException {
+        return storageService.insertMailAccount(mailAccount, user, ctx, session, con);
     }
 
     @Override
