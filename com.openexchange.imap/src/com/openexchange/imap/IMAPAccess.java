@@ -723,13 +723,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Get store...
          */
         if (fromCache && USE_IMAP_STORE_CACHE.get()) {
-            if (!DEBUG) {
-                return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session);
-            }
-            final IMAPStore store = IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session);
-            final long dur = System.currentTimeMillis() - st;
-            LOG.debug("IMAPAccess.connectIMAPStore() took " + dur + "msec.");
-            return store;
+            return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session);
         }
         /*
          * Establish a new one...

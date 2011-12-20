@@ -72,6 +72,9 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
     @Override
     public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        if (DEBUG) {
+            LOG.debug("IMAPStoreContainer.getStore(): " + semaphore.getQueueLength() + " threads currently waiting for available IMAPStore instance.");
+        }
         semaphore.acquire();
         return super.getStore(imapSession);
     }

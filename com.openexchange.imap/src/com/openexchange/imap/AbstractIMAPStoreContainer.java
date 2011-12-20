@@ -65,6 +65,8 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AbstractIMAPStoreContainer.class));
 
+    protected static final boolean DEBUG = LOG.isDebugEnabled();
+
     protected final String name;
 
     /**

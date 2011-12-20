@@ -94,6 +94,11 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         IMAPStore imapStore = null == imapStoreWrapper ? null : imapStoreWrapper.imapStore;
         if (null == imapStore) {
             imapStore = newStore(server, port, login, pw, imapSession);
+            if (DEBUG) {
+                LOG.debug("IMAPStoreContainer.getStore(): Returning newly established IMAPStore instance.");
+            }
+        } else if (DEBUG) {
+            LOG.debug("IMAPStoreContainer.getStore(): Returning _cached_ IMAPStore instance.");
         }
         return imapStore;
     }
@@ -102,6 +107,8 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     public void backStore(final IMAPStore imapStore) {
         if (!queue.offer(new IMAPStoreWrapper(imapStore))) {
             closeSafe(imapStore);
+        } else if (DEBUG) {
+            LOG.debug("IMAPStoreContainer.backStore(): Added IMAPStore instance to cache.");
         }
     }
 
@@ -118,7 +125,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
                         final String info = imapStoreWrapper.imapStore.toString();
                         closeSafe(imapStoreWrapper.imapStore);
                         debugBuilder.setLength(0);
-                        LOG.debug(debugBuilder.append("Closed elapsed IMAP store: ").append(info).toString());
+                        LOG.debug(debugBuilder.append("IMAPStoreContainer.closeElapsed(): Closed elapsed IMAP store: ").append(info).toString());
                     }
                 } catch (final IllegalStateException e) {
                     // Ignore
