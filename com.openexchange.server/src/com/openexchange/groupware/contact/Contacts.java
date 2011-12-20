@@ -76,6 +76,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import javax.imageio.ImageIO;
 import javax.mail.internet.AddressException;
 import org.apache.commons.logging.Log;
@@ -333,6 +334,18 @@ public final class Contacts {
         }
     }
 
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
     public static void performContactStorageInsert(final Contact contact, final int user, final Session session, final boolean override) throws OXException, OXException {
 
         final StringBuilder insert_fields = new StringBuilder();
@@ -383,6 +396,12 @@ public final class Contacts {
             }
             if (!contact.containsFileAs()) {
                 contact.setFileAs(contact.getDisplayName());
+            }
+            /*
+             * Ensure a UID is present
+             */
+            if (!contact.containsUid() || isEmpty(contact.getUid())) {
+                contact.setUid(UUID.randomUUID().toString());
             }
             contact.removeContextID();
             contact.removeLastModified();
