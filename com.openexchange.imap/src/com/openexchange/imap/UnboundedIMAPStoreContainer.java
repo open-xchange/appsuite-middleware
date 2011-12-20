@@ -215,7 +215,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             lock.lock();
             try {
                 final IMAPStoreWrapper e = q.peek();
-                if ((null != e) && (e.lastAccessed >= stamp)) {
+                if ((null != e) && (e.lastAccessed < stamp)) {
                     return q.poll();
                 }
                 return null;
