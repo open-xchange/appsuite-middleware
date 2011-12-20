@@ -120,6 +120,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
+        if (DEBUG) {
+            LOG.debug("IMAPStoreContainer.closeElapsed(): " + queue.size() + " IMAPStore instances in queue for " + login + "@" + server + ":" + port);
+        }
         IMAPStoreWrapper imapStoreWrapper;
         do {
             imapStoreWrapper = queue.pollIfElapsed(stamp);
