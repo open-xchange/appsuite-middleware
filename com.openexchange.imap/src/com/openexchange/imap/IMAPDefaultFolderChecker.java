@@ -83,7 +83,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
@@ -383,7 +382,7 @@ public final class IMAPDefaultFolderChecker {
                                     attributes,
                                     session.getUserId(),
                                     session.getContextId(),
-                                    IMAPServiceRegistry.getService(SecretService.class).getSecret(session),
+                                    session,
                                     con,
                                     true);
                                 keepgoing = true;
@@ -826,14 +825,13 @@ public final class IMAPDefaultFolderChecker {
                     {
                         final MailAccountStorageService storageService =
                             IMAPServiceRegistry.getService(MailAccountStorageService.class, true);
-                        final SecretService secretService = IMAPServiceRegistry.getService(SecretService.class);
 
                         storageService.updateMailAccount(
                             mad,
                             attributes,
                             session.getUserId(),
                             session.getContextId(),
-                            secretService.getSecret(session));
+                            session);
                     }
                     final String fn = tmp.append(prefix).append(candidate).toString();
                     tmp.setLength(0);

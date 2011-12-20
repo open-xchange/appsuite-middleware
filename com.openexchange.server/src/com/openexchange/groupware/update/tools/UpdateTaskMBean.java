@@ -331,7 +331,7 @@ public final class UpdateTaskMBean implements DynamicMBean {
         } else if (actionName.equals("runAllUpdate")) {
             try {
                 UpdateTaskToolkit.runUpdateOnAllSchemas();
-            } catch (final UpdateException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
                 final Exception wrapMe = new Exception(e.getMessage());
                 throw new MBeanException(wrapMe);

@@ -844,11 +844,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword) throws OXException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session) throws OXException {
         final Connection con = Database.get(cid, true);
         try {
             con.setAutoCommit(false);
-            updateMailAccount(mailAccount, attributes, user, cid, sessionPassword, con, false);
+            updateMailAccount(mailAccount, attributes, user, cid, session, con, false);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -902,7 +902,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         Attribute.REPLY_TO_LITERAL);
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final String sessionPassword, final Connection con, final boolean changePrimary) throws OXException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
         dropPOP3StorageFolders(user, cid);
         if (attributes.contains(Attribute.NAME_LITERAL)) {
             // Check name
@@ -1020,10 +1020,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 String encryptedPassword = null; //
 
                 List<Attribute> orderedAttributes = null;
-                final Session session = getActiveSessionFor(user, cid);
-                if (null == session) {
-                    throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("No session found for user " + user + " in context " + cid);
-                }
                 if (UpdateMailAccountBuilder.needsUpdate(attributes)) {
                     orderedAttributes = new ArrayList<Attribute>(attributes);
 
@@ -1169,7 +1165,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         if (null != transportURL) {
                             stmt.close();
                             final String encryptedTransportPassword;
-                            if (sessionPassword == null) {
+                            if (session == null) {
                                 encryptedTransportPassword = null;
                             } else {
                                 encryptedTransportPassword = encrypt(mailAccount.getPassword(), session);
@@ -1399,7 +1395,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final String sessionPassword) throws OXException {
+    public void updateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Session session) throws OXException {
         if (mailAccount.isDefaultFlag() || MailAccount.DEFAULT_ID == mailAccount.getId()) {
             throw MailAccountExceptionCodes.NO_DEFAULT_UPDATE.create(I(user), I(cid));
         }
@@ -1414,10 +1410,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             con.setAutoCommit(false);
             {
-                final Session session = getActiveSessionFor(user, cid);
-                if (null == session) {
-                    throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("No session found for user " + user + " in context " + cid);
-                }
                 final String encryptedPassword = encrypt(mailAccount.getPassword(), session);
                 stmt = con.prepareStatement(UPDATE_MAIL_ACCOUNT);
                 int pos = 1;
@@ -1464,12 +1456,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             final String transportURL = mailAccount.generateTransportServerURL();
             if (null != transportURL) {
-                final String encryptedTransportPassword;
-                try {
-                    encryptedTransportPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
-                } catch (final GeneralSecurityException e) {
-                    throw MailAccountExceptionCodes.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
-                }
+                final String encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                 stmt.close();
                 stmt = con.prepareStatement(UPDATE_TRANSPORT_ACCOUNT);
                 int pos = 1;
@@ -1540,7 +1527,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword, final Connection con) throws OXException {
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session, final Connection con) throws OXException {
         final int cid = ctx.getContextId();
         // Check for duplicate
         final String primaryAddress = mailAccount.getPrimaryAddress();
@@ -1580,13 +1567,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             {
                 stmt = con.prepareStatement(INSERT_MAIL_ACCOUNT);
                 final String encryptedPassword;
-                if (sessionPassword == null) {
+                if (session == null) {
                     encryptedPassword = null;
                 } else {
-                    final Session session = getActiveSessionFor(user, cid);
-                    if (null == session) {
-                        throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create("No session found for user " + user + " in context " + cid);
-                    }
                     encryptedPassword = encrypt(mailAccount.getPassword(), session);
                 }
                 int pos = 1;
@@ -1661,14 +1644,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (null != transportURL) {
                 stmt.close();
                 final String encryptedTransportPassword;
-                if (sessionPassword == null) {
+                if (session == null) {
                     encryptedTransportPassword = null;
                 } else {
-                    try {
-                        encryptedTransportPassword = MailPasswordUtil.encrypt(mailAccount.getTransportPassword(), sessionPassword);
-                    } catch (final GeneralSecurityException e) {
-                        throw MailAccountExceptionCodes.PASSWORD_ENCRYPTION_FAILED.create(e, new Object[0]);
-                    }
+                    encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                 }
                 // cid, id, user, name, url, login, password, send_addr, default_flag
                 stmt = con.prepareStatement(INSERT_TRANSPORT_ACCOUNT);
@@ -1741,13 +1720,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final String sessionPassword) throws OXException {
+    public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session) throws OXException {
         final int cid = ctx.getContextId();
         final Connection con = Database.get(cid, true);
         final int retval;
         try {
             con.setAutoCommit(false);
-            retval = insertMailAccount(mailAccount, user, ctx, sessionPassword, con);
+            retval = insertMailAccount(mailAccount, user, ctx, session, con);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -2137,11 +2116,6 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     private static <S> S getService(final Class<? extends S> clazz) {
         return ServerServiceRegistry.getInstance().getService(clazz);
-    }
-
-    private Session getActiveSessionFor(final int userId, final int contextId) {
-        final SessiondService sessiondService = getService(SessiondService.class);
-        return null == sessiondService ? null : sessiondService.getAnyActiveSessionForUser(userId, contextId);
     }
 
     /*-

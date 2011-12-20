@@ -158,7 +158,7 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    public static void runUpdateOnAllSchemas() throws UpdateException {
+    public static void runUpdateOnAllSchemas() throws OXException {
         synchronized (LOCK) {
             // Get all available schemas
             final Map<String, Set<Integer>> map = getSchemasAndContexts();
