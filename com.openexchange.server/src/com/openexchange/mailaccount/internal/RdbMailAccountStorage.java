@@ -1979,23 +1979,17 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt = con.prepareStatement(SELECT_EXISTS_FOR_USER1);
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
-
             rs = stmt.executeQuery();
-
             if (rs.next()) {
                 return true;
             }
-
-            rs.close();
-            stmt.close();
+            DBUtils.closeSQLStuff(rs, stmt);
 
             stmt = con.prepareStatement(SELECT_EXISTS_FOR_USER2);
             stmt.setInt(1, cid);
             stmt.setInt(2, user);
-
             rs = stmt.executeQuery();
             return rs.next();
-
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
