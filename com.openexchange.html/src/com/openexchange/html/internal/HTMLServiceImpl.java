@@ -459,7 +459,9 @@ public final class HTMLServiceImpl implements HTMLService {
 //        return handler.getText();
 
         final String prepared = insertBlockquoteMarker(htmlContent);
-        return quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).toString());
+        final String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).toString());
+        // text = text.replaceFirst("^ *", "");
+        return text;
     }
 
     private static final String CRLF = "\r\n";
