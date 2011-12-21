@@ -1,6 +1,7 @@
 * 2011-12-21 - thorben.betten@open-xchange.com
 
  - Fix for bug #21044: Fixed regex
+ - Fix for bug #21049: Try best-guess converrsion of HTML whitespaces to text whitespaces on html2text conversion
 
 * 2011-12-21 - marcus.klein@open-xchange.com
 
