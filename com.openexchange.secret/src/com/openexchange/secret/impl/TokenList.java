@@ -136,15 +136,29 @@ public final class TokenList {
 
     private final List<SecretService> queue;
 
+    private final boolean usesPassword;
+
     /**
      * Initializes a new {@link TokenList}.
      */
     private TokenList(final Collection<List<Token>> collection) {
         super();
         queue = new ArrayList<SecretService>(collection.size());
+        List<Token> last = null;
         for (final List<Token> list : collection) {
+            last = list;
             queue.add(new SessionSecretService(list));
         }
+        usesPassword = null == last ? false : last.contains(ReservedToken.PASSWORD);
+    }
+
+    /**
+     * Checks if last entry uses password secret source.
+     * 
+     * @return <code>true</code> if last entry uses password secret source; otherwise <code>false</code>
+     */
+    public boolean isUsesPassword() {
+        return usesPassword;
     }
 
     @Override

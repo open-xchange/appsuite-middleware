@@ -58,6 +58,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
+import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.impl.CryptoSecretEncryptionFactoryService;
 import com.openexchange.secret.impl.LiteralToken;
 import com.openexchange.secret.impl.ReservedToken;
@@ -76,6 +77,10 @@ import com.openexchange.server.osgiservice.HousekeepingActivator;
 public class SecretActivator extends HousekeepingActivator {
 
     private volatile WhiteboardSecretService secretService;
+
+    public SecretActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -141,6 +146,13 @@ public class SecretActivator extends HousekeepingActivator {
                 sessionSecretService = new SessionSecretService(tl);
                 tokenList = TokenList.newInstance(Collections.singleton(tl));
             }
+            registerService(SecretUsesPasswordChecker.class, new SecretUsesPasswordChecker() {
+                
+                @Override
+                public boolean usesPassword() {
+                    return tokenList.isUsesPassword();
+                }
+            });
 
             final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
