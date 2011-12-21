@@ -56,7 +56,7 @@ import java.util.Set;
  * TaskParticipant.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class TaskParticipant {
+public abstract class TaskParticipant {
 
     /**
      * An empty set of participants for tasks.

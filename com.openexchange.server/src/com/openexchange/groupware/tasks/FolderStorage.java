@@ -91,7 +91,7 @@ public abstract class FolderStorage {
      * @param type storage type of folder mappings.
      * @throws OXException if an exception occurs.
      */
-    abstract void insertFolder(Context ctx, Connection con, int taskId,
+    public abstract void insertFolder(Context ctx, Connection con, int taskId,
         Set<Folder> folders, StorageType type) throws OXException;
 
     /**
@@ -119,7 +119,7 @@ public abstract class FolderStorage {
      * @return the folder objects.
      * @throws OXException if an exception occurs.
      */
-    abstract Set<Folder> selectFolder(Context ctx, Connection con, int taskId,
+    public abstract Set<Folder> selectFolder(Context ctx, Connection con, int taskId,
         StorageType type) throws OXException;
 
     /**
@@ -151,7 +151,7 @@ public abstract class FolderStorage {
      * especially for the user. This can occur for public folders.
      * @throws OXException if an exception occurs.
      */
-    abstract Folder selectFolderByUser(Context ctx, Connection con, int taskId,
+    public abstract Folder selectFolderByUser(Context ctx, Connection con, int taskId,
         int userId, StorageType type) throws OXException;
 
     /**
@@ -305,7 +305,7 @@ public abstract class FolderStorage {
      * @return the folder mapping for the user or <code>null</code> if it can't
      * be found.
      */
-    static Folder extractFolderOfUser(final Set<Folder> folders, final int userId) {
+    public static Folder extractFolderOfUser(final Set<Folder> folders, final int userId) {
         Folder retval = null;
         for (final Folder folder : folders) {
             if (folder.getUser() == userId) {
