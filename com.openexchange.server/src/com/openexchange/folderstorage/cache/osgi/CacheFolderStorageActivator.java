@@ -298,7 +298,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
 
     private static final String DEFAULT = MailFolder.DEFAULT_FOLDER_ID;
 
-    private static final Pattern PAT_FIX = Pattern.compile(Pattern.quote(DEFAULT) + "[0-9]+" + Pattern.quote(DEFAULT));
+    private static final Pattern PAT_FIX = Pattern.compile(Pattern.quote(DEFAULT) + "([0-9]+)" + Pattern.quote(DEFAULT));
 
     protected static String sanitizeFolderId(final String id) {
         String fid = id;
