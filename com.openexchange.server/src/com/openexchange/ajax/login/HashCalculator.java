@@ -76,9 +76,13 @@ public class HashCalculator {
     private static final Pattern PATTERN_NON_WORD_CHAR = Pattern.compile("\\W");
 
     public static String getHash(final HttpServletRequest req, final String client) {
+        return getHash(req, getUserAgent(req), client);
+    }
+
+    public static String getHash(final HttpServletRequest req, final String userAgent, final String client) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(getUserAgent(req).getBytes(Charsets.UTF_8));
+            md.update(userAgent.getBytes(Charsets.UTF_8));
             md.update(client.getBytes(Charsets.UTF_8));
             final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             final String fieldList = null == service ? "" : service.getProperty("com.openexchange.cookie.hash.fields", "");

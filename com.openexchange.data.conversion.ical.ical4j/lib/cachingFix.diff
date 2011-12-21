@@ -6,17 +6,8 @@ RCS file: /cvsroot/ical4j/iCal4j/source/net/fortuna/ical4j/model/TimeZoneRegistr
 retrieving revision 1.26
 diff -u -r1.26 TimeZoneRegistryImpl.java
 --- source/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java	20 Feb 2011 03:12:32 -0000	1.26
-+++ source/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java	19 Dec 2011 15:00:42 -0000
-@@ -68,8 +68,6 @@
-     
-     private static final String UPDATE_ENABLED = "net.fortuna.ical4j.timezone.update.enabled";
- 
--    private static final Map DEFAULT_TIMEZONES = new ConcurrentHashMap();
--
-     private static final Properties ALIASES = new Properties();
-     static {
-         try {
-@@ -135,40 +133,30 @@
++++ source/net/fortuna/ical4j/model/TimeZoneRegistryImpl.java	21 Dec 2011 09:57:03 -0000
+@@ -135,40 +135,42 @@
      public final TimeZone getTimeZone(final String id) {
          TimeZone timezone = (TimeZone) timezones.get(id);
          if (timezone == null) {
@@ -26,7 +17,13 @@ diff -u -r1.26 TimeZoneRegistryImpl.java
 -                final String alias = ALIASES.getProperty(id);
 -                if (alias != null) {
 -                    return getTimeZone(alias);
--                }
++            Map cachedTimezones;
++            synchronized (DEFAULT_TIMEZONES) {
++                cachedTimezones = (Map) DEFAULT_TIMEZONES.get(resourcePrefix);
++                if (null == cachedTimezones) {
++                    cachedTimezones = new ConcurrentHashMap();
++                    DEFAULT_TIMEZONES.put(resourcePrefix, cachedTimezones);
+                 }
 -                else {
 -                    synchronized (DEFAULT_TIMEZONES) {
 -                    	// check again as it may be loaded now..
@@ -47,36 +44,40 @@ diff -u -r1.26 TimeZoneRegistryImpl.java
 -                                        return getTimeZone(matcher.group());
 -                                    }
 -                                }
--                            }
++            }
++            synchronized (cachedTimezones) {
++                timezone = (TimeZone) cachedTimezones.get(id);
++                if (timezone == null) {
++                    // if timezone not found with identifier, try loading an alias..
++                    final String alias = ALIASES.getProperty(id);
++                    if (alias != null) {
++                        return getTimeZone(alias);
++                    }
++                        try {
++                            final VTimeZone vTimeZone = loadVTimeZone(id);
++                            if (vTimeZone != null) {
++                                // XXX: temporary kludge..
++                                // ((TzId) vTimeZone.getProperties().getProperty(Property.TZID)).setValue(id);
++                                timezone = new TimeZone(vTimeZone);
++                                cachedTimezones.put(timezone.getID(), timezone);
+                             }
 -                            catch (Exception e) {
 -                                Log log = LogFactory.getLog(TimeZoneRegistryImpl.class);
 -                                log.warn("Error occurred loading VTimeZone", e);
--                            }
++                            else if (CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING)) {
++                                // strip global part of id and match on default tz..
++                                Matcher matcher = TZ_ID_SUFFIX.matcher(id);
++                                if (matcher.find()) {
++                                    return getTimeZone(matcher.group());
++                                }
+                             }
 -                    	}
-+            // if timezone not found with identifier, try loading an alias..
-+            final String alias = ALIASES.getProperty(id);
-+            if (alias != null) {
-+                return getTimeZone(alias);
-+            }
-+            else {
-+                try {
-+                    final VTimeZone vTimeZone = loadVTimeZone(id);
-+                    if (vTimeZone != null) {
-+                        // XXX: temporary kludge..
-+                        // ((TzId) vTimeZone.getProperties().getProperty(Property.TZID)).setValue(id);
-+                        timezone = new TimeZone(vTimeZone);
-                     }
-+                    else if (CompatibilityHints.isHintEnabled(CompatibilityHints.KEY_RELAXED_PARSING)) {
-+                        // strip global part of id and match on default tz..
-+                        Matcher matcher = TZ_ID_SUFFIX.matcher(id);
-+                        if (matcher.find()) {
-+                            return getTimeZone(matcher.group());
+-                    }
 +                        }
-+                    }
-+                }
-+                catch (Exception e) {
-+                    Log log = LogFactory.getLog(TimeZoneRegistryImpl.class);
-+                    log.warn("Error occurred loading VTimeZone", e);
++                        catch (Exception e) {
++                            Log log = LogFactory.getLog(TimeZoneRegistryImpl.class);
++                            log.warn("Error occurred loading VTimeZone", e);
++                        }
                  }
              }
          }
