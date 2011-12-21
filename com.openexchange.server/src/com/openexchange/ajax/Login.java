@@ -978,7 +978,7 @@ public class Login extends AJAXServlet {
         final Map<String, List<String>> headers = copyHeaders(req);
         final LoginRequest loginRequest = new LoginRequest() {
 
-            private final String hash = HashCalculator.getHash(req, client);
+            private final String hash = HashCalculator.getHash(req, userAgent, client);
 
             @Override
             public String getLogin() {
@@ -1134,7 +1134,7 @@ public class Login extends AJAXServlet {
         final String userAgent = parseUserAgent(req);
         final Map<String, List<String>> headers = copyHeaders(req);
         final LoginRequest request = new LoginRequest() {
-            private final String hash = HashCalculator.getHash(req, client);
+            private final String hash = HashCalculator.getHash(req, userAgent, client);
             @Override
             public String getVersion() {
                 return version;

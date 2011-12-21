@@ -1,3 +1,7 @@
+* 2011-12-21 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20757: Using clientUserAgent login parameter in favour of User-Agent header if provided with the login request.
+
 * 2011-12-20 - marcus.klein@open-xchange.com
 
  - Fix for bug 19123: Added the column uid to tasks.
