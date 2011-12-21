@@ -169,7 +169,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
             accountDescription,
             session.getUserId(),
             getContext(session.getContextId()),
-            session.getPassword());
+            session);
     }
 
     @Override
@@ -486,7 +486,7 @@ public final class MailMessagingAccountManager implements MessagingAccountManage
                 }
             }
 
-            mass.updateMailAccount(accountDescription, attributes, session.getUserId(), session.getContextId(), session.getPassword());
+            mass.updateMailAccount(accountDescription, attributes, session.getUserId(), session.getContextId(), session);
         } catch (final OXException e) {
             throw e;
         }

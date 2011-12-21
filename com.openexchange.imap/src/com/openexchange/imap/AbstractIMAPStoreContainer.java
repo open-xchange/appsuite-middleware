@@ -141,7 +141,7 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
         public int compareTo(final IMAPStoreWrapper other) {
             final long thisVal = this.lastAccessed;
             final long anotherVal = other.lastAccessed;
-            return (thisVal<anotherVal ? 1 : (thisVal==anotherVal ? 0 : -1));
+            return (thisVal<anotherVal ? -1 : (thisVal==anotherVal ? 0 : 1));
         }
     }
 

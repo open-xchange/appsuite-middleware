@@ -91,6 +91,15 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         this.server = server;
     }
 
+    /**
+     * Gets the backing blocking queue.
+     * 
+     * @return The queue
+     */
+    protected BlockingQueue<IMAPStoreWrapper> getQueue() {
+        return queue;
+    }
+
     @Override
     public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
         /*
@@ -451,7 +460,6 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
             }
 
             @Override
-            @SuppressWarnings("unchecked")
             public IMAPStoreWrapper next() {
                 if (cursor >= array.length) {
                     throw new NoSuchElementException();
