@@ -58,10 +58,10 @@ package com.openexchange.secret;
 public interface SecretEncryptionFactoryService {
 
     /**
-     * Creates the service for specified strategy.
+     * Creates the secret encryption service for specified strategy.
      * 
      * @param strategy The strategy
-     * @return The created service
+     * @return The created secret encryption service
      */
     public <T> SecretEncryptionService<T> createService(SecretEncryptionStrategy<T> strategy);
 }
