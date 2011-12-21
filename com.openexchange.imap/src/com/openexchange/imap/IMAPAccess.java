@@ -352,7 +352,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 }
             }
             if (imapStore != null) {
-                if (USE_IMAP_STORE_CACHE.get()) {
+                if (useIMAPStoreCache()) {
                     IMAPStoreCache.getInstance().returnIMAPStore(imapStore.dropAndGetImapStore(), server, port, login);
                 } else {
                     try {
@@ -722,7 +722,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Get store...
          */
-        if (fromCache && USE_IMAP_STORE_CACHE.get()) {
+        if (fromCache && useIMAPStoreCache()) {
             return IMAPStoreCache.getInstance().borrowIMAPStore(accountId, imapSession, server, port, login, pw, session);
         }
         /*
@@ -839,7 +839,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isCacheable() {
-        return (maxCount <= 0) || (!USE_IMAP_STORE_CACHE.get());
+        return !useIMAPStoreCache();
+    }
+
+    private boolean useIMAPStoreCache() {
+        return ((maxCount > 0) && USE_IMAP_STORE_CACHE.get());
     }
 
     /**
