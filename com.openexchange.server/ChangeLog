@@ -1,7 +1,7 @@
 * 2011-12-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 21044: Fixed regex
- - Fix for bug 21049: Try best-guess converrsion of HTML whitespaces to text whitespaces on html2text conversion
+ - Fix for bug 21049: Try best-guess conversion of HTML whitespaces to text whitespaces on html2text conversion
  - Fix for bug 20872: Added new USM cache region
  - Fix for bug 20788: Performing fast-secret-migration at the very end to ensure everything has been migrated then
 
