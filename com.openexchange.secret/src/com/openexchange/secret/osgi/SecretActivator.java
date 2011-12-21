@@ -152,6 +152,11 @@ public class SecretActivator extends HousekeepingActivator {
                 public boolean usesPassword() {
                     return tokenList.isUsesPassword();
                 }
+
+                @Override
+                public SecretService passwordUsingSecretService() {
+                    return sessionSecretService;
+                }
             });
 
             final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);

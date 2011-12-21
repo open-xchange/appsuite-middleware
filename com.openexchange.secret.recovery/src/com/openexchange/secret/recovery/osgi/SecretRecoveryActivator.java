@@ -56,7 +56,6 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
-import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
@@ -72,7 +71,6 @@ import com.openexchange.user.UserService;
 public class SecretRecoveryActivator extends HousekeepingActivator {
 
     private volatile WhiteboardSecretMigrator migrator;
-    private volatile WhiteboardSecretService secretService;
     private volatile WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
 
     @Override
@@ -82,19 +80,20 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        final boolean usesPassword = getService(SecretUsesPasswordChecker.class).usesPassword();
+        final SecretUsesPasswordChecker checker = getService(SecretUsesPasswordChecker.class);
+        final boolean usesPassword = checker.usesPassword();
         if (usesPassword) {
             /*
              * Initialize whiteboard services
              */
             final WhiteboardSecretMigrator migrator = this.migrator = new WhiteboardSecretMigrator(context);
-            final WhiteboardSecretService secretService = this.secretService = new WhiteboardSecretService(context);
             final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = this.whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
             /*
              * Register SecretInconsistencyDetector
              */
             final CryptoService cryptoService = getService(CryptoService.class);
             final UserService userService = getService(UserService.class);
+            final SecretService secretService = checker.passwordUsingSecretService();
             final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
             registerService(SecretInconsistencyDetector.class, detector);
             /*
@@ -107,7 +106,6 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
             /*
              * Open whiteboard services
              */
-            secretService.open();
             migrator.open();
             whiteboardEncryptedItemDetector.open();
         } else {
@@ -131,11 +129,6 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        final WhiteboardSecretService ss = secretService;
-        if (null != ss) {
-            ss.close();
-            secretService = null;
-        }
         final WhiteboardSecretMigrator migr = migrator;
         if (null != migr) {
             migr.close();
