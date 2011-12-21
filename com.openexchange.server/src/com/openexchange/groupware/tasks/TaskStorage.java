@@ -63,7 +63,7 @@ import com.openexchange.server.impl.DBPool;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class TaskStorage {
+public abstract class TaskStorage {
 
     private static final int[] UPDATE_DUMMY_ATTRS = new int[] { Task.CREATION_DATE, Task.LAST_MODIFIED, Task.CREATED_BY, Task.MODIFIED_BY };
 
@@ -95,7 +95,7 @@ abstract class TaskStorage {
      * @param type storage type of the task (one of ACTIVE, DELETED).
      * @throws OXException if inserting the task fails.
      */
-    abstract void insertTask(Context ctx, Connection con, Task task, StorageType type) throws OXException;
+    public abstract void insertTask(Context ctx, Connection con, Task task, StorageType type) throws OXException;
 
     /**
      * Stores a task object.
@@ -107,7 +107,7 @@ abstract class TaskStorage {
      * @param optional <code>true</code> to ignore an already existing task.
      * @throws OXException if some SQL or database connection problem occurs.
      */
-    void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, final boolean optional) throws OXException {
+    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, final boolean optional) throws OXException {
         if (optional) {
             final boolean exists = existsTask(ctx, con, task.getObjectID(), type);
             if (exists) {
@@ -130,7 +130,7 @@ abstract class TaskStorage {
      * @return <code>true</code> if the storage contains a task with the given identifier.
      * @throws OXException if some SQL or database connection problem occurs.
      */
-    abstract boolean existsTask(Context ctx, Connection con, int taskId, StorageType type) throws OXException;
+    public abstract boolean existsTask(Context ctx, Connection con, int taskId, StorageType type) throws OXException;
 
     /**
      * Updates a task without touching folder mappings and participants.
@@ -143,7 +143,7 @@ abstract class TaskStorage {
      * @param type storage type of the task (one of ACTIVE, DELETED).
      * @throws OXException if an exception occurs.
      */
-    abstract void updateTask(Context ctx, Connection con, Task task, Date lastRead, int[] modified, StorageType type) throws OXException;
+    public abstract void updateTask(Context ctx, Connection con, Task task, Date lastRead, int[] modified, StorageType type) throws OXException;
 
     /**
      * Deletes a task.
@@ -155,7 +155,7 @@ abstract class TaskStorage {
      * @param type ACTIVE or DELETED.
      * @throws OXException if the task has been changed in the meantime or an exception occurred.
      */
-    void delete(final Context ctx, final Connection con, final int taskId, final Date lastRead, final StorageType type) throws OXException {
+    public void delete(final Context ctx, final Connection con, final int taskId, final Date lastRead, final StorageType type) throws OXException {
         delete(ctx, con, taskId, lastRead, type, true);
     }
 
@@ -171,7 +171,7 @@ abstract class TaskStorage {
      * @throws OXException if the task has been changed in the meantime or an exception occurred or there is no task to delete and
      *             sanityCheck is <code>true</code>.
      */
-    abstract void delete(Context ctx, Connection con, int taskId, Date lastRead, StorageType type, boolean sanityCheck) throws OXException;
+    public abstract void delete(Context ctx, Connection con, int taskId, Date lastRead, StorageType type, boolean sanityCheck) throws OXException;
 
     /**
      * Counts tasks in a folder.
@@ -213,7 +213,26 @@ abstract class TaskStorage {
      * @return a SearchIterator for iterating over all returned tasks.
      * @throws OXException if an error occurs while listing tasks.
      */
-    abstract TaskIterator list(Context ctx, int folderId, int from, int until, int orderBy, Order order, int[] columns, boolean onlyOwn, int userId, boolean noPrivate) throws OXException;
+    public abstract TaskIterator list(Context ctx, int folderId, int from, int until, int orderBy, Order order, int[] columns, boolean onlyOwn, int userId, boolean noPrivate) throws OXException;
+
+    /**
+     * This method lists tasks in a folder.
+     *
+     * @param ctx Context.
+     * @param folderId unique identifier of the folder.
+     * @param from Iterator should only return tasks that position in the list is after this from.
+     * @param until Iterator should only return tasks that position in the list is before this from.
+     * @param orderBy identifier of the column that should be used for sorting. If no ordering is necessary give <code>0</code>.
+     * @param order sorting direction.
+     * @param columns Columns of the tasks that should be loaded.
+     * @param onlyOwn <code>true</code> if only own tasks can be seen.
+     * @param userId unique identifier of the user (own tasks).
+     * @param noPrivate <code>true</code> if private tasks should not be listed (shared folder).
+     * @param con Connection to database
+     * @return a SearchIterator for iterating over all returned tasks.
+     * @throws OXException if an error occurs while listing tasks.
+     */
+    public abstract TaskIterator list(Context ctx, int folderId, int from, int until, int orderBy, Order order, int[] columns, boolean onlyOwn, int userId, boolean noPrivate, Connection con) throws OXException;
 
     /**
      * Searches for tasks. Currently not all search options are available.
@@ -230,7 +249,7 @@ abstract class TaskStorage {
      * @return an iterator for all found tasks.
      * @throws OXException if an error occurs.
      */
-    abstract TaskIterator search(Context ctx, int userId, TaskSearchObject search, int orderBy, Order order, int[] columns, List<Integer> all, List<Integer> own, List<Integer> shared) throws OXException;
+    public abstract TaskIterator search(Context ctx, int userId, TaskSearchObject search, int orderBy, Order order, int[] columns, List<Integer> all, List<Integer> own, List<Integer> shared) throws OXException;
 
     /**
      * This method only reads the task without participants and folders.
@@ -242,7 +261,7 @@ abstract class TaskStorage {
      * @return a task object without participants and folder.
      * @throws OXException if an error occurs.
      */
-    abstract Task selectTask(Context context, Connection con, int taskId, StorageType type) throws OXException;
+    public abstract Task selectTask(Context context, Connection con, int taskId, StorageType type) throws OXException;
 
     /**
      * This method only reads the task without participants and folders.
@@ -253,7 +272,7 @@ abstract class TaskStorage {
      * @return a task object without participants and folder.
      * @throws OXException if an error occurs.
      */
-    Task selectTask(final Context ctx, final int taskId, final StorageType type) throws OXException {
+    public Task selectTask(final Context ctx, final int taskId, final StorageType type) throws OXException {
         final Connection con = DBPool.pickup(ctx);
         try {
             return selectTask(ctx, con, taskId, type);

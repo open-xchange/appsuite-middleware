@@ -138,7 +138,7 @@ public class RdbTaskStorage extends TaskStorage {
      *             sanityCheck is <code>true</code>.
      */
     @Override
-    void delete(final Context ctx, final Connection con, final int taskId, final Date lastRead, final StorageType type, final boolean sanityCheck) throws OXException {
+    public void delete(final Context ctx, final Connection con, final int taskId, final Date lastRead, final StorageType type, final boolean sanityCheck) throws OXException {
         final String sql = "DELETE FROM @table@ WHERE cid=? AND id=? AND last_modified<=?";
         PreparedStatement stmt = null;
         try {
@@ -172,7 +172,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator list(final Context ctx, final int folderId, final int from, final int to, final int orderBy, final Order order, final int[] columns, final boolean onlyOwn, final int userId, final boolean noPrivate) throws OXException {
+    public TaskIterator list(final Context ctx, final int folderId, final int from, final int to, final int orderBy, final Order order, final int[] columns, final boolean onlyOwn, final int userId, final boolean noPrivate) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, false));
@@ -204,7 +204,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
+    public TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, true));
@@ -304,7 +304,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type) throws OXException {
+    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type) throws OXException {
         final StringBuilder insert = new StringBuilder();
         insert.append("INSERT INTO ");
         insert.append(SQL.TASK_TABLES.get(type));
@@ -347,7 +347,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    boolean existsTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws OXException {
+    public boolean existsTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(Mapping.getMapping(Task.OBJECT_ID).getDBColumnName());
@@ -379,7 +379,7 @@ public class RdbTaskStorage extends TaskStorage {
      * {@inheritDoc}
      */
     @Override
-    Task selectTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws OXException {
+    public Task selectTask(final Context ctx, final Connection con, final int taskId, final StorageType type) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
         sql.append(SQL.getAllFields());
@@ -425,7 +425,7 @@ public class RdbTaskStorage extends TaskStorage {
      * @throws OXException if no task is updated.
      */
     @Override
-    void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final StorageType type) throws OXException {
+    public void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final StorageType type) throws OXException {
         if (modified.length == 0) {
             return;
         }
@@ -561,5 +561,37 @@ public class RdbTaskStorage extends TaskStorage {
         LIST_MODIFIED.put(
             ACTIVE,
             "SELECT @fields@ FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND last_modified>?");
+    }
+
+    @Override
+    public TaskIterator list(final Context ctx, final int folderId, final int from, final int to, final int orderBy, final Order order, final int[] columns, final boolean onlyOwn, final int userId, final boolean noPrivate, final Connection con) throws OXException {
+        if (con == null) {
+            return list(ctx, folderId, from, to, orderBy, order, columns, onlyOwn, userId, noPrivate);
+        }
+        final StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ");
+        sql.append(SQL.getFields(columns, false));
+        sql.append(" FROM task JOIN task_folder USING (cid,id) ");
+        sql.append("WHERE task.cid=? AND task_folder.folder=?");
+        if (onlyOwn) {
+            sql.append(ONLY_OWN);
+        }
+        if (noPrivate) {
+            sql.append(NO_PRIVATE);
+        }
+        sql.append(SQL.getOrder(orderBy, order));
+        sql.append(SQL.getLimit(from, to));
+        return new TaskIterator2(ctx, userId, sql.toString(), new StatementSetter() {
+
+            @Override
+            public void perform(final PreparedStatement stmt) throws SQLException {
+                int pos = 1;
+                stmt.setInt(pos++, ctx.getContextId());
+                stmt.setInt(pos++, folderId);
+                if (onlyOwn) {
+                    stmt.setInt(pos++, userId);
+                }
+            }
+        }, folderId, columns, ACTIVE, con);
     }
 }

@@ -362,7 +362,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
      * {@inheritDoc}
      */
     @Override
-    void insertExternals(final Context ctx, final Connection con,
+    public void insertExternals(final Context ctx, final Connection con,
         final int taskId, final Set<ExternalParticipant> participants,
         final StorageType type) throws OXException {
         if (0 == participants.size() || StorageType.REMOVED == type) {
@@ -461,7 +461,7 @@ public class RdbParticipantStorage extends ParticipantStorage {
      * {@inheritDoc}
      */
     @Override
-    void insertInternals(final Context ctx, final Connection con,
+    public void insertInternals(final Context ctx, final Connection con,
         final int taskId, final Set<InternalParticipant> participants,
         final StorageType type) throws OXException {
         if (0 == participants.size()) {

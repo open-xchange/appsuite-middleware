@@ -67,7 +67,7 @@ import com.openexchange.server.impl.DBPool;
  * Interface to different SQL implementations for storing task participants.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class ParticipantStorage {
+public abstract class ParticipantStorage {
 
     /**
      * Singleton attribute.
@@ -364,7 +364,7 @@ abstract class ParticipantStorage {
      * @return a set of participants.
      * @throws OXException if an exception occurs.
      */
-    final Set<TaskParticipant> selectParticipants(final Context ctx,
+    public final Set<TaskParticipant> selectParticipants(final Context ctx,
         final int taskId, final StorageType type) throws OXException {
         final Connection con = DBPool.pickup(ctx);
         try {
@@ -437,22 +437,22 @@ abstract class ParticipantStorage {
         return retval;
     }
 
-    void insertParticipants(final Context ctx, final Connection con, final int taskId, final Set<TaskParticipant> participants, final StorageType type) throws OXException {
+    public void insertParticipants(final Context ctx, final Connection con, final int taskId, final Set<TaskParticipant> participants, final StorageType type) throws OXException {
         final Set<InternalParticipant> internals = extractInternal(participants);
         final Set<ExternalParticipant> externals = extractExternal(participants);
         insertInternals(ctx, con, taskId, internals, type);
         insertExternals(ctx, con, taskId, externals, type);
     }
 
-    abstract void insertInternals(Context ctx, Connection con, int taskId,
+    public abstract void insertInternals(Context ctx, Connection con, int taskId,
         Set<InternalParticipant> participants, StorageType type)
         throws OXException;
 
-    abstract void insertExternals(Context ctx, Connection con, int taskId,
+    public abstract void insertExternals(Context ctx, Connection con, int taskId,
         Set<ExternalParticipant> participants, StorageType type)
         throws OXException;
 
-    final static Set<ExternalParticipant> extractExternal(final Set<TaskParticipant> participants) {
+    public final static Set<ExternalParticipant> extractExternal(final Set<TaskParticipant> participants) {
         final Set<ExternalParticipant> retval = new HashSet<ExternalParticipant>();
         for (final TaskParticipant participant : participants) {
             if (Type.EXTERNAL == participant.getType()) {
@@ -462,7 +462,7 @@ abstract class ParticipantStorage {
         return retval;
     }
 
-    static Set<InternalParticipant> extractInternal(
+    public static Set<InternalParticipant> extractInternal(
         final Set<TaskParticipant> participants) {
         final Set<InternalParticipant> retval =
             new HashSet<InternalParticipant>();

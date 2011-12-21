@@ -56,7 +56,7 @@ import java.util.Set;
  * Stores a folder that contains a task.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-class Folder {
+public class Folder {
 
     /**
      * An empty set of folders.
@@ -80,7 +80,7 @@ class Folder {
      * @param user unique identifier of the user or <code>0</code> if the
      * folder is the main folder of the task.
      */
-    Folder(final int folder, final int user) {
+    public Folder(final int folder, final int user) {
         super();
         this.identifier = folder;
         this.user = user;
@@ -89,7 +89,7 @@ class Folder {
     /**
      * @return Returns the folder.
      */
-    int getIdentifier() {
+    public int getIdentifier() {
         return identifier;
     }
 

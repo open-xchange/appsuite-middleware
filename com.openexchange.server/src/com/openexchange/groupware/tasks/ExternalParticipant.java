@@ -59,7 +59,7 @@ public class ExternalParticipant extends TaskParticipant {
 
     private final ExternalUserParticipant external;
 
-    ExternalParticipant(final ExternalUserParticipant external) {
+    public ExternalParticipant(final ExternalUserParticipant external) {
         super();
         this.external = external;
     }
