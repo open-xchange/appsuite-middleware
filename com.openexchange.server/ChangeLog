@@ -4,8 +4,8 @@
 
 * 2011-12-19 - marcus.klein@open-xchange.com
 
- - Fix for bug 19295, 18699: Removed caching of time zone information from iCal4J to have always the correct time zone information for
-   export and for invitations.
+ - Fix for bug 19295, 18699: Doing a zone-info file related caching of time zone information from iCal4J to have always the correct time
+   zone information for export and for invitations.
  - Fix for bug 18841: Surrounding comments of an InfoStore document with <pre> tags to preserve text formats.
  - Fix for bug 19435: Writing failed logins to the log file as requested.
 
