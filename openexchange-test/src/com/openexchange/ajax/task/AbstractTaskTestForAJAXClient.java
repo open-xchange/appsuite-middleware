@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.task;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
@@ -95,7 +96,9 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
         }
         testManager.insertTaskOnServer(task);
         Task resultingTask = testManager.getTaskFromServer(task);
-        TaskAsserts.assertAllTaskFieldsMatchExcept(task, resultingTask, new HashSet<Integer>());
+        Set<Integer> ignore = new HashSet<Integer>();
+        ignore.add(I(Task.UID));
+        TaskAsserts.assertAllTaskFieldsMatchExcept(task, resultingTask, ignore);
         testManager.cleanUp();
     }
 
@@ -110,8 +113,9 @@ public abstract class AbstractTaskTestForAJAXClient extends AbstractAJAXSession 
         for(int field: fieldsThatChange){
             changingFields.add(Integer.valueOf(field));
         }
-        changingFields.add( Integer.valueOf( Task.CREATION_DATE ) );
-        changingFields.add( Integer.valueOf( Task.LAST_MODIFIED ) ); //must be different afterwards
+        changingFields.add(I(Task.CREATION_DATE));
+        changingFields.add(I(Task.LAST_MODIFIED)); //must be different afterwards
+        changingFields.add(I(Task.UID));
 
         TaskTestManager testManager = new TaskTestManager(getClient());
         testManager.insertTaskOnServer(insertTask);

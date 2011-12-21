@@ -334,7 +334,8 @@ public class TaskTestManager implements TestManager{
             Mapper attributeMapping = Mapping.getMapping(column);
             if (taskAsArray.isNull(i) || attributeMapping == null || taskAsArray.get(i) == null)
                 continue;
-
+            // FIXME the following method does not honor, that the backend sends shifted timestamps for JavaScript.
+            // FIXME set time zone in frontend to Pacific/Honolulu and some tests fail!
             Object newValue = transformColumn(column, taskAsArray.get(i));
             attributeMapping.set(resultingTask, newValue);
         }
