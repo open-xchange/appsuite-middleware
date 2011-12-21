@@ -198,7 +198,7 @@ public final class Duplicate {
             for (final Entry<String, List<String>> entry : name2ids.entrySet()) {
                 final List<String> folderIds = entry.getValue();
                 final int sz = folderIds.size();
-                for (int i = 0; i < sz; i++) { // All but first entry
+                for (int i = 0; i < sz; i++) {
                     Delete.deleteFolder(cid, tree, user, folderIds.get(i), false, false, con);
                 }
             }
