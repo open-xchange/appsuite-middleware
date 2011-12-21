@@ -2,6 +2,7 @@
 
  - Fix for bug #21044: Fixed regex
  - Fix for bug #21049: Try best-guess converrsion of HTML whitespaces to text whitespaces on html2text conversion
+ - Fix for bug 20872: Added new USM cache region
 
 * 2011-12-21 - marcus.klein@open-xchange.com
 
