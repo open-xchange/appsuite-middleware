@@ -522,20 +522,12 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_GREEDY_BLOCKQUOTE = Pattern.compile("<blockquote.*?>(.*)</blockquote>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BLOCKQUOTE_START = Pattern.compile("<blockquote.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_BLOCKQUOTE_END = Pattern.compile("</blockquote>", Pattern.CASE_INSENSITIVE);
 
     private static String insertBlockquoteMarker(final String html) {
-        final Matcher m = PATTERN_GREEDY_BLOCKQUOTE.matcher(html);
-        if (!m.find()) {
-            return html;
-        }
-        final StringBuffer sb = new StringBuffer(html.length());
-        do {
-            final String surrounded = BLOCKQUOTE_MARKER+m.group(1)+BLOCKQUOTE_MARKER_END;
-            m.appendReplacement(sb, Matcher.quoteReplacement(insertBlockquoteMarker(surrounded)));
-        } while (m.find());
-        m.appendTail(sb);
-        return sb.toString();
+        return PATTERN_BLOCKQUOTE_END.matcher(PATTERN_BLOCKQUOTE_START.matcher(html).replaceAll(BLOCKQUOTE_MARKER)).replaceAll(BLOCKQUOTE_MARKER_END);
     }
 
     private static final String HTML_BR = "<br />";
