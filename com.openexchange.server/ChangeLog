@@ -1,3 +1,7 @@
+* 2011-12-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21023: Fixed subscription of shared folder in Dovecot IMAP server
+
 * 2011-12-22 - marcus.klein@open-xchange.com
 
  - Fix for bug 20782: Dealing in the database pool with connections that are broken.

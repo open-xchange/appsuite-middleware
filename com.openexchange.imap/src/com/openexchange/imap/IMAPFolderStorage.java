@@ -597,7 +597,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             throw IMAPException.create(IMAPException.Code.NO_LOOKUP_ACCESS, imapConfig, session, parentFullName);
                         }
                     } catch (final MessagingException e) {
-                        throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullName);
+                        if (!startsWithNamespaceFolder(parentFullName, parentEntry.getSeparator())) {
+                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, parentFullName);
+                        }
                     }
                 }
                 return getSubfolderArray(all, parent);
@@ -2871,6 +2873,20 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return true;
         }
         return fullName.charAt(length) == separator;
+    }
+
+    private boolean startsWithNamespaceFolder(final String fullName, final char separator) throws MessagingException {
+        for (final String nsFullName : NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId)) {
+            if (isSubfolderOf(fullName, nsFullName, separator)) {
+                return true;
+            }
+        }
+        for (final String nsFullName : NamespaceFoldersCache.getSharedNamespaces(imapStore, true, session, accountId)) {
+            if (isSubfolderOf(fullName, nsFullName, separator)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
