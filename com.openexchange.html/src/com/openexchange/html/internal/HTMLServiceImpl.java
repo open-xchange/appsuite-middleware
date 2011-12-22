@@ -460,7 +460,7 @@ public final class HTMLServiceImpl implements HTMLService {
 
         String prepared = insertBlockquoteMarker(htmlContent);
         prepared = insertSpaceMarker(prepared);
-        String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).toString());
+        String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).setMaxLineLength(9999).setIncludeHyperlinkURLs(appendHref).toString());
         text = whitespaceText(text);
         // Drop heading whitespaces
         text = text.replaceFirst("^ *", "");
