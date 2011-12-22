@@ -167,17 +167,19 @@ public final class ReplicationMonitor {
                     throw createException(assign, true, e2);
                 }
             }
-            try {
-                clientTransaction = readTransaction(retval, assign.getContextId());
-            } catch (final OXException e) {
-                LOG.warn(e.getMessage(), e);
+            if (!write && assign.isTransactionInitialized()) {
                 try {
-                    retval.close();
-                } catch (final SQLException e1) {
-                    OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                    LOG.error(e2.getMessage(), e2);
+                    clientTransaction = readTransaction(retval, assign.getContextId());
+                } catch (final OXException e) {
+                    LOG.warn(e.getMessage(), e);
+                    try {
+                        retval.close();
+                    } catch (final SQLException e1) {
+                        OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                        LOG.error(e2.getMessage(), e2);
+                    }
+                    retval = null;
                 }
-                retval = null;
             }
         } while (null == retval && tries < 10);
         if (null == retval) {
