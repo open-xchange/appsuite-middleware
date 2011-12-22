@@ -98,7 +98,7 @@ public class InternalParticipant extends TaskParticipant {
     /**
      * @return the unique identifier of the user.
      */
-    int getIdentifier() {
+    public int getIdentifier() {
         return user.getIdentifier();
     }
 

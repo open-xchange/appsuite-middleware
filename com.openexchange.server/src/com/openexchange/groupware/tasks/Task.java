@@ -112,7 +112,7 @@ public class Task extends CalendarObject {
         // From FolderChildObject
         // FOLDER_ID,
         // From DataObject
-        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC };
+        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED};//, LAST_MODIFIED_UTC };
 
     public static final int LOW = 1;
 
@@ -280,12 +280,12 @@ public class Task extends CalendarObject {
         projectIdSet = true;
     }
 
-    public void setTargetCosts(Float target_costs) {
+    public void setTargetCosts(final Float target_costs) {
         this.targetCosts = target_costs;
         targetCostsSet = true;
     }
 
-    public void setActualCosts(Float actual_costs) {
+    public void setActualCosts(final Float actual_costs) {
         this.actualCosts = actual_costs;
         actualCostsSet = true;
     }
@@ -293,7 +293,7 @@ public class Task extends CalendarObject {
     /**
      * @param targetDuration the target duration to set
      */
-    public void setTargetDuration(Long targetDuration) {
+    public void setTargetDuration(final Long targetDuration) {
         this.targetDuration = targetDuration;
         targetDurationSet = true;
     }
@@ -301,7 +301,7 @@ public class Task extends CalendarObject {
     /**
      * @param actualDuration the actual duration to set
      */
-    public void setActualDuration(Long actualDuration) {
+    public void setActualDuration(final Long actualDuration) {
         this.actualDuration = actualDuration;
         actualDurationSet = true;
     }
@@ -557,7 +557,7 @@ public class Task extends CalendarObject {
     }
 
     @Override
-    public Set<Integer> findDifferingFields(DataObject dataObject) {
+    public Set<Integer> findDifferingFields(final DataObject dataObject) {
         Set<Integer> differingFields = super.findDifferingFields(dataObject);
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
             return differingFields;
@@ -573,7 +573,7 @@ public class Task extends CalendarObject {
     }
 
     @Override
-    public void set(int field, Object value) {
+    public void set(final int field, final Object value) {
         switch (field) {
         case STATUS:
             setStatus(((Integer) value).intValue());
@@ -623,7 +623,7 @@ public class Task extends CalendarObject {
     }
 
     @Override
-    public Object get(int field) {
+    public Object get(final int field) {
         switch (field) {
         case STATUS:
             return I(getStatus());
@@ -659,7 +659,7 @@ public class Task extends CalendarObject {
     }
 
     @Override
-    public boolean contains(int field) {
+    public boolean contains(final int field) {
         switch (field) {
         case STATUS:
             return containsStatus();
@@ -695,7 +695,7 @@ public class Task extends CalendarObject {
     }
 
     @Override
-    public void remove(int field) {
+    public void remove(final int field) {
         switch (field) {
         case STATUS:
             removeStatus();

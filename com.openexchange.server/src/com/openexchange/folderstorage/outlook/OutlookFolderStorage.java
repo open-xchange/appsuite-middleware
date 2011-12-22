@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -109,6 +110,7 @@ import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
 import com.openexchange.folderstorage.outlook.sql.Delete;
+import com.openexchange.folderstorage.outlook.sql.Duplicate;
 import com.openexchange.folderstorage.outlook.sql.Insert;
 import com.openexchange.folderstorage.outlook.sql.Select;
 import com.openexchange.folderstorage.outlook.sql.Update;
@@ -342,8 +344,34 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Initialize memory tree
          */
         final Session session = storageParameters.getSession();
+        final int tree = Tools.getUnsignedInteger(treeId);
+        {
+            final Map<String, List<String>> name2ids = Duplicate.lookupDuplicateNames(session.getContextId(), tree, session.getUserId());
+            for (final List<String> folderIds : name2ids.values()) {
+                for (final String folderId : folderIds) {
+                    final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+                    final boolean started = folderStorage.startTransaction(storageParameters, true);
+                    try {
+                        folderStorage.deleteFolder(realTreeId, folderId, storageParameters);
+                        if (started) {
+                            folderStorage.commitTransaction(storageParameters);
+                        }
+                    } catch (final OXException e) {
+                        if (started) {
+                            folderStorage.rollback(storageParameters);
+                        }
+                        LOG.warn("Deleting folder "+folderId+" failed for tree " + treeId, e);
+                    } catch (final Exception e) {
+                        if (started) {
+                            folderStorage.rollback(storageParameters);
+                        }
+                        LOG.warn("Deleting folder "+folderId+" failed for tree " + treeId, e);
+                    }
+                }
+            }
+        }
         final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
-        final List<String> folderIds = memoryTable.getTree(Tools.getUnsignedInteger(treeId), session).getFolders();
+        final List<String> folderIds = memoryTable.getTree(tree, session).getFolders();
         for (final String folderId : folderIds) {
             final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
             final boolean started = folderStorage.startTransaction(storageParameters, true);

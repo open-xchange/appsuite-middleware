@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,83 +47,28 @@
  *
  */
 
-package com.openexchange.groupware.tasks;
+package com.openexchange.secret;
 
-import java.util.Collections;
-import java.util.Set;
 
 /**
- * Stores a folder that contains a task.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link SecretUsesPasswordChecker} - Checks if secret service is configured to use password.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Folder {
+public interface SecretUsesPasswordChecker {
 
     /**
-     * An empty set of folders.
+     * Checks if secret service is configured to use password
+     * 
+     * @return <code>true</code> if secret service is configured to use password; otherwise <code>false</code>
      */
-    static final Set<Folder> EMPTY = Collections.emptySet();
+    boolean usesPassword();
 
     /**
-     * Unique identifier of the folder.
+     * Gets the password-using secret service.
+     * 
+     * @return The password-using secret service
      */
-    private final int identifier;
+    SecretService passwordUsingSecretService();
 
-    /**
-     * Unique identifier of the user or <code>MAIN_FOLDER</code> if the folder
-     * is the main folder of the task.
-     */
-    private final int user;
-
-    /**
-     * Default constructor.
-     * @param folder unique identifier of the folder the task must appear in.
-     * @param user unique identifier of the user or <code>0</code> if the
-     * folder is the main folder of the task.
-     */
-    public Folder(final int folder, final int user) {
-        super();
-        this.identifier = folder;
-        this.user = user;
-    }
-
-    /**
-     * @return Returns the folder.
-     */
-    public int getIdentifier() {
-        return identifier;
-    }
-
-    /**
-     * @return Returns the user.
-     */
-    int getUser() {
-        return user;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean equals(final Object obj) {
-        if (!(obj instanceof Folder)) {
-            return false;
-        }
-        return identifier == ((Folder) obj).identifier;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return identifier;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return "TaskFolder: " + getIdentifier() + ", User: " + getUser();
-    }
 }

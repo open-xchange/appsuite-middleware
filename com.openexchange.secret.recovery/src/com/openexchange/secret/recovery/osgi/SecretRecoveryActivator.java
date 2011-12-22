@@ -53,12 +53,14 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
-import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
+import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -68,48 +70,75 @@ import com.openexchange.user.UserService;
  */
 public class SecretRecoveryActivator extends HousekeepingActivator {
 
-    private WhiteboardSecretMigrator migrator;
-    private WhiteboardSecretService secretService;
-    private WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
+    private volatile WhiteboardSecretMigrator migrator;
+    private volatile WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector;
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{CryptoService.class, UserService.class, SecretService.class};
+        return new Class[] { CryptoService.class, UserService.class, SecretService.class, SecretUsesPasswordChecker.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        migrator = new WhiteboardSecretMigrator(context);
-        
-        secretService = new WhiteboardSecretService(context);
-        whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
-        
-        final CryptoService cryptoService = getService(CryptoService.class);
-        final UserService userService = getService(UserService.class);
-        
-        final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
-        
-        registerService(SecretInconsistencyDetector.class, detector, null);
-        
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
-        
-        
-        registerService(SecretMigrator.class, migrator, properties);
-        registerService(SecretMigrator.class, detector); // Needs Migration as well
-   
-        secretService.open();
-        migrator.open();
-        whiteboardEncryptedItemDetector.open();
-        
+        final SecretUsesPasswordChecker checker = getService(SecretUsesPasswordChecker.class);
+        final boolean usesPassword = checker.usesPassword();
+        if (usesPassword) {
+            /*
+             * Initialize whiteboard services
+             */
+            final WhiteboardSecretMigrator migrator = this.migrator = new WhiteboardSecretMigrator(context);
+            final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = this.whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
+            /*
+             * Register SecretInconsistencyDetector
+             */
+            final CryptoService cryptoService = getService(CryptoService.class);
+            final UserService userService = getService(UserService.class);
+            final SecretService secretService = checker.passwordUsingSecretService();
+            final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
+            registerService(SecretInconsistencyDetector.class, detector);
+            /*
+             * Register SecretMigrator
+             */
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(1000));
+            registerService(SecretMigrator.class, migrator, properties);
+            registerService(SecretMigrator.class, detector); // Needs Migration as well
+            /*
+             * Open whiteboard services
+             */
+            migrator.open();
+            whiteboardEncryptedItemDetector.open();
+        } else {
+            registerService(SecretInconsistencyDetector.class, new SecretInconsistencyDetector() {
+                
+                @Override
+                public String isSecretWorking(final ServerSession session) throws OXException {
+                    return null;
+                }
+            });
+            registerService(SecretMigrator.class, new SecretMigrator() {
+                
+                @Override
+                public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
+                    // No nothing
+                }
+            });
+        }
     }
     
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-        secretService.close();
-        migrator.close();
-        whiteboardEncryptedItemDetector.close();
+        final WhiteboardSecretMigrator migr = migrator;
+        if (null != migr) {
+            migr.close();
+            migrator = null;
+        }
+        final WhiteboardEncryptedItemDetector detector = whiteboardEncryptedItemDetector;
+        if (null != detector) {
+            detector.close();
+            whiteboardEncryptedItemDetector = null;
+        }
     }
 
 }

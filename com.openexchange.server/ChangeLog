@@ -2,6 +2,15 @@
 
  - Fix for bug 20782: Dealing in the database pool with connections that are broken.
 
+* 2011-12-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21044: Fixed regex
+ - Fix for bug 21049: Try best-guess conversion of HTML whitespaces to text whitespaces on html2text conversion
+ - Fix for bug 20872: Added new USM cache region
+ - Fix for bug 20788: Performing fast-secret-migration at the very end to ensure everything has been migrated then
+ - Fix for bug 20855: Sanity check on login to delete duplicate virtual folders which break OL
+ - Fix for bug 21055: Fixed quoting of a reply
+
 * 2011-12-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 20757: Using clientUserAgent login parameter in favour of User-Agent header if provided with the login request.

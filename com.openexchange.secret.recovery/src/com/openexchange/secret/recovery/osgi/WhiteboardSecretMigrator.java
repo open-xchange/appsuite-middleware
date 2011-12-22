@@ -56,6 +56,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -76,12 +77,17 @@ public class WhiteboardSecretMigrator extends ServiceTracker<SecretMigrator, Sec
     public void migrate(final String oldSecret, final String newSecret, final ServerSession session) throws OXException {
         final Collection<SecretMigrator> services = getTracked().values();
         OXException exception = null;
+        FastSecretInconsistencyDetector special = null;
         for (final SecretMigrator migrator : services) {
             if (migrator == this) {
                 continue;
             }
             try {
-                migrator.migrate(oldSecret, newSecret, session);
+                if (migrator instanceof FastSecretInconsistencyDetector) {
+                    special = (FastSecretInconsistencyDetector) migrator;
+                } else {
+                    migrator.migrate(oldSecret, newSecret, session);
+                }
             } catch (final OXException x) {
                 exception = x;
                 LOG.error(x.getMessage(), x);
@@ -89,6 +95,9 @@ public class WhiteboardSecretMigrator extends ServiceTracker<SecretMigrator, Sec
         }
         if (exception != null) {
             throw exception;
+        }
+        if (null != special) {
+            special.migrate(oldSecret, newSecret, session);
         }
     }
 }

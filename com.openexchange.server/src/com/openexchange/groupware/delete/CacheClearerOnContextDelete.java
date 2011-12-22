@@ -91,7 +91,7 @@ public final class CacheClearerOnContextDelete extends ContextDelete {
         /*
          * Clear foreign caches
          */
-        final List<String> cacheNames = Arrays.asList("USMOXObjectIDToUUIDCache", "USMUUIDToOXObjectIDCache");
+        final List<String> cacheNames = Arrays.asList("USMOXObjectIDToUUIDCache", "USMUUIDToOXObjectIDCache", "USMUUIDCache");
         for (final String cacheName : cacheNames) {
             try {
                 final Cache cache = cacheService.getCache(cacheName);

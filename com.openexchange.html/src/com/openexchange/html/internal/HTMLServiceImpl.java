@@ -458,8 +458,27 @@ public final class HTMLServiceImpl implements HTMLService {
 //        HTMLParser.parse(htmlContent, handler);
 //        return handler.getText();
 
-        final String prepared = insertBlockquoteMarker(htmlContent);
-        return quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).toString());
+        String prepared = insertBlockquoteMarker(htmlContent);
+        prepared = insertSpaceMarker(prepared);
+        String text = quoteText(new Renderer(new Segment(new Source(prepared), 0, prepared.length())).toString());
+        text = whitespaceText(text);
+        // Drop heading whitespaces
+        text = text.replaceFirst("^ *", "");
+        return text;
+    }
+
+    private static final String SPACE_MARKER = "--?space?--";
+
+    private static final Pattern PATTERN_SPACE_MARKER = Pattern.compile(Pattern.quote(SPACE_MARKER));
+
+    private static String whitespaceText(final String text) {
+        return PATTERN_SPACE_MARKER.matcher(text).replaceAll(" ");
+    }
+
+    private static final Pattern PATTERN_HTML_MANDATORY_SPACE = Pattern.compile("(?:&nbsp;|&#160;)", Pattern.CASE_INSENSITIVE);
+
+    private static String insertSpaceMarker(final String html) {
+        return PATTERN_HTML_MANDATORY_SPACE.matcher(html).replaceAll(SPACE_MARKER);
     }
 
     private static final String CRLF = "\r\n";
@@ -503,20 +522,12 @@ public final class HTMLServiceImpl implements HTMLService {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_GREEDY_BLOCKQUOTE = Pattern.compile("<blockquote.*?>(.*)</blockquote>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+    private static final Pattern PATTERN_BLOCKQUOTE_START = Pattern.compile("<blockquote.*?>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_BLOCKQUOTE_END = Pattern.compile("</blockquote>", Pattern.CASE_INSENSITIVE);
 
     private static String insertBlockquoteMarker(final String html) {
-        final Matcher m = PATTERN_GREEDY_BLOCKQUOTE.matcher(html);
-        if (!m.find()) {
-            return html;
-        }
-        final StringBuffer sb = new StringBuffer(html.length());
-        do {
-            final String surrounded = BLOCKQUOTE_MARKER+m.group(1)+BLOCKQUOTE_MARKER_END;
-            m.appendReplacement(sb, Matcher.quoteReplacement(insertBlockquoteMarker(surrounded)));
-        } while (m.find());
-        m.appendTail(sb);
-        return sb.toString();
+        return PATTERN_BLOCKQUOTE_END.matcher(PATTERN_BLOCKQUOTE_START.matcher(html).replaceAll(BLOCKQUOTE_MARKER)).replaceAll(BLOCKQUOTE_MARKER_END);
     }
 
     private static final String HTML_BR = "<br />";

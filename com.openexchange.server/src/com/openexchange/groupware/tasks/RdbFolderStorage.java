@@ -81,7 +81,7 @@ public class RdbFolderStorage extends FolderStorage {
      * {@inheritDoc}
      */
     @Override
-    void insertFolder(final Context ctx, final Connection con,
+    public void insertFolder(final Context ctx, final Connection con,
         final int taskId, final Set<Folder> folders, final StorageType type)
         throws OXException {
         PreparedStatement stmt = null;
@@ -108,7 +108,7 @@ public class RdbFolderStorage extends FolderStorage {
      * {@inheritDoc}
      */
     @Override
-    Set<Folder> selectFolder(final Context ctx, final Connection con,
+    public Set<Folder> selectFolder(final Context ctx, final Connection con,
         final int taskId, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -133,7 +133,7 @@ public class RdbFolderStorage extends FolderStorage {
      * {@inheritDoc}
      */
     @Override
-    Folder selectFolderByUser(final Context ctx, final Connection con,
+    public Folder selectFolderByUser(final Context ctx, final Connection con,
         final int taskId, final int userId, final StorageType type)
         throws OXException {
         PreparedStatement stmt = null;
@@ -245,7 +245,7 @@ public class RdbFolderStorage extends FolderStorage {
      * {@inheritDoc}
      */
     @Override
-    int[][] searchFolderByUser(final Context ctx, final Connection con,
+    public int[][] searchFolderByUser(final Context ctx, final Connection con,
         final int userId, final StorageType type) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;

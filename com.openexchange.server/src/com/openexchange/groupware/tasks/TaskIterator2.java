@@ -94,6 +94,8 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
 
     private final StorageType type;
 
+    private Connection con;
+
     private final PreRead<Task> preread = new PreRead<Task>();
 
     private final Queue<Task> ready = new LinkedList<Task>();
@@ -139,8 +141,16 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         modifyAdditionalAttributes(tmp2);
         this.additionalAttributes = Collections.toArray(tmp2);
         this.type = type;
+        this.con = null;
         runner = new Thread(this);
         runner.start();
+    }
+
+    TaskIterator2(final Context ctx, final int userId, final String sql,
+        final StatementSetter setter, final int folderId, final int[] attributes,
+        final StorageType type, final Connection con) {
+        this(ctx, userId, sql, setter, folderId, attributes, type);
+        this.con = con;
     }
 
     private void modifyAdditionalAttributes(final List<Integer> additional) {
@@ -274,12 +284,17 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     @Override
     public void run() {
         final Connection con;
-        try {
-            con = DBPool.pickup(ctx);
-        } catch (final OXException e) {
-            preread.finished();
-            exc = e;
-            return;
+        boolean externalConnection = false;
+        if (this.con == null) {
+            try {
+                con = DBPool.pickup(ctx);
+            } catch (final OXException e) {
+                preread.finished();
+                exc = e;
+                return;
+            }
+        } else {
+            con = this.con;
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -310,8 +325,10 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             exc = TaskExceptionCode.THREAD_ISSUE.create(t);
         } finally {
             preread.finished();
-            DBUtils.closeSQLStuff(result, stmt);
-            DBPool.closeReaderSilent(ctx, con);
+            if (!externalConnection) {
+                DBUtils.closeSQLStuff(result, stmt);
+                DBPool.closeReaderSilent(ctx, con);
+            }
         }
     }
 
