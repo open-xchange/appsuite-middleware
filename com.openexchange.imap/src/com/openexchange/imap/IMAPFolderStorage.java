@@ -2557,7 +2557,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
             final long[] uids;
             try {
-                uids = IMAPCommandsCollection.seqNums2UID(toMove, ARGS_ALL, toMove.getMessageCount());
+                final int messageCount = toMove.getMessageCount();
+                uids = IMAPCommandsCollection.seqNums2UID(toMove, (1 == messageCount ? new String[] { "1" } : ARGS_ALL), messageCount);
             } finally {
                 toMove.close(false);
             }

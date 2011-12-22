@@ -166,7 +166,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         for (int i = 0; i < length; i++) {
             seqNum2index.put(seqNums[i], i);
         }
-        args = length == messageCount ? ARGS_ALL : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
+        args = length == messageCount ? (1 == length ? new String[] { "1" } : ARGS_ALL) : IMAPNumArgSplitter.splitSeqNumArg(seqNums, false, LENGTH + command.length());
         if (0 == length) {
             returnDefaultValue = true;
         }
@@ -201,7 +201,7 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
             command = getFetchCommand(isRev1, fp, false);
-            args = ARGS_ALL;
+            args = (1 == length ? new String[] { "1" } : ARGS_ALL);
             uid = false;
         } else {
             command = getFetchCommand(isRev1, fp, false);
