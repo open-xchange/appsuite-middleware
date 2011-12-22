@@ -2,6 +2,7 @@
 
  - Fix for bug 21023: Fixed subscription of shared folder in Dovecot IMAP server
  - Fix for bug 21046: Fixed message set argument if IMAP folder contains only one message ("1:*" does not work for all IMAP servers then)
+ - Fix for bug 21051: Disabled default line-wrap on html2text conversion
 
 * 2011-12-22 - marcus.klein@open-xchange.com
 
