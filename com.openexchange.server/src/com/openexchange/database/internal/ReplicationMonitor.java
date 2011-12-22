@@ -84,12 +84,12 @@ public final class ReplicationMonitor {
     }
 
     interface FetchAndSchema {
-        Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws OXException;
+        Connection get(Pools pools, Assignment assign, boolean write, boolean usedAsRead) throws PoolingException, OXException;
     }
 
     static final FetchAndSchema TIMEOUT = new FetchAndSchema() {
         @Override
-        public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws OXException {
+        public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws PoolingException, OXException {
             final int poolId;
             if (write) {
                 poolId = assign.getWritePoolId();
@@ -97,12 +97,7 @@ public final class ReplicationMonitor {
                 poolId = assign.getReadPoolId();
             }
             final ConnectionPool pool = pools.getPool(poolId);
-            Connection retval;
-            try {
-                retval = pool.get();
-            } catch (final PoolingException e) {
-                throw new OXException(e);
-            }
+            final Connection retval = pool.get();
             try {
                 final String schema = assign.getSchema();
                 if (null != schema && !retval.getCatalog().equals(schema)) {
@@ -122,7 +117,7 @@ public final class ReplicationMonitor {
 
     static final FetchAndSchema NOTIMEOUT = new FetchAndSchema() {
         @Override
-        public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws OXException {
+        public Connection get(final Pools pools, final Assignment assign, final boolean write, final boolean usedAsRead) throws OXException, PoolingException {
             final int poolId;
             if (write) {
                 poolId = assign.getWritePoolId();
@@ -130,12 +125,7 @@ public final class ReplicationMonitor {
                 poolId = assign.getReadPoolId();
             }
             final ConnectionPool pool = pools.getPool(poolId);
-            final Connection retval;
-            try {
-                retval = pool.getWithoutTimeout();
-            } catch (final PoolingException e) {
-                throw new OXException(e);
-            }
+            final Connection retval = pool.getWithoutTimeout();
             try {
                 final String schema = assign.getSchema();
                 if (null != schema && !retval.getCatalog().equals(schema)) {
@@ -155,25 +145,45 @@ public final class ReplicationMonitor {
 
     static Connection checkActualAndFallback(final Pools pools, final Assignment assign, final FetchAndSchema fetch, final boolean write) throws OXException {
         Connection retval;
-        try {
-            retval = fetch.get(pools, assign, write, false);
-            incrementFetched(assign, write);
-        } catch (final OXException e) {
-            final OXException e1 = createException(assign, write, e);
-            // Immediately fail if connection to master is wanted or no fallback is there.
-            if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
-                throw e1;
-            }
-            // Try fallback to master.
-            LOG.warn(e1.getMessage(), e1);
+        long clientTransaction = 0;
+        int tries = 0;
+        do {
+            tries++;
             try {
-                retval = fetch.get(pools, assign, true, true);
-                incrementInstead();
-            } catch (final OXException e2) {
-                throw createException(assign, true, e2);
+                retval = fetch.get(pools, assign, write, false);
+                incrementFetched(assign, write);
+            } catch (PoolingException e) {
+                OXException e1 = createException(assign, write, e);
+                // Immediately fail if connection to master is wanted or no fallback is there.
+                if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
+                    throw e1;
+                }
+                // Try fallback to master.
+                LOG.warn(e1.getMessage(), e1);
+                try {
+                    retval = fetch.get(pools, assign, true, true);
+                    incrementInstead();
+                } catch (PoolingException e2) {
+                    throw createException(assign, true, e2);
+                }
             }
+            try {
+                clientTransaction = readTransaction(retval, assign.getContextId());
+            } catch (final OXException e) {
+                LOG.warn(e.getMessage(), e);
+                try {
+                    retval.close();
+                } catch (final SQLException e1) {
+                    OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                    LOG.error(e2.getMessage(), e2);
+                }
+                retval = null;
+            }
+        } while (null == retval && tries < 10);
+        if (null == retval) {
+            throw createException(assign, write, null);
         }
-        if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), readTransaction(retval, assign.getContextId()))) {
+        if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), clientTransaction)) {
             LOG.debug("Slave " + assign.getReadPoolId() + " is not actual. Using master " + assign.getWritePoolId() + " instead.");
             final Connection toReturn = retval;
             try {
@@ -185,7 +195,7 @@ public final class ReplicationMonitor {
                     final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                     LOG.error(e1.getMessage(), e1);
                 }
-            } catch (final OXException e) {
+            } catch (final PoolingException e) {
                 // Use not actual slave if master connection cannot be obtained.
                 final OXException e1 = createException(assign, true, e);
                 LOG.warn(e1.getMessage(), e1);
@@ -209,7 +219,7 @@ public final class ReplicationMonitor {
         if (write) {
             poolId = assign.getWritePoolId();
             if (poolId != assign.getReadPoolId() && !usedAsRead) {
-                ReplicationMonitor.increaseTransactionCounter(assign, con);
+                increaseTransactionCounter(assign, con);
             }
         } else {
             poolId = assign.getReadPoolId();

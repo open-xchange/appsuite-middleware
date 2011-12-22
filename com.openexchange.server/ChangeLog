@@ -1,3 +1,7 @@
+* 2011-12-22 - marcus.klein@open-xchange.com
+
+ - Fix for bug 20782: Dealing in the database pool with connections that are broken.
+
 * 2011-12-21 - marcus.klein@open-xchange.com
 
  - Fix for bug 20757: Using clientUserAgent login parameter in favour of User-Agent header if provided with the login request.
