@@ -1284,7 +1284,8 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException - if an error occurs in underlying protocol
      */
     public static boolean clearAllColorLabels(final IMAPFolder imapFolder, final long[] msgUIDs) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             /*
              * Empty folder...
              */
@@ -1297,7 +1298,7 @@ public final class IMAPCommandsCollection {
                 final String[] args;
                 final String format;
                 if (null == msgUIDs) {
-                    args = ARGS_ALL;
+                    args = (1 == messageCount ? new String[] { "1" } : ARGS_ALL);
                     format = TEMPL_STORE_FLAGS;
                 } else {
                     args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 160);
@@ -1342,7 +1343,8 @@ public final class IMAPCommandsCollection {
      * @throws MessagingException - if an error occurs in underlying protocol
      */
     public static boolean setColorLabel(final IMAPFolder imapFolder, final long[] msgUIDs, final String colorLabelFlag) throws MessagingException {
-        if (imapFolder.getMessageCount() == 0) {
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount == 0) {
             /*
              * Empty folder...
              */
@@ -1355,7 +1357,7 @@ public final class IMAPCommandsCollection {
                 final String[] args;
                 final String format;
                 if (null == msgUIDs) {
-                    args = ARGS_ALL;
+                    args = (1 == messageCount ? new String[] { "1" } : ARGS_ALL);
                     format = TEMPL_STORE_FLAGS;
                 } else {
                     args = IMAPNumArgSplitter.splitUIDArg(msgUIDs, false, 32 + colorLabelFlag.length());
@@ -2258,7 +2260,7 @@ public final class IMAPCommandsCollection {
                  * Execute command
                  */
                 final TLongIntHashMap seqNumMap = new TLongIntHashMap(length);
-                final String[] args = messageCount == length ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                final String[] args = messageCount == length ? (1 == messageCount ? new String[] { "1" } : ARGS_ALL) : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
@@ -2336,7 +2338,7 @@ public final class IMAPCommandsCollection {
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final TLongIntHashMap uid2seqNum = new TLongIntHashMap(uids.length);
-                final String[] args = messageCount == uids.length ? ARGS_ALL : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
+                final String[] args = messageCount == uids.length ? (1 == messageCount ? new String[] { "1" } : ARGS_ALL) : IMAPNumArgSplitter.splitUIDArg(uids, false, 16); // "UID FETCH <uids> (UID)"
                 final long start = System.currentTimeMillis();
                 for (int k = 0; k < args.length; k++) {
                     /*-
