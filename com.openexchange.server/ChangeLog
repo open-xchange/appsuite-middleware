@@ -1,6 +1,7 @@
 * 2011-12-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 21063: Dropped "synchronized" keyword from SSL socket factory creation routine
+ - Fix for bug 21065: Introduced update task to add necessary (cid, uid) index to calendar tables
 
 * 2011-12-22 - thorben.betten@open-xchange.com
 
