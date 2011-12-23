@@ -68,6 +68,25 @@ import com.openexchange.exception.OXException;
  */
 public final class CalendarVolatileCache {
 
+    /**
+     * References the volatily cached query, element, whatever. 
+     */
+    public static enum CacheType {
+        getAllPrivateAppointmentAndFolderIdsForUser(1),
+        
+        ;
+
+        private final int num;
+
+        private CacheType(final int num) {
+            this.num = num;
+        }
+
+        protected int getNum() {
+            return num;
+        }
+    }
+
     public static final String REGION = "CalendarVolatileCache";
 
     private static final AtomicReference<CalendarVolatileCache> INSTANCE_REF = new AtomicReference<CalendarVolatileCache>();
@@ -356,25 +375,25 @@ public final class CalendarVolatileCache {
     /**
      * New cache key for given <code>int</code> pair.
      * 
-     * @param int1 The first <code>int</code> value
-     * @param int2 The second <code>int</code> value
+     * @param cacheType The cache type
+     * @param int2 An arbitrary <code>int</code> value
      * @return The cache key or <code>null</code>
      */
-    public CacheKey newCacheKey(final int int1, final int int2) {
+    public CacheKey newCacheKey(final CacheType cacheType, final int int2) {
         final Cache cache = this.cache;
-        return null == cache ? null : cache.newCacheKey(int1, int2);
+        return null == cache ? null : cache.newCacheKey(cacheType.getNum(), int2);
     }
 
     /**
      * New cache key.
      * 
-     * @param intVal An <code>int</code> value
+     * @param cacheType The cache type
      * @param objs Arbitrary further keys
      * @return The cache key or <code>null</code>
      */
-    public CacheKey newCacheKey(final int intVal, final Serializable... objs) {
+    public CacheKey newCacheKey(final CacheType cacheType, final Serializable... objs) {
         final Cache cache = this.cache;
-        return null == cache ? null : cache.newCacheKey(intVal, objs);
+        return null == cache ? null : cache.newCacheKey(cacheType.getNum(), objs);
     }
 
 }

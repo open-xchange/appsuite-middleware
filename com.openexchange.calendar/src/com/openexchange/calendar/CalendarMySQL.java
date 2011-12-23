@@ -77,6 +77,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.cache.Attribute;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
+import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.calendar.storage.SQL;
 import com.openexchange.event.impl.EventClient;
@@ -481,7 +482,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     public final SearchIterator<List<Integer>> getAllPrivateAppointmentAndFolderIdsForUser(final Context c, final int id, final Connection readcon) throws SQLException {
         try {
             final CalendarVolatileCache cache = CalendarVolatileCache.getInstance();
-            final CacheKey key = cache.newCacheKey(1, id);
+            final CacheKey key = cache.newCacheKey(CacheType.getAllPrivateAppointmentAndFolderIdsForUser, id);
             final String gid = String.valueOf(c.getContextId());
             List<List<Integer>> list = cache.getFromGroup(key, gid);
             if (null == list) {
