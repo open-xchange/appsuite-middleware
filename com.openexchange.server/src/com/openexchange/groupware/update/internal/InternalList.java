@@ -420,6 +420,9 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.ContactAddUIDValueTask(),
 
         // Adds UIDs to tasks.
-        new com.openexchange.groupware.update.tasks.TasksAddUidColumnTask()
+        new com.openexchange.groupware.update.tasks.TasksAddUidColumnTask(),
+
+        // Adds UID indexes.
+        new com.openexchange.groupware.update.tasks.CalendarAddUIDIndexTask()
     };
 }
