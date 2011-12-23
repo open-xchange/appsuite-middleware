@@ -50,7 +50,9 @@
 package com.openexchange.mail;
 
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -83,6 +85,15 @@ public final class MailProviderRegistry {
      */
     private MailProviderRegistry() {
         super();
+    }
+
+    /**
+     * Gets registered mail providers' protocols
+     * 
+     * @return The protocols
+     */
+    public static List<Protocol> getProtocols() {
+        return new ArrayList<Protocol>(PROVIDERS.keySet());
     }
 
     /**
