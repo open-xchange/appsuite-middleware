@@ -65,17 +65,17 @@ import org.apache.commons.logging.LogFactory;
 /**
  * This ssl socket factory creates a ssl context that trusts all certificates and uses then this context to create a ssl socket factory that
  * will trust all certificates.
- *
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class TrustAllSSLSocketFactory extends SSLSocketFactory {
+public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
 
     private static final Log LOG = LogFactory.getLog(TrustAllSSLSocketFactory.class);
 
     /**
      * This factory will trust all certificates.
      */
-    private SSLSocketFactory factory;
+    private final SSLSocketFactory factory;
 
     /**
      * This constructor creates a ssl context with the TrustAllManager and uses the ssl socket factory from this ssl context.
@@ -88,12 +88,19 @@ public class TrustAllSSLSocketFactory extends SSLSocketFactory {
             factory = context.getSocketFactory();
         } catch (final NoSuchAlgorithmException e) {
             LOG.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         } catch (final KeyManagementException e) {
             LOG.error(e.getMessage(), e);
+            throw new IllegalStateException(e.getMessage(), e);
         }
     }
 
-    public static synchronized SSLSocketFactory getDefault() {
+    /**
+     * Gets a new trust-all SSL socket factory.
+     * 
+     * @return A new trust-all SSL socket factory
+     */
+    public static SSLSocketFactory getDefault() {
         return new TrustAllSSLSocketFactory();
     }
 
