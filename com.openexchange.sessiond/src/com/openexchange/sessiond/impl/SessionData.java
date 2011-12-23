@@ -63,7 +63,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -101,7 +100,8 @@ final class SessionData {
     // This is used to guard against potentially slow serial searches of the long term sessions
     private final Set<UserKey> longTermUserGuardian = new HashSet<UserKey>();
 
-    private final Lock longTermLock = new ReentrantLock();
+    private final Lock wlongTermLock;
+    private final Lock rlongTermLock;
 
     SessionData(final long containerCount, final int maxSessions, final long randomTokenTimeout, final long longTermContainerCount, final boolean autoLogin) {
         super();
@@ -111,9 +111,12 @@ final class SessionData {
 
         sessionList = new LinkedList<SessionContainer>();
         randoms = new ConcurrentHashMap<String, String>();
-        final ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
+        ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
         rlock = rwlock.readLock();
         wlock = rwlock.writeLock();
+        rwlock = new ReentrantReadWriteLock(true);
+        wlongTermLock = rwlock.writeLock();
+        rlongTermLock = rwlock.readLock();
         for (int i = 0; i < containerCount; i++) {
             sessionList.add(0, new SessionContainer());
         }
@@ -132,31 +135,43 @@ final class SessionData {
         } finally {
             wlock.unlock();
         }
-        longTermLock.lock();
+        wlongTermLock.lock();
         try {
             longTermList.clear();
             longTermUserGuardian.clear();
         } finally {
-            longTermLock.unlock();
+            wlongTermLock.unlock();
         }
     }
 
     void checkEmAll() {
         // Long-term list
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             final long lifeTime = SessionHandler.config.getLongLifeTime();
             for (final SessionContainer container : sessionList) {
                 final long stamp = System.currentTimeMillis() - lifeTime;
                 for (final SessionControl sessionControl : container.getSessionControls()) {
-                    final long lastAccessed = sessionControl.getLastAccessed();
+                    long lastAccessed = sessionControl.getLastAccessed();
                     if (lastAccessed < stamp) {
-                        container.removeSessionById(sessionControl.getSession().getSessionID());
+                        // Upgrade lock
+                        rlongTermLock.unlock();
+                        wlongTermLock.lock();
+                        try {
+                            lastAccessed = sessionControl.getLastAccessed();
+                            if (lastAccessed < stamp) {
+                                container.removeSessionById(sessionControl.getSession().getSessionID());
+                            }
+                        } finally {
+                            // Down-grade lock
+                            rlock.lock();
+                            wlock.unlock();
+                        }
                     }
                 }
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
         // Short-term list
         rlock.lock();
@@ -179,13 +194,13 @@ final class SessionData {
                                 container.removeSessionById(session.getSessionID());
                                 if (autoLogin) {
                                     // Add to long-term list
-                                    longTermLock.lock();
+                                    wlongTermLock.lock();
                                     try {
                                         final Map<String, SessionControl> first = longTermList.getFirst();
                                         first.put(session.getSessionID(), sessionControl);
                                         longTermUserGuardian.add(new UserKey(session.getUserId(), session.getContextId()));
                                     } finally {
-                                        longTermLock.unlock();
+                                        wlongTermLock.unlock();
                                     }
                                 }
                             }
@@ -215,7 +230,7 @@ final class SessionData {
             final List<SessionControl> retval = new ArrayList<SessionControl>(maxSessions);
             retval.addAll(sessionList.removeLast().getSessionControls());
             if (autoLogin) {
-                longTermLock.lock();
+                wlongTermLock.lock();
                 try {
                     final Map<String, SessionControl> first = longTermList.getFirst();
                     for (final SessionControl control : retval) {
@@ -223,7 +238,7 @@ final class SessionData {
                         longTermUserGuardian.add(new UserKey(control.getSession().getUserId(), control.getSession().getContextId()));
                     }
                 } finally {
-                    longTermLock.unlock();
+                    wlongTermLock.unlock();
                 }
             }
             return retval;
@@ -233,7 +248,7 @@ final class SessionData {
     }
 
     List<SessionControl> rotateLongTerm() {
-        longTermLock.lock();
+        wlongTermLock.lock();
         try {
             longTermList.addFirst(new HashMap<String, SessionControl>());
             final List<SessionControl> retval = new ArrayList<SessionControl>();
@@ -243,7 +258,7 @@ final class SessionData {
             }
             return retval;
         } finally {
-            longTermLock.unlock();
+            wlongTermLock.unlock();
         }
     }
 
@@ -266,11 +281,11 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             return hasLongTermSession(userId, context.getContextId());
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
     }
 
@@ -292,7 +307,7 @@ final class SessionData {
         } finally {
             wlock.unlock();
         }
-        longTermLock.lock();
+        wlongTermLock.lock();
         try {
             if (!hasLongTermSession(userId, contextId)) {
                 return retval.toArray(new SessionControl[retval.size()]);
@@ -309,7 +324,7 @@ final class SessionData {
                 }
             }
         } finally {
-            longTermLock.unlock();
+            wlongTermLock.unlock();
         }
         return retval.toArray(new SessionControl[retval.size()]);
     }
@@ -327,7 +342,7 @@ final class SessionData {
             rlock.unlock();
         }
         if (includeLongTerm) {
-            longTermLock.lock();
+            rlongTermLock.lock();
             try {
                 if (!hasLongTermSession(userId, contextId)) {
                     return null;
@@ -341,7 +356,7 @@ final class SessionData {
                     }
                 }
             } finally {
-                longTermLock.unlock();
+                rlongTermLock.unlock();
             }
         }
         return null;
@@ -359,7 +374,7 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             if (!hasLongTermSession(userId, contextId)) {
                 return null;
@@ -373,7 +388,7 @@ final class SessionData {
                 }
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
         return null;
     }
@@ -391,7 +406,7 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             if (!hasLongTermSession(userId, contextId)) {
                 return retval.toArray(new SessionControl[retval.size()]);
@@ -405,7 +420,7 @@ final class SessionData {
                 }
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
         return retval.toArray(new SessionControl[retval.size()]);
     }
@@ -421,7 +436,7 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             if (!hasLongTermSession(userId, contextId)) {
                 return count;
@@ -435,7 +450,7 @@ final class SessionData {
                 }
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
         return count;
     }
@@ -455,7 +470,7 @@ final class SessionData {
                 rlock.unlock();
             }
         }
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 for (final SessionControl control : longTermMap.values()) {
@@ -465,7 +480,7 @@ final class SessionData {
                 }
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
     }
 
@@ -497,13 +512,13 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 count += longTermMap.size();
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
         return count;
     }
@@ -532,7 +547,7 @@ final class SessionData {
         if (null != control) {
             return control;
         }
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 if (longTermMap.containsKey(sessionId)) {
@@ -541,7 +556,7 @@ final class SessionData {
                 }
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
         return control;
     }
@@ -613,13 +628,13 @@ final class SessionData {
 
     List<SessionControl> getLongTermSessions() {
         final List<SessionControl> retval = new ArrayList<SessionControl>();
-        longTermLock.lock();
+        rlongTermLock.lock();
         try {
             for (final Map<String, SessionControl> longTermMap : longTermList) {
                 retval.addAll(longTermMap.values());
             }
         } finally {
-            longTermLock.unlock();
+            rlongTermLock.unlock();
         }
         return retval;
     }
@@ -655,7 +670,7 @@ final class SessionData {
     void move2FirstContainerLongTerm(final String sessionId) {
         SessionControl control = null;
         wlock.lock();
-        longTermLock.lock();
+        wlongTermLock.lock();
         try {
             boolean movedSession = false;
             for (int i = 0; i < longTermList.size() && !movedSession; i++) {
@@ -679,7 +694,7 @@ final class SessionData {
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            longTermLock.unlock();
+            wlongTermLock.unlock();
             wlock.unlock();
         }
         unscheduleTask2MoveSession2FirstContainer(sessionId);
