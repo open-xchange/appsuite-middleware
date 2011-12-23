@@ -1881,7 +1881,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 /*
                  * Remove from session storage
                  */
-                IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, fullName);
+                if (IMAPSessionStorageAccess.isEnabled()) {
+                    IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, fullName);
+                }
                 f.open(Folder.READ_WRITE);
                 try {
                     int msgCount = f.getMessageCount();
@@ -2590,7 +2592,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         // ListLsubCache.clearCache(accountId, session);
         RightsCache.removeCachedRights(toMove, session, accountId);
         UserFlagsCache.removeUserFlags(toMove, session, accountId);
-        IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);
+        if (IMAPSessionStorageAccess.isEnabled()) {
+            IMAPSessionStorageAccess.removeDeletedFolder(accountId, session, moveFullname);
+        }
         return newFolder;
     }
 
@@ -2799,6 +2803,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private void removeSessionData(final Folder f) {
+        if (!IMAPSessionStorageAccess.isEnabled()) {
+            return;
+        }
         try {
             final Folder[] fs = f.list();
             for (int i = 0; i < fs.length; i++) {

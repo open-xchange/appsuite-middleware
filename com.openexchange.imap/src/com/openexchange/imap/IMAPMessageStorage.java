@@ -1141,7 +1141,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             final boolean backup = (!isSubfolderOf(fullName, trashFullname, getSeparator(imapFolder)));
             blockwiseDeletion(msgUIDs, backup, backup ? trashFullname : null);
-            IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
+            if (IMAPSessionStorageAccess.isEnabled()) {
+                IMAPSessionStorageAccess.removeDeletedSessionData(msgUIDs, accountId, session, fullName);
+            }
             notifyIMAPFolderModification(fullName);
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
@@ -1440,7 +1442,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     destFolder.close(false);
                 }
             }
-            if (move) {
+            if (move && IMAPSessionStorageAccess.isEnabled()) {
                 IMAPSessionStorageAccess.removeDeletedSessionData(mailIds, accountId, session, sourceFullName);
             }
             return result;

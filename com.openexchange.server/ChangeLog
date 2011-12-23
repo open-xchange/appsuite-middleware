@@ -3,6 +3,7 @@
  - Fix for bug 21063: Dropped "synchronized" keyword from SSL socket factory creation routine
  - Fix for bug 21065: Introduced update task to add necessary (cid, uid) index to calendar tables
  - Fix for bug 21068: Introduced read-write lock for long-term session container to support concurrent read-only accesses
+ - Fix for bug 21070: Suppress invocation of disabled acrion=updates methods for IMAP bundle
 
 * 2011-12-22 - thorben.betten@open-xchange.com
 

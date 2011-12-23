@@ -70,6 +70,15 @@ public final class IMAPSessionStorageAccess {
         super();
     }
 
+    /**
+     * Checks if enabled.
+     * 
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public static boolean isEnabled() {
+        return ENABLED;
+    }
+
     private static IMAPSessionStorage ensureExistence(final Session session) {
         return new IMAPSessionStorage(session);
     }
