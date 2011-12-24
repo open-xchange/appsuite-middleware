@@ -69,7 +69,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
-    private final PriorityBlockingQueue queue;
+    private final InheritedPriorityBlockingQueue queue;
 
     protected final String server;
 
@@ -84,7 +84,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
      */
     public UnboundedIMAPStoreContainer(final String server, final int port, final String login, final String pw) {
         super();
-        queue = new PriorityBlockingQueue();
+        queue = new InheritedPriorityBlockingQueue();
         this.login = login;
         this.port = port;
         this.pw = pw;
@@ -162,7 +162,7 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         }
     }
 
-    private static class PriorityBlockingQueue extends AbstractQueue<IMAPStoreWrapper> implements BlockingQueue<IMAPStoreWrapper>, java.io.Serializable {
+    private static class InheritedPriorityBlockingQueue extends AbstractQueue<IMAPStoreWrapper> implements BlockingQueue<IMAPStoreWrapper>, java.io.Serializable {
 
         private static final long serialVersionUID = 1337510919245408276L;
 
@@ -173,10 +173,10 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
         private final Condition notEmpty;
 
         /**
-         * Creates a <tt>PriorityBlockingQueue</tt> with the default initial capacity (11) that orders its elements according to their
+         * Creates a <tt>InheritedPriorityBlockingQueue</tt> with the default initial capacity (11) that orders its elements according to their
          * {@linkplain Comparable natural ordering}.
          */
-        public PriorityBlockingQueue() {
+        protected InheritedPriorityBlockingQueue() {
             super();
             q = new PriorityQueue<IMAPStoreWrapper>();
             lock = new ReentrantLock(true);
