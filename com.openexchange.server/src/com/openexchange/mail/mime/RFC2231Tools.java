@@ -137,16 +137,25 @@ public final class RFC2231Tools {
         } else if (!Charset.isSupported(charset)) {
             return encoded;
         }
-        final char[] chars = encoded.toCharArray();
-        final ByteBuffer bb = ByteBuffer.allocate(chars.length);
-        for (int i = 0; i < chars.length; i++) {
-            final char c = chars[i];
-            if ((c == '%') && isHexDigit(chars[i + 1]) && isHexDigit(chars[i + 2])) {
-                bb.put((byte) ((Character.digit(chars[i + 1], RADIX) << 4) + Character.digit(chars[i + 2], RADIX)));
-                i += 2;
+        final int length = encoded.length();
+        final ByteBuffer bb = ByteBuffer.allocate(length);
+        int i = 0;
+        while (i < length) {
+            final char c = encoded.charAt(i);
+            if ('%' == c) {
+                if ((i < (length - 2)) && isHexDigit(encoded.charAt(i + 1)) && isHexDigit(encoded.charAt(i + 2))) {
+                    bb.put((byte) ((Character.digit(encoded.charAt(i + 1), RADIX) << 4) + Character.digit(encoded.charAt(i + 2), RADIX)));
+                    i += 2;
+                } else if ((i < (length - 1)) && isHexDigit(encoded.charAt(i + 1))) {
+                    bb.put((byte) (Character.digit(encoded.charAt(i + 1), RADIX)));
+                    i += 1;
+                } else {
+                    bb.put((byte) c);
+                }
             } else {
                 bb.put((byte) c);
             }
+            i++;
         }
         bb.flip();
         final Charset cs = Charsets.forName(charset);
