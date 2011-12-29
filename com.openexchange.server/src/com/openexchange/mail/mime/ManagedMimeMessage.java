@@ -74,9 +74,9 @@ public final class ManagedMimeMessage extends MimeMessage {
 
     private static final int DEFAULT_MAX_INMEMORY_SIZE = 131072; // 128KB
 
-    private ManagedFile managedFile;
+    private volatile ManagedFile managedFile;
 
-    private File file;
+    private volatile File file;
 
     /**
      * Initializes a new {@link ManagedMimeMessage} with default in-memory size of 128KB.
