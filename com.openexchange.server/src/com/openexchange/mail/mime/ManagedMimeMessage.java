@@ -168,6 +168,12 @@ public final class ManagedMimeMessage extends MimeMessage {
         saved = true;
     }
 
+    @Override
+    protected void finalize() throws Throwable {
+        cleanUp();
+        super.finalize();
+    }
+
     /**
      * Cleans up this managed MIME message.
      */
