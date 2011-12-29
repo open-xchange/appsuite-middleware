@@ -231,15 +231,19 @@ public class MIMEMailException extends OXException {
                     final SMTPSendFailedException smtpExc = (SMTPSendFailedException) nextException;
                     final Address[] invalidAddresses = smtpExc.getInvalidAddresses();
                     if (null == invalidAddresses || invalidAddresses.length == 0) {
-                        return MIMEMailExceptionCode.SEND_FAILED_MSG.create(exc, exc.getMessage());
+                        return MIMEMailExceptionCode.SEND_FAILED_MSG_EXT.create(exc, exc.getMessage(), '('+smtpExc.getMessage()+')');
                     }
+                }
+                String serverInfo = null;
+                if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
+                    serverInfo = nextException.getMessage();
                 }
                 final Address[] addrs = exc.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {
                     // No invalid addresses available
                     return MIMEMailExceptionCode.SEND_FAILED_MSG.create(exc, exc.getMessage());
                 }
-                return MIMEMailExceptionCode.SEND_FAILED.create(exc, Arrays.toString(addrs));
+                return MIMEMailExceptionCode.SEND_FAILED_EXT.create(exc, Arrays.toString(addrs), null == serverInfo ? "" : '('+serverInfo+')');
             } else if (e instanceof javax.mail.StoreClosedException) {
                 if (null != mailConfig && null != session) {
                     return MIMEMailExceptionCode.STORE_CLOSED_EXT.create(

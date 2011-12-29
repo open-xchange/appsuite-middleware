@@ -118,6 +118,10 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
      */
     SEND_FAILED("Message could not be sent to the following recipients: %1$s", Category.CATEGORY_USER_INPUT, 1013),
     /**
+     * Message could not be sent to following recipients: %1$s %2$s (arbitrary server information)
+     */
+    SEND_FAILED_EXT("Message could not be sent to the following recipients: %1$s %2$s", Category.CATEGORY_USER_INPUT, 1013),
+    /**
      * Store already closed: %1$s
      */
     STORE_CLOSED("Store already closed: %1$s", Category.CATEGORY_ERROR, 1014),
@@ -209,6 +213,10 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
      * Message could not be sent: %1$s
      */
     SEND_FAILED_MSG("Message could not be sent: %1$s", Category.CATEGORY_ERROR, 1028),
+    /**
+     * Message could not be sent: %1$s %2$s (arbitrary server information)
+     */
+    SEND_FAILED_MSG_EXT("Message could not be sent: %1$s %2$s", Category.CATEGORY_ERROR, 1028),
     /**
      * Message cannot be displayed.
      */
