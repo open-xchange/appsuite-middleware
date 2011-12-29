@@ -341,6 +341,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(sourceAccountId);
         final int destAccountId = dest.getAccountId();
         if (sourceAccountId == destAccountId) {
+            final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            MailMessage[] flagInfo = null;
             if (move) {
                 /*
                  * Check for spam action; meaning a move/copy from/to spam folder
@@ -355,6 +357,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 if (spamAction != SPAM_NOOP) {
                     if (spamAction == SPAM_SPAM) {
+                        flagInfo = messageStorage.getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
                         /*
                          * Handle spam
                          */
@@ -365,6 +368,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             false,
                             session);
                     } else {
+                        flagInfo = messageStorage.getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
                         /*
                          * Handle ham.
                          */
@@ -379,10 +383,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             final String[] maildIds;
             if (move) {
-                maildIds = mailAccess.getMessageStorage().moveMessages(sourceFullname, destFullname, msgUIDs, false);
+                maildIds = messageStorage.moveMessages(sourceFullname, destFullname, msgUIDs, false);
                 postEvent(sourceAccountId, sourceFullname, true);
             } else {
-                maildIds = mailAccess.getMessageStorage().copyMessages(sourceFullname, destFullname, msgUIDs, false);
+                maildIds = messageStorage.copyMessages(sourceFullname, destFullname, msgUIDs, false);
+            }
+            /*
+             * Restore \Seen flags
+             */
+            if (null != flagInfo) {
+                final List<String> list = new ArrayList<String>(maildIds.length >> 1);
+                for (int i = 0; i < maildIds.length; i++) {
+                    if (!flagInfo[i].isSeen()) {
+                        list.add(maildIds[i]);
+                    }
+                }
+                messageStorage.updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
             }
             postEvent(sourceAccountId, destFullname, true);
             try {
@@ -398,8 +414,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             return maildIds;
         }
+        /*
+         * Differing accounts...
+         */
         final MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
         try {
+            MailMessage[] flagInfo = null;
             if (move) {
                 /*
                  * Check for spam action; meaning a move/copy from/to spam folder
@@ -415,6 +435,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     }
                 }
                 if (SPAM_HAM == spamActionSource) {
+                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
                     /*
                      * Handle ham.
                      */
@@ -426,6 +447,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         session);
                 }
                 if (SPAM_SPAM == spamActionDest) {
+                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
                     /*
                      * Handle spam
                      */
@@ -446,6 +468,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
                 postEvent(sourceAccountId, sourceFullname, true);
             }
+            /*
+             * Restore \Seen flags
+             */
+            if (null != flagInfo) {
+                final List<String> list = new ArrayList<String>(maildIds.length >> 1);
+                for (int i = 0; i < maildIds.length; i++) {
+                    if (!flagInfo[i].isSeen()) {
+                        list.add(maildIds[i]);
+                    }
+                }
+                destAccess.getMessageStorage().updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
+            }
             postEvent(destAccountId, destFullname, true);
             try {
                 if (move) {
@@ -459,7 +493,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 LOG.error(e.getMessage(), e);
             }
             return maildIds;
-
         } finally {
             destAccess.close(true);
         }

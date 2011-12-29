@@ -1,3 +1,7 @@
+* 2011-12-29 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21084: Keeping \Seen flag on DnD to spam folder
+
 * 2011-12-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 21074: More robust parsing of RFC2231-encoded parameters
