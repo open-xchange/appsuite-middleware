@@ -84,7 +84,6 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.MailExceptionCode;
@@ -375,8 +374,7 @@ public final class MIMEMessageConverter {
                         fos.flush();
                         fos.close();
                         fos = null;
-                        final ManagedFile managedFile = fileManagement.createManagedFile(newTempFile);
-                        mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), managedFile);
+                        mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), newTempFile);
                     } catch (final IOException e) {
                         throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                     } finally {

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.File;
 import java.io.IOException;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
@@ -74,6 +75,8 @@ public final class ManagedMimeMessage extends MimeMessage {
     private static final int DEFAULT_MAX_INMEMORY_SIZE = 131072; // 128KB
 
     private ManagedFile managedFile;
+
+    private File file;
 
     /**
      * Initializes a new {@link ManagedMimeMessage} with default in-memory size of 128KB.
@@ -129,13 +132,13 @@ public final class ManagedMimeMessage extends MimeMessage {
      * Initializes a new {@link ManagedMimeMessage}.
      *
      * @param session The session
-     * @param sourceBytes The RFC822 source bytes
-     * @param maxInMemorySize The max. in-memory size in bytes
+     * @param managedFile The RFC822 managed file
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
     public ManagedMimeMessage(final Session session, final ManagedFile managedFile) throws MessagingException, IOException {
         super(session);
+        this.file = null;
         this.managedFile = managedFile;
         final SharedFileInputStream sis = new SharedFileInputStream(managedFile.getFile(), DEFAULT_MAX_INMEMORY_SIZE);
         flags = new Flags(); // empty Flags object
@@ -146,25 +149,51 @@ public final class ManagedMimeMessage extends MimeMessage {
     }
 
     /**
-     * Cleans up this managed MIME message.
+     * Initializes a new {@link ManagedMimeMessage}.
      *
+     * @param session The session
+     * @param file The RFC822 source file
      * @throws MessagingException If a messaging error occurs
+     * @throws IOException If an I/O error occurs
      */
-    public void cleanUp() throws MessagingException {
-        if (null == managedFile) {
-            return;
-        }
-        try {
-            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            if (null != management) {
-                try {
-                    management.removeByID(managedFile.getID());
-                } catch (final OXException e) {
-                    throw new MessagingException(e.getMessage(), e);
+    public ManagedMimeMessage(final Session session, final File file) throws MessagingException, IOException {
+        super(session);
+        this.managedFile = null;
+        this.file = file;
+        final SharedFileInputStream sis = new SharedFileInputStream(file, DEFAULT_MAX_INMEMORY_SIZE);
+        flags = new Flags(); // empty Flags object
+        headers = createInternetHeaders(sis);
+        contentStream = sis.newStream(sis.getPosition(), -1);
+        modified = false;
+        saved = true;
+    }
+
+    /**
+     * Cleans up this managed MIME message.
+     */
+    public void cleanUp() {
+        if (null != managedFile) {
+            try {
+                final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+                if (null != management) {
+                    try {
+                        management.removeByID(managedFile.getID());
+                    } catch (final OXException e) {
+                        // Ignore
+                    }
                 }
+            } finally {
+                managedFile = null;
             }
-        } finally {
-            managedFile = null;
+        }
+        if (null != file) {
+            try {
+                file.delete();
+            } catch (final Exception e) {
+                // Ignore
+            } finally {
+                file = null;
+            }
         }
     }
 

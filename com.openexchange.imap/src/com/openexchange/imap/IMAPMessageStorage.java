@@ -1698,11 +1698,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (null != msgs) {
                 for (final Message message : msgs) {
                     if (message instanceof ManagedMimeMessage) {
-                        try {
-                            ((ManagedMimeMessage) message).cleanUp();
-                        } catch (final MessagingException e) {
-                            // Ignore
-                        }
+                        ((ManagedMimeMessage) message).cleanUp();
                     }
                 }
             }
