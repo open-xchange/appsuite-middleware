@@ -1,6 +1,7 @@
 * 2011-12-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 21084: Keeping \Seen flag on DnD to spam folder
+ - Fix for bug 21082: Appending SMTP message to error message
 
 * 2011-12-27 - thorben.betten@open-xchange.com
 
