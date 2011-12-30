@@ -51,7 +51,6 @@ package com.openexchange.ajp13.servlet.http;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +62,7 @@ import javax.servlet.http.HttpSessionContext;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.HashKeyMap;
 
 /**
  * {@link HttpSessionWrapper} - A wrapper class for {@link HttpSession}.
@@ -116,8 +116,8 @@ public class HttpSessionWrapper implements HttpSession {
         /*
          * Initialize other stuff
          */
-        attributes = new HashMap<String, Object>();
-        values = new HashMap<String, Object>();
+        attributes = new HashKeyMap<Object>();
+        values = new HashKeyMap<Object>();
         creationTime = lastAccessedTime = System.currentTimeMillis();
         this.id = id;
     }

@@ -56,7 +56,6 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -71,6 +70,7 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.HashKeyMap;
 import com.openexchange.mail.mime.ContentType;
 
 /**
@@ -134,9 +134,9 @@ public class ServletRequestWrapper implements ServletRequest {
     public ServletRequestWrapper() throws AJPv13Exception {
         super();
         protocol = "HTTP/1.1";
-        attributes = new HashMap<String, Object>();
-        parameters = new HashMap<String, String[]>();
-        headers = new HashMap<String, String[]>();
+        attributes = new HashKeyMap<Object>();
+        parameters = new HashKeyMap<String[]>();
+        headers = new HashKeyMap<String[]>();
         setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
     }
 
@@ -518,17 +518,17 @@ public class ServletRequestWrapper implements ServletRequest {
 
     @Override
     public String getServerName() {
-        String host = getFromHost();
+        final String host = getFromHost();
 
         return (host == null) ? serverName : host;
     }
 
     private String getFromHost() {
-        String header = getHeader(HOST);
+        final String header = getHeader(HOST);
         if(header == null) {
             return null;
         }
-        int colonPos = header.indexOf(':');
+        final int colonPos = header.indexOf(':');
         if(colonPos == -1) {
             return header;
         }

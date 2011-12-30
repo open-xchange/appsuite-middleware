@@ -84,6 +84,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.HashKey;
+import com.openexchange.java.HashKeyMap;
 import com.openexchange.log.Log;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.servlet.http.Tools;
@@ -201,9 +203,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         this.response = response;
         protocol = "HTTP/1.1";
         scheme = "http";
-        attributes = new HashMap<String, Object>();
-        parameters = new HashMap<String, List<String>>();
-        headers = new HashMap<String, List<String>>(8);
+        attributes = new HashKeyMap<Object>();
+        parameters = new HashKeyMap<List<String>>();
+        headers = new HashKeyMap<List<String>>(new HashMap<HashKey, List<String>>(8));
         try {
             setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
         } catch (final AJPv13Exception e) {
@@ -483,7 +485,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public Map<?, ?> getParameterMap() {
-        final Map<String, String[]> retval = new HashMap<String, String[]>(parameters.size());
+        final Map<String, String[]> retval = new HashKeyMap<String[]>(parameters.size());
         for (final Entry<String, List<String>> entry : parameters.entrySet()) {
             final List<String> values = entry.getValue();
             retval.put(entry.getKey(), values.toArray(new String[values.size()]));

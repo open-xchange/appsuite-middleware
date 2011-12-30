@@ -59,7 +59,6 @@ import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -85,6 +84,7 @@ import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.HashKeyMap;
 import com.openexchange.server.impl.Version;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -229,7 +229,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
      */
     public HttpServletResponseImpl(final AjpProcessor ajpProcessor) {
         super();
-        headers = new HashMap<String, List<String>>();
+        headers = new HashKeyMap<List<String>>();
         outputSelection = OUTPUT_NOT_SELECTED;
         cookies = new LinkedHashSet<Cookie>();
         status = HttpServletResponse.SC_OK;

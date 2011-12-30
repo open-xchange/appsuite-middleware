@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,46 +49,90 @@
 
 package com.openexchange.java;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-
 /**
- * {@link JSON} - helpers for typical JSON tasks
+ * {@link HashKey} - Uses a safe hash key computation if a <code>String</code> is intended to be used as hash key.
  * 
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSON {
+public final class HashKey {
 
     /**
-     * Takes a JSONArray and transforms it to a list
+     * Returns the computation-safe hash key for specified <code>String</code> key.
      * 
-     * @param array JSONArray to transform
-     * @return list that is result of transformation
-     * @throws JSONException in case JSON cannot be read
+     * @param key The <code>String</code> key
+     * @return The computation-safe hash key
      */
-    public static List<String> jsonArray2list(final JSONArray array) throws JSONException {
-        final List<String> list = new LinkedList<String>();
-        for (int i = 0, size = array.length(); i < size; i++) {
-            list.add(array.getString(i));
-        }
-        return list;
+    public static HashKey valueOf(final String key) {
+        return new HashKey(key);
     }
 
-    /**
-     * Takes a collection and transforms it to a JSONArray
-     * 
-     * @param coll Collection to transform
-     * @return array that is result of transformation
-     */
-    public static JSONArray collection2jsonArray(final Collection<? extends Object> coll) {
-        final JSONArray array = new JSONArray();
-        for (final Object obj : coll) {
-            array.put(obj);
+    private static final int DEFAULT_HASH = 5381;
+
+    private static final int MULTIPLICATION_CONSTANT = 33;
+
+    private static int calcSafeHashCode(final char[] val) {
+        int h = DEFAULT_HASH;
+        final int len = val.length;
+        if (len > 0) {
+            final int fac = MULTIPLICATION_CONSTANT;
+            for (int i = 0; i < len; i++) {
+                h = fac * h + val[i];
+            }
         }
-        return array;
+        return h;
+    }
+
+    /** The value is used for character storage. */
+    private final char value[];
+
+    /** The count is the number of characters in the String. */
+    private final int count;
+
+    /** Cache the hash code for the string */
+    private final int hash; // Default to 5381
+
+    /**
+     * Initializes a new {@link HashKey}.
+     */
+    private HashKey(final String key) {
+        super();
+        value = key.toCharArray();
+        count = value.length;
+        hash = calcSafeHashCode(value);
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof HashKey)) {
+            return false;
+        }
+        final HashKey other = (HashKey) obj;
+        if (count != other.count) {
+            return false;
+        }
+        int n = count;
+        final char v1[] = value;
+        final char v2[] = other.value;
+        int i = 0;
+        while (n-- != 0) {
+            if (v1[i] != v2[i++]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return new String(value);
     }
 
 }

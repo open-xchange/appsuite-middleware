@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -65,6 +64,7 @@ import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.AJPv13ServletOutputStream;
 import com.openexchange.ajp13.util.CharsetValidator;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.HashKeyMap;
 import com.openexchange.tools.regex.MatcherReplacer;
 
 /**
@@ -131,7 +131,7 @@ public class ServletResponseWrapper implements ServletResponse {
      */
     public ServletResponseWrapper() {
         super();
-        headers = new HashMap<String, String[]>();
+        headers = new HashKeyMap<String[]>();
         outputSelection = OUTPUT_NOT_SELECTED;
     }
 
