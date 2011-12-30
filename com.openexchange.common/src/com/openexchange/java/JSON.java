@@ -55,15 +55,16 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-
 /**
  * {@link JSON} - helpers for typical JSON tasks
- *
+ * 
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class JSON {
+
     /**
      * Takes a JSONArray and transforms it to a list
+     * 
      * @param array JSONArray to transform
      * @return list that is result of transformation
      * @throws JSONException in case JSON cannot be read
@@ -78,12 +79,13 @@ public class JSON {
 
     /**
      * Takes a collection and transforms it to a JSONArray
+     * 
      * @param coll Collection to transform
      * @return array that is result of transformation
      */
     public static JSONArray collection2jsonArray(final Collection<? extends Object> coll) {
         final JSONArray array = new JSONArray();
-        for(final Object obj: coll){
+        for (final Object obj : coll) {
             array.put(obj);
         }
         return array;
