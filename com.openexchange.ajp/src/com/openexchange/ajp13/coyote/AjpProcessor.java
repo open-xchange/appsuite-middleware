@@ -816,7 +816,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         final byte[] buf = new byte[buflen];
                         sink.reset();
                         final ServletInputStream inputStream = request.getInputStream();
-                        for (int read = inputStream.read(buf, 0, buflen); read > 0; read = inputStream.read(buf, 0, buflen)) {
+                        for (int read; (read = inputStream.read(buf, 0, buflen)) > 0;) {
                             sink.write(buf, 0, read);
                         }
                         String charEnc = request.getCharacterEncoding();
