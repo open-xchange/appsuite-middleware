@@ -103,7 +103,7 @@ public final class HashKeyMap<V> implements Map<String, V> {
 
     @Override
     public boolean containsKey(final Object key) {
-        return map.containsKey(key);
+        return map.containsKey(HashKey.valueOf(key.toString()));
     }
 
     @Override
