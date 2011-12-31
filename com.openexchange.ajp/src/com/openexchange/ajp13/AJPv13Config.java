@@ -94,6 +94,8 @@ public final class AJPv13Config implements Initialization {
 
     private int maxNumOfSockets = 50;
 
+    private int maxRequestParameterCount = 30;
+
     private boolean modJK;
 
     private boolean connectionPool;
@@ -149,6 +151,7 @@ public final class AJPv13Config implements Initialization {
         listenerPoolSize = 20;
         listenerReadTimeout = 60000;
         keepAliveTime = 20000;
+        maxRequestParameterCount = 30;
         maxNumOfSockets = 50;
         modJK = false;
         connectionPool = false;
@@ -240,6 +243,13 @@ public final class AJPv13Config implements Initialization {
             keepAliveTime = Integer.parseInt(ajpProperties.getProperty("AJP_KEEP_ALIVE_TIME", "20000").trim());
             if (keepAliveTime < 0) {
                 keepAliveTime = 0;
+            }
+            /*
+             * AJP_MAX_REQUEST_PARAMETER_COUNT
+             */
+            maxRequestParameterCount = Integer.parseInt(ajpProperties.getProperty("AJP_MAX_REQUEST_PARAMETER_COUNT", "30").trim());
+            if (maxRequestParameterCount < 0) {
+                maxRequestParameterCount = 0;
             }
             /*
              * AJP_CONNECTION_POOL / AJP_CONNECTION_POOL_SIZE
@@ -356,6 +366,7 @@ public final class AJPv13Config implements Initialization {
             logBuilder.append("\tAJP_LISTENER_POOL_SIZE=").append(instance.listenerPoolSize).append('\n');
             logBuilder.append("\tAJP_LISTENER_READ_TIMEOUT=").append(instance.listenerReadTimeout).append('\n');
             logBuilder.append("\tAJP_KEEP_ALIVE_TIME=").append(instance.keepAliveTime).append('\n');
+            logBuilder.append("\tAJP_MAX_REQUEST_PARAMETER_COUNT=").append(instance.maxRequestParameterCount).append('\n');
             logBuilder.append("\tAJP_CONNECTION_POOL=").append(instance.connectionPool).append('\n');
             logBuilder.append("\tAJP_CONNECTION_POOL_SIZE=").append(instance.connectionPoolSize).append('\n');
             logBuilder.append("\tAJP_REQUEST_HANDLER_POOL=").append(instance.requestHandlerPool).append('\n');
@@ -415,6 +426,15 @@ public final class AJPv13Config implements Initialization {
      */
     public static int getKeepAliveTime() {
         return instance.keepAliveTime;
+    }
+
+    /**
+     * Gets the max. request parameter count allowed.
+     * 
+     * @return The max. request parameter count
+     */
+    public static int getMaxRequestParameterCount() {
+        return instance.maxRequestParameterCount;
     }
 
     public static boolean useAJPConnectionPool() {
