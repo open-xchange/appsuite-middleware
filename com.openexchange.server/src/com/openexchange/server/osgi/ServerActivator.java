@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -359,6 +360,7 @@ public final class ServerActivator extends DeferredActivator {
     @Override
     protected void startBundle() throws Exception {
         CONTEXT = context;
+        JSONObject.setMaxSize(getService(ConfigurationService.class).getIntProperty("com.openexchange.json.maxSize", 1000));
         // get version information from MANIFEST file
         final Dictionary<?, ?> headers = context.getBundle().getHeaders();
         Version.buildnumber = "Rev" + (String) headers.get("OXRevision");
