@@ -64,6 +64,7 @@ import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServletInputStream;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
@@ -126,6 +127,8 @@ public class ServletRequestWrapper implements ServletRequest {
 
     private AJPv13ServletInputStream servletInputStream;
 
+    private final int max;
+
     /**
      * Initializes a new {@link ServletRequestWrapper}.
      *
@@ -133,6 +136,7 @@ public class ServletRequestWrapper implements ServletRequest {
      */
     public ServletRequestWrapper() throws AJPv13Exception {
         super();
+        max = AJPv13Config.getMaxRequestParameterCount();
         protocol = "HTTP/1.1";
         attributes = new HashKeyMap<Object>();
         parameters = new HashKeyMap<String[]>();
@@ -170,6 +174,9 @@ public class ServletRequestWrapper implements ServletRequest {
         final String[] values = parameters.get(name);
         final String[] newValues;
         if (null == values) {
+            if (max > 0 && parameters.size() >= max) {
+                throw new IllegalStateException("Max. allowed number of request parameters ("+max+") exceeded");
+            }
             newValues = new String[] { value };
         } else {
             final int len = values.length;

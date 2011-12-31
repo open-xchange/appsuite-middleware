@@ -72,6 +72,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import com.openexchange.ajp13.AJPv13Config;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.exception.AJPv13Exception;
 import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
@@ -193,11 +194,14 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private long contentLength;
 
+    private final int max;
+
     /**
      * Initializes a new {@link ServletRequestWrapper}.
      */
     public HttpServletRequestImpl(final HttpServletResponseImpl response) {
         super();
+        max = AJPv13Config.getMaxRequestParameterCount();
         contextPath = "";
         requestedSessionIdFromCookie = true;
         this.response = response;
@@ -318,6 +322,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     public void setParameter(final String name, final String value) {
         final List<String> values = parameters.get(name);
         if (null == values) {
+            if (max > 0 && parameters.size() >= max) {
+                throw new IllegalStateException("Max. allowed number of request parameters ("+max+") exceeded");
+            }
             parameters.put(name, newLinkedList(value));
         } else {
             values.add(value);
@@ -451,16 +458,6 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
     @Override
     public Enumeration<?> getHeaderNames() {
         return makeEnumeration(headers.keySet().iterator());
-    }
-
-    /**
-     * Sets a parameter's values.
-     *
-     * @param name The parameter name to which the values shall be bound
-     * @param values The parameter values
-     */
-    public void setParameterValues(final String name, final List<String> values) {
-        parameters.put(name, values);
     }
 
     @Override
