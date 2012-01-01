@@ -60,7 +60,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HashKeySet implements Set<String> {
+public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> implements Set<String> {
 
     private final Set<HashKey> set;
 
@@ -70,6 +70,12 @@ public final class HashKeySet implements Set<String> {
     public HashKeySet(final Set<HashKey> set) {
         super();
         this.set = set;
+    }
+
+    @Override
+    protected HashKeySet thisCollection() {
+        clear();
+        return this;
     }
 
     @Override
@@ -84,7 +90,7 @@ public final class HashKeySet implements Set<String> {
 
     @Override
     public boolean contains(final Object o) {
-        return set.contains(HashKey.valueOf(o.toString()));
+        return set.contains(newKey(o.toString()));
     }
 
     @Override
@@ -116,19 +122,19 @@ public final class HashKeySet implements Set<String> {
 
     @Override
     public boolean add(final String e) {
-        return set.add(HashKey.valueOf(e));
+        return set.add(newKey(e));
     }
 
     @Override
     public boolean remove(final Object o) {
-        return set.remove(HashKey.valueOf(o.toString()));
+        return set.remove(newKey(o.toString()));
     }
 
     @Override
     public boolean containsAll(final Collection<?> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
-            col.add(HashKey.valueOf(o.toString()));
+            col.add(newKey(o.toString()));
         }
         return set.containsAll(col);
     }
@@ -137,7 +143,7 @@ public final class HashKeySet implements Set<String> {
     public boolean addAll(final Collection<? extends String> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
-            col.add(HashKey.valueOf(o.toString()));
+            col.add(newKey(o.toString()));
         }
         return set.addAll(col);
     }
@@ -146,7 +152,7 @@ public final class HashKeySet implements Set<String> {
     public boolean retainAll(final Collection<?> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
-            col.add(HashKey.valueOf(o.toString()));
+            col.add(newKey(o.toString()));
         }
         return set.retainAll(col);
     }
@@ -155,7 +161,7 @@ public final class HashKeySet implements Set<String> {
     public boolean removeAll(final Collection<?> c) {
         final Collection<HashKey> col = new ArrayList<HashKey>(c.size());
         for (final Object o : c) {
-            col.add(HashKey.valueOf(o.toString()));
+            col.add(newKey(o.toString()));
         }
         return set.removeAll(col);
     }

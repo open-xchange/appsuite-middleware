@@ -63,15 +63,53 @@ public final class HashKey {
      * @return The computation-safe hash key
      */
     public static HashKey valueOf(final String key) {
-        return new HashKey(key);
+        return new HashKey(key, DEFAULT_HASH, null);
     }
 
-    private static final int DEFAULT_HASH = 5381;
+    /**
+     * Returns the computation-safe hash key for specified <code>String</code> key.
+     * 
+     * @param key The <code>String</code> key
+     * @param hashStart The hash start
+     * @return The computation-safe hash key
+     */
+    public static HashKey valueOf(final String key, final int hashStart) {
+        return new HashKey(key, hashStart, null);
+    }
+
+    /**
+     * Returns the computation-safe hash key for specified <code>String</code> key.
+     * 
+     * @param key The <code>String</code> key
+     * @param hashStart The hash start
+     * @param salt The salt
+     * @return The computation-safe hash key
+     */
+    public static HashKey valueOf(final String key, final int hashStart, final String salt) {
+        return new HashKey(key, hashStart, salt);
+    }
+
+    /**
+     * Returns the computation-safe hash key for specified <code>String</code> key.
+     * 
+     * @param key The <code>String</code> key
+     * @param hashStart The hash start
+     * @param salt The salt
+     * @return The computation-safe hash key
+     */
+    public static HashKey valueOf(final String key, final String salt) {
+        return new HashKey(key, DEFAULT_HASH, salt);
+    }
+
+    /**
+     * The default hash start: <code>5381</code>.
+     */
+    public static final int DEFAULT_HASH = 5381;
 
     private static final int MULTIPLICATION_CONSTANT = 33;
 
-    private static int calcSafeHashCode(final char[] val) {
-        int h = DEFAULT_HASH;
+    private static int calcSafeHashCode(final int hashStart, final char[] val) {
+        int h = hashStart;
         final int len = val.length;
         if (len > 0) {
             final int fac = MULTIPLICATION_CONSTANT;
@@ -83,22 +121,31 @@ public final class HashKey {
     }
 
     /** The value is used for character storage. */
-    private final char value[];
-
-    /** The count is the number of characters in the String. */
-    private final int count;
+    private final String value;
 
     /** Cache the hash code for the string */
-    private final int hash; // Default to 5381
+    private final int hash;
+
+    /** The optional salt */
+    private final String salt;
 
     /**
      * Initializes a new {@link HashKey}.
      */
-    private HashKey(final String key) {
+    private HashKey(final String key, final int hashStart, final String salt) {
         super();
-        value = key.toCharArray();
-        count = value.length;
-        hash = calcSafeHashCode(value);
+        value = key;
+        this.salt = salt;
+        final char[] chars;
+        if (null == salt) {
+            chars = key.toCharArray();
+        } else {
+            final StringBuilder sb = new StringBuilder(key).append('-').append(salt);
+            final int count = sb.length();
+            chars = new char[count];
+            sb.getChars(0, count, chars, 0);
+        }
+        hash = calcSafeHashCode(hashStart, chars);
     }
 
     @Override
@@ -115,24 +162,23 @@ public final class HashKey {
             return false;
         }
         final HashKey other = (HashKey) obj;
-        if (count != other.count) {
-            return false;
-        }
-        int n = count;
-        final char v1[] = value;
-        final char v2[] = other.value;
-        int i = 0;
-        while (n-- != 0) {
-            if (v1[i] != v2[i++]) {
+        if (null == value) {
+            if (null != other.value) {
                 return false;
             }
+        } else if (!value.equals(other.value)) {
+            return false;
         }
         return true;
     }
 
     @Override
     public String toString() {
-        return new String(value);
+        if (null == salt) {
+            return new String(value);
+        }
+        final String string = new String(value);
+        return string.substring(0, string.lastIndexOf('-'));
     }
 
 }

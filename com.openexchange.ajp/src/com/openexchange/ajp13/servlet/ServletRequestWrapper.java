@@ -53,6 +53,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -71,6 +72,8 @@ import com.openexchange.ajp13.exception.AJPv13Exception.AJPCode;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.DefaultHashKeyGenerator;
+import com.openexchange.java.HashKeyGenerator;
 import com.openexchange.java.HashKeyMap;
 import com.openexchange.mail.mime.ContentType;
 
@@ -98,6 +101,8 @@ public class ServletRequestWrapper implements ServletRequest {
     private static final Set<String> SINGLE_VALUE_HEADERS = new HashSet<String>(Arrays.asList(CONTENT_TYPE, CONTENT_LENGTH));
 
     private static final String HOST = "Host";
+
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     /*-
      * ------------------- Member stuff ---------------------
@@ -138,9 +143,11 @@ public class ServletRequestWrapper implements ServletRequest {
         super();
         max = AJPv13Config.getMaxRequestParameterCount();
         protocol = "HTTP/1.1";
-        attributes = new HashKeyMap<Object>();
-        parameters = new HashKeyMap<String[]>();
-        headers = new HashKeyMap<String[]>();
+        final String salt = Integer.toString(RANDOM.nextInt(), 10); // request-specific salt
+        final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
+        attributes = new HashKeyMap<Object>().setGenerator(hashKeyGenerator);
+        parameters = new HashKeyMap<String[]>().setGenerator(hashKeyGenerator);
+        headers = new HashKeyMap<String[]>().setGenerator(hashKeyGenerator);
         setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
     }
 

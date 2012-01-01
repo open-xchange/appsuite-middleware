@@ -62,7 +62,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
+public final class HashKeyEntrySet<V> extends AbstractHashKeyCollection<HashKeyEntrySet<V>> implements Set<Map.Entry<String, V>> {
 
     private final Set<Map.Entry<HashKey, V>> entrySet;
 
@@ -75,6 +75,12 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
         super();
         this.entrySet = entrySet;
         sz = entrySet.size();
+    }
+
+    @Override
+    protected HashKeyEntrySet<V> thisCollection() {
+        clear();
+        return this;
     }
 
     @Override
@@ -121,14 +127,14 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
 
     @Override
     public boolean add(final Entry<String, V> e) {
-        return entrySet.add(new EntryImplementation<V>(e));
+        return entrySet.add(new EntryImplementation(e));
     }
 
-    @SuppressWarnings("unchecked")
     @Override
+    @SuppressWarnings("unchecked")
     public boolean remove(final Object o) {
         if (o instanceof Entry) {
-            return entrySet.remove(new EntryImplementation<V>((Entry<String, V>) o));
+            return entrySet.remove(new EntryImplementation((Entry<String, V>) o));
         }
         return entrySet.remove(o);
     }
@@ -140,7 +146,7 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
             if (!(o instanceof Entry)) {
                 return false;
             }
-            list.add(new EntryImplementation<V>((Entry<String, V>) o));
+            list.add(new EntryImplementation((Entry<String, V>) o));
         }
         return entrySet.containsAll(list);
     }
@@ -149,7 +155,7 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
     public boolean addAll(final Collection<? extends Entry<String, V>> c) {
         final List<Entry<HashKey, V>> list = new ArrayList<Map.Entry<HashKey, V>>(c.size());
         for (final Entry<String, V> entry : c) {
-            list.add(new EntryImplementation<V>(entry));
+            list.add(new EntryImplementation(entry));
         }
         return entrySet.addAll(list);
     }
@@ -159,7 +165,7 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
         final List<Entry<HashKey, V>> list = new ArrayList<Map.Entry<HashKey, V>>(c.size());
         for (final Object o : c) {
             if (o instanceof Entry) {
-                list.add(new EntryImplementation<V>((Entry<String, V>) o));
+                list.add(new EntryImplementation((Entry<String, V>) o));
             }
         }
         return entrySet.retainAll(list);
@@ -170,7 +176,7 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
         final List<Entry<HashKey, V>> list = new ArrayList<Map.Entry<HashKey, V>>(c.size());
         for (final Object o : c) {
             if (o instanceof Entry) {
-                list.add(new EntryImplementation<V>((Entry<String, V>) o));
+                list.add(new EntryImplementation((Entry<String, V>) o));
             }
         }
         return entrySet.removeAll(list);
@@ -191,7 +197,7 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
         return entrySet.hashCode();
     }
 
-    private static final class EntryImplementation<V> implements Entry<HashKey, V> {
+    private final class EntryImplementation implements Entry<HashKey, V> {
 
         private final Entry<String, V> e;
 
@@ -202,7 +208,7 @@ public final class HashKeyEntrySet<V> implements Set<Map.Entry<String, V>> {
 
         @Override
         public HashKey getKey() {
-            return HashKey.valueOf(e.getKey());
+            return newKey(e.getKey());
         }
 
         @Override

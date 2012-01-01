@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.security.Principal;
+import java.security.SecureRandom;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -85,7 +86,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.DefaultHashKeyGenerator;
 import com.openexchange.java.HashKey;
+import com.openexchange.java.HashKeyGenerator;
 import com.openexchange.java.HashKeyMap;
 import com.openexchange.log.Log;
 import com.openexchange.mail.mime.ContentType;
@@ -118,15 +121,19 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private static final String HOST = "Host";
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     /*-
      * ------------------- Member stuff ---------------------
      */
 
-    private final Map<String, Object> attributes;
+    private volatile HashKeyGenerator hashKeyGenerator;
 
-    private final Map<String, List<String>> parameters;
+    private final HashKeyMap<Object> attributes;
 
-    private final Map<String, List<String>> headers;
+    private final HashKeyMap<List<String>> parameters;
+
+    private final HashKeyMap<List<String>> headers;
 
     private String characterEncoding;
 
@@ -207,9 +214,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         this.response = response;
         protocol = "HTTP/1.1";
         scheme = "http";
-        attributes = new HashKeyMap<Object>();
-        parameters = new HashKeyMap<List<String>>();
-        headers = new HashKeyMap<List<String>>(new HashMap<HashKey, List<String>>(8));
+        final String salt = Integer.toString(RANDOM.nextInt(), 10); // request-specific salt
+        final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
+        this.hashKeyGenerator = hashKeyGenerator;
+        attributes = new HashKeyMap<Object>(32).setGenerator(hashKeyGenerator);
+        parameters = new HashKeyMap<List<String>>(32).setGenerator(hashKeyGenerator);
+        headers = new HashKeyMap<List<String>>(new HashMap<HashKey, List<String>>(8)).setGenerator(hashKeyGenerator);
         try {
             setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
         } catch (final AJPv13Exception e) {
@@ -249,9 +259,12 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      */
     public void recycle() {
         servletInputStream.recycle();
-        attributes.clear();
-        parameters.clear();
-        headers.clear();
+        final String salt = Integer.toString(RANDOM.nextInt(), 10); // request-specific salt
+        final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
+        this.hashKeyGenerator = hashKeyGenerator;
+        attributes.setGenerator(hashKeyGenerator);
+        parameters.setGenerator(hashKeyGenerator);
+        headers.setGenerator(hashKeyGenerator);
         try {
             setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
         } catch (final AJPv13Exception e) {
@@ -482,7 +495,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     @Override
     public Map<?, ?> getParameterMap() {
-        final Map<String, String[]> retval = new HashKeyMap<String[]>(parameters.size());
+        final Map<String, String[]> retval = new HashKeyMap<String[]>(parameters.size()).setGenerator(hashKeyGenerator);
         for (final Entry<String, List<String>> entry : parameters.entrySet()) {
             final List<String> values = entry.getValue();
             retval.put(entry.getKey(), values.toArray(new String[values.size()]));

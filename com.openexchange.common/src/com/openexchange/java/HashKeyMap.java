@@ -61,7 +61,7 @@ import java.util.Set;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @see HashKey
  */
-public final class HashKeyMap<V> implements Map<String, V> {
+public final class HashKeyMap<V> extends AbstractHashKeyCollection<HashKeyMap<V>> implements Map<String, V> {
 
     private final Map<HashKey, V> map;
 
@@ -92,6 +92,12 @@ public final class HashKeyMap<V> implements Map<String, V> {
     }
 
     @Override
+    protected HashKeyMap<V> thisCollection() {
+        clear();
+        return this;
+    }
+
+    @Override
     public int size() {
         return map.size();
     }
@@ -103,7 +109,7 @@ public final class HashKeyMap<V> implements Map<String, V> {
 
     @Override
     public boolean containsKey(final Object key) {
-        return map.containsKey(HashKey.valueOf(key.toString()));
+        return map.containsKey(newKey(key.toString()));
     }
 
     @Override
@@ -113,17 +119,17 @@ public final class HashKeyMap<V> implements Map<String, V> {
 
     @Override
     public V get(final Object key) {
-        return map.get(HashKey.valueOf(key.toString()));
+        return map.get(newKey(key.toString()));
     }
 
     @Override
     public V put(final String key, final V value) {
-        return map.put(HashKey.valueOf(key), value);
+        return map.put(newKey(key), value);
     }
 
     @Override
     public V remove(final Object key) {
-        return map.remove(HashKey.valueOf(key.toString()));
+        return map.remove(newKey(key.toString()));
     }
 
     @Override
@@ -133,7 +139,7 @@ public final class HashKeyMap<V> implements Map<String, V> {
         }
         for (final Iterator<? extends Map.Entry<? extends String, ? extends V>> i = m.entrySet().iterator(); i.hasNext();) {
             final Map.Entry<? extends String, ? extends V> e = i.next();
-            map.put(HashKey.valueOf(e.getKey()), e.getValue());
+            map.put(newKey(e.getKey()), e.getValue());
         }
     }
 
@@ -144,7 +150,7 @@ public final class HashKeyMap<V> implements Map<String, V> {
 
     @Override
     public Set<String> keySet() {
-        return new HashKeySet(map.keySet());
+        return new HashKeySet(map.keySet()).setGenerator(generatorReference.get());
     }
 
     @Override
@@ -154,7 +160,7 @@ public final class HashKeyMap<V> implements Map<String, V> {
 
     @Override
     public Set<java.util.Map.Entry<String, V>> entrySet() {
-        return new HashKeyEntrySet<V>(map.entrySet());
+        return new HashKeyEntrySet<V>(map.entrySet()).setGenerator(generatorReference.get());
     }
 
     @Override
