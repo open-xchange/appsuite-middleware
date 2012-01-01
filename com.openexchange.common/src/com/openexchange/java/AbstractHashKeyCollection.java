@@ -80,16 +80,16 @@ public abstract class AbstractHashKeyCollection<C> {
     }
 
     /**
-     * Clears & returns this collection.
+     * Returns this collection.
      * 
      * @return This cleared collection
      */
     protected abstract C thisCollection();
 
     /**
-     * Creates a new {@link HashKey} for specified String key.
+     * Creates a new {@link HashKey} for specified <code>String</code> key.
      * 
-     * @param s The String key
+     * @param s The <code>String</code> key
      * @return The hash key
      */
     protected HashKey newKey(final String s) {

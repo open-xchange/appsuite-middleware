@@ -93,7 +93,6 @@ public final class HashKeyMap<V> extends AbstractHashKeyCollection<HashKeyMap<V>
 
     @Override
     protected HashKeyMap<V> thisCollection() {
-        clear();
         return this;
     }
 
@@ -171,6 +170,11 @@ public final class HashKeyMap<V> extends AbstractHashKeyCollection<HashKeyMap<V>
     @Override
     public int hashCode() {
         return map.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return map.toString();
     }
 
 }

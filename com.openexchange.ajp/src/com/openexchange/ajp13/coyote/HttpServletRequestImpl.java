@@ -87,7 +87,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.DefaultHashKeyGenerator;
-import com.openexchange.java.HashKey;
 import com.openexchange.java.HashKeyGenerator;
 import com.openexchange.java.HashKeyMap;
 import com.openexchange.log.Log;
@@ -121,7 +120,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private static final String HOST = "Host";
 
-    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final SecureRandom RANDOM = Constants.RANDOM;
 
     /*-
      * ------------------- Member stuff ---------------------
@@ -129,11 +128,11 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
 
     private volatile HashKeyGenerator hashKeyGenerator;
 
-    private final HashKeyMap<Object> attributes;
+    private final Map<String, Object> attributes;
 
     private final HashKeyMap<List<String>> parameters;
 
-    private final HashKeyMap<List<String>> headers;
+    private final Map<String, List<String>> headers;
 
     private String characterEncoding;
 
@@ -217,9 +216,9 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         final String salt = Integer.toString(RANDOM.nextInt(), 10); // request-specific salt
         final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
         this.hashKeyGenerator = hashKeyGenerator;
-        attributes = new HashKeyMap<Object>(32).setGenerator(hashKeyGenerator);
-        parameters = new HashKeyMap<List<String>>(32).setGenerator(hashKeyGenerator);
-        headers = new HashKeyMap<List<String>>(new HashMap<HashKey, List<String>>(8)).setGenerator(hashKeyGenerator);
+        attributes = new HashMap<String, Object>(32);
+        parameters = new HashKeyMap<List<String>>(max > 0 ? max : 64).setGenerator(hashKeyGenerator);
+        headers = new HashMap<String, List<String>>(16);
         try {
             setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
         } catch (final AJPv13Exception e) {
@@ -262,9 +261,10 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         final String salt = Integer.toString(RANDOM.nextInt(), 10); // request-specific salt
         final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
         this.hashKeyGenerator = hashKeyGenerator;
-        attributes.setGenerator(hashKeyGenerator);
+        attributes.clear();
+        parameters.clear();
         parameters.setGenerator(hashKeyGenerator);
-        headers.setGenerator(hashKeyGenerator);
+        headers.clear();
         try {
             setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
         } catch (final AJPv13Exception e) {

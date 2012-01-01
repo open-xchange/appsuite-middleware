@@ -79,7 +79,6 @@ public final class HashKeyEntrySet<V> extends AbstractHashKeyCollection<HashKeyE
 
     @Override
     protected HashKeyEntrySet<V> thisCollection() {
-        clear();
         return this;
     }
 
@@ -195,6 +194,11 @@ public final class HashKeyEntrySet<V> extends AbstractHashKeyCollection<HashKeyE
     @Override
     public int hashCode() {
         return entrySet.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return entrySet.toString();
     }
 
     private final class EntryImplementation implements Entry<HashKey, V> {

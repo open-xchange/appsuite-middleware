@@ -57,6 +57,7 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
@@ -145,9 +146,9 @@ public class ServletRequestWrapper implements ServletRequest {
         protocol = "HTTP/1.1";
         final String salt = Integer.toString(RANDOM.nextInt(), 10); // request-specific salt
         final HashKeyGenerator hashKeyGenerator = new DefaultHashKeyGenerator(salt);
-        attributes = new HashKeyMap<Object>().setGenerator(hashKeyGenerator);
-        parameters = new HashKeyMap<String[]>().setGenerator(hashKeyGenerator);
-        headers = new HashKeyMap<String[]>().setGenerator(hashKeyGenerator);
+        attributes = new HashMap<String, Object>(32);
+        parameters = new HashKeyMap<String[]>(max > 0 ? max : 64).setGenerator(hashKeyGenerator);
+        headers = new HashMap<String, String[]>(16);
         setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
     }
 

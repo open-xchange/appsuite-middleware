@@ -126,26 +126,21 @@ public final class HashKey {
     /** Cache the hash code for the string */
     private final int hash;
 
-    /** The optional salt */
-    private final String salt;
-
     /**
      * Initializes a new {@link HashKey}.
      */
     private HashKey(final String key, final int hashStart, final String salt) {
         super();
         value = key;
-        this.salt = salt;
-        final char[] chars;
         if (null == salt) {
-            chars = key.toCharArray();
+            hash = calcSafeHashCode(hashStart, key.toCharArray());
         } else {
             final StringBuilder sb = new StringBuilder(key).append('-').append(salt);
             final int count = sb.length();
-            chars = new char[count];
+            final char[] chars = new char[count];
             sb.getChars(0, count, chars, 0);
+            hash = calcSafeHashCode(hashStart, chars);
         }
-        hash = calcSafeHashCode(hashStart, chars);
     }
 
     @Override
@@ -174,11 +169,7 @@ public final class HashKey {
 
     @Override
     public String toString() {
-        if (null == salt) {
-            return new String(value);
-        }
-        final String string = new String(value);
-        return string.substring(0, string.lastIndexOf('-'));
+        return value;
     }
 
 }

@@ -74,7 +74,6 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
 
     @Override
     protected HashKeySet thisCollection() {
-        clear();
         return this;
     }
 
@@ -179,6 +178,11 @@ public final class HashKeySet extends AbstractHashKeyCollection<HashKeySet> impl
     @Override
     public int hashCode() {
         return set.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return set.toString();
     }
 
 }
