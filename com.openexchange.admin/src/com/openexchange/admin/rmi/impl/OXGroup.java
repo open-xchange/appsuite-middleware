@@ -46,8 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.I2i;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -375,12 +377,7 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
             // if members sent, check exist
             if (grp.getMembers() != null && grp.getMembers().length > 0) {
-                final Integer[] mems = grp.getMembers();
-                final int[] tmp_mems = new int[mems.length];
-                for (int i = 0; i < mems.length; i++) {
-                    tmp_mems[i] = mems[i];
-                }
-                if (!tool.existsUser(ctx, tmp_mems)) {
+                if (!tool.existsUser(ctx, I2i(grp.getMembers()))) {
                     throw new NoSuchUserException("No such user");
                 }
             }

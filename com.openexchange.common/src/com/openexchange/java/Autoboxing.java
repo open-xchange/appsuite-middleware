@@ -153,9 +153,17 @@ public final class Autoboxing {
      * @return int[]
      */
     public static int[] I2i(final Integer[] integerArray) {
-        final int[] intArray = new int[integerArray.length];
-        for (int i = 0; i < intArray.length; i++) {
-            intArray[i] = integerArray[i].intValue();
+        int[] intArray = new int[integerArray.length];
+        int pos = 0;
+        for (Integer i : integerArray) {
+            if (null != i) {
+                intArray[pos++] = i.intValue();
+            }
+        }
+        if (pos != intArray.length) {
+            final int[] tmpArray = new int[pos];
+            System.arraycopy(intArray, 0, tmpArray, 0, pos);
+            intArray = tmpArray;
         }
         return intArray;
     }
@@ -166,10 +174,17 @@ public final class Autoboxing {
      * @return int[]
      */
     public static int[] I2i(final Collection<Integer> integerCollection) {
-        final int[] intArray = new int[integerCollection.size()];
+        int[] intArray = new int[integerCollection.size()];
         int pos = 0;
         for (final Integer i : integerCollection) {
-            intArray[pos++] = i.intValue();
+            if (null != i) {
+                intArray[pos++] = i.intValue();
+            }
+        }
+        if (pos != intArray.length) {
+            final int[] tmpArray = new int[pos];
+            System.arraycopy(intArray, 0, tmpArray, 0, pos);
+            intArray = tmpArray;
         }
         return intArray;
     }
