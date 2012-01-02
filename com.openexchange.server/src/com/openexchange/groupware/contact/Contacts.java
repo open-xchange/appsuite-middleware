@@ -771,11 +771,45 @@ public final class Contacts {
                 throw ContactExceptionCodes.NO_CHANGES.create(I(ctx.getContextId()), I(co.getObjectID()));
             }
 
+            boolean addressBusinessChanged = false;
+            boolean addressHomeChanged = false;
+            boolean addressOtherChanged = false;
             for (int i = 0; i < modtrim.length; i++) {
                 final int field = modtrim[i];
                 final Mapper mapper = mapping[field];
                 if ((mapper != null) && mapper.containsElement(co) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+
+                    addressBusinessChanged |= (Arrays.binarySearch(Contact.ADDRESS_FIELDS_BUSINESS, field) >= 0);
+                    addressHomeChanged |= (Arrays.binarySearch(Contact.ADDRESS_FIELDS_HOME, field) >= 0);
+                    addressOtherChanged |= (Arrays.binarySearch(Contact.ADDRESS_FIELDS_OTHER, field) >= 0);
+
                     update.append(mapper.getDBFieldName()).append(" = ?,");
+                }
+            }
+            if (addressBusinessChanged || addressHomeChanged || addressOtherChanged) {
+                final int[] tmp = new int[modtrim.length];
+                System.arraycopy(modtrim, 0, tmp, 0, modtrim.length);
+                Arrays.sort(tmp);
+                if (addressBusinessChanged) {
+                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_BUSINESS) < 0) {
+                        update.append("businessAddress").append(" = ?,");
+                    } else {
+                        addressBusinessChanged = false;
+                    }
+                }
+                if (addressHomeChanged) {
+                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_HOME) < 0) {
+                        update.append("homeAddress").append(" = ?,");
+                    } else {
+                        addressHomeChanged = false;
+                    }
+                }
+                if (addressOtherChanged) {
+                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_OTHER) < 0) {
+                        update.append("otherAddress").append(" = ?,");
+                    } else {
+                        addressOtherChanged = false;
+                    }
                 }
             }
             final int id = co.getObjectID();
@@ -795,6 +829,15 @@ public final class Contacts {
                     mapper.fillPreparedStatement(ps, counter, co);
                     counter++;
                 }
+            }
+            if (addressBusinessChanged) {
+                ps.setNull(counter++, java.sql.Types.VARCHAR);
+            }
+            if (addressHomeChanged) {
+                ps.setNull(counter++, java.sql.Types.VARCHAR);
+            }
+            if (addressOtherChanged) {
+                ps.setNull(counter++, java.sql.Types.VARCHAR);
             }
 
             final Date ddd = new Date(lmd);
@@ -965,7 +1008,7 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
-        } catch (final RuntimeException re) {
+        } catch (final Exception re) {
             rollback(writecon);
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create(re, re.getMessage());
         } finally {
@@ -1118,10 +1161,40 @@ public final class Contacts {
                 throw ContactExceptionCodes.NO_CHANGES.create(I(ctx.getContextId()), I(contact.getObjectID()));
             }
 
+            boolean addressBusinessChanged = false;
+            boolean addressHomeChanged = false;
+            boolean addressOtherChanged = false;
             for (int i = 0; i < modtrim.length; i++) {
-                final Mapper mapper = mapping[modtrim[i]];
-                if ((mapper != null) && mapper.containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                final int field = modtrim[i];
+                final Mapper mapper = mapping[field];
+                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     update.append(mapper.getDBFieldName()).append(" = ?,");
+                }
+            }
+            if (addressBusinessChanged || addressHomeChanged || addressOtherChanged) {
+                final int[] tmp = new int[modtrim.length];
+                System.arraycopy(modtrim, 0, tmp, 0, modtrim.length);
+                Arrays.sort(tmp);
+                if (addressBusinessChanged) {
+                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_BUSINESS) < 0) {
+                        update.append("businessAddress").append(" = ?,");
+                    } else {
+                        addressBusinessChanged = false;
+                    }
+                }
+                if (addressHomeChanged) {
+                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_HOME) < 0) {
+                        update.append("homeAddress").append(" = ?,");
+                    } else {
+                        addressHomeChanged = false;
+                    }
+                }
+                if (addressOtherChanged) {
+                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_OTHER) < 0) {
+                        update.append("otherAddress").append(" = ?,");
+                    } else {
+                        addressOtherChanged = false;
+                    }
                 }
             }
             final int id = contact.getObjectID();
@@ -1136,11 +1209,21 @@ public final class Contacts {
             ps = writecon.prepareStatement(updater.toString());
             int counter = 1;
             for (int i = 0; i < modtrim.length; i++) {
-                final Mapper mapper = mapping[modtrim[i]];
-                if ((mapper != null) && mapper.containsElement(contact) && (modtrim[i] != Contact.DISTRIBUTIONLIST) && (modtrim[i] != Contact.LINKS) && (modtrim[i] != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
+                final int field = modtrim[i];
+                final Mapper mapper = mapping[field];
+                if ((mapper != null) && mapper.containsElement(contact) && (field != Contact.DISTRIBUTIONLIST) && (field != Contact.LINKS) && (field != Contact.OBJECT_ID) && (i != Contact.IMAGE1_CONTENT_TYPE)) {
                     mapper.fillPreparedStatement(ps, counter, contact);
                     counter++;
                 }
+            }
+            if (addressBusinessChanged) {
+                ps.setNull(counter++, java.sql.Types.VARCHAR);
+            }
+            if (addressHomeChanged) {
+                ps.setNull(counter++, java.sql.Types.VARCHAR);
+            }
+            if (addressOtherChanged) {
+                ps.setNull(counter++, java.sql.Types.VARCHAR);
             }
 
             final Date ddd = new Date(lmd);
@@ -1212,7 +1295,7 @@ public final class Contacts {
         } catch (final SQLException e) {
             rollback(writecon);
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, getStatement(ps));
-        } catch (final RuntimeException re) {
+        } catch (final Exception re) {
             rollback(writecon);
             throw ContactExceptionCodes.UNEXPECTED_ERROR.create(re, re.getMessage());
         } finally {
