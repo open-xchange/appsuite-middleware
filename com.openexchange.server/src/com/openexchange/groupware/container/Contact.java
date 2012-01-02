@@ -336,23 +336,16 @@ public class Contact extends CommonObject implements Serializable {
     static {
         int[] ia =
             new int[] {
-                Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, Contact.FAX_BUSINESS, Contact.POSTAL_CODE_BUSINESS,
-                Contact.STATE_BUSINESS, Contact.STREET_BUSINESS, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2,
-                Contact.EMAIL1, Contact.COMPANY };
+                Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, Contact.POSTAL_CODE_BUSINESS, Contact.STATE_BUSINESS,
+                Contact.STREET_BUSINESS };
         Arrays.sort(ia);
         ADDRESS_FIELDS_BUSINESS = ia;
 
-        ia =
-            new int[] {
-                Contact.CITY_HOME, Contact.COUNTRY_HOME, Contact.FAX_HOME, Contact.POSTAL_CODE_HOME,
-                Contact.STATE_HOME, Contact.STREET_HOME, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.EMAIL2 };
+        ia = new int[] { Contact.CITY_HOME, Contact.COUNTRY_HOME, Contact.POSTAL_CODE_HOME, Contact.STATE_HOME, Contact.STREET_HOME };
         Arrays.sort(ia);
         ADDRESS_FIELDS_HOME = ia;
 
-        ia =
-            new int[] {
-                Contact.CITY_OTHER, Contact.COUNTRY_OTHER, Contact.FAX_OTHER, Contact.POSTAL_CODE_OTHER,
-                Contact.STATE_OTHER, Contact.STREET_OTHER, Contact.TELEPHONE_OTHER, Contact.EMAIL3 };
+        ia = new int[] { Contact.CITY_OTHER, Contact.COUNTRY_OTHER, Contact.POSTAL_CODE_OTHER, Contact.STATE_OTHER, Contact.STREET_OTHER };
         Arrays.sort(ia);
         ADDRESS_FIELDS_OTHER = ia;
     }
