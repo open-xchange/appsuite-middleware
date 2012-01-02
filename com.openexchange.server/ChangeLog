@@ -1,3 +1,7 @@
+* 2012-01-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21098: Manually generating UID values for contact entries
+
 * 2011-12-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 21084: Keeping \Seen flag on DnD to spam folder

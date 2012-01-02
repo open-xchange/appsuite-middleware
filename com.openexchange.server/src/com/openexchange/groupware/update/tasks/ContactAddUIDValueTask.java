@@ -51,9 +51,18 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.rollback;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -114,11 +123,67 @@ public final class ContactAddUIDValueTask extends UpdateTaskAdapter {
 
     private void addUid(final String tableName, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
+        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("UPDATE " + tableName + " SET uid = uuid() WHERE uid IS NULL OR uid = ''");
-            stmt.executeUpdate();
+            stmt = con.prepareStatement("SELECT intfield01, cid FROM " + tableName + " WHERE uid IS NULL OR uid = ''");
+            rs = stmt.executeQuery();
+            final TIntObjectMap<TIntList> map = new TIntObjectHashMap<TIntList>(1024);
+            while (rs.next()) {
+                final int cid = rs.getInt(2);
+                TIntList ids = map.get(cid);
+                if (null == ids) {
+                    ids = new TIntLinkedList();
+                    map.put(cid, ids);
+                }
+                ids.add(rs.getInt(1));
+            }
+            DBUtils.closeSQLStuff(rs, stmt);
+
+            final AtomicReference<SQLException> exceptionReference = new AtomicReference<SQLException>();
+            map.forEachEntry(new TIntObjectProcedure<TIntList>() {
+
+                @Override
+                public boolean execute(final int cid, final TIntList ids) {
+                    PreparedStatement innerStmt = null;
+                    try {
+                        innerStmt = con.prepareStatement("UPDATE " + tableName + " SET uid = ? WHERE cid = ? AND intfield01 = ?");
+                        final PreparedStatement pStmt = innerStmt;
+                        ids.forEach(new TIntProcedure() {
+
+                            @Override
+                            public boolean execute(final int id) {
+                                try {
+                                    pStmt.setString(1, UUID.randomUUID().toString());
+                                    pStmt.setInt(2, cid);
+                                    pStmt.setInt(3, id);
+                                    pStmt.addBatch();
+                                    return true;
+                                } catch (final SQLException e) {
+                                    exceptionReference.set(e);
+                                    return false;
+                                }
+                            }
+                        });
+                        final SQLException sqlException = exceptionReference.get();
+                        if (null != sqlException) {
+                            throw sqlException;
+                        }
+                        innerStmt.executeBatch();
+                        return true;
+                    } catch (final SQLException e) {
+                        exceptionReference.set(e);
+                        return false;
+                    } finally {
+                        DBUtils.closeSQLStuff(innerStmt);
+                    }
+                }
+            }); // end of for-each procedure
+            final SQLException sqlException = exceptionReference.get();
+            if (null != sqlException) {
+                throw sqlException;
+            }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
