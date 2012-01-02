@@ -96,6 +96,7 @@ import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -144,6 +145,11 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
      * Response object.
      */
     protected final HttpServletResponseImpl response;
+
+    /**
+     * The response output buffer.
+     */
+    private final OutputBuffer outputBuffer;
 
     /**
      * The socket timeout used when reading the first block of the request header.
@@ -412,7 +418,8 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         this.packetSize = packetSize;
         request.setInputBuffer(new SocketInputBuffer());
-        response.setOutputBuffer(new SocketOutputBuffer());
+        outputBuffer = new SocketOutputBuffer();
+        response.setOutputBuffer(outputBuffer);
         /*
          * Initialize rest
          */
@@ -846,6 +853,25 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
                         listenerMonitor.incrementNumRequests();
                     }
+                } catch (final UploadServletException e) {
+                    /*
+                     * Log ServletException's own root cause separately
+                     */
+                    final Throwable rootCause = e.getRootCause();
+                    if (null != rootCause) {
+                        LOG.error(rootCause.getMessage(), rootCause);
+                    }
+                    /*
+                     * Now log actual UploadServletException...
+                     */
+                    LOG.error(e.getMessage(), e);
+                    /*
+                     * ... and write bytes
+                     */
+                    final byte[] bytes = e.getData().getBytes("UTF-8");
+                    final ByteChunk byteChunk = new ByteChunk(packetSize);
+                    byteChunk.append(bytes, 0, bytes.length);
+                    outputBuffer.doWrite(byteChunk);
                 } catch (final InterruptedIOException e) {
                     error = true;
                 } catch (final IOException e) {

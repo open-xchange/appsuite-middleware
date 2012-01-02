@@ -2,6 +2,8 @@
 
  - Fix for bug 21098: Manually generating UID values for contact entries
  - Fix for bug 19827: Deleting OL address fields if one of contained fields is changed but associated address field is missing
+ - Fix for bug 21103: Sync'ing POP3 account only when accessing messages
+ - Fix for bug 21104: Properly responding JSON data to client if upload limit is exceeded
 
 * 2011-12-29 - thorben.betten@open-xchange.com
 
