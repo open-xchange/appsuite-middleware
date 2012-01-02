@@ -420,6 +420,9 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         pop3Storage.connect();
         addWarnings(pop3Storage.getWarnings());
         connected = true;
+    }
+
+    private void sync() throws OXException, Error {
         /*
          * Ensure exclusive connect through future since a POP3 account may only be connected to one client at the same time
          */
@@ -499,6 +502,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
         if (!connected) {
             throw POP3ExceptionCode.NOT_CONNECTED.create();
         }
+        sync();
         if (null == messageStorage) {
             messageStorage = new POP3MessageStorage(pop3Storage, accountId, session);
         }
