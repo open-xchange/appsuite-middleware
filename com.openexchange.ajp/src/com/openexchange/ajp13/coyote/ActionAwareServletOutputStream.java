@@ -107,6 +107,15 @@ public final class ActionAwareServletOutputStream extends ServletOutputStream {
 
     @Override
     public void write(final int b) throws IOException {
+        if (packetSize <= byteChunk.getLength()) {  
+            /*-
+             * No remaining size
+             *
+             * Flush chunk
+             */
+            outputBuffer.doWrite(byteChunk);
+            byteChunk.recycle();
+        }
         byteChunk.append((byte) b);
     }
 
