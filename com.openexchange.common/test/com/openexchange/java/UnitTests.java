@@ -49,41 +49,24 @@
 
 package com.openexchange.java;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import static org.junit.Assert.assertArrayEquals;
-import java.util.ArrayList;
-import java.util.List;
-import org.junit.Test;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * Tests the {@link Autoboxing} class methods.
- * TODO should be moved to common bundle where the {@link Autoboxing} class is located but this results in cyclic bundle dependencies.
+ * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AutoboxingTest {
+public class UnitTests {
 
-    public AutoboxingTest() {
+    public UnitTests() {
         super();
     }
 
-    @Test
-    public final void testI2iIntegerArray() {
-        final Integer[] test = new Integer[] { null, I(1), null, I(2), null };
-        assertArrayEquals("Array conversion failed.", new int[] { 1, 2 }, I2i(test));
-        com.openexchange.java.Autoboxing a;
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTest(new JUnit4TestAdapter(AutoboxingTest.class));
+        return tests;
     }
-
-    @Test
-    public final void testI2iCollectionOfIntegerWithNullValues() {
-        List<Integer> test = new ArrayList<Integer>();
-        test.add(null);
-        test.add(I(1));
-        test.add(null);
-        test.add(I(2));
-        test.add(null);
-        assertArrayEquals("Collection conversion not correct.", new int[] { 1, 2 }, I2i(test));
-    }
-
 }
