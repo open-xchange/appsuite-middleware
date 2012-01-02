@@ -320,6 +320,43 @@ public class Contact extends CommonObject implements Serializable {
      */
     public static final int UID = 616;
 
+    /**
+     * Sorted array of fields belonging to business address.
+     */
+    public static final int[] ADDRESS_FIELDS_BUSINESS;
+    /**
+     * Sorted array of fields belonging to home address.
+     */
+    public static final int[] ADDRESS_FIELDS_HOME;
+    /**
+     * Sorted array of fields belonging to other address.
+     */
+    public static final int[] ADDRESS_FIELDS_OTHER;
+
+    static {
+        int[] ia =
+            new int[] {
+                Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, Contact.FAX_BUSINESS, Contact.POSTAL_CODE_BUSINESS,
+                Contact.STATE_BUSINESS, Contact.STREET_BUSINESS, Contact.TELEPHONE_BUSINESS1, Contact.TELEPHONE_BUSINESS2,
+                Contact.EMAIL1, Contact.COMPANY };
+        Arrays.sort(ia);
+        ADDRESS_FIELDS_BUSINESS = ia;
+
+        ia =
+            new int[] {
+                Contact.CITY_HOME, Contact.COUNTRY_HOME, Contact.FAX_HOME, Contact.POSTAL_CODE_HOME,
+                Contact.STATE_HOME, Contact.STREET_HOME, Contact.TELEPHONE_HOME1, Contact.TELEPHONE_HOME2, Contact.EMAIL2 };
+        Arrays.sort(ia);
+        ADDRESS_FIELDS_HOME = ia;
+
+        ia =
+            new int[] {
+                Contact.CITY_OTHER, Contact.COUNTRY_OTHER, Contact.FAX_OTHER, Contact.POSTAL_CODE_OTHER,
+                Contact.STATE_OTHER, Contact.STREET_OTHER, Contact.TELEPHONE_OTHER, Contact.EMAIL3 };
+        Arrays.sort(ia);
+        ADDRESS_FIELDS_OTHER = ia;
+    }
+
     public static final int[] CONTENT_COLUMNS = {
         DISPLAY_NAME, GIVEN_NAME, SUR_NAME, MIDDLE_NAME, SUFFIX, TITLE, STREET_HOME, POSTAL_CODE_HOME, CITY_HOME, STATE_HOME, COUNTRY_HOME,
         BIRTHDAY, MARITAL_STATUS, NUMBER_OF_CHILDREN, PROFESSION, NICKNAME, SPOUSE_NAME, ANNIVERSARY, NOTE, DEPARTMENT, POSITION,
