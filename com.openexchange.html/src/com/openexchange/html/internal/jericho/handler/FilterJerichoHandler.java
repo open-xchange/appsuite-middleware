@@ -471,34 +471,38 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     }
                 } else {
                     if (allowedAttributes.containsKey(attr)) {
-                        final Set<String> allowedValues = allowedAttributes.get(attr);
-                        if (null == allowedValues || allowedValues.contains(val.toLowerCase(Locale.US))) {
-                            if (isNonJavaScriptURL(val)) {
-                                if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
-                                    attrBuilder.append(' ').append(attr).append("=\"\"");
-                                    imageURLFound = true;
-                                } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
-                                    if (val.regionMatches(true, 0, CID, 0, 4) || PATTERN_FILENAME.matcher(val).matches()) {
-                                        // Allow inline images
-                                        attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
-                                    } else {
+                        if (null == val) {
+                            attrBuilder.append(' ').append(attr);
+                        } else {
+                            final Set<String> allowedValues = allowedAttributes.get(attr);
+                            if (null == allowedValues || allowedValues.contains(val.toLowerCase(Locale.US))) {
+                                if (isNonJavaScriptURL(val)) {
+                                    if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                                         attrBuilder.append(' ').append(attr).append("=\"\"");
                                         imageURLFound = true;
-                                    }
-                                } else {
-                                    if (replaceUrls && uriAttributes.contains(attribute)) {
-                                        attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(replaceUrls ? checkPossibleURL(val) : val)).append('"');
+                                    } else if (dropExternalImages && (HTMLElementName.IMG == tagName || HTMLElementName.INPUT == tagName) && "src".equals(attr)) {
+                                        if (val.regionMatches(true, 0, CID, 0, 4) || PATTERN_FILENAME.matcher(val).matches()) {
+                                            // Allow inline images
+                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                        } else {
+                                            attrBuilder.append(' ').append(attr).append("=\"\"");
+                                            imageURLFound = true;
+                                        }
                                     } else {
-                                        attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                        if (replaceUrls && uriAttributes.contains(attribute)) {
+                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(replaceUrls ? checkPossibleURL(val) : val)).append('"');
+                                        } else {
+                                            attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
+                                        }
                                     }
                                 }
-                            }
-                        } else if (NUM_ATTRIBS == allowedValues) {
-                            /*
-                             * Only numeric attribute value allowed
-                             */
-                            if (PAT_NUMERIC.matcher(val.trim()).matches()) {
-                                attrBuilder.append(' ').append(attr).append("=\"").append(val).append('"');
+                            } else if (NUM_ATTRIBS == allowedValues) {
+                                /*
+                                 * Only numeric attribute value allowed
+                                 */
+                                if (PAT_NUMERIC.matcher(val.trim()).matches()) {
+                                    attrBuilder.append(' ').append(attr).append("=\"").append(val).append('"');
+                                }
                             }
                         }
                     }

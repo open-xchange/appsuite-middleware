@@ -296,7 +296,7 @@ public final class CSSMatcher {
     }
 
     private static final Pattern PATTERN_STYLE_LINE = Pattern.compile(
-        "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;]]+);?",
+        "([\\p{Alnum}-_]+)\\s*:\\s*([\\p{Print}&&[^;{}]]+);?",
         Pattern.CASE_INSENSITIVE);
 
     /**
