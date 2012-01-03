@@ -681,7 +681,7 @@ public abstract class MailConfig {
             builder.append("login=").append(login).append(", ");
         }
         if (password != null) {
-            builder.append("password=").append(password).append(", ");
+            // builder.append("password=").append(password).append(", ");
         }
         builder.append("getPort()=").append(getPort()).append(", ");
         if (getServer() != null) {

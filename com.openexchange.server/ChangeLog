@@ -1,3 +1,7 @@
+* 2012-01-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21107: Fixed toString() implementation
+
 * 2012-01-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 21098: Manually generating UID values for contact entries
