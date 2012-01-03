@@ -1799,7 +1799,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final String fileName;
                 {
                     final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
-                    fileName = new StringBuilder(subject.replaceAll("\\W+", "_")).append(".zip").toString();
+                    fileName = new StringBuilder(subject).append(".zip").toString();
                 }
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.

@@ -92,8 +92,11 @@ public final class JerichoParser {
         int lastSegmentEnd = 0;
         for (final Segment segment : streamedSource) {
             if (segment.getEnd() <= lastSegmentEnd) {
-                continue; // if this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with
-                          // the previous tag.
+                /*
+                 * If this tag is inside the previous tag (e.g. a server tag) then ignore it as it was already output along with the
+                 * previous tag.
+                 */
+                continue;
             }
             lastSegmentEnd = segment.getEnd();
             if (segment instanceof Tag) {

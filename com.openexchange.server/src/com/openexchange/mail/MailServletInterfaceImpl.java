@@ -74,11 +74,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -975,7 +975,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             try {
                 final File tempFile = mfm.newTempFile();
-                final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(tempFile));
+                final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(new FileOutputStream(tempFile));
+                zipOutput.setEncoding("UTF-8");
+                zipOutput.setUseLanguageEncodingFlag(true);
                 try {
                     final byte[] buf = new byte[8192];
                     for (int i = 0; i < files.length; i++) {
@@ -988,13 +990,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                  */
                                 final String subject = mails[i].getSubject();
                                 final String ext = ".eml";
-                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject.replaceAll("\\W+", "_")) + ext;
+                                final String name = (isEmpty(subject) ? "mail" + (i+1) : subject) + ext;
+                                ZipArchiveEntry entry;
                                 int num = 1;
                                 while (true) {
                                     try {
                                         final int pos = name.indexOf(ext);
                                         final String entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + ext;
-                                        out.putNextEntry(new ZipEntry(entryName));
+                                        entry = new ZipArchiveEntry(entryName);
+                                        zipOutput.putArchiveEntry(entry);
                                         break;
                                     } catch (final java.util.zip.ZipException e) {
                                         final String message = e.getMessage();
@@ -1007,14 +1011,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Transfer bytes from the file to the ZIP file
                                  */
-                                int len;
-                                while ((len = in.read(buf)) > 0) {
-                                    out.write(buf, 0, len);
+                                long size = 0;
+                                for (int len; (len = in.read(buf)) > 0;) {
+                                    zipOutput.write(buf, 0, len);
+                                    size += len;
                                 }
+                                entry.setSize(size);
                                 /*
                                  * Complete the entry
                                  */
-                                out.closeEntry();
+                                zipOutput.closeArchiveEntry();
                             } finally {
                                 try {
                                     in.close();
@@ -1027,7 +1033,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 } finally {
                     // Complete the ZIP file
                     try {
-                        out.close();
+                        zipOutput.close();
                     } catch (final IOException e) {
                         LOG.error(e.getMessage(), e);
                     }
@@ -1100,7 +1106,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              */
             try {
                 final File tempFile = mfm.newTempFile();
-                final ZipOutputStream out = new ZipOutputStream(new FileOutputStream(tempFile));
+                final ZipArchiveOutputStream zipOutput = new ZipArchiveOutputStream(new FileOutputStream(tempFile));
+                zipOutput.setEncoding("UTF-8");
+                zipOutput.setUseLanguageEncodingFlag(true);
                 try {
                     final byte[] buf = new byte[8192];
                     for (int i = 0; i < files.length; i++) {
@@ -1111,8 +1119,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Add ZIP entry to output stream
                                  */
-                                final String name = parts[i].getFileName().replaceAll("[^\\p{ASCII}]+", "_");
+                                final String name = parts[i].getFileName();
                                 int num = 1;
+                                ZipArchiveEntry entry;
                                 while (true) {
                                     try {
                                         final String entryName;
@@ -1124,7 +1133,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                                 entryName = name.substring(0, pos) + (num > 1 ? "_(" + num + ")" : "") + name.substring(pos);
                                             }
                                         }
-                                        out.putNextEntry(new ZipEntry(entryName));
+                                        entry = new ZipArchiveEntry(entryName);
+                                        zipOutput.putArchiveEntry(entry);
                                         break;
                                     } catch (final java.util.zip.ZipException e) {
                                         final String message = e.getMessage();
@@ -1137,14 +1147,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                 /*
                                  * Transfer bytes from the file to the ZIP file
                                  */
-                                int len;
-                                while ((len = in.read(buf)) > 0) {
-                                    out.write(buf, 0, len);
+                                long size = 0;
+                                for (int len; (len = in.read(buf)) > 0;) {
+                                    zipOutput.write(buf, 0, len);
+                                    size += len;
                                 }
+                                entry.setSize(size);
                                 /*
                                  * Complete the entry
                                  */
-                                out.closeEntry();
+                                zipOutput.closeArchiveEntry();
                             } finally {
                                 try {
                                     in.close();
@@ -1157,7 +1169,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 } finally {
                     // Complete the ZIP file
                     try {
-                        out.close();
+                        zipOutput.close();
                     } catch (final IOException e) {
                         LOG.error(e.getMessage(), e);
                     }
