@@ -102,6 +102,11 @@ public interface CommonEvent {
     public static final int CONFIRM_TENTATIVE = 7;
 
     /**
+     * Constant for removed confirmation action.
+     */
+    public static final int CONFIRM_WAITING = 8;
+
+    /**
      * Gets the context ID.
      *
      * @return The context ID
