@@ -3789,7 +3789,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (CalendarObject.TENTATIVE == confirm) {
             return CalendarOperation.CONFIRM_TENTATIVELY_ACCEPTED;
         }
-        return CalendarObject.NONE;
+        return CalendarOperation.CONFIRM_WAITING;
     }
 
     @Override

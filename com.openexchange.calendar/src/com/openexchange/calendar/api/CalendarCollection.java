@@ -2321,6 +2321,13 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(18));
                 }
                 break;
+            case CalendarOperation.CONFIRM_WAITING:
+                try {
+                    eventclient.waiting(appointmentobject); // TODO
+                } catch (final RuntimeException e) {
+                    throw OXCalendarExceptionCodes.UNEXPECTED_EXCEPTION.create(e, Integer.valueOf(18));
+                }
+                break;
             default:
                 throw OXCalendarExceptionCodes.UNSUPPORTED_ACTION_TYPE.create(Integer.valueOf(action));
         }

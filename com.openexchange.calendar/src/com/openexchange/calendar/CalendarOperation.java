@@ -122,6 +122,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      */
     public static final int CONFIRM_TENTATIVELY_ACCEPTED = 5;
 
+    /**
+     * Indicates removed confirmation status.
+     */
+    public static final int CONFIRM_WAITING = 6;
+
     public static final int MAX_RESULT_LIMIT = -1;
 
     private int result_counter;
@@ -440,7 +445,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setGlobalFolderID(0);
             }
             if (cdao.getFolderType() == FolderObject.SHARED) {
-                int folderOwner = ofa.getFolderOwner(inFolder);
+                final int folderOwner = ofa.getFolderOwner(inFolder);
                 cdao.setCreatedBy(folderOwner);
                 cdao.setModifiedBy(folderOwner);
             }
