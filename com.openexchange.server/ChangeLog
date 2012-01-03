@@ -2,6 +2,7 @@
 
  - Fix for bug 21107: Fixed toString() implementation
  - Fix for bug 21094: Introduced alternative HTML parser capable to parse real-life HTML content
+ - Fix for bug 18444: Allowing to remove a user's confirmation status
 
 * 2012-01-02 - thorben.betten@open-xchange.com
 
