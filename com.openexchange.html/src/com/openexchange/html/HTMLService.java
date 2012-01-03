@@ -123,6 +123,17 @@ public interface HTMLService {
     String filterExternalImages(String htmlContent, boolean[] modified);
 
     /**
+     * Sanitizes specified HTML content.
+     * 
+     * @param htmlContent The HTML content to sanitize
+     * @param optConfigName The optional configuration name to read whitelist from
+     * @param dropExternalImages Whether to drop image URLs
+     * @param modified A <code>boolean</code> array with length <code>1</code> to store modified status
+     * @return The sanitized HTML content
+     */
+    String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified);
+
+    /**
      * Converts specified HTML content to plain text.
      * <p>
      * <b>Note</b>: Specified HTML content needs to be validated as per {@link #getConformHTML(String, String)}

@@ -78,6 +78,8 @@ import org.jsoup.Jsoup;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HTMLService;
+import com.openexchange.html.internal.jericho.JerichoParser;
+import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
 import com.openexchange.html.internal.parser.HTMLParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
@@ -449,6 +451,30 @@ public final class HTMLServiceImpl implements HTMLService {
         final HTMLImageFilterHandler handler = new HTMLImageFilterHandler(this, htmlContent.length());
         HTMLParser.parse(htmlContent, handler);
         modified[0] |= handler.isImageURLFound();
+        return handler.getHTML();
+    }
+
+    @Override
+    public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified) {
+        String confName = optConfigName;
+        if (null != confName && !confName.endsWith(".properties")) {
+            confName += ".properties";
+        }
+        final String html = replaceHexEntities(htmlContent);
+        final FilterJerichoHandler handler;
+        {
+            final String definition = null == confName ? null : getConfiguration().getText(confName);
+            if (null == definition) {
+                handler = new FilterJerichoHandler(html.length());
+            } else {
+                handler = new FilterJerichoHandler(html.length(), definition);
+            }
+        }
+        JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages));
+        if (null != modified) {
+            modified[0] |= handler.isImageURLFound();
+        }
+        // processDownlevelRevealedConditionalComments(handler.getHTML());
         return handler.getHTML();
     }
 
