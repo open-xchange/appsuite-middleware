@@ -58,7 +58,6 @@ import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-
 import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
@@ -112,9 +111,7 @@ public final class JerichoParser {
                 final CharacterReference characterReference = (CharacterReference) segment;
                 handler.handleCharacterReference(characterReference);
             } else {
-                if (!segment.isWhiteSpace()) {
-                    handler.handleContent(segment);
-                }
+                handler.handleContent(segment);
             }
         }
     }
