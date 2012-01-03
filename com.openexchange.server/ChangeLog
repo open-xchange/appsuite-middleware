@@ -1,3 +1,7 @@
+* 2012-01-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 14456: Closing all statements before returning connection to pool.
+
 * 2012-01-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 21107: Fixed toString() implementation

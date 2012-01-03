@@ -50,7 +50,10 @@
 package com.openexchange.calendar;
 
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
+import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
@@ -3794,78 +3797,61 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
-        Connection writecon = null;
-        int changes[];
+        int changes;
         PreparedStatement pst = null;
-        int oldAmount = 0;
+        int amount = 0;
         ResultSet rs = null;
         PreparedStatement prep = null;
         long last_modified = 0L;
+        final Connection con = DBPool.pickupWriteable(c);
         try {
-            writecon = DBPool.pickupWriteable(c);
-            writecon.setAutoCommit(false);
+            con.setAutoCommit(false);
             final StringBuilder sb = new StringBuilder(96);
-            sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01 = ");
+            sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01=");
             sb.append(oid);
-            sb.append(" AND cid = ");
+            sb.append(" AND cid=");
             sb.append(c.getContextId());
             sb.append(" FOR UPDATE");
-            prep = getPreparedStatement(writecon, sb.toString());
-            rs = getResultSet(prep);
+            prep = getPreparedStatement(con, sb.toString());
+            rs = prep.executeQuery();
             if (rs.next()) {
-                oldAmount = rs.getInt(1);
+                amount = rs.getInt(1);
             } else {
                 LOG.error("Object Not Found: " + "Unable to handle attachment action", new Throwable());
                 throw OXException.notFound("");
             }
-
-
-            oldAmount += numberOfAttachments;
-            if (oldAmount < 0) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Integer.valueOf(oldAmount), " oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
+            amount += numberOfAttachments;
+            if (amount < 0) {
+                LOG.error(StringCollection.convertArraytoString(new Object[] { "Object seems to be corrupted: new number of attachments:", Autoboxing.I(amount), " oid:cid:uid ", Autoboxing.I(oid), Character.valueOf(CalendarOperation.COLON), Autoboxing.I(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Autoboxing.I(uid) }), new Throwable());
                 throw new OXException();
             }
-
-            pst = writecon.prepareStatement("update prg_dates SET changing_date = ?, changed_from = ?, intfield08 = ? WHERE intfield01 = ? AND cid = ?");
+            pst = con.prepareStatement("UPDATE prg_dates SET changing_date=?,changed_from=?,intfield08=? WHERE intfield01=? AND cid=?");
             last_modified = System.currentTimeMillis();
             pst.setLong(1, last_modified);
             pst.setInt(2, uid);
-            pst.setInt(3, oldAmount);
+            pst.setInt(3, amount);
             pst.setInt(4, oid);
             pst.setInt(5, c.getContextId());
-            pst.addBatch();
-            changes = pst.executeBatch();
-            if (changes[0] == 0) {
-                LOG.error(StringCollection.convertArraytoString(new Object[] { "Object not found: attachmentAction: oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }), new Throwable());
+            changes = pst.executeUpdate();
+            if (changes == 0) {
+                LOG.error(StringCollection.convertArraytoString(new Object[] { "Object not found: attachmentAction: oid:cid:uid ", Autoboxing.I(oid), Character.valueOf(CalendarOperation.COLON), Autoboxing.I(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Autoboxing.I(uid) }), new Throwable());
                 throw OXException.notFound("");
             }
-            LOG.warn(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Integer.valueOf(changes[0]), ". Check prg_dates oid:cid:uid ", Integer.valueOf(oid), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Integer.valueOf(uid) }));
-            writecon.commit();
+            LOG.debug(StringCollection.convertArraytoString(new Object[] { "Result of attachmentAction was ", Autoboxing.I(changes), ". Check prg_dates oid:cid:uid ", Autoboxing.I(oid), Character.valueOf(CalendarOperation.COLON), Autoboxing.I(c.getContextId()), Character.valueOf(CalendarOperation.COLON), Autoboxing.I(uid) }));
+            con.commit();
         } catch (final SQLException sqle) {
-            if (writecon != null) {
-                try {
-                    writecon.rollback();
-                } catch (final SQLException rb) {
-                    LOG.error("attachmentAction (writecon) error while rollback ", rb);
-                }
-            }
+            rollback(con);
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
-            collection.closePreparedStatement(pst);
-            collection.closePreparedStatement(prep);
-            if (writecon != null) {
-                try {
-                    writecon.setAutoCommit(true);
-                } catch (final SQLException sqle) {
-                    LOG.error("attachmentAction (writecon) error while setAutoCommit(true) ", sqle);
-                }
-                DBPool.closeWriterSilent(c, writecon);
-            }
+            closeSQLStuff(prep);
+            closeSQLStuff(pst);
+            autocommit(con);
+            DBPool.closeWriterSilent(c, con);
         }
         final CalendarDataObject edao = new CalendarDataObject();
         edao.setParentFolderID(folderId);
         edao.setObjectID(oid);
-        edao.setNumberOfAttachments(oldAmount);
+        edao.setNumberOfAttachments(amount);
         final EventClient eventclient = new EventClient(session);
         try {
             eventclient.modify(edao);
