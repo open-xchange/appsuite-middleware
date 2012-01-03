@@ -58,7 +58,8 @@ import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
@@ -67,6 +68,10 @@ import com.openexchange.html.internal.parser.HTMLHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JerichoParser {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JerichoParser.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     /**
      * Initializes a new {@link JerichoParser}.
@@ -82,6 +87,7 @@ public final class JerichoParser {
      * @param handler The HTML handler
      */
     public static void parse(final String html, final JerichoHandler handler) {
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         final StreamedSource streamedSource = new StreamedSource(html);
         int lastSegmentEnd = 0;
         for (final Segment segment : streamedSource) {
@@ -112,10 +118,12 @@ public final class JerichoParser {
                 final CharacterReference characterReference = (CharacterReference) segment;
                 handler.handleCharacterReference(characterReference);
             } else {
-                if (!segment.isWhiteSpace()) {
-                    handler.handleContent(segment);
-                }
+                handler.handleContent(segment);
             }
+        }
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
         }
     }
 
