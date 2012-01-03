@@ -70,6 +70,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.MailPath;
@@ -159,22 +160,34 @@ public final class HTMLProcessing {
                 retval = content;
             } else {
                 retval = htmlService.dropScriptTagsInHeader(content);
-                retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
                 if (DisplayMode.MODIFYABLE.isIncluded(mode) && usm.isDisplayHtmlInlineContent()) {
                     final boolean externalImagesAllowed = usm.isAllowHTMLImages();
                     retval = htmlService.checkBaseTag(retval, externalImagesAllowed);
-                    /*
-                     * Filter according to white-list
-                     */
-                    retval = htmlService.filterWhitelist(retval);
-
-                    if (externalImagesAllowed) {
-                        /*
-                         * TODO: Does not work reliably by now
-                         */
-                        // retval = htmlService.checkExternalImages(retval);
+                    if (useSanitize()) {
+                        // No need to generate well-formed HTML
+                        if (externalImagesAllowed) {
+                            /*
+                             * TODO: Does not work reliably by now
+                             */
+                            // retval = htmlService.checkExternalImages(retval);
+                            retval = htmlService.sanitize(retval, null, false, null);
+                        } else {
+                            retval = htmlService.sanitize(retval, null, true, modified);
+                        }
                     } else {
-                        retval = htmlService.filterExternalImages(retval, modified);
+                        retval = htmlService.getConformHTML(retval, charset == null ? CHARSET_US_ASCII : charset, false);
+                        /*
+                         * Filter according to white-list
+                         */
+                        retval = htmlService.filterWhitelist(retval);
+                        if (externalImagesAllowed) {
+                            /*
+                             * TODO: Does not work reliably by now
+                             */
+                            // retval = htmlService.checkExternalImages(retval);
+                        } else {
+                            retval = htmlService.filterExternalImages(retval, modified);
+                        }
                     }
                     /*
                      * Filter inlined images
@@ -182,8 +195,6 @@ public final class HTMLProcessing {
                     if (mailPath != null && session != null) {
                         retval = filterInlineImages(retval, session, mailPath);
                     }
-                    // Replace CSS classes
-                    retval = saneCss(retval, htmlService);
                 }
             }
         } else {
@@ -201,6 +212,20 @@ public final class HTMLProcessing {
             }
         }
         return retval;
+    }
+
+    private static volatile Boolean useSanitize;
+
+    private static boolean useSanitize() {
+        if (null == useSanitize) {
+            synchronized (HTMLProcessing.class) {
+                if (null == useSanitize) {
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    useSanitize = Boolean.valueOf((null == service) || (service.getBoolProperty("com.openexchange.mail.text.useSanitize", true)));
+                }
+            }
+        }
+        return useSanitize.booleanValue();
     }
 
     private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
