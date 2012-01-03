@@ -98,6 +98,16 @@ public interface AppointmentEventInterface {
 	 */
 	public void appointmentTentativelyAccepted(Appointment appointmentObj, Session sessionObj);
 
+	/**
+     * Invoked if one of appointment's participants removed confirmation status.
+     *
+     * @param appointmentObj
+     *            The appointment
+     * @param sessionObj
+     *            The user session
+     */
+    public void appointmentWaiting(Appointment appointmentObj, Session sessionObj);
+
     public void appointmentDeleted(Appointment appointmentObj, Session sessionObj);
 
 }

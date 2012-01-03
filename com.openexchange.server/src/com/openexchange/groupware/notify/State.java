@@ -71,7 +71,7 @@ public interface State {
 
 	public static enum Type {
 		NEW("New"), MODIFIED("Modified"), DELETED("Deleted"), REMINDER("Reminder"), ACCEPTED("Accepted"), DECLINED(
-				"Declined"), TENTATIVELY_ACCEPTED("Tentatively accepted");
+				"Declined"), TENTATIVELY_ACCEPTED("Tentatively accepted"), NONE_ACCEPTED("Not yet accepted");
 
 		private final String str;
 

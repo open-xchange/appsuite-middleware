@@ -151,6 +151,8 @@ public class AppointmentState extends LinkableState {
         case DECLINED:
             /*fall through*/
         case TENTATIVELY_ACCEPTED:
+            /*fall through*/
+        case NONE_ACCEPTED:
             return (participant == owner) ? userSettingMail.isNotifyAppointmentsConfirmOwner() : userSettingMail
                     .isNotifyAppointmentsConfirmParticipant();
         case REMINDER:

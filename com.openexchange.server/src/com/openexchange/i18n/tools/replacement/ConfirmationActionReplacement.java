@@ -71,6 +71,8 @@ public final class ConfirmationActionReplacement extends LocalizedStringReplacem
 
     public static final int ACTION_TENTATIVELY_ACCEPTED = 2;
 
+    public static final int ACTION_NONE_ACCEPTED = 3;
+
     /**
      * Initializes a new {@link ConfirmationActionReplacement}
      *

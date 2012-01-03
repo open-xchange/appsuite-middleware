@@ -135,6 +135,12 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         }
     }
 
+    public void waiting(final Appointment appointment, final Session session) {
+        for (final AppointmentEventInterface listener : appointmentListeners) {
+            listener.appointmentWaiting(appointment, session);
+        }
+    }
+
     public void deleted(final Appointment appointment, final Session session) {
         for (final AppointmentEventInterface listener : appointmentListeners) {
             listener.appointmentDeleted(appointment, session);
@@ -214,6 +220,8 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
                     declined((Appointment) actionObj, session);
                 } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
                     tentativelyAccepted((Appointment) actionObj, session);
+                } else if (CommonEvent.CONFIRM_WAITING == action) {
+                    waiting((Appointment) actionObj, session);
                 }
             } else if (Types.TASK == module) {
                 if (CommonEvent.INSERT == action) {

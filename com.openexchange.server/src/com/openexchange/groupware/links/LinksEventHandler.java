@@ -314,6 +314,11 @@ public class LinksEventHandler implements NoDelayEventInterface, AppointmentEven
     }
 
     @Override
+    public void appointmentWaiting(final Appointment appointmentObj, final Session sessionObj) {
+        // Nothing to do
+    }
+
+    @Override
     public void taskAccepted(final Task taskObj, final Session sessionObj) {
         // nothing to do
     }

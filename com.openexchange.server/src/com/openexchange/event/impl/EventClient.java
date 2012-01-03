@@ -99,6 +99,7 @@ public class EventClient {
     public static final int CONFIRM_ACCEPTED = 9;
     public static final int CONFIRM_DECLINED = 10;
     public static final int CONFIRM_TENTATIVE = 11;
+    public static final int CONFIRM_WAITING = 11;
 
     private final Session session;
 
@@ -136,7 +137,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void modify(final Appointment appointment) throws OXException, OXException {
+    public void modify(final Appointment appointment) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -160,7 +161,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void accepted(final Appointment appointment) throws OXException, OXException {
+    public void accepted(final Appointment appointment) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -184,7 +185,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void declined(final Appointment appointment) throws OXException, OXException {
+    public void declined(final Appointment appointment) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -208,7 +209,7 @@ public class EventClient {
         EventQueue.add(eventObject);
     }
 
-    public void tentative(final Appointment appointment) throws OXException, OXException {
+    public void tentative(final Appointment appointment) throws OXException {
         final Context ctx = ContextStorage.getInstance().getContext(contextId);
 
         final int folderId = appointment.getParentFolderID();
@@ -229,6 +230,30 @@ public class EventClient {
         triggerEvent(event);
 
         final EventObject eventObject = new EventObject(newAppointment, CONFIRM_TENTATIVE, session);
+        EventQueue.add(eventObject);
+    }
+
+    public void waiting(final Appointment appointment) throws OXException {
+        final Context ctx = ContextStorage.getInstance().getContext(contextId);
+
+        final int folderId = appointment.getParentFolderID();
+        if (folderId > 0) {
+            final FolderObject folderObj = getFolder(folderId, ctx);
+            waiting(null, appointment, folderObj);
+        }
+    }
+
+    public void waiting(final Appointment oldAppointment, final Appointment newAppointment, final FolderObject folder) throws OXException {
+        final Map<Integer, Set<Integer>> affectedUsers = getAffectedUsers(new CalendarObject[] { oldAppointment, newAppointment }, new FolderObject[] { folder });
+        final CommonEvent genericEvent = new CommonEventImpl(contextId, userId, unmodifyable(affectedUsers), CommonEvent.CONFIRM_WAITING, Types.APPOINTMENT, newAppointment, oldAppointment, folder, null, session);
+
+        final Dictionary<String, CommonEvent> ht = new Hashtable<String, CommonEvent>(1);
+        ht.put(CommonEvent.EVENT_KEY, genericEvent);
+
+        final Event event = new Event("com/openexchange/groupware/appointment/waiting", ht);
+        triggerEvent(event);
+
+        final EventObject eventObject = new EventObject(newAppointment, CONFIRM_WAITING, session);
         EventQueue.add(eventObject);
     }
 

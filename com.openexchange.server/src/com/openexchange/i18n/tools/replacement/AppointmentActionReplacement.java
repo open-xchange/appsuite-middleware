@@ -63,7 +63,7 @@ public final class AppointmentActionReplacement extends LocalizedStringReplaceme
 
     private static String[] ACTIONS = { Notifications.APPOINTMENT_CREATE_TITLE, Notifications.APPOINTMENT_UPDATE_TITLE,
             Notifications.APPOINTMENT_DELETE_TITLE, Notifications.APPOINTMENT_ACCEPTED_TITLE,
-            Notifications.APPOINTMENT_DECLINED_TITLE, Notifications.APPOINTMENT_TENTATIVE_TITLE };
+            Notifications.APPOINTMENT_DECLINED_TITLE, Notifications.APPOINTMENT_TENTATIVE_TITLE, Notifications.APPOINTMENT_NONE_TITLE };
 
     public static final int ACTION_NEW = 0;
 
@@ -77,13 +77,15 @@ public final class AppointmentActionReplacement extends LocalizedStringReplaceme
 
     public static final int ACTION_TENTATIVE = 5;
 
+    public static final int ACTION_NONE = -1;
+
     /**
      * Initializes a new {@link AppointmentActionReplacement}
      *
      * @param appointmentAction The appointment action; supposed to be either
      *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
      *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
-     *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
+     *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}, or {@link #ACTION_NONE}
      */
     public AppointmentActionReplacement(final int appointmentAction) {
         this(appointmentAction, null);
@@ -95,7 +97,7 @@ public final class AppointmentActionReplacement extends LocalizedStringReplaceme
      * @param appointmentAction The appointment action; supposed to be either
      *            {@link #ACTION_NEW}, {@link #ACTION_CHANGED},
      *            {@link #ACTION_DELETED}, {@link #ACTION_ACCEPTED},
-     *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}
+     *            {@link #ACTION_DECLINED}, or {@link #ACTION_TENTATIVE}, or {@link #ACTION_NONE}
      * @param locale The locale
      */
     public AppointmentActionReplacement(final int appointmentAction, final Locale locale) {

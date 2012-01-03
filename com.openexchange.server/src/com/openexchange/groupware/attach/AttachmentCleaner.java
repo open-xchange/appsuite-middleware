@@ -205,6 +205,11 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
     }
 
     @Override
+    public void appointmentWaiting(final Appointment appointmentObj, final Session sessionObj) {
+        // Nothing to do
+    }
+
+    @Override
     public void taskAccepted(final Task taskObj, final Session sessionObj) {
         // Nothing to do
     }

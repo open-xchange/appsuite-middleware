@@ -377,6 +377,15 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     }
 
     @Override
+    public void appointmentWaiting(final Appointment appointmentObj, final Session session) {
+        sendNotification(null, appointmentObj, session, new AppointmentState(
+                new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_NONE),
+                new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_NONE_ACCEPTED),
+                Notifications.APPOINTMENT_CONFIRMATION_MAIL,
+                State.Type.NONE_ACCEPTED), false, false, false);
+    }
+
+    @Override
     public void appointmentDeleted(final Appointment appointmentObj, final Session session) {
         /*
          * Clear calendar object from notification pool
@@ -2395,7 +2404,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
     	return null != state &&
 			State.Type.ACCEPTED.equals(state.getType()) ||
         	State.Type.DECLINED.equals(state.getType()) ||
-        	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType());
+        	State.Type.TENTATIVELY_ACCEPTED.equals(state.getType()) || 
+            State.Type.NONE_ACCEPTED.equals(state.getType());
     }
 
     /**

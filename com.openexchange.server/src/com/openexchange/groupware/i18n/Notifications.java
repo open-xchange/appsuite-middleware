@@ -614,6 +614,8 @@ public class Notifications implements LocalizableStrings {
 
     public static final String APPOINTMENT_TENTATIVE_TITLE = "Appointment (tentative)";
 
+    public static final String APPOINTMENT_NONE_TITLE = "Appointment (none)";
+
     public static final String TASK_CREATE_TITLE = "New task";
 
     public static final String TASK_UPDATE_TITLE = "Task changed";
