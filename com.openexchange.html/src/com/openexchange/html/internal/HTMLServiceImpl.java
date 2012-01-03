@@ -471,7 +471,7 @@ public final class HTMLServiceImpl implements HTMLService {
             }
         }
         JerichoParser.parse(html, handler.setDropExternalImages(dropExternalImages));
-        if (null != modified) {
+        if (dropExternalImages && null != modified) {
             modified[0] |= handler.isImageURLFound();
         }
         // processDownlevelRevealedConditionalComments(handler.getHTML());
