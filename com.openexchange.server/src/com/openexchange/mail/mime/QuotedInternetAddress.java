@@ -51,11 +51,13 @@ package com.openexchange.mail.mime;
 
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeUtility;
@@ -463,12 +465,12 @@ public final class QuotedInternetAddress extends InternetAddress {
                     pers = tmp;
                 }
                 if (rfc822 || strict || parseHdr) {
-                    final String ace = toACE(addr);
+                    final StringBuilder ace = new StringBuilder(toACE(addr));
                     if (!ignoreErrors) {
-                        checkAddress(ace, route_addr, false);
+                        checkAddress(ace, route_addr, false, true);
                     }
                     qia = new QuotedInternetAddress();
-                    qia.setAddress(ace);
+                    qia.setAddress(ace.toString());
                     if (pers != null) {
                         qia.encodedPersonal = pers;
                     }
@@ -478,10 +480,10 @@ public final class QuotedInternetAddress extends InternetAddress {
                     final StringTokenizer st = new StringTokenizer(addr);
                     while (st.hasMoreTokens()) {
                         final String a = st.nextToken();
-                        final String ace = toACE(a);
-                        checkAddress(ace, false, false);
+                        final StringBuilder ace = new StringBuilder(toACE(a));
+                        checkAddress(ace, false, false, true);
                         qia = new QuotedInternetAddress();
-                        qia.setAddress(ace);
+                        qia.setAddress(ace.toString());
                         list.add(qia);
                     }
                 }
@@ -589,12 +591,12 @@ public final class QuotedInternetAddress extends InternetAddress {
                 pers = tmp;
             }
             if (rfc822 || strict || parseHdr) {
-                final String ace = toACE(addr);
+                final StringBuilder ace = new StringBuilder(toACE(addr));
                 if (!ignoreErrors) {
-                    checkAddress(ace, route_addr, false);
+                    checkAddress(ace, route_addr, false, true);
                 }
                 qia = new QuotedInternetAddress();
-                qia.setAddress(ace);
+                qia.setAddress(ace.toString());
                 if (pers != null) {
                     qia.encodedPersonal = pers;
                 }
@@ -604,10 +606,10 @@ public final class QuotedInternetAddress extends InternetAddress {
                 final StringTokenizer st = new StringTokenizer(addr);
                 while (st.hasMoreTokens()) {
                     final String a = st.nextToken();
-                    final String ace = toACE(a);
-                    checkAddress(ace, false, false);
+                    final StringBuilder ace = new StringBuilder(toACE(a));
+                    checkAddress(ace, false, false, true);
                     qia = new QuotedInternetAddress();
-                    qia.setAddress(ace);
+                    qia.setAddress(ace.toString());
                     list.add(qia);
                 }
             }
@@ -874,7 +876,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     public QuotedInternetAddress(final String address, final boolean strict) throws AddressException {
-        this(address);
+        this(init(address, true));
         if (strict) {
             if (isGroup()) {
                 getGroup(true); // throw away the result
