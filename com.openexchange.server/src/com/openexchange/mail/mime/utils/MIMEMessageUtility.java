@@ -904,7 +904,29 @@ public final class MIMEMessageUtility {
         }
     }
 
-    private static final Pattern SPLIT = Pattern.compile("\\s*,\\s*");
+    private static final Pattern SPLITS = Pattern.compile(" *, *");
+
+    private static List<String> splitAddrs(final String addrs) {
+        final String[] sa = SPLITS.split(addrs, 0);
+        final List<String> ret = new ArrayList<String>(sa.length);
+        final StringBuilder tmp = new StringBuilder(24);
+        for (final String string : sa) {
+            final String trim = string.trim();
+            if (trim.charAt(0) == '"') {
+                tmp.setLength(0);
+                tmp.append(trim).append(", ");
+            } else if (trim.indexOf("\" <") >= 0) {
+                tmp.append(trim);
+                ret.add(tmp.toString());
+                tmp.setLength(0);
+            } else if (tmp.length() > 0) {
+                tmp.append(string).append(", ");
+            } else {
+                ret.add(string);
+            }
+        }
+        return ret;
+    }
 
     /**
      * Parse the given sequence of addresses into InternetAddress objects by invoking
@@ -934,9 +956,9 @@ public final class MIMEMessageUtility {
             addrs = QuotedInternetAddress.parse(al, strict);
         } catch (final AddressException e) {
             // Retry with single parse
-            final String[] sAddrs = SPLIT.split(al, 0);
+            final List<String> sAddrs = splitAddrs(al);
             try {
-                final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.length);
+                final List<InternetAddress> addrList = new ArrayList<InternetAddress>(sAddrs.size());
                 for (final String sAddr : sAddrs) {
                     final QuotedInternetAddress tmp = new QuotedInternetAddress(sAddr, strict);
                     if (TRACE) {
@@ -963,7 +985,7 @@ public final class MIMEMessageUtility {
                             "using plain addresses' string representation instead.").toString(),
                         e);
                 }
-                addrs = PlainTextAddress.getAddresses(al.split(" *, *"));
+                addrs = PlainTextAddress.getAddresses(splitAddrs(al).toArray(new String[0]));
             }
         }
         try {
