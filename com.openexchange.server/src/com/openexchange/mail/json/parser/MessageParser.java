@@ -893,7 +893,7 @@ public final class MessageParser {
                 value = jo.getString(key);
             }
         }
-        return parseAddressList(value, false, true);
+        return parseAddressList(value, true, true);
     }
 
     /**
