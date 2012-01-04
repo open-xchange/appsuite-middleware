@@ -188,7 +188,7 @@ public final class MessageWriter {
          */
         final JSONObject jsonObject = handler.getJSONObject();
         final String key = MailJSONField.MSGREF.getKey();
-        if (!jsonObject.has(key)) {
+        if (!jsonObject.has(key) && null != mailPath) {
             try {
                 jsonObject.put(key, mailPath.toString());
             } catch (final JSONException e) {
