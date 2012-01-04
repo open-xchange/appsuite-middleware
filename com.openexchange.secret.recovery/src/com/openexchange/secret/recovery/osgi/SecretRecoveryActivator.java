@@ -81,7 +81,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final SecretUsesPasswordChecker checker = getService(SecretUsesPasswordChecker.class);
-        final boolean usesPassword = checker.usesPassword();
+        final boolean usesPassword = checker != null && checker.usesPassword();
         if (usesPassword) {
             /*
              * Initialize whiteboard services

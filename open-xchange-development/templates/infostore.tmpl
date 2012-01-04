@@ -7,9 +7,7 @@
 				</span>
 			</div>
 			<div class="co_12">
-				<span class="${key} value">
-					${value?html}
-				</span>
+				<span class="${key} value">${value?html}</span>
 			</div>
 		</div>
 	</#if>
@@ -37,7 +35,7 @@
 		</div>
 		<div class="co_12">
 			<span class="">
-				<a class="ox_file button btn" href="${request.scheme!"http"}://${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
+				<a class="ox_file button btn" href="${utils.getScheme(request)!"http"}${request.serverName}${utils.getFileURL(publication, infoitem)}"  >Download</a>
 			</span>
 		</div>
 	</div>
@@ -54,6 +52,9 @@
     <script type="text/javascript" src="https://pubsub.open-xchange.com/_data/jss/base.js"></script> 
 
     <title>Social OX - Sharing Documents and Contacts</title>
+    <style type="text/css">
+      .ox_comment { white-space:pre-wrap; }
+    </style>
   </head>
   <body>
     <div id="layout" class="hasJs">
@@ -74,7 +75,7 @@
               Create your own test account here: <a href="http://ox.io" target="_blank">http://ox.io</a>. You are convinced? Sign up <a href="http://www.open-xchange.com/en/buy/partner" target="_blank">here</a>
             </p>
             <p>
-            	This entry was published with Open-Xchange's <a target="_blank" href="http://www.open-xchange.com/en/products/open-xchange-appliance-editon-en/infostore">Infostore</a> using its <a target="_blank" href="http://www.open-xchange.com/sales_support/social-ox/">Social OX Feature</a> extending your reach!
+               This entry was published with Open-Xchange's <a target="_blank" href="http://www.open-xchange.com/en/products/open-xchange-appliance-editon-en/infostore">Infostore</a> using its <a target="_blank" href="http://www.open-xchange.com/sales_support/social-ox/">Social OX Feature</a> extending your reach!
             </p>
           </div>
         </div>

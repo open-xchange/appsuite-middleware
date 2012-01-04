@@ -180,7 +180,22 @@ public final class MessageWriter {
                 warnings.addAll(list);
             }
         }
-        return handler.getJSONObject();
+        if (!mail.isDraft()) {
+            return handler.getJSONObject();
+        }
+        /*
+         * Ensure "msgref" is present in draft mail
+         */
+        final JSONObject jsonObject = handler.getJSONObject();
+        final String key = MailJSONField.MSGREF.getKey();
+        if (!jsonObject.has(key)) {
+            try {
+                jsonObject.put(key, mailPath.toString());
+            } catch (final JSONException e) {
+                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
+        return jsonObject;
     }
 
     /**
