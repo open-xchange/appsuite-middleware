@@ -874,7 +874,7 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @throws AddressException If parsing the address fails
      */
     public QuotedInternetAddress(final String address, final boolean strict) throws AddressException {
-        this(address);
+        this(init(address, true));
         if (strict) {
             if (isGroup()) {
                 getGroup(true); // throw away the result
