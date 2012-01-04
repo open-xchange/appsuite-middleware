@@ -791,21 +791,21 @@ public final class Contacts {
                 System.arraycopy(modtrim, 0, tmp, 0, modtrim.length);
                 Arrays.sort(tmp);
                 if (addressBusinessChanged) {
-                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_BUSINESS) < 0) {
+                    if ((Arrays.binarySearch(tmp, Contact.ADDRESS_BUSINESS) < 0) || !co.containsAddressBusiness()) {
                         update.append("businessAddress").append(" = ?,");
                     } else {
                         addressBusinessChanged = false;
                     }
                 }
                 if (addressHomeChanged) {
-                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_HOME) < 0) {
+                    if ((Arrays.binarySearch(tmp, Contact.ADDRESS_HOME) < 0) || !co.containsAddressHome()) {
                         update.append("homeAddress").append(" = ?,");
                     } else {
                         addressHomeChanged = false;
                     }
                 }
                 if (addressOtherChanged) {
-                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_OTHER) < 0) {
+                    if ((Arrays.binarySearch(tmp, Contact.ADDRESS_OTHER) < 0) || !co.containsAddressOther()) {
                         update.append("otherAddress").append(" = ?,");
                     } else {
                         addressOtherChanged = false;
@@ -1176,21 +1176,21 @@ public final class Contacts {
                 System.arraycopy(modtrim, 0, tmp, 0, modtrim.length);
                 Arrays.sort(tmp);
                 if (addressBusinessChanged) {
-                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_BUSINESS) < 0) {
+                    if ((Arrays.binarySearch(tmp, Contact.ADDRESS_BUSINESS) < 0) || !contact.containsAddressBusiness()) {
                         update.append("businessAddress").append(" = ?,");
                     } else {
                         addressBusinessChanged = false;
                     }
                 }
                 if (addressHomeChanged) {
-                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_HOME) < 0) {
+                    if ((Arrays.binarySearch(tmp, Contact.ADDRESS_HOME) < 0) || !contact.containsAddressHome()) {
                         update.append("homeAddress").append(" = ?,");
                     } else {
                         addressHomeChanged = false;
                     }
                 }
                 if (addressOtherChanged) {
-                    if (Arrays.binarySearch(tmp, Contact.ADDRESS_OTHER) < 0) {
+                    if ((Arrays.binarySearch(tmp, Contact.ADDRESS_OTHER) < 0) || !contact.containsAddressOther()) {
                         update.append("otherAddress").append(" = ?,");
                     } else {
                         addressOtherChanged = false;
