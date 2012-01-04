@@ -474,8 +474,8 @@ public final class HTMLServiceImpl implements HTMLService {
         if (dropExternalImages && null != modified) {
             modified[0] |= handler.isImageURLFound();
         }
-        // processDownlevelRevealedConditionalComments(handler.getHTML());
-        return handler.getHTML();
+        final String retval = processDownlevelRevealedConditionalComments(handler.getHTML());
+        return retval;
     }
 
     @Override
