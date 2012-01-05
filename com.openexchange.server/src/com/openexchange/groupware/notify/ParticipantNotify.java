@@ -417,11 +417,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void taskModified(final Task taskObj, final Session session) {
-        sendNotification(null, taskObj, session, new TaskState(
-            new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
-            Notifications.TASK_UPDATE_MAIL,
-            State.Type.MODIFIED), false, false, true);
-
+        taskModified(null, taskObj, session);
     }
 
     @Override
@@ -434,7 +430,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void taskAccepted(final Task taskObj, final Session session) {
-        sendNotification(null, taskObj, session, new TaskState(
+        taskAccepted(null, taskObj, session);
+    }
+
+    public void taskAccepted(final Task oldTask, final Task taskObj, final Session session) {
+        sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_ACCEPTED),
             Notifications.TASK_CONFIRMATION_MAIL,
@@ -443,7 +443,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void taskDeclined(final Task taskObj, final Session session) {
-        sendNotification(null, taskObj, session, new TaskState(
+        taskDeclined(null, taskObj, session);
+    }
+
+    public void taskDeclined(final Task oldTask, final Task taskObj, final Session session) {
+        sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_DECLINED),
             Notifications.TASK_CONFIRMATION_MAIL,
@@ -452,7 +456,11 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void taskTentativelyAccepted(final Task taskObj, final Session session) {
-        sendNotification(null, taskObj, session, new TaskState(
+        taskTentativelyAccepted(null, taskObj, session);
+    }
+
+    public void taskTentativelyAccepted(final Task oldTask, final Task taskObj, final Session session) {
+        sendNotification(oldTask, taskObj, session, new TaskState(
             new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE),
             new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
             Notifications.TASK_CONFIRMATION_MAIL,
@@ -1405,7 +1413,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
         }
         // Add task owner to receivers list to make him receive mails about changed participants states.
         if (newObj instanceof Task) {
-            addTaskOwner(newObj, receivers, all, session);
+            addTaskOwner(oldObj, newObj, receivers, all, session);
         }
         /*
          * Generate a render map
@@ -2084,9 +2092,10 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     }
 
-    private void addTaskOwner(final CalendarObject task, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session) {
+    private void addTaskOwner(final CalendarObject oldTask, final CalendarObject newTask, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session) {
         final Context ctx = session.getContext();
-        final int creatorId = task.getCreatedBy();
+        final int creatorId = newTask.getCreatedBy();
+        final int folderId = null != oldTask ? oldTask.getParentFolderID() : -1;
         try {
             final User user = resolveUsers(ctx, creatorId)[0];
             final EmailableParticipant emailable =  new EmailableParticipant(
@@ -2099,7 +2108,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 user.getLocale(),
                 getCalendarTools().getTimeZone(user.getTimeZone()),
                 10,
-                -1,
+                folderId,
                 CalendarObject.NONE,
                 null,
                 false);

@@ -59,6 +59,8 @@ import java.util.Set;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
@@ -142,16 +144,25 @@ public final class ConfirmTask {
 
 
     void sentEvent(final Session session) throws OXException {
+        final Task orig = getOrigTask();
+        if (userId != orig.getCreatedBy() && null == ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(getParticipants()), orig.getCreatedBy())) {
+            // Delegator not participant and participant changed task. Change parent folder of original task to delegators folder identifier
+            // so we are able to use that for participant notification.
+            Folder delegatorFolder = FolderStorage.extractFolderOfUser(getFolders(), orig.getCreatedBy());
+            orig.setParentFolderID(delegatorFolder.getIdentifier());
+            orig.setUsers(new UserParticipant[0]);
+            orig.setParticipants(new Participant[0]);
+        }
         final EventClient eventClient = new EventClient(session);
         switch (changedParticipant.getConfirm()) {
         case CalendarObject.ACCEPT:
-            eventClient.accept(getOrigTask(), getFilledChangedTask());
+            eventClient.accept(orig, getFilledChangedTask());
             break;
         case CalendarObject.DECLINE:
-            eventClient.declined(getOrigTask(), getFilledChangedTask());
+            eventClient.declined(orig, getFilledChangedTask());
             break;
         case CalendarObject.TENTATIVE:
-            eventClient.tentative(getOrigTask(), getFilledChangedTask());
+            eventClient.tentative(orig, getFilledChangedTask());
             break;
         }
     }
