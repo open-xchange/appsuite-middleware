@@ -329,7 +329,11 @@ public enum POP3ExceptionCode implements OXExceptionCode {
      * Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s
      * (user=%4$s, context=%5$s).
      */
-    EXPUNGE_MODE_ONLY("Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s).", CATEGORY_CONFIGURATION, 2070);
+    EXPUNGE_MODE_ONLY("Due to missing required capability %1$s POP3 messages are fetched and removed (expunge-on-quit) from server %2$s with login %3$s (user=%4$s, context=%5$s).", CATEGORY_CONFIGURATION, 2070),
+    /**
+     * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.
+     */
+    VALIDATE_DENIED("Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work.", CATEGORY_WARNING, 2071);
 
     private final String message;
 

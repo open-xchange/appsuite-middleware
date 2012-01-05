@@ -5,6 +5,7 @@
 * 2012-01-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 20034: Checking permission for OAuth using config cascade
+ - Fix for bug 20883: Disable action=validate for POP3 accounts
 
 * 2012-01-03 - marcus.klein@open-xchange.com
 
