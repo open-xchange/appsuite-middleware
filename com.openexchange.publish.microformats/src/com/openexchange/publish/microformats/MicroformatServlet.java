@@ -79,6 +79,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
+import com.openexchange.publish.microformats.tools.HTMLUtils;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
@@ -218,6 +219,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 new Date());
             variables.put("privacy", privacyText ); //TODO Use lastmodified once someone implements this.
             variables.put("userContact", userContact);
+            variables.put("htmlService", new HTMLUtils(htmlService));
 
             if (additionalTemplateVariables.containsKey(module)) {
                 variables.putAll(additionalTemplateVariables.get(module));

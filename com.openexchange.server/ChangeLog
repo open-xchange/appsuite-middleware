@@ -1,6 +1,6 @@
-* 2012-01-04 - marcus.klein@open-xchange.com
+* 2012-01-05 - marcus.klein@open-xchange.com
 
- - Fix for bug 18841: Placing CSS style for comments of an InfoStore document to preserve text formats.
+ - Fix for bug 18841: Fix for bug 18841: Descriptions of InfoStore items are formatted into HTML before filling them into the template.
 
 * 2012-01-03 - marcus.klein@open-xchange.com
 
