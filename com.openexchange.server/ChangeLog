@@ -1,10 +1,10 @@
+* 2012-01-05 - marcus.klein@open-xchange.com
+
+ - Fix for bug 18841: Fix for bug 18841: Descriptions of InfoStore items are formatted into HTML before filling them into the template.
+
 * 2012-01-05 - thorben.betten@open-xchange.com
 
  - Fix for bug 20034: Checking permission for OAuth using config cascade
-
-* 2012-01-04 - marcus.klein@open-xchange.com
-
- - Fix for bug 18841: Placing CSS style for comments of an InfoStore document to preserve text formats.
 
 * 2012-01-03 - marcus.klein@open-xchange.com
 

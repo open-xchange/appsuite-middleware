@@ -7,7 +7,7 @@
 				</span>
 			</div>
 			<div class="co_12">
-				<span class="${key} value">${value?html}</span>
+                <span class="${key} value"><#if key=="ox_comment">${htmlService.htmlFormat(value)}<#else>${value?html}</#if></span>
 			</div>
 		</div>
 	</#if>
@@ -52,9 +52,6 @@
     <script type="text/javascript" src="https://pubsub.open-xchange.com/_data/jss/base.js"></script> 
 
     <title>Social OX - Sharing Documents and Contacts</title>
-    <style type="text/css">
-      .ox_comment { white-space:pre-wrap; }
-    </style>
   </head>
   <body>
     <div id="layout" class="hasJs">
