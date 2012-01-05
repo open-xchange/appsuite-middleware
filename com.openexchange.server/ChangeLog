@@ -1,6 +1,6 @@
 * 2012-01-04 - marcus.klein@open-xchange.com
 
- - Fix for bug 18841: Surrounding comments of an InfoStore document with <pre> tags to preserve text formats.
+ - Fix for bug 18841: Placing CSS style for comments of an InfoStore document to preserve text formats.
 
 * 2012-01-03 - marcus.klein@open-xchange.com
 
