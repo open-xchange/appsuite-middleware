@@ -766,7 +766,7 @@ public class MIMEMessageFiller {
                     bodyPart.setContent(alternativeMultipart);
                     primaryMultipart.addBodyPart(bodyPart);
                 }
-            } else if (embeddedImages) {
+            } else if (embeddedImages && !mail.getContentType().startsWith(MIMETypes.MIME_TEXT_PLAIN)) {
                 final Multipart relatedMultipart = createMultipartRelated(mail, content, images, new String[1]);
                 if (primaryMultipart == null) {
                     primaryMultipart = relatedMultipart;
@@ -782,7 +782,7 @@ public class MIMEMessageFiller {
                 /*
                  * Convert html content to regular text if mail text is demanded to be text/plain
                  */
-                if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN)) {
+                if (mail.getContentType().startsWith(MIMETypes.MIME_TEXT_PLAIN)) {
                     /*
                      * Append text content
                      */
