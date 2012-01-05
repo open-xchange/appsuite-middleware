@@ -340,7 +340,8 @@ public final class MailFolderStorage implements FolderStorage {
             mailAccess.connect(false);
             final MailFolderDescription mfd = new MailFolderDescription();
             mfd.setExists(false);
-            mfd.setParentFullname(arg.getFullname());
+            final String parentFullName = arg.getFullname();
+            mfd.setParentFullname(parentFullName);
             mfd.setParentAccountId(accountId);
             // Separator
             mfd.setSeparator(mailAccess.getFolderStorage().getFolder(arg.getFullname()).getSeparator());
@@ -366,6 +367,43 @@ public final class MailFolderStorage implements FolderStorage {
                     mailPermissions[i] = mailPerm;
                 }
                 mfd.addPermissions(mailPermissions);
+            } else {
+                if (MailFolder.DEFAULT_FOLDER_ID.equals(parentFullName)) {
+                    final MailPermission[] mailPermissions = new MailPermission[1];
+                    final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
+                    {
+                        final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
+                        mailPerm.setEntity(session.getUserId());
+                        mailPerm.setAllPermission(
+                            MailPermission.ADMIN_PERMISSION,
+                            MailPermission.ADMIN_PERMISSION,
+                            MailPermission.ADMIN_PERMISSION,
+                            MailPermission.ADMIN_PERMISSION);
+                        mailPerm.setFolderAdmin(true);
+                        mailPerm.setGroupPermission(false);
+                        mailPermissions[0] = mailPerm;
+                    }
+                    mfd.addPermissions(mailPermissions);
+                } else {
+                    final MailFolder parent = mailAccess.getFolderStorage().getFolder(parentFullName);
+                    final MailPermission[] parentPermissions = parent.getPermissions();
+                    final MailPermission[] mailPermissions = new MailPermission[1];
+                    final MailProvider provider = MailProviderRegistry.getMailProviderBySession(session, accountId);
+                    for (int i = 0; i < parentPermissions.length; i++) {
+                        final MailPermission parentPerm = parentPermissions[i];
+                        final MailPermission mailPerm = provider.createNewMailPermission(session, accountId);
+                        mailPerm.setEntity(parentPerm.getEntity());
+                        mailPerm.setAllPermission(
+                            parentPerm.getFolderPermission(),
+                            parentPerm.getReadPermission(),
+                            parentPerm.getWritePermission(),
+                            parentPerm.getDeletePermission());
+                        mailPerm.setFolderAdmin(parentPerm.isFolderAdmin());
+                        mailPerm.setGroupPermission(parentPerm.isGroupPermission());
+                        mailPermissions[i] = mailPerm;
+                    }
+                    mfd.addPermissions(mailPermissions);
+                }
             }
             final String fullname = mailAccess.getFolderStorage().createFolder(mfd);
             addWarnings(mailAccess, storageParameters);

@@ -91,6 +91,7 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -267,17 +268,18 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
         final DefaultFileStorageFolder fsFolder = new DefaultFileStorageFolder();
         fsFolder.setExists(false);
-        fsFolder.setParentId(fsfi.getFolderId());
+        final String parentId = fsfi.getFolderId();
+        fsFolder.setParentId(parentId);
         // Other
         fsFolder.setName(folder.getName());
         fsFolder.setSubscribed(folder.isSubscribed());
         // Permissions
+        final Session session = storageParameters.getSession();
+        if (null == session) {
+            throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+        }
         final Permission[] permissions = folder.getPermissions();
         if (null != permissions && permissions.length > 0) {
-            final Session session = storageParameters.getSession();
-            if (null == session) {
-                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-            }
             final List<FileStoragePermission> fsPermissions = new ArrayList<FileStoragePermission>(permissions.length);
             for (final Permission permission : permissions) {
                 final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
@@ -292,7 +294,43 @@ public final class FileStorageFolderStorage implements FolderStorage {
                 fsPermissions.add(fsPerm);
             }
             fsFolder.setPermissions(fsPermissions);
+        } else {
+            if (FileStorageFolder.ROOT_FULLNAME.equals(parentId)) {
+                final FileStoragePermission[] messagingPermissions = new FileStoragePermission[1];
+                {
+                    final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
+                    fsPerm.setEntity(session.getUserId());
+                    fsPerm.setAllPermissions(
+                        MessagingPermission.MAX_PERMISSION,
+                        MessagingPermission.MAX_PERMISSION,
+                        MessagingPermission.MAX_PERMISSION,
+                        MessagingPermission.MAX_PERMISSION);
+                    fsPerm.setAdmin(true);
+                    fsPerm.setGroup(false);
+                    messagingPermissions[0] = fsPerm;
+                }
+                fsFolder.setPermissions(Arrays.asList(messagingPermissions));
+            } else {
+                final FileStorageFolder parent = accountAccess.getFolderAccess().getFolder(parentId);
+                final List<FileStoragePermission> parentPermissions = parent.getPermissions();
+                final FileStoragePermission[] ffPermissions = new FileStoragePermission[parentPermissions.size()];
+                int i = 0;
+                for (final FileStoragePermission parentPerm : parentPermissions) {
+                    final FileStoragePermission fsPerm = DefaultFileStoragePermission.newInstance();
+                    fsPerm.setEntity(parentPerm.getEntity());
+                    fsPerm.setAllPermissions(
+                        parentPerm.getFolderPermission(),
+                        parentPerm.getReadPermission(),
+                        parentPerm.getWritePermission(),
+                        parentPerm.getDeletePermission());
+                    fsPerm.setAdmin(parentPerm.isAdmin());
+                    fsPerm.setGroup(parentPerm.isGroup());
+                    ffPermissions[i++] = fsPerm;
+                }
+                fsFolder.setPermissions(Arrays.asList(ffPermissions));
+            }
         }
+
         final String fullname = accountAccess.getFolderAccess().createFolder(fsFolder);
         folder.setID(new FileStorageFolderIdentifier(serviceId, accountId, fullname).toString());
     }

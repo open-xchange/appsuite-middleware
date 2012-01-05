@@ -417,6 +417,34 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     oclPermissions[i] = oclPerm;
                 }
                 createMe.setPermissionsAsArray(oclPermissions);
+            } else {
+                final OCLPermission[] oclPermissions;
+                final int parentFolderID = createMe.getParentFolderID();
+                if (parentFolderID < FolderObject.MIN_FOLDER_ID) {
+                    oclPermissions = new OCLPermission[1];
+                    final OCLPermission oclPerm = new OCLPermission();
+                    oclPerm.setEntity(storageParameters.getUserId());
+                    oclPerm.setGroupPermission(false);
+                    oclPerm.setFolderAdmin(true);
+                    oclPerm.setAllPermission(
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION,
+                        OCLPermission.ADMIN_PERMISSION);
+                    oclPerm.setSystem(0);
+                    oclPermissions[0] = oclPerm;
+                } else {
+                    final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con);
+                    final List<OCLPermission> list = parent.getPermissions();
+                    final List<OCLPermission> dest = new ArrayList<OCLPermission>(list.size());
+                    for (final OCLPermission oclPermission : list) {
+                        if (oclPermission.getSystem() <= 0) {
+                            dest.add(oclPermission);
+                        }
+                    }
+                    oclPermissions = dest.toArray(new OCLPermission[0]);
+                }
+                createMe.setPermissionsAsArray(oclPermissions);
             }
             // Create
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
