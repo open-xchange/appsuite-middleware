@@ -92,7 +92,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             final OAuthService oAuthService = getOAuthService();
             final OAuthServiceMetaDataRegistry registry = oAuthService.getMetaDataRegistry();
-            final OAuthServiceMetaData service = registry.getService(serviceId);
+            final OAuthServiceMetaData service = registry.getService(serviceId, session.getUserId(), session.getContextId());
             /*
              * Write account as a JSON object
              */

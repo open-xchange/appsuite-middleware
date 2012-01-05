@@ -73,17 +73,17 @@ public class YahooConnectionTest extends TestCase {
 
     public void testUsingExistingAccessToken(){
 
-        YahooOAuthActivator activator = new YahooOAuthActivator();
+        final YahooOAuthActivator activator = new YahooOAuthActivator();
         activator.setOAuthMetaData(new OAuthServiceMetaDataYahooImpl(apiKey, apiSecret, null));
-        MockOAuthService oAuthService = new MockOAuthService();
+        final MockOAuthService oAuthService = new MockOAuthService();
         oAuthService.setToken(token);
         oAuthService.setSecret(tokenSecret);
         activator.setOauthService(oAuthService);
 
-        YahooService service = new YahooServiceImpl(activator);
-        List<Contact> contacts = service.getContacts("", 1, 1, 1);
+        final YahooService service = new YahooServiceImpl(activator);
+        final List<Contact> contacts = service.getContacts(null, 1, 1, 1);
         assertTrue("there should be contacts in here", contacts.size()>0);
-        for (Contact contact : contacts){
+        for (final Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
         }
     }

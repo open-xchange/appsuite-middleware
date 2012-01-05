@@ -52,6 +52,7 @@ package com.openexchange.oauth;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthService} - The OAuth service.
@@ -72,25 +73,25 @@ public interface OAuthService {
     /**
      * Gets all accounts belonging to specified user.
      *
-     * @param password The user password
+     * @param session The session
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OXException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(String password, int user, int contextId) throws OXException;
+    List<OAuthAccount> getAccounts(Session session, int user, int contextId) throws OXException;
 
     /**
      * Gets all accounts belonging to specified user with given service identifier.
      *
      * @param serviceMetaData The identifier of service meta data
-     * @param password The user password
+     * @param session The session
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OXException If accounts cannot be returned
      * @return The accounts
      */
-    List<OAuthAccount> getAccounts(String serviceMetaData, String password, int user, int contextId) throws OXException;
+    List<OAuthAccount> getAccounts(String serviceMetaData, Session session, int user, int contextId) throws OXException;
 
     /**
      * Initializes a new OAuth account.
@@ -169,12 +170,12 @@ public interface OAuthService {
      * Gets the specified account.
      *
      * @param accountId The account identifier
-     * @param password The user password
+     * @param session The session
      * @param user The user identifier
      * @param contextId The context identifier
      * @throws OXException If account cannot be returned
      * @return The account
      */
-    OAuthAccount getAccount(int accountId, String password, int user, int contextId) throws OXException;
+    OAuthAccount getAccount(int accountId, Session session, int user, int contextId) throws OXException;
 
 }

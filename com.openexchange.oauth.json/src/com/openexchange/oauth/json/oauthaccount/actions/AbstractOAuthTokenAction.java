@@ -106,7 +106,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         final Map<String, Object> arguments = new HashMap<String, Object>(3);
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, request.getParameter(AccountField.DISPLAY_NAME.getName()));
         arguments.put(OAuthConstants.ARGUMENT_PIN, oauthVerfifier);
-        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, secret( session ));
+        arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
         final DefaultOAuthToken token = new DefaultOAuthToken();
         token.setSecret(oauthTokenSecret);
         token.setToken(oauthToken);

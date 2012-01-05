@@ -60,10 +60,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import junit.framework.TestCase;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 
 /**
@@ -74,16 +74,16 @@ import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
 public class MSNConnectionTest extends TestCase{
 
     public void testMSNServiceImpl(){
-       String apiKey = "000000004C03D925";
-       String apiSecret = "dFxbH5WdWnt3cdjqWeKaoyqm1lrNiD28";
-       MSNOAuthActivator activator = new MSNOAuthActivator();
+       final String apiKey = "000000004C03D925";
+       final String apiSecret = "dFxbH5WdWnt3cdjqWeKaoyqm1lrNiD28";
+       final MSNOAuthActivator activator = new MSNOAuthActivator();
        activator.setOAuthMetadata(new OAuthServiceMetaDataMSNImpl(apiKey, apiSecret, null));
        activator.setOauthService(new MockOAuthService());
-       MSNServiceImpl service = new MSNServiceImpl(activator);
-       List<Contact> contacts = service.getContacts("", 0, 0, 0);
+       final MSNServiceImpl service = new MSNServiceImpl(activator);
+       final List<Contact> contacts = service.getContacts(null, 0, 0, 0);
        System.out.println(contacts.size());
        //assertTrue("No. of contacts found should be > 0 ", contacts.size() > 0);
-       for (Contact contact : contacts){
+       for (final Contact contact : contacts){
            System.out.println("first name : " + contact.getGivenName());
            System.out.println("last name : " + contact.getSurName());
        }
@@ -95,30 +95,30 @@ public class MSNConnectionTest extends TestCase{
         final String callbackURL = "http://www.open-xchange.com";
         final Scanner in = new Scanner(System.in);
 
-        String authURL = "https://consent.live.com/connect.aspx?wrap_client_id=" + clientID + "&wrap_callback=" + callbackURL + "&wrap_client_state=js_close_window&mkt=en-us&wrap_scope=WL_Profiles.View,WL_Contacts.View,Messenger.SignIn";
+        final String authURL = "https://consent.live.com/connect.aspx?wrap_client_id=" + clientID + "&wrap_callback=" + callbackURL + "&wrap_client_state=js_close_window&mkt=en-us&wrap_scope=WL_Profiles.View,WL_Contacts.View,Messenger.SignIn";
         System.out.println("Authorization URL (paste this into browser) : ");
         System.out.println(authURL);
 
         // Now lets try to get an access token with this wrap_verification_code ...
         System.out.println("paste the wrap_verification_code here");
         System.out.print(">>");
-        String wrap_verification_code = in.nextLine();
+        final String wrap_verification_code = in.nextLine();
 
-        OAuthServiceMetaDataMSNImpl metadata = new OAuthServiceMetaDataMSNImpl(clientID, clientSecret, null);
-        HashMap<String, Object> arguments = new HashMap<String, Object>();
+        final OAuthServiceMetaDataMSNImpl metadata = new OAuthServiceMetaDataMSNImpl(clientID, clientSecret, null);
+        final HashMap<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, wrap_verification_code);
         arguments.put(OAuthConstants.ARGUMENT_CALLBACK, callbackURL);
         try {
             metadata.getOAuthToken(arguments);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
 
     public void testURLLength(){
-        String longURL = "";
-        String shortURL = "";
+        final String longURL = "";
+        final String shortURL = "";
 
        System.out.println("Length of long URL : " + longURL.length());
        System.out.println("Length of short URL : " + shortURL.length());
@@ -144,19 +144,19 @@ public class MSNConnectionTest extends TestCase{
 
             String line = null;
 
-            DefaultOAuthToken token = new DefaultOAuthToken();
+            final DefaultOAuthToken token = new DefaultOAuthToken();
             token.setSecret("");
 
             while((line = reader.readLine()) != null) {
-                String[] keyValuePairs = line.split("&");
-                for (String keyValuePair : keyValuePairs) {
+                final String[] keyValuePairs = line.split("&");
+                for (final String keyValuePair : keyValuePairs) {
                     System.out.println(keyValuePair);
                 }
             }
 
-        } catch (UnsupportedEncodingException x) {
+        } catch (final UnsupportedEncodingException x) {
             System.out.println(x.getMessage());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             System.out.println(e.getMessage());
         }
     }

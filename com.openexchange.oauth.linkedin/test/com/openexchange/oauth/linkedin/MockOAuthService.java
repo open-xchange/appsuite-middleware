@@ -52,13 +52,14 @@ package com.openexchange.oauth.linkedin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.session.Session;
 
 
 /**
@@ -93,7 +94,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#getAccount(int, int, int)
      */
     @Override
-    public OAuthAccount getAccount(final int accountId, final String password, final int user, final int contextId) {
+    public OAuthAccount getAccount(final int accountId, final Session session, final int user, final int contextId) {
         final DefaultOAuthAccount account = new DefaultOAuthAccount();
         account.setSecret(SECRET);
         account.setToken(TOKEN);
@@ -104,7 +105,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#getAccounts(int, int)
      */
     @Override
-    public List<OAuthAccount> getAccounts(final String password, final int user, final int contextId) {
+    public List<OAuthAccount> getAccounts(final Session session, final int user, final int contextId) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -113,7 +114,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#getAccounts(java.lang.String, int, int)
      */
     @Override
-    public List<OAuthAccount> getAccounts(final String serviceMetaData, final String password, final int user, final int contextId) {
+    public List<OAuthAccount> getAccounts(final String serviceMetaData, final Session session, final int user, final int contextId) {
         final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
         final DefaultOAuthAccount account = new DefaultOAuthAccount();
         account.setSecret(SECRET);
@@ -159,7 +160,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
     @Override
-    public OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException {
+    public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

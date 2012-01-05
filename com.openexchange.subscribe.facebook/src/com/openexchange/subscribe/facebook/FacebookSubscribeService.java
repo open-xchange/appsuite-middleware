@@ -56,13 +56,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 
 /**
@@ -80,7 +80,7 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
 
     private final FacebookService facebookService;
 
-    public FacebookSubscribeService(OAuthServiceMetaData facebookMetaData, FacebookService facebookService) {
+    public FacebookSubscribeService(final OAuthServiceMetaData facebookMetaData, final FacebookService facebookService) {
         this.facebookMetaData = facebookMetaData;
         this.facebookService = facebookService;
 
@@ -89,9 +89,9 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
         source.setId("com.openexchange.subscribe.socialplugin.facebook");
         source.setSubscribeService(this);
 
-        DynamicFormDescription form = new DynamicFormDescription();
+        final DynamicFormDescription form = new DynamicFormDescription();
 
-        FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
         oauthAccount.setOption("type", facebookMetaData.getId());
         form.add(oauthAccount);
 
@@ -99,9 +99,9 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public Collection<?> getContent(Subscription subscription) throws OXException {
+    public Collection<?> getContent(final Subscription subscription) throws OXException {
         return facebookService.getContacts(
-            subscription.getSecret(),
+            subscription.getSession(),
             subscription.getUserId(),
             subscription.getContext().getContextId(),
             (Integer) subscription.getConfiguration().get("account"));
@@ -113,31 +113,31 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
     }
 
     @Override
-    public boolean handles(int folderModule) {
+    public boolean handles(final int folderModule) {
         return FolderObject.CONTACT == folderModule;
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws OXException {
+    public void modifyIncoming(final Subscription subscription) throws OXException {
         super.modifyIncoming(subscription);
-        Integer accountId = (Integer) subscription.getConfiguration().get("account");
+        final Integer accountId = (Integer) subscription.getConfiguration().get("account");
         if (accountId != null) {
             subscription.getConfiguration().put("account", accountId.toString());
         }
     }
 
     @Override
-    public void modifyOutgoing(Subscription subscription) throws OXException {
-        String accountId = (String) subscription.getConfiguration().get("account");
+    public void modifyOutgoing(final Subscription subscription) throws OXException {
+        final String accountId = (String) subscription.getConfiguration().get("account");
         if (null != accountId) {
-            Integer accountIdInt = Integer.parseInt(accountId);
+            final Integer accountIdInt = Integer.parseInt(accountId);
             if (null != accountIdInt) {
                 subscription.getConfiguration().put("account", accountIdInt);
             }
             String displayName = null;
             if (subscription.getSecret() != null) {
                 displayName = facebookService.getAccountDisplayName(
-                subscription.getSecret(),
+                subscription.getSession(),
                 subscription.getUserId(),
                 subscription.getContext().getContextId(),
                 (Integer) subscription.getConfiguration().get("account"));
@@ -152,8 +152,8 @@ public class FacebookSubscribeService extends AbstractSubscribeService {
         super.modifyOutgoing(subscription);
     }
 
-    public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
-        Map<String, Object> query = new HashMap<String, Object>();
+    public void deleteAllUsingOAuthAccount(final Context context, final int id) throws OXException {
+        final Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));
         removeWhereConfigMatches(context, query);
     }

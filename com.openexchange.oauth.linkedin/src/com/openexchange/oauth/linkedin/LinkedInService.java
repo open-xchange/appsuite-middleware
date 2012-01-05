@@ -50,11 +50,10 @@
 package com.openexchange.oauth.linkedin;
 
 import java.util.List;
-
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 /**
  * {@link LinkedInService}
@@ -63,42 +62,42 @@ import com.openexchange.groupware.container.Contact;
  */
 public interface LinkedInService {
 
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId);
+    public List<Contact> getContacts(Session session, int user, int contextId, int accountId);
 
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId);
+    public String getAccountDisplayName(Session session, int user, int contextId, int accountId);
 
     /**
      * @return all data on a contact identified by e-mail (special feature, only available with extended API keys)
      */
-	public JSONObject getFullProfileByEMail(List<String> email, String password, int user, int contextId, int accountId) throws OXException;
+	public JSONObject getFullProfileByEMail(List<String> email, Session session, int user, int contextId, int accountId) throws OXException;
 
     /**
      * @return all data on a contact identified by id
      */
-	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException;
+	public JSONObject getProfileForId(String id, Session session, int user, int contextId, int accountId) throws OXException;
 
 	/**
 	 * @return all data of all connections a user has
 	 */
-	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException;
+	public JSONObject getConnections(Session session, int user, int contextId,	int accountId) throws OXException;
 
 	/**
 	 * @return the IDs of all connections a user has (so you can query them separately)
 	 */
-	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException;
+	public List<String> getUsersConnectionsIds(Session session, int user, int contextId, int accountId) throws OXException;
 
 	/**
 	 * @return A list of contacts that list the targeted user to the current user
 	 */
-	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException;
+	public JSONObject getRelationToViewer(String id, Session session, int user, int contextId, int accountId) throws OXException;
 
 	/**
 	 * @return A chronologically sorted list of all events that happened in a users network
 	 */
-	public JSONObject getNetworkUpdates(String password, int user, int contextId, int accountId) throws OXException;
+	public JSONObject getNetworkUpdates(Session session, int user, int contextId, int accountId) throws OXException;
 
 	/**
 	 * @return The messages in the user's inbox
 	 */
-	public JSONObject getMessageInbox(String string, int i, int j, int k) throws OXException;
+	public JSONObject getMessageInbox(Session session, int i, int j, int k) throws OXException;
 }

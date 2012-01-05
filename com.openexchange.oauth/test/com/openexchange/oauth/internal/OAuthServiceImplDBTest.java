@@ -158,7 +158,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
-        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
+        arguments.put(OAuthConstants.ARGUMENT_SESSION, null);
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
             @Override
@@ -179,7 +179,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testDefaultDisplayName() throws OXException {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
-        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
+        arguments.put(OAuthConstants.ARGUMENT_SESSION, null);
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
             @Override
@@ -202,7 +202,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testGetAccount() throws Exception {
         final OAuthAccount authAccount = createTestAccount();
 
-        final OAuthAccount account = oauth.getAccount(authAccount.getId(), "password", 23, 1);
+        final OAuthAccount account = oauth.getAccount(authAccount.getId(), null, 23, 1);
 
         assertNotNull(account);
         assertEqualAttributes(authAccount, account);
@@ -215,14 +215,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,42,3,'account1user2', '1234', '4321', 'com.openexchange.test');");
 
 
-        final List<OAuthAccount> accounts = oauth.getAccounts("password", 23, 1);
+        final List<OAuthAccount> accounts = oauth.getAccounts(null, 23, 1);
 
         assertEquals(2, accounts.size());
 
         final DefaultOAuthAccount expected = new DefaultOAuthAccount();
         expected.setToken("1234");
         expected.setSecret("4321");
-        expected.setMetaData(registry.getService("com.openexchange.test"));
+        expected.setMetaData(registry.getService("com.openexchange.test", -1, -1));
 
         for(final OAuthAccount account : accounts) {
             expected.setDisplayName("account"+account.getId()+"user1");
@@ -239,14 +239,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,42,4,'account1user2', '1234', '4321', 'com.openexchange.test');");
 
 
-        final List<OAuthAccount> accounts = oauth.getAccounts("com.openexchange.test", 23, 1);
+        final List<OAuthAccount> accounts = oauth.getAccounts("com.openexchange.test", null, 23, 1);
 
         assertEquals(2, accounts.size());
 
         final DefaultOAuthAccount expected = new DefaultOAuthAccount();
         expected.setToken("1234");
         expected.setSecret("4321");
-        expected.setMetaData(registry.getService("com.openexchange.test"));
+        expected.setMetaData(registry.getService("com.openexchange.test", -1, -1));
 
         for(final OAuthAccount account : accounts) {
             expected.setDisplayName("account"+account.getId()+"user1");
@@ -260,7 +260,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
         final Map<String, Object> update = new HashMap<String,Object>();
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
-        update.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
+        update.put(OAuthConstants.ARGUMENT_SESSION, null);
         oauth.updateAccount(1, update, 23, 1);
 
         assertResult("SELECT 1 FROM oauthAccounts WHERE cid = 1 AND user = 23 AND displayName = 'updatedDisplayName' AND id = 1");
@@ -280,7 +280,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         final Map<String, Object> arguments = new HashMap<String, Object>();
         arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "Test OAuthAccount");
         arguments.put(OAuthConstants.ARGUMENT_PIN, "pin");
-        arguments.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
+        arguments.put(OAuthConstants.ARGUMENT_SESSION, null);
         arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new OAuthToken() {
 
             @Override
@@ -304,7 +304,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     public void testUnknownIdOnGet() {
         try {
-            oauth.getAccount(12, "password", 1, 23);
+            oauth.getAccount(12, null, 1, 23);
             fail("Should have died");
         } catch (final OXException x) {
             // Hooray!
@@ -315,7 +315,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         try {
             final Map<String, Object> update = new HashMap<String,Object>();
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
-            update.put(OAuthConstants.ARGUMENT_PASSWORD, "password");
+            update.put(OAuthConstants.ARGUMENT_SESSION, null);
             oauth.updateAccount(12, update, 23, 1);
             fail("Should have died");
         } catch (final OXException x) {

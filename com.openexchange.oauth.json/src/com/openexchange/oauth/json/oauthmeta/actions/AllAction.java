@@ -85,7 +85,7 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
              */
             final OAuthService oAuthService = getOAuthService();
             final OAuthServiceMetaDataRegistry registry = oAuthService.getMetaDataRegistry();
-            final List<OAuthServiceMetaData> services = registry.getAllServices();
+            final List<OAuthServiceMetaData> services = registry.getAllServices(session.getUserId(), session.getContextId());
             /*
              * Write accounts as a JSON array
              */

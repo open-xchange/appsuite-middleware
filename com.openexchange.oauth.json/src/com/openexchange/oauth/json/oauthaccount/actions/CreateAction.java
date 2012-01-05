@@ -97,7 +97,7 @@ AbstractOAuthTokenAction {
             final OAuthServiceMetaData service;
             {
                 final OAuthServiceMetaDataRegistry registry = oAuthService.getMetaDataRegistry();
-                service = registry.getService(serviceId);
+                service = registry.getService(serviceId, session.getUserId(), session.getContextId());
             }
             final Map<String, Object> arguments = processOAuthArguments(request, session, service);
             /*

@@ -51,6 +51,7 @@ package com.openexchange.oauth.msn;
 
 import java.util.List;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 
 /**
@@ -60,7 +61,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public interface MSNService {
 
-    public abstract List<Contact> getContacts(String password, int user, int contextId, int accountId);
+    public abstract List<Contact> getContacts(Session session, int user, int contextId, int accountId);
 
-    public abstract String getAccountDisplayName(String password, int user, int contextId, int accountId);
+    public abstract String getAccountDisplayName(Session session, int user, int contextId, int accountId);
 }
