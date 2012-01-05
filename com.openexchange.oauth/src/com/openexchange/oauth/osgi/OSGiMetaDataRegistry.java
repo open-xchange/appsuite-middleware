@@ -57,6 +57,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -64,29 +67,24 @@ import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 
 /**
  * {@link OSGiMetaDataRegistry}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry {
 
     private static volatile OSGiMetaDataRegistry instance;
 
+    public static void initialize(final ConfigViewFactory configViews) {
+        instance = new OSGiMetaDataRegistry(configViews);
+    }
+
     /**
      * Gets the registry instance.
-     *
+     * 
      * @return The instance
      */
     public static OSGiMetaDataRegistry getInstance() {
-        OSGiMetaDataRegistry tmp = instance;
-        if (null == tmp) {
-            synchronized (OSGiMetaDataRegistry.class) {
-                tmp = instance;
-                if (null == tmp) {
-                    instance = tmp = new OSGiMetaDataRegistry();
-                }
-            }
-        }
-        return tmp;
+        return instance;
     }
 
     /**
@@ -102,6 +100,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
             }
         }
     }
+    final ConfigViewFactory configViews;
 
     final ConcurrentMap<String, OAuthServiceMetaData> map;
 
@@ -110,28 +109,50 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
     /**
      * Initializes a new {@link OSGiMetaDataRegistry}.
      */
-    public OSGiMetaDataRegistry() {
+    public OSGiMetaDataRegistry(final ConfigViewFactory configViews) {
         super();
         map = new ConcurrentHashMap<String, OAuthServiceMetaData>();
+        this.configViews = configViews;
     }
 
     @Override
-    public List<OAuthServiceMetaData> getAllServices() {
-        return new ArrayList<OAuthServiceMetaData>(map.values());
+    public List<OAuthServiceMetaData> getAllServices(final int user, final int contextId) throws OXException {
+        final java.util.List<OAuthServiceMetaData> retval = new ArrayList<OAuthServiceMetaData>(map.values().size());
+        final ConfigView view = configViews.getView(user, contextId);
+        for (final OAuthServiceMetaData metadata : map.values()) {
+            final ComposedConfigProperty<Boolean> property = view.property(metadata.getId(), boolean.class);
+            if (property.isDefined() && property.get().booleanValue()) {
+                retval.add(metadata);
+            }
+        }
+        return retval;
     }
 
     @Override
-    public OAuthServiceMetaData getService(final String id) throws OXException {
+    public OAuthServiceMetaData getService(final String id, final int user, final int contextId) throws OXException {
         final OAuthServiceMetaData service = map.get(id);
         if (null == service) {
             throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
         }
-        return service;
+        final ConfigView view = configViews.getView(user, contextId);
+        final ComposedConfigProperty<Boolean> property = view.property(id, boolean.class);
+        if (property.isDefined() && property.get().booleanValue()) {
+            return service;
+        }
+        throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
     }
 
     @Override
-    public boolean containsService(final String id) {
-        return null == id ? false : map.containsKey(id);
+    public boolean containsService(final String id, final int user, final int contextId) throws OXException {
+        if (id == null) {
+            return false;
+        }
+        final ConfigView view = configViews.getView(user, contextId);
+        final ComposedConfigProperty<Boolean> property = view.property(id, boolean.class);
+        if (property.isDefined() && property.get().booleanValue()) {
+            return map.containsKey(id);
+        }
+        return false;
     }
 
     /**

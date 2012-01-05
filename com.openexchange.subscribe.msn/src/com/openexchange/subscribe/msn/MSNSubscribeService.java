@@ -56,12 +56,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.msn.osgi.Activator;
 
@@ -79,7 +79,7 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNSubscribeService.class));
 
-    public MSNSubscribeService(Activator activator){
+    public MSNSubscribeService(final Activator activator){
         this.activator = activator;
 
         source.setDisplayName("Windows Live / MSN");
@@ -87,9 +87,9 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
         source.setId("com.openexchange.subscribe.socialplugin.msn");
         source.setSubscribeService(this);
 
-        DynamicFormDescription form = new DynamicFormDescription();
+        final DynamicFormDescription form = new DynamicFormDescription();
 
-        FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
         oauthAccount.setOption("type", activator.getOAuthServiceMetaData().getId());
         form.add(oauthAccount);
 
@@ -97,8 +97,8 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     }
 
     @Override
-    public Collection<?> getContent(Subscription subscription) throws OXException {
-        return activator.getMsnService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+    public Collection<?> getContent(final Subscription subscription) throws OXException {
+        return activator.getMsnService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
     @Override
@@ -107,12 +107,12 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     }
 
     @Override
-    public boolean handles(int folderModule) {
+    public boolean handles(final int folderModule) {
         return FolderObject.CONTACT == folderModule;
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws OXException {
+    public void modifyIncoming(final Subscription subscription) throws OXException {
         if(subscription != null) {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null){
@@ -130,20 +130,20 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
     }
 
     @Override
-    public void modifyOutgoing(Subscription subscription) throws OXException {
-        String accountId = (String) subscription.getConfiguration().get("account");
+    public void modifyOutgoing(final Subscription subscription) throws OXException {
+        final String accountId = (String) subscription.getConfiguration().get("account");
         if (null != accountId){
             try {
-                Integer accountIdInt = Integer.parseInt(accountId);
+                final Integer accountIdInt = Integer.valueOf(accountId);
                 if (null != accountIdInt) {
                     subscription.getConfiguration().put("account",accountIdInt);
                 }
-            } catch (NumberFormatException x) {
+            } catch (final NumberFormatException x) {
                 // Invalid account, but at least allow people to delete it.
             }
             String displayName = null;
             if(subscription.getSecret() != null) {
-                displayName = activator.getMsnService().getAccountDisplayName(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+                displayName = activator.getMsnService().getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
             }
             if (null != displayName && !"".equals(displayName)){
                 subscription.setDisplayName(displayName);
@@ -155,8 +155,8 @@ public class MSNSubscribeService  extends AbstractSubscribeService {
         super.modifyOutgoing(subscription);
     }
 
-    public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
-        Map<String, Object> query = new HashMap<String, Object>();
+    public void deleteAllUsingOAuthAccount(final Context context, final int id) throws OXException {
+        final Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));
         removeWhereConfigMatches(context, query);
     }

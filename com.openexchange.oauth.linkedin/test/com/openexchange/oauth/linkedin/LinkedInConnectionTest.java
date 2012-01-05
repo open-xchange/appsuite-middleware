@@ -67,7 +67,6 @@ package com.openexchange.oauth.linkedin;
 import java.util.Arrays;
 import java.util.List;
 import junit.framework.TestCase;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +89,7 @@ public class LinkedInConnectionTest extends TestCase {
 
     @Override
     public void setUp(){
-        Activator activator = new Activator();
+        final Activator activator = new Activator();
         linkedIn = new LinkedInServiceImpl(activator);
         activator.setOauthService(new MockOAuthService());
         activator.setConfigurationService(new MockConfigurationService(apiKey, apiSecret));
@@ -162,9 +161,9 @@ public class LinkedInConnectionTest extends TestCase {
 //    }
 
     public void testGetMyContacts(){
-        List<Contact> contacts = linkedIn.getContacts("password",1,1,1);
+        final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
         boolean found = false;
-        for (Contact contact : contacts){
+        for (final Contact contact : contacts){
             if("Marcus".equals(contact.getGivenName()) && "Klein".equals(contact.getSurName())){
             	found = true;
             }
@@ -174,44 +173,44 @@ public class LinkedInConnectionTest extends TestCase {
 
 
     public void testGetContacts() {
-    	linkedIn.getContacts("password",1,1,1);
+    	linkedIn.getContacts(null,1,1,1);
     }
 
     public void testGetProfileForEMail() throws OXException, JSONException{
-    	JSONObject fullProfile = linkedIn.getFullProfileByEMail(Arrays.asList("tobiasprinz@gmx.net"),"password",1,1,1);
+    	final JSONObject fullProfile = linkedIn.getFullProfileByEMail(Arrays.asList("tobiasprinz@gmx.net"),null,1,1,1);
     	assertEquals("Tobias", fullProfile.getString("firstName"));
     	assertEquals("Prinz", fullProfile.getString("lastName"));
     }
 
 	public void testGetProfileForId() throws OXException, JSONException {
-		JSONObject profile = linkedIn.getProfileForId(LI_ID_KLEIN,"password",1,1,1);
+		final JSONObject profile = linkedIn.getProfileForId(LI_ID_KLEIN,null,1,1,1);
 		assertEquals("Marcus", profile.getString("firstName"));
 	}
 
 	public void testGetConnections() throws Exception {
-		JSONObject connections = linkedIn.getConnections("password",1,1,1);
-		List<String> ids = linkedIn.extractIds(connections.getJSONArray("values"));
+		final JSONObject connections = linkedIn.getConnections(null,1,1,1);
+		final List<String> ids = linkedIn.extractIds(connections.getJSONArray("values"));
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", ids.contains(LI_ID_KAUSS) || ids.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
 	}
 
 	public void testGetUsersConnectionsIds() throws OXException {
-		List<String> connectionIds = linkedIn.getUsersConnectionsIds("password",1,1,1);
+		final List<String> connectionIds = linkedIn.getUsersConnectionsIds(null,1,1,1);
 		assertTrue("Should contain either Kleini or Big Kauss in contact list", connectionIds.contains(LI_ID_KAUSS) || connectionIds.contains(LI_ID_KLEIN)); //you're an OX programmer, aren't you?
 	}
 
 	public void testGetRelationToViewer() throws Exception {
-		JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, "password",1,1,1);
+		final JSONObject relations = linkedIn.getRelationToViewer(LI_ID_KAUSS, null,1,1,1);
 		assertTrue("Should know Martin", relations.getJSONObject("relationToViewer").getInt("distance") > 0);
 	}
 
 	public void testNetworkUpdates() throws Exception {
-		JSONObject updateObj = linkedIn.getNetworkUpdates("password",1,1,1);
-		JSONArray updates = updateObj.getJSONArray("values");
+		final JSONObject updateObj = linkedIn.getNetworkUpdates(null,1,1,1);
+		final JSONArray updates = updateObj.getJSONArray("values");
 		assertTrue("Something should have happened lately", updates.length() > 0);
 	}
 
 	public void testMessageInbox() throws Exception {
-		JSONObject inbox = linkedIn.getMessageInbox("password",1,1,1);
+		final JSONObject inbox = linkedIn.getMessageInbox(null,1,1,1);
 		assertEquals("Should have zero messages.", 0, inbox.getInt("_total"));
 	}
 }

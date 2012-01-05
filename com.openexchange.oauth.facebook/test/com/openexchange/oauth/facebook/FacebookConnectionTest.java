@@ -186,7 +186,7 @@ public class FacebookConnectionTest  extends TestCase {
     }
 
     public void testUsageOfExistingAccount(){
-        final List<Contact> contacts = facebook.getContacts("password",1,1,1);
+        final List<Contact> contacts = facebook.getContacts(null,1,1,1);
         for (final Contact contact : contacts){
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
             System.out.println(contact.getBirthday());
@@ -253,7 +253,7 @@ public class FacebookConnectionTest  extends TestCase {
                                       .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        final Token accessToken = new Token(mock.getAccount(1, "password", 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, null, 1, 1).getToken(),"");
 
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
@@ -300,7 +300,7 @@ public class FacebookConnectionTest  extends TestCase {
                                       .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        final Token accessToken = new Token(mock.getAccount(1, "password", 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, null, 1, 1).getToken(),"");
 
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
@@ -341,7 +341,7 @@ public class FacebookConnectionTest  extends TestCase {
                                       .build();
         final MockOAuthService mock = new MockOAuthService();
         // get the wall
-        final Token accessToken = new Token(mock.getAccount(1, "password", 1, 1).getToken(),"");
+        final Token accessToken = new Token(mock.getAccount(1, null, 1, 1).getToken(),"");
 
         //find out the uid of the user
         final OAuthRequest request2 = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");

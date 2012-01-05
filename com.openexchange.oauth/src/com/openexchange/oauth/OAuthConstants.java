@@ -98,9 +98,9 @@ public final class OAuthConstants {
     public static final String ARGUMENT_SECRET = "secret";
 
     /**
-     * The argument name for password string. <code>java.lang.String</code>
+     * The argument name for session. <code>com.openexchange.session.Session</code>
      */
-    public static final String ARGUMENT_PASSWORD = "password";
+    public static final String ARGUMENT_SESSION = "session";
 
     /*-
      * ------------------- URL parameters -------------------

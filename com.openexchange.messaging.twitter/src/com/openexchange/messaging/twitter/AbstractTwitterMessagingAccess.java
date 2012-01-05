@@ -135,7 +135,7 @@ public abstract class AbstractTwitterMessagingAccess {
                                 arguments.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, account.getDisplayName());
                                 arguments.put(OAuthConstants.ARGUMENT_TOKEN, token);
                                 arguments.put(OAuthConstants.ARGUMENT_SECRET, tokenSecret);
-                                arguments.put(OAuthConstants.ARGUMENT_PASSWORD, secret);
+                                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
                                 oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId);
                                 /*
                                  * Write to configuration
@@ -144,11 +144,11 @@ public abstract class AbstractTwitterMessagingAccess {
                                 final MessagingAccountManager accountManager = account.getMessagingService().getAccountManager();
                                 accountManager.updateAccount(account, session);
                             } else {
-                                oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), secret, userId, contextId);
+                                oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session, userId, contextId);
                             }
                         }
                     } else {
-                        oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), secret, userId, contextId);
+                        oAuthAccount = oAuthService.getAccount(oAuthAccountId.intValue(), session, userId, contextId);
                     }
                 }
                 newTwitterAccess = twitterService.getOAuthTwitterAccess(oAuthAccount.getToken(), oAuthAccount.getSecret());

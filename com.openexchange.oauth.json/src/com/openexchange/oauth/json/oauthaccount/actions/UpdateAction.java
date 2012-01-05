@@ -97,7 +97,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
             } else {
                 id = Tools.getUnsignedInteger(accountId);
             }
-            final OAuthAccount account = AccountParser.parse(data);
+            final OAuthAccount account = AccountParser.parse(data, session.getUserId(), session.getContextId());
             /*
              * Update account
              */
@@ -115,7 +115,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
             }
 
             if (!arguments.isEmpty()) {
-                arguments.put(OAuthConstants.ARGUMENT_PASSWORD, secret( session ));
+                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
                 oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId());
             }
 

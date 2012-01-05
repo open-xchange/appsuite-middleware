@@ -49,7 +49,6 @@
 package com.openexchange.halo.linkedin;
 
 import java.util.List;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -71,27 +70,29 @@ public abstract class AbstractLinkedinDataSource  implements HaloContactDataSour
 		return serviceLookup;
 	}
 
-	public void setServiceLookup(ServiceLookup serviceLookup) {
+	public void setServiceLookup(final ServiceLookup serviceLookup) {
 		this.serviceLookup = serviceLookup;
 	}
 
 	public LinkedInService getLinkedinService() {
-		if(linkedinService != null)
-			return linkedinService;
+		if(linkedinService != null) {
+            return linkedinService;
+        }
 		return serviceLookup.getService(LinkedInService.class);
 	}
 
-	public void setLinkedinService(LinkedInService linkedinService) {
+	public void setLinkedinService(final LinkedInService linkedinService) {
 		this.linkedinService = linkedinService;
 	}
 
 	public OAuthService getOauthService() {
-		if(oauthService != null)
-			return oauthService;
+		if(oauthService != null) {
+            return oauthService;
+        }
 		return serviceLookup.getService(OAuthService.class);
 	}
 
-	public void setOauthService(OAuthService oauthService) {
+	public void setOauthService(final OAuthService oauthService) {
 		this.oauthService = oauthService;
 	}
 
@@ -102,12 +103,12 @@ public abstract class AbstractLinkedinDataSource  implements HaloContactDataSour
 	}
 
 	@Override
-	public boolean isAvailable(ServerSession session) throws OXException {
-		String password = session.getPassword();
-		int uid = session.getUserId();
-		int cid = session.getContextId();
+	public boolean isAvailable(final ServerSession session) throws OXException {
+		final String password = session.getPassword();
+		final int uid = session.getUserId();
+		final int cid = session.getContextId();
 
-		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
+		final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
 		return !accounts.isEmpty();
 	}
 

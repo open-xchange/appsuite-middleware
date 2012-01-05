@@ -86,7 +86,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         }
         final OAuthService oAuthService = getOAuthService();
 
-        OAuthServiceMetaData service = oAuthService.getMetaDataRegistry().getService(serviceId);
+        OAuthServiceMetaData service = oAuthService.getMetaDataRegistry().getService(serviceId, session.getUserId(), session.getContextId());
 
         Map<String, Object> arguments = processOAuthArguments(request, session, service);
 

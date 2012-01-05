@@ -63,8 +63,9 @@ public interface OAuthServiceMetaDataRegistry {
      * Gets all known services.
      *
      * @return All services
+     * @throws OXException If operation fails
      */
-    List<OAuthServiceMetaData> getAllServices();
+    List<OAuthServiceMetaData> getAllServices(int uid, int cid) throws OXException;
 
     /**
      * Gets the service belonging to specified identifier.
@@ -73,14 +74,15 @@ public interface OAuthServiceMetaDataRegistry {
      * @return The service
      * @throws OXException If service look-up fails
      */
-    OAuthServiceMetaData getService(String id) throws OXException;
+    OAuthServiceMetaData getService(String id, int uid, int cid) throws OXException;
 
     /**
      * Checks for existence of specified service
      *
      * @param id The service identifier
      * @return <code>true</code> if such a service exists; otherwise <code>false</code>
+     * @throws OXException If operation fails
      */
-    boolean containsService(String id);
+    boolean containsService(String id, int uid, int cid) throws OXException;
 
 }

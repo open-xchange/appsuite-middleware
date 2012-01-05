@@ -66,11 +66,12 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
+import com.openexchange.session.Session;
 
 /**
  * {@link YahooServiceImpl}
@@ -87,7 +88,7 @@ public class YahooServiceImpl implements YahooService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooServiceImpl.class));
 
-    public YahooServiceImpl(YahooOAuthActivator activator) {
+    public YahooServiceImpl(final YahooOAuthActivator activator) {
         this.activator = activator;
     }
 
@@ -95,92 +96,92 @@ public class YahooServiceImpl implements YahooService {
      * @see com.openexchange.oauth.yahoo.YahooService#getContacts(java.lang.String, int, int, int)
      */
     @Override
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthAccount account = null;
 
 
-            com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
             try {
-                account = oAuthService.getAccount(accountId, password, user, contextId);
-            } catch (OXException e) {
+                account = oAuthService.getAccount(accountId, session, user, contextId);
+            } catch (final OXException e) {
                 LOG.error(e);
             }
-            Token accessToken = new Token(account.getToken(), account.getSecret());
+            final Token accessToken = new Token(account.getToken(), account.getSecret());
             contacts = useAccessTokenToAccessData(accessToken);
 
         return contacts;
     }
 
-    private List<Contact> useAccessTokenToAccessData(Token accessToken) {
-        List<Contact> contactList = new ArrayList<Contact>();
-        OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey(activator.getOAuthMetaData().getAPIKey()).apiSecret(
+    private List<Contact> useAccessTokenToAccessData(final Token accessToken) {
+        final List<Contact> contactList = new ArrayList<Contact>();
+        final OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey(activator.getOAuthMetaData().getAPIKey()).apiSecret(
             activator.getOAuthMetaData().getAPISecret()).build();
         // Get the GUID of the current user from yahoo. This is needed for later requests
-        OAuthRequest request1 = new OAuthRequest(Verb.GET, "http://social.yahooapis.com/v1/me/guid?format=xml");
+        final OAuthRequest request1 = new OAuthRequest(Verb.GET, "http://social.yahooapis.com/v1/me/guid?format=xml");
         service.signRequest(accessToken, request1);
-        Response response1 = request1.send();
+        final Response response1 = request1.send();
 
 
         // Extract the Users ID from a response looking like this: <value>ANZAPAEE55TMMWPLYXQCJO7BAM<
-        Pattern pattern = Pattern.compile("<value>([^<]*)<");
-        Matcher matcher = pattern.matcher(response1.getBody());
+        final Pattern pattern = Pattern.compile("<value>([^<]*)<");
+        final Matcher matcher = pattern.matcher(response1.getBody());
         String guid = "";
         if (matcher.find()) {
             guid = matcher.group(1);
         }
 
         // Now get the ids of all the users contacts
-        String resource = ALL_CONTACT_IDS_URL.replace("GUID", guid);
-        OAuthRequest request = new OAuthRequest(Verb.GET, resource);
+        final String resource = ALL_CONTACT_IDS_URL.replace("GUID", guid);
+        final OAuthRequest request = new OAuthRequest(Verb.GET, resource);
         service.signRequest(accessToken, request);
-        Response response = request.send();
+        final Response response = request.send();
 
         try {
-            JSONObject allContactsWholeResponse = new JSONObject(response.getBody());
+            final JSONObject allContactsWholeResponse = new JSONObject(response.getBody());
             if (allContactsWholeResponse.has("contacts")) {
-                JSONObject contacts = (JSONObject) allContactsWholeResponse.get("contacts");
+                final JSONObject contacts = (JSONObject) allContactsWholeResponse.get("contacts");
                 if (contacts.has("contact")) {
-                    JSONArray allContactsArray = (JSONArray) contacts.get("contact");
+                    final JSONArray allContactsArray = (JSONArray) contacts.get("contact");
 
                     // get each contact with its own request
                     for (int i = 0; i < allContactsArray.length(); i++) {
-                        JSONObject entry = allContactsArray.getJSONObject(i);
+                        final JSONObject entry = allContactsArray.getJSONObject(i);
                         if (entry.has("id")) {
-                            String contactId = entry.getString("id");
-                            String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", guid).replace("CONTACT_ID", contactId);
-                            OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
+                            final String contactId = entry.getString("id");
+                            final String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", guid).replace("CONTACT_ID", contactId);
+                            final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
                             service.signRequest(accessToken, singleContactRequest);
-                            Response singleContactResponse = singleContactRequest.send();
+                            final Response singleContactResponse = singleContactRequest.send();
                             contactList.add(parseSingleContact(singleContactResponse.getBody()));
 
                         }
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e);
         }
 
         return contactList;
     }
 
-    private Contact parseSingleContact(String singleContact) {
-        Contact oxContact = new Contact();
+    private Contact parseSingleContact(final String singleContact) {
+        final Contact oxContact = new Contact();
         try {
-            JSONObject all = new JSONObject(singleContact);
+            final JSONObject all = new JSONObject(singleContact);
             if (all.has("contact")) {
-                JSONObject contact = all.getJSONObject("contact");
+                final JSONObject contact = all.getJSONObject("contact");
                 if (contact.has("fields")) {
-                    JSONArray fields = contact.getJSONArray("fields");
+                    final JSONArray fields = contact.getJSONArray("fields");
                     for (int i = 0; i < fields.length(); i++) {
-                        JSONObject field = fields.getJSONObject(i);
+                        final JSONObject field = fields.getJSONObject(i);
                         if (field.has("type")) {
-                            String type = field.getString("type");
+                            final String type = field.getString("type");
 
                             if (type.equals("name")) {
                                 if (field.has("value")) {
-                                    JSONObject value = field.getJSONObject("value");
+                                    final JSONObject value = field.getJSONObject("value");
                                     if (value.has("givenName")) {
                                         oxContact.setGivenName(value.getString("givenName"));
                                     }
@@ -208,7 +209,7 @@ public class YahooServiceImpl implements YahooService {
 
                             else if (type.equals("phone")) {
                                 if (field.has("flags") && field.has("value")) {
-                                    String kind = field.getString("flags");
+                                    final String kind = field.getString("flags");
                                     if (kind.equals("[\"WORK\"]")) {
                                         oxContact.setTelephoneBusiness1(field.getString("value"));
                                     } else if (kind.equals("[\"HOME\"]")) {
@@ -242,7 +243,7 @@ public class YahooServiceImpl implements YahooService {
                                 int month = 0;
                                 int date = 0;
                                 if (field.has("value")) {
-                                    JSONObject value = field.getJSONObject("value");
+                                    final JSONObject value = field.getJSONObject("value");
                                     if (value.has("day")) {
                                         date = Integer.parseInt(value.getString("day"));
                                     }
@@ -263,11 +264,11 @@ public class YahooServiceImpl implements YahooService {
 
                             else if (type.equals("otherid")){
                                 if (field.has("value") && field.has("flags")){
-                                    String kind = field.getString("flags");
-                                    Pattern pattern = Pattern.compile("\\[\"([^\"]*)\"\\]");
-                                    Matcher matcher = pattern.matcher(kind);
+                                    final String kind = field.getString("flags");
+                                    final Pattern pattern = Pattern.compile("\\[\"([^\"]*)\"\\]");
+                                    final Matcher matcher = pattern.matcher(kind);
                                     if (matcher.find()){
-                                        String service = matcher.group(1);
+                                        final String service = matcher.group(1);
                                         oxContact.setInstantMessenger1(field.getString("value") + " ("+service+")");
                                     }
                                 }
@@ -275,8 +276,8 @@ public class YahooServiceImpl implements YahooService {
 
                             else if (type.equals("address")) {
                                 if (field.has("flags")) {
-                                    String kind = field.getString("flags");
-                                    JSONObject address = field.getJSONObject("value");
+                                    final String kind = field.getString("flags");
+                                    final JSONObject address = field.getJSONObject("value");
                                     if (kind.equals("[\"WORK\"]")) {
                                         if (address.has("street")) {
                                             oxContact.setStreetBusiness(address.getString("street"));
@@ -310,20 +311,20 @@ public class YahooServiceImpl implements YahooService {
                     }
                 }
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e);
         }
         return oxContact;
     }
 
     @Override
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
+    public String getAccountDisplayName(final Session session, final int user, final int contextId, final int accountId) {
         String displayName = "";
         try {
-            com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
+            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e);
         }
         return displayName;

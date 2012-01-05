@@ -51,7 +51,6 @@ package com.openexchange.oauth.linkedin;
 
 import java.util.LinkedList;
 import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
@@ -64,12 +63,12 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.osgi.Activator;
+import com.openexchange.session.Session;
 
 /**
  * {@link LinkedInServiceImpl}
@@ -90,7 +89,7 @@ public class LinkedInServiceImpl implements LinkedInService{
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(LinkedInServiceImpl.class));
 
 
-    public LinkedInServiceImpl(Activator activator) {
+    public LinkedInServiceImpl(final Activator activator) {
         this.activator = activator;
     }
 
@@ -98,37 +97,37 @@ public class LinkedInServiceImpl implements LinkedInService{
         return activator;
     }
 
-    public void setActivator(Activator activator) {
+    public void setActivator(final Activator activator) {
         this.activator = activator;
     }
 
 
-    public Response performRequest(String password, int user, int contextId, int accountId, Verb method, String url) {
-        OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
+    public Response performRequest(final Session session, final int user, final int contextId, final int accountId, final Verb method, final String url) {
+        final OAuthServiceMetaData linkedInMetaData = new OAuthServiceMetaDataLinkedInImpl(activator);
 
-        OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
+        final OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(linkedInMetaData.getAPIKey()).apiSecret(
             linkedInMetaData.getAPISecret()).build();
 
         OAuthAccount account = null;
         try {
-            com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            account = oAuthService.getAccount(accountId, password, user, contextId);
-        } catch (OXException e) {
+            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            account = oAuthService.getAccount(accountId, session, user, contextId);
+        } catch (final OXException e) {
             LOG.error(e);
         }
 
-        Token accessToken = new Token(account.getToken(), account.getSecret());
-        OAuthRequest request = new OAuthRequest(method, url);
+        final Token accessToken = new Token(account.getToken(), account.getSecret());
+        final OAuthRequest request = new OAuthRequest(method, url);
         service.signRequest(accessToken, request);
         return request.send();
     }
 
 
-	private JSONObject extractJson(Response response) throws OXException {
+	private JSONObject extractJson(final Response response) throws OXException {
 		JSONObject json;
 		try {
 			json = new JSONObject(response.getBody());
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			LOG.error(e);
 			throw OXException.general("Could not parse JSON: " + response.getBody()); //TODO: Different exception - wasn't this supposed to get easier with the rewrite?
 		}
@@ -136,25 +135,25 @@ public class LinkedInServiceImpl implements LinkedInService{
 	}
 
 
-	protected List<String> extractIds(Response response) throws OXException{
+	protected List<String> extractIds(final Response response) throws OXException{
 		List<String> result = new LinkedList<String>();
 		try {
-			JSONObject json = new JSONObject(response.getBody());
-			JSONArray ids = json.getJSONArray("values");
+			final JSONObject json = new JSONObject(response.getBody());
+			final JSONArray ids = json.getJSONArray("values");
 			result = extractIds(ids);
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 
 		}
 		return result;
 	}
 
-	protected List<String> extractIds(JSONArray connections) throws OXException{
-		List<String> result = new LinkedList<String>();
+	protected List<String> extractIds(final JSONArray connections) throws OXException{
+		final List<String> result = new LinkedList<String>();
 		try {
 			for(int i = 0, max = connections.length(); i < max; i++){
 				result.add(connections.getJSONObject(i).getString("id"));
 			}
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 
 		}
 		return result;
@@ -162,13 +161,13 @@ public class LinkedInServiceImpl implements LinkedInService{
 
 
     @Override
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
+    public String getAccountDisplayName(final Session session, final int user, final int contextId, final int accountId) {
         String displayName="";
         try {
-            com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
+            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e);
         }
         return displayName;
@@ -176,85 +175,85 @@ public class LinkedInServiceImpl implements LinkedInService{
 
 
     @Override
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
-    	Response response = performRequest(password, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
-    	LinkedInXMLParser parser = new LinkedInXMLParser();
-        List<Contact> contacts = parser.parseConnections(response.getBody());
+    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
+    	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, CONNECTIONS_URL);
+    	final LinkedInXMLParser parser = new LinkedInXMLParser();
+        final List<Contact> contacts = parser.parseConnections(response.getBody());
         return contacts;
     }
 
 
 	@Override
-	public JSONObject getProfileForId(String id, String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/id="+id+PERSONAL_FIELD_QUERY;
-	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+	public JSONObject getProfileForId(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
+		final String uri = "http://api.linkedin.com/v1/people/id="+id+PERSONAL_FIELD_QUERY;
+	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
     	return extractJson(response);
 	}
 
 
 	@Override
-	public JSONObject getRelationToViewer(String id, String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer)";
-	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	JSONObject relations = extractJson(response);
+	public JSONObject getRelationToViewer(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
+		final String uri = "http://api.linkedin.com/v1/people/id="+id+":(relation-to-viewer)";
+	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	final JSONObject relations = extractJson(response);
     	return relations;
 	}
 
 	@Override
-	public JSONObject getConnections(String password, int user, int contextId,	int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/~/connections"+PERSONAL_FIELD_QUERY;
-		Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+	public JSONObject getConnections(final Session session, final int user, final int contextId,	final int accountId) throws OXException {
+		final String uri = "http://api.linkedin.com/v1/people/~/connections"+PERSONAL_FIELD_QUERY;
+		final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
 		return extractJson(response);
 	}
 
 
 	@Override
-	public List<String> getUsersConnectionsIds(String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
-		Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+	public List<String> getUsersConnectionsIds(final Session session, final int user, final int contextId, final int accountId) throws OXException {
+		final String uri = "http://api.linkedin.com/v1/people/~/connections:(id)";
+		final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
 		return extractIds(response);
 	}
 
-	public JSONObject getFullProfileById(String id, String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/id="+id+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
-	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	JSONObject data = extractJson(response);
+	public JSONObject getFullProfileById(final String id, final Session session, final int user, final int contextId, final int accountId) throws OXException {
+		final String uri = "http://api.linkedin.com/v1/people/id="+id+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
+	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	final JSONObject data = extractJson(response);
     	return data;
 	}
 
     @Override
-    public JSONObject getFullProfileByEMail(List<String> email, String password, int user, int contextId, int accountId) throws OXException {
+    public JSONObject getFullProfileByEMail(final List<String> email, final Session session, final int user, final int contextId, final int accountId) throws OXException {
 
 		String uri = null;
 		if (email.size() == 1) {
 			uri = "http://api.linkedin.com/v1/people/email="+email.get(0)+":("+RELATION_TO_VIEWER+","+PERSONAL_FIELDS+")";
 		} else {
-			StringBuilder b = new StringBuilder("http://api.linkedin.com/v1/people::(");
-			for(String s : email) {
+			final StringBuilder b = new StringBuilder("http://api.linkedin.com/v1/people::(");
+			for(final String s : email) {
 				b.append("email=").append(s).append(",");
 			}
 			b.setLength(b.length()-1);
 			b.append("):(").append(RELATION_TO_VIEWER).append(",").append(PERSONAL_FIELDS).append(")");
 			uri = b.toString();
 		}
-	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri + IN_JSON);
-    	JSONObject data = extractJson(response);
+	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri + IN_JSON);
+    	final JSONObject data = extractJson(response);
     	return data;
     }
 
 	@Override
-	public JSONObject getNetworkUpdates(String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/~/network/updates" + IN_JSON + "&type=CONN";
-	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri);
-    	JSONObject data = extractJson(response);
+	public JSONObject getNetworkUpdates(final Session session, final int user, final int contextId, final int accountId) throws OXException {
+		final String uri = "http://api.linkedin.com/v1/people/~/network/updates" + IN_JSON + "&type=CONN";
+	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
+    	final JSONObject data = extractJson(response);
     	return data;
 	}
 
 	@Override
-	public JSONObject getMessageInbox(String password, int user, int contextId, int accountId) throws OXException {
-		String uri = "http://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions,body)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
-	   	Response response = performRequest(password, user, contextId, accountId, Verb.GET, uri);
-    	JSONObject data = extractJson(response);
+	public JSONObject getMessageInbox(final Session session, final int user, final int contextId, final int accountId) throws OXException {
+		final String uri = "http://api.linkedin.com/v1/people/~/mailbox:(id,folder,from:(person:(id,first-name,last-name,picture-url,headline)),recipients:(person:(id,first-name,last-name,picture-url,headline)),subject,short-body,last-modified,timestamp,mailbox-item-actions,body)?message-type=message-connections,invitation-request,invitation-reply,inmail-direct-connection&format=json";
+	   	final Response response = performRequest(session, user, contextId, accountId, Verb.GET, uri);
+    	final JSONObject data = extractJson(response);
     	System.out.println(data);
     	return data;
 	}
