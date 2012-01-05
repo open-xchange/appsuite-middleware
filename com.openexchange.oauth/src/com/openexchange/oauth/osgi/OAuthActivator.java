@@ -50,6 +50,7 @@
 package com.openexchange.oauth.osgi;
 
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
@@ -88,7 +89,9 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class };
+        return new Class<?>[] {
+            DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
+            CryptoService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -135,6 +138,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             /*
              * Collect OAuth services
              */
+            OSGiMetaDataRegistry.initialize(getService(ConfigViewFactory.class));
             final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
             registry.start(context);
             /*

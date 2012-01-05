@@ -119,8 +119,14 @@ public final class NewAction extends AbstractChatConversationAction {
                 throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
-        final String serviceId = req.checkParameter("serviceId");
-        final String accountId = req.checkParameter("accountId");
+        String serviceId = req.getParameter("serviceId");
+        if (null == serviceId) {
+            serviceId = ChatService.DEFAULT_SERVICE;
+        }
+        String accountId = req.getParameter("accountId");
+        if (null == accountId) {
+            accountId = ChatService.DEFAULT_ACCOUNT;
+        }
         /*
          * Get service
          */

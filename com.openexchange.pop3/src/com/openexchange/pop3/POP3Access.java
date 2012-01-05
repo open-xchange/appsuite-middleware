@@ -60,6 +60,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import javax.mail.MessagingException;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailProperties;
@@ -382,6 +383,20 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
 
     @Override
     public boolean ping() throws OXException {
+        /*-
+         * Some POP3 accounts specify a connect frequency limitation,
+         * therefore skip ping check if:
+         * 
+         * com.openexchange.pop3.allowPing=false
+         */
+        final ConfigurationService service = POP3ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        if (null == service || !service.getBoolProperty("com.openexchange.pop3.allowPing", false)) {
+            warnings.add(POP3ExceptionCode.VALIDATE_DENIED.create());
+            return true;
+        }
+        /*
+         * Ping allowed by configuration service
+         */
         final POP3Config config = getPOP3Config();
         checkFieldsBeforeConnect(config);
         try {

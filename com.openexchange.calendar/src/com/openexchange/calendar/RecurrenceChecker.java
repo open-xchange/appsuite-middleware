@@ -79,7 +79,7 @@ public class RecurrenceChecker {
             throw OXCalendarExceptionCodes.INCOMPLETE_REC_INFOS_INTERVAL.create();
         }
 
-        if (cdao.containsUntil() && cdao.containsOccurrence() && !(cdao.getUntil() == null && cdao.getOccurrence() == 0)) {
+        if (cdao.containsUntil() && cdao.containsOccurrence() && cdao.getUntil() != null && cdao.getOccurrence() != 0) {
             throw OXCalendarExceptionCodes.REDUNDANT_UNTIL_OCCURRENCES.create();
         }
 
