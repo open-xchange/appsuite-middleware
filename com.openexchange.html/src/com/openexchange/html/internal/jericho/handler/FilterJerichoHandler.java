@@ -583,7 +583,19 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     @Override
     public void handleComment(final String comment) {
-        htmlBuilder.append(comment);
+        if (isCss) {
+            checkCSSElements(cssBuffer.append(comment), styleMap, true);
+            String checkedCSS = cssBuffer.toString();
+            cssBuffer.setLength(0);
+            if (dropExternalImages) {
+                imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, true, false);
+                checkedCSS = cssBuffer.toString();
+                cssBuffer.setLength(0);
+            }
+            htmlBuilder.append(checkedCSS);
+        } else {
+            htmlBuilder.append(comment);
+        }
     }
 
     /*-
