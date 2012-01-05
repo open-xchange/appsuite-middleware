@@ -141,7 +141,17 @@ public class FileResponseRenderer implements ResponseRenderer {
                 if (contentDisposition == null) {
                     resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                 } else {
-                    resp.setHeader("Content-Disposition", contentDisposition);
+                    if (contentDisposition.indexOf(';') < 0) {
+                        final String disposition = checkedDownload.getContentDisposition();
+                        final int pos = disposition.indexOf(';');
+                        if (pos >= 0) {
+                            resp.setHeader("Content-Disposition", contentDisposition + disposition.substring(pos));
+                        } else {
+                            resp.setHeader("Content-Disposition", contentDisposition);
+                        }
+                    } else {
+                        resp.setHeader("Content-Disposition", contentDisposition);
+                    }
                 }
                 if (contentType == null) {
                     resp.setContentType(checkedDownload.getContentType());
