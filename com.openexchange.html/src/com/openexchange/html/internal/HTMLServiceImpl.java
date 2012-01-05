@@ -99,6 +99,8 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(HTMLServiceImpl.class));
 
+    private static final boolean DEBUG = LOG.isDebugEnabled();
+
     private static final String CHARSET_US_ASCII = "US-ASCII";
 
     private static final String CHARSET_UTF_8 = "UTF-8";
@@ -456,11 +458,13 @@ public final class HTMLServiceImpl implements HTMLService {
 
     @Override
     public String sanitize(final String htmlContent, final String optConfigName, final boolean dropExternalImages, final boolean[] modified) {
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
         String confName = optConfigName;
         if (null != confName && !confName.endsWith(".properties")) {
             confName += ".properties";
         }
-        final String html = replaceHexEntities(htmlContent);
+        String html = replaceHexEntities(htmlContent);
+        html = replaceHexNbsp(html);
         final FilterJerichoHandler handler;
         {
             final String definition = null == confName ? null : getConfiguration().getText(confName);
@@ -475,6 +479,10 @@ public final class HTMLServiceImpl implements HTMLService {
             modified[0] |= handler.isImageURLFound();
         }
         final String retval = processDownlevelRevealedConditionalComments(handler.getHTML());
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
+        }
         return retval;
     }
 
@@ -1190,6 +1198,12 @@ public final class HTMLServiceImpl implements HTMLService {
         } while (m.find());
         mr.appendTail(builder);
         return builder.toString();
+    }
+
+    private static final Pattern PAT_HEX_NBSP = Pattern.compile(Pattern.quote("&#160;"));
+
+    private static String replaceHexNbsp(final String validated) {
+        return PAT_HEX_NBSP.matcher(validated).replaceAll("&nbsp;");
     }
 
     /**
