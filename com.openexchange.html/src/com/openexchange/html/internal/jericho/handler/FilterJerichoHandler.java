@@ -305,7 +305,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     }
 
     @Override
-    public void handleContent(final Segment content) {
+    public void handleSegment(final Segment content) {
         if (skipLevel == 0) {
             if (isCss) {
                 /*
@@ -321,9 +321,13 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
                 htmlBuilder.append(checkedCSS);
             } else {
-                final String decodedText = CharacterReference.decode(content);
-                final String encodedText = CharacterReference.encode(decodedText);
-                htmlBuilder.append(encodedText);
+                if (content.isWhiteSpace()) {
+                    htmlBuilder.append(content);
+                } else {
+                    final String decodedText = CharacterReference.decode(content);
+                    final String encodedText = CharacterReference.encode(decodedText);
+                    htmlBuilder.append(encodedText);
+                }
             }
         }
     }
