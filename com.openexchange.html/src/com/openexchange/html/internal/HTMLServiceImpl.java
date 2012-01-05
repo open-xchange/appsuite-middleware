@@ -460,7 +460,8 @@ public final class HTMLServiceImpl implements HTMLService {
         if (null != confName && !confName.endsWith(".properties")) {
             confName += ".properties";
         }
-        final String html = replaceHexEntities(htmlContent);
+        String html = replaceHexEntities(htmlContent);
+        html = replaceHexNbsp(html);
         final FilterJerichoHandler handler;
         {
             final String definition = null == confName ? null : getConfiguration().getText(confName);
@@ -1190,6 +1191,12 @@ public final class HTMLServiceImpl implements HTMLService {
         } while (m.find());
         mr.appendTail(builder);
         return builder.toString();
+    }
+
+    private static final Pattern PAT_HEX_NBSP = Pattern.compile(Pattern.quote("&#160;"));
+
+    private static String replaceHexNbsp(final String validated) {
+        return PAT_HEX_NBSP.matcher(validated).replaceAll("&nbsp;");
     }
 
     /**

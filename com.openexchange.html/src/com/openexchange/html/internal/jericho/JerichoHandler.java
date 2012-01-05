@@ -84,7 +84,7 @@ public interface JerichoHandler {
 
     void handleCharacterReference(CharacterReference characterReference);
 
-    void handleContent(Segment content);
+    void handleSegment(Segment content);
 
     void handleStartTag(StartTag startTag);
 

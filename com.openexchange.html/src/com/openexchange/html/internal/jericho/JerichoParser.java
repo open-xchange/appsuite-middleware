@@ -49,6 +49,8 @@
 
 package com.openexchange.html.internal.jericho;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.EndTagType;
@@ -80,6 +82,10 @@ public final class JerichoParser {
         super();
     }
 
+    private static final Pattern NESTED_TAG = Pattern.compile("^(?:\r?\n *)?(<[^>]+>)");
+
+    private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
+    
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HTMLHandler}
      * 
@@ -99,35 +105,76 @@ public final class JerichoParser {
                 continue;
             }
             lastSegmentEnd = segment.getEnd();
-            if (segment instanceof Tag) {
-                final Tag tag = (Tag) segment;
-                final TagType tagType = tag.getTagType();
-                if (tagType == StartTagType.NORMAL) {
-                    handler.handleStartTag((StartTag) tag);
-                } else if (tagType == EndTagType.NORMAL) {
-                    handler.handleEndTag((EndTag) tag);
-                } else if (tagType == StartTagType.DOCTYPE_DECLARATION) {
-                    handler.handleDocDeclaration(segment.toString());
-                } else if (tagType == StartTagType.CDATA_SECTION) {
-                    handler.handleCData(segment.toString());
-                } else if (tagType == StartTagType.COMMENT) {
-                    handler.handleComment(segment.toString());
-                } else {
-                    if (!segment.isWhiteSpace()) {
-                        handler.handleUnknownTag(tag);
-                    }
-                }
-            } else if (segment instanceof CharacterReference) {
-                final CharacterReference characterReference = (CharacterReference) segment;
-                handler.handleCharacterReference(characterReference);
-            } else {
-                handler.handleContent(segment);
-            }
+            /*
+             * Handle current segment
+             */
+            handleSegment(handler, segment, true);
         }
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("\tJerichoParser.parse() took " + dur + "msec.");
         }
+    }
+
+    private static void handleSegment(final JerichoHandler handler, final Segment segment, final boolean reparseSegment) {
+        if (segment instanceof Tag) {
+            final Tag tag = (Tag) segment;
+            final TagType tagType = tag.getTagType();
+            if (tagType == StartTagType.NORMAL) {
+                handler.handleStartTag((StartTag) tag);
+            } else if (tagType == EndTagType.NORMAL) {
+                handler.handleEndTag((EndTag) tag);
+            } else if (tagType == StartTagType.DOCTYPE_DECLARATION) {
+                handler.handleDocDeclaration(segment.toString());
+            } else if (tagType == StartTagType.CDATA_SECTION) {
+                handler.handleCData(segment.toString());
+            } else if (tagType == StartTagType.COMMENT) {
+                handler.handleComment(segment.toString());
+            } else {
+                if (!segment.isWhiteSpace()) {
+                    handler.handleUnknownTag(tag);
+                }
+            }
+        } else if (segment instanceof CharacterReference) {
+            final CharacterReference characterReference = (CharacterReference) segment;
+            handler.handleCharacterReference(characterReference);
+        } else {
+            /*
+             * Safety re-parse
+             */
+            if (reparseSegment && (segment.toString().indexOf('<') >= 0) && !segment.isWhiteSpace()) {
+                final Matcher m = NESTED_TAG.matcher(segment);
+                if (m.matches()) {
+                    final int startTagPos = m.start(1);
+                    /*
+                     * Handle extracted whitespace segment
+                     */
+                    StreamedSource nestedSource = new StreamedSource(segment.subSequence(0, startTagPos));
+                    for (final Segment nestedSegment : nestedSource) {
+                        handler.handleSegment(nestedSegment);
+                    }
+                    /*
+                     * Re-parse start tag
+                     */
+                    final String startTag = fixStyleAttribute(segment.subSequence(startTagPos, segment.length()).toString());
+                    nestedSource = new StreamedSource(startTag);
+                    for (final Segment nestedSegment : nestedSource) {
+                        handleSegment(handler, nestedSegment, false);
+                    }
+                } else {
+                    handler.handleSegment(segment);
+                }
+            } else {
+                handler.handleSegment(segment);
+            }
+        }
+    }
+
+    private static String fixStyleAttribute(final String startTag) {
+        if (startTag.indexOf("style=") <= 0) {
+            return startTag;
+        }
+        return INVALID_DELIM.matcher(startTag).replaceAll("; ");
     }
 
 }
