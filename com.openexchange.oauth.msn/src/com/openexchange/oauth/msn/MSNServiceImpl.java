@@ -67,10 +67,11 @@ import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.msn.osgi.MSNOAuthActivator;
+import com.openexchange.session.Session;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -85,24 +86,24 @@ public class MSNServiceImpl implements MSNService {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MSNServiceImpl.class));
 
-    public MSNServiceImpl(MSNOAuthActivator activator){
+    public MSNServiceImpl(final MSNOAuthActivator activator){
         this.activator = activator;
     }
 
     @Override
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
         List<Contact> contacts = new ArrayList<Contact>();
 
         OAuthAccount account = null;
         try {
-            com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            account = oAuthService.getAccount(accountId, password, user, contextId);
+            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            account = oAuthService.getAccount(accountId, session, user, contextId);
             // the account contains the refresh-token in this case
-            String wrap_access_token = useRefreshTokenToGetAccessToken(account.getToken());
-            JSONObject response = useAccessTokenToAccessData(wrap_access_token);
+            final String wrap_access_token = useRefreshTokenToGetAccessToken(account.getToken());
+            final JSONObject response = useAccessTokenToAccessData(wrap_access_token);
             contacts = parseIntoContacts(wrap_access_token, response);
 
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e);
         }
 
@@ -113,54 +114,54 @@ public class MSNServiceImpl implements MSNService {
      * @param wrap_access_token
      * @return
      */
-    private JSONObject useAccessTokenToAccessData(String wrap_access_token) {
+    private JSONObject useAccessTokenToAccessData(final String wrap_access_token) {
         JSONObject wholeResponse = new JSONObject();
-        String responseString = "";
-        String protectedUrl = "http://apis.live.net/V4.1/";
-        GetMethod getMethod = new GetMethod(protectedUrl);
+        final String responseString = "";
+        final String protectedUrl = "http://apis.live.net/V4.1/";
+        final GetMethod getMethod = new GetMethod(protectedUrl);
         getMethod.setRequestHeader("Accept", "application/json");
         getMethod.setRequestHeader("Content-type", "application/json");
         getMethod.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
 
-        HttpClient client = new HttpClient();
+        final HttpClient client = new HttpClient();
         client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
         try {
-            int responseCode = client.executeMethod(getMethod);
+            final int responseCode = client.executeMethod(getMethod);
 
-            GetMethod getMethod2 = new GetMethod(protectedUrl + "Contacts/");
+            final GetMethod getMethod2 = new GetMethod(protectedUrl + "Contacts/");
             getMethod2.setRequestHeader("Accept", "application/json");
             getMethod2.setRequestHeader("Content-type", "application/json");
             getMethod2.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
-            int responseCode2 = client.executeMethod(getMethod2);
+            final int responseCode2 = client.executeMethod(getMethod2);
 
-            JSONObject response = new JSONObject(getMethod2.getResponseBodyAsString());
+            final JSONObject response = new JSONObject(getMethod2.getResponseBodyAsString());
             String baseURI = "";
             if (null != response && response.has("BaseUri")) {
                 baseURI = response.getString("BaseUri");
             }
             if (!baseURI.equals("")) {
-                String finalURL = baseURI + "Contacts/AllContacts";
-                GetMethod getMethod3 = new GetMethod(finalURL);
+                final String finalURL = baseURI + "Contacts/AllContacts";
+                final GetMethod getMethod3 = new GetMethod(finalURL);
                 getMethod3.setRequestHeader("Accept", "application/json");
                 getMethod3.setRequestHeader("Content-type", "application/json");
                 getMethod3.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
-                int responseCode3 = client.executeMethod(getMethod3);
+                final int responseCode3 = client.executeMethod(getMethod3);
                 wholeResponse = new JSONObject(getMethod3.getResponseBodyAsString());
 
             }
-        } catch (HttpException e) {
+        } catch (final HttpException e) {
             LOG.error(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e);
         }
         return wholeResponse;
     }
 
-    private List<Contact> parseIntoContacts(String wrap_access_token, JSONObject wholeResponse) {
-        List<Contact> contacts = new ArrayList<Contact>();
-        HttpClient client = new HttpClient();
+    private List<Contact> parseIntoContacts(final String wrap_access_token, final JSONObject wholeResponse) {
+        final List<Contact> contacts = new ArrayList<Contact>();
+        final HttpClient client = new HttpClient();
         client.getParams().setParameter("http.protocol.content-charset", "UTF-8");
         try {
             String baseURI = "";
@@ -169,44 +170,44 @@ public class MSNServiceImpl implements MSNService {
             }
 
             if (wholeResponse.has("Entries")) {
-                JSONArray entries = (JSONArray) wholeResponse.get("Entries");
+                final JSONArray entries = (JSONArray) wholeResponse.get("Entries");
                 for (int i = 0; i < entries.length(); i++) {
-                    Contact contact = new Contact();
-                    JSONObject entry = entries.getJSONObject(i);
-                    String contactURI = entry.getString("SelfLink");
+                    final Contact contact = new Contact();
+                    final JSONObject entry = entries.getJSONObject(i);
+                    final String contactURI = entry.getString("SelfLink");
                     if (null != contactURI) {
-                        GetMethod getMethod4 = new GetMethod(baseURI + contactURI);
+                        final GetMethod getMethod4 = new GetMethod(baseURI + contactURI);
                         getMethod4.setRequestHeader("Accept", "application/json");
                         getMethod4.setRequestHeader("Content-type", "application/json");
                         getMethod4.setRequestHeader("Authorization", "WRAP access_token=" + wrap_access_token);
-                        int responseCode4 = client.executeMethod(getMethod4);
-                        JSONObject wlcontact = new JSONObject(getMethod4.getResponseBodyAsString());
+                        final int responseCode4 = client.executeMethod(getMethod4);
+                        final JSONObject wlcontact = new JSONObject(getMethod4.getResponseBodyAsString());
 
                         if (wlcontact.has("FirstName")) {
-                            String firstname = wlcontact.getString("FirstName");
+                            final String firstname = wlcontact.getString("FirstName");
                             contact.setGivenName(firstname);
                         }
                         if (wlcontact.has("LastName")) {
-                            String lastname = wlcontact.getString("LastName");
+                            final String lastname = wlcontact.getString("LastName");
                             contact.setSurName(lastname);
                         }
                         if (wlcontact.has("Locations")) {
-                            JSONArray locations = wlcontact.getJSONArray("Locations");
-                            JSONObject location = locations.getJSONObject(0);
+                            final JSONArray locations = wlcontact.getJSONArray("Locations");
+                            final JSONObject location = locations.getJSONObject(0);
                             if (location.has("City")) {
-                                String city = location.getString("City");
+                                final String city = location.getString("City");
                                 contact.setCityBusiness(city);
                             }
                             if (location.has("CountryRegion")) {
-                                String country = location.getString("CountryRegion");
+                                final String country = location.getString("CountryRegion");
                                 contact.setCountryBusiness(country);
                             }
                         }
                         if (wlcontact.has("ThumbnailImageLink")) {
-                            String imageUrl = wlcontact.getString("ThumbnailImageLink");
+                            final String imageUrl = wlcontact.getString("ThumbnailImageLink");
                             try {
                                 OXContainerConverter.loadImageFromURL(contact, imageUrl);
-                            } catch (ConverterException e) {
+                            } catch (final ConverterException e) {
                                 LOG.error(e);
                             }
                         }
@@ -214,11 +215,11 @@ public class MSNServiceImpl implements MSNService {
                     }
                 }
             }
-        } catch (HttpException e) {
+        } catch (final HttpException e) {
             LOG.error(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e);
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e);
         }
         return contacts;
@@ -227,42 +228,42 @@ public class MSNServiceImpl implements MSNService {
     /**
      * @param token
      */
-    private String useRefreshTokenToGetAccessToken(String wrap_refresh_token) {
+    private String useRefreshTokenToGetAccessToken(final String wrap_refresh_token) {
         String accessToken = "";
-        HttpClient client = new HttpClient();
-        PostMethod postMethod = new PostMethod("https://consent.live.com/RefreshToken.aspx" + "?wrap_refresh_token=" + wrap_refresh_token);
+        final HttpClient client = new HttpClient();
+        final PostMethod postMethod = new PostMethod("https://consent.live.com/RefreshToken.aspx" + "?wrap_refresh_token=" + wrap_refresh_token);
 
         RequestEntity requestEntity;
         try {
             requestEntity = new StringRequestEntity(postMethod.getQueryString(), "application/x-www-form-urlencoded", "UTF-8");
             postMethod.setRequestEntity(requestEntity);
-            int responseCode = client.executeMethod(postMethod);
-            String response = URLDecoder.decode(postMethod.getResponseBodyAsString(), "UTF-8");
-            Pattern pattern = Pattern.compile("wrap_access_token=([^&]*).*");
-            Matcher matcher = pattern.matcher(response);
+            final int responseCode = client.executeMethod(postMethod);
+            final String response = URLDecoder.decode(postMethod.getResponseBodyAsString(), "UTF-8");
+            final Pattern pattern = Pattern.compile("wrap_access_token=([^&]*).*");
+            final Matcher matcher = pattern.matcher(response);
             if (matcher.find()) {
                 accessToken = matcher.group(1);
             } else {
                 LOG.error("No AccessToken found in response : " + postMethod.getResponseBodyAsString());
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (final UnsupportedEncodingException e) {
             LOG.error(e);
-        } catch (HttpException e) {
+        } catch (final HttpException e) {
             LOG.error(e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error(e);
         }
         return accessToken;
     }
 
     @Override
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
+    public String getAccountDisplayName(final Session session, final int user, final int contextId, final int accountId) {
         String displayName = "";
         try {
-            com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
+            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+            final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e);
         }
         return displayName;

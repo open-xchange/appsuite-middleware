@@ -56,11 +56,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
-import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.yahoo.osgi.Activator;
 
@@ -78,7 +78,7 @@ private final Activator activator;
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(YahooSubscribeService.class));
 
-    public YahooSubscribeService(Activator activator){
+    public YahooSubscribeService(final Activator activator){
         this.activator = activator;
 
         source.setDisplayName("Yahoo");
@@ -86,9 +86,9 @@ private final Activator activator;
         source.setId("com.openexchange.subscribe.socialplugin.yahoo");
         source.setSubscribeService(this);
 
-        DynamicFormDescription form = new DynamicFormDescription();
+        final DynamicFormDescription form = new DynamicFormDescription();
 
-        FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
+        final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", "The OAuthAccount to use");
         oauthAccount.setOption("type", activator.getOAuthServiceMetaData().getId());
         form.add(oauthAccount);
 
@@ -96,8 +96,8 @@ private final Activator activator;
     }
 
     @Override
-    public Collection<?> getContent(Subscription subscription) throws OXException {
-        return activator.getYahooService().getContacts(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+    public Collection<?> getContent(final Subscription subscription) throws OXException {
+        return activator.getYahooService().getContacts(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
     }
 
     @Override
@@ -106,12 +106,12 @@ private final Activator activator;
     }
 
     @Override
-    public boolean handles(int folderModule) {
+    public boolean handles(final int folderModule) {
         return FolderObject.CONTACT == folderModule;
     }
 
     @Override
-    public void modifyIncoming(Subscription subscription) throws OXException {
+    public void modifyIncoming(final Subscription subscription) throws OXException {
         if(subscription != null) {
             super.modifyIncoming(subscription);
             if (subscription.getConfiguration() != null){
@@ -129,16 +129,16 @@ private final Activator activator;
     }
 
     @Override
-    public void modifyOutgoing(Subscription subscription) throws OXException {
-        String accountId = (String) subscription.getConfiguration().get("account");
+    public void modifyOutgoing(final Subscription subscription) throws OXException {
+        final String accountId = (String) subscription.getConfiguration().get("account");
         if (null != accountId){
-            Integer accountIdInt = Integer.parseInt(accountId);
+            final Integer accountIdInt = Integer.valueOf(accountId);
             if (null != accountIdInt) {
                 subscription.getConfiguration().put("account",accountIdInt);
             }
             String displayName = null;
             if(subscription.getSecret() != null) {
-                displayName = activator.getYahooService().getAccountDisplayName(subscription.getSecret(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
+                displayName = activator.getYahooService().getAccountDisplayName(subscription.getSession(), subscription.getUserId(), subscription.getContext().getContextId(), (Integer)subscription.getConfiguration().get("account"));
             }
             if (null != displayName && !"".equals(displayName)){
                 subscription.setDisplayName(displayName);
@@ -150,8 +150,8 @@ private final Activator activator;
         super.modifyOutgoing(subscription);
     }
 
-    public void deleteAllUsingOAuthAccount(Context context, int id) throws OXException {
-        Map<String, Object> query = new HashMap<String, Object>();
+    public void deleteAllUsingOAuthAccount(final Context context, final int id) throws OXException {
+        final Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));
         removeWhereConfigMatches(context, query);
     }

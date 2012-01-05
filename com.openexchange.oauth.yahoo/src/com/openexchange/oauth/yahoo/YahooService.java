@@ -51,6 +51,7 @@ package com.openexchange.oauth.yahoo;
 
 import java.util.List;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 /**
  * {@link YahooService}
@@ -59,8 +60,8 @@ import com.openexchange.groupware.container.Contact;
  */
 public interface YahooService {
 
-    public abstract List<Contact> getContacts(String password, int user, int contextId, int accountId);
+    public abstract List<Contact> getContacts(Session session, int user, int contextId, int accountId);
 
-    public abstract String getAccountDisplayName(String password, int user, int contextId, int accountId);
+    public abstract String getAccountDisplayName(Session session, int user, int contextId, int accountId);
 
 }

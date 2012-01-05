@@ -64,9 +64,10 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.tools.versit.converter.OXContainerConverter;
 
@@ -82,46 +83,46 @@ public class FacebookServiceImpl implements FacebookService {
     private final com.openexchange.oauth.OAuthService oAuthService;
     private final OAuthServiceMetaDataFacebookImpl facebookMetaData;
 
-    public FacebookServiceImpl(com.openexchange.oauth.OAuthService oAuthService, OAuthServiceMetaDataFacebookImpl facebookMetaData) {
+    public FacebookServiceImpl(final com.openexchange.oauth.OAuthService oAuthService, final OAuthServiceMetaDataFacebookImpl facebookMetaData) {
         this.oAuthService = oAuthService;
         this.facebookMetaData = facebookMetaData;
     }
 
     @Override
-    public List<Contact> getContacts(String password, int user, int contextId, int accountId) {
+    public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) {
 
         List<Contact> contacts = new ArrayList<Contact>();
-        OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
+        final OAuthService service = new ServiceBuilder().provider(FacebookApi.class).apiKey(facebookMetaData.getAPIKey()).apiSecret(
             facebookMetaData.getAPISecret()).build();
 
         OAuthAccount account = null;
 
         try {
-            account = oAuthService.getAccount(accountId, password, user, contextId);
-        } catch (OXException e) {
+            account = oAuthService.getAccount(accountId, session, user, contextId);
+        } catch (final OXException e) {
             LOG.error(e);
         }
         if (null != account) {
             // get the users own profile (for his id) with the given access token
-            Token accessToken = new Token(account.getToken(), account.getSecret());
-            OAuthRequest ownProfileRequest = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
+            final Token accessToken = new Token(account.getToken(), account.getSecret());
+            final OAuthRequest ownProfileRequest = new OAuthRequest(Verb.GET, "https://graph.facebook.com/me");
             service.signRequest(accessToken, ownProfileRequest);
-            Response ownProfileResponse = ownProfileRequest.send();
+            final Response ownProfileResponse = ownProfileRequest.send();
 
             String myuid = "";
             try {
-                JSONObject object = new JSONObject(ownProfileResponse.getBody());
+                final JSONObject object = new JSONObject(ownProfileResponse.getBody());
                 myuid = object.getString("id");
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 LOG.error(e);
             }
 
             // get the users connections
-            OAuthRequest connectionsRequest = new OAuthRequest(
+            final OAuthRequest connectionsRequest = new OAuthRequest(
                 Verb.GET,
                 "https://api.facebook.com/method/fql.query?query=SELECT%20name,first_name,last_name,email,birthday_date,pic_big,hometown_location%20from%20user%20where%20uid%20in%20%28SELECT%20uid2%20from%20friend%20where%20uid1=" + myuid + "%29&format=JSON");
             service.signRequest(accessToken, connectionsRequest);
-            Response connectionsResponse = connectionsRequest.send();
+            final Response connectionsResponse = connectionsRequest.send();
 
             // parse the returned JSON into neat little contacts
             contacts = parseIntoContacts(connectionsResponse.getBody());
@@ -131,14 +132,14 @@ public class FacebookServiceImpl implements FacebookService {
 
     }
 
-    public List<Contact> parseIntoContacts(String jsonString) {
+    public List<Contact> parseIntoContacts(final String jsonString) {
         final List<Contact> contacts = new ArrayList<Contact>();
 
         try {
-            JSONArray allConnections = new JSONArray(jsonString);
+            final JSONArray allConnections = new JSONArray(jsonString);
             for (int i = 0; i < allConnections.length(); i++) {
-                JSONObject connection = allConnections.getJSONObject(i);
-                Contact contact = new Contact();
+                final JSONObject connection = allConnections.getJSONObject(i);
+                final Contact contact = new Contact();
                 if (JSONObject.NULL != connection.get("first_name") && !"".equals(connection.get("first_name")) && !"nil".equals(connection.get("first_name"))) {
                     contact.setGivenName((String) connection.get("first_name"));
                 }
@@ -150,7 +151,7 @@ public class FacebookServiceImpl implements FacebookService {
                 if (JSONObject.NULL != connection.get("pic_big") && !"".equals(connection.get("pic_big")) && !"nil".equals(connection.get("pic_big"))) {
                     try {
                         OXContainerConverter.loadImageFromURL(contact, (String) connection.get("pic_big"));
-                    } catch (ConverterException e) {
+                    } catch (final ConverterException e) {
                         LOG.error(e);
                     }
                 }
@@ -159,9 +160,9 @@ public class FacebookServiceImpl implements FacebookService {
                 // System.out.println(connection.get("email"));
 
                 if (JSONObject.NULL != connection.get("birthday_date") && !"".equals(connection.get("birthday_date")) && !"nil".equals(connection.get("birthday_date"))) {
-                    String dateString = (String) connection.get("birthday_date");
-                    Integer month = Integer.parseInt(dateString.substring(0, 2)) - 1;
-                    Integer day = Integer.parseInt(dateString.substring(3, 5));
+                    final String dateString = (String) connection.get("birthday_date");
+                    final Integer month = Integer.parseInt(dateString.substring(0, 2)) - 1;
+                    final Integer day = Integer.parseInt(dateString.substring(3, 5));
                     Integer year = 0;
                     // year is available
                     if (dateString.length() == 10) {
@@ -173,7 +174,7 @@ public class FacebookServiceImpl implements FacebookService {
                 // System.out.println();
 
                 if (JSONObject.NULL != connection.get("hometown_location")) {
-                    JSONObject hometownLocation = (JSONObject) connection.get("hometown_location");
+                    final JSONObject hometownLocation = (JSONObject) connection.get("hometown_location");
                     if (JSONObject.NULL != hometownLocation.get("city") && !"".equals(hometownLocation.get("city")) && !"nil".equals(hometownLocation.get("city"))) {
                         contact.setCityHome((String) hometownLocation.get("city"));
                     }
@@ -186,7 +187,7 @@ public class FacebookServiceImpl implements FacebookService {
                 }
                 contacts.add(contact);
             }
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             LOG.error(e);
         }
 
@@ -194,12 +195,12 @@ public class FacebookServiceImpl implements FacebookService {
     }
 
     @Override
-    public String getAccountDisplayName(String password, int user, int contextId, int accountId) {
+    public String getAccountDisplayName(final Session session, final int user, final int contextId, final int accountId) {
         String displayName = "";
         try {
-            OAuthAccount account = oAuthService.getAccount(accountId, password, user, contextId);
+            final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
             displayName = account.getDisplayName();
-        } catch (OXException e) {
+        } catch (final OXException e) {
             LOG.error(e);
         }
         return displayName;

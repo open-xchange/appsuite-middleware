@@ -164,7 +164,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         /*
          * Get account by identifier
          */
-        final OAuthAccount account = oAuthService.getAccount(Tools.getUnsignedInteger(accountId), secret( session ), session.getUserId(), session.getContextId());
+        final OAuthAccount account = oAuthService.getAccount(Tools.getUnsignedInteger(accountId), session, session.getUserId(), session.getContextId());
         final String serviceId = account.getMetaData().getId();
         /*
          * Generate UUID

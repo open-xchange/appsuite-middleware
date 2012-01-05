@@ -50,9 +50,7 @@ package com.openexchange.halo.linkedin;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -69,7 +67,7 @@ import com.openexchange.user.UserService;
 
 public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implements HaloContactDataSource {
 
-	public LinkedinProfileDataSource(ServiceLookup serviceLookup) {
+	public LinkedinProfileDataSource(final ServiceLookup serviceLookup) {
 		this.serviceLookup = serviceLookup;
 	}
 
@@ -79,41 +77,46 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
 	}
 
 	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
-		String password = session.getPassword();
-		int uid = session.getUserId();
-		int cid = session.getContextId();
+	public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
+		final String password = session.getPassword();
+		final int uid = session.getUserId();
+		final int cid = session.getContextId();
 
-		Contact contact = query.getContact();
-		ContactInterfaceDiscoveryService cids = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
-		UserService userService = serviceLookup.getService(UserService.class);
-		ContactEMailCompletor cc = new ContactEMailCompletor(session, cids, userService);
+		final Contact contact = query.getContact();
+		final ContactInterfaceDiscoveryService cids = serviceLookup.getService(ContactInterfaceDiscoveryService.class);
+		final UserService userService = serviceLookup.getService(UserService.class);
+		final ContactEMailCompletor cc = new ContactEMailCompletor(session, cids, userService);
 		cc.complete(contact);
 
-		List<String> email = getEMail(contact);
-		if(email == null || email.isEmpty())
-			throw new OXException(2).setPrefix("HAL-LI").setLogMessage("Need an e-mail address to look up LinkedIn data");
+		final List<String> email = getEMail(contact);
+		if(email == null || email.isEmpty()) {
+            throw new OXException(2).setPrefix("HAL-LI").setLogMessage("Need an e-mail address to look up LinkedIn data");
+        }
 
 
-		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
-		if(accounts.size() == 0)
-			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
+		if(accounts.size() == 0) {
+            throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+        }
 
-		OAuthAccount linkedinAccount = accounts.get(0);
-		JSONObject json = getLinkedinService().getFullProfileByEMail(email, password, uid, cid, linkedinAccount.getId());
-		AJAXRequestResult result = new AJAXRequestResult();
+		final OAuthAccount linkedinAccount = accounts.get(0);
+		final JSONObject json = getLinkedinService().getFullProfileByEMail(email, session, uid, cid, linkedinAccount.getId());
+		final AJAXRequestResult result = new AJAXRequestResult();
 		result.setResultObject(json, "json");
 		return result;
 	}
 
-	private List<String> getEMail(Contact queryContact) {
-		List<String> emails = new ArrayList<String>(3);
-		if(queryContact.containsEmail1())
-			emails.add(queryContact.getEmail1());
-		if(queryContact.containsEmail2())
-			emails.add(queryContact.getEmail2());
-		if(queryContact.containsEmail3())
-			emails.add(queryContact.getEmail3());
+	private List<String> getEMail(final Contact queryContact) {
+		final List<String> emails = new ArrayList<String>(3);
+		if(queryContact.containsEmail1()) {
+            emails.add(queryContact.getEmail1());
+        }
+		if(queryContact.containsEmail2()) {
+            emails.add(queryContact.getEmail2());
+        }
+		if(queryContact.containsEmail3()) {
+            emails.add(queryContact.getEmail3());
+        }
 		return emails;
 	}
 }

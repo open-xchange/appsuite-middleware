@@ -69,7 +69,7 @@ public class AccountParser {
         super();
     }
 
-    public static OAuthAccount parse(final JSONObject accountJSON) throws OXException, JSONException {
+    public static OAuthAccount parse(final JSONObject accountJSON, int user, int contextId) throws OXException, JSONException {
         try {
             final DefaultOAuthAccount account = new DefaultOAuthAccount();
 
@@ -88,7 +88,7 @@ public class AccountParser {
             if (accountJSON.hasAndNotNull(AccountField.SERVICE_ID.getName())) {
                 final String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
                 final OAuthServiceMetaDataRegistry registry = ServiceRegistry.getInstance().getService(OAuthService.class, true).getMetaDataRegistry();
-                account.setMetaData(registry.getService(serviceId));
+                account.setMetaData(registry.getService(serviceId, user, contextId));
             }
 
             return account;

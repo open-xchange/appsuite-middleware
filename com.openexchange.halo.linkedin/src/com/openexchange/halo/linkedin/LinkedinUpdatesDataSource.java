@@ -49,9 +49,7 @@
 package com.openexchange.halo.linkedin;
 
 import java.util.List;
-
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -64,23 +62,24 @@ import com.openexchange.tools.session.ServerSession;
 public class LinkedinUpdatesDataSource extends AbstractLinkedinDataSource
 		implements HaloContactDataSource {
 
-	public LinkedinUpdatesDataSource(ServiceLookup lookup) {
+	public LinkedinUpdatesDataSource(final ServiceLookup lookup) {
 		setServiceLookup(lookup);
 	}
 
 	@Override
-	public AJAXRequestResult investigate(HaloContactQuery query, AJAXRequestData req, ServerSession session) throws OXException {
-		String password = session.getPassword();
-		int uid = session.getUserId();
-		int cid = session.getContextId();
+	public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
+		final String password = session.getPassword();
+		final int uid = session.getUserId();
+		final int cid = session.getContextId();
 
-		List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", password, uid, cid);
-		if(accounts.size() == 0)
-			throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+		final List<OAuthAccount> accounts = getOauthService().getAccounts("com.openexchange.socialplugin.linkedin", session, uid, cid);
+		if(accounts.size() == 0) {
+            throw new OXException(1).setPrefix("HAL-LI").setLogMessage("Need at least 1 LinkedIn account");
+        }
 
-		OAuthAccount linkedinAccount = accounts.get(0);
-		JSONObject json = getLinkedinService().getNetworkUpdates(password, uid, cid, linkedinAccount.getId());
-		AJAXRequestResult result = new AJAXRequestResult();
+		final OAuthAccount linkedinAccount = accounts.get(0);
+		final JSONObject json = getLinkedinService().getNetworkUpdates(session, uid, cid, linkedinAccount.getId());
+		final AJAXRequestResult result = new AJAXRequestResult();
 		result.setResultObject(json, "json");
 		return result;
 	}
