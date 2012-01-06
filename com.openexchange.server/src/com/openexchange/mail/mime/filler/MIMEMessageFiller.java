@@ -739,7 +739,7 @@ public class MIMEMessageFiller {
          * Check embedded images
          */
         final boolean embeddedImages;
-        if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+        if (sendMultipartAlternative || mail.getContentType().startsWith("text/htm")) {
             /*
              * Check for referenced images (by cid oder locally available)
              */
@@ -899,8 +899,8 @@ public class MIMEMessageFiller {
         /*
          * Create a non-multipart message
          */
-        if (mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-            final boolean isPlainText = mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_PLAIN);
+        if (mail.getContentType().startsWith("text/")) {
+            final boolean isPlainText = mail.getContentType().startsWith(MIMETypes.MIME_TEXT_PLAIN);
             if (mail.getContentType().getCharsetParameter() == null) {
                 mail.getContentType().setCharsetParameter(charset);
             }
