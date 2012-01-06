@@ -745,7 +745,7 @@ public class MIMEMessageFiller {
              */
             embeddedImages = !images.isEmpty() || MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content);
         } else {
-            content = dropImages(content);
+            content = dropImages(content, false);
             embeddedImages = false;
         }
         /*
