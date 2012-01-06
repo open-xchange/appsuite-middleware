@@ -4,6 +4,7 @@
  - Fix for bug 21118: Keeping character reference entities properly
  - Fix for bug 21071: Fixed deletion of POP3 account
  - Fix for bug 20979: Perform a compare-and-set update when storing user settings
+ - Fix for bug 21110: Adding "From" to recipients on reply-all action
 
 * 2012-01-05 - marcus.klein@open-xchange.com
 
