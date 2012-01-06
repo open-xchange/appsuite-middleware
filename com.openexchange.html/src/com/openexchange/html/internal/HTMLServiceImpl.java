@@ -463,8 +463,8 @@ public final class HTMLServiceImpl implements HTMLService {
         if (null != confName && !confName.endsWith(".properties")) {
             confName += ".properties";
         }
-        String html = replaceHexEntities(htmlContent);
-        html = replaceHexNbsp(html);
+        final String html = replaceHexEntities(htmlContent);
+        // html = replaceHexNbsp(html);
         final FilterJerichoHandler handler;
         {
             final String definition = null == confName ? null : getConfiguration().getText(confName);

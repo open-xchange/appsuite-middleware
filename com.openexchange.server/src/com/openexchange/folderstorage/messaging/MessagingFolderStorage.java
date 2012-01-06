@@ -297,18 +297,19 @@ public final class MessagingFolderStorage implements FolderStorage {
 
             final DefaultMessagingFolder dmf = new DefaultMessagingFolder();
             dmf.setExists(false);
-            dmf.setParentId(mfi.getFullname());
+            final String parentId = mfi.getFullname();
+            dmf.setParentId(parentId);
             // Other
             dmf.setName(folder.getName());
             dmf.setSubscribed(folder.isSubscribed());
             // Permissions
+            final Session session = storageParameters.getSession();
+            if (null == session) {
+                throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
+            }
             final Permission[] permissions = folder.getPermissions();
             if (null != permissions && permissions.length > 0) {
                 final MessagingPermission[] messagingPermissions = new MessagingPermission[permissions.length];
-                final Session session = storageParameters.getSession();
-                if (null == session) {
-                    throw FolderExceptionErrorMessage.MISSING_SESSION.create(new Object[0]);
-                }
                 for (int i = 0; i < permissions.length; i++) {
                     final Permission permission = permissions[i];
                     final MessagingPermission dmp = DefaultMessagingPermission.newInstance();
@@ -323,6 +324,41 @@ public final class MessagingFolderStorage implements FolderStorage {
                     messagingPermissions[i] = dmp;
                 }
                 dmf.setPermissions(Arrays.asList(messagingPermissions));
+            } else {
+                if (MessagingFolder.ROOT_FULLNAME.equals(parentId)) {
+                    final MessagingPermission[] messagingPermissions = new MessagingPermission[1];
+                    {
+                        final MessagingPermission dmp = DefaultMessagingPermission.newInstance();
+                        dmp.setEntity(session.getUserId());
+                        dmp.setAllPermissions(
+                            MessagingPermission.MAX_PERMISSION,
+                            MessagingPermission.MAX_PERMISSION,
+                            MessagingPermission.MAX_PERMISSION,
+                            MessagingPermission.MAX_PERMISSION);
+                        dmp.setAdmin(true);
+                        dmp.setGroup(false);
+                        messagingPermissions[0] = dmp;
+                    }
+                    dmf.setPermissions(Arrays.asList(messagingPermissions));
+                } else {
+                    final MessagingFolder parent = accountAccess.getFolderAccess().getFolder(parentId);
+                    final List<MessagingPermission> parentPermissions = parent.getPermissions();
+                    final MessagingPermission[] messagingPermissions = new MessagingPermission[parentPermissions.size()];
+                    int i = 0;
+                    for (final MessagingPermission parentPerm : parentPermissions) {
+                        final MessagingPermission dmp = DefaultMessagingPermission.newInstance();
+                        dmp.setEntity(parentPerm.getEntity());
+                        dmp.setAllPermissions(
+                            parentPerm.getFolderPermission(),
+                            parentPerm.getReadPermission(),
+                            parentPerm.getWritePermission(),
+                            parentPerm.getDeletePermission());
+                        dmp.setAdmin(parentPerm.isAdmin());
+                        dmp.setGroup(parentPerm.isGroup());
+                        messagingPermissions[i++] = dmp;
+                    }
+                    dmf.setPermissions(Arrays.asList(messagingPermissions));
+                }
             }
 
             final String fullname = accountAccess.getFolderAccess().createFolder(dmf);

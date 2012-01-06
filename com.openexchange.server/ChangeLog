@@ -3,6 +3,12 @@
  - Fix for bug 21125: Lowered strictness of redundant recurrence check
  - Fix for bug 21127: Skip intermediate Latin-1 conversion for inline encoded binary property values
 
+* 2012-01-06 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21116: Lowered log level to an appropriate level
+ - Fix for bug 21118: Keeping character reference entities properly
+ - Fix for bug 21071: Fixed deletion of POP3 account
+
 * 2012-01-05 - marcus.klein@open-xchange.com
 
  - Fix for bug 18841: Fix for bug 18841: Descriptions of InfoStore items are formatted into HTML before filling them into the template.
