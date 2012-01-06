@@ -728,7 +728,7 @@ public class MIMEMessageFiller {
         /*
          * Check for with-source images
          */
-        final String content;
+        String content;
         final Map<String, SourcedImage> images;
         {
             final StringBuilder sb = new StringBuilder((String) textBodyPart.getContent());
@@ -739,14 +739,13 @@ public class MIMEMessageFiller {
          * Check embedded images
          */
         final boolean embeddedImages;
-        if (!images.isEmpty()) {
-            embeddedImages = true;
-        } else if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
+        if (sendMultipartAlternative || mail.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
             /*
              * Check for referenced images (by cid oder locally available)
              */
-            embeddedImages = MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content);
+            embeddedImages = !images.isEmpty() || MIMEMessageUtility.hasEmbeddedImages(content) || MIMEMessageUtility.hasReferencedLocalImages(content);
         } else {
+            content = dropImages(content);
             embeddedImages = false;
         }
         /*
@@ -890,29 +889,6 @@ public class MIMEMessageFiller {
                 }
             }
             /*
-             * Attach forwarded messages
-             */
-            // if (isAttachmentForward) {
-            // if (primaryMultipart == null) {
-            // primaryMultipart = new MimeMultipart();
-            // }
-            // final int count = mail.getEnclosedCount();
-            // final MailMessage[] refMails = mail.getReferencedMails();
-            // final StringBuilder sb = new StringBuilder(32);
-            // final ByteArrayOutputStream out = new
-            // UnsynchronizedByteArrayOutputStream();
-            // for (final MailMessage refMail : refMails) {
-            // out.reset();
-            // sb.setLength(0);
-            // refMail.writeTo(out);
-            // addNestedMessage(primaryMultipart, new DataHandler(new
-            // MessageDataSource(out.toByteArray(),
-            // MIMETypes.MIME_MESSAGE_RFC822)), sb.append(
-            // refMail.getSubject().replaceAll("\\p{Blank}+",
-            // "_")).append(".eml").toString());
-            // }
-            // }
-            /*
              * Finally set multipart
              */
             if (primaryMultipart != null) {
@@ -934,14 +910,34 @@ public class MIMEMessageFiller {
                     /*
                      * Convert HTML content to regular text (preserving links)
                      */
-                    mailText =
-                        performLineFolding(
-                            htmlService.html2text(htmlService.getConformHTML(content, charset), true),
-                            usm.getAutoLinebreak());
-                    // mailText =
-                    // performLineFolding(getConverter().convertWithQuotes
-                    // ((String) mail.getContent()), false,
-                    // usm.getAutoLinebreak());
+                    final boolean isHtml;
+                    final String text;
+                    {
+                        final String plainText = textBodyPart.getPlainText();
+                        if (null == plainText) {
+                            isHtml = true;
+                            /*-
+                             * Expect HTML content
+                             *
+                             * Well-formed HTML
+                             */
+                            final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
+                            text = wellFormedHTMLContent;
+                        } else {
+                            isHtml = false;
+                            text = plainText;
+                        }
+                    }
+                    /*
+                     * Define text content
+                     */
+                    if (text == null || text.length() == 0) {
+                        mailText = "";
+                    } else if (isHtml) {
+                        mailText = performLineFolding(htmlService.html2text(text, true), usm.getAutoLinebreak());
+                    } else {
+                        mailText = performLineFolding(text, usm.getAutoLinebreak());
+                    }
                 } else {
                     mailText = htmlService.getConformHTML(content, mail.getContentType().getCharsetParameter());
                 }
@@ -1400,6 +1396,43 @@ public class MIMEMessageFiller {
         html.setHeader(MessageHeaders.HDR_MIME_VERSION, VERSION_1_0);
         html.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
         return html;
+    }
+
+    private static final Pattern PATTERN_IMG = Pattern.compile("<img[^>]*/?>", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_IMG_ALT = Pattern.compile("alt=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Drops referenced local images in passed HTML content.
+     *
+     * @param htmlContent The HTML content whose &lt;img&gt; tags must be dropped
+     * @param considerAlt Whether the <code>"alt"</code> attribute of look-up &lt;img&gt; tag shall be maintained if present
+     * @return the replaced HTML content
+     */
+    protected final static String dropImages(final String htmlContent, final boolean considerAlt) {
+        final Matcher m = PATTERN_IMG.matcher(htmlContent);
+        if (!m.find()) {
+            return htmlContent;
+        }
+        final MatcherReplacer mr = new MatcherReplacer(m, htmlContent);
+        final StringBuilder sb = new StringBuilder(htmlContent.length());
+        if (considerAlt) {
+            Matcher tmp = null;
+            do {
+                final String alternative;
+                {
+                    tmp = PATTERN_IMG_ALT.matcher(m.group());
+                    alternative = tmp.find() ? tmp.group(1) : null;
+                }
+                mr.appendLiteralReplacement(sb, null == alternative ? "" : " " + alternative + " ");
+            } while (m.find());
+        } else {
+            do {
+                mr.appendLiteralReplacement(sb, "");
+            } while (m.find());
+        }
+        mr.appendTail(sb);
+        return sb.toString();
     }
 
     /**
