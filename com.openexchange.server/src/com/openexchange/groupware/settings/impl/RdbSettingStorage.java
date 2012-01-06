@@ -68,6 +68,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class implements the storage for settings using a relational database.
@@ -94,6 +95,12 @@ public class RdbSettingStorage extends SettingStorage {
      */
     private static final String UPDATE_SETTING = "UPDATE user_setting "
         + "SET value=? WHERE cid=? AND user_id=? AND path_id=?";
+
+    /**
+     * SQL statement for compare-and-set updating one specific user setting.
+     */
+    private static final String UPDATE_SETTING_CAS = "UPDATE user_setting "
+        + "SET value=? WHERE cid=? AND user_id=? AND path_id=? AND value=?";
 
     /** SQL statement for checking if a setting for a user exists. */
     private static final String SETTING_EXISTS = "SELECT COUNT(value) FROM user_setting WHERE cid=? AND user_id=? AND path_id=? FOR UPDATE";
@@ -219,6 +226,8 @@ public class RdbSettingStorage extends SettingStorage {
         }
     }
 
+    private static final int MAX_RETRY = 3;
+
     /**
      * Internally saves a setting into the database.
      * @param con a writable database connection.
@@ -227,10 +236,9 @@ public class RdbSettingStorage extends SettingStorage {
      */
     private void saveInternal2(final Connection con, final Setting setting)
         throws OXException {
-        saveInternal2(con, setting, 0);
+        //saveInternal2(con, setting, 0);
+        saveInternalCAS(con, setting, MAX_RETRY);
     }
-
-    private static final int MAX_RETRY = 3;
 
     /**
      * Internally saves a setting into the database.
@@ -278,6 +286,110 @@ public class RdbSettingStorage extends SettingStorage {
         }
         if (retry) {
             saveInternal2(con, setting, retryCount + 1);
+        }
+    }
+
+    /**
+     * Internally saves a setting into the database.
+     * @param con a writable database connection.
+     * @param setting setting to store.
+     * @param retryCount The current retry count
+     * @throws OXException if storing fails.
+     */
+    private void saveInternalCAS(final Connection con, final Setting setting, final int retryCount) throws OXException {
+        try {
+            /*
+             * Start
+             */
+            String val = null;
+            int retry = 0;
+            boolean tryInsert = false;
+            while (val == null && retry++ < retryCount) {
+                /*
+                 * Try to perform a compare-and-set UPDATE
+                 */
+                String cur;
+                do {
+                    cur = performSelect(setting, con);
+                    if (cur == null) {
+                        if (tryInsert) {
+                            if (performInsert(setting, con)) {
+                                return;
+                            }
+                            tryInsert = false;
+                        }
+                        cur = performSelect(setting, con);
+                    }
+                } while (!compareAndSet(setting, cur, con));
+                val = setting.getSingleValue().toString();
+                /*
+                 * Retry...
+                 */
+            }
+            /*
+             * Return value
+             */
+            return;
+        } catch (final SQLException e) {
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
+        }
+    }
+
+    private boolean compareAndSet(final Setting setting, final String expected, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(UPDATE_SETTING_CAS);
+            int pos = 1;
+            stmt.setString(pos++, setting.getSingleValue().toString());
+            stmt.setInt(pos++, ctxId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos++, setting.getId());
+            stmt.setString(pos, expected);
+            final int result = stmt.executeUpdate();
+            return (result > 0);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private boolean performInsert(final Setting setting, final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(INSERT_SETTING);
+            int pos = 1;
+            stmt.setString(pos++, setting.getSingleValue().toString());
+            stmt.setInt(pos++, ctxId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos, setting.getId());
+            try {
+                final int result = stmt.executeUpdate();
+                return (result > 0);
+            } catch (final SQLException e) {
+                return false;
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private String performSelect(final Setting setting, final Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(SELECT_VALUE);
+            int pos = 1;
+            stmt.setInt(pos++, ctxId);
+            stmt.setInt(pos++, userId);
+            stmt.setInt(pos, setting.getId());
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return result.getString(1);
+            }
+            return null;
+        } catch (final SQLException e) {
+            throw SettingExceptionCodes.SQL_ERROR.create(e);
+        } finally {
+            closeSQLStuff(result, stmt);
         }
     }
 
