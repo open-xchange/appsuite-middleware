@@ -762,12 +762,22 @@ public final class VirtualFolderStorage implements FolderStorage {
             final List<Folder> folders = new ArrayList<Folder>(pairs.size());
             for (final Pair pair : pairs) {
                 final String folderId = pair.id;
+<<<<<<< HEAD
                 final FolderStorage fs = VirtualFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
                 if (null == fs) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
                 }
                 checkOpenedStorage(fs, false, openStorages, storageParameters);
                 folders.add(fs.getFolder(realTreeId, folderId, storageParameters));
+=======
+                final FolderStorage realFolderStorage =
+                    VirtualFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                if (null == realFolderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
+                checkOpenedStorage(realFolderStorage, false, openStorages, storageParameters);
+                folders.add(realFolderStorage.getFolder(realTreeId, folderId, storageParameters));
+>>>>>>> 5d3eed2f6c85fc5af86616b69af14ebfb621f9df
             }
             for (final FolderStorage fs : openStorages) {
                 fs.commitTransaction(storageParameters);
@@ -784,7 +794,6 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-
     }
 
     private static void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages, final StorageParameters storageParameters) throws OXException {
