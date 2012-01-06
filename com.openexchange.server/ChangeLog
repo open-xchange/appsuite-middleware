@@ -2,6 +2,7 @@
 
  - Fix for bug 21116: Lowered log level to an appropriate level
  - Fix for bug 21118: Keeping character reference entities properly
+ - Fix for bug 21071: Fixed deletion of POP3 account
 
 * 2012-01-05 - marcus.klein@open-xchange.com
 

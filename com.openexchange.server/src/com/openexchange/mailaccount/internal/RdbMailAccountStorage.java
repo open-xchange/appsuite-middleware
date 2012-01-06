@@ -64,6 +64,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -451,6 +452,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.NO_DEFAULT_DELETE.create(I(user), I(cid));
         }
         dropPOP3StorageFolders(user, cid);
+        final boolean restoreConstraints = disableForeignKeyChecks(con);
         PreparedStatement stmt = null;
         try {
             // A POP3 account?
@@ -501,6 +503,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+            if (restoreConstraints) {
+                try {
+                    enableForeignKeyChecks(con);
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
+                }
+            }
         }
     }
 
@@ -2135,6 +2144,29 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     /*-
      * ++++++++++++++++++++++++++++++++++++ UTILITY METHOD(S) ++++++++++++++++++++++++++++++++++++
      */
+
+    private static boolean disableForeignKeyChecks(final Connection con) {
+        if (null == con) {
+            return false;
+        }
+        try {
+            final Statement createStatement = con.createStatement();
+            createStatement.execute("SET foreign_key_checks = 0");
+            createStatement.close();
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+    
+    private static void enableForeignKeyChecks(final Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
+        final Statement createStatement = con.createStatement();
+        createStatement.execute("SET foreign_key_checks = 1");
+        createStatement.close();
+    }
 
     private static void setOptionalString(final PreparedStatement stmt, final int pos, final String string) throws SQLException {
         if (null == string) {
