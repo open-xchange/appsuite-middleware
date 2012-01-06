@@ -300,7 +300,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleCharacterReference(final CharacterReference characterReference) {
         if (skipLevel == 0) {
-            htmlBuilder.append(CharacterReference.decode(characterReference));
+            htmlBuilder.append(CharacterReference.getDecimalCharacterReferenceString(characterReference.getChar()));
         }
     }
 
