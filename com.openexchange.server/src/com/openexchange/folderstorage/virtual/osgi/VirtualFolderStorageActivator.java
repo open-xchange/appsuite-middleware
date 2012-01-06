@@ -130,7 +130,7 @@ public class VirtualFolderStorageActivator extends HousekeepingActivator {
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>();
             dictionary.put("tree", FolderStorage.ALL_TREE_ID);
-            registerService(FolderStorage.class, new VirtualFolderStorage(), dictionary);
+            registerService(FolderStorage.class, VirtualFolderStorage.getInstance(), dictionary);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;

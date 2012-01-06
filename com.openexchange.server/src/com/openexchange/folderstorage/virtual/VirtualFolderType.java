@@ -64,10 +64,21 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
  */
 public final class VirtualFolderType implements FolderType {
 
+    private static final VirtualFolderType INSTANCE = new VirtualFolderType();
+
+    /**
+     * Gets the instance.
+     * 
+     * @return The instance
+     */
+    public static VirtualFolderType getInstance() {
+        return INSTANCE;
+    }
+
     /**
      * Initializes a new {@link VirtualFolderType}.
      */
-    public VirtualFolderType() {
+    private VirtualFolderType() {
         super();
     }
 

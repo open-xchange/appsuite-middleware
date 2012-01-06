@@ -52,8 +52,10 @@ package com.openexchange.folderstorage.virtual;
 import static com.openexchange.folderstorage.internal.Tools.getUnsignedInteger;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -65,9 +67,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.concurrent.CallerRunsCompletionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
@@ -79,11 +81,11 @@ import com.openexchange.folderstorage.cache.CacheServiceRegistry;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
+import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.performers.InstanceStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.SessionStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.StorageParametersProvider;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.outlook.OutlookId;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -97,6 +99,7 @@ import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link VirtualFolderStorage} - The virtual folder storage.
@@ -104,6 +107,17 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class VirtualFolderStorage implements FolderStorage {
+
+    private static final VirtualFolderStorage INSTANCE = new VirtualFolderStorage();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static VirtualFolderStorage getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * The folder tree identifier for EAS folder list.
@@ -136,9 +150,9 @@ public final class VirtualFolderStorage implements FolderStorage {
     /**
      * Initializes a new {@link VirtualFolderStorage}.
      */
-    public VirtualFolderStorage() {
+    private VirtualFolderStorage() {
         super();
-        folderType = new VirtualFolderType();
+        folderType = VirtualFolderType.getInstance();
         realTreeId = REAL_TREE_ID;
     }
 
@@ -634,7 +648,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             final String[] ids = memoryTree.getSubfolderIds(locale, parentId, Collections.<String[]> emptyList());
             final SortableId[] ret = new SortableId[ids.length];
             for (int i = 0; i < ids.length; i++) {
-                ret[i] = new OutlookId(ids[i], i, null);
+                ret[i] = new VirtualId(ids[i], i, null);
             }
             return ret;
         }
@@ -709,11 +723,126 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters params) throws OXException {
-        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
+        final User user = params.getUser();
+        final Locale locale = user.getLocale();
+        /*
+         * Check memory table
+         */
+        final ServerSession session = getServerSession(params);
+        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
+        final MemoryTree memoryTree = memoryTable.getTree(unsignedInt(treeId), session);
+        if (null == memoryTree) {
+            throw FolderExceptionErrorMessage.TREE_NOT_FOUND.create(treeId);
+        }
+        /*
+         * Get sorted
+         */
+        final List<Pair> list = new ArrayList<Pair>(32);
+        traverse(ROOT_ID, memoryTree, locale, list);
+        Collections.sort(list, new PairComparator(locale));
+        /*
+         * Get associated folders
+         */
+        final List<Folder> folders = loadFolderFor(list, params);
+        final List<SortableId> ret = new ArrayList<SortableId>(folders.size());
+        final String cts = contentType.toString();
+        final List<ContentType> contentTypes = Collections.singletonList(contentType);
+        int index = 0;
+        for (final Folder folder : folders) {
+            if (cts.equals(folder.getContentType().toString()) && CalculatePermission.calculate(folder, session, contentTypes).isVisible()) {
+                ret.add(new VirtualId(folder.getID(), index++, folder.getLocalizedName(locale)));
+            }
+        }
+        return ret.toArray(new SortableId[ret.size()]);
+    }
+
+    private List<Folder> loadFolderFor(final List<Pair> pairs, final StorageParameters storageParameters) throws OXException {
+        final List<FolderStorage> openStorages = new ArrayList<FolderStorage>(4);
+        try {
+            final List<Folder> folders = new ArrayList<Folder>(pairs.size());
+            for (final Pair pair : pairs) {
+                final String folderId = pair.id;
+                final FolderStorage fs = VirtualFolderStorageRegistry.getInstance().getFolderStorage(realTreeId, folderId);
+                if (null == fs) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
+                checkOpenedStorage(fs, false, openStorages, storageParameters);
+                folders.add(fs.getFolder(realTreeId, folderId, storageParameters));
+            }
+            for (final FolderStorage fs : openStorages) {
+                fs.commitTransaction(storageParameters);
+            }
+            return folders;
+        } catch (final OXException e) {
+            for (final FolderStorage fs : openStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw e;
+        } catch (final Exception e) {
+            for (final FolderStorage fs : openStorages) {
+                fs.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
+    }
+
+    private static void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages, final StorageParameters storageParameters) throws OXException {
+        if (openedStorages.contains(checkMe) || !checkMe.startTransaction(storageParameters, modify)) {
+            return;
+        }
+        openedStorages.add(checkMe);
+    }
+
+    private static void traverse(final String parentId, final MemoryTree memoryTree, final Locale locale, final List<Pair> list) {
+        final String[] ids = memoryTree.getSubfolderIds(locale, parentId, Collections.<String[]> emptyList());
+        for (final String id : ids) {
+            final Pair pair = new Pair(id, memoryTree.getFolderName(id));
+            list.add(pair);
+            traverse(id, memoryTree, locale, list);
+        }
     }
 
     private static int unsignedInt(final String sInteger) {
         return getUnsignedInteger(sInteger);
     }
+
+    private ServerSession getServerSession(final StorageParameters params) throws OXException {
+        final Session s = params.getSession();
+        if (s instanceof ServerSession) {
+            return (ServerSession) s;
+        }
+        return new ServerSessionAdapter(s);
+    }
+
+    private static final class Pair {
+
+        final String id;
+        final String name;
+
+        protected Pair(final String id, final String name) {
+            super();
+            this.id = id;
+            this.name = name;
+        }
+
+    }
+
+    private static final class PairComparator implements Comparator<Pair> {
+
+        private final Collator collator;
+
+        protected PairComparator(final Locale locale) {
+            super();
+            collator = Collator.getInstance(locale == null ? Locale.US : locale);
+            collator.setStrength(Collator.SECONDARY);
+        }
+
+        @Override
+        public int compare(final Pair o1, final Pair o2) {
+            return collator.compare(o1.name, o2.name);
+        }
+
+    } // End of PairComparator
 
 }
