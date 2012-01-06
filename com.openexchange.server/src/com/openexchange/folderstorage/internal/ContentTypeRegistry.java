@@ -64,6 +64,8 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageComparator;
+import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
+import com.openexchange.folderstorage.virtual.VirtualFolderType;
 
 /**
  * {@link ContentTypeRegistry} - A registry for a tree's content types.
@@ -212,6 +214,9 @@ public final class ContentTypeRegistry implements ContentTypeDiscoveryService {
     public FolderStorage getFolderStorageByContentType(final String treeId, final ContentType contentType) {
         final Element element = getElementForTreeId(treeId, false);
         if (null == element) {
+            if (VirtualFolderType.getInstance().servesTreeId(treeId)) {
+                return VirtualFolderStorage.getInstance();
+            }
             return null;
         }
         // Look-up in general-purpose folder storages
