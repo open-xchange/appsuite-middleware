@@ -86,6 +86,7 @@ public class AggregatedCollection extends AbstractCarddavCollection {
 
     }
 
+    @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         State state = factory.getState();
         List<Contact> contacts;
@@ -109,6 +110,7 @@ public class AggregatedCollection extends AbstractCarddavCollection {
     }
 
 
+    @Override
     public String getDisplayName() throws WebdavProtocolException {
         return "Contacts";
     }

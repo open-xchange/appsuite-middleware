@@ -112,10 +112,12 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
         super.endRequest(status);
     }
 
+    @Override
     public CarddavProtocol getProtocol() {
         return PROTOCOL;
     }
 
+    @Override
     public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
         if (url.size() > 1) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, 404);
@@ -141,6 +143,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
         return url.size() == 0;
     }
 
+    @Override
     public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
         if (url.size() == 2) {
             return mixin(((AggregatedCollection) resolveCollection(url.parent())).getChild(url.name()));

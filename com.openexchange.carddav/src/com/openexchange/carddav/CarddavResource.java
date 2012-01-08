@@ -142,12 +142,12 @@ public class CarddavResource extends AbstractResource {
 
     @Override
     protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-
+        // Empty
     }
 
     @Override
     protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
-
+        // Empty
     }
 
     @Override
@@ -201,9 +201,10 @@ public class CarddavResource extends AbstractResource {
 
     @Override
     public void setCreationDate(Date date) throws WebdavProtocolException {
-
+        // Empty
     }
 
+    @Override
     public void create() throws WebdavProtocolException {
         // save Contact
         try {
@@ -214,6 +215,7 @@ public class CarddavResource extends AbstractResource {
         }
     }
 
+    @Override
     public void delete() throws WebdavProtocolException {
         // delete contact
         try {
@@ -223,10 +225,12 @@ public class CarddavResource extends AbstractResource {
         }
     }
 
+    @Override
     public boolean exists() throws WebdavProtocolException {
         return exists;
     }
 
+    @Override
     public InputStream getBody() throws WebdavProtocolException {
         // generate VCard File
         String outputString = generateVCard();
@@ -265,18 +269,22 @@ public class CarddavResource extends AbstractResource {
         return customAttributes.matcher(outputString).replaceAll("");
     }
 
+    @Override
     public String getContentType() throws WebdavProtocolException {
         return "text/vcard";
     }
 
+    @Override
     public Date getCreationDate() throws WebdavProtocolException {
         return contact.getCreationDate();
     }
 
+    @Override
     public String getDisplayName() throws WebdavProtocolException {
         return contact.getDisplayName();
     }
 
+    @Override
     public String getETag() throws WebdavProtocolException {
         if (!exists) {
             return "";
@@ -284,40 +292,49 @@ public class CarddavResource extends AbstractResource {
         return "http://www.open-xchange.com/carddav/" + contact.getObjectID() + "_" + contact.getLastModified().getTime();
     }
 
+    @Override
     public String getLanguage() throws WebdavProtocolException {
         return null;
     }
 
+    @Override
     public Date getLastModified() throws WebdavProtocolException {
         return contact.getLastModified();
     }
 
+    @Override
     public Long getLength() throws WebdavProtocolException {
         // generate vcard file and count bytes
         String outputString = generateVCard();
         return new Long(outputString.getBytes().length);
     }
 
+    @Override
     public WebdavLock getLock(String token) throws WebdavProtocolException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getLocks() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
+    @Override
     public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
         return null;
     }
 
+    @Override
     public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
         return null;
     }
 
+    @Override
     public String getSource() throws WebdavProtocolException {
         return null;
     }
 
+    @Override
     public WebdavPath getUrl() {
         if (url == null) {
             return new WebdavPath("UNSET");
@@ -325,10 +342,12 @@ public class CarddavResource extends AbstractResource {
         return url;
     }
 
+    @Override
     public void lock(WebdavLock lock) throws WebdavProtocolException {
 
     }
 
+    @Override
     public void save() throws WebdavProtocolException {
         try {
             factory.getContactInterface().updateContactObject(contact, parent.getStandardFolder(), contact.getLastModified());
@@ -338,26 +357,32 @@ public class CarddavResource extends AbstractResource {
         }
     }
 
+    @Override
     public void setContentType(String type) throws WebdavProtocolException {
 
     }
 
+    @Override
     public void setDisplayName(String displayName) throws WebdavProtocolException {
         contact.setDisplayName(displayName);
     }
 
+    @Override
     public void setLanguage(String language) throws WebdavProtocolException {
 
     }
 
+    @Override
     public void setLength(Long length) throws WebdavProtocolException {
 
     }
 
+    @Override
     public void setSource(String source) throws WebdavProtocolException {
 
     }
 
+    @Override
     public void unlock(String token) throws WebdavProtocolException {
 
     }
