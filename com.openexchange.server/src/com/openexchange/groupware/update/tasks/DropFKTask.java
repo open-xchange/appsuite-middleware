@@ -54,8 +54,12 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -92,23 +96,67 @@ public final class DropFKTask extends UpdateTaskAdapter {
         final Connection con = dbService.getForUpdateTask(cid);
         try {
             con.setAutoCommit(false);
-            final List<String> tables = Arrays.asList(
-                "pop3_storage_deleted",
-                "pop3_storage_ids",
-                "user_mail_account_properties",
-                "user_mail_account",
-                "user_transport_account_properties",
-                "user_transport_account",
-                "virtualBackupPermission",
-                "virtualBackupSubscription",
-                "virtualBackupTree",
-                "virtualPermission",
-                "virtualSubscription",
-                "virtualTree"
-            );
-            for (final String table : tables) {
-                handleTable(table, con);
+            con.setAutoCommit(false);
+
+            /*
+             * Drop foreign keys
+             */
+            {
+                final List<String> tables =
+                    Arrays.asList(
+                        "pop3_storage_deleted",
+                        "pop3_storage_ids",
+                        "user_mail_account_properties",
+                        "user_mail_account",
+                        "user_transport_account_properties",
+                        "user_transport_account",
+                        "virtualBackupPermission",
+                        "virtualBackupSubscription",
+                        "virtualBackupTree",
+                        "virtualPermission",
+                        "virtualSubscription",
+                        "virtualTree");
+                for (final String table : tables) {
+                    dropForeignKeysFrom(table, con);
+                }
             }
+            /*
+             * Check indexes
+             */
+            {
+                final Map<String, List<List<String>>> indexes = new LinkedHashMap<String, List<List<String>>>();
+
+                List<List<String>> indexList = new ArrayList<List<String>>(4);
+                indexList.add(Arrays.asList("cid", "tree", "user", "parentId"));
+                indexList.add(Arrays.asList("cid", "tree", "user", "shadow"));
+                indexList.add(Arrays.asList("cid", "user"));
+                indexList.add(Arrays.asList("cid", "modifiedBy"));
+                indexes.put("virtualTree", indexList);
+
+                indexList = new ArrayList<List<String>>(1);
+                indexList.add(Arrays.asList("cid", "tree", "user", "folderId"));
+                indexes.put("virtualPermission", indexList);
+
+                indexList = new ArrayList<List<String>>(4);
+                indexList.add(Arrays.asList("cid", "tree", "user", "parentId"));
+                indexList.add(Arrays.asList("cid", "tree", "user", "shadow"));
+                indexList.add(Arrays.asList("cid", "user"));
+                indexList.add(Arrays.asList("cid", "modifiedBy"));
+                indexes.put("virtualTree", indexList);
+
+                indexList = new ArrayList<List<String>>(1);
+                indexList.add(Arrays.asList("cid", "tree", "user", "folderId"));
+                indexes.put("virtualPermission", indexList);
+
+                for (final Entry<String, List<List<String>>> entry : indexes.entrySet()) {
+                    final String table = entry.getKey();
+                    for (final List<String> cols : entry.getValue()) {
+                        checkIndex(table, cols.toArray(new String[cols.size()]), null, con);
+                    }
+                }
+            }
+
+            con.commit();
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -122,7 +170,7 @@ public final class DropFKTask extends UpdateTaskAdapter {
         }
     }
 
-    private void handleTable(final String table, final Connection con) throws SQLException {
+    private void dropForeignKeysFrom(final String table, final Connection con) throws SQLException {
         final List<String> keyNames = Tools.allForeignKey(con, table);
         Statement stmt = null;
         for (final String keyName : keyNames) {
@@ -132,6 +180,12 @@ public final class DropFKTask extends UpdateTaskAdapter {
             } finally {
                 DBUtils.closeSQLStuff(null, stmt);
             }
+        }
+    }
+
+    private void checkIndex(final String table, final String[] columns, final String optName, final Connection con) throws SQLException {
+        if (null == Tools.existsIndex(con, table, columns)) {
+            Tools.createIndex(con, table, optName, columns, false);
         }
     }
 }
