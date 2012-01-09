@@ -423,6 +423,9 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.TasksAddUidColumnTask(),
 
         // Adds UID indexes.
-        new com.openexchange.groupware.update.tasks.CalendarAddUIDIndexTask()
+        new com.openexchange.groupware.update.tasks.CalendarAddUIDIndexTask(),
+
+        // Drops rather needless foreign keys
+        new com.openexchange.groupware.update.tasks.POP3DropFKTask()
     };
 }
