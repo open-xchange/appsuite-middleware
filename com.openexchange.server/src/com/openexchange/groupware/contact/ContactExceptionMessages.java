@@ -124,6 +124,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public static final String NO_CHANGE_PERMISSION_MSG = "You are not allowed to modify contact %1$d in context %2$d.";
 
+    public static final String NO_UID_CHANGE_MSG = "UID of contacts can not be changed.";
+
     public static final String LOAD_OBJECT_FAILED_MSG = "Unable to load objects. Context %1$d User %2$d";
 
     public static final String FEATURE_DISABLED_MSG = "This feature has not been enabled";
