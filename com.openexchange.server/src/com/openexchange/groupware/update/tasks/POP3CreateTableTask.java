@@ -90,9 +90,7 @@ public class POP3CreateTableTask implements UpdateTask {
         		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         		"fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
         		"uid VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        		"PRIMARY KEY (cid, user, id, uidl)," +
-        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," +
-        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" +
+        		"PRIMARY KEY (cid, user, id, uidl)" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
@@ -102,9 +100,7 @@ public class POP3CreateTableTask implements UpdateTask {
         		"user INT4 unsigned NOT NULL," +
         		"id INT4 unsigned NOT NULL," +
         		"uidl VARCHAR(70) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-        		"PRIMARY KEY (cid, user, id, uidl)," +
-        		"FOREIGN KEY (cid, user) REFERENCES user (cid, id)," +
-        		"FOREIGN KEY (cid, user, id) REFERENCES user_mail_account (cid, user, id)" +
+        		"PRIMARY KEY (cid, user, id, uidl)" +
         		") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
