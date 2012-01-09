@@ -148,6 +148,16 @@ public final class DropFKTask extends UpdateTaskAdapter {
                 indexList.add(Arrays.asList("cid", "tree", "user", "folderId"));
                 indexes.put("virtualPermission", indexList);
 
+                indexList = new ArrayList<List<String>>(2);
+                indexList.add(Arrays.asList("cid", "user"));
+                indexList.add(Arrays.asList("cid", "user", "id"));
+                indexes.put("pop3_storage_ids", indexList);
+
+                indexList = new ArrayList<List<String>>(2);
+                indexList.add(Arrays.asList("cid", "user"));
+                indexList.add(Arrays.asList("cid", "user", "id"));
+                indexes.put("pop3_storage_deleted", indexList);
+
                 for (final Entry<String, List<List<String>>> entry : indexes.entrySet()) {
                     final String table = entry.getKey();
                     for (final List<String> cols : entry.getValue()) {
