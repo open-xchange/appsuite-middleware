@@ -239,6 +239,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.folder.Contacts.class,
             com.openexchange.groupware.settings.tree.folder.Infostore.class,
             com.openexchange.groupware.settings.tree.folder.Tasks.class,
+            com.openexchange.groupware.settings.tree.folder.EASFolder.class,
             com.openexchange.groupware.settings.tree.GUI.class,
             com.openexchange.groupware.settings.tree.Identifier.class,
             com.openexchange.groupware.settings.tree.Language.class,
