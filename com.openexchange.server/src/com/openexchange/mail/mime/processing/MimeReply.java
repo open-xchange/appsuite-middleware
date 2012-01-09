@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -239,18 +240,39 @@ public final class MimeReply {
                     recipientAddrs = parseAddressList(hdrVal, true);
                 }
             } else {
-                final String[] replyTo = originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
-                if (MIMEMessageUtility.isEmptyHeader(replyTo)) {
-                    /*
-                     * Set from as recipient
-                     */
-                    recipientAddrs = originalMsg.getFrom();
-                } else {
-                    /*
-                     * Message holds header 'Reply-To'
-                     */
-                    recipientAddrs = QuotedInternetAddress.parseHeader(unfold(replyTo[0]), true);
+                final Set<InternetAddress> tmpSet = new LinkedHashSet<InternetAddress>(4);
+                final boolean fromAdded;
+                {
+                    final String[] replyTo = originalMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
+                    if (MIMEMessageUtility.isEmptyHeader(replyTo)) {
+                        /*
+                         * Set from as recipient
+                         */
+                        tmpSet.addAll(Arrays.asList(originalMsg.getFrom()));
+                        fromAdded = true;
+                    } else {
+                        /*
+                         * Message holds header 'Reply-To'
+                         */
+                        tmpSet.addAll(Arrays.asList(QuotedInternetAddress.parseHeader(unfold(replyTo[0]), true)));
+                        fromAdded = false;
+                    }
                 }
+                if (replyAll) {
+                    /*-
+                     * Check 'Sender', too
+                     * 
+                    final String[] hdr = originalMsg.getHeader("Sender");
+                    if (!MIMEMessageUtility.isEmptyHeader(hdr)) {
+                        tmpSet.addAll(Arrays.asList(QuotedInternetAddress.parseHeader(unfold(hdr[0]), true)));
+                    }
+                     * 
+                     */
+                    if (!fromAdded) {
+                        tmpSet.addAll(Arrays.asList(originalMsg.getFrom()));
+                    }
+                }
+                recipientAddrs = tmpSet.toArray(new InternetAddress[tmpSet.size()]);
             }
             if (replyAll) {
                 /*

@@ -47,59 +47,50 @@
  *
  */
 
-package com.openexchange.folderstorage.virtual;
+package com.openexchange.groupware.settings.tree.folder;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.folderstorage.FolderStorage;
-import com.openexchange.folderstorage.FolderType;
-import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.session.Session;
 
 /**
- * {@link VirtualFolderType} - The virtual folder type.
+ * {@link EASFolder}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderType implements FolderType {
-
-    private static final VirtualFolderType INSTANCE = new VirtualFolderType();
+public class EASFolder implements PreferencesItemService {
 
     /**
-     * Gets the instance.
-     * 
-     * @return The instance
+     * Default constructor.
      */
-    public static VirtualFolderType getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Initializes a new {@link VirtualFolderType}.
-     */
-    private VirtualFolderType() {
+    public EASFolder() {
         super();
     }
 
     @Override
-    public boolean servesFolderId(final String folderId) {
-        // A virtual storage serves every folder ID except null
-        return (null != folderId);
-    }
-
-    private static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
-        FolderStorage.REAL_TREE_ID,
-        OutlookFolderStorage.OUTLOOK_TREE_ID)));
-
-    @Override
-    public boolean servesTreeId(final String treeId) {
-        return !KNOWN_TREES.contains(treeId);
+    public String[] getPath() {
+        return new String[] { "folder", "eas" };
     }
 
     @Override
-    public boolean servesParentId(final String parentId) {
-        return servesFolderId(parentId);
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+            @Override
+            public void getValue(final Session session, final Context ctx,
+                final User user, final UserConfiguration userConfig,
+                final Setting setting) throws OXException {
+                setting.setSingleValue(Boolean.TRUE);
+            }
+        };
     }
-
 }

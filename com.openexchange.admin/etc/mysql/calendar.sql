@@ -32,7 +32,8 @@ CREATE TABLE prg_dates (
     PRIMARY KEY (cid, intfield01),
     INDEX (cid, intfield02),
     INDEX (cid, timestampfield01),
-    INDEX (cid, timestampfield02)
+    INDEX (cid, timestampfield02),
+    INDEX `uidIndex` (cid, uid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE prg_date_rights (
@@ -84,7 +85,11 @@ CREATE TABLE del_dates (
     uid VARCHAR(255),
     organizer VARCHAR(255),
     sequence INT4 UNSIGNED,
-    PRIMARY KEY (cid, intfield01)
+    PRIMARY KEY (cid, intfield01),
+    INDEX (cid, intfield02),
+    INDEX (cid, timestampfield01),
+    INDEX (cid, timestampfield02),
+    INDEX `uidIndex` (cid, uid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE del_dates_members (

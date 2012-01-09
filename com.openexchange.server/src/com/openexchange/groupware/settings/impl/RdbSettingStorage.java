@@ -68,6 +68,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class implements the storage for settings using a relational database.
@@ -90,19 +91,10 @@ public class RdbSettingStorage extends SettingStorage {
         "INSERT INTO user_setting (value,cid,user_id,path_id) VALUES (?,?,?,?)";
 
     /**
-     * SQL statement for updating one specific user setting.
-     */
-    private static final String UPDATE_SETTING = "UPDATE user_setting "
-        + "SET value=? WHERE cid=? AND user_id=? AND path_id=?";
-
-    /**
      * SQL statement for compare-and-set updating one specific user setting.
      */
     private static final String UPDATE_SETTING_CAS = "UPDATE user_setting "
         + "SET value=? WHERE cid=? AND user_id=? AND path_id=? AND value=?";
-
-    /** SQL statement for checking if a setting for a user exists. */
-    private static final String SETTING_EXISTS = "SELECT COUNT(value) FROM user_setting WHERE cid=? AND user_id=? AND path_id=?";
 
     /**
      * Reference to the context.
@@ -296,7 +288,7 @@ public class RdbSettingStorage extends SettingStorage {
             final int result = stmt.executeUpdate();
             return (result > 0);
         } finally {
-            closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 
@@ -316,7 +308,7 @@ public class RdbSettingStorage extends SettingStorage {
                 return false;
             }
         } finally {
-            closeSQLStuff(stmt);
+            DBUtils.closeSQLStuff(stmt);
         }
     }
 
@@ -407,39 +399,6 @@ public class RdbSettingStorage extends SettingStorage {
                 setting.getParent().removeElement(setting);
             }
         }
-    }
-
-    /**
-     * Checks if a setting is already stored in the database.
-     * @param con readonly database connection.
-     * @param userId unique identifier of the user.
-     * @param setting Setting.
-     * @return <code>true</code> if a value for the setting exists in the
-     * database.
-     * @throws OXException if an error occurs.
-     */
-    private boolean settingExists(final Connection con, final int userId,
-        final Setting setting)
-        throws OXException {
-        boolean exists = false;
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(SETTING_EXISTS);
-            int pos = 1;
-            stmt.setInt(pos++, ctxId);
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos++, setting.getId());
-            result = stmt.executeQuery();
-            if (result.next()) {
-                exists = result.getInt(1) == 1;
-            }
-        } catch (final SQLException e) {
-            throw SettingExceptionCodes.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        return exists;
     }
 
     /**

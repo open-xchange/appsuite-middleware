@@ -2020,11 +2020,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                      * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment
                      * disposition.
                      */
-                    final ContentType contentType = new ContentType();
-                    contentType.setPrimaryType("application");
-                    contentType.setSubType("octet-stream");
-                    resp.setContentType(contentType.toString());
-                    resp.setHeader("Content-disposition", getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType(), req.getHeader("user-agent")));
+                    resp.setContentType("application/octet-stream");
+                    resp.setHeader("Content-Disposition", getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType(), req.getHeader("user-agent")));
                 } else {
                     final CheckedDownload checkedDownload =
                         DownloadUtility.checkInlineDownload(
@@ -2033,7 +2030,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                             mailPart.getContentType().toString(),
                             req.getHeader(STR_USER_AGENT));
                     resp.setContentType(checkedDownload.getContentType());
-                    resp.setHeader("Content-disposition", checkedDownload.getContentDisposition());
+                    resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     attachmentInputStream = checkedDownload.getInputStream();
                 }
                 /*

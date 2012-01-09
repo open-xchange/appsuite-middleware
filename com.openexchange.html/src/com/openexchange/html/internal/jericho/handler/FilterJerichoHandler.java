@@ -300,7 +300,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     @Override
     public void handleCharacterReference(final CharacterReference characterReference) {
         if (skipLevel == 0) {
-            htmlBuilder.append(CharacterReference.decode(characterReference));
+            htmlBuilder.append(CharacterReference.getDecimalCharacterReferenceString(characterReference.getChar()));
         }
     }
 
@@ -324,9 +324,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 if (content.isWhiteSpace()) {
                     htmlBuilder.append(content);
                 } else {
-                    final String decodedText = CharacterReference.decode(content);
-                    final String encodedText = CharacterReference.encode(decodedText);
-                    htmlBuilder.append(encodedText);
+                    htmlBuilder.append(CharacterReference.reencode(content));
                 }
             }
         }

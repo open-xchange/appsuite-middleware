@@ -588,7 +588,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 /*
                  * Missing mail account; drop listener
                  */
-                LOG.info("Missing (default) mail account for user " + userId + ". Stopping obsolete IMAP-IDLE listener.");
+                LOG.debug("Missing (default) mail account for user " + userId + ". Stopping obsolete IMAP-IDLE listener.");
                 return false;
             }
             dropSessionRef("MSG".equals(e.getPrefix()) && 1001 == e.getCode());

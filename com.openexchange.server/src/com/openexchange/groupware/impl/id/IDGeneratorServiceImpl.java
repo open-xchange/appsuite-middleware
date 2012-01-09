@@ -118,6 +118,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
          */
         int retval = -1;
         int retry = 0;
+        boolean tryInsert = true;
         while (retval < 0 && retry++ < 5) {
             /*
              * Try to perform an UPDATE
@@ -127,8 +128,11 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
             do {
                 cur = performSelect(type, contextId, con);
                 if (cur < 0) {
-                    if (performInsert(type, contextId, minId, con)) {
-                        return minId;
+                    if (tryInsert) {
+                        if (performInsert(type, contextId, minId, con)) {
+                            return minId;
+                        }
+                        tryInsert = false;
                     }
                     cur = performSelect(type, contextId, con);
                 }

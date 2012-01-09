@@ -65,7 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.html.internal.parser.HTMLHandler;
 
 /**
- * {@link JerichoParser}
+ * {@link JerichoParser} - Parses specified real-life HTML document.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

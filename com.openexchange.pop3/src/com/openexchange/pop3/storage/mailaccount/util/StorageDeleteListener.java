@@ -53,8 +53,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Locale;
 import java.util.Map;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -138,12 +140,46 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
             /*
              * Drop database entries
              */
-            RdbPOP3StorageProperties.dropProperties(id, user, cid, con);
-            RdbPOP3StorageTrashContainer.dropTrash(id, user, cid, con);
-            RdbPOP3StorageUIDLMap.dropIDs(id, user, cid, con);
+            final boolean restoreConstraints = disableForeignKeyChecks(con);
+            try {
+                RdbPOP3StorageProperties.dropProperties(id, user, cid, con);
+                RdbPOP3StorageTrashContainer.dropTrash(id, user, cid, con);
+                RdbPOP3StorageUIDLMap.dropIDs(id, user, cid, con);
+            } finally {
+                if (restoreConstraints) {
+                    try {
+                        enableForeignKeyChecks(con);
+                    } catch (final SQLException e) {
+                        com.openexchange.log.Log.valueOf(LogFactory.getLog(StorageDeleteListener.class)).error(e.getMessage(), e);
+                    }
+                }
+            }
         } catch (final OXException e) {
             throw e;
         }
+    }
+
+    private static boolean disableForeignKeyChecks(final Connection con) {
+        if (null == con) {
+            return false;
+        }
+        try {
+            final Statement createStatement = con.createStatement();
+            createStatement.execute("SET foreign_key_checks = 0");
+            createStatement.close();
+            return true;
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+    
+    private static void enableForeignKeyChecks(final Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
+        final Statement createStatement = con.createStatement();
+        createStatement.execute("SET foreign_key_checks = 1");
+        createStatement.close();
     }
 
 }

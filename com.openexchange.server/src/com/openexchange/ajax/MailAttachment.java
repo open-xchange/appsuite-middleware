@@ -175,15 +175,8 @@ public class MailAttachment extends AJAXServlet {
                      * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment
                      * disposition.
                      */
-                    final ContentType contentType = new ContentType();
-                    contentType.setPrimaryType("application");
-                    contentType.setSubType("octet-stream");
-                    res.setContentType(contentType.toString());
-                    final String preparedFileName =
-                        Mail.getSaveAsFileName(fileName, isMSIEOnWindows(req.getHeader("user-agent")), mailPart.getContentType().toString());
-                    res.setHeader(
-                        "Content-disposition",
-                        new StringBuilder(64).append("attachment; filename=\"").append(preparedFileName).append('"').toString());
+                    res.setContentType("application/octet-stream");
+                    res.setHeader("Content-Disposition", Mail.getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType(), req.getHeader("user-agent")));
                 } else {
                     final CheckedDownload checkedDownload =
                         DownloadUtility.checkInlineDownload(
@@ -192,7 +185,7 @@ public class MailAttachment extends AJAXServlet {
                             mailPart.getContentType().toString(),
                             req.getHeader("user-agent"));
                     res.setContentType(checkedDownload.getContentType());
-                    res.setHeader("Content-disposition", checkedDownload.getContentDisposition());
+                    res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     attachmentInputStream = checkedDownload.getInputStream();
                 }
                 /*
