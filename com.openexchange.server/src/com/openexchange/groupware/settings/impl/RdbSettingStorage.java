@@ -303,7 +303,7 @@ public class RdbSettingStorage extends SettingStorage {
              */
             String val = null;
             int retry = 0;
-            boolean tryInsert = false;
+            boolean tryInsert = true;
             while (val == null && retry++ < retryCount) {
                 /*
                  * Try to perform a compare-and-set UPDATE
