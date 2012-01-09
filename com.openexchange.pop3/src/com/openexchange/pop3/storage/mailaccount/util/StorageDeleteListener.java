@@ -165,7 +165,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
         }
         try {
             final Statement createStatement = con.createStatement();
-            createStatement.execute("SET foreign_key_checks = 0");
+            createStatement.execute("SET FOREIGN_KEY_CHECKS=0");
             createStatement.close();
             return true;
         } catch (final Exception e) {
@@ -178,7 +178,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
             return;
         }
         final Statement createStatement = con.createStatement();
-        createStatement.execute("SET foreign_key_checks = 1");
+        createStatement.execute("SET FOREIGN_KEY_CHECKS=1");
         createStatement.close();
     }
 
