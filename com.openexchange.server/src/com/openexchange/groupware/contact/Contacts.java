@@ -722,6 +722,20 @@ public final class Contacts {
              * Check for bad characters
              */
             checkCharacters(co);
+            
+            /*
+             * Check uid
+             */
+            if (original.containsUid() || false == isEmpty(original.getUid())) {
+            	if (co.containsUid() && false == original.getUid().equals(co.getUid())) {
+                	// no uid change allowed
+            		throw ContactExceptionCodes.NO_UID_CHANGE.create();
+            	}
+            } else if (false == co.containsUid() || isEmpty(co.getUid())) {
+            	// set uid during this update
+            	co.setUid(UUID.randomUUID().toString());
+            }            
+
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
@@ -1129,6 +1143,20 @@ public final class Contacts {
 
             // Check for bad characters
             checkCharacters(contact);
+            
+            /*
+             * Check uid
+             */
+            if (original.containsUid() || false == isEmpty(original.getUid())) {
+            	if (contact.containsUid() && false == original.getUid().equals(contact.getUid())) {
+                	// no uid change allowed
+            		throw ContactExceptionCodes.NO_UID_CHANGE.create();
+            	}
+            } else if (false == contact.containsUid() || isEmpty(contact.getUid())) {
+            	// set uid during this update
+            	contact.setUid(UUID.randomUUID().toString());
+            }            
+
         } finally {
             try {
                 DBPool.closeReaderSilent(ctx, readcon);
