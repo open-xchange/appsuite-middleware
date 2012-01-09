@@ -214,7 +214,8 @@ public class AbstractContactTest extends AbstractAJAXSession {
         Contact.USERFIELD18,
         Contact.USERFIELD19,
         Contact.USERFIELD20,
-        Contact.DEFAULT_ADDRESS
+        Contact.DEFAULT_ADDRESS,
+        Contact.UID
     };
 
     protected int contactFolderId = -1;
@@ -386,6 +387,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         OXTestToolkit.assertEqualsAndNotNull("userfield20 is not equals", contactObj1.getUserField20(), contactObj2.getUserField20());
         OXTestToolkit.assertEqualsAndNotNull("number of attachments is not equals", contactObj1.getNumberOfAttachments(), contactObj2.getNumberOfAttachments());
         OXTestToolkit.assertEqualsAndNotNull("default address is not equals", contactObj1.getDefaultAddress(), contactObj2.getDefaultAddress());
+        OXTestToolkit.assertEqualsAndNotNull("uid is not equals", contactObj1.getUid(), contactObj2.getUid());
 
         OXTestToolkit.assertEqualsAndNotNull("links are not equals", links2String(contactObj1.getLinks()), links2String(contactObj2.getLinks()));
         OXTestToolkit.assertEqualsAndNotNull("distribution list is not equals", distributionlist2String(contactObj1.getDistributionList()), distributionlist2String(contactObj2.getDistributionList()));
@@ -505,6 +507,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
         contactObj.setUserField19("userfield19");
         contactObj.setUserField20("userfield20");
         contactObj.setDefaultAddress(1);
+        contactObj.setUid("uid");
 
         contactObj.setParentFolderID(contactFolderId);
 
@@ -1193,6 +1196,11 @@ public class AbstractContactTest extends AbstractAJAXSession {
         case Contact.USE_COUNT:
             if (!jsonArray.isNull(pos)) {
                 contactObj.setUseCount(jsonArray.getInt(pos));
+            }
+            break;
+        case Contact.UID:
+            if (!jsonArray.isNull(pos)) {
+                contactObj.setUid(jsonArray.getString(pos));
             }
             break;
         default:
