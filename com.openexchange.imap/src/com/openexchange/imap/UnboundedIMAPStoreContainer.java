@@ -92,6 +92,18 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
     }
 
     /**
+     * Initializes an empty {@link UnboundedIMAPStoreContainer}.
+     */
+    protected UnboundedIMAPStoreContainer() {
+        super();
+        queue = null;
+        this.login = null;
+        this.port = 0;
+        this.pw = null;
+        this.server = null;
+    }
+
+    /**
      * Gets the backing blocking queue.
      * 
      * @return The queue
