@@ -141,6 +141,19 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
         cacheLock = new ReentrantLock(true);
     }
 
+    /**
+     * Invalidates specified account.
+     * 
+     * @param serviceId The service identifier
+     * @param id The account identifier
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If invalidation fails
+     */
+    public void invalidate(final String serviceId, final int id, final int user, final int contextId) throws OXException {
+        invalidateMessagingAccount(serviceId, id, user, contextId);
+    }
+
     @Override
     public int addAccount(final String serviceId, final MessagingAccount account, final Session session, final Modifier modifier) throws OXException {
         return delegatee.addAccount(serviceId, account, session, modifier);

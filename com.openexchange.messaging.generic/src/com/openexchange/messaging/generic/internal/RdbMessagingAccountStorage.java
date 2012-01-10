@@ -169,7 +169,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                         final String toDecrypt = (String) configuration.get(passwordElementName);
                         if (null != toDecrypt) {
                             try {
-                                final String decrypted = decrypt(toDecrypt, session, confId, passwordElementName);
+                                final String decrypted = decrypt(toDecrypt, serviceId, id, session, confId, passwordElementName);
                                 configuration.put(passwordElementName, decrypted);
                             } catch (final OXException x) {
                                 // Must not be fatal
@@ -369,11 +369,18 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
     }
 
     @Override
-    public void update(final String recrypted, final GenericProperty customizationNote) throws OXException {
+    public void update(final String recrypted, final GenericProperty prop) throws OXException {
         final HashMap<String, Object> update = new HashMap<String, Object>();
-        update.put(customizationNote.propertyName, recrypted);
+        update.put(prop.propertyName, recrypted);
         final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
-        genericConfStorageService.update(getContext(customizationNote.session), customizationNote.confId, update);
+        final Session session = prop.session;
+        genericConfStorageService.update(getContext(session), prop.confId, update);
+        // Invalidate account
+        try {
+            CachingMessagingAccountStorage.getInstance().invalidate(prop.serviceId, prop.id, session.getUserId(), session.getContextId());
+        } catch (final Exception e) {
+            // Ignore
+        }
     }
 
     private String encrypt(final String toCrypt, final Session session) throws OXException {
@@ -381,9 +388,9 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
         return encryptionService.encrypt(session, toCrypt);
     }
 
-    private String decrypt(final String toDecrypt, final Session session, final int confId, final String propertyName) throws OXException {
+    private String decrypt(final String toDecrypt, final String serviceId, final int id, final Session session, final int confId, final String propertyName) throws OXException {
         final SecretEncryptionService<GenericProperty> encryptionService = getService(SecretEncryptionFactoryService.class).createService(this);
-        return encryptionService.decrypt(session, toDecrypt, new GenericProperty(confId, propertyName, session));
+        return encryptionService.decrypt(session, toDecrypt, new GenericProperty(confId, propertyName, serviceId, id, session));
     }
 
     private static final String SQL_DELETE = "DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?";
