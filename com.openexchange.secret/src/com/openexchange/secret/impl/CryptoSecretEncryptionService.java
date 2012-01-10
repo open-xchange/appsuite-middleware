@@ -49,6 +49,8 @@
 
 package com.openexchange.secret.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.Decrypter;
@@ -64,6 +66,10 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class CryptoSecretEncryptionService<T> implements SecretEncryptionService<T> {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CryptoSecretEncryptionService.class));
+
+    private static final boolean DEBUG = LOG.isDebugEnabled();
 
     private final TokenList tokenList;
 
@@ -142,20 +148,32 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
          * Try to decrypt "the old way"
          */
         if (decrypted == null) {
+            if (DEBUG) {
+                LOG.debug("Failed to decrypt password with 'secrets' token list. Retrying with former crypt mechanism");
+            }
             if (customizationNote instanceof Decrypter) {
                 try {
                     final Decrypter decrypter = (Decrypter) customizationNote;
                     decrypted = decrypter.getDecrypted(session, toDecrypt);
+                    if (DEBUG) {
+                        LOG.debug("Decrypted password with former crypt mechanism");
+                    }
                 } catch (final OXException x) {
                     // Ignore and try other secret service
                 }
                 if (decrypted == null) {
                     final String secret = secretService.getSecret(session);
                     decrypted = crypto.decrypt(toDecrypt, secret);
+                    if (DEBUG) {
+                        LOG.debug("Decrypted password with former crypt mechanism");
+                    }
                 }
             } else {
                 final String secret = secretService.getSecret(session);
                 decrypted = crypto.decrypt(toDecrypt, secret);
+                if (DEBUG) {
+                    LOG.debug("Decrypted password with former crypt mechanism");
+                }
             }
         }
         /*
