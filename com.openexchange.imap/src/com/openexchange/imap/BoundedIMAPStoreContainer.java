@@ -127,6 +127,7 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 if (null != service) {
                     final Runnable task = new Runnable() {
 
+                        @Override
                         public void run() {
                             if (stores.isEmpty()) {
                                 LOG.info("No occupied IMAPStore \"" + server + "\" instance for login " + login);
@@ -145,6 +146,16 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                     timerTask = service.scheduleWithFixedDelay(task, 15000, 15000);
                 }
             }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            final ScheduledTimerTask task = timerTask;
+            if (null != task) {
+                task.cancel();
+                timerTask = null;
+            }
+            super.finalize();
         }
 
         @Override
