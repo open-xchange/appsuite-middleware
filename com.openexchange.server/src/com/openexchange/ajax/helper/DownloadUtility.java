@@ -250,9 +250,17 @@ public final class DownloadUtility {
          *
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
-        final String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
-        if (browserDetector.isSafari()) {
+        String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
+        final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
+        if (!isAndroid && browserDetector.isSafari()) {
             appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
+        }
+        if (isAndroid) {
+            // myfile.dat => myfile.DAT
+            final int pos = foo.lastIndexOf('.');
+            if (pos >= 0) {
+                foo = foo.substring(0, pos) + foo.substring(pos).toUpperCase(Locale.ENGLISH);
+            }
         }
         appendTo.append("; filename=\"").append(foo).append('"').toString();
     }
