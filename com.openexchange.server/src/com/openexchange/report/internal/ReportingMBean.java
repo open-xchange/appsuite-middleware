@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.AttributeNotFoundException;
@@ -79,16 +80,10 @@ import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
@@ -111,7 +106,7 @@ public class ReportingMBean implements DynamicMBean {
 
     private final String[] moduleAccessCombinationNames = { "module access combination", "users", "inactive" };
 
-    private final String[] detailNames = { "identifier", "admin permission", "users", "age", "created", "mappings", "module access combinations" };
+    private final String[] detailNames = { "identifier", "admin permission", "users", "age", "created", "module access combinations" };
 
     private CompositeType detailRow;
 
@@ -162,10 +157,11 @@ public class ReportingMBean implements DynamicMBean {
                 total.put(value);
             } catch (final OpenDataException e) {
                 LOG.error(e.getMessage(), e);
-                throw new MBeanException(new Exception(e.getMessage()));
+                throw new MBeanException(e);
             } catch (final OXException e) {
                 LOG.error(e.getMessage(), e);
-                throw new MBeanException(new Exception(e.getMessage()));
+                final Exception wrapMe = new Exception(e.getMessage());
+                throw new MBeanException(wrapMe);
             }
             return total;
         } else if ("Detail".equals(attribute)) {
@@ -173,134 +169,123 @@ public class ReportingMBean implements DynamicMBean {
         }
         throw new AttributeNotFoundException("Cannot find " + attribute + " attribute ");
     }
+    
+    private final Map<Integer, ReportContext> loadContextData() throws MBeanException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        try {
+            final Map<String, Integer> schemaMap = Tools.getAllSchemata(LOG);
+            final Map<Integer,ReportContext> allctx = new HashMap<Integer, ReportContext>();
+            for (final String schema : schemaMap.keySet()) {
+                final int readPool = schemaMap.get(schema).intValue();
+                final Connection connection;
+                try {
+                    connection = dbService.get(readPool, schema);
+                } catch (final OXException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
+                }
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = connection.prepareStatement("SELECT c.cid,c.creating_date,a.user,u.permissions FROM prg_contacts c JOIN user_setting_admin a ON c.cid=a.cid AND c.userid=a.user JOIN user_configuration u ON c.cid=u.cid AND u.user=a.user");
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        final ReportContext rc = new ReportContext();
+                        rc.setId(I(rs.getInt(1)));
+                        rc.setAge(L((System.currentTimeMillis() - rs.getLong(2)) / Constants.MILLI_DAY));
+                        rc.setCreated(new Date(rs.getLong(2)));
+                        rc.setAdminId(I(rs.getInt(3)));
+                        rc.setAdminPermission(I(rs.getInt(4)));
+                        allctx.put(rc.getId(), rc);
+                    }
+                    rs.close();
+                    stmt.close();
+
+                    stmt = connection.prepareStatement("SELECT c.cid,COUNT(c.permissions),c.permissions,COUNT(IF(u.mailEnabled=0,1,null)) FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user GROUP BY permissions,cid ORDER BY cid;");
+                    rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        final ReportContext rc = allctx.get(I(rs.getInt(1)));
+                        final int numusr = rs.getInt(2);
+                        final int perm = rs.getInt(3);
+                        final int inaccnt = rs.getInt(4);
+                        if( null != rc ) {
+                            Map<Integer,Integer> accCombs = rc.getAccessCombinations();
+                            Map<Integer,Integer> inactive = rc.getInactiveByCombination(); 
+                            if( null == accCombs ) {
+                                accCombs = new HashMap<Integer, Integer>();
+                            }
+                            if( null == inactive ) {
+                                inactive = new HashMap<Integer, Integer>();
+                            }
+                            accCombs.put(I(perm), I(numusr));
+                            inactive.put(I(perm), I(inaccnt));
+                            final Integer nusr = rc.getNumUsers();
+                            if( null != nusr ) {
+                                rc.setNumUsers(I(nusr.intValue()+numusr));
+                            } else {
+                                rc.setNumUsers(I(numusr));
+                            }
+                            rc.setInactiveByCombination(inactive);
+                            rc.setAccessCombinations(accCombs);
+                        }
+                    }
+                } catch (final SQLException e) {
+                    LOG.error(e.getMessage(), e);
+                    throw new MBeanException(e, e.getMessage());
+                } finally {
+                    DBUtils.closeSQLStuff(rs, stmt);
+                    dbService.back(readPool, connection);
+                }
+            }
+            return allctx;
+        } catch (final MBeanException e) {
+            LOG.error(e.getMessage(), e);
+            throw e;
+        }
+    }
 
     private TabularDataSupport generateDetailTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) throws MBeanException {
         final TabularDataSupport detail = new TabularDataSupport(detailType);
         try {
-            final List<Integer> allContextIds = contextService.getAllContextIds();
-            for (final Integer contextId : allContextIds) {
-                final Context context = contextService.getContext(contextId.intValue());
-                final int contextAdmin = context.getMailadmin();
-                final UserConfiguration[] configs = getUserConfigurations(userService, configService, context);
-                final Date created = getContextCreated(context);
-                final StringBuilder sb = new StringBuilder();
-                for (final String loginInfo : context.getLoginInfo()) {
-                    sb.append(loginInfo);
-                    sb.append(',');
-                }
-                if (sb.length() > 0) {
-                    sb.setLength(sb.length() - 1);
-                }
+            /**
+             *  FIXME: 
+             *  Caldav/Carddav only available via ConfigCascade this might need to be added
+             *  Former version also did send login_mappings, but report client did not use it
+             */
+            final Map<Integer,ReportContext> ret = loadContextData();
+            for(final ReportContext c : ret.values().toArray(new ReportContext[ret.size()])) {
                 final TabularDataSupport moduleAccessCombinations = new TabularDataSupport(moduleAccessCombinationsType);
-                consolidateAccessCombinations(configs, userService, moduleAccessCombinations);
+                final Map<Integer,Integer> accessCombinations = c.getAccessCombinations();
+                final Map<Integer,Integer> inacByCombi = c.getInactiveByCombination();
+                if( null != accessCombinations ) {
+                    for(final Entry<Integer, Integer> e : accessCombinations.entrySet()) {
+                        int inac=0;
+                        if( null != inacByCombi ) {
+                            final Integer inAc = inacByCombi.get(e.getKey());
+                            inac = inAc == null ? 0 : inAc.intValue();
+                        }
+                        moduleAccessCombinations.put(new CompositeDataSupport(moduleAccessPermission, moduleAccessCombinationNames, new Object[] {
+                            e.getKey(), e.getValue(), I(inac) }));
+                    }
+                }
                 final CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
-                    contextId, getAdminPermission(contextAdmin, configs), I(configs.length), calcAge(created), created, sb.toString(),
-                    moduleAccessCombinations });
+                    c.getId(), c.getAdminPermission(), c.getNumUsers(), c.getAge(), c.getCreated(), moduleAccessCombinations });
                 detail.put(value);
             }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            throw new MBeanException(new Exception(e.getMessage()));
         } catch (final OpenDataException e) {
             LOG.error(e.getMessage(), e);
-            throw new MBeanException(new Exception(e.getMessage()));
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe);
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
-            throw new MBeanException(new Exception(e.getMessage()));
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
-            throw new MBeanException(new Exception(t.getMessage()));
+            final Exception wrapMe = new Exception(t.getMessage());
+            throw new MBeanException(wrapMe);
         }
         return detail;
-    }
-
-    private void consolidateAccessCombinations(final UserConfiguration[] configs, final UserService userService, final TabularDataSupport moduleAccessCombinations) throws OpenDataException, OXException {
-        final Map<Integer, Integer[]> combinations = new HashMap<Integer, Integer[]>();
-        final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        for (final UserConfiguration config : configs) {
-            final User user = userService.getUser(config.getUserId(), config.getContext());
-            Integer accessCombination = I(config.getPermissionBits());
-            try {
-                accessCombination = modifyForConfigCascade(accessCombination, configViews.getView(user.getId(), config.getContext().getContextId()));
-            } catch (final OXException e) {
-                // Skip
-            }
-            Integer[] users = combinations.get(accessCombination);
-            if (null == users) {
-                users = new Integer[] { I(1), user.isMailEnabled() ? I(0) : I(1) };
-            } else {
-                users[0] = I(users[0].intValue() + 1);
-                if (!user.isMailEnabled()) {
-                    users[1] = I(users[1].intValue() + 1);
-                }
-            }
-            combinations.put(accessCombination, users);
-        }
-        for (final Map.Entry<Integer, Integer[]> entry : combinations.entrySet()) {
-            moduleAccessCombinations.put(new CompositeDataSupport(moduleAccessPermission, moduleAccessCombinationNames, new Object[] {
-                entry.getKey(), entry.getValue()[0], entry.getValue()[1] }));
-        }
-    }
-
-    private Integer modifyForConfigCascade(Integer accessCombination, final ConfigView configView) throws OXException {
-        final ComposedConfigProperty<Boolean> caldav = configView.property("com.openexchange.caldav.enabled", boolean.class);
-        final ComposedConfigProperty<Boolean> carddav = configView.property("com.openexchange.carddav.enabled", boolean.class);
-
-        if (caldav.isDefined() && caldav.get()) {
-            accessCombination =  (accessCombination | UserConfiguration.CALDAV);
-        }
-
-        if (carddav.isDefined() && carddav.get()) {
-            accessCombination =  (accessCombination | UserConfiguration.CARDDAV);
-        }
-
-        return accessCombination;
-    }
-
-    private Integer getAdminPermission(final int contextAdmin, final UserConfiguration[] configs) {
-        for (final UserConfiguration config : configs) {
-            if (config.getUserId() == contextAdmin) {
-                return I(config.getPermissionBits());
-            }
-        }
-        LOG.error("Can not find context admin");
-        return I(-1);
-    }
-
-    private UserConfiguration[] getUserConfigurations(final UserService userService, final UserConfigurationService configurationService, final Context ctx) throws OXException, OXException {
-        final User[] users = userService.getUser(ctx);
-        final UserConfiguration[] configurations = configurationService.getUserConfiguration(ctx, users);
-        return configurations;
-    }
-
-    private Long calcAge(final Date created) {
-        return L((System.currentTimeMillis() - created.getTime()) / Constants.MILLI_DAY);
-    }
-
-    private Date getContextCreated(final Context ctx) {
-        final Connection con;
-        try {
-            con = Database.get(ctx, false);
-        } catch (final OXException e) {
-            LOG.error("Unable to get database connection.", e);
-            return new Date(0);
-        }
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement("SELECT c.creating_date FROM prg_contacts c JOIN user_setting_admin a ON c.cid=a.cid AND c.userid=a.user WHERE a.cid=?");
-            stmt.setInt(1, ctx.getContextId());
-            result = stmt.executeQuery();
-            if (result.next()) {
-                return new Date(result.getLong(1));
-            }
-        } catch (final SQLException e) {
-            LOG.error("SQL problem.", e);
-        } finally {
-            DBUtils.closeSQLStuff(result, stmt);
-            Database.back(ctx, false, con);
-        }
-        return new Date(0);
     }
 
     @Override
@@ -372,9 +357,9 @@ public class ReportingMBean implements DynamicMBean {
 
             final String[] detailDescriptions = {
                 "Context identifier", "Context admin permission", "Number of users", "Context age in days",
-                "Date and time of context creation", "Login mappings", "Module access permission combinations" };
+                "Date and time of context creation", "Module access permission combinations" };
             final OpenType[] detailTypes = {
-                SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, SimpleType.STRING,
+                SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE,
                 moduleAccessCombinationsType };
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             detailType = new TabularType("Detail", "Detail view", detailRow, new String[] { "identifier" });
