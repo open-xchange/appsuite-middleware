@@ -57,5 +57,12 @@ import com.openexchange.session.Session;
  */
 public interface TaskEventInterface2 extends TaskEventInterface{
 
-    public void taskModified(Task oldTask, Task newTask, Session sessionObj);
+    void taskModified(Task oldTask, Task newTask, Session sessionObj);
+
+    void taskAccepted(Task oldTask, Task newTask, Session sessionObj);
+
+    void taskDeclined(Task oldTask, Task newTask, Session sessionObj);
+
+    void taskTentativelyAccepted(Task oldTask, Task newTask, Session sessionObj);
+
 }

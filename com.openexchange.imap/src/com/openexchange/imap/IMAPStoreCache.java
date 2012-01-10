@@ -259,7 +259,7 @@ public final class IMAPStoreCache {
             final int maxCount = protocol.getMaxCount(server, MailAccount.DEFAULT_ID == accountId);
             final IMAPStoreContainer newContainer;
             if (maxCount > 0) {
-                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount);
+                newContainer = new BoundedIMAPStoreContainer(server, port, login, pw, maxCount, BoundedIMAPStoreContainer.ImplType.REENTRANT_SEMAPHORE);
             } else {
                 newContainer = new UnboundedIMAPStoreContainer(server, port, login, pw);
             }

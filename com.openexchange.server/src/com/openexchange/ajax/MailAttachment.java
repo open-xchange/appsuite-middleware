@@ -50,6 +50,7 @@
 package com.openexchange.ajax;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -149,6 +150,7 @@ public class MailAttachment extends AJAXServlet {
              * Write part to output stream
              */
             final MailPart mailPart = token.getAttachment();
+            final File file = null;
             InputStream attachmentInputStream = null;
             try {
                 if (filter && !saveToDisk && mailPart.getContentType().isMimeType(MIMETypes.MIME_TEXT_HTM_ALL)) {
@@ -178,15 +180,46 @@ public class MailAttachment extends AJAXServlet {
                     res.setContentType("application/octet-stream");
                     res.setHeader("Content-Disposition", Mail.getAttachmentDispositionValue(fileName, mailPart.getContentType().getBaseType(), req.getHeader("user-agent")));
                 } else {
+                    final String userAgent = req.getHeader("user-agent");
                     final CheckedDownload checkedDownload =
                         DownloadUtility.checkInlineDownload(
                             attachmentInputStream,
                             fileName,
                             mailPart.getContentType().toString(),
-                            req.getHeader("user-agent"));
+                            userAgent);
                     res.setContentType(checkedDownload.getContentType());
                     res.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
                     attachmentInputStream = checkedDownload.getInputStream();
+                    /*-
+                     * Check for Android client
+                     * 
+                    final boolean isAndroid = (null != userAgent && userAgent.toLowerCase(Locale.ENGLISH).indexOf("android") >= 0);
+                    if (isAndroid) {
+                        final ManagedFileManagement service = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+                        if (null != service) {
+                            file = service.newTempFile();
+                            final FileOutputStream fos = new FileOutputStream(file);
+                            try {
+                                final int buflen = 0xFFFF;
+                                final byte[] buffer = new byte[buflen];
+                                for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) != -1;) {
+                                    fos.write(buffer, 0, len);
+                                }
+                                fos.flush();
+                            } finally {
+                                try {
+                                    fos.close();
+                                } catch (final Exception e) {
+                                    // Ignore
+                                }
+                            }
+                            // Set Content-Length header properly
+                            res.setContentLength((int) file.length());
+                            attachmentInputStream = new FileInputStream(file);
+                        }
+                    }
+                     * 
+                     */
                 }
                 /*
                  * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
@@ -201,7 +234,7 @@ public class MailAttachment extends AJAXServlet {
                 {
                     final int buflen = 0xFFFF;
                     final byte[] buffer = new byte[buflen];
-                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) != -1;) {
+                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
@@ -210,6 +243,9 @@ public class MailAttachment extends AJAXServlet {
                 token.close();
                 if (null != attachmentInputStream) {
                     attachmentInputStream.close();
+                }
+                if (null != file) {
+                    file.delete();
                 }
             }
         } catch (final OXException e) {

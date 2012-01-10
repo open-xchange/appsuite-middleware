@@ -168,26 +168,28 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
         }
     }
 
-    public void accepted(final Task task, final Session session) {
+    public void accepted(final Task oldTask, final Task task, final Session session) {
         for (final TaskEventInterface listener : taskListeners) {
-            listener.taskAccepted(task, session);
+            if (TaskEventInterface2.class.isAssignableFrom(listener.getClass())) {
+                ((TaskEventInterface2) listener).taskAccepted(oldTask, task, session);
+            }
         }
     }
 
-    public void declined(final Task task, final Session session) {
+    public void declined(final Task oldTask, final Task task, final Session session) {
         for (final TaskEventInterface listener : taskListeners) {
-            listener.taskDeclined(task, session);
+            if (TaskEventInterface2.class.isAssignableFrom(listener.getClass())) {
+                ((TaskEventInterface2) listener).taskDeclined(oldTask, task, session);
+            }
         }
     }
 
-    public void tentativelyAccepted(final Task task, final Session session) {
+    public void tentativelyAccepted(final Task oldTask, final Task task, final Session session) {
         for (final TaskEventInterface listener : taskListeners) {
-            listener.taskTentativelyAccepted(task, session);
+            if (TaskEventInterface2.class.isAssignableFrom(listener.getClass())) {
+                ((TaskEventInterface2) listener).taskTentativelyAccepted(oldTask, task, session);
+            }
         }
-    }
-
-    public void modified(final Task task, final Session session) {
-        modified(null, task, session);
     }
 
     public void deleted(final Task task, final Session session) {
@@ -231,11 +233,11 @@ public class OSGiEventDispatcher implements EventHandlerRegistration, EventDispa
                 } else if (CommonEvent.DELETE == action) {
                     deleted((Task) actionObj, session);
                 } else if (CommonEvent.CONFIRM_ACCEPTED == action) {
-                    accepted((Task) actionObj, session);
+                    accepted((Task) oldObj, (Task) actionObj, session);
                 } else if (CommonEvent.CONFIRM_DECLINED == action) {
-                    declined((Task) actionObj, session);
+                    declined((Task) oldObj, (Task) actionObj, session);
                 } else if (CommonEvent.CONFIRM_TENTATIVE == action) {
-                    tentativelyAccepted((Task) actionObj, session);
+                    tentativelyAccepted((Task) oldObj, (Task) actionObj, session);
                 }
             }
         } catch (final Exception e) {

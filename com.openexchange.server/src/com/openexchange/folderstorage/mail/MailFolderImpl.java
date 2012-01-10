@@ -435,17 +435,10 @@ public final class MailFolderImpl extends AbstractFolder {
 
     @Override
     public int getUnread() {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(userId, contextId, accountId);
             mailAccess.connect(false);
-        } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Obtaining/connecting MauilAccess instance failed. Cannot return up-to-date unread counter.", e);
-            }
-            return super.getUnread();
-        }
-        try {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
                 return ((IMailFolderStorageEnhanced) folderStorage).getUnreadCounter(ensureFullName(fullName));
@@ -462,23 +455,18 @@ public final class MailFolderImpl extends AbstractFolder {
             }
             return super.getUnread();
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 
     @Override
     public int getTotal() {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(userId, contextId, accountId);
             mailAccess.connect(false);
-        } catch (final OXException e) {
-            if (DEBUG) {
-                LOG.debug("Obtaining/connecting MailAccess instance failed. Cannot return up-to-date total counter.", e);
-            }
-            return super.getTotal();
-        }
-        try {
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
                 return ((IMailFolderStorageEnhanced) folderStorage).getTotalCounter(ensureFullName(fullName));
@@ -495,7 +483,9 @@ public final class MailFolderImpl extends AbstractFolder {
             }
             return super.getTotal();
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 
