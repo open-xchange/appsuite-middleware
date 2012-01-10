@@ -236,7 +236,8 @@ public final class DownloadUtility {
             }
         }
         fn = escapeBackslashAndQuote(fn);
-        if (null != userAgent && new BrowserDetector(userAgent).isMSIE()) {
+        final BrowserDetector browserDetector = new BrowserDetector(userAgent);
+        if (null != userAgent && browserDetector.isMSIE()) {
             // InternetExplorer
             appendTo.append("; filename=\"").append(Helper.encodeFilenameForIE(fn, Charsets.UTF_8)).append('"').toString();
             return;
@@ -250,7 +251,10 @@ public final class DownloadUtility {
          * Therefore ensure we have a one-character-per-byte charset, as it is with ISO-8859-1
          */
         final String foo = new String(fn.getBytes(Charsets.UTF_8), Charsets.ISO_8859_1);
-        appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn)).append("; filename=\"").append(foo).append('"').toString();
+        if (browserDetector.isSafari()) {
+            appendTo.append("; filename*=UTF-8''").append(URLCoder.encode(fn));
+        }
+        appendTo.append("; filename=\"").append(foo).append('"').toString();
     }
 
     private static final Pattern PAT_BSLASH = Pattern.compile("\\\\");
