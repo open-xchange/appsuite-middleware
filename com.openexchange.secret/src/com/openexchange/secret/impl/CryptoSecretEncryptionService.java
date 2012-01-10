@@ -131,27 +131,43 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
          * Try other secrets in list
          */
         String decrypted = null;
-        for (int i = size - 2; i >= 0; i--) {
+        for (int i = size - 2; null == decrypted && i >= 0; i--) {
             try {
                 decrypted = crypto.decrypt(toDecrypt, tokenList.get(i).getSecret(session));
-                break;
             } catch (final OXException x) {
-                // Ignore and try other secret
+                // Ignore and try other secret service
             }
         }
+        /*
+         * Try to decrypt "the old way"
+         */
         if (decrypted == null) {
             if (customizationNote instanceof Decrypter) {
-                final Decrypter decrypter = (Decrypter) customizationNote;
-                decrypted = decrypter.getDecrypted(session, toDecrypt);
+                try {
+                    final Decrypter decrypter = (Decrypter) customizationNote;
+                    decrypted = decrypter.getDecrypted(session, toDecrypt);
+                } catch (final OXException x) {
+                    // Ignore and try other secret service
+                }
+                if (decrypted == null) {
+                    final String secret = secretService.getSecret(session);
+                    decrypted = crypto.decrypt(toDecrypt, secret);
+                }
             } else {
                 final String secret = secretService.getSecret(session);
                 decrypted = crypto.decrypt(toDecrypt, secret);
             }
         }
+        /*
+         * At last, re-crypt password using current secret service & store it
+         */
         {
             final String recrypted = crypto.encrypt(decrypted, tokenList.peekLast().getSecret(session));
             strategy.update(recrypted, customizationNote);
         }
+        /*
+         * Return plain-text password
+         */
         return decrypted;
     }
 

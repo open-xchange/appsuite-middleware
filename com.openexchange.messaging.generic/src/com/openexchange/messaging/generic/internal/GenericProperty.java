@@ -64,15 +64,21 @@ public final class GenericProperty {
     public final String propertyName;
 
     public final Session session;
+
+    public final String serviceId;
+
+    public final int id;
     
     /**
      * Initializes a new {@link GenericProperty}.
      */
-    public GenericProperty(final int confId, final String propertyName, final Session session) {
+    public GenericProperty(final int confId, final String propertyName, final String serviceId, final int id, final Session session) {
         super();
         this.confId = confId;
         this.propertyName = propertyName;
         this.session = session;
+        this.serviceId = serviceId;
+        this.id = id;
     }
 
 }
