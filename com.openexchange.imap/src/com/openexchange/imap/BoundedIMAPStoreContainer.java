@@ -110,11 +110,13 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
         @Override
         public void backStore(final IMAPStore imapStore) {
-            final CountedIMAPStore cImapStore = stores.remove(Thread.currentThread());
+            final Thread thread = Thread.currentThread();
+            final CountedIMAPStore cImapStore = stores.get(thread);
             cImapStore.count = cImapStore.count - 1;
             if (cImapStore.count > 0) {
                 return;
             }
+            stores.remove(thread);
             // Release IMAPStore instance orderly
             super.backStore(imapStore);
             semaphore.release();
