@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.logging.LogFactory;
@@ -164,9 +163,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
             return false;
         }
         try {
-            final Statement createStatement = con.createStatement();
-            createStatement.execute("SET foreign_key_checks = 0");
-            createStatement.close();
+            DBUtils.disableMysqlForeignKeyChecks(con);
             return true;
         } catch (final Exception e) {
             return false;
@@ -177,9 +174,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
         if (null == con) {
             return;
         }
-        final Statement createStatement = con.createStatement();
-        createStatement.execute("SET foreign_key_checks = 1");
-        createStatement.close();
+        DBUtils.enableMysqlForeignKeyChecks(con);
     }
 
 }

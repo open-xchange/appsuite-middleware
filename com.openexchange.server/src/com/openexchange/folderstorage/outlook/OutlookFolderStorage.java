@@ -402,7 +402,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, contentType);
         }
-        final boolean started = folderStorage.startTransaction(storageParameters, true);
+        final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
             final SortableId[] ret = folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters);
             if (started) {

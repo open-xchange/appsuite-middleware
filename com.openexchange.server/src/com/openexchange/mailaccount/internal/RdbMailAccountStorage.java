@@ -64,7 +64,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2150,9 +2149,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return false;
         }
         try {
-            final Statement createStatement = con.createStatement();
-            createStatement.execute("SET foreign_key_checks = 0");
-            createStatement.close();
+            DBUtils.disableMysqlForeignKeyChecks(con);
             return true;
         } catch (final Exception e) {
             return false;
@@ -2163,9 +2160,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (null == con) {
             return;
         }
-        final Statement createStatement = con.createStatement();
-        createStatement.execute("SET foreign_key_checks = 1");
-        createStatement.close();
+        DBUtils.enableMysqlForeignKeyChecks(con);
     }
 
     private static void setOptionalString(final PreparedStatement stmt, final int pos, final String string) throws SQLException {

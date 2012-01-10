@@ -63,6 +63,7 @@ import javax.crypto.spec.SecretKeySpec;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.internal.GenericProperty;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -140,6 +141,17 @@ public final class MailPasswordUtil {
                 stmt.setInt(3, session.getUserId());
                 stmt.setInt(4, customizationNote.accountId);
                 stmt.executeUpdate();
+                /*
+                 * Invalidate
+                 */
+                final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != service) {
+                    try {
+                        service.invalidateMailAccount(customizationNote.accountId, session.getUserId(), session.getContextId());
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
             } finally {
                 DBUtils.closeSQLStuff(stmt);
             }

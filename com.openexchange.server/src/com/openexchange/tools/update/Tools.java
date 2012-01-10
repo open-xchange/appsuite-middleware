@@ -215,6 +215,24 @@ public final class Tools {
         return null;
     }
 
+    public static final List<String> allForeignKey(final Connection con, final String foreignTable) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet result = null;
+        try {
+            result = metaData.getImportedKeys(null, null, foreignTable);
+            final Set<String> set = new HashSet<String>();
+            while (result.next()) {
+                final String keyName = result.getString("FK_NAME");
+                if (null != keyName) {
+                    set.add(keyName);
+                }
+            }
+            return new ArrayList<String>(set);
+        } finally {
+            closeSQLStuff(result);
+        }
+    }
+
     /**
      * This method drops the primary key on the table. Beware, this method is vulnerable to SQL injection because table and index name can
      * not be set through a {@link PreparedStatement}.

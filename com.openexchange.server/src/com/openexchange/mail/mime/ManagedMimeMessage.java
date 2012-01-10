@@ -49,8 +49,12 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -73,6 +77,8 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 public final class ManagedMimeMessage extends MimeMessage {
 
     private static final int DEFAULT_MAX_INMEMORY_SIZE = 131072; // 128KB
+
+    private final List<Closeable> closeables;
 
     private volatile ManagedFile managedFile;
 
@@ -104,6 +110,7 @@ public final class ManagedMimeMessage extends MimeMessage {
         if (0 > maxInMemorySize) {
             throw new IllegalArgumentException("maxInMemorySize is less than zero.");
         }
+        closeables = new ArrayList<Closeable>(2);
         flags = new Flags(); // empty Flags object
         final byte[][] splitted = split(sourceBytes);
         headers =
@@ -138,6 +145,7 @@ public final class ManagedMimeMessage extends MimeMessage {
      */
     public ManagedMimeMessage(final Session session, final ManagedFile managedFile) throws MessagingException, IOException {
         super(session);
+        closeables = new ArrayList<Closeable>(2);
         this.file = null;
         this.managedFile = managedFile;
         final SharedFileInputStream sis = new SharedFileInputStream(managedFile.getFile(), DEFAULT_MAX_INMEMORY_SIZE);
@@ -157,15 +165,15 @@ public final class ManagedMimeMessage extends MimeMessage {
      * @throws IOException If an I/O error occurs
      */
     public ManagedMimeMessage(final Session session, final File file) throws MessagingException, IOException {
-        super(session);
+        this(session, file, new FileInputStream(file));
+    }
+
+    private ManagedMimeMessage(final Session session, final File file, final FileInputStream fis) throws MessagingException {
+        super(session, fis);
+        closeables = new ArrayList<Closeable>(2);
+        closeables.add(fis);
         this.managedFile = null;
         this.file = file;
-        final SharedFileInputStream sis = new SharedFileInputStream(file, DEFAULT_MAX_INMEMORY_SIZE);
-        flags = new Flags(); // empty Flags object
-        headers = createInternetHeaders(sis);
-        contentStream = sis.newStream(sis.getPosition(), -1);
-        modified = false;
-        saved = true;
     }
 
     @Override
@@ -178,6 +186,13 @@ public final class ManagedMimeMessage extends MimeMessage {
      * Cleans up this managed MIME message.
      */
     public void cleanUp() {
+        while (!closeables.isEmpty()) {
+            try {
+                closeables.remove(0).close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
         if (null != managedFile) {
             try {
                 final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);

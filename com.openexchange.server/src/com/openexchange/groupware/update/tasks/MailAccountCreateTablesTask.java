@@ -108,8 +108,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
             "confirmed_spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
             "confirmed_ham_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
             "PRIMARY KEY  (cid, id, user)," +
-            "INDEX (cid, user)," +
-            "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
+            "INDEX (cid, user)" +
             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
@@ -128,8 +127,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
                 "default_flag TINYINT unsigned NOT NULL default 0," +
                 "unified_inbox TINYINT unsigned default 0," +
                 "PRIMARY KEY  (cid, id, user)," +
-                "INDEX (cid, user)," +
-                "FOREIGN KEY (cid, user) REFERENCES user (cid, id)" +
+                "INDEX (cid, user)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
     }
 
@@ -140,8 +138,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
                 "user INT4 unsigned NOT NULL," +
                 "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
                 "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-                "PRIMARY KEY  (cid, id, user, name)," +
-                "FOREIGN KEY (cid, id, user) REFERENCES user_mail_account (cid, id, user)" +
+                "PRIMARY KEY  (cid, id, user, name)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 
@@ -152,8 +149,7 @@ public class MailAccountCreateTablesTask implements UpdateTask {
                 "user INT4 unsigned NOT NULL," +
                 "name VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
                 "value VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-                "PRIMARY KEY  (cid, id, user, name)," +
-                "FOREIGN KEY (cid, id, user) REFERENCES user_transport_account (cid, id, user)" +
+                "PRIMARY KEY  (cid, id, user, name)" +
                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     }
 

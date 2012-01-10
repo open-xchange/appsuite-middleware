@@ -316,9 +316,9 @@ public final class DBUtils {
      * @return A set with all the tables that exist of those to be checked for
      * @throws SQLException If something goes wrong
      */
-    public static Set<String> existingTables(Connection con, String... tablesToCheck) throws SQLException {
-        Set<String> tables = new HashSet<String>();
-        for (String table : tablesToCheck) {
+    public static Set<String> existingTables(final Connection con, final String... tablesToCheck) throws SQLException {
+        final Set<String> tables = new HashSet<String>();
+        for (final String table : tablesToCheck) {
             if(tableExists(con, table)) {
                 tables.add(table);
             }
@@ -333,8 +333,8 @@ public final class DBUtils {
      * @return A set with all the tables that exist of those to be checked for
      * @throws SQLException If something goes wrong
      */
-    public static boolean tablesExist(Connection con, String... tablesToCheck) throws SQLException {
-        for (String table : tablesToCheck) {
+    public static boolean tablesExist(final Connection con, final String... tablesToCheck) throws SQLException {
+        for (final String table : tablesToCheck) {
             if(!tableExists(con, table)) {
                 return false;
             }
@@ -349,7 +349,7 @@ public final class DBUtils {
      * @return A set with all the tables that exist of those to be checked for
      * @throws SQLException If something goes wrong
      */
-    public static boolean tableExists(Connection con, String table) throws SQLException {
+    public static boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
         boolean retval = false;
@@ -362,7 +362,7 @@ public final class DBUtils {
         return retval;
     }
 
-    public static String forSQLCommand(Order order) {
+    public static String forSQLCommand(final Order order) {
         if (order != null) {
             switch (order) {
             case ASCENDING: return " ASC ";
@@ -372,4 +372,37 @@ public final class DBUtils {
         }
         return " ";
     }
+
+    /**
+     * Disable MySQL foreign key checks on this connection.<br>
+     * For certain cases, you must disable foreign key checks before truncate or delete all table data. Remember that you must use this
+     * connection to perform the delete all or the truncate.
+     * 
+     * @param connection {@link Connection}.
+     * @throws SQLException If any error occurs during disable.
+     * @see #enableMysqlForeignKeyChecks(java.sql.Connection)
+     * @see #cleanInsert(String, java.sql.Connection)
+     * @see #truncate(String, java.sql.Connection)
+     * @see #truncateAndInsert(String, java.sql.Connection)
+     */
+    public static void disableMysqlForeignKeyChecks(final Connection connection) throws SQLException {
+        setMysqlForeignKeyChecks(connection, 0);
+    }
+
+    /**
+     * Enable MySQL foreign key checks on this connection.<br>
+     * 
+     * @param connection {@link Connection}.
+     * @throws SQLException If any error occurs during enable.
+     */
+    public static void enableMysqlForeignKeyChecks(final Connection connection) throws SQLException {
+        setMysqlForeignKeyChecks(connection, 1);
+    }
+
+    private static void setMysqlForeignKeyChecks(final Connection connection, final int value) throws SQLException {
+        final Statement statement = connection.createStatement();
+        statement.execute("SET @@foreign_key_checks = " + value);
+        statement.close();
+    }
+
 }
