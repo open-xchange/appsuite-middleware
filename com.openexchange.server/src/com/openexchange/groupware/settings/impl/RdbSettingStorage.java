@@ -91,19 +91,10 @@ public class RdbSettingStorage extends SettingStorage {
         "INSERT INTO user_setting (value,cid,user_id,path_id) VALUES (?,?,?,?)";
 
     /**
-     * SQL statement for updating one specific user setting.
-     */
-    private static final String UPDATE_SETTING = "UPDATE user_setting "
-        + "SET value=? WHERE cid=? AND user_id=? AND path_id=?";
-
-    /**
      * SQL statement for compare-and-set updating one specific user setting.
      */
     private static final String UPDATE_SETTING_CAS = "UPDATE user_setting "
         + "SET value=? WHERE cid=? AND user_id=? AND path_id=? AND value=?";
-
-    /** SQL statement for checking if a setting for a user exists. */
-    private static final String SETTING_EXISTS = "SELECT COUNT(value) FROM user_setting WHERE cid=? AND user_id=? AND path_id=? FOR UPDATE";
 
     /**
      * Reference to the context.
@@ -234,59 +225,8 @@ public class RdbSettingStorage extends SettingStorage {
      * @param setting setting to store.
      * @throws OXException if storing fails.
      */
-    private void saveInternal2(final Connection con, final Setting setting)
-        throws OXException {
-        //saveInternal2(con, setting, 0);
+    private void saveInternal2(final Connection con, final Setting setting) throws OXException {
         saveInternalCAS(con, setting, MAX_RETRY);
-    }
-
-    /**
-     * Internally saves a setting into the database.
-     * @param con a writable database connection.
-     * @param setting setting to store.
-     * @param retryCount The current retry count
-     * @throws OXException if storing fails.
-     */
-    private void saveInternal2(final Connection con, final Setting setting, final int retryCount)
-        throws OXException {
-        final boolean update = settingExists(con, userId, setting);
-        PreparedStatement stmt = null;
-        boolean retry = false;
-        try {
-            if (update) {
-                stmt = con.prepareStatement(UPDATE_SETTING);
-            } else {
-                stmt = con.prepareStatement(INSERT_SETTING);
-            }
-            int pos = 1;
-            stmt.setString(pos++, setting.getSingleValue().toString());
-            stmt.setInt(pos++, ctxId);
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos++, setting.getId());
-            if (update) {
-                stmt.executeUpdate();
-            } else {
-                try {
-                    stmt.executeUpdate();
-                } catch (final SQLException e) {
-                    if (retryCount > MAX_RETRY) {
-                        throw e;
-                    }
-                    // Another thread inserted in the meantime: Retry
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Detected concurrent insertion of a user's setting.", e);
-                    }
-                    retry = true;
-                }
-            }
-        } catch (final SQLException e) {
-            throw SettingExceptionCodes.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(null, stmt);
-        }
-        if (retry) {
-            saveInternal2(con, setting, retryCount + 1);
-        }
     }
 
     /**
@@ -459,39 +399,6 @@ public class RdbSettingStorage extends SettingStorage {
                 setting.getParent().removeElement(setting);
             }
         }
-    }
-
-    /**
-     * Checks if a setting is already stored in the database.
-     * @param con readonly database connection.
-     * @param userId unique identifier of the user.
-     * @param setting Setting.
-     * @return <code>true</code> if a value for the setting exists in the
-     * database.
-     * @throws OXException if an error occurs.
-     */
-    private boolean settingExists(final Connection con, final int userId,
-        final Setting setting)
-        throws OXException {
-        boolean exists = false;
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        try {
-            stmt = con.prepareStatement(SETTING_EXISTS);
-            int pos = 1;
-            stmt.setInt(pos++, ctxId);
-            stmt.setInt(pos++, userId);
-            stmt.setInt(pos++, setting.getId());
-            result = stmt.executeQuery();
-            if (result.next()) {
-                exists = result.getInt(1) == 1;
-            }
-        } catch (final SQLException e) {
-            throw SettingExceptionCodes.SQL_ERROR.create(e);
-        } finally {
-            closeSQLStuff(result, stmt);
-        }
-        return exists;
     }
 
     /**

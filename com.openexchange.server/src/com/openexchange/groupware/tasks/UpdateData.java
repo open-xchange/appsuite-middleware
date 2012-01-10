@@ -726,6 +726,13 @@ class UpdateData {
     }
 
     void sentEvent(final Session session) throws OXException {
+        final Task orig = getOrigTask();
+        if (getUserId() != orig.getCreatedBy() && null == ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(getChangedParticipants()), orig.getCreatedBy())) {
+            // Delegator not participant and participant changed task. Change parent folder of original task to delegators folder identifier
+            // so we are able to use that for participant notification.
+            Folder delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), orig.getCreatedBy());
+            orig.setParentFolderID(delegatorFolder.getIdentifier());
+        }
         sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
     }
 

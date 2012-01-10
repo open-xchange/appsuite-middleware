@@ -377,7 +377,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 access.close(true);
             }
         }
-        imapIdleFuture = threadPoolService.submit(ThreadPools.task(this));
+        imapIdleFuture = threadPoolService.submit(ThreadPools.task(this, getClass().getName()));
     }
 
     /**
