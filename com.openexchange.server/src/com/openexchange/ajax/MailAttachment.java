@@ -234,7 +234,7 @@ public class MailAttachment extends AJAXServlet {
                 {
                     final int buflen = 0xFFFF;
                     final byte[] buffer = new byte[buflen];
-                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) != -1;) {
+                    for (int len; (len = attachmentInputStream.read(buffer, 0, buflen)) > 0;) {
                         out.write(buffer, 0, len);
                     }
                     out.flush();
