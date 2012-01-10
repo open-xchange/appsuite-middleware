@@ -49,10 +49,14 @@
 
 package com.openexchange.imap;
 
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
 import javax.mail.MessagingException;
+import com.openexchange.imap.services.IMAPServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.sun.mail.imap.IMAPStore;
 
 /**
@@ -77,16 +81,70 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         }
     }
 
+    protected static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb) {
+        if (null == trace) {
+            sb.append("<missing stack trace>\n");
+            return;
+        }
+        for (final StackTraceElement ste : trace) {
+            final String className = ste.getClassName();
+            if (null != className) {
+                sb.append("\tat ").append(className).append('.').append(ste.getMethodName());
+                if (ste.isNativeMethod()) {
+                    sb.append("(Native Method)");
+                } else {
+                    final String fileName = ste.getFileName();
+                    if (null == fileName) {
+                        sb.append("(Unknown Source)");
+                    } else {
+                        final int lineNumber = ste.getLineNumber();
+                        sb.append('(').append(fileName);
+                        if (lineNumber >= 0) {
+                            sb.append(':').append(lineNumber);
+                        }
+                        sb.append(')');
+                    }
+                }
+                sb.append("\n");
+            }
+        }
+    }
+
     private static final class ReentrantSemaphoredBoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {
 
-        private final ConcurrentMap<Thread, CountedIMAPStore> stores;
+        protected final ConcurrentMap<Thread, CountedIMAPStore> stores;
 
         private final Semaphore semaphore;
+
+        private volatile ScheduledTimerTask timerTask;
 
         protected ReentrantSemaphoredBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
             super(server, port, login, pw);
             semaphore = new Semaphore(maxCount, true);
             stores = new ConcurrentHashMap<Thread, CountedIMAPStore>(maxCount);
+            if (DEBUG) {
+                final TimerService service = IMAPServiceRegistry.getService(TimerService.class);
+                if (null != service) {
+                    final Runnable task = new Runnable() {
+
+                        public void run() {
+                            if (stores.isEmpty()) {
+                                LOG.info("No occupied IMAPStore \"" + server + "\" instance for login " + login);
+                            }
+                            final StringBuilder sb = new StringBuilder(512);
+                            for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
+                                sb.setLength(0);
+                                final Thread t = entry.getKey();
+                                sb.append(t.getName()).append(" occupies IMAPStore \"");
+                                sb.append(server).append("\" instance for login ").append(login).append('\n');
+                                appendStackTrace(t.getStackTrace(), sb);
+                                LOG.info(sb.toString());
+                            }
+                        }
+                    };
+                    timerTask = service.scheduleWithFixedDelay(task, 15000, 15000);
+                }
+            }
         }
 
         @Override
