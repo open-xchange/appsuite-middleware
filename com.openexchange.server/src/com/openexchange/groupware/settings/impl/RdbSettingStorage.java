@@ -217,10 +217,11 @@ public class RdbSettingStorage extends SettingStorage {
         }
     }
 
-    private static final int MAX_RETRY = 3;
+    private static final int MAX_RETRY = 10;
 
     /**
      * Internally saves a setting into the database.
+     * TODO maybe INSERT ON DUPLICATE KEY UPDATE can also solve this problem.
      * @param con a writable database connection.
      * @param setting setting to store.
      * @throws OXException if storing fails.
