@@ -84,6 +84,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
@@ -150,7 +151,16 @@ public class ReportingMBean implements DynamicMBean {
                 final List<Integer> allContextIds = contextService.getAllContextIds();
                 int userCount = 0;
                 for (final Integer contextId : allContextIds) {
-                    userCount += userService.listAllUser(contextService.getContext(contextId.intValue())).length;
+                    int length;
+                    try {
+                        length = userService.listAllUser(contextService.getContext(contextId.intValue())).length;
+                    } catch (final OXException e) {
+                        if (!ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                            throw e;
+                        }
+                        length = 0;
+                    }
+                    userCount += length;
                 }
                 final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] {
                     I(allContextIds.size()), I(userCount) });
