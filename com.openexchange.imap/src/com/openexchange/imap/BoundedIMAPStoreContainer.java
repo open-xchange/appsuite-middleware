@@ -180,7 +180,18 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
             }
             // Acquire a new IMAPStore instance
             if (!semaphore.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)) {
-                final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, server, login);
+                // Timed out...
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append(semaphore.getQueueLength()).append(" threads waiting to acquire a connection to \"").append(server);
+                sb.append("\" for login ").append(login);
+                for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
+                    final Thread t = entry.getKey();
+                    sb.append("\n--- ").append(t.getName()).append(" occupies IMAPStore \"");
+                    sb.append(server).append("\" instance for login ").append(login).append('\n');
+                    appendStackTrace(t.getStackTrace(), sb);
+                }
+                final Throwable t = new Throwable(sb.toString());
+                final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, t, server, login);
                 throw new MessagingException(e.getMessage(), e);
             }
             final IMAPStore imapStore = super.getStore(imapSession);
