@@ -206,31 +206,23 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, t, server, login);
                 throw new MessagingException(e.getMessage(), e);
             }
-            final IMAPStore imapStore = superGetStore(imapSession);
+            // Obtain new IMAPStore instance
+            final IMAPStore imapStore = getStoreErrorAware(imapSession);
             stores.put(thread, new CountedIMAPStore(imapStore));
             return imapStore;
         }
 
-        private IMAPStore superGetStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+        private IMAPStore getStoreErrorAware(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+            boolean releasePermit = true;
             try {
-                return super.getStore(imapSession);
-            } catch (final MessagingException e) {
-                // IMAPStore could not be obtained; release previously obtained permit
-                semaphore.release();
-                throw e;
-            } catch (final InterruptedException e) {
-                // IMAPStore could not be obtained; release previously obtained permit
-                semaphore.release();
-                throw e;
-            } catch (final Exception e) {
-                // IMAPStore could not be obtained; release previously obtained permit
-                semaphore.release();
-                throw new MessagingException(e.getMessage(), e);
-            } catch (final Throwable t) {
-                // IMAPStore could not be obtained; release previously obtained permit
-                semaphore.release();
-                final String message = t.getMessage();
-                throw new MessagingException(message, new IllegalStateException(message, t));
+                final IMAPStore imapStore = super.getStore(imapSession);
+                releasePermit = false;
+                return imapStore;
+            } finally {
+                if (releasePermit) {
+                    // An exception/throwable was thrown; release previously acquired permit
+                    semaphore.release();
+                }
             }
         }
 
