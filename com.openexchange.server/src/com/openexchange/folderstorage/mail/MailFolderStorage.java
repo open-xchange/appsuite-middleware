@@ -97,6 +97,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -714,16 +715,12 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * An external account folder
                  */
-                final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
-                mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
                 retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
-                final String parentId = prepareFullname(accountId, fullname);
-                final SortableId[] subfolders = getSubfolders(parentId, storageParameters, mailAccess);
-                final String[] ids = new String[subfolders.length];
-                for (int i = 0; i < ids.length; i++) {
-                    ids[i] = subfolders[i].getId();
-                }
-                retval.setSubfolderIDs(ids);
+                /*
+                 * Reload in FolderMap
+                 */
+                retval.setSubfolderIDs(null);
+                LogProperties.getLogProperties().put("com.openexchange.session.session", session);
             }
         } else {
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
@@ -739,7 +736,12 @@ public final class MailFolderStorage implements FolderStorage {
                     mailAccess.getMailConfig(),
                     storageParameters,
                     new MailAccessFullnameProvider(mailAccess));
-                retval = MailAccount.DEFAULT_ID == accountId ? mailFolderImpl : new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);
+                if (MailAccount.DEFAULT_ID == accountId) {
+                    retval = mailFolderImpl;
+                } else {
+                    retval = new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);
+                    LogProperties.getLogProperties().put("com.openexchange.session.session", session);
+                }
             }
             hasSubfolders = mailFolder.hasSubfolders();
             /*
