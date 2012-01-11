@@ -73,6 +73,15 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
     public static enum ImplType {
         SEMAPHORE, SYNCHRONIZED;
+
+        public static ImplType implTypeFor(final String identifier) {
+            for (final ImplType it : ImplType.values()) {
+                if (it.name().equalsIgnoreCase(identifier)) {
+                    return it;
+                }
+            }
+            return null;
+        }
     }
 
     private static final class CountedIMAPStore {
@@ -197,9 +206,32 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, t, server, login);
                 throw new MessagingException(e.getMessage(), e);
             }
-            final IMAPStore imapStore = super.getStore(imapSession);
+            final IMAPStore imapStore = superGetStore(imapSession);
             stores.put(thread, new CountedIMAPStore(imapStore));
             return imapStore;
+        }
+
+        private IMAPStore superGetStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+            try {
+                return super.getStore(imapSession);
+            } catch (final MessagingException e) {
+                // IMAPStore could not be obtained; release previously obtained permit
+                semaphore.release();
+                throw e;
+            } catch (final InterruptedException e) {
+                // IMAPStore could not be obtained; release previously obtained permit
+                semaphore.release();
+                throw e;
+            } catch (final Exception e) {
+                // IMAPStore could not be obtained; release previously obtained permit
+                semaphore.release();
+                throw new MessagingException(e.getMessage(), e);
+            } catch (final Throwable t) {
+                // IMAPStore could not be obtained; release previously obtained permit
+                semaphore.release();
+                final String message = t.getMessage();
+                throw new MessagingException(message, new IllegalStateException(message, t));
+            }
         }
 
         @Override
@@ -270,9 +302,9 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                         throw new MessagingException(e.getMessage(), e);
                     }
                 }
-                count++;
                 final IMAPStore imapStore = super.getStore(imapSession);
                 stores.put(thread, new CountedIMAPStore(imapStore));
+                count++;
                 return imapStore;
             }
         }
