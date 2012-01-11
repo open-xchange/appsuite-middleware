@@ -182,7 +182,8 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
             if (!semaphore.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)) {
                 // Timed out...
                 final StringBuilder sb = new StringBuilder(512);
-                sb.append(semaphore.getQueueLength()).append(" threads waiting to acquire a connection to \"").append(server);
+                sb.append(semaphore.getQueueLength()).append(" threads waiting. ");
+                sb.append(semaphore.availablePermits()).append(" permits available for \"").append(server);
                 sb.append("\" for login ").append(login);
                 for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
                     final Thread t = entry.getKey();
