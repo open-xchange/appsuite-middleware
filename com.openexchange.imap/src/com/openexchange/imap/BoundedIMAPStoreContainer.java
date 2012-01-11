@@ -356,4 +356,14 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
         impl.backStore(imapStore);
     }
 
+    @Override
+    public void clear() {
+        impl.clear();
+    }
+
+    @Override
+    public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
+        impl.closeElapsed(stamp, debugBuilder);
+    }
+
 }
