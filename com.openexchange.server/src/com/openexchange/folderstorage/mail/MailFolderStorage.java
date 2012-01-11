@@ -80,6 +80,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolderWrapper;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -690,6 +691,8 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    private static final Set<String> IGNORABLES = RemoveAfterAccessFolder.IGNORABLES;
+
     private Folder getFolder(final String treeId, final FullnameArgument argument, final StorageParameters storageParameters, final MailAccess<?, ?> mailAccess, final ServerSession session, final MailAccount mailAccount) throws OXException {
         final int accountId = argument.getAccountId();
         final String fullname = argument.getFullname();
@@ -715,12 +718,16 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * An external account folder
                  */
-                retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                if (IGNORABLES.contains(mailAccount.getMailProtocol())) {
+                    retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                } else {
+                    retval = new RemoveAfterAccessExtRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    LogProperties.getLogProperties().put("com.openexchange.session.session", session);
+                }
                 /*
-                 * Reload in FolderMap
+                 * Load on demand (or in FolderMap)
                  */
                 retval.setSubfolderIDs(null);
-                LogProperties.getLogProperties().put("com.openexchange.session.session", session);
             }
         } else {
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);

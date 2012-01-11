@@ -98,9 +98,10 @@ final class KF2AFEqualCallable implements Task<Object> {
     }
 
     public Object call() throws Exception {
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, accountId);
-        mailAccess.connect();
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect();
             final String realSource = UnifiedINBOXUtility.determineAccountFullname(mailAccess, sourceFolder);
             final String[] results;
             if (move) {
@@ -114,7 +115,9 @@ final class KF2AFEqualCallable implements Task<Object> {
                 toFill[indexList.get(j)] = results[j];
             }
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
         return null;
     }

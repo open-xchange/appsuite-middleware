@@ -215,9 +215,10 @@ public final class UnifiedINBOXMessageCopier {
         final String[] retval;
         // Parse source folder
         final FullnameArgument sourceFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(sourceFolder);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
-        mailAccess.connect();
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
+            mailAccess.connect();
             final String realDest = UnifiedINBOXUtility.determineAccountFullname(mailAccess, destFolder);
             final String sourceFullname = sourceFullnameArgument.getFullname();
             if (move && sourceFullname.equals(realDest)) {
@@ -230,7 +231,9 @@ public final class UnifiedINBOXMessageCopier {
             }
 
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
         return retval;
     }
@@ -265,22 +268,28 @@ public final class UnifiedINBOXMessageCopier {
             }
         }
         final String[] retval;
-        final MailAccess<?, ?> sourceMailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
-        sourceMailAccess.connect();
+        MailAccess<?, ?> sourceMailAccess = null;
         try {
+            sourceMailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
+            sourceMailAccess.connect();
             final MailMessage[] mails = sourceMailAccess.getMessageStorage().getMessages(sourceFullname, mailIds, FIELDS_FULL);
-            final MailAccess<?, ?> destMailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
-            destMailAccess.connect();
+            MailAccess<?, ?> destMailAccess = null;
             try {
+                destMailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
+                destMailAccess.connect();
                 retval = destMailAccess.getMessageStorage().appendMessages(destFullname, mails);
             } finally {
-                destMailAccess.close(true);
+                if (null != destMailAccess) {
+                    destMailAccess.close(true);
+                }
             }
             if (move) {
                 sourceMailAccess.getMessageStorage().deleteMessages(sourceFullname, mailIds, true);
             }
         } finally {
-            sourceMailAccess.close(true);
+            if (null != sourceMailAccess) {
+                sourceMailAccess.close(true);
+            }
         }
         return retval;
     }

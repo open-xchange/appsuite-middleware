@@ -47,34 +47,51 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.folderstorage.mail;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.mailaccount.UnifiedINBOXManagement;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.RemoveAfterAccessFolder;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RemoveAfterAccessFolder} - A folder which is removed from cache (if elapsed) after it was accessed.
- * <p>
- * Applies only to locally (not globally) cached folders; meaning {@link #isCacheable()} MUST return <code>true</code> AND
- * {@link #isGlobalID()} MUST return <code>false</code>.
+ * {@link RemoveAfterAccessExtRootFolder} - A mail folder especially for root folder of an external account implementing
+ * {@link RemoveAfterAccessFolder}.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface RemoveAfterAccessFolder extends Folder {
+public final class RemoveAfterAccessExtRootFolder extends ExternalMailAccountRootFolder implements RemoveAfterAccessFolder {
+
+    private static final long serialVersionUID = -7259106085690350497L;
 
     /**
-     * Set of ignorable mail protocol identifiers.
-     */
-    public static final Set<String> IGNORABLES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("pop3", UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX)));
-
-    /**
-     * Whether to load subfolders.
+     * Initializes a new {@link RemoveAfterAccessExtRootFolder} from given mail account.
+     * <p>
+     * Subfolder identifiers and tree identifier are not set within this constructor.
      * 
-     * @return <code>true</code> to load subfolders; otherwise <code>false</code>
+     * @param mailAccount The underlying mail account
+     * @param mailConfig The mail configuration
+     * @param session The session
+     * @throws OXException If creation fails
      */
-    boolean loadSubfolders();
+    public RemoveAfterAccessExtRootFolder(final MailAccount mailAccount, final MailConfig mailConfig, final ServerSession session) throws OXException {
+        super(mailAccount, mailConfig, session);
+    }
+
+    @Override
+    public boolean loadSubfolders() {
+        return true;
+    }
+
+    @Override
+    public RemoveAfterAccessExtRootFolder clone() {
+        return (RemoveAfterAccessExtRootFolder) super.clone();
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return true;
+    }
 
 }
