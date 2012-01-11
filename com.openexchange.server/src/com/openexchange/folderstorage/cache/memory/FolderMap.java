@@ -58,6 +58,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
+import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
@@ -219,7 +220,28 @@ public final class FolderMap {
     }
 
     private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
-        ThreadPools.getThreadPool().submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders, this)), AbortBehavior.getInstance());
+        try {
+            final ServerSession session = ServerSessionAdapter.valueOf((Session) LogProperties.getLogProperties().get("com.openexchange.session.session"));
+            if (null == session) {
+                return;
+            }
+            ThreadPools.getThreadPool().submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders, this, session)), AbortBehavior.getInstance());
+        } catch (final Exception e) {
+            // Ignore
+        }
+    }
+
+    private void loadSubolders(final Folder folder, final String treeId) {
+        try {
+            final ServerSession session = ServerSessionAdapter.valueOf((Session) LogProperties.getLogProperties().get("com.openexchange.session.session"));
+            if (null == session) {
+                return;
+            }
+            ThreadPools.getThreadPool().submit(ThreadPools.task(new LoadSubfolders(folder, treeId, this, session)), AbortBehavior.getInstance());
+        } catch (final Exception e) {
+            // Ignore
+            folder.setSubfolderIDs(null);
+        }
     }
 
     /**
@@ -294,8 +316,12 @@ public final class FolderMap {
         return new Key(folderId, treeId);
     }
 
-    private static Wrapper wrapperOf(final Folder folder) {
-        return new Wrapper(folder);
+    private Wrapper wrapperOf(final Folder folder) {
+        final Wrapper wrapper = new Wrapper(folder);
+        if (wrapper.loadSubfolders && null == folder.getSubfolderIDs()) {
+            loadSubolders(folder, folder.getTreeID());
+        }
+        return wrapper;
     }
 
     private static final class Wrapper {
@@ -414,21 +440,19 @@ public final class FolderMap {
         private final String treeId;
         private final boolean loadSubfolders;
         private final FolderMap folderMap;
+        private final ServerSession session;
 
-        protected RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders, final FolderMap folderMap) {
+        protected RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders, final FolderMap folderMap, final ServerSession session) {
             this.folderId = folderId;
             this.treeId = treeId;
             this.loadSubfolders = loadSubfolders;
             this.folderMap = folderMap;
+            this.session = session;
         }
 
         @Override
         public void run() {
             try {
-                final ServerSession session = ServerSessionAdapter.valueOf((Session) LogProperties.getLogProperties().get("com.openexchange.session.session"));
-                if (null == session) {
-                    return;
-                }
                 final StorageParameters params = new StorageParametersImpl(session);
                 params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
                 final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
@@ -453,6 +477,55 @@ public final class FolderMap {
                                     folderMap.put(treeId, loaded);
                                 }
                             }
+                        }
+                    }
+                } finally {
+                    lock.unlock();
+                }
+            } catch (final Exception e) {
+                LOG.debug(e.getMessage(), e); 
+            }
+        }
+    }
+
+    private static final class LoadSubfolders implements Runnable {
+
+        private final Folder folder;
+        private final String treeId;
+        private final FolderMap folderMap;
+        private final ServerSession session;
+
+        protected LoadSubfolders(final Folder folder, final String treeId, final FolderMap folderMap, final ServerSession session) {
+            this.folder = folder;
+            this.treeId = treeId;
+            this.folderMap = folderMap;
+            this.session = session;
+        }
+
+        @Override
+        public void run() {
+            try {
+                final StorageParameters params = new StorageParametersImpl(session);
+                params.putParameter(MailFolderType.getInstance(), StorageParameters.PARAM_ACCESS_FAST, Boolean.FALSE);
+                final Lock lock = CacheFolderStorage.readLockFor(treeId, params);
+                lock.lock();
+                try {
+                    final CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
+                    // Check for subfolders
+                    final SortableId[] subfolders = folderStorage.getSubfolders(treeId, folder.getID(), params);
+                    {
+                        final String[] ids = new String[subfolders.length];
+                        for (int i = 0; i < ids.length; i++) {
+                            ids[i] = subfolders[i].getId();
+                        }
+                        folder.setSubfolderIDs(ids);
+                    }
+                    for (final SortableId sortableId : subfolders) {
+                        final Folder loaded = folderStorage.loadFolder(treeId, sortableId.getId(), StorageType.WORKING, params);
+                        if (loaded.isGlobalID()) {
+                            folderStorage.putFolder(loaded, treeId, params);
+                        } else {
+                            folderMap.put(treeId, loaded);
                         }
                     }
                 } finally {

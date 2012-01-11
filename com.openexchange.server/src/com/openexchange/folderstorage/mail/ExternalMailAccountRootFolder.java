@@ -55,7 +55,6 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.SystemType;
@@ -73,11 +72,11 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ExternalMailAccountRootFolder extends AbstractFolder implements RemoveAfterAccessFolder {
+public class ExternalMailAccountRootFolder extends AbstractFolder {
 
     private static final long serialVersionUID = -7259106085690350497L;
 
-    private final com.openexchange.folderstorage.mail.MailFolderImpl.MailFolderType mailFolderType;
+    protected final com.openexchange.folderstorage.mail.MailFolderImpl.MailFolderType mailFolderType;
 
     /**
      * Initializes a new {@link ExternalMailAccountRootFolder} from given mail account.
@@ -167,18 +166,13 @@ public final class ExternalMailAccountRootFolder extends AbstractFolder implemen
     }
 
     @Override
-    public boolean loadSubfolders() {
-        return true;
-    }
-
-    @Override
     public ExternalMailAccountRootFolder clone() {
         return (ExternalMailAccountRootFolder) super.clone();
     }
 
     @Override
     public boolean isCacheable() {
-        return true;
+        return false;
     }
 
     @Override
