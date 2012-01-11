@@ -102,12 +102,14 @@ final class KF2AFDifferCallable implements Task<Object> {
     }
 
     public Object call() throws Exception {
-        final MailAccess<?, ?> sourceMailAccess = MailAccess.getInstance(session, accountId);
-        sourceMailAccess.connect();
+        MailAccess<?, ?> sourceMailAccess = null;
         try {
-            final MailAccess<?, ?> destMailAccess = MailAccess.getInstance(session, destAccountId);
-            destMailAccess.connect();
+            sourceMailAccess = MailAccess.getInstance(session, accountId);
+            sourceMailAccess.connect();
+            MailAccess<?, ?> destMailAccess = null;
             try {
+                destMailAccess = MailAccess.getInstance(session, destAccountId);
+                destMailAccess.connect();
                 final int size = idList.size();
                 final MailMessage[] mails = new MailMessage[size];
                 // Gather mails
@@ -131,10 +133,14 @@ final class KF2AFDifferCallable implements Task<Object> {
                     }
                 }
             } finally {
-                destMailAccess.close(true);
+                if (null != destMailAccess) {
+                    destMailAccess.close(true);
+                }
             }
         } finally {
-            sourceMailAccess.close(true);
+            if (null != sourceMailAccess) {
+                sourceMailAccess.close(true);
+            }
         }
         return null;
     }

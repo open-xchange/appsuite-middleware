@@ -167,6 +167,9 @@ public class UnboundedIMAPStoreContainer extends AbstractIMAPStoreContainer {
 
     @Override
     public void clear() {
+        if (null == queue) {
+            return;
+        }
         for (final Iterator<IMAPStoreWrapper> iter = queue.iterator(); iter.hasNext();) {
             final IMAPStoreWrapper imapStoreWrapper = iter.next();
             iter.remove();

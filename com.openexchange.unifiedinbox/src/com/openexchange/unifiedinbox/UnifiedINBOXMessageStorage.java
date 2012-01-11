@@ -145,6 +145,13 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
         user = session.getUserId();
     }
 
+    protected static void closeSafe(final MailAccess<?, ?> mailAccess) {
+        if (null == mailAccess) {
+            return;
+        }
+        mailAccess.close(true);
+    }
+
     /**
      * Gets session user's locale
      *
@@ -207,15 +214,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess;
+                        MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return GetMessagesResult.EMPTY_RESULT;
-                        }
-                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             for (final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator(); inneriter.hasNext();) {
                                 final Map.Entry<String, List<String>> e = inneriter.next();
@@ -246,8 +248,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                     return GetMessagesResult.EMPTY_RESULT;
                                 }
                             }
+                        } catch (final OXException e) {
+                            getLogger().debug(e.getMessage(), e);
+                            return GetMessagesResult.EMPTY_RESULT;
                         } finally {
-                            mailAccess.close(true);
+                            closeSafe(mailAccess);
                         }
                         // Return dummy object
                         return GetMessagesResult.EMPTY_RESULT;
@@ -279,7 +284,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                     }
                 } finally {
                     if (close) {
-                        mailAccess.close(true);
+                        closeSafe(mailAccess);
                     }
                 }
                  */
@@ -304,11 +309,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             return messages;
         }
         final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        boolean close = false;
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
             mailAccess.connect();
-            close = true;
             // Get messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(fa.getFullname(), mailIds, fields);
             for (final MailMessage mail : mails) {
@@ -318,9 +322,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
             return mails;
         } finally {
-            if (close) {
-                mailAccess.close(true);
-            }
+            closeSafe(mailAccess);
         }
     }
 
@@ -331,11 +333,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
         }
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullName)) {
             final UnifiedINBOXUID uid = new UnifiedINBOXUID(mailId);
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, uid.getAccountId());
-            boolean close = false;
+            MailAccess<?, ?> mailAccess = null;
             try {
+                mailAccess = MailAccess.getInstance(session, uid.getAccountId());
                 mailAccess.connect();
-                close = true;
                 MailMessage mail = mailAccess.getMessageStorage().getMessage(uid.getFullName(), uid.getId(), markSeen);
                 if (null == mail) {
                     return null;
@@ -346,17 +347,14 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 mail.setFolder(fullName);
                 return mail;
             } finally {
-                if (close) {
-                    mailAccess.close(true);
-                }
+                closeSafe(mailAccess);
             }
         }
         final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        boolean close = false;
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
             mailAccess.connect();
-            close = true;
             // Get message
             final MailMessage mail = mailAccess.getMessageStorage().getMessage(fa.getFullname(), mailId, markSeen);
             if (null == mail) {
@@ -366,9 +364,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             mail.setFolder(fullName);
             return mail;
         } finally {
-            if (close) {
-                mailAccess.close(true);
-            }
+                closeSafe(mailAccess);
         }
     }
 
@@ -403,16 +399,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
 
                     public List<MailMessage> call() {
                         final int accountId = mailAccount.getId();
-                        final MailAccess<?, ?> mailAccess;
+                        MailAccess<?, ?> mailAccess = null;
+                        String fn = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return Collections.emptyList();
-                        }
-                        String fn = null;
-                        try {
                             // Get real full name
                             fn = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullName);
                             // Check if denoted account has such a default folder
@@ -446,7 +437,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                             getLogger().warn(tmp.toString(), e);
                             return Collections.emptyList();
                         } finally {
-                            mailAccess.close(true);
+                            closeSafe(mailAccess);
                         }
                     }
                 });
@@ -474,11 +465,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
         }
         final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        boolean close = false;
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
             mailAccess.connect();
-            close = true;
             // Get account's messages
             final MailMessage[] mails =
                 mailAccess.getMessageStorage().searchMessages(fa.getFullname(), indexRange, sortField, order, searchTerm, fields);
@@ -487,9 +477,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
             return mails;
         } finally {
-            if (close) {
-                mailAccess.close(true);
-            }
+                closeSafe(mailAccess);
         }
     }
 
@@ -520,15 +508,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
                     public List<MailMessage> call() throws Exception {
-                        final MailAccess<?, ?> mailAccess;
+                        MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
                             mailAccess.connect();
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return Collections.emptyList();
-                        }
-                        try {
                             // Get real fullname
                             final String fn = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullName);
                             // Check if denoted account has such a default folder
@@ -547,8 +530,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 messages.add(umm);
                             }
                             return messages;
+                        } catch (final OXException e) {
+                            getLogger().debug(e.getMessage(), e);
+                            return Collections.emptyList();
                         } finally {
-                            mailAccess.close(true);
+                            closeSafe(mailAccess);
                         }
                     }
                 });
@@ -575,11 +561,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
         }
         final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        boolean close = false;
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
             mailAccess.connect();
-            close = true;
             // Get account's messages
             final MailMessage[] mails = mailAccess.getMessageStorage().getUnreadMessages(fa.getFullname(), sortField, order, fields, limit);
             for (final MailMessage mail : mails) {
@@ -587,9 +572,7 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
             return mails;
         } finally {
-            if (close) {
-                mailAccess.close(true);
-            }
+                closeSafe(mailAccess);
         }
     }
 
@@ -613,15 +596,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess;
+                        MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return null;
-                        }
-                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
@@ -632,8 +610,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 // Delete messages
                                 mailAccess.getMessageStorage().deleteMessages(folder, uids.toArray(new String[uids.size()]), hardDelete);
                             }
+                        } catch (final OXException e) {
+                            getLogger().debug(e.getMessage(), e);
+                            return null;
                         } finally {
-                            mailAccess.close(true);
+                            closeSafe(mailAccess);
                         }
                         return null;
                     }
@@ -657,16 +638,13 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-            boolean close = false;
+            MailAccess<?, ?> mailAccess = null;
             try {
+                mailAccess = MailAccess.getInstance(session, fa.getAccountId());
                 mailAccess.connect();
-                close = true;
                 mailAccess.getMessageStorage().deleteMessages(fa.getFullname(), mailIds, hardDelete);
             } finally {
-                if (close) {
-                    mailAccess.close(true);
-                }
+                    closeSafe(mailAccess);
             }
         }
     }
@@ -689,12 +667,13 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
         }
         // Parse destination folder
         final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFullname);
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
-        mailAccess.connect();
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, destFullnameArgument.getAccountId());
+            mailAccess.connect();
             return mailAccess.getMessageStorage().appendMessages(destFullnameArgument.getFullname(), mailMessages);
         } finally {
-            mailAccess.close(true);
+            closeSafe(mailAccess);
         }
     }
 
@@ -717,15 +696,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess;
+                        MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return null;
-                        }
-                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
@@ -736,8 +710,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                 // Update flags
                                 mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
                             }
+                        } catch (final OXException e) {
+                            getLogger().debug(e.getMessage(), e);
+                            return null;
                         } finally {
-                            mailAccess.close(true);
+                            closeSafe(mailAccess);
                         }
                         return null;
                     }
@@ -761,16 +738,13 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-            boolean close = false;
+            MailAccess<?, ?> mailAccess = null;
             try {
+                mailAccess = MailAccess.getInstance(session, fa.getAccountId());
                 mailAccess.connect();
-                close = true;
                 mailAccess.getMessageStorage().updateMessageFlags(fa.getFullname(), mailIds, flags, set);
             } finally {
-                if (close) {
-                    mailAccess.close(true);
-                }
+                closeSafe(mailAccess);
             }
         }
     }
@@ -794,15 +768,10 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                         final Map.Entry<Integer, Map<String, List<String>>> accountMapEntry = iter.next();
                         final int accountId = accountMapEntry.getKey().intValue();
                         // Get account's mail access
-                        final MailAccess<?, ?> mailAccess;
+                        MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(getSession(), accountId);
                             mailAccess.connect();
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return null;
-                        }
-                        try {
                             final Map<String, List<String>> folderUIDMap = accountMapEntry.getValue();
                             final int innersize = folderUIDMap.size();
                             final Iterator<Map.Entry<String, List<String>>> inneriter = folderUIDMap.entrySet().iterator();
@@ -816,8 +785,11 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
                                     uids.toArray(new String[uids.size()]),
                                     colorLabel);
                             }
+                        } catch (final OXException e) {
+                            getLogger().debug(e.getMessage(), e);
+                            return null;
                         } finally {
-                            mailAccess.close(true);
+                            closeSafe(mailAccess);
                         }
                         return null;
                     }
@@ -841,16 +813,13 @@ public final class UnifiedINBOXMessageStorage extends MailMessageStorage {
             }
         } else {
             final FullnameArgument fa = UnifiedINBOXUtility.parseNestedFullname(fullName);
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-            boolean close = false;
+            MailAccess<?, ?> mailAccess = null;
             try {
+                mailAccess = MailAccess.getInstance(session, fa.getAccountId());
                 mailAccess.connect();
-                close = true;
                 mailAccess.getMessageStorage().updateMessageColorLabel(fa.getFullname(), mailIds, colorLabel);
             } finally {
-                if (close) {
-                    mailAccess.close(true);
-                }
+                closeSafe(mailAccess);
             }
         }
     }

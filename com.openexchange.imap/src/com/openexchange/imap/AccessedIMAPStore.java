@@ -50,6 +50,7 @@
 package com.openexchange.imap;
 
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
@@ -70,7 +71,7 @@ import com.sun.mail.imap.IMAPStore;
  */
 public final class AccessedIMAPStore extends IMAPStore {
 
-    private IMAPStore imapStore;
+    private final AtomicReference<IMAPStore> imapStoreRef;
 
     private final IMAPAccess imapAccess;
 
@@ -84,7 +85,11 @@ public final class AccessedIMAPStore extends IMAPStore {
     public AccessedIMAPStore(final IMAPAccess imapAccess, final IMAPStore imapStore, final Session imapSession) {
         super(imapSession, imapStore.getURLName());
         this.imapAccess = imapAccess;
-        this.imapStore = imapStore;
+        this.imapStoreRef = new AtomicReference<IMAPStore>(imapStore);
+    }
+
+    private IMAPStore imapStore() {
+        return imapStoreRef.get();
     }
 
     /**
@@ -93,9 +98,7 @@ public final class AccessedIMAPStore extends IMAPStore {
      * @return The IMAP store
      */
     public IMAPStore dropAndGetImapStore() {
-        final IMAPStore store = imapStore;
-        imapStore = null;
-        return store;
+        return imapStoreRef.getAndSet(null);
     }
 
     /**
@@ -119,106 +122,107 @@ public final class AccessedIMAPStore extends IMAPStore {
 
     @Override
     public int hashCode() {
-        return imapStore.hashCode();
+        return imapStore().hashCode();
     }
 
     @Override
     public void connect() throws MessagingException {
-        imapStore.connect();
+        imapStore().connect();
     }
 
     @Override
     public boolean equals(final Object obj) {
-        return imapStore.equals(obj);
+        return imapStore().equals(obj);
     }
 
     @Override
     public void connect(final String host, final String user, final String password) throws MessagingException {
-        imapStore.connect(host, user, password);
+        imapStore().connect(host, user, password);
     }
 
     @Override
     public void connect(final String user, final String password) throws MessagingException {
-        imapStore.connect(user, password);
+        imapStore().connect(user, password);
     }
 
     @Override
     public void addStoreListener(final StoreListener l) {
-        imapStore.addStoreListener(l);
+        imapStore().addStoreListener(l);
     }
 
     @Override
     public void removeStoreListener(final StoreListener l) {
-        imapStore.removeStoreListener(l);
+        imapStore().removeStoreListener(l);
     }
 
     @Override
     public void connect(final String host, final int port, final String user, final String password) throws MessagingException {
-        imapStore.connect(host, port, user, password);
+        imapStore().connect(host, port, user, password);
     }
 
     @Override
     public void addFolderListener(final FolderListener l) {
-        imapStore.addFolderListener(l);
+        imapStore().addFolderListener(l);
     }
 
     @Override
     public void removeFolderListener(final FolderListener l) {
-        imapStore.removeFolderListener(l);
+        imapStore().removeFolderListener(l);
     }
 
     @Override
     public URLName getURLName() {
-        return imapStore.getURLName();
+        return imapStore().getURLName();
     }
 
     @Override
     public void addConnectionListener(final ConnectionListener l) {
-        imapStore.addConnectionListener(l);
+        imapStore().addConnectionListener(l);
     }
 
     @Override
     public void removeConnectionListener(final ConnectionListener l) {
-        imapStore.removeConnectionListener(l);
+        imapStore().removeConnectionListener(l);
     }
 
     @Override
     public String toString() {
-        return imapStore.toString();
+        return imapStore().toString();
     }
 
     @Override
     public void setUsername(final String user) {
-        imapStore.setUsername(user);
+        imapStore().setUsername(user);
     }
 
     @Override
     public void setPassword(final String password) {
-        imapStore.setPassword(password);
+        imapStore().setPassword(password);
     }
 
     @Override
     public boolean hasCapability(final String capability) throws MessagingException {
-        return imapStore.hasCapability(capability);
+        return imapStore().hasCapability(capability);
     }
 
     @Override
     public Map getCapabilities() throws MessagingException {
-        return imapStore.getCapabilities();
+        return imapStore().getCapabilities();
     }
 
     @Override
     public String getGreeting() throws MessagingException {
-        return imapStore.getGreeting();
+        return imapStore().getGreeting();
     }
 
     @Override
     public boolean isConnected() {
-        return imapStore.isConnected();
+        return imapStore().isConnected();
     }
 
     @Override
     public void close() throws MessagingException {
+        final IMAPStore imapStore = imapStore();
         if (null == imapStore) {
             return;
         }
@@ -227,64 +231,64 @@ public final class AccessedIMAPStore extends IMAPStore {
 
     @Override
     public Folder getDefaultFolder() throws MessagingException {
-        return imapStore.getDefaultFolder();
+        return imapStore().getDefaultFolder();
     }
 
     @Override
     public Folder getFolder(final String name) throws MessagingException {
         try {
-            return imapStore.getFolder(name);
+            return imapStore().getFolder(name);
         } catch (final IllegalStateException e) {
             if (!"Not connected".equals(e.getMessage())) {
                 throw e;
             }
             try {
-                imapStore = imapAccess.connectIMAPStore(false);
+                imapStoreRef.set(imapAccess.connectIMAPStore(false));
             } catch (final OXException ignore) {
                 // Cannot occur since not borrowed from cache
             }
-            return imapStore.getFolder(name);
+            return imapStore().getFolder(name);
         }
     }
 
     @Override
     public Folder getFolder(final URLName url) throws MessagingException {
-        return imapStore.getFolder(url);
+        return imapStore().getFolder(url);
     }
 
     @Override
     public Folder[] getPersonalNamespaces() throws MessagingException {
-        return imapStore.getPersonalNamespaces();
+        return imapStore().getPersonalNamespaces();
     }
 
     @Override
     public Folder[] getUserNamespaces(final String user) throws MessagingException {
-        return imapStore.getUserNamespaces(user);
+        return imapStore().getUserNamespaces(user);
     }
 
     @Override
     public Folder[] getSharedNamespaces() throws MessagingException {
-        return imapStore.getSharedNamespaces();
+        return imapStore().getSharedNamespaces();
     }
 
     @Override
     public Quota[] getQuota(final String root) throws MessagingException {
-        return imapStore.getQuota(root);
+        return imapStore().getQuota(root);
     }
 
     @Override
     public void setQuota(final Quota quota) throws MessagingException {
-        imapStore.setQuota(quota);
+        imapStore().setQuota(quota);
     }
 
     @Override
     public void handleResponse(final Response r) {
-        imapStore.handleResponse(r);
+        imapStore().handleResponse(r);
     }
 
     @Override
     public void idle() throws MessagingException {
-        imapStore.idle();
+        imapStore().idle();
     }
 
 }
