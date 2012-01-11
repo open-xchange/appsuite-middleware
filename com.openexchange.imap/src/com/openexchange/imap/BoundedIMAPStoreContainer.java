@@ -53,7 +53,10 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -114,7 +117,9 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
         protected final ConcurrentMap<Thread, CountedIMAPStore> stores;
 
-        private final Semaphore semaphore;
+        protected final Semaphore semaphore;
+
+        private final int timeoutMillis;
 
         private volatile ScheduledTimerTask timerTask;
 
@@ -122,6 +127,8 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
             super(server, port, login, pw);
             semaphore = new Semaphore(maxCount, true);
             stores = new ConcurrentHashMap<Thread, CountedIMAPStore>(maxCount);
+            final ConfigurationService configurationService = IMAPServiceRegistry.getService(ConfigurationService.class);
+            timeoutMillis = null == configurationService ? 20000 : configurationService.getIntProperty("com.openexchange.imap.imapConnectionTimeout", 20000);
             if (DEBUG) {
                 final TimerService service = IMAPServiceRegistry.getService(TimerService.class);
                 if (null != service) {
@@ -129,8 +136,9 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
                         @Override
                         public void run() {
+                            LOG.info(semaphore.getQueueLength() + " threads waiting to acquire a connection to \"" + server + "\" for login " + login);
                             if (stores.isEmpty()) {
-                                LOG.info("No occupied IMAPStore \"" + server + "\" instance for login " + login);
+                                return;
                             }
                             final StringBuilder sb = new StringBuilder(512);
                             for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
@@ -171,7 +179,10 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 return cImapStore.imapStore;
             }
             // Acquire a new IMAPStore instance
-            semaphore.acquire();
+            if (!semaphore.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, server, login);
+                throw new MessagingException(e.getMessage(), e);
+            }
             final IMAPStore imapStore = super.getStore(imapSession);
             stores.put(thread, new CountedIMAPStore(imapStore));
             return imapStore;

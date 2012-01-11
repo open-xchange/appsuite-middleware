@@ -312,6 +312,12 @@ public final class IMAPStoreCache {
             // Should not occur
             ThreadPools.unexpectedlyInterrupted(Thread.currentThread());
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+        } catch (final MessagingException e) {
+            final Exception nested = e.getNextException();
+            if (nested instanceof OXException) {
+                throw (OXException) nested;
+            }
+            throw e;
         }
     }
 

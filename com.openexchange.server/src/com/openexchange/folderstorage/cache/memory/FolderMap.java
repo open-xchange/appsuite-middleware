@@ -65,7 +65,6 @@ import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 import com.openexchange.tools.session.ServerSession;
@@ -220,8 +219,7 @@ public final class FolderMap {
     }
 
     private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
-        final ThreadPoolService threadPool = ThreadPools.getThreadPool();
-        threadPool.submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders)), AbortBehavior.getInstance());
+        ThreadPools.getThreadPool().submit(ThreadPools.task(new RunnableImpl(folderId, treeId, loadSubfolders, this)), AbortBehavior.getInstance());
     }
 
     /**
@@ -415,11 +413,13 @@ public final class FolderMap {
         private final String folderId;
         private final String treeId;
         private final boolean loadSubfolders;
+        private final FolderMap folderMap;
 
-        protected RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders) {
+        protected RunnableImpl(final String folderId, final String treeId, final boolean loadSubfolders, final FolderMap folderMap) {
             this.folderId = folderId;
             this.treeId = treeId;
             this.loadSubfolders = loadSubfolders;
+            this.folderMap = folderMap;
         }
 
         @Override
@@ -436,14 +436,22 @@ public final class FolderMap {
                 try {
                     final CacheFolderStorage folderStorage = CacheFolderStorage.getInstance();
                     Folder loaded = folderStorage.loadFolder(treeId, folderId, StorageType.WORKING, params);
-                    folderStorage.putFolder(loaded, treeId, params);
+                    if (loaded.isGlobalID()) {
+                        // Eh... No global folder here.
+                        return;
+                    }
+                    folderMap.put(treeId, loaded);
                     // Check for subfolders
                     if (loadSubfolders) {
                         final String[] subfolderIDs = loaded.getSubfolderIDs();
                         if (null != subfolderIDs) {
                             for (final String subfolderId : subfolderIDs) {
                                 loaded = folderStorage.loadFolder(treeId, subfolderId, StorageType.WORKING, params);
-                                folderStorage.putFolder(loaded, treeId, params);
+                                if (loaded.isGlobalID()) {
+                                    folderStorage.putFolder(loaded, treeId, params);
+                                } else {
+                                    folderMap.put(treeId, loaded);
+                                }
                             }
                         }
                     }
