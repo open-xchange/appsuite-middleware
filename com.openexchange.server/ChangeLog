@@ -1,6 +1,7 @@
 * 2012-01-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 21170: Fixed reporting tool if context is deleted in the meantime
+ - Fix for bug 20652: Introduced properties to define default behavior for contact collection on mail access/on mail transport
 
 * 2012-01-10 - thorben.betten@open-xchange.com
 
