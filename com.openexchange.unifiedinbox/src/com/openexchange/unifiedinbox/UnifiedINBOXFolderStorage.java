@@ -68,6 +68,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -170,6 +171,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 mailFolder.setName(getMailAccountName(nestedAccountId));
                 mailFolder.setSubfolders(false);
                 mailFolder.setSubscribedSubfolders(false);
+                mailFolder.setDefaultFolder(false);
+                mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                 UnifiedINBOXFolderConverter.setPermissions(mailFolder);
                 UnifiedINBOXFolderConverter.setOwnPermission(mailFolder, session.getUserId());
                 return mailFolder;

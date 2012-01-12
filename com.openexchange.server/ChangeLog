@@ -1,3 +1,7 @@
+* 2012-01-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21169: Introduced twitteroauth.properties to enable/disable Twitter OAuth bundle via config cascade
+
 * 2012-01-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 21170: Fixed reporting tool if context is deleted in the meantime
