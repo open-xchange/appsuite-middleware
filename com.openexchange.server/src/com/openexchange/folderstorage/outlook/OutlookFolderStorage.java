@@ -98,6 +98,7 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.FileStorageFolderIdentifier;
+import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
 import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.MailFolderType;
@@ -117,6 +118,7 @@ import com.openexchange.folderstorage.outlook.sql.Update;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.folderstorage.type.MailType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -147,6 +149,8 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class OutlookFolderStorage implements FolderStorage {
+
+    private static final String INFOSTORE = Integer.toString(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 
     /**
      * The logger.
@@ -1341,6 +1345,61 @@ public final class OutlookFolderStorage implements FolderStorage {
                             id, name == null ? folderStorage.getFolder(realTreeId, id, storageParameters).getName() : name });
                     }
                 }
+                /*
+                 * Add file storage root folder below "infostore" folder
+                 */
+                if (INFOSTORE.equals(parentId)) {
+                    /*
+                     * Obtain file storage accounts with running thread
+                     */
+                    {
+                        /*
+                         * File storage accounts
+                         */
+                        final List<FileStorageAccount> fsAccounts = new ArrayList<FileStorageAccount>();
+                        final FileStorageServiceRegistry fsr = OutlookServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class);
+                        if (null == fsr) {
+                            // Do nothing
+                        } else {
+                            try {
+                                final List<FileStorageService> allServices = fsr.getAllServices();
+                                for (final FileStorageService fsService : allServices) {
+                                    /*
+                                     * Check if file storage service provides a root folder
+                                     */
+                                    final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(storageParameters.getSession());
+                                    for (final FileStorageAccount userAccount : userAccounts) {
+                                        final FileStorageAccountAccess accountAccess =
+                                            userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), storageParameters.getSession());
+                                        accountAccess.connect();
+                                        try {
+                                            final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
+                                            if (null != rootFolder) {
+                                                fsAccounts.add(userAccount);
+                                            }
+                                        } finally {
+                                            accountAccess.close();
+                                        }
+                                    }
+                                }
+                            } catch (final OXException e) {
+                                LOG.error(e.getMessage(), e);
+                            }
+                            if (fsAccounts.isEmpty()) {
+                                // Do nothing
+                            } else {
+                                Collections.sort(fsAccounts, new FileStorageAccountComparator(locale));
+                                final int sz = fsAccounts.size();
+                                for (int i = 0; i < sz; i++) {
+                                    final FileStorageAccount fsa = fsAccounts.get(i);
+                                    final FileStorageFolderIdentifier fsfi =
+                                        new FileStorageFolderIdentifier(fsa.getFileStorageService().getId(), fsa.getId(), MessagingFolder.ROOT_FULLNAME);
+                                    l.add(new String[] { fsfi.toString(), fsa.getDisplayName()});
+                                }
+                            }
+                        }
+                    }
+                }
                 if (started) {
                     folderStorage.commitTransaction(storageParameters);
                 }
@@ -1858,58 +1917,6 @@ public final class OutlookFolderStorage implements FolderStorage {
                 }
             }
         }
-        /*
-         * Obtain file storage accounts with running thread
-         */
-        final List<String> fsSubfolderIDs;
-        {
-            /*
-             * File storage accounts
-             */
-            final List<FileStorageAccount> fsAccounts = new ArrayList<FileStorageAccount>();
-            final FileStorageServiceRegistry fsr = OutlookServiceRegistry.getServiceRegistry().getService(FileStorageServiceRegistry.class);
-            if (null == fsr) {
-                fsSubfolderIDs = Collections.emptyList();
-            } else {
-                try {
-                    final List<FileStorageService> allServices = fsr.getAllServices();
-                    for (final FileStorageService fsService : allServices) {
-                        /*
-                         * Check if file storage service provides a root folder
-                         */
-                        final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(parameters.getSession());
-                        for (final FileStorageAccount userAccount : userAccounts) {
-                            final FileStorageAccountAccess accountAccess =
-                                userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), parameters.getSession());
-                            accountAccess.connect();
-                            try {
-                                final FileStorageFolder rootFolder = accountAccess.getFolderAccess().getRootFolder();
-                                if (null != rootFolder) {
-                                    fsAccounts.add(userAccount);
-                                }
-                            } finally {
-                                accountAccess.close();
-                            }
-                        }
-                    }
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                }
-                if (fsAccounts.isEmpty()) {
-                    fsSubfolderIDs = Collections.emptyList();
-                } else {
-                    Collections.sort(fsAccounts, new FileStorageAccountComparator(locale));
-                    final int sz = fsAccounts.size();
-                    fsSubfolderIDs = new ArrayList<String>(sz);
-                    for (int i = 0; i < sz; i++) {
-                        final FileStorageAccount fsa = fsAccounts.get(i);
-                        final FileStorageFolderIdentifier fsfi =
-                            new FileStorageFolderIdentifier(fsa.getFileStorageService().getId(), fsa.getId(), MessagingFolder.ROOT_FULLNAME);
-                        fsSubfolderIDs.add(fsfi.toString());
-                    }
-                }
-            }
-        }
 
         /*
          * Wait for completion
@@ -1951,7 +1958,6 @@ public final class OutlookFolderStorage implements FolderStorage {
          * Add external messaging accounts/file storage accounts
          */
         sortedIDs.addAll(messagingSubfolderIDs);
-        sortedIDs.addAll(fsSubfolderIDs);
         final int size = sortedIDs.size();
         final SortableId[] ret = new SortableId[size];
         for (int i = 0; i < size; i++) {
@@ -2356,7 +2362,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (FolderStorage.SHARED_ID.equals(id)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
-        } else if ("9".equals(id)) { // InfoStore folder
+        } else if (INFOSTORE.equals(id)) { // InfoStore folder
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isDefaultMailFolder(folder)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
@@ -2364,6 +2370,26 @@ public final class OutlookFolderStorage implements FolderStorage {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (PREPARED_FULLNAME_DEFAULT.equals(folder.getParentID())) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
+        } else if (isDefaultFileStorageFolder(folder)) {
+            folder.setParentID(INFOSTORE);
+        }
+    }
+
+    private static final int MODULE_FILE = FileStorageContentType.getInstance().getModule();
+
+    private static boolean isDefaultFileStorageFolder(final OutlookFolder folder) {
+        if (MODULE_FILE != folder.getContentType().getModule()) {
+            return false;
+        }
+        try {
+            final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(folder.getID());
+            // FileStorage root full name has zero length
+            return 0 == fsfi.getFolderId().length() && !"com.openexchange.infostore".equals(fsfi.getServiceId());
+        } catch (final Exception e) {
+            /*
+             * Parsing failed
+             */
+            return false;
         }
     }
 
