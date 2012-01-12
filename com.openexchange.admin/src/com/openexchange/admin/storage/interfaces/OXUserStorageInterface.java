@@ -136,6 +136,15 @@ public abstract class OXUserStorageInterface {
     }
 
     /**
+     * Checks if specified context exists.
+     * 
+     * @param ctx The context at least providing context identifier
+     * @return <code>true</code> if exists; otherwise <code>false</code>
+     * @throws StorageException If an error occurred
+     */
+    public abstract boolean doesContextExist (final Context ctx)  throws StorageException;
+
+    /**
      * Retrieve the ModuleAccess for an user.
      *
      * @param context Context

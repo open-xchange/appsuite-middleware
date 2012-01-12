@@ -1200,6 +1200,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (null == ctx.getId()) {
             throw new InvalidDataException("Context invalid");
         }
+        // Check exists
+        try {
+            if (!oxu.doesContextExist(ctx)) {
+                throw new InvalidDataException("Context " + ctx.getId() + " does not exist.");
+            }
+        } catch (final StorageException e) {
+            throw new InvalidDataException(e);
+        }
     }
 
     private String getUserIdArrayFromUsersAsString(final User[] users) throws InvalidDataException {
