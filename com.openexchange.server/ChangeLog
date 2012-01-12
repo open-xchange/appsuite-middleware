@@ -2,6 +2,7 @@
 
  - Fix for bug 21169: Introduced twitteroauth.properties to enable/disable Twitter OAuth bundle via config cascade
  - Fix for bug 21184: Handling possibly thrown UnsupportedOperationException
+ - Fix for bug 21176: Added user information to audit logs
 
 * 2012-01-11 - thorben.betten@open-xchange.com
 

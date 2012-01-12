@@ -68,20 +68,17 @@ public class AuditActivator extends HousekeepingActivator {
 
 	private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AuditActivator.class));
 
-	private static final Class<?>[] NEEDED_SERVICES = { ConfigurationService.class } ;
-
 	final Dictionary<String,Object> serviceProperties;
 
 	public AuditActivator() {
 		super();
 		serviceProperties = new Hashtable<String,Object>();
-		serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{
-				"com/openexchange/groupware/*"});
+		serviceProperties.put(EventConstants.EVENT_TOPIC, new String[]{"com/openexchange/groupware/*"});
 	}
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
+		return new Class<?>[] { ConfigurationService.class };
 	}
 
 	@Override
