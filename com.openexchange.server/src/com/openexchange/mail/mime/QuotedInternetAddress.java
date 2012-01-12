@@ -798,11 +798,14 @@ public final class QuotedInternetAddress extends InternetAddress {
             gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
     }
 
+    private final String jcharset;
+
     /**
      * Initializes a new {@link QuotedInternetAddress}.
      */
     public QuotedInternetAddress() {
         super();
+        jcharset = MimeUtility.getDefaultJavaCharset();
     }
 
     /**
@@ -832,6 +835,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     public QuotedInternetAddress(final String address) throws AddressException {
         super();
         parseAddress0(address);
+        jcharset = MimeUtility.getDefaultJavaCharset();
     }
 
     /**
@@ -912,6 +916,13 @@ public final class QuotedInternetAddress extends InternetAddress {
     public QuotedInternetAddress(final String address, final String personal, final String charset) throws AddressException, UnsupportedEncodingException {
         super();
         this.address = toACE(address);
+        if (charset == null) {
+            // use default charset
+            jcharset = MimeUtility.getDefaultJavaCharset();
+        } else {
+            // MIME charset -> java charset
+            jcharset = MimeUtility.javaCharset(charset);
+        }
         setPersonal(personal, charset);
     }
 
@@ -983,7 +994,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     public String toString() {
         if (encodedPersonal == null && personal != null) {
             try {
-                encodedPersonal = MimeUtility.encodeWord(personal);
+                encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
             } catch (final UnsupportedEncodingException ex) {
                 LOG.error(ex.getMessage(), ex);
             }
@@ -1007,7 +1018,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                 }
                 personal = personal.substring(1, personal.length() - 1);
                 try {
-                    encodedPersonal = MimeUtility.encodeWord(personal);
+                    encodedPersonal = MimeUtility.encodeWord(personal, jcharset, null);
                 } catch (final UnsupportedEncodingException ex) {
                     LOG.error(ex.getMessage(), ex);
                 }
@@ -1015,7 +1026,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
             if (needQuoting(personal)) {
                 try {
-                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal));
+                    encodedPersonal = MimeUtility.encodeWord(quotePhrase(personal), jcharset, null);
                 } catch (final UnsupportedEncodingException e) {
                     LOG.error(e.getMessage(), e);
                 }
