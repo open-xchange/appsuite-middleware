@@ -150,6 +150,11 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class OutlookFolderStorage implements FolderStorage {
 
+    private static final String SERVICE_INFOSTORE = "com.openexchange.infostore";
+
+    /**
+     * <code>"9"</code>
+     */
     private static final String INFOSTORE = Integer.toString(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
 
     /**
@@ -1369,6 +1374,9 @@ public final class OutlookFolderStorage implements FolderStorage {
                                      */
                                     final List<FileStorageAccount> userAccounts = fsService.getAccountManager().getAccounts(storageParameters.getSession());
                                     for (final FileStorageAccount userAccount : userAccounts) {
+                                        if (SERVICE_INFOSTORE.equals(userAccount.getId())) {
+                                            continue;
+                                        }
                                         final FileStorageAccountAccess accountAccess =
                                             userAccount.getFileStorageService().getAccountAccess(userAccount.getId(), storageParameters.getSession());
                                         accountAccess.connect();
@@ -2384,7 +2392,7 @@ public final class OutlookFolderStorage implements FolderStorage {
         try {
             final FileStorageFolderIdentifier fsfi = new FileStorageFolderIdentifier(folder.getID());
             // FileStorage root full name has zero length
-            return 0 == fsfi.getFolderId().length() && !"com.openexchange.infostore".equals(fsfi.getServiceId());
+            return 0 == fsfi.getFolderId().length() && !SERVICE_INFOSTORE.equals(fsfi.getServiceId());
         } catch (final Exception e) {
             /*
              * Parsing failed
