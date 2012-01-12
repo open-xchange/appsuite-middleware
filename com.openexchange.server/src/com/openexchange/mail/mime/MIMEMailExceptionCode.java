@@ -122,13 +122,13 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
      */
     SEND_FAILED_EXT("Message could not be sent to the following recipients: %1$s %2$s", Category.CATEGORY_USER_INPUT, 1013),
     /**
-     * Store already closed: %1$s
+     * Lost connection to mail server.
      */
-    STORE_CLOSED("Store already closed: %1$s", Category.CATEGORY_ERROR, 1014),
+    STORE_CLOSED("Lost connection to mail server.", Category.CATEGORY_ERROR, 1014),
     /**
-     * Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s
+     * Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s).
      */
-    STORE_CLOSED_EXT("Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s): %5$s", STORE_CLOSED.category, STORE_CLOSED.detailNumber),
+    STORE_CLOSED_EXT("Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s).", STORE_CLOSED.category, STORE_CLOSED.detailNumber),
     /**
      * Could not bind mail connection to local port %1$s
      * <p>
