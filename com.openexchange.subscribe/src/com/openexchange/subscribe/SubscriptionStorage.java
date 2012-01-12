@@ -54,11 +54,12 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.secret.SecretEncryptionStrategy;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public interface SubscriptionStorage {
+public interface SubscriptionStorage extends SecretEncryptionStrategy<EncryptedField> {
 
     public void rememberSubscription(Subscription subscription) throws OXException;
 

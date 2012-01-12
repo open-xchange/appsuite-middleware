@@ -705,7 +705,9 @@ public final class Init {
         if (null == ServerServiceRegistry.getInstance().getService(SessiondService.class)) {
             SessiondServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, services.get(ConfigurationService.class));
             SessiondServiceRegistry.getServiceRegistry().addService(TimerService.class, services.get(TimerService.class));
-            ServerServiceRegistry.getInstance().addService(SessiondService.class, new SessiondServiceImpl());
+            final SessiondServiceImpl serviceImpl = new SessiondServiceImpl();
+            SessiondService.SERVICE_REFERENCE.set(serviceImpl);
+            ServerServiceRegistry.getInstance().addService(SessiondService.class, serviceImpl);
         }
     }
 

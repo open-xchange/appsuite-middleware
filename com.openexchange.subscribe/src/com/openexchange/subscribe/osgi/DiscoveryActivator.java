@@ -59,7 +59,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.osgi.WhiteboardContextService;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.osgi.tools.WhiteboardGenericConfigurationStorageService;
 import com.openexchange.folder.FolderService;
@@ -70,8 +69,7 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.secret.recovery.EncryptedItemDetectorService;
-import com.openexchange.secret.recovery.SecretMigrator;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
@@ -85,7 +83,6 @@ import com.openexchange.subscribe.internal.DocumentMetadataHolderFolderUpdaterSt
 import com.openexchange.subscribe.internal.StrategyFolderUpdaterService;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
 import com.openexchange.subscribe.internal.TaskFolderUpdaterStrategy;
-import com.openexchange.subscribe.secret.SubscriptionSecretHandling;
 import com.openexchange.subscribe.sql.SubscriptionSQLStorage;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -150,7 +147,7 @@ public class DiscoveryActivator implements BundleActivator {
 
         AbstractSubscribeService.STORAGE = storage;
 
-        AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
+        AbstractSubscribeService.CRYPTO = whiteboard.getService(SecretEncryptionFactoryService.class);
         AbstractSubscribeService.FOLDERS = folders;
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
@@ -158,10 +155,6 @@ public class DiscoveryActivator implements BundleActivator {
         listener.setDiscoveryService(discoveryCollector);
 
         context.registerService(DeleteListener.class.getName(), listener, null);
-
-        final SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
-        context.registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null);
-        context.registerService(SecretMigrator.class.getName(), secretHandling, null);
 
     }
 

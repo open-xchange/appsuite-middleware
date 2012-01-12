@@ -79,8 +79,6 @@ public interface SubscribeService {
 
     public boolean knows(Context context, int subscriptionId) throws OXException;
 
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
-
     public boolean hasAccounts(Context context, User user) throws OXException;
 
 }

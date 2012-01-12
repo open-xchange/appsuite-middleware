@@ -62,6 +62,8 @@ import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
@@ -91,7 +93,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
 
     private int module = FolderObject.CONTACT;
 
-    public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, Activator activator, boolean enableJavascript) {
+    public GenericSubscribeService(final String displayName, final String id, final int module, final String workflowString, final int priority, final Activator activator, final boolean enableJavascript) {
         FORM.add(FormElement.input(LOGIN, FORM_LABEL_LOGIN)).add(FormElement.password("password", FORM_LABEL_PASSWORD));
         addExtraFields(FORM);
         SOURCE.setDisplayName(displayName);
@@ -106,7 +108,7 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         this.module = module;
     }
 
-    protected void addExtraFields(DynamicFormDescription form) {
+    protected void addExtraFields(final DynamicFormDescription form) {
         // May be overridden to include extra fields
     }
 
@@ -129,10 +131,10 @@ public class GenericSubscribeService extends AbstractSubscribeService {
         final Map<String, Object> configuration = subscription.getConfiguration();
         // All contacts should get a UUID for aggregation
         if (this.module == FolderObject.CONTACT){
-            List list =  Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
-            List<Contact> contacts = new ArrayList<Contact>();
-            for (Object object : list){
-                Contact contact = (Contact) object;
+            final List list =  Arrays.asList(workflow.execute((String) configuration.get("login"), (String) configuration.get("password")));
+            final List<Contact> contacts = new ArrayList<Contact>();
+            for (final Object object : list){
+                final Contact contact = (Contact) object;
                 contact.setUserField20(UUID.randomUUID().toString());
                 contacts.add(contact);
             }
@@ -156,14 +158,42 @@ public class GenericSubscribeService extends AbstractSubscribeService {
     public void modifyIncoming(final Subscription subscription) throws OXException {
         super.modifyIncoming(subscription);
         final Map<String, Object> configuration = subscription.getConfiguration();
-        encrypt(subscription.getSecret(), configuration, PASSWORD);
+        try {
+            encrypt(subscription.getSession(), configuration, PASSWORD);
+        } catch (final UnsupportedOperationException e) {
+            // May be thrown by TargetFolderSession, retry with real session
+            final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
+            if (null == service) {
+                throw e;
+            }
+            final Session fake = subscription.getSession();
+            final Session session = service.getAnyActiveSessionForUser(fake.getUserId(), fake.getContextId());
+            if (null == session) {
+                throw e;
+            }
+            encrypt(session, configuration, PASSWORD);
+        }
     }
 
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         super.modifyOutgoing(subscription);
         final Map<String, Object> configuration = subscription.getConfiguration();
-        decrypt(subscription.getSecret(), configuration, PASSWORD);
+        try {
+            decrypt(subscription, subscription.getSession(), configuration, PASSWORD);
+        } catch (final UnsupportedOperationException e) {
+            // May be thrown by TargetFolderSession, retry with real session
+            final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
+            if (null == service) {
+                throw e;
+            }
+            final Session fake = subscription.getSession();
+            final Session session = service.getAnyActiveSessionForUser(fake.getUserId(), fake.getContextId());
+            if (null == session) {
+                throw e;
+            }
+            decrypt(subscription, session, configuration, PASSWORD);
+        }
         subscription.setDisplayName((String) subscription.getConfiguration().get(LOGIN));
     }
 

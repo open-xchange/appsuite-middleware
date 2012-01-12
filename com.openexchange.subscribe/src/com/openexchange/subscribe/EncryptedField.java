@@ -49,46 +49,20 @@
 
 package com.openexchange.subscribe;
 
-import java.util.HashMap;
-import java.util.Map;
-import junit.framework.TestCase;
-import com.openexchange.crypto.SimCryptoService;
-import com.openexchange.exception.OXException;
-
 
 /**
- * {@link AbstractSubscribeServiceTest}
+ * {@link EncryptedField}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public class AbstractSubscribeServiceTest extends TestCase {
-    public void testEncryptPasswords() throws OXException {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("p1","password1");
-        map.put("p2","password2");
-        map.put("something else", "something else");
-
-        AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
-        AbstractSubscribeService.encrypt("secret", map, "p1", "p2");
-
-        assertEquals("encrypted", map.get("p1"));
-        assertEquals("encrypted", map.get("p2"));
-
+public class EncryptedField {
+    public final Subscription subscription;
+    public final String field;
+    
+    public EncryptedField(Subscription subscription, String field) {
+        super();
+        this.subscription = subscription;
+        this.field = field;
     }
-
-    public void testDecryptPasswords() throws OXException {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("p1","password1");
-        map.put("p2","password2");
-        map.put("something else", "something else");
-        map.put("com.openexchange.crypto.secret", "secret");
-
-        AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
-        AbstractSubscribeService.decrypt("secret", map, "p1", "p2");
-
-        assertEquals("decrypted", map.get("p1"));
-        assertEquals("decrypted", map.get("p2"));
-
-    }
+    
 }
