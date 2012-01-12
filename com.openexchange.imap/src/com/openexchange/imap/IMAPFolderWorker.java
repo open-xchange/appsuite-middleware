@@ -221,7 +221,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a messaging error occurs
      */
-    protected boolean holdsMessages() throws OXException {
+    protected boolean holdsMessages() throws OXException, MessagingException {
         if (holdsMessages == -1) {
             holdsMessages = ListLsubCache.getCachedLISTEntry(imapFolder.getFullName(), accountId, imapFolder, session).canOpen() ? 1 : 0;
         }

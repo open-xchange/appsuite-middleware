@@ -2566,11 +2566,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return MIMEMessageConverter.convertMessages(msgs, fields, headerNames, includeBody);
     }
 
-    private char getSeparator(final IMAPFolder imapFolder) throws OXException {
+    private char getSeparator(final IMAPFolder imapFolder) throws OXException, MessagingException {
         return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
     }
 
-    private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException {
+    private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
         return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session);
     }
 
