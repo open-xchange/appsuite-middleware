@@ -2141,6 +2141,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }
+                        parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
@@ -2149,6 +2150,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }
+                        parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
@@ -2157,6 +2159,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage(), e);
                         }
+                        parameters.addWarning(e);
                         /*
                          * Return empty map
                          */
