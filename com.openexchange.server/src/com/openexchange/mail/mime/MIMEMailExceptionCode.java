@@ -104,11 +104,11 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
     /**
      * Invalid search expression: %1$s
      */
-    SEARCH_ERROR("Invalid search expression: %1$s", Category.CATEGORY_ERROR, 1011),
+    SEARCH_ERROR("Invalid search expression: %1$s", Category.CATEGORY_USER_INPUT, 1011),
     /**
      * Message could not be sent because it is too large
      */
-    MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.CATEGORY_ERROR, 1012),
+    MESSAGE_TOO_LARGE("Message could not be sent because it is too large", Category.CATEGORY_USER_INPUT, 1012),
     /**
      * Message could not be sent to following recipients: %1$s
      * <p>
@@ -124,7 +124,7 @@ public enum MIMEMailExceptionCode implements OXExceptionCode {
     /**
      * Lost connection to mail server.
      */
-    STORE_CLOSED("Lost connection to mail server.", Category.CATEGORY_ERROR, 1014),
+    STORE_CLOSED("Lost connection to mail server.", Category.CATEGORY_SERVICE_DOWN, 1014),
     /**
      * Connection closed to mail server %1$s with login %2$s (user=%3$s, context=%4$s).
      */
