@@ -2136,6 +2136,12 @@ public final class OutlookFolderStorage implements FolderStorage {
                 final SortableId[] mailIDs;
                 try {
                     mailIDs = getSubfolders(fullname, realTreeId, realFolderStorage, storageParameters);
+                    final Set<OXException> warnings = storageParameters.getWarnings();
+                    if (!warnings.isEmpty()) {
+                        for (final OXException warning : warnings) {
+                            parameters.addWarning(warning);
+                        }
+                    }
                 } catch (final OXException e) {
                     if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
                         if (LOG.isDebugEnabled()) {
