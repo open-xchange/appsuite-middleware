@@ -129,7 +129,7 @@ public class OXContextMySQLStorageCommon {
                 }
 
                 cs.setEnabled(rs.getBoolean(2)); // enabled
-                int reason_id = rs.getInt(3); //reason
+                final int reason_id = rs.getInt(3); //reason
                 // CONTEXT STATE INFOS #
                 if (-1 != reason_id) {
                     cs.setMaintenanceReason(new MaintenanceReason(reason_id));
@@ -142,8 +142,8 @@ public class OXContextMySQLStorageCommon {
                     // set quota max also in context setup object
                     cs.setMaxQuota(quota_max);
                 }
-                int write_pool = rs.getInt(7); // write_pool_id
-                int read_pool = rs.getInt(8); //read_pool_id
+                final int write_pool = rs.getInt(7); // write_pool_id
+                final int read_pool = rs.getInt(8); //read_pool_id
                 final String db_schema = rs.getString(9); // db_schema
                 if (null != db_schema) {
                     cs.setReadDatabase(new Database(read_pool, db_schema));
@@ -152,14 +152,14 @@ public class OXContextMySQLStorageCommon {
                 //DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
                 // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
                 // SEE #11094 FOR DETAILS!
-                String login_mapping = rs.getString(10);   
+                final String login_mapping = rs.getString(10);   
                 if(!ctx.getIdAsString().equals(login_mapping)){
                     cs.addLoginMapping(login_mapping);
                 }
             }
             // All other lines contain the same content except the mapping so we concentrate on the mapping here
             while (rs.next()) {
-                String login_mapping = rs.getString(10);       
+                final String login_mapping = rs.getString(10);       
                 // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
                 // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
                 // SEE #11094 FOR DETAILS!
@@ -226,10 +226,10 @@ public class OXContextMySQLStorageCommon {
     }
 
     
-    private void loadDynamicAttributes(Connection oxCon, Context ctx) throws SQLException, PoolException, StorageException {
+    private void loadDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException, PoolException, StorageException {
         ResultSet rs = null;
         PreparedStatement stmtuserattributes = null;
-        int contextId = ctx.getId();
+        final int contextId = ctx.getId();
         try {
             stmtuserattributes = oxCon.prepareStatement("SELECT name, value FROM contextAttribute WHERE cid = ?");
             stmtuserattributes.setInt(1, contextId);
@@ -254,31 +254,31 @@ public class OXContextMySQLStorageCommon {
     }
 
 
-    public Context[] loadContexts(Collection<Integer> cids, long averageSize, List<Filter<Context, Context>> filters) throws StorageException {
+    public Context[] loadContexts(final Collection<Integer> cids, final long averageSize, final List<Filter<Context, Context>> filters, final boolean failOnMissing) throws StorageException {
         PipesAndFiltersService pnfService;
         try {
             pnfService = AdminServiceRegistry.getInstance().getService(PipesAndFiltersService.class, true);
-        } catch (OXException e) {
+        } catch (final OXException e) {
             throw new StorageException(e.getMessage(), e);
         }
-        DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache));
-        if( null != filters && filters.size() > 0) {
-            for(final Object f : filters.toArray()) {
-                output = output.addFilter((Filter<Context, Context>) f);
+        DataSource<Context> output = pnfService.create(cids).addFilter(new ContextLoader(cache, failOnMissing));
+        if( null != filters && !filters.isEmpty()) {
+            for(final Filter<Context, Context> f : filters) {
+                output = output.addFilter(f);
             }
         }
         output = output.addFilter(new LoginInfoLoader(cache)).addFilter(new FilestoreUsageLoader(cache, averageSize)).addFilter(new DynamicAttributesLoader(cache));
-        SortedMap<Integer, Context> retval = new TreeMap<Integer, Context>();
+        final SortedMap<Integer, Context> retval = new TreeMap<Integer, Context>();
         try {
             while (output.hasData()) {
-                List<Context> tmp = new ArrayList<Context>();
+                final List<Context> tmp = new ArrayList<Context>();
                 output.getData(tmp);
-                for (Context context : tmp) {
+                for (final Context context : tmp) {
                     retval.put(context.getId(), context);
                 }
             }
-        } catch (PipesAndFiltersException e) {
-            Throwable cause = e.getCause();
+        } catch (final PipesAndFiltersException e) {
+            final Throwable cause = e.getCause();
             if (cause instanceof StorageException) {
                 throw (StorageException) cause;
             }
@@ -290,7 +290,7 @@ public class OXContextMySQLStorageCommon {
     public final void createStandardGroupForContext(final int context_id, final Connection ox_write_con, final String display_name, final int group_id, final int gid_number) throws SQLException {
         // TODO: this must be defined somewhere else
         final int NOGROUP = 65534;
-        PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified,gidNumber) VALUES (?,?,'users',?,?,?);");
+        final PreparedStatement group_stmt = ox_write_con.prepareStatement("INSERT INTO groups (cid, id, identifier, displayname,lastModified,gidNumber) VALUES (?,?,'users',?,?,?);");
         group_stmt.setInt(1, context_id);
         group_stmt.setInt(2, group_id);
         group_stmt.setString(3, display_name);
@@ -304,7 +304,7 @@ public class OXContextMySQLStorageCommon {
         group_stmt.close();
     }
 
-    public final void deleteContextFromConfigDB(Connection configCon, int contextId) throws SQLException {
+    public final void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
         // find out what db_schema context belongs to
         PreparedStatement stmt3 = null;
         PreparedStatement stmt2 = null;
@@ -337,7 +337,7 @@ public class OXContextMySQLStorageCommon {
             // tell pool, that database has been removed
             try {
                 com.openexchange.databaseold.Database.reset(contextId);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 log.error(e.getMessage(), e);
             }
 
@@ -368,7 +368,7 @@ public class OXContextMySQLStorageCommon {
                         stmt3.close();
                     }
                     stmt2.close();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                     log.error("Problem deleting database while doing rollback, cid=" + contextId + ": ", e);
                 }
             }
@@ -393,10 +393,10 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    private String[] determineSequenceTables(Connection con) throws SQLException {
+    private String[] determineSequenceTables(final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet result = null;
-        List<String> tmp = new ArrayList<String>();
+        final List<String> tmp = new ArrayList<String>();
         try {
             stmt = con.prepareStatement("SHOW TABLES LIKE ?");
             stmt.setString(1, "%sequence\\_%");
@@ -410,7 +410,7 @@ public class OXContextMySQLStorageCommon {
         return tmp.toArray(new String[tmp.size()]);
     }
 
-    public void fillContextAndServer2DBPool(Context ctx, Connection con, Database db) throws StorageException {
+    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException {
         // dbid is the id in db_pool of database engine to use for next context
     
         // if read id -1 (not set by client ) or 0 (there is no read db for this
@@ -433,7 +433,7 @@ public class OXContextMySQLStorageCommon {
         fillContextServer2DBPool(ctx, db, con);
     }
 
-    public final void handleCreateContextRollback(Connection configCon, Connection oxCon, int contextId) {
+    public final void handleCreateContextRollback(final Connection configCon, final Connection oxCon, final int contextId) {
         // Creating the whole context is now done in a transaction. Rolling back this transaction should be sufficient to remove the context
         // if creation fails.
         rollback(oxCon);
@@ -443,7 +443,7 @@ public class OXContextMySQLStorageCommon {
                 deleteContextFromConfigDB(configCon, contextId);
                 configCon.commit();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error removing/rollback entries from configdb for context " + contextId, e);
         }
     }
@@ -467,11 +467,11 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void initSequenceTables(int contextId, Connection con) throws SQLException {
+    public final void initSequenceTables(final int contextId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            for (String tableName : determineSequenceTables(con)) {
-                int startValue = modifyStartValue(tableName);
+            for (final String tableName : determineSequenceTables(con)) {
+                final int startValue = modifyStartValue(tableName);
                 stmt = con.prepareStatement("INSERT INTO `" + tableName + "` VALUES (?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, startValue);
@@ -483,7 +483,7 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void initReplicationMonitor(Connection con, int contextId) throws SQLException {
+    public final void initReplicationMonitor(final Connection con, final int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO replicationMonitor (cid,transaction) VALUES (?,0)");
@@ -494,7 +494,7 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    public final void initFilestoreUsage(Connection con, int contextId) throws SQLException {
+    public final void initFilestoreUsage(final Connection con, final int contextId) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,used) VALUES (?,0)");
@@ -513,7 +513,7 @@ public class OXContextMySQLStorageCommon {
         }
         // check for the uid number feature
         if ("sequence_uid_number".equals(tableName)) {
-            int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
+            final int startnum = Integer.parseInt(prop.getUserProp(AdminProperties.User.UID_NUMBER_START, "-1"));
             if (startnum > 0) {
                 // we use the uid number feature
                 // set the start number in the sequence for uid_numbers 
@@ -522,7 +522,7 @@ public class OXContextMySQLStorageCommon {
         }
         // check for the gid number feature
         if ("sequence_gid_number".equals(tableName)){
-            int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
+            final int startnum = Integer.parseInt(prop.getGroupProp(AdminProperties.Group.GID_NUMBER_START, "-1"));
             if (startnum > 0) {
                 // we use the gid number feature
                 // set the start number in the sequence for gid_numbers 
@@ -555,7 +555,7 @@ public class OXContextMySQLStorageCommon {
         return sid;
     }
 
-    private final void fillContextServer2DBPool(Context ctx, Database db, Connection configdbCon) throws StorageException {
+    private final void fillContextServer2DBPool(final Context ctx, final Database db, final Connection configdbCon) throws StorageException {
         PreparedStatement stmt = null;
         try {
             stmt = configdbCon.prepareStatement("INSERT INTO context_server2db_pool (server_id,cid,read_db_pool_id,write_db_pool_id,db_schema) VALUES  (?,?,?,?,?)");
@@ -565,14 +565,14 @@ public class OXContextMySQLStorageCommon {
             stmt.setInt(4, db.getId().intValue());
             stmt.setString(5, db.getScheme());
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(stmt);
         }
     }
 
-    private final void fillContextTable(Context ctx, Connection configdbCon) throws StorageException {
+    private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException {
         PreparedStatement stmt = null;
         try {
             stmt = configdbCon.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
@@ -587,7 +587,7 @@ public class OXContextMySQLStorageCommon {
             stmt.setString(5, ctx.getFilestore_name());
             stmt.setLong(6, ctx.getMaxQuota().longValue());
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closePreparedStatement(stmt);
@@ -606,7 +606,7 @@ public class OXContextMySQLStorageCommon {
             for (final String mapping : loginMappings) {
                 checkAvailable.setString(1, mapping);
                 found = checkAvailable.executeQuery();
-                boolean mappingTaken = found.next();
+                final boolean mappingTaken = found.next();
                 found.close();
 
                 if(mappingTaken) {
@@ -628,17 +628,17 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    private void closeResultSet(ResultSet rs) {
+    private void closeResultSet(final ResultSet rs) {
         try {
             if (rs != null) {
                 rs.close();
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
         }
     }
     
-    private void closePreparedStatement(PreparedStatement stmt) {
+    private void closePreparedStatement(final PreparedStatement stmt) {
         try {
             if (stmt != null) {
                 stmt.close();

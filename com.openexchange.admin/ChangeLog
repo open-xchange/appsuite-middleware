@@ -1,3 +1,7 @@
+* 2012-01-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20379: Don't fail listcontext CLI if a context cannot be loaded
+
 * 2012-01-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 21198: Checking for context existence on listuser invocation

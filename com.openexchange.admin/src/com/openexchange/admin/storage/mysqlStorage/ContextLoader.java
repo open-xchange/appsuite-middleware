@@ -84,16 +84,19 @@ public class ContextLoader implements Filter<Integer, Context> {
 
     private final AdminCache cache;
 
-    public ContextLoader(AdminCache cache) {
+    private final boolean failOnMissing;
+
+    public ContextLoader(final AdminCache cache, final boolean failOnMissing) {
         super();
         this.cache = cache;
+        this.failOnMissing = failOnMissing;
     }
 
-    public Context[] filter(Collection<Integer> input) throws PipesAndFiltersException {
+    public Context[] filter(final Collection<Integer> input) throws PipesAndFiltersException {
         List<Context> contexts;
         try {
             contexts = loadContexts(input);
-        } catch (StorageException e) {
+        } catch (final StorageException e) {
             throw new PipesAndFiltersException(e);
         }
         return contexts.toArray(new Context[contexts.size()]);
@@ -101,30 +104,30 @@ public class ContextLoader implements Filter<Integer, Context> {
 
     private static final String SQL = "SELECT context.cid,context.name,context.enabled,context.reason_id,context.filestore_id,context.filestore_name,context.quota_max,context_server2db_pool.write_db_pool_id,context_server2db_pool.read_db_pool_id,context_server2db_pool.db_schema FROM context JOIN context_server2db_pool ON context.cid=context_server2db_pool.cid JOIN server ON context_server2db_pool.server_id=server.server_id WHERE server.name=? AND context.cid IN (";
 
-    private List<Context> loadContexts(Collection<Integer> cids) throws StorageException {
+    private List<Context> loadContexts(final Collection<Integer> cids) throws StorageException {
         final Connection con;
         try {
             con = cache.getConnectionForConfigDB();
-        } catch (PoolException e) {
+        } catch (final PoolException e) {
             throw new StorageException(e);
         }
-        List<Context> retval = new ArrayList<Context>(cids.size());
+        final List<Context> retval = new ArrayList<Context>(cids.size());
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement(getIN(SQL, cids.size()) + " ORDER BY context_server2db_pool.read_db_pool_id,context_server2db_pool.db_schema");
             int pos = 1;
             stmt.setString(pos++, cache.getProperties().getProp(AdminProperties.Prop.SERVER_NAME, "local"));
-            for (Integer cid : cids) {
+            for (final Integer cid : cids) {
                 stmt.setInt(pos++, cid.intValue());
             }
             rs = stmt.executeQuery();
             while (rs.next()) {
-                Context cs = new Context();
+                final Context cs = new Context();
                 cs.setId(I(rs.getInt(1)));
                 cs.setName(rs.getString(2));
                 cs.setEnabled(B(rs.getBoolean(3)));
-                int reasonId = rs.getInt(4);
+                final int reasonId = rs.getInt(4);
                 if (-1 != reasonId) {
                     cs.setMaintenanceReason(new MaintenanceReason(I(reasonId)));
                 }
@@ -136,27 +139,30 @@ public class ContextLoader implements Filter<Integer, Context> {
                     quotaMax /= Math.pow(2, 20);
                     cs.setMaxQuota(L(quotaMax));
                 }
-                String dbSchema = rs.getString(10);
+                final String dbSchema = rs.getString(10);
                 cs.setReadDatabase(new Database(rs.getInt(9), dbSchema));
                 cs.setWriteDatabase(new Database(rs.getInt(8), dbSchema));
                 retval.add(cs);
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
             try {
                 cache.pushConnectionForConfigDB(con);
-            } catch (PoolException e) {
+            } catch (final PoolException e) {
                 LOG.error(e.getMessage(), e);
             }
         }
         if (cids.size() != retval.size()) {
-            List<Integer> missing = new ArrayList<Integer>(cids);
-            for (Context context : retval) {
+            final List<Integer> missing = new ArrayList<Integer>(cids);
+            for (final Context context : retval) {
                 missing.remove(context.getId());
             }
-            throw new StorageException("Can not load the following contexts: " + missing.toString());
+            if (failOnMissing) {
+                throw new StorageException("Can not load the following contexts: " + missing.toString());
+            }
+            LOG.warn("Can not load the following contexts: " + missing.toString());
         }
         return retval;
     }
