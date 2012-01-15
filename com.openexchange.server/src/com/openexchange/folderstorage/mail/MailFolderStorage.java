@@ -348,7 +348,11 @@ public final class MailFolderStorage implements FolderStorage {
             // Separator
             mfd.setSeparator(mailAccess.getFolderStorage().getFolder(arg.getFullname()).getSeparator());
             // Other
-            mfd.setName(folder.getName());
+            {
+                final String name = folder.getName();
+                checkFolderName(name);
+                mfd.setName(name);
+            }
             mfd.setSubscribed(folder.isSubscribed());
             // Permissions
             final Permission[] permissions = folder.getPermissions();
@@ -1183,8 +1187,12 @@ public final class MailFolderStorage implements FolderStorage {
                 mfd.setSeparator(mf.getSeparator());
             }
             // Name
-            if (null != folder.getName()) {
-                mfd.setName(folder.getName());
+            {
+                final String name = folder.getName();
+                if (null != name) {
+                    checkFolderName(name);
+                    mfd.setName(name);
+                }
             }
             // Subscribed
             mfd.setSubscribed(folder.isSubscribed());
@@ -1590,6 +1598,32 @@ public final class MailFolderStorage implements FolderStorage {
             }
         }
         return ret;
+    }
+
+    private final static String INVALID = "<>"; // "()<>@,;:\\\".[]";
+
+    private static void checkFolderName(final String name) throws OXException {
+        if (isEmpty(name)) {
+            throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
+        }
+        final int length = name.length();
+        for (int i = 0; i < length; i++) {
+            if (INVALID.indexOf(name.charAt(i)) >= 0) {
+                throw MailExceptionCode.INVALID_FOLDER_NAME2.create(name);
+            }
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
