@@ -96,7 +96,7 @@ public final class FolderWriter {
     /**
      * The default locale: en_US.
      */
-    protected static final Locale DEFAULT_LOCALE = Locale.US;
+    public static final Locale DEFAULT_LOCALE = Locale.US;
 
     /**
      * Initializes a new {@link FolderWriter}.
