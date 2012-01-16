@@ -86,6 +86,19 @@ public final class DuplicateCleaner {
      * @throws OXException If cleaning fails
      */
     public static void cleanDuplicates(final String treeId, final StorageParameters storageParameters) throws OXException {
+        cleanDuplicates(treeId, storageParameters, null);
+    }
+
+    /**
+     * Cleans duplicates from virtual tree.
+     * 
+     * @param treeId The virtual tree identifier
+     * @param storageParameters The storage parameters
+     * @param lookUp The optional look-up identifier possibly contained in deleted duplicates
+     * @return <code>true</code> if look-up is contained in deleted IDs; otherwise <code>false</code>
+     * @throws OXException If cleaning fails
+     */
+    public static boolean cleanDuplicates(final String treeId, final StorageParameters storageParameters, final String lookUp) throws OXException {
         final OutlookFolderStorage outlookFolderStorage = OutlookFolderStorage.getInstance();
         final FolderStorageDiscoverer folderStorageRegistry = outlookFolderStorage.folderStorageRegistry;
         final String realTreeId = outlookFolderStorage.realTreeId;
@@ -94,8 +107,12 @@ public final class DuplicateCleaner {
         final int tree = Tools.getUnsignedInteger(treeId);
 
         final Map<String, List<String>> name2ids = Duplicate.lookupDuplicateNames(session.getContextId(), tree, session.getUserId());
+        boolean retval = false;
         for (final List<String> folderIds : name2ids.values()) {
             for (final String folderId : folderIds) {
+                if (!retval && null != lookUp) {
+                    retval = lookUp.equals(folderId);
+                }
                 final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
                 final boolean started = folderStorage.startTransaction(storageParameters, true);
                 try {
@@ -116,6 +133,7 @@ public final class DuplicateCleaner {
                 }
             }
         }
+        return retval;
     }
 
 }
