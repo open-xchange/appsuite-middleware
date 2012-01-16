@@ -99,12 +99,21 @@ public final class Duplicate {
             throw e;
         }
         try {
-            return lookupDuplicateNames(cid, tree, user, con);
+            con.setAutoCommit(false); // BEGIN
+            final Map<String, List<String>> ret = lookupDuplicateNames(cid, tree, user, con);
+            con.commit(); // COMMIT
+            return ret;
+        } catch (final SQLException e) {
+            DBUtils.rollback(con); // ROLLBACK
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
+            DBUtils.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
+            DBUtils.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            DBUtils.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }

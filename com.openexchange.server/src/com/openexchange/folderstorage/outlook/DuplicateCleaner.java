@@ -107,6 +107,9 @@ public final class DuplicateCleaner {
         final int tree = Tools.getUnsignedInteger(treeId);
 
         final Map<String, List<String>> name2ids = Duplicate.lookupDuplicateNames(session.getContextId(), tree, session.getUserId());
+        if (name2ids.isEmpty()) {
+            return false;
+        }
         boolean retval = false;
         for (final List<String> folderIds : name2ids.values()) {
             for (final String folderId : folderIds) {
