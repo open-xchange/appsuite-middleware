@@ -2,6 +2,7 @@
 
  - Fix for bug 21042: Fixed HTML pretty-printer
  - Fix for bug 21217: Deny creation of duplicate mail account
+ - Fix for bug 21233: Dealing with missing task module on ICal insert
 
 * 2012-01-12 - thorben.betten@open-xchange.com
 
