@@ -49,6 +49,7 @@
 
 package com.openexchange.user;
 
+import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -186,6 +187,24 @@ public class SimUserService implements UserService {
     public User[] searchUserByName(final String name, final Context context, final int searchType) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public User getUser(Connection con, int uid, Context context) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public int createUser(Connection con, Context context, User user) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    @Override
+    public int createUser(Context context, User user) throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
     }
 
 }

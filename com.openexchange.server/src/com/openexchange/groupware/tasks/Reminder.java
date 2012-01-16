@@ -190,6 +190,21 @@ final class Reminder {
                 .getDate());
         }
     }
+    
+    static void loadReminder(final Context ctx, final int userId,
+        final Collection<Task> tasks, final Connection con) throws OXException {
+            final ReminderService remStor = new ReminderHandler(ctx);
+            final Map<Integer, Task> tmp = new HashMap<Integer, Task>();
+            for (final Task task : tasks) {
+                tmp.put(Integer.valueOf(task.getObjectID()), task);
+            }
+            final ReminderObject[] reminders;
+            reminders = remStor.loadReminders(Collections.toArray(tmp.keySet()), userId, Types.TASK, con);
+            for (final ReminderObject reminder : reminders) {
+                tmp.get(Integer.valueOf(reminder.getTargetId())).setAlarm(reminder
+                    .getDate());
+            }
+    }
 
     /**
      * Loads a reminder for a user and a task.

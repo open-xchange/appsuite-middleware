@@ -76,16 +76,21 @@ public class RdbReminderStorage extends ReminderStorage {
     public RdbReminderStorage() {
         super();
     }
-
+    
     @Override
-    public ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws OXException {
+    public ReminderObject[] selectReminder(final Context ctx, final Connection con, final User user, final Date end) throws OXException {
+        return selectReminder(ctx, con, user.getId(), end);
+    }
+    
+    @Override
+    public ReminderObject[] selectReminder(final Context ctx, final Connection con, final int userId, final Date end) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         List<ReminderObject> retval = new ArrayList<ReminderObject>();
         try {
             stmt = con.prepareStatement(SQL.SELECT_RANGE);
             stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, user.getId());
+            stmt.setInt(2, userId);
             stmt.setTimestamp(3, new Timestamp(end.getTime()));
             result = stmt.executeQuery();
             while (result.next()) {
@@ -94,7 +99,7 @@ public class RdbReminderStorage extends ReminderStorage {
                 retval.add(reminder);
             }
         } catch (SQLException e) {
-            throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            throw ReminderExceptionCode.SQL_ERROR.create(e);
         } finally {
             closeSQLStuff(result, stmt);
         }
@@ -131,5 +136,27 @@ public class RdbReminderStorage extends ReminderStorage {
         reminder.setDescription(result.getString(pos++));
         reminder.setFolder(result.getInt(pos++));
         reminder.setLastModified(new Date(result.getLong(pos++)));
+    }
+    
+    @Override
+    public void writeReminder(final Connection con, final int ctxId, final ReminderObject reminder) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL.sqlInsert);
+            stmt.setInt(1, reminder.getObjectId());
+            stmt.setInt(2, ctxId);
+            stmt.setInt(3, reminder.getTargetId());
+            stmt.setInt(4, reminder.getModule());
+            stmt.setInt(5, reminder.getUser());           
+            stmt.setTimestamp(6, new Timestamp(reminder.getDate().getTime()));
+            stmt.setInt(7, reminder.getRecurrencePosition());
+            stmt.setLong(8, reminder.getLastModified().getTime());
+            stmt.setInt(9, reminder.getFolder());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ReminderExceptionCode.INSERT_EXCEPTION.create(e);
+        } finally {
+            closeSQLStuff(stmt);
+        }
     }
 }

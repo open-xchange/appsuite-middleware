@@ -1740,6 +1740,58 @@ public class ContactSetter implements ContactSwitcher {
         conObj.setImageContentType(value);
         return conObj;
     }
+    
+    public Object homeaddress(Object[] objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.HOME_ADDRESS.getReadableName());
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final String value = (String) objects[1];
+        conObj.setAddressHome(value);
+        return conObj;
+    }
+
+    public Object businessaddress(Object[] objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.BUSINESS_ADDRESS.getReadableName());
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final String value = (String) objects[1];
+        conObj.setAddressBusiness(value);
+        return conObj;
+    }
+
+    public Object otheraddress(Object[] objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.OTHER_ADDRESS.getReadableName());
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final String value = (String) objects[1];
+        conObj.setAddressOther(value);
+        return conObj;
+    }
+
+    public Object uid(Object[] objects) throws OXException {
+        if (objects.length < 2) {
+            throw ContactExceptionCodes.TOO_FEW_ATTRIBUTES.create(ContactField.UID.getReadableName());
+        }
+        final Contact conObj = (Contact) objects[0];
+        if(objects[1] == null) {
+            return conObj;
+        }
+        final String value = (String) objects[1];
+        conObj.setUid(value);
+        return conObj;
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) {

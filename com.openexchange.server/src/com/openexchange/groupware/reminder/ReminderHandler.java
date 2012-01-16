@@ -455,6 +455,25 @@ public class ReminderHandler implements ReminderService {
             DBPool.closeReaderSilent(context, con);
         }
     }
+    
+    public ReminderObject[] loadReminders(final int[] targetIds, final int userId, final int module, final Connection connection) throws OXException {
+        Connection con = null;
+        boolean externalConnection = false;
+        if (connection == null) {
+            con = DBPool.pickup(context);
+        } else {
+            con = connection;
+            externalConnection = true;
+        }
+    
+        try {
+            return loadReminder(targetIds, userId, module, con);
+        } finally {
+            if (!externalConnection) {
+                DBPool.closeReaderSilent(context, con);
+            }
+        }
+    }
 
     /**
      * This method loads the reminder for several target objects.

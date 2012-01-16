@@ -665,6 +665,22 @@ public class AbstractContactSwitcherWithDelegate implements ContactSwitcher {
     public Object image1contenttype(Object[] objects) throws OXException {
         return delegate.image1contenttype(objects);
     }
+    
+    public Object homeaddress(Object[] objects) throws OXException {
+        return delegate.homeaddress(objects);
+    }
+
+    public Object businessaddress(Object[] objects) throws OXException {
+        return delegate.businessaddress(objects);
+    }
+
+    public Object otheraddress(Object[] objects) throws OXException {
+        return delegate.otheraddress(objects);
+    }
+
+    public Object uid(Object[] objects) throws OXException {
+        return delegate.uid(objects);
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {

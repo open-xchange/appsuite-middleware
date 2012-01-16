@@ -572,7 +572,11 @@ public class RdbTaskStorage extends TaskStorage {
         sql.append("SELECT ");
         sql.append(SQL.getFields(columns, false));
         sql.append(" FROM task JOIN task_folder USING (cid,id) ");
-        sql.append("WHERE task.cid=? AND task_folder.folder=?");
+        if (folderId != -1) {
+            sql.append("WHERE task.cid=? AND task_folder.folder=?");
+        } else {
+            sql.append("WHERE task.cid=?");
+        }
         if (onlyOwn) {
             sql.append(ONLY_OWN);
         }
@@ -587,7 +591,9 @@ public class RdbTaskStorage extends TaskStorage {
             public void perform(final PreparedStatement stmt) throws SQLException {
                 int pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
-                stmt.setInt(pos++, folderId);
+                if (folderId != -1) {
+                    stmt.setInt(pos++, folderId);
+                }
                 if (onlyOwn) {
                     stmt.setInt(pos++, userId);
                 }

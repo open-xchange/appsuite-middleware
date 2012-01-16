@@ -256,6 +256,25 @@ public abstract class UserStorage {
      */
     public abstract void invalidateUser(final Context ctx, final int userId) throws OXException;
 
+    /**
+     * Creates a user within the database.
+     * 
+     * @param con The connection.
+     * @param context The context.
+     * @param user The user.
+     * @return The ID of the created user.
+     */
+    public abstract int createUser(final Context context, final User user) throws OXException;    
+    
+    /**
+     * 
+     * @param con The database connection.
+     * @param context The context.
+     * @param user The user.
+     * @return The ID of the created user.
+     */
+    public abstract int createUser(final Connection con, final Context context, final User user) throws OXException;
+    
     public final void invalidateUser(final Context ctx, final int[] userIds) throws OXException {
         for (final int member : userIds) {
             invalidateUser(ctx, member);

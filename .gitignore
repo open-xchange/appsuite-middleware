@@ -1,6 +1,7 @@
 *.class
 bin
 bin/
+openexchange-test/conf/test.properties
 open-xchange-development/tmp
 open-xchange-development/adminTmp
 open-xchange-development/commonTmp

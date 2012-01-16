@@ -103,7 +103,18 @@ public enum UserExceptionCode implements OXExceptionCode {
       * Invalid password length. The password must be of maximum length %1$d.
       */
      INVALID_MAX_LENGTH("Invalid password length. The password must be of maximum length %1$d.", Category.CATEGORY_USER_INPUT, 21),
-
+     /**
+      * The parameter %s for this user is missing.
+      */
+     MISSING_PARAMETER("The parameter %s for this user is missing.", Category.CATEGORY_USER_INPUT, 22),
+     /**
+      * %s is not a valid locale.
+      */
+     INVALID_LOCALE("%s is not a valid locale.", Category.CATEGORY_USER_INPUT, 23),
+     /**
+      * %s is not a valid time zone.
+      */
+     INVALID_TIMEZONE("%s is not a valid time zone.", Category.CATEGORY_USER_INPUT, 24)
      ;
 
     private static final String PREFIX = "USR";

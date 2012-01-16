@@ -436,6 +436,42 @@ public abstract class ParticipantStorage {
         }
         return retval;
     }
+    
+    /**
+     * Reads the participants of several task.
+     * 
+     * @param ctx Context.
+     * @param tasks unique identifier of the tasks.
+     * @param type type of participant that should be selected.
+     * @param con Connection to database
+     * @return a map with the task identifier as the key and a set of participants as values. If for a task no participants are found no
+     *         entry exists in this map.
+     * @throws OXException if an exception occurs.
+     */
+    final Map<Integer, Set<TaskParticipant>> selectParticipants(final Context ctx, final int[] tasks, final StorageType type, final Connection con) throws OXException {
+        final Map<Integer, Set<InternalParticipant>> internals;
+        final Map<Integer, Set<ExternalParticipant>> externals;
+        internals = selectInternal(ctx, con, tasks, type);
+        externals = selectExternal(ctx, con, tasks, type);
+        final Map<Integer, Set<TaskParticipant>> retval = new HashMap<Integer, Set<TaskParticipant>>();
+        for (final Entry<Integer, Set<InternalParticipant>> entry : internals.entrySet()) {
+            Set<TaskParticipant> parts = retval.get(entry.getKey());
+            if (null == parts) {
+                parts = new HashSet<TaskParticipant>();
+                retval.put(entry.getKey(), parts);
+            }
+            parts.addAll(entry.getValue());
+        }
+        for (final Entry<Integer, Set<ExternalParticipant>> entry : externals.entrySet()) {
+            Set<TaskParticipant> parts = retval.get(entry.getKey());
+            if (null == parts) {
+                parts = new HashSet<TaskParticipant>();
+                retval.put(entry.getKey(), parts);
+            }
+            parts.addAll(entry.getValue());
+        }
+        return retval;
+    }
 
     public void insertParticipants(final Context ctx, final Connection con, final int taskId, final Set<TaskParticipant> participants, final StorageType type) throws OXException {
         final Set<InternalParticipant> internals = extractInternal(participants);

@@ -81,7 +81,7 @@ public class InternalParticipant extends TaskParticipant {
      * @param groupId unique identifier of the group if this participant is
      * added through a group.
      */
-    InternalParticipant(final UserParticipant user, final Integer groupId) {
+    public InternalParticipant(final UserParticipant user, final Integer groupId) {
         super();
         this.user = user;
         this.groupId = groupId;

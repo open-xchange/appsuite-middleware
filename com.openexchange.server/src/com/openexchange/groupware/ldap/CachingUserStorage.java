@@ -114,6 +114,16 @@ public class CachingUserStorage extends UserStorage {
         final UserFactory factory = new UserFactory(delegate, cacheService, cacheLock, ctx, userId);
         return null == user ? new UserReloader(factory, REGION_NAME) : new UserReloader(factory, user, REGION_NAME);
     }
+    
+    @Override
+    public int createUser(final Connection con, final Context context, final User user) throws OXException {
+        return delegate.createUser(con, context, user);
+    }
+    
+    @Override
+    public int createUser(final Context context, final User user) throws OXException {
+        return delegate.createUser(context, user);
+    }
 
     @Override
     public User getUser(final Context ctx, final int userId, final Connection con) throws OXException {

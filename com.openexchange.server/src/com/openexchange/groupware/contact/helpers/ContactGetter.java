@@ -1115,6 +1115,38 @@ public class ContactGetter implements ContactSwitcher {
         final Contact conObj = (Contact) objects[0];
         return conObj.getImageContentType();
     }
+    
+    public Object homeaddress(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.HOME_ADDRESS.getReadableName()); 
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getAddressHome();
+    }
+
+    public Object businessaddress(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.BUSINESS_ADDRESS.getReadableName()); 
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getAddressBusiness();
+    }
+
+    public Object otheraddress(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.OTHER_ADDRESS.getReadableName()); 
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getAddressOther();
+    }
+
+    public Object uid(Object[] objects) throws OXException {
+        if (objects.length < 1) {
+            throw ContactExceptionCodes.CONTACT_OBJECT_MISSING.create(ContactField.UID.getReadableName()); 
+        }
+        final Contact conObj = (Contact) objects[0];
+        return conObj.getUid();
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects){
