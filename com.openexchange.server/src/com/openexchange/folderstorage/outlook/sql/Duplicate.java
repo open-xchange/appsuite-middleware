@@ -99,8 +99,7 @@ public final class Duplicate {
             throw e;
         }
         try {
-            final Map<String, List<String>> ret = lookupDuplicateNames(cid, tree, user, con);
-            return ret;
+            return lookupDuplicateNames(cid, tree, user, con);
         } catch (final OXException e) {
             throw e;
         } catch (final Exception e) {
