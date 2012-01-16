@@ -71,8 +71,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.Serializer;
+import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import com.openexchange.config.ConfigurationService;
@@ -1246,7 +1246,7 @@ public final class HTMLServiceImpl implements HTMLService {
         props.setUseCdataForScriptAndStyle(false);
         props.setIgnoreQuestAndExclam(true);
         HTML_CLEANER = new HtmlCleaner(props);
-        SERIALIZER = new PrettyXmlSerializer(props, " ");
+        SERIALIZER = new SimpleHtmlSerializer(props); // (props, " ");
     }
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";

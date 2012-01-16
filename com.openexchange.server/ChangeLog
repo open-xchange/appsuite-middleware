@@ -1,3 +1,8 @@
+* 2012-01-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21042: Fixed HTML pretty-printer
+ - Fix for bug 21217: Deny creation of duplicate mail account
+
 * 2012-01-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 21169: Introduced twitteroauth.properties to enable/disable Twitter OAuth bundle via config cascade
