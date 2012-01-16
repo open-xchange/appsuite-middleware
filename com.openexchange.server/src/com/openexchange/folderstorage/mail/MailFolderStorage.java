@@ -1600,7 +1600,7 @@ public final class MailFolderStorage implements FolderStorage {
         return ret;
     }
 
-    private final static String INVALID = "<>"; // "()<>@,;:\\\".[]";
+    private final static String INVALID = "<>"; // "()<>;\".[]";
 
     private static void checkFolderName(final String name) throws OXException {
         if (isEmpty(name)) {
