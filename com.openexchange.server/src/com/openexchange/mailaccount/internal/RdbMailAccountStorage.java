@@ -56,6 +56,8 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -1004,6 +1006,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             attribute.doSwitch(setSwitch);
                         }
                     }
+                    checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+                } else if (attributes.contains(Attribute.MAIL_URL_LITERAL)) {
+                    checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
                 }
 
                 if (prepareURL(attributes, Attribute.TRANSPORT_URL_ATTRIBUTES, Attribute.TRANSPORT_URL_LITERAL)) {
@@ -1020,6 +1025,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             attribute.doSwitch(setSwitch);
                         }
                     }
+                    checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+                } else if (attributes.contains(Attribute.TRANSPORT_URL_LITERAL)) {
+                    checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
                 }
 
                 attributes.removeAll(Attribute.MAIL_URL_ATTRIBUTES);
@@ -1416,6 +1424,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         final Connection con = Database.get(cid, true);
         PreparedStatement stmt = null;
         try {
+            checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
+            checkDuplicateTransportAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), user, cid, con);
             con.setAutoCommit(false);
             {
                 final String encryptedPassword = encrypt(mailAccount.getPassword(), session);
@@ -1542,8 +1552,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         if (-1 != getByPrimaryAddress(primaryAddress, user, cid, con)) {
             throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(user), I(cid));
         }
-        checkDuplicateMailAccount(mailAccount, user, cid, con);
-        checkDuplicateTransportAccount(mailAccount, user, cid, con);
+        checkDuplicateMailAccount(mailAccount, null, user, cid, con);
+        checkDuplicateTransportAccount(mailAccount, null, user, cid, con);
         // Check name
         final String name = mailAccount.getName();
         if (!isValid(name)) {
@@ -1835,7 +1845,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private void checkDuplicateMailAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Connection con) throws OXException {
+    private void checkDuplicateMailAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int user, final int cid, final Connection con) throws OXException {
         final String server = mailAccount.getMailServer();
         if (isEmpty(server)) {
             /*
@@ -1864,10 +1874,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             final String login = mailAccount.getLogin();
             do {
                 final int id = (int) result.getLong(1);
-                final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
-                current.parseMailServerURL(result.getString(2));
-                if (checkMailServer(server, addr, current) && current.getMailPort() == port && login.equals(current.getLogin())) {
-                    throw MailAccountExceptionCodes.DUPLICATE_MAIL_ACCOUNT.create(I(user), I(cid));
+                if (null == excepts || !excepts.contains(id)) {
+                    final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+                    current.parseMailServerURL(result.getString(2));
+                    if (checkMailServer(server, addr, current) && current.getMailPort() == port && login.equals(result.getString(3))) {
+                        throw MailAccountExceptionCodes.DUPLICATE_MAIL_ACCOUNT.create(I(user), I(cid));
+                    }
                 }
             } while (result.next());
         } catch (final SQLException e) {
@@ -1899,7 +1911,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final int user, final int cid, final Connection con) throws OXException {
+    private void checkDuplicateTransportAccount(final MailAccountDescription mailAccount, final TIntSet excepts, final int user, final int cid, final Connection con) throws OXException {
         final String server = mailAccount.getTransportServer();
         if (isEmpty(server)) {
             /*
@@ -1931,10 +1943,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
             do {
                 final int id = (int) result.getLong(1);
-                final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
-                current.parseTransportServerURL(result.getString(2));
-                if (checkTransportServer(server, addr, current) && current.getTransportPort() == port && login.equals(current.getTransportLogin())) {
-                    throw MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT.create(I(user), I(cid));
+                if (null == excepts || !excepts.contains(id)) {
+                    final AbstractMailAccount current = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+                    current.parseTransportServerURL(result.getString(2));
+                    if (checkTransportServer(server, addr, current) && current.getTransportPort() == port && login.equals(result.getString(3))) {
+                        throw MailAccountExceptionCodes.DUPLICATE_TRANSPORT_ACCOUNT.create(I(user), I(cid));
+                    }
                 }
             } while (result.next());
         } catch (final SQLException e) {
