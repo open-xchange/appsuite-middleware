@@ -426,6 +426,14 @@ public final class InternalList {
         new com.openexchange.groupware.update.tasks.CalendarAddUIDIndexTask(),
 
         // Drops rather needless foreign keys
-        new com.openexchange.groupware.update.tasks.DropFKTask()
+        new com.openexchange.groupware.update.tasks.DropFKTask(),
+
+        // Adds 'organizerId', 'principal' and 'principalId' to prg_dates and del_dates
+        new com.openexchange.groupware.update.tasks.AppointmentAddOrganizerIdPrincipalPrincipalIdColumnsTask(),
+
+        // Adds index to prg_dates_members and del_dates_members
+        new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembers(),
+        
+        
     };
 }
