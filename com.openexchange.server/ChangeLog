@@ -4,6 +4,7 @@
  - Fix for bug 20299: Responding with proper HTML callback if "save=1" URL parameter is set
  - Fix for bug 21249: Add "X-Mailer" header to messages sent by OLOX2
  - Fix for bug 21254: Fixed possible NPE
+ - Fix for bug 20822: Added needed index to calendar tables
 
 * 2012-01-16 - thorben.betten@open-xchange.com
 
