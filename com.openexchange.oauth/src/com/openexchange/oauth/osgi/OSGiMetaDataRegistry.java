@@ -104,7 +104,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
 
     final ConcurrentMap<String, OAuthServiceMetaData> map;
 
-    private ServiceTracker tracker;
+    private ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData> tracker;
 
     /**
      * Initializes a new {@link OSGiMetaDataRegistry}.
@@ -121,7 +121,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         final ConfigView view = configViews.getView(user, contextId);
         for (final OAuthServiceMetaData metadata : map.values()) {
             final ComposedConfigProperty<Boolean> property = view.property(metadata.getId(), boolean.class);
-            if (property.isDefined() && property.get().booleanValue()) {
+            if (!property.isDefined() || property.get().booleanValue()) {
                 retval.add(metadata);
             }
         }
@@ -136,7 +136,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         }
         final ConfigView view = configViews.getView(user, contextId);
         final ComposedConfigProperty<Boolean> property = view.property(id, boolean.class);
-        if (property.isDefined() && property.get().booleanValue()) {
+        if (!property.isDefined() || property.get().booleanValue()) {
             return service;
         }
         throw OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.create(id);
@@ -149,7 +149,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         }
         final ConfigView view = configViews.getView(user, contextId);
         final ComposedConfigProperty<Boolean> property = view.property(id, boolean.class);
-        if (property.isDefined() && property.get().booleanValue()) {
+        if (!property.isDefined() || property.get().booleanValue()) {
             return map.containsKey(id);
         }
         return false;
@@ -162,7 +162,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
      */
     void start(final BundleContext context) {
         if (null == tracker) {
-            tracker = new ServiceTracker(context, OAuthServiceMetaData.class.getName(), new Customizer(context));
+            tracker = new ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new Customizer(context));
             tracker.open();
         }
     }
@@ -177,7 +177,7 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         }
     }
 
-    private final class Customizer implements ServiceTrackerCustomizer {
+    private final class Customizer implements ServiceTrackerCustomizer<OAuthServiceMetaData,OAuthServiceMetaData> {
 
         private final BundleContext context;
 
@@ -190,10 +190,10 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object service = context.getService(reference);
-            if ((service instanceof OAuthServiceMetaData)) {
-                final OAuthServiceMetaData addMe = (OAuthServiceMetaData) service;
+        public OAuthServiceMetaData addingService(final ServiceReference<OAuthServiceMetaData> reference) {
+            final OAuthServiceMetaData service = context.getService(reference);
+            {
+                final OAuthServiceMetaData addMe = service;
                 if (null == map.putIfAbsent(addMe.getId(), addMe)) {
                     return service;
                 }
@@ -212,16 +212,16 @@ public final class OSGiMetaDataRegistry implements OAuthServiceMetaDataRegistry 
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData service) {
             // Nothing to do
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<OAuthServiceMetaData> reference, final OAuthServiceMetaData service) {
             if (null != service) {
                 try {
-                    if (service instanceof OAuthServiceMetaData) {
-                        final OAuthServiceMetaData removeMe = (OAuthServiceMetaData) service;
+                    {
+                        final OAuthServiceMetaData removeMe = service;
                         map.remove(removeMe.getId());
                     }
                 } finally {
