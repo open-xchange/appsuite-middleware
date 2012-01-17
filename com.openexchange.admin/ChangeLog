@@ -1,3 +1,7 @@
+* 2012-01-17 - thorben.betten@open-xchange.com
+
+ - Fix for 19846: Fixed extraction of host name out of a JDBC URL
+
 * 2012-01-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 20379: Don't fail listcontext CLI if a context cannot be loaded

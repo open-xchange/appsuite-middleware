@@ -52,7 +52,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.ArrayList;
-
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -99,7 +98,7 @@ public class ListDatabase extends DatabaseAbstraction {
 
     }
 
-    private void sysoutOutput(Database[] databases) throws InvalidDataException, URISyntaxException {
+    private void sysoutOutput(final Database[] databases) throws InvalidDataException, URISyntaxException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Database database : databases) {
             data.add(makeStandardData(database, false));
@@ -110,7 +109,7 @@ public class ListDatabase extends DatabaseAbstraction {
                  new String[] { "id", "name", "hostname", "master", "mid", "weight", "maxctx", "curctx", "hlimit", "max", "inital" }, data);
     }
 
-    private void precsvinfos(Database[] databases) throws URISyntaxException, InvalidDataException {
+    private void precsvinfos(final Database[] databases) throws URISyntaxException, InvalidDataException {
         // needed for csv output, KEEP AN EYE ON ORDER!!!
         final ArrayList<String> columns = new ArrayList<String>();
         columns.add("id");
@@ -191,7 +190,7 @@ public class ListDatabase extends DatabaseAbstraction {
         return rea_data;
     }
 
-    private ArrayList<String> makeStandardData(final Database db, boolean csv) throws URISyntaxException {
+    private ArrayList<String> makeStandardData(final Database db, final boolean csv) throws URISyntaxException {
         final ArrayList<String> rea_data = new ArrayList<String>();
         
         rea_data.add(db.getId().toString());
@@ -206,7 +205,7 @@ public class ListDatabase extends DatabaseAbstraction {
             if (csv) {
                 rea_data.add(db.getUrl());
             } else {
-                rea_data.add(new URI(db.getUrl().substring("jdbc:".length())).getHost());
+                rea_data.add(new URI(db.getUrl()).getHost());
             }
         } else {
             rea_data.add(null);
