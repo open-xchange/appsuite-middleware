@@ -80,6 +80,7 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.RemoveAfterAccessFolderWrapper;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -97,6 +98,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -346,7 +348,11 @@ public final class MailFolderStorage implements FolderStorage {
             // Separator
             mfd.setSeparator(mailAccess.getFolderStorage().getFolder(arg.getFullname()).getSeparator());
             // Other
-            mfd.setName(folder.getName());
+            {
+                final String name = folder.getName();
+                checkFolderName(name);
+                mfd.setName(name);
+            }
             mfd.setSubscribed(folder.isSubscribed());
             // Permissions
             final Permission[] permissions = folder.getPermissions();
@@ -689,6 +695,8 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    private static final Set<String> IGNORABLES = RemoveAfterAccessFolder.IGNORABLES;
+
     private Folder getFolder(final String treeId, final FullnameArgument argument, final StorageParameters storageParameters, final MailAccess<?, ?> mailAccess, final ServerSession session, final MailAccount mailAccount) throws OXException {
         final int accountId = argument.getAccountId();
         final String fullname = argument.getFullname();
@@ -714,16 +722,16 @@ public final class MailFolderStorage implements FolderStorage {
                 /*
                  * An external account folder
                  */
-                final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
-                mailAccess.connect(null == accessFast ? true : !accessFast.booleanValue());
-                retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
-                final String parentId = prepareFullname(accountId, fullname);
-                final SortableId[] subfolders = getSubfolders(parentId, storageParameters, mailAccess);
-                final String[] ids = new String[subfolders.length];
-                for (int i = 0; i < ids.length; i++) {
-                    ids[i] = subfolders[i].getId();
+                if (IGNORABLES.contains(mailAccount.getMailProtocol())) {
+                    retval = new ExternalMailAccountRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                } else {
+                    retval = new RemoveAfterAccessExtRootFolder(mailAccount, mailAccess.getMailConfig(), session);
+                    LogProperties.getLogProperties().put("com.openexchange.session.session", session);
                 }
-                retval.setSubfolderIDs(ids);
+                /*
+                 * Load on demand (or in FolderMap)
+                 */
+                retval.setSubfolderIDs(null);
             }
         } else {
             final Boolean accessFast = storageParameters.getParameter(folderType, paramAccessFast);
@@ -739,7 +747,12 @@ public final class MailFolderStorage implements FolderStorage {
                     mailAccess.getMailConfig(),
                     storageParameters,
                     new MailAccessFullnameProvider(mailAccess));
-                retval = MailAccount.DEFAULT_ID == accountId ? mailFolderImpl : new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);
+                if (MailAccount.DEFAULT_ID == accountId) {
+                    retval = mailFolderImpl;
+                } else {
+                    retval = new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);
+                    LogProperties.getLogProperties().put("com.openexchange.session.session", session);
+                }
             }
             hasSubfolders = mailFolder.hasSubfolders();
             /*
@@ -1174,8 +1187,12 @@ public final class MailFolderStorage implements FolderStorage {
                 mfd.setSeparator(mf.getSeparator());
             }
             // Name
-            if (null != folder.getName()) {
-                mfd.setName(folder.getName());
+            {
+                final String name = folder.getName();
+                if (null != name) {
+                    checkFolderName(name);
+                    mfd.setName(name);
+                }
             }
             // Subscribed
             mfd.setSubscribed(folder.isSubscribed());
@@ -1581,6 +1598,32 @@ public final class MailFolderStorage implements FolderStorage {
             }
         }
         return ret;
+    }
+
+    private final static String INVALID = "<>"; // "()<>;\".[]";
+
+    private static void checkFolderName(final String name) throws OXException {
+        if (isEmpty(name)) {
+            throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
+        }
+        final int length = name.length();
+        for (int i = 0; i < length; i++) {
+            if (INVALID.indexOf(name.charAt(i)) >= 0) {
+                throw MailExceptionCode.INVALID_FOLDER_NAME2.create(name);
+            }
+        }
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }

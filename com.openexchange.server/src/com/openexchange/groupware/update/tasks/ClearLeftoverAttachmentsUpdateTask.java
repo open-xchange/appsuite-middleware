@@ -93,11 +93,11 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
                 removeFile(att.getFileId(), att.getContextId()); //FIXME will not work during update
                 try {
                     removeDatabaseEntry(att.getId(),att.getContextId());
-                } catch (SQLException e) {
+                } catch (final SQLException e) {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             filestorages.set(null);
@@ -145,9 +145,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
                     LOG.warn("Can't reset auto commit", x);
                 }
 
-                if(writeCon != null) {
-                    Database.back(contextId, true, writeCon);
-                }
+                Database.back(contextId, true, writeCon);
             }
         }
     }
@@ -284,9 +282,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
             }
 
             if(readCon != null) {
-                if(readCon != null) {
-                    Database.back(contextId, false, readCon);
-                }
+                Database.back(contextId, false, readCon);
             }
         }
     }
@@ -296,7 +292,7 @@ public class ClearLeftoverAttachmentsUpdateTask implements UpdateTask {
         int id;
         int contextId;
 
-        private LeftoverAttachment(final String fileId, final int id, final int contextId) {
+        LeftoverAttachment(final String fileId, final int id, final int contextId) {
             this.fileId = fileId;
             this.id = id;
             this.contextId = contextId;

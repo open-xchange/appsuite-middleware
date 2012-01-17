@@ -619,7 +619,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private MailFolder namespaceFolderFor(final String fn, final IMAPFolder parent, final boolean subscribed) throws OXException {
+    private MailFolder namespaceFolderFor(final String fn, final IMAPFolder parent, final boolean subscribed) throws OXException, MessagingException {
         final ListLsubEntry listEntry = getLISTEntry(fn, parent);
         if (null == listEntry || !listEntry.exists() || (subscribed ? !listEntry.isSubscribed() : false)) {
             return null;
@@ -1839,7 +1839,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private boolean inferiors(final IMAPFolder imapFolder) throws OXException {
+    private boolean inferiors(final IMAPFolder imapFolder) throws OXException, MessagingException {
         return getLISTEntry(imapFolder).hasInferiors();
     }
 
@@ -2055,7 +2055,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private boolean isSelectable(final IMAPFolder imapFolder) throws OXException {
+    private boolean isSelectable(final IMAPFolder imapFolder) throws OXException, MessagingException {
         return getLISTEntry(imapFolder).canOpen();
     }
 
@@ -2839,27 +2839,27 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return STR_INBOX.equals(entry.getFullName()) || (entry.exists());
     }
 
-    private ListLsubEntry getLISTEntry(final IMAPFolder imapFolder) throws OXException {
+    private ListLsubEntry getLISTEntry(final IMAPFolder imapFolder) throws OXException, MessagingException {
         return getLISTEntry(imapFolder.getFullName(), imapFolder);
     }
 
-    private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException {
+    private ListLsubEntry getLISTEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
         return ListLsubCache.getCachedLISTEntry(fullName, accountId, imapFolder, session);
     }
 
-    private ListLsubEntry getLSUBEntry(final IMAPFolder imapFolder) throws OXException {
+    private ListLsubEntry getLSUBEntry(final IMAPFolder imapFolder) throws OXException, MessagingException {
         return getLSUBEntry(imapFolder.getFullName(), imapFolder);
     }
 
-    private ListLsubEntry getLSUBEntry(final String fullName, final IMAPFolder imapFolder) throws OXException {
+    private ListLsubEntry getLSUBEntry(final String fullName, final IMAPFolder imapFolder) throws OXException, MessagingException {
         return ListLsubCache.getCachedLSUBEntry(fullName, accountId, imapFolder, session);
     }
 
-    private char getSeparator(final IMAPFolder imapFolder) throws OXException {
+    private char getSeparator(final IMAPFolder imapFolder) throws OXException, MessagingException {
         return getLISTEntry(STR_INBOX, imapFolder).getSeparator();
     }
 
-    private String getNameOf(final IMAPFolder imapFolder) throws OXException {
+    private String getNameOf(final IMAPFolder imapFolder) throws OXException, MessagingException {
         final String fullName = imapFolder.getFullName();
         return fullName.substring(fullName.lastIndexOf(getSeparator(imapFolder)) + 1);
     }

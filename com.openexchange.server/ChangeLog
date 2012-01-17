@@ -2,9 +2,33 @@
 
  - Fix for bug 21026: Unfinishing and finishing again the last occurrence of a occurrence count limited task series works now correctly.
 
+* 2012-01-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20013: Supporting IDN email addresses in user aliases
+ - Fix for bug 20299: Responding with proper HTML callback if "save=1" URL parameter is set
+ - Fix for bug 21249: Add "X-Mailer" header to messages sent by OLOX2
+
+* 2012-01-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21042: Fixed HTML pretty-printer
+ - Fix for bug 21217: Deny creation of duplicate mail account
+ - Fix for bug 21233: Dealing with missing task module on ICal insert
+
+* 2012-01-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21169: Introduced twitteroauth.properties to enable/disable Twitter OAuth bundle via config cascade
+ - Fix for bug 21184: Handling possibly thrown UnsupportedOperationException
+ - Fix for bug 21176: Added user information to audit logs
+
+* 2012-01-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21170: Fixed reporting tool if context is deleted in the meantime
+ - Fix for bug 20652: Introduced properties to define default behavior for contact collection on mail access/on mail transport
+ - Fix for bug 21159: Added deprecation notice
+
 * 2012-01-10 - thorben.betten@open-xchange.com
 
- - Possible fix for bug 21149: Introduced reentrant-sensitive semaphore
+ - Fix for bug 21149: Introduced reentrant-sensitive semaphore
  - Fix for bug 20066: Fixed counter of reporting tool (except for *DAV)
 
 * 2011-01-06 - tobias.friedrich@open-xchange.com

@@ -252,9 +252,9 @@ public class MIMEMailException extends OXException {
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
-                        e.getMessage());
+                        EMPTY_ARGS);
                 }
-                return MIMEMailExceptionCode.STORE_CLOSED.create(e, e.getMessage());
+                return MIMEMailExceptionCode.STORE_CLOSED.create(e, EMPTY_ARGS);
             }
             final Exception nextException = e.getNextException();
             if (nextException == null) {

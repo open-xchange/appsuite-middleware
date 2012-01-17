@@ -71,8 +71,8 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.htmlcleaner.CleanerProperties;
 import org.htmlcleaner.HtmlCleaner;
-import org.htmlcleaner.PrettyXmlSerializer;
 import org.htmlcleaner.Serializer;
+import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import com.openexchange.config.ConfigurationService;
@@ -463,7 +463,8 @@ public final class HTMLServiceImpl implements HTMLService {
         if (null != confName && !confName.endsWith(".properties")) {
             confName += ".properties";
         }
-        final String html = replaceHexEntities(htmlContent);
+        String html = replaceHexEntities(htmlContent);
+        html = processDownlevelRevealedConditionalComments(html);
         // html = replaceHexNbsp(html);
         final FilterJerichoHandler handler;
         {
@@ -478,7 +479,7 @@ public final class HTMLServiceImpl implements HTMLService {
         if (dropExternalImages && null != modified) {
             modified[0] |= handler.isImageURLFound();
         }
-        final String retval = processDownlevelRevealedConditionalComments(handler.getHTML());
+        final String retval = handler.getHTML();
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");
@@ -1246,7 +1247,7 @@ public final class HTMLServiceImpl implements HTMLService {
         props.setUseCdataForScriptAndStyle(false);
         props.setIgnoreQuestAndExclam(true);
         HTML_CLEANER = new HtmlCleaner(props);
-        SERIALIZER = new PrettyXmlSerializer(props, " ");
+        SERIALIZER = new SimpleHtmlSerializer(props); // (props, " ");
     }
 
     private static final String DOCTYPE_DECL = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n\r\n";

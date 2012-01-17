@@ -73,7 +73,7 @@ public final class UnitTests {
         pubSuite.addTestSuite(ContactFolderMultipleUpdaterStrategyTest.class);
         pubSuite.addTestSuite(SubscriptionExecutionServiceImplTest.class);
 //        pubSuite.addTestSuite(SubscriptionSQLStorageTest.class);
-        pubSuite.addTestSuite(AbstractSubscribeServiceTest.class);
+        //pubSuite.addTestSuite(AbstractSubscribeServiceTest.class);
         pubSuite.addTestSuite(CompositeSubscriptionSourceDiscoveryServiceTest.class);
         //pubSuite.addTestSuite(FacebookContactParserTest.class);
         //pubSuite.addTestSuite(LinkedInContactParserTest.class);

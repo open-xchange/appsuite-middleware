@@ -49,11 +49,16 @@
 
 package com.openexchange.imap;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import javax.mail.MessagingException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -67,7 +72,16 @@ import com.sun.mail.imap.IMAPStore;
 public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {
 
     public static enum ImplType {
-        REENTRANT_SEMAPHORE, SEMAPHORE, SYNCHRONIZED;
+        SEMAPHORE, SYNCHRONIZED;
+
+        public static ImplType implTypeFor(final String identifier) {
+            for (final ImplType it : ImplType.values()) {
+                if (it.name().equalsIgnoreCase(identifier)) {
+                    return it;
+                }
+            }
+            return null;
+        }
     }
 
     private static final class CountedIMAPStore {
@@ -114,7 +128,9 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
         protected final ConcurrentMap<Thread, CountedIMAPStore> stores;
 
-        private final Semaphore semaphore;
+        protected final Semaphore semaphore;
+
+        private final int timeoutMillis;
 
         private volatile ScheduledTimerTask timerTask;
 
@@ -122,6 +138,8 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
             super(server, port, login, pw);
             semaphore = new Semaphore(maxCount, true);
             stores = new ConcurrentHashMap<Thread, CountedIMAPStore>(maxCount);
+            final ConfigurationService configurationService = IMAPServiceRegistry.getService(ConfigurationService.class);
+            timeoutMillis = null == configurationService ? 20000 : configurationService.getIntProperty("com.openexchange.imap.imapConnectionTimeout", 20000);
             if (DEBUG) {
                 final TimerService service = IMAPServiceRegistry.getService(TimerService.class);
                 if (null != service) {
@@ -129,8 +147,9 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
                         @Override
                         public void run() {
+                            LOG.info(semaphore.getQueueLength() + " threads waiting to acquire a connection to \"" + server + "\" for login " + login);
                             if (stores.isEmpty()) {
-                                LOG.info("No occupied IMAPStore \"" + server + "\" instance for login " + login);
+                                return;
                             }
                             final StringBuilder sb = new StringBuilder(512);
                             for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
@@ -171,52 +190,56 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
                 return cImapStore.imapStore;
             }
             // Acquire a new IMAPStore instance
-            semaphore.acquire();
-            final IMAPStore imapStore = super.getStore(imapSession);
+            if (!semaphore.tryAcquire(timeoutMillis, TimeUnit.MILLISECONDS)) {
+                // Timed out...
+                final StringBuilder sb = new StringBuilder(512);
+                sb.append(semaphore.getQueueLength()).append(" threads waiting. ");
+                sb.append(semaphore.availablePermits()).append(" permits available for \"").append(server);
+                sb.append("\" for login ").append(login);
+                for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
+                    final Thread t = entry.getKey();
+                    sb.append("\n--- ").append(t.getName()).append(" occupies IMAPStore \"");
+                    sb.append(server).append("\" instance for login ").append(login).append('\n');
+                    appendStackTrace(t.getStackTrace(), sb);
+                }
+                final Throwable t = new Throwable(sb.toString());
+                final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, t, server, login);
+                throw new MessagingException(e.getMessage(), e);
+            }
+            // Obtain new IMAPStore instance
+            final IMAPStore imapStore = getStoreErrorAware(imapSession);
             stores.put(thread, new CountedIMAPStore(imapStore));
             return imapStore;
+        }
+
+        private IMAPStore getStoreErrorAware(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
+            boolean releasePermit = true;
+            try {
+                final IMAPStore imapStore = super.getStore(imapSession);
+                releasePermit = false;
+                return imapStore;
+            } finally {
+                if (releasePermit) {
+                    // An exception/throwable was thrown; release previously acquired permit
+                    semaphore.release();
+                }
+            }
         }
 
         @Override
         public void backStore(final IMAPStore imapStore) {
             final Thread thread = Thread.currentThread();
             final CountedIMAPStore cImapStore = stores.get(thread);
-            cImapStore.count = cImapStore.count - 1;
-            if (cImapStore.count > 0) {
-                return;
+            if (null != cImapStore) {
+                cImapStore.count = cImapStore.count - 1;
+                if (cImapStore.count > 0) {
+                    return;
+                }
+                stores.remove(thread);
             }
-            stores.remove(thread);
             // Release IMAPStore instance orderly
             super.backStore(imapStore);
             semaphore.release();
-        }
-    }
-
-    private static final class SemaphoredBoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer {
-
-        private final Semaphore semaphore;
-
-        protected SemaphoredBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
-            super(server, port, login, pw);
-            semaphore = new Semaphore(maxCount, true);
-        }
-
-        @Override
-        public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
-            if (DEBUG) {
-                LOG.debug("IMAPStoreContainer.getStore(): " + semaphore.getQueueLength() + " threads currently waiting for available IMAPStore instance.");
-            }
-            semaphore.acquire();
-            return super.getStore(imapSession);
-        }
-
-        @Override
-        public void backStore(final IMAPStore imapStore) {
-            try {
-                super.backStore(imapStore);
-            } finally {
-                semaphore.release();
-            }
         }
     }
 
@@ -226,29 +249,71 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
 
         private final int maxCount;
 
+        private final int timeoutMillis;
+
+        protected final Map<Thread, CountedIMAPStore> stores;
+
         private int count;
-        
+
         protected SynchronizedBoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount) {
             super(server, port, login, pw);
             mutex = new Object();
             this.maxCount = maxCount;
+            stores = new HashMap<Thread, CountedIMAPStore>(maxCount);
             count = 0;
+            final ConfigurationService configurationService = IMAPServiceRegistry.getService(ConfigurationService.class);
+            timeoutMillis = null == configurationService ? 20000 : configurationService.getIntProperty("com.openexchange.imap.imapConnectionTimeout", 20000);
         }
 
         @Override
         public IMAPStore getStore(final javax.mail.Session imapSession) throws MessagingException, InterruptedException {
             synchronized (mutex) {
-                while (count >= maxCount) {
-                    mutex.wait();
+                final Thread thread = Thread.currentThread();
+                // Reentrant thread?
+                final CountedIMAPStore cImapStore = stores.get(thread);
+                if (null != cImapStore) {
+                    cImapStore.count = cImapStore.count + 1;
+                    return cImapStore.imapStore;
                 }
+                // Try to acquire a new IMAPStore instance
+                while (count >= maxCount) {
+                    mutex.wait(timeoutMillis);
+                    if (count >= maxCount) {
+                        // Timed out...
+                        final StringBuilder sb = new StringBuilder(512);
+                        sb.append(maxCount - count).append(" permits available for \"").append(server);
+                        sb.append("\" for login ").append(login);
+                        for (final Entry<Thread, CountedIMAPStore> entry : stores.entrySet()) {
+                            final Thread t = entry.getKey();
+                            sb.append("\n--- ").append(t.getName()).append(" occupies IMAPStore \"");
+                            sb.append(server).append("\" instance for login ").append(login).append('\n');
+                            appendStackTrace(t.getStackTrace(), sb);
+                        }
+                        final Throwable t = new Throwable(sb.toString());
+                        final OXException e = IMAPException.create(IMAPException.Code.CONNECTION_UNAVAILABLE, t, server, login);
+                        throw new MessagingException(e.getMessage(), e);
+                    }
+                }
+                final IMAPStore imapStore = super.getStore(imapSession);
+                stores.put(thread, new CountedIMAPStore(imapStore));
                 count++;
-                return super.getStore(imapSession);
+                return imapStore;
             }
         }
 
         @Override
         public void backStore(final IMAPStore imapStore) {
             synchronized (mutex) {
+                final Thread thread = Thread.currentThread();
+                final CountedIMAPStore cImapStore = stores.get(thread);
+                if (null != cImapStore) {
+                    cImapStore.count = cImapStore.count - 1;
+                    if (cImapStore.count > 0) {
+                        return;
+                    }
+                    stores.remove(thread);
+                }
+                // Release IMAPStore instance orderly
                 super.backStore(imapStore);
                 count--;
                 mutex.notify();
@@ -264,11 +329,8 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
     public BoundedIMAPStoreContainer(final String server, final int port, final String login, final String pw, final int maxCount, final ImplType implType) {
         super();
         switch (implType) {
-        case REENTRANT_SEMAPHORE:
-            impl = new ReentrantSemaphoredBoundedIMAPStoreContainer(server, port, login, pw, maxCount);
-            break;
         case SEMAPHORE:
-            impl = new SemaphoredBoundedIMAPStoreContainer(server, port, login, pw, maxCount);
+            impl = new ReentrantSemaphoredBoundedIMAPStoreContainer(server, port, login, pw, maxCount);
             break;
         default:
             impl = new SynchronizedBoundedIMAPStoreContainer(server, port, login, pw, maxCount);
@@ -284,6 +346,16 @@ public final class BoundedIMAPStoreContainer extends UnboundedIMAPStoreContainer
     @Override
     public void backStore(final IMAPStore imapStore) {
         impl.backStore(imapStore);
+    }
+
+    @Override
+    public void clear() {
+        impl.clear();
+    }
+
+    @Override
+    public void closeElapsed(final long stamp, final StringBuilder debugBuilder) {
+        impl.closeElapsed(stamp, debugBuilder);
     }
 
 }

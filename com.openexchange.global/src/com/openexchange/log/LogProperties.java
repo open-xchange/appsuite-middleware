@@ -140,12 +140,26 @@ public final class LogProperties {
         Map<String, Object> map = THREAD_LOCAL.get(thread);
         if (null == map) {
             final Map<String, Object> newmap = new HashMap<String, Object>();
-            map = THREAD_LOCAL.put(thread, newmap);
+            map = THREAD_LOCAL.putIfAbsent(thread, newmap);
             if (null == map) {
                 map = newmap;
             }
         }
         return map;
+    }
+
+    /**
+     * Clones the thread-local log properties.
+     * 
+     * @param other The other thread
+     */
+    public static void cloneLogProperties(final Thread other) {
+        final Thread thread = Thread.currentThread();
+        final Map<String, Object> map = THREAD_LOCAL.get(thread);
+        if (null == map) {
+            return;
+        }
+        THREAD_LOCAL.put(other, new HashMap<String, Object>(map));
     }
 
     /**

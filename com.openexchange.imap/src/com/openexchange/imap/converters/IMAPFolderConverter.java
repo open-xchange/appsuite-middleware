@@ -168,12 +168,16 @@ public final class IMAPFolderConverter {
      * @throws OXException If IMAP folder's attributes cannot be accessed
      */
     public static Entity2ACLArgs getEntity2AclArgs(final Session session, final IMAPFolder imapFolder, final IMAPConfig imapConfig) throws OXException {
-        return new Entity2ACLArgsImpl(
-            imapConfig.getAccountId(),
-            new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()),
-            session.getUserId(),
-            imapFolder.getFullName(),
-            ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session));
+        try {
+            return new Entity2ACLArgsImpl(
+                imapConfig.getAccountId(),
+                new InetSocketAddress(imapConfig.getServer(), imapConfig.getPort()),
+                session.getUserId(),
+                imapFolder.getFullName(),
+                ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session));
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        }
     }
 
     private static final DefaultFolderType[] TYPES = {

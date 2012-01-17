@@ -204,15 +204,27 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                 for (final FolderStorage folderStorage : realFolderStorages) {
                     final String[] modifiedFolderIDs =
                         folderStorage.getModifiedFolderIDs(treeId, since, includeContentTypes, storageParameters);
-                    for (final String modifiedFolderID : modifiedFolderIDs) {
+                    if (modifiedFolderIDs.length > 0) {
                         try {
-                            modifiedFolders.add(folderStorage.getFolder(FolderStorage.REAL_TREE_ID, modifiedFolderID, storageParameters));
+                            modifiedFolders.addAll(folderStorage.getFolders(
+                                FolderStorage.REAL_TREE_ID,
+                                Arrays.asList(modifiedFolderIDs),
+                                storageParameters));
                         } catch (final OXException e) {
-                            LOG.error(
-                                new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
-                                    "\" could not be fetched from storage \"").append(folderStorage.getClass().getName()).append("\":\n").append(
-                                    e.getMessage()).toString(),
-                                e);
+                            for (final String modifiedFolderID : modifiedFolderIDs) {
+                                try {
+                                    modifiedFolders.add(folderStorage.getFolder(
+                                        FolderStorage.REAL_TREE_ID,
+                                        modifiedFolderID,
+                                        storageParameters));
+                                } catch (final OXException ee) {
+                                    LOG.error(
+                                        new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
+                                            "\" could not be fetched from storage \"").append(folderStorage.getClass().getName()).append(
+                                            "\":\n").append(ee.getMessage()).toString(),
+                                        ee);
+                                }
+                            }
                         }
                     }
                 }
@@ -223,18 +235,27 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                         try {
                             final String[] modifiedFolderIDs =
                                 storage.getModifiedFolderIDs(treeId, since, includeContentTypes, storageParameters);
-                            for (final String modifiedFolderID : modifiedFolderIDs) {
+                            if (modifiedFolderIDs.length > 0) {
                                 try {
-                                    modifiedFolders.add(storage.getFolder(
+                                    modifiedFolders.addAll(storage.getFolders(
                                         FolderStorage.REAL_TREE_ID,
-                                        modifiedFolderID,
+                                        Arrays.asList(modifiedFolderIDs),
                                         storageParameters));
                                 } catch (final OXException e) {
-                                    LOG.error(
-                                        new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
-                                            "\" could not be fetched from storage \"").append(storage.getClass().getName()).append("\":\n").append(
-                                            e.getMessage()).toString(),
-                                        e);
+                                    for (final String modifiedFolderID : modifiedFolderIDs) {
+                                        try {
+                                            modifiedFolders.add(storage.getFolder(
+                                                FolderStorage.REAL_TREE_ID,
+                                                modifiedFolderID,
+                                                storageParameters));
+                                        } catch (final OXException ee) {
+                                            LOG.error(
+                                                new StringBuilder(128).append("Updated folder \"").append(modifiedFolderID).append(
+                                                    "\" could not be fetched from storage \"").append(storage.getClass().getName()).append(
+                                                    "\":\n").append(ee.getMessage()).toString(),
+                                                ee);
+                                        }
+                                    }
                                 }
                             }
                             if (started) {

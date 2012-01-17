@@ -121,6 +121,10 @@ public final class MailMessageParser {
 
     private static final boolean WARN_ENABLED = LOG.isWarnEnabled();
 
+    private static final String HDR_CONTENT_DISPOSITION = MessageHeaders.HDR_CONTENT_DISPOSITION;
+
+    private static final String HDR_CONTENT_TYPE = MessageHeaders.HDR_CONTENT_TYPE;
+
     private static final int BUF_SIZE = 8192;
 
     private static final Iterator<Entry<String, String>> EMPTY_ITER = new Iterator<Entry<String, String>>() {
@@ -583,11 +587,11 @@ public final class MailMessageParser {
                         /*
                          * Set part's headers
                          */
-                        part.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                        part.setHeader(HDR_CONTENT_TYPE, contentTypeStr);
                         {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(getFileName(null, getSequenceId(prefix, partCount), "text/calendar"));
-                            part.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, cd.toString());
+                            part.setHeader(HDR_CONTENT_DISPOSITION, cd.toString());
                         }
                         part.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                         {
@@ -642,7 +646,7 @@ public final class MailMessageParser {
                              * Set content through a data handler to avoid further exceptions raised by unavailable DCH (data content handler)
                              */
                             rtfPart.setDataHandler(new DataHandler(new MessageDataSource(decompressedBytes, contentTypeStr)));
-                            rtfPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentTypeStr);
+                            rtfPart.setHeader(HDR_CONTENT_TYPE, contentTypeStr);
                             rtfPart.setSize(decompressedBytes.length);
                             /*
                              * Further process TNEF attachment
@@ -683,13 +687,13 @@ public final class MailMessageParser {
                             final DataSource ds = new RawDataSource(attachment.getRawData(), contentTypeStr);
                             bodyPart.setDataHandler(new DataHandler(ds));
                             bodyPart.setHeader(
-                                MessageHeaders.HDR_CONTENT_TYPE,
+                                HDR_CONTENT_TYPE,
                                 ContentType.prepareContentTypeString(contentTypeStr, attachFilename));
                             if (attachFilename != null) {
                                 final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(attachFilename);
                                 bodyPart.setHeader(
-                                    MessageHeaders.HDR_CONTENT_DISPOSITION,
+                                    HDR_CONTENT_DISPOSITION,
                                     MIMEMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             os.reset();
@@ -705,7 +709,7 @@ public final class MailMessageParser {
                             os.reset();
                             nestedMessage.writeTo(os);
                             bodyPart.setDataHandler(new DataHandler(new MessageDataSource(os.toByteArray(), MIMETypes.MIME_MESSAGE_RFC822)));
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
+                            bodyPart.setHeader(HDR_CONTENT_TYPE, MIMETypes.MIME_MESSAGE_RFC822);
                             parseMailContent(MIMEMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         }
                     }
@@ -738,13 +742,13 @@ public final class MailMessageParser {
                         final DataSource ds = new RawDataSource(messageClass.getRawData(), MIMETypes.MIME_APPL_OCTET);
                         bodyPart.setDataHandler(new DataHandler(ds));
                         bodyPart.setHeader(
-                            MessageHeaders.HDR_CONTENT_TYPE,
+                            HDR_CONTENT_TYPE,
                             ContentType.prepareContentTypeString(MIMETypes.MIME_APPL_OCTET, attachFilename));
                         if (attachFilename != null) {
                             final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                             cd.setFilenameParameter(attachFilename);
                             bodyPart.setHeader(
-                                MessageHeaders.HDR_CONTENT_DISPOSITION,
+                                HDR_CONTENT_DISPOSITION,
                                 MIMEMessageUtility.foldContentDisposition(cd.toString()));
                         }
                         bodyPart.setSize(messageClass.getLength());
@@ -999,8 +1003,10 @@ public final class MailMessageParser {
         }
     }
 
+    private static final String HDR_CONTENT_TRANSFER_ENC = MessageHeaders.HDR_CONTENT_TRANSFER_ENC;
+
     private static boolean is7BitTransferEncoding(final MailPart mailPart) {
-        final String transferEncoding = mailPart.getFirstHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC);
+        final String transferEncoding = mailPart.getFirstHeader(HDR_CONTENT_TRANSFER_ENC);
         /*-
          * Taken from RFC 2045 Section 6.1. (Content-Transfer-Encoding Syntax):
          * ...
@@ -1012,7 +1018,7 @@ public final class MailMessageParser {
 
     private static String getCharset(final MailPart mailPart, final ContentType contentType) throws OXException {
         final String charset;
-        if (mailPart.containsHeader(MessageHeaders.HDR_CONTENT_TYPE)) {
+        if (mailPart.containsHeader(HDR_CONTENT_TYPE)) {
             String cs = contentType.getCharsetParameter();
             if (!CharsetDetector.isValid(cs)) {
                 StringBuilder sb = null;

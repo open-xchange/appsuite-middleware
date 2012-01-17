@@ -50,6 +50,7 @@
 package com.openexchange.threadpool.internal;
 
 import java.util.concurrent.atomic.AtomicInteger;
+import com.openexchange.log.LogProperties;
 
 /**
  * {@link CustomThreadFactory} - A thread factory taking a custom name prefix for created threads.
@@ -115,6 +116,7 @@ public final class CustomThreadFactory implements java.util.concurrent.ThreadFac
          */
         final CustomThread t = new CustomThread(r, getThreadName(threadNum, new StringBuilder(len).append(namePrefix)));
         t.setUncaughtExceptionHandler(new CustomUncaughtExceptionhandler());
+        LogProperties.cloneLogProperties(t);
         return t;
     }
 

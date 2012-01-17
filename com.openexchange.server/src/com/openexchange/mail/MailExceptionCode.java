@@ -368,6 +368,10 @@ public enum MailExceptionCode implements OXExceptionCode {
      * Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as "replied" and/or "forwarded".
      */
     FLAG_FAIL("Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as \"replied\" and/or \"forwarded\".", Category.CATEGORY_WARNING, 82),
+    /**
+     * Invalid folder name: "%1$s"
+     */
+    INVALID_FOLDER_NAME2("Invalid folder name: \"%1$s\"", INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
 
     ;
 

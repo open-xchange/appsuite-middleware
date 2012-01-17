@@ -201,6 +201,10 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      * The folder name "%1$s" is reserved. Please choose another name.
      */
     RESERVED_NAME(FolderExceptionMessages.RESERVED_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1033),
+    /**
+     * Found two folders named "%1$s" located below parent folder "%2$s". Please resolve this condition (via web interface).
+     */
+    DUPLICATE_NAME(FolderExceptionMessages.DUPLICATE_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1034),
 
     ;
 

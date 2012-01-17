@@ -70,6 +70,7 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.server.osgiservice.Whiteboard;
@@ -150,7 +151,8 @@ public class DiscoveryActivator implements BundleActivator {
 
         AbstractSubscribeService.STORAGE = storage;
 
-        AbstractSubscribeService.CRYPTO = whiteboard.getService(CryptoService.class);
+        AbstractSubscribeService.ENCRYPTION_FACTORY = whiteboard.getService(SecretEncryptionFactoryService.class);
+        AbstractSubscribeService.CRYPTO_SERVICE = whiteboard.getService(CryptoService.class);
         AbstractSubscribeService.FOLDERS = folders;
 
         final SubscriptionUserDeleteListener listener = new SubscriptionUserDeleteListener();
@@ -162,7 +164,6 @@ public class DiscoveryActivator implements BundleActivator {
         final SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
         context.registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null);
         context.registerService(SecretMigrator.class.getName(), secretHandling, null);
-
     }
 
     @Override

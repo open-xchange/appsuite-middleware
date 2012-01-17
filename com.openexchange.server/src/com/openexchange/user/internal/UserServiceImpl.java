@@ -49,11 +49,18 @@
 
 package com.openexchange.user.internal;
 
+import java.sql.Connection;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.user.UserService;
 
 /**
@@ -89,6 +96,11 @@ public final class UserServiceImpl implements UserService {
     public User getUser(final int uid, final Context context) throws OXException {
         return UserStorage.getInstance().getUser(uid, context);
     }
+    
+    @Override
+    public User getUser(final Connection con, final int uid, final Context context) throws OXException {
+        return UserStorage.getInstance().getUser(context, uid, con);
+    }
 
     @Override
     public User[] getUser(final Context context, final int[] userIds) throws OXException {
@@ -98,6 +110,18 @@ public final class UserServiceImpl implements UserService {
     @Override
     public User[] getUser(final Context context) throws OXException {
         return UserStorage.getInstance().getUser(context);
+    }
+    
+    @Override
+    public int createUser(final Context context, final User user) throws OXException {
+        checkUser(user);
+        return UserStorage.getInstance().createUser(context, user);
+    }
+    
+    @Override
+    public int createUser(final Connection con, final Context context, final User user) throws OXException {
+        checkUser(user);
+        return UserStorage.getInstance().createUser(con, context, user);
     }
 
     @Override
@@ -146,6 +170,65 @@ public final class UserServiceImpl implements UserService {
     @Override
     public boolean authenticate(final User user, final String password) throws OXException {
         return UserStorage.authenticate(user, password);
+    }
+    
+    private void checkUser(final User user) throws OXException {        
+        final String mail = user.getMail();
+        final String language = user.getPreferredLanguage();
+        final String timeZone = user.getTimeZone();
+        final String passwordMech = user.getPasswordMech();
+        
+        /*
+         * Mail address
+         */
+        if (mail == null) {
+            throw UserExceptionCode.MISSING_PARAMETER.create("mail address");
+        }    
+        
+        /*
+         * Preferred language
+         */
+        if (language == null || LocaleTools.getLocale(language) == null) { 
+            throw UserExceptionCode.MISSING_PARAMETER.create("preferred language");
+        } else {
+            final Locale locale = LocaleTools.getLocale(language);
+            if (locale == null) {
+                throw UserExceptionCode.INVALID_LOCALE.create(language);
+            }            
+        }
+        
+        /*
+         * Time zone
+         */
+        if (timeZone == null) {
+            throw UserExceptionCode.MISSING_PARAMETER.create("timezone");
+        } else {
+            final List<String> validTimeZones = Arrays.asList(TimeZone.getAvailableIDs());
+            boolean found = false;
+            for (final String validTimeZone : validTimeZones) {
+                if (validTimeZone.equals(timeZone)) {
+                    found = true;
+                    break;
+                }
+            }
+            
+            if (!found) {
+                throw UserExceptionCode.INVALID_TIMEZONE.create(timeZone);
+            }
+        }
+        
+        /*
+         * Password mech
+         */
+        if (passwordMech == null) {
+            throw UserExceptionCode.MISSING_PASSWORD_MECH.create();
+        } else {
+            if (!passwordMech.equalsIgnoreCase("{CRYPT}") && !passwordMech.equalsIgnoreCase("{SHA}")) {
+                throw UserExceptionCode.MISSING_PASSWORD_MECH.create(passwordMech);
+            }
+        }
+        
+        // TODO: Maybe we have to check the contact id here.
     }
 
 }

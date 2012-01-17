@@ -66,14 +66,14 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class SubscriptionSecretHandling implements EncryptedItemDetectorService, SecretMigrator {
-
+    
     private SubscriptionSourceDiscoveryService discovery = null;
-
+    
     public SubscriptionSecretHandling(final SubscriptionSourceDiscoveryService discovery) {
         super();
         this.discovery = discovery;
     }
-
+    
     @Override
     public boolean hasEncryptedItems(final ServerSession session) throws OXException {
         final List<SubscriptionSource> sources = discovery.getSources();
@@ -100,11 +100,13 @@ public class SubscriptionSecretHandling implements EncryptedItemDetectorService,
             if(passwordFields.isEmpty()) {
                 continue;
             }
-
+            
             final SubscribeService subscribeService = subscriptionSource.getSubscribeService();
-
-            subscribeService.migrateSecret(session.getContext(), session.getUser(), oldSecret, newSecret);
+            
+            subscribeService.migrateSecret(session, oldSecret, newSecret);
         }
     }
+
+
 
 }

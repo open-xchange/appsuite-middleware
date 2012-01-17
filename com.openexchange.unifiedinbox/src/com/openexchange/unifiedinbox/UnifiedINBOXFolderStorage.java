@@ -68,6 +68,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.dataobjects.MailFolder.DefaultFolderType;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -129,12 +130,15 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         if (!isMailAccountEnabled(fa.getAccountId())) {
             return false;
         }
-        final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, fa.getAccountId());
-        mailAccess.connect();
+        MailAccess<?, ?> mailAccess = null;
         try {
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            mailAccess.connect();
             return mailAccess.getFolderStorage().exists(fa.getFullname());
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
     }
 
@@ -153,9 +157,10 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             if (!isMailAccountEnabled(nestedAccountId)) {
                 throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(fullname);
             }
-            final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session, nestedAccountId);
-            mailAccess.connect();
+            MailAccess<?, ?> mailAccess = null;
             try {
+                mailAccess = MailAccess.getInstance(session, nestedAccountId);
+                mailAccess.connect();
                 final String nestedFullname = fa.getFullname();
                 final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(nestedFullname);
                 mailFolder.setFullname(UnifiedINBOXUtility.generateNestedFullname(
@@ -166,11 +171,15 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 mailFolder.setName(getMailAccountName(nestedAccountId));
                 mailFolder.setSubfolders(false);
                 mailFolder.setSubscribedSubfolders(false);
+                mailFolder.setDefaultFolder(false);
+                mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                 UnifiedINBOXFolderConverter.setPermissions(mailFolder);
                 UnifiedINBOXFolderConverter.setOwnPermission(mailFolder, session.getUserId());
                 return mailFolder;
             } finally {
-                mailAccess.close(true);
+                if (null != mailAccess) {
+                    mailAccess.close(true);
+                }
             }
         }
         throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(fullname);
@@ -343,15 +352,10 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             completionService.submit(new LoggingCallable<MailFolder>(session) {
 
                 public MailFolder call() throws Exception {
-                    final MailAccess<?, ?> mailAccess;
+                    MailAccess<?, ?> mailAccess = null;
                     try {
                         mailAccess = MailAccess.getInstance(getSession(), mailAccount.getId());
                         mailAccess.connect();
-                    } catch (final OXException e) {
-                        getLogger().debug(e.getMessage(), e);
-                        return null;
-                    }
-                    try {
                         final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, parentFullname);
                         // Check if account fullname is not null
                         if (null == accountFullname) {
@@ -370,8 +374,13 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                         mailFolder.setSubscribedSubfolders(false);
                         mailFolder.setName(mailAccount.getName());
                         return mailFolder;
+                    } catch (final OXException e) {
+                        getLogger().debug(e.getMessage(), e);
+                        return null;
                     } finally {
-                        mailAccess.close(true);
+                        if (null != mailAccess) {
+                            mailAccess.close(true);
+                        }
                     }
                 }
             });

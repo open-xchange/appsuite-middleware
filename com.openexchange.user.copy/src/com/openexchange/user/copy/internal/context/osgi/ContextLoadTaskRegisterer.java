@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,50 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.user.copy.internal.context.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
-import junit.framework.TestCase;
-import com.openexchange.crypto.SimCryptoService;
-import com.openexchange.exception.OXException;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.context.ContextService;
+import com.openexchange.user.copy.CopyUserTaskService;
+import com.openexchange.user.copy.internal.context.ContextLoadTask;
 
 /**
- * {@link AbstractSubscribeServiceTest}
+ * {@link ContextLoadTaskRegisterer}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class AbstractSubscribeServiceTest extends TestCase {
-    public void testEncryptPasswords() throws OXException {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("p1","password1");
-        map.put("p2","password2");
-        map.put("something else", "something else");
+public class ContextLoadTaskRegisterer implements ServiceTrackerCustomizer<ContextService, ContextService> {
 
-        AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
-        AbstractSubscribeService.encrypt("secret", map, "p1", "p2");
+    private final BundleContext context;
+    
+    private ContextLoadTask task;
+    
+    private ServiceRegistration<CopyUserTaskService> registration;
+    
 
-        assertEquals("encrypted", map.get("p1"));
-        assertEquals("encrypted", map.get("p2"));
-
+    public ContextLoadTaskRegisterer(final BundleContext context) {
+        super();
+        this.context = context;
     }
 
-    public void testDecryptPasswords() throws OXException {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("p1","password1");
-        map.put("p2","password2");
-        map.put("something else", "something else");
-        map.put("com.openexchange.crypto.secret", "secret");
+    public ContextService addingService(final ServiceReference<ContextService> reference) {
+        final ContextService service = context.getService(reference);
+        task = new ContextLoadTask(service);
+        registration = context.registerService(CopyUserTaskService.class, task, null);
+        
+        return service;
+    }
 
-        AbstractSubscribeService.CRYPTO = new SimCryptoService("encrypted", "decrypted");
-        AbstractSubscribeService.decrypt("secret", map, "p1", "p2");
+    public void modifiedService(final ServiceReference<ContextService> reference, final ContextService service) {
+        // Nothing to do.
+    }
 
-        assertEquals("decrypted", map.get("p1"));
-        assertEquals("decrypted", map.get("p2"));
-
+    public void removedService(final ServiceReference<ContextService> reference, final ContextService service) {
+        registration.unregister();
+        task = null;
+        context.ungetService(reference);
     }
 }

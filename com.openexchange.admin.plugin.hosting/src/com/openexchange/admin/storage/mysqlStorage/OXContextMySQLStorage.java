@@ -789,9 +789,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
         }
 
+        final boolean failOnMissing = false;
+
         return contextCommon.loadContexts(filteredCids != null ? filteredCids : cids, Long.parseLong(prop.getProp(
             "AVERAGE_CONTEXT_SIZE",
-            "100")), loaders);
+            "100")), loaders, failOnMissing);
     }
 
     @Override

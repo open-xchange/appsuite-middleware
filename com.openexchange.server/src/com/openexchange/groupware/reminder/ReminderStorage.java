@@ -85,6 +85,8 @@ public abstract class ReminderStorage {
 
     public abstract ReminderObject[] selectReminder(Context ctx, Connection con, User user, Date end) throws OXException;
 
+    public abstract ReminderObject[] selectReminder(Context ctx, Connection con, int userId, Date end) throws OXException;
+    
     public void deleteReminder(final Context ctx, final ReminderObject reminder) throws OXException {
         final Connection con = Database.get(ctx, true);
         try {
@@ -95,4 +97,15 @@ public abstract class ReminderStorage {
     }
 
     public abstract void deleteReminder(Connection con, int ctxId, int reminderId) throws OXException;
+    
+    public void writeReminder(final Context ctx, final ReminderObject reminder) throws OXException {
+        final Connection con = Database.get(ctx, true);
+        try {
+            writeReminder(con, ctx.getContextId(), reminder);
+        } finally {
+            Database.back(ctx, true, con);
+        }
+    }
+
+    public abstract void writeReminder(Connection con, int ctxId, ReminderObject reminder) throws OXException;
 }

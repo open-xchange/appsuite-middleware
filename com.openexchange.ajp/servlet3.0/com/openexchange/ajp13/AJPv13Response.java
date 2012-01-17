@@ -51,7 +51,6 @@ package com.openexchange.ajp13;
 
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -360,9 +359,7 @@ public class AJPv13Response {
         final byte[] headers;
         {
             sink.reset();
-            final Iterator<String> iter = servletResponse.getHeaderNames();
-            for (int i = 0; i < headersSize; i++) {
-                final String headerName = iter.next();
+            for (final String headerName : servletResponse.getHeaderNames()) {
                 writeHeader(headerName, servletResponse.getHeader(headerName), sink);
             }
             headers = sink.toByteArray();

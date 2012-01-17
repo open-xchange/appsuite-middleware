@@ -132,7 +132,12 @@ public final class MBoxEnabledCache {
             f = map.putIfAbsent(imapConfig.getImapServerSocketAddress(), ft);
             if (null == f) {
                 f = ft;
-                final Boolean mbox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
+                Boolean mbox;
+                try {
+                    mbox = ListLsubCache.consideredAsMBox(imapConfig.getAccountId(), imapFolder, imapConfig.getSession());
+                } catch (final MessagingException e) {
+                    throw MIMEMailException.handleMessagingException(e, imapConfig, imapConfig.getSession());
+                }
                 if (null == mbox) {
                     ft.run();
                 } else {

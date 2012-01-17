@@ -691,6 +691,22 @@ public class ContactStringGetter implements ContactSwitcher {
     public Object image1contenttype(Object[] objects) throws OXException {
         return stringify(delegate.image1contenttype(objects));
     }
+    
+    public Object homeaddress(Object[] objects) throws OXException {
+        return stringify(delegate.homeaddress(objects));
+    }
+
+    public Object businessaddress(Object[] objects) throws OXException {
+        return stringify(delegate.businessaddress(objects));
+    }
+
+    public Object otheraddress(Object[] objects) throws OXException {
+        return stringify(delegate.otheraddress(objects));
+    }
+
+    public Object uid(Object[] objects) throws OXException {
+        return stringify(delegate.uid(objects));
+    }
 
     @Override
     public boolean _unknownfield(final Contact contact, final String fieldname, final Object value, final Object... additionalObjects) throws OXException {

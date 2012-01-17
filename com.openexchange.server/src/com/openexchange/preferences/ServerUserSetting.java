@@ -58,9 +58,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * Interface for accessing configuration settings.
@@ -121,7 +123,8 @@ public class ServerUserSetting {
 
         @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
-            return Boolean.valueOf(rs.getBoolean(getColumnName()));
+            final boolean b = rs.getBoolean(getColumnName());
+            return rs.wasNull() ? null : Boolean.valueOf(b);
         }
 
         @Override
@@ -144,7 +147,8 @@ public class ServerUserSetting {
 
         @Override
         public Boolean getAttribute(final ResultSet rs) throws SQLException {
-            return Boolean.valueOf(rs.getBoolean(getColumnName()));
+            final boolean b = rs.getBoolean(getColumnName());
+            return rs.wasNull() ? null : Boolean.valueOf(b);
         }
 
         @Override
@@ -337,7 +341,14 @@ public class ServerUserSetting {
      */
     public Boolean isContactCollectOnMailAccess(final int cid, final int user) throws OXException {
         final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_ACCESS);
-        return null == attribute ? Boolean.FALSE : attribute;
+        if (null != attribute) {
+            return attribute;
+        }
+        /*
+         * Return as configured
+         */
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return null == service ? Boolean.FALSE : Boolean.valueOf(service.getBoolProperty("com.openexchange.user.contactCollectOnMailAccess", false));
     }
 
     /**
@@ -362,7 +373,14 @@ public class ServerUserSetting {
      */
     public Boolean isContactCollectOnMailTransport(final int cid, final int user) throws OXException {
         final Boolean attribute = getAttribute(cid, user, CONTACT_COLLECT_ON_MAIL_TRANSPORT);
-        return null == attribute ? Boolean.FALSE : attribute;
+        if (null != attribute) {
+            return attribute;
+        }
+        /*
+         * Return as configured
+         */
+        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return null == service ? Boolean.FALSE : Boolean.valueOf(service.getBoolProperty("com.openexchange.user.contactCollectOnMailTransport", false));
     }
 
     /**

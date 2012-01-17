@@ -53,6 +53,7 @@ import java.util.Collection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -79,7 +80,7 @@ public interface SubscribeService {
 
     public boolean knows(Context context, int subscriptionId) throws OXException;
 
-    public void migrateSecret(Context context, User user, String oldSecret, String newSecret) throws OXException;
+    public void migrateSecret(Session session, String oldSecret, String newSecret) throws OXException;
 
     public boolean hasAccounts(Context context, User user) throws OXException;
 

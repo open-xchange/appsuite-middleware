@@ -278,15 +278,10 @@ public final class UnifiedINBOXFolderConverter {
                 completionService.submit(new LoggingCallable<int[]>(session) {
 
                     public int[] call() throws Exception {
-                        final MailAccess<?, ?> mailAccess;
+                        MailAccess<?, ?> mailAccess = null;
                         try {
                             mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                             mailAccess.connect();
-                        } catch (final OXException e) {
-                            getLogger().debug(e.getMessage(), e);
-                            return EMPTY_COUNTS;
-                        }
-                        try {
                             final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
                             // Check if account fullname is not null
                             if (null == accountFullname) {
@@ -300,8 +295,13 @@ public final class UnifiedINBOXFolderConverter {
                                     mailFolder.getNewMessageCount() };
                             retval.set(true);
                             return counts;
+                        } catch (final OXException e) {
+                            getLogger().debug(e.getMessage(), e);
+                            return EMPTY_COUNTS;
                         } finally {
-                            mailAccess.close(true);
+                            if (null != mailAccess) {
+                                mailAccess.close(true);
+                            }
                         }
                     }
                 });
@@ -367,15 +367,10 @@ public final class UnifiedINBOXFolderConverter {
     private static int[][] getAccountDefaultFolders0(final int accountId, final Session session, final String[] fullnames) throws OXException {
         final int[][] retval = new int[fullnames.length][];
         // Get & connect appropriate mail access
-        final MailAccess<?, ?> mailAccess;
+        MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            return new int[0][];
-        }
-        try {
             for (int i = 0; i < retval.length; i++) {
                 final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullnames[i]);
                 if (null != accountFullname && mailAccess.getFolderStorage().exists(accountFullname)) {
@@ -387,8 +382,13 @@ public final class UnifiedINBOXFolderConverter {
                         accountId).toString());
                 }
             }
+        } catch (final OXException e) {
+            LOG.error(e.getMessage(), e);
+            return new int[0][];
         } finally {
-            mailAccess.close(true);
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
         }
         return retval;
     }

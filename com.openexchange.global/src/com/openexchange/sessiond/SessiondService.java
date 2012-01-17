@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -62,6 +63,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface SessiondService {
+
+    /**
+     * The reference to {@link SessiondService} instance.
+     */
+    public static final AtomicReference<SessiondService> SERVICE_REFERENCE = new AtomicReference<SessiondService>();
 
     /**
      * Creates a new session object in the SessionD storage with the given session parameters.

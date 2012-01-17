@@ -60,7 +60,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.secret.SecretEncryptionFactoryService;
+import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AbstractSubscribeService}
@@ -71,7 +76,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public static SubscriptionStorage STORAGE = null;
 
-    public static CryptoService CRYPTO;
+    public static SecretEncryptionFactoryService ENCRYPTION_FACTORY;
+
+    public static CryptoService CRYPTO_SERVICE;
 
     public static FolderService FOLDERS;
 
@@ -167,40 +174,39 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         return false;
     }
 
-    public static void encrypt(final String secret, final Map<String, Object> map, final String... keys) throws OXException {
-        if (CRYPTO == null) {
+    public static void encrypt(final Session session, final Map<String, Object> map, final String... keys) throws OXException {
+        if (ENCRYPTION_FACTORY == null) {
             return;
         }
-        if (secret == null) {
+        if (session == null) {
             return;
         }
+        final SecretEncryptionService<EncryptedField> encryptionService = ENCRYPTION_FACTORY.createService(STORAGE);
         for (final String key : keys) {
             if (map.containsKey(key)) {
                 final String toEncrypt = (String) map.get(key);
-                String encrypted;
-                try {
-                    encrypted = CRYPTO.encrypt(toEncrypt, secret);
-                } catch (final OXException e) {
-                    throw new OXException(e);
-                }
+                final String encrypted = encryptionService.encrypt(session, toEncrypt);
                 map.put(key, encrypted);
             }
         }
     }
 
-    public static void decrypt(final String secret, final Map<String, Object> map, final String... keys) throws OXException {
-        if (CRYPTO == null) {
+    public static void decrypt(final Subscription subscription, final Session session, final Map<String, Object> map, final String... keys) throws OXException {
+        if (ENCRYPTION_FACTORY == null) {
             return;
         }
-        if (secret == null) {
+        if (session == null) {
             return;
         }
+        final SecretEncryptionService<EncryptedField> encryptionService = ENCRYPTION_FACTORY.createService(STORAGE);
         for (final String key : keys) {
             if (map.containsKey(key)) {
+                final EncryptedField encryptedField = new EncryptedField(subscription, key);
+
                 final String toDecrypt = (String) map.get(key);
                 String decrypted;
                 try {
-                    decrypted = CRYPTO.decrypt(toDecrypt, secret);
+                    decrypted = encryptionService.decrypt(session, toDecrypt, encryptedField);
                 } catch (final OXException e) {
                     // Fail silently
                     decrypted = null;
@@ -220,12 +226,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     }
 
     @Override
-    public void migrateSecret(final Context context, final User user, final String oldSecret, final String newSecret) throws OXException {
+    public void migrateSecret(final Session session, final String oldSecret, final String newSecret) throws OXException {
         final Set<String> passwordFields = getSubscriptionSource().getPasswordFields();
         if (passwordFields.isEmpty()) {
             return;
         }
-        final List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(context, user.getId());
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        final List<Subscription> allSubscriptions = STORAGE.getSubscriptionsOfUser(serverSession.getContext(), session.getUserId());
         for (final Subscription subscription : allSubscriptions) {
             if (subscription.getSource().getId().equals(getSubscriptionSource().getId())) {
                 final Map<String, Object> configuration = subscription.getConfiguration();
@@ -237,15 +244,15 @@ public abstract class AbstractSubscribeService implements SubscribeService {
                         try {
                             try {
                                 // If we can already decrypt with the new secret, we're done with this entry
-                                CRYPTO.decrypt(password, newSecret);
+                                CRYPTO_SERVICE.decrypt(password, newSecret);
                             } catch (final OXException x) {
                                 // Alright, this one needs migration
-                                final String transcriptedPassword = CRYPTO.encrypt(CRYPTO.decrypt(password, oldSecret), newSecret);
+                                final String transcriptedPassword = CRYPTO_SERVICE.encrypt(CRYPTO_SERVICE.decrypt(password, oldSecret), newSecret);
                                 update.put(passwordField, transcriptedPassword);
                                 save = true;
                             }
                         } catch (final OXException e) {
-                            throw new OXException(e);
+                            throw e;
                         }
                     }
                 }
@@ -256,7 +263,6 @@ public abstract class AbstractSubscribeService implements SubscribeService {
             }
         }
     }
-
 
     protected void removeWhereConfigMatches(final Context context, final Map<String, Object> query) throws OXException {
         STORAGE.deleteAllSubscriptionsWhereConfigMatches(query, getSubscriptionSource().getId(), context);

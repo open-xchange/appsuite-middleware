@@ -49,6 +49,12 @@
 
 package com.openexchange.folderstorage;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.mailaccount.UnifiedINBOXManagement;
+
 /**
  * {@link RemoveAfterAccessFolder} - A folder which is removed from cache (if elapsed) after it was accessed.
  * <p>
@@ -58,6 +64,11 @@ package com.openexchange.folderstorage;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface RemoveAfterAccessFolder extends Folder {
+
+    /**
+     * Set of ignorable mail protocol identifiers.
+     */
+    public static final Set<String> IGNORABLES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("pop3", UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX)));
 
     /**
      * Whether to load subfolders.

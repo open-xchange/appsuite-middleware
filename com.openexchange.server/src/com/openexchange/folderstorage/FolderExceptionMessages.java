@@ -160,6 +160,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // The folder name "%1$s" is reserved. Please choose another name.
     public static final String RESERVED_NAME_MSG = "The folder name \"%1$s\" is reserved. Please choose another name.";
 
+    // Found two folders named "%1$s" located below parent folder "%2$s". Please resolve this condition (via web interface).
+    public static final String DUPLICATE_NAME_MSG = "Found two folders named \"%1$s\" located below parent folder \"%2$s\". Please resolve this condition (via web interface).";
+
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

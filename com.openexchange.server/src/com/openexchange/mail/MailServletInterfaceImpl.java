@@ -1908,6 +1908,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (!mailFolder.containsExists() && !mailFolder.containsFullname()) {
             throw MailExceptionCode.INSUFFICIENT_FOLDER_ATTR.create();
         }
+        {
+            final String name = mailFolder.getName();
+            if (null != name) {
+                checkFolderName(name);
+            }
+        }
         if ((mailFolder.containsExists() && mailFolder.exists()) || ((mailFolder.getFullname() != null) && mailAccess.getFolderStorage().exists(
             mailFolder.getFullname()))) {
             /*
@@ -2071,6 +2077,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             fullCopy(srcAccess, tmp[i].getFullname(), destAccess, destFullname, destSeparator, user, hasPermissions);
         }
         return destFullname;
+    }
+
+    private final static String INVALID = "<>"; // "()<>@,;:\\\".[]";
+
+    private static void checkFolderName(final String name) throws OXException {
+        if (isEmpty(name)) {
+            throw MailExceptionCode.INVALID_FOLDER_NAME_EMPTY.create();
+        }
+        final int length = name.length();
+        for (int i = 0; i < length; i++) {
+            if (INVALID.indexOf(name.charAt(i)) >= 0) {
+                throw MailExceptionCode.INVALID_FOLDER_NAME2.create(name);
+            }
+        }
     }
 
     @Override

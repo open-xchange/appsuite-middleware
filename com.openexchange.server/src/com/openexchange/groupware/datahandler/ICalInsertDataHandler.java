@@ -114,11 +114,13 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         } catch (final NumberFormatException e) {
             throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[0], e, dataArguments.get(ARGS[0]));
         }
-        final int taskFolder;
+        OXException missingTaskFolderException = null;
+        int taskFolder;
         try {
             taskFolder = Integer.parseInt(dataArguments.get(ARGS[1]));
         } catch (final NumberFormatException e) {
-            throw DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
+            missingTaskFolderException = DataExceptionCodes.INVALID_ARGUMENT.create(ARGS[1], e, dataArguments.get(ARGS[1]));
+            taskFolder = -1;
         }
 
         final Confirm confirm = parseConfirmation(dataArguments);
@@ -195,6 +197,12 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             }
         }
         if (!tasks.isEmpty()) {
+            if (taskFolder < 0) {
+                if (null != missingTaskFolderException) {
+                    throw missingTaskFolderException;
+                }
+                throw DataExceptionCodes.MISSING_ARGUMENT.create(ARGS[1]);
+            }
             /*
              * Insert parsed tasks into denoted task folder
              */

@@ -50,6 +50,9 @@
 package com.openexchange.folder.json.actions;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,6 +63,7 @@ import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folder.json.writer.FolderWriter;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -107,6 +111,7 @@ public final class ListAction extends AbstractFolderAction {
         }
         final String timeZoneId = request.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
         final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
+        final boolean errorOnDuplicateName = parseBoolean(request.getParameter("errorOnDuplicateName"), false);
         /*
          * Request subfolders from folder service
          */
@@ -123,11 +128,40 @@ public final class ListAction extends AbstractFolderAction {
          */
         long lastModified = 0;
         final UserizedFolder[] subfolders = subfoldersResponse.getResponse();
-        for (final UserizedFolder userizedFolder : subfolders) {
-            final Date modified = userizedFolder.getLastModifiedUTC();
-            if (modified != null) {
-                final long time = modified.getTime();
-                lastModified = ((lastModified >= time) ? lastModified : time);
+        final int length = subfolders.length;
+        if (length <= 0) {
+            /*
+             * Return appropriate result
+             */
+            final Date dNull = null;
+            return new AJAXRequestResult(new JSONArray(), dNull).addWarnings(subfoldersResponse.getWarnings());
+        }
+        /*
+         * length > 0
+         */
+        if (errorOnDuplicateName) {
+            final Set<String> names = new HashSet<String>(length);
+            for (int i = 0; i < length; i++) {
+                final UserizedFolder userizedFolder = subfolders[i];
+                final Locale locale = userizedFolder.getLocale();
+                if (errorOnDuplicateName && !names.add(userizedFolder.getLocalizedName(locale == null ? FolderWriter.DEFAULT_LOCALE : locale))) {
+                    // Duplicate name
+                    final String parentName = folderService.getFolder(treeId, parentId, session, null).getLocalizedName(locale);
+                    throw FolderExceptionErrorMessage.DUPLICATE_NAME.create(userizedFolder.getLocalizedName(locale), parentName);
+                }
+                final Date modified = userizedFolder.getLastModifiedUTC();
+                if (modified != null) {
+                    final long time = modified.getTime();
+                    lastModified = ((lastModified >= time) ? lastModified : time);
+                }
+            }
+        } else {
+            for (int i = 0; i < length; i++) {
+                final Date modified = subfolders[i].getLastModifiedUTC();
+                if (modified != null) {
+                    final long time = modified.getTime();
+                    lastModified = ((lastModified >= time) ? lastModified : time);
+                }
             }
         }
         /*
@@ -138,6 +172,14 @@ public final class ListAction extends AbstractFolderAction {
          * Return appropriate result
          */
         return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(subfoldersResponse.getWarnings());
+    }
+
+    private static boolean parseBoolean(final String string, final boolean defaultValue) {
+        if (null == string) {
+            return defaultValue;
+        }
+        final String s = string.toLowerCase(Locale.ENGLISH);
+        return "true".equals(s) || "yes".equals(s) || "on".equals(s) || "1".equals(s);
     }
 
 }

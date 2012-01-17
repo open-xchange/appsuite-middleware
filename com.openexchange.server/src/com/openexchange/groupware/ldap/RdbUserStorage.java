@@ -82,6 +82,8 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -112,6 +114,15 @@ public class RdbUserStorage extends UserStorage {
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
     private static final String SQL_UPDATE_PASSWORD = "UPDATE user SET userPassword = ?, shadowLastChange = ? WHERE cid = ? AND id = ?";
+
+    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " +
+        "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " +
+        "homeDirectory, loginShell) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+    private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value) VALUES (?, ?, ?, ?)";
+
+    private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
+
 
     /**
      * Default constructor.
@@ -148,6 +159,112 @@ public class RdbUserStorage extends UserStorage {
             DBPool.closeReaderSilent(context, con);
         }
         return userId;
+    }
+    
+    @Override
+    public int createUser(final Connection con, final Context context, final User user) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            final int userId = IDGenerator.getId(context, com.openexchange.groupware.Types.PRINCIPAL, con);
+            stmt = con.prepareStatement(INSERT_USER);
+            int i = 1;
+            stmt.setInt(i++, context.getContextId());
+            stmt.setInt(i++, userId);
+            setStringOrNull(i++, stmt, user.getImapServer());
+            setStringOrNull(i++, stmt, user.getImapLogin());
+            setStringOrNull(i++, stmt, user.getMail());
+            setStringOrNull(i++, stmt, user.getMailDomain());
+            
+            /*
+             * Setting mailEnabled to true as it is not part of the user object.
+             * Referring to com.openexchange.admin.rmi.dataobjects.User this value is not used anyway.
+             * This may(!) cause a loss of data during a user move/copy.
+             */            
+            stmt.setInt(i++, 1);
+            
+            setStringOrNull(i++, stmt, user.getPreferredLanguage());
+            stmt.setInt(i++, user.getShadowLastChange());
+            setStringOrNull(i++, stmt, user.getSmtpServer());
+            setStringOrNull(i++, stmt, user.getTimeZone());
+            setStringOrNull(i++, stmt, user.getUserPassword());
+            stmt.setInt(i++, user.getContactId());
+            setStringOrNull(i++, stmt, user.getPasswordMech());
+            
+            /*
+             * Now we fill uidNumber, gidNumber, homeDirectory and loginShell.
+             * As this seems not to be used anymore we set this manually.
+             * This may(!) cause a loss of data during a user move/copy.
+             */
+            stmt.setInt(i++, 0);
+            stmt.setInt(i++, 0);
+            setStringOrNull(i++, stmt, "/home/" + user.getGivenName());
+            setStringOrNull(i++, stmt, "/bin/bash");        
+            stmt.executeUpdate();
+            
+            writeLoginInfo(con, user, context, userId); 
+            writeUserAttributes(con, user, context, userId);                       
+            return userId;
+        } catch (final SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+    
+    private void writeLoginInfo(final Connection con, final User user, final Context context, final int userId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(INSERT_LOGIN_INFO);
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
+            stmt.setString(3, user.getLoginInfo());
+            
+            stmt.executeUpdate();
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    private void writeUserAttributes(final Connection con, final User user, final Context context, final int userId) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(INSERT_ATTRIBUTES);
+            final Map<String, Set<String>> attributes = user.getAttributes();
+            for (final String key : attributes.keySet()) {
+                final Set<String> valueSet = attributes.get(key);
+                for (final String value : valueSet) {
+                    stmt.setInt(1, context.getContextId());
+                    stmt.setInt(2, userId);
+                    stmt.setString(3, key);
+                    stmt.setString(4, value);
+                    
+                    stmt.addBatch();
+                }                
+            }
+            
+            stmt.executeBatch();            
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
+    public int createUser(final Context context, final User user) throws OXException {
+        Connection con = null;
+        try {
+            con = DBPool.pickup(context);
+            return createUser(con, context, user);
+        } finally {
+            DBPool.closeReaderSilent(context, con);
+        }
+    }
+    
+    private void setStringOrNull(final int parameter, final PreparedStatement stmt, final String value) throws SQLException {
+        if (value == null) {
+            stmt.setNull(parameter, java.sql.Types.VARCHAR);
+        } else {
+            stmt.setString(parameter, value);
+        }
     }
 
     @Override
@@ -410,7 +527,15 @@ public class RdbUserStorage extends UserStorage {
                 if (aliases == null) {
                     user.setAliases(new String[0]);
                 } else {
-                    user.setAliases(aliases.toArray(new String[aliases.size()]));
+                    final List<String> tmp = new ArrayList<String>(aliases.size());
+                    for (final String alias : aliases) {
+                        try {
+                            tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
+                        } catch (final Exception e) {
+                            tmp.add(alias);
+                        }
+                    }
+                    user.setAliases(tmp.toArray(new String[tmp.size()]));
                 }
             }
             // Apply attributes

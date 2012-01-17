@@ -146,7 +146,9 @@ public final class SessiondActivator extends HousekeepingActivator {
                 LOG.info("starting bundle: com.openexchange.sessiond");
             }
             SessiondInit.getInstance().start();
-            registerService(SessiondService.class, new SessiondServiceImpl());
+            final SessiondServiceImpl serviceImpl = new SessiondServiceImpl();
+            SessiondService.SERVICE_REFERENCE.set(serviceImpl);
+            registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
 
             track(ManagementService.class, new ManagementRegisterer(context));
@@ -179,6 +181,7 @@ public final class SessiondActivator extends HousekeepingActivator {
                 eventHandlerRegistration = null;
             }
             cleanUp();
+            SessiondService.SERVICE_REFERENCE.set(null);
             // Put remaining sessions into cache for remote distribution
             final List<SessionControl> sessions = SessionHandler.getSessions();
             try {

@@ -341,6 +341,10 @@ public final class IMAPException extends OXException {
          * IMAP server refuses to import one or more E-Mails.
          */
         INVALID_MESSAGE(IMAPCode.INVALID_MESSAGE),
+        /**
+         * Currently not possible to establish a new connection to server %1$s with login %2$s. Please try again.
+         */
+        CONNECTION_UNAVAILABLE(IMAPCode.CONNECTION_UNAVAILABLE),
 
         ;
 
@@ -862,6 +866,10 @@ public final class IMAPException extends OXException {
          * IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user=%3$s, context=%3$s)
          */
         INVALID_MESSAGE_EXT("IMAP server %1$s refuses to import one or more E-Mails with login %2$s (user=%3$s, context=%4$s)", INVALID_MESSAGE),
+        /**
+         * Currently not possible to establish a new connection to server %1$s with login %2$s. Please try again.
+         */
+        CONNECTION_UNAVAILABLE("Currently not possible to establish a new connection to server %1$s with login %2$s. Please try again.", Category.CATEGORY_TRY_AGAIN, 2058),
 
         ;
 

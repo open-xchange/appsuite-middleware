@@ -169,6 +169,46 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public boolean doesContextExist(final Context ctx) throws StorageException {
+        final Integer id = ctx.getId();
+        if (null == id) {
+            throw new StorageException("Missing context identifier");
+        }
+        Connection con = null;
+        PreparedStatement stmt = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid = ? LIMIT 1");
+            stmt.setInt(1, id.intValue());
+            return stmt.executeQuery().next();
+        } catch (final DataTruncation dt) {
+            log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
+            throw AdminCache.parseDataTruncation(dt);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != stmt) {
+                try {
+                    stmt.close();
+                } catch (final SQLException e) {
+                    // Ignore
+                }
+            }
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    @Override
     public void change(final Context ctx, final User usrdata) throws StorageException {
         final int contextId = ctx.getId().intValue();
         final Connection con;

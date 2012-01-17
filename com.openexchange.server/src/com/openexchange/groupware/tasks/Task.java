@@ -110,7 +110,7 @@ public class Task extends CalendarObject {
         // NUMBER_OF_LINKS,
 
         // From FolderChildObject
-        // FOLDER_ID,
+        FOLDER_ID,
         // From DataObject
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED};//, LAST_MODIFIED_UTC };
 
@@ -551,19 +551,19 @@ public class Task extends CalendarObject {
 
     private static Map<Integer, Mapper<?>> MAPPER_LOOKUP = new HashMap<Integer, Mapper<?>>();
     static {
-        for (Mapper<?> mapper : ALL_MAPPERS) {
+        for (final Mapper<?> mapper : ALL_MAPPERS) {
             MAPPER_LOOKUP.put(I(mapper.getId()), mapper);
         }
     }
 
     @Override
     public Set<Integer> findDifferingFields(final DataObject dataObject) {
-        Set<Integer> differingFields = super.findDifferingFields(dataObject);
+        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
         if (!getClass().isAssignableFrom(dataObject.getClass())) {
             return differingFields;
         }
 
-        Task other = (Task) dataObject;
+        final Task other = (Task) dataObject;
         for (final Mapper<?> mapper : ALL_MAPPERS) {
             if (mapper.isSet(this) && (!mapper.isSet(other) || !mapper.equals(this, other))) {
                 differingFields.add(Integer.valueOf(mapper.getId()));

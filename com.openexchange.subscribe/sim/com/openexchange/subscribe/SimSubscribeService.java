@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 
 /**
  * {@link SimSubscribeService}
@@ -163,21 +164,21 @@ public class SimSubscribeService implements SubscribeService {
     }
 
     /* (non-Javadoc)
+     * @see com.openexchange.subscribe.SubscribeService#migrateSecret(com.openexchange.session.Session, java.lang.String, java.lang.String)
+     */
+    @Override
+    public void migrateSecret(final Session session, final String oldSecret, final String newSecret) throws OXException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
      * @see com.openexchange.subscribe.SubscribeService#hasAccounts(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User)
      */
     @Override
     public boolean hasAccounts(final Context context, final User user) throws OXException {
         // TODO Auto-generated method stub
         return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.subscribe.SubscribeService#migrateSecret(com.openexchange.groupware.contexts.Context, com.openexchange.groupware.ldap.User, java.lang.String, java.lang.String)
-     */
-    @Override
-    public void migrateSecret(final Context context, final User user, final String oldSecret, final String newSecret) throws OXException {
-        // TODO Auto-generated method stub
-
     }
 
 }

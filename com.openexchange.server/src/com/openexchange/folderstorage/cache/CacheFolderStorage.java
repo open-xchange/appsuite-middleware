@@ -83,6 +83,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -238,6 +239,8 @@ public final class CacheFolderStorage implements FolderStorage {
         }
     }
 
+    protected static final Set<String> IGNORABLES = RemoveAfterAccessFolder.IGNORABLES;
+
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
         final Lock lock = writeLockFor(treeId, storageParameters);
@@ -286,7 +289,7 @@ public final class CacheFolderStorage implements FolderStorage {
                                         storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
                                     for (final MailAccount mailAccount : accounts) {
                                         final int accountId = mailAccount.getId();
-                                        if (accountId != MailAccount.DEFAULT_ID) {
+                                        if (accountId != MailAccount.DEFAULT_ID && !IGNORABLES.contains(mailAccount.getMailProtocol())) {
                                             final Runnable mailAccountTask = new Runnable() {
 
                                                 @Override

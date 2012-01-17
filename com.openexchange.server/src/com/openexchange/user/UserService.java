@@ -49,6 +49,7 @@
 
 package com.openexchange.user;
 
+import java.sql.Connection;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -113,6 +114,38 @@ public interface UserService {
      * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
      */
     User getUser(int uid, Context context) throws OXException;
+    
+    /**
+     * Reads the data from a user from the underlying persistent data storage.
+     *
+     * @param con The database connection 
+     * @param uid User identifier.
+     * @return a user object.
+     * @param context The context.
+     * @throws OXException if an error occurs while reading from the persistent storage or the user doesn't exist.
+     */
+    User getUser(Connection con, int uid, Context context) throws OXException;
+    
+    /**
+     * Writes a new user into the database.
+     * 
+     * @param con The database connection.
+     * @param context The context.
+     * @param user The user.
+     * @return ID of the new user.
+     * @throws OXException if an error occurrs while creating the user.
+     */
+    int createUser(Connection con, Context context, User user) throws OXException;
+
+    /**
+     * Writes a new user into the database.
+     * 
+     * @param context The context.
+     * @param user The user.
+     * @return ID of the new user.
+     * @throws OXException if an error occurrs while creating the user.
+     */
+    int createUser(Context context, User user) throws OXException;
 
     /**
      * Reads the data for a set of user from the underlying persistent data storage.

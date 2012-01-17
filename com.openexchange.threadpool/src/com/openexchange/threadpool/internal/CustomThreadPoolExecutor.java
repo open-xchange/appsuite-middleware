@@ -78,6 +78,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.log.LogProperties;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -763,6 +764,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 }
             } finally {
                 runLock.unlock();
+
+                // Drop possible log properties
+                LogProperties.removeLogProperties();
             }
         }
 

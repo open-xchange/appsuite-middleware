@@ -308,7 +308,10 @@ final class UserReloader extends Refresher<User> implements User {
      */
     private void updateDelegate() throws RuntimeException {
         try {
-            this.delegate = refresh();
+            final User tmp = refresh();
+            if (null != tmp) {
+                this.delegate = tmp;
+            }
         } catch (final OXException e) {
             throw new RuntimeException(e.getMessage(), e);
         }

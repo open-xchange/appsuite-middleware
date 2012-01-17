@@ -94,7 +94,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
 
     private final StorageType type;
 
-    private Connection con;
+    private final Connection con;
 
     private final PreRead<Task> preread = new PreRead<Task>();
 
@@ -121,6 +121,12 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
     TaskIterator2(final Context ctx, final int userId, final String sql,
         final StatementSetter setter, final int folderId, final int[] attributes,
         final StorageType type) {
+        this(ctx, userId, sql, setter, folderId, attributes, type, null);
+    }
+
+    TaskIterator2(final Context ctx, final int userId, final String sql,
+        final StatementSetter setter, final int folderId, final int[] attributes,
+        final StorageType type, final Connection con) {
         super();
         this.warnings =  new ArrayList<OXException>(2);
         this.ctx = ctx;
@@ -141,16 +147,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         modifyAdditionalAttributes(tmp2);
         this.additionalAttributes = Collections.toArray(tmp2);
         this.type = type;
-        this.con = null;
+        this.con = con;
         runner = new Thread(this);
         runner.start();
-    }
-
-    TaskIterator2(final Context ctx, final int userId, final String sql,
-        final StatementSetter setter, final int folderId, final int[] attributes,
-        final StorageType type, final Connection con) {
-        this(ctx, userId, sql, setter, folderId, attributes, type);
-        this.con = con;
     }
 
     private void modifyAdditionalAttributes(final List<Integer> additional) {
@@ -207,7 +206,11 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
                         break;
                     case Task.ALARM:
                         try {
-                            Reminder.loadReminder(ctx, userId, tasks);
+                            if (con == null) {
+                                Reminder.loadReminder(ctx, userId, tasks);
+                            } else {
+                                Reminder.loadReminder(ctx, userId, tasks, con);
+                            }
                         } catch (final OXException e) {
                             throw e;
                         }
@@ -251,7 +254,12 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         for (int i = 0; i < tasks.size(); i++) {
             ids[i] = tasks.get(i).getObjectID();
         }
-        final Map<Integer, Set<TaskParticipant>> parts = partStor.selectParticipants(ctx, ids, type);
+        Map<Integer, Set<TaskParticipant>> parts = null;
+        if (this.con == null) {
+            parts = partStor.selectParticipants(ctx, ids, type);
+        } else {
+            parts = partStor.selectParticipants(ctx, ids, type, con);
+        }
         for (final Task task : tasks) {
             final Set<TaskParticipant> participants = parts.get(I(task.getObjectID()));
             if (null != participants) {
@@ -283,23 +291,22 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
 
     @Override
     public void run() {
-        final Connection con;
-        boolean externalConnection = false;
-        if (this.con == null) {
+        final Connection myCon;
+        if (null == con) {
             try {
-                con = DBPool.pickup(ctx);
+                myCon = DBPool.pickup(ctx);
             } catch (final OXException e) {
                 preread.finished();
-                exc = e;
+                exc = TaskExceptionCode.NO_CONNECTION.create(e);
                 return;
             }
         } else {
-            con = this.con;
+            myCon = this.con;
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(sql);
+            stmt = myCon.prepareStatement(sql);
             setter.perform(stmt);
             result = stmt.executeQuery();
             while (result.next()) {
@@ -325,9 +332,9 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             exc = TaskExceptionCode.THREAD_ISSUE.create(t);
         } finally {
             preread.finished();
-            if (!externalConnection) {
-                DBUtils.closeSQLStuff(result, stmt);
-                DBPool.closeReaderSilent(ctx, con);
+            DBUtils.closeSQLStuff(result, stmt);
+            if (null == con) {
+                DBPool.closeReaderSilent(ctx, myCon);
             }
         }
     }

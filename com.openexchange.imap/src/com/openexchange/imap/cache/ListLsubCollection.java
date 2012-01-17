@@ -120,9 +120,9 @@ final class ListLsubCollection {
      * @param user The user namespaces
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws OXException If initialization fails
+     * @throws MessagingException If a messaging error occurs
      */
-    protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    protected ListLsubCollection(final IMAPFolder imapFolder, final String[] shared, final String[] user, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
         super();
         listMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
         lsubMap = new ConcurrentHashMap<String, ListLsubEntryImpl>();
@@ -279,9 +279,9 @@ final class ListLsubCollection {
      * @param imapFolder The IMAP folder
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws OXException If re-initialization fails
+     * @throws MessagingException If a messaging error occurs
      */
-    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    public void reinit(final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
         clear();
         init(true, imapFolder, doStatus, doGetAcl);
     }
@@ -294,175 +294,171 @@ final class ListLsubCollection {
         }
     }
 
-    private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
-        try {
-            if (clearMaps) {
-                listMap.clear();
-                lsubMap.clear();
+    private void init(final boolean clearMaps, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
+        if (clearMaps) {
+            listMap.clear();
+            lsubMap.clear();
+        }
+        final long st = DEBUG ? System.currentTimeMillis() : 0L;
+        /*
+         * Perform LIST "" ""
+         */
+        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                doRootListCommand(protocol);
+                return null;
             }
-            final long st = DEBUG ? System.currentTimeMillis() : 0L;
-            /*
-             * Perform LIST "" ""
-             */
-            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-                @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    doRootListCommand(protocol);
-                    return null;
-                }
+        });
+        /*
+         * Perform LIST "" "*"
+         */
+        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
-            });
-            /*
-             * Perform LIST "" "*"
-             */
-            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-                @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    doListLsubCommand(protocol, true);
-                    return null;
-                }
-
-            });
-            /*
-             * Perform LSUB "" "*"
-             */
-            imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
-                @Override
-                public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                    doListLsubCommand(protocol, false);
-                    return null;
-                }
-
-            });
-            /*
-             * Debug logs
-             */
-            if (DEBUG) {
-                final StringBuilder sb = new StringBuilder(1024);
-                {
-                    final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
-                    sb.append("LIST cache contains after (re-)initialization:\n");
-                    for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                        sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
-                    }
-                    LOG.debug(sb.toString());
-                }
-                {
-                    final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
-                    sb.setLength(0);
-                    sb.append("LSUB cache contains after (re-)initialization:\n");
-                    for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
-                        sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
-                    }
-                    LOG.debug(sb.toString());
-                }
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                doListLsubCommand(protocol, true);
+                return null;
             }
-            /*
-             * Consistency check
-             */
-            checkConsistency();
-            /*
-             * Status if enabled
-             */
-            if (doStatus) {
-                final ConcurrentMap<String, ListLsubEntryImpl> primary;
-                final ConcurrentMap<String, ListLsubEntryImpl> lookup;
-                if (listMap.size() > lsubMap.size()) {
-                    primary = lsubMap;
-                    lookup = listMap;
-                } else {
-                    primary = listMap;
-                    lookup = lsubMap;
-                }
-                /*
-                 * Gather STATUS for each entry
-                 */
-                for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
-                    final ListLsubEntryImpl listEntry = iter.next();
-                    if (listEntry.canOpen()) {
-                        try {
-                            final String fullName = listEntry.getFullName();
-                            final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
-                            if (null != status) {
-                                listEntry.setStatus(status);
-                                final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
-                                if (null != lsubEntry) {
-                                    lsubEntry.setStatus(status);
-                                }
-                            }
-                        } catch (final Exception e) {
-                            // Swallow failed STATUS command
-                            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
-                                "STATUS command failed for " + imapFolder.getStore().toString(),
-                                e);
-                        }
-                    }
-                }
+
+        });
+        /*
+         * Perform LSUB "" "*"
+         */
+        imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                doListLsubCommand(protocol, false);
+                return null;
             }
-            /*
-             * ACLs if enabled
-             */
-            if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
-                final ConcurrentMap<String, ListLsubEntryImpl> primary;
-                final ConcurrentMap<String, ListLsubEntryImpl> lookup;
-                if (listMap.size() > lsubMap.size()) {
-                    primary = lsubMap;
-                    lookup = listMap;
-                } else {
-                    primary = listMap;
-                    lookup = lsubMap;
+
+        });
+        /*
+         * Debug logs
+         */
+        if (DEBUG) {
+            final StringBuilder sb = new StringBuilder(1024);
+            {
+                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(listMap);
+                sb.append("LIST cache contains after (re-)initialization:\n");
+                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
                 }
-                /*
-                 * Perform GETACL command for each entry
-                 */
-                for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
-                    final ListLsubEntryImpl listEntry = iter.next();
-                    if (listEntry.canOpen()) {
-                        try {
-                            final String fullName = listEntry.getFullName();
-                            final List<ACL> aclList = IMAPCommandsCollection.getAcl(fullName, imapFolder, false);
-                            listEntry.setAcls(aclList);
-                            final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
-                            if (null != lsubEntry) {
-                                lsubEntry.setAcls(aclList);
-                            }
-                        } catch (final Exception e) {
-                            // Swallow failed ACL command
-                            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
-                                "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
-                                e);
-                        }
-                    }
-                }
-            }
-            if (DEBUG) {
-                final long dur = System.currentTimeMillis() - st;
-                final StringBuilder sb = new StringBuilder(128);
-                sb.append("LIST/LSUB cache");
-                if (doStatus || doGetAcl) {
-                    sb.append(" (");
-                    if (doStatus) {
-                        sb.append(" including STATUS");
-                    }
-                    if (doGetAcl) {
-                        sb.append(" including GETACL");
-                    }
-                    sb.append(')');
-                }
-                sb.append(" built in ").append(dur).append("msec.");
                 LOG.debug(sb.toString());
             }
-            /*
-             * Set time stamp
-             */
-            stamp = System.currentTimeMillis();
-            deprecated.set(false);
-        } catch (final MessagingException e) {
-            throw MIMEMailException.handleMessagingException(e);
+            {
+                final TreeMap<String, ListLsubEntryImpl> tm = new TreeMap<String, ListLsubEntryImpl>(lsubMap);
+                sb.setLength(0);
+                sb.append("LSUB cache contains after (re-)initialization:\n");
+                for (final Entry<String, ListLsubEntryImpl> entry : tm.entrySet()) {
+                    sb.append('"').append(entry.getKey()).append("\"=").append(entry.getValue()).append('\n');
+                }
+                LOG.debug(sb.toString());
+            }
         }
+        /*
+         * Consistency check
+         */
+        checkConsistency();
+        /*
+         * Status if enabled
+         */
+        if (doStatus) {
+            final ConcurrentMap<String, ListLsubEntryImpl> primary;
+            final ConcurrentMap<String, ListLsubEntryImpl> lookup;
+            if (listMap.size() > lsubMap.size()) {
+                primary = lsubMap;
+                lookup = listMap;
+            } else {
+                primary = listMap;
+                lookup = lsubMap;
+            }
+            /*
+             * Gather STATUS for each entry
+             */
+            for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
+                final ListLsubEntryImpl listEntry = iter.next();
+                if (listEntry.canOpen()) {
+                    try {
+                        final String fullName = listEntry.getFullName();
+                        final int[] status = IMAPCommandsCollection.getStatus(fullName, imapFolder);
+                        if (null != status) {
+                            listEntry.setStatus(status);
+                            final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
+                            if (null != lsubEntry) {
+                                lsubEntry.setStatus(status);
+                            }
+                        }
+                    } catch (final Exception e) {
+                        // Swallow failed STATUS command
+                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                            "STATUS command failed for " + imapFolder.getStore().toString(),
+                            e);
+                    }
+                }
+            }
+        }
+        /*
+         * ACLs if enabled
+         */
+        if (doGetAcl && ((IMAPStore) imapFolder.getStore()).hasCapability("ACL")) {
+            final ConcurrentMap<String, ListLsubEntryImpl> primary;
+            final ConcurrentMap<String, ListLsubEntryImpl> lookup;
+            if (listMap.size() > lsubMap.size()) {
+                primary = lsubMap;
+                lookup = listMap;
+            } else {
+                primary = listMap;
+                lookup = lsubMap;
+            }
+            /*
+             * Perform GETACL command for each entry
+             */
+            for (final Iterator<ListLsubEntryImpl> iter = primary.values().iterator(); iter.hasNext();) {
+                final ListLsubEntryImpl listEntry = iter.next();
+                if (listEntry.canOpen()) {
+                    try {
+                        final String fullName = listEntry.getFullName();
+                        final List<ACL> aclList = IMAPCommandsCollection.getAcl(fullName, imapFolder, false);
+                        listEntry.setAcls(aclList);
+                        final ListLsubEntryImpl lsubEntry = lookup.get(fullName);
+                        if (null != lsubEntry) {
+                            lsubEntry.setAcls(aclList);
+                        }
+                    } catch (final Exception e) {
+                        // Swallow failed ACL command
+                        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ListLsubCollection.class)).debug(
+                            "ACL/MYRIGHTS command failed for " + imapFolder.getStore().toString(),
+                            e);
+                    }
+                }
+            }
+        }
+        if (DEBUG) {
+            final long dur = System.currentTimeMillis() - st;
+            final StringBuilder sb = new StringBuilder(128);
+            sb.append("LIST/LSUB cache");
+            if (doStatus || doGetAcl) {
+                sb.append(" (");
+                if (doStatus) {
+                    sb.append(" including STATUS");
+                }
+                if (doGetAcl) {
+                    sb.append(" including GETACL");
+                }
+                sb.append(')');
+            }
+            sb.append(" built in ").append(dur).append("msec.");
+            LOG.debug(sb.toString());
+        }
+        /*
+         * Set time stamp
+         */
+        stamp = System.currentTimeMillis();
+        deprecated.set(false);
     }
 
     private void checkConsistency() {
@@ -578,9 +574,9 @@ final class ListLsubCollection {
      * @param imapFolder An IMAP folder providing connected protocol
      * @param doStatus Whether STATUS command shall be performed
      * @param doGetAcl Whether ACL command shall be performed
-     * @throws OXException If update fails
+     * @throws MessagingException If a messaging error occurs
      */
-    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws OXException {
+    public void update(final String fullName, final IMAPFolder imapFolder, final boolean doStatus, final boolean doGetAcl) throws MessagingException {
         if (deprecated.get() || ROOT_FULL_NAME.equals(fullName)) {
             init(true, imapFolder, doStatus, doGetAcl);
             return;
