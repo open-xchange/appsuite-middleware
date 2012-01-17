@@ -1,6 +1,7 @@
 * 2012-01-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 20013: Supporting IDN email addresses in user aliases
+ - Fix for bug 20299: Responding with proper HTML callback if "save=1" URL parameter is set
 
 * 2012-01-16 - thorben.betten@open-xchange.com
 
