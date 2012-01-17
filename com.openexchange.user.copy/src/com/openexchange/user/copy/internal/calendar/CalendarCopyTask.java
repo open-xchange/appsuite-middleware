@@ -62,6 +62,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -272,6 +273,9 @@ public class CalendarCopyTask implements CopyUserTaskService {
     }
     
     Map<Integer, ExternalDate> loadExternalDatesFromDB(final Connection con, final int cid, final Collection<Integer> appointmentIds) throws OXException {
+        if (null == appointmentIds || appointmentIds.isEmpty()) {
+            return Collections.<Integer, ExternalDate> emptyMap();
+        }
         final Map<Integer, ExternalDate> dates = new HashMap<Integer,ExternalDate>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
