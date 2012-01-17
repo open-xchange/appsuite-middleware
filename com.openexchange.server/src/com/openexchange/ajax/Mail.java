@@ -3432,6 +3432,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Drop special "x-original-headers" header
                  */
                 message.removeHeader("x-original-headers");
+                new MIMEMessageFiller(session, session.getContext()).setCommonHeaders(message);
                 /*
                  * Proceed...
                  */
