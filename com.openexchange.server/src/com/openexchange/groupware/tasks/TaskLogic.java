@@ -53,6 +53,7 @@ import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.f;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
@@ -611,18 +612,12 @@ public final class TaskLogic {
                 fields.add(Integer.valueOf(mapper.getId()));
             }
         }
-
         // If the end of recurrence information is changed from 'after x occurrences' to 'at *date*'
         // the field recurrence_count has explicitly to be unset.
-        if (oldTask.containsOccurrence() && !task.containsOccurrence()) {
+        if (oldTask.containsOccurrence() && !task.containsOccurrence() && task.containsUntil()) {
             fields.add(I(Task.RECURRENCE_COUNT));
         }
-
-        final int[] retval = new int[fields.size()];
-        for (int i = 0; i < fields.size(); i++) {
-            retval[i] = fields.get(i).intValue();
-        }
-        return retval;
+        return I2i(fields);
     }
 
     /**
