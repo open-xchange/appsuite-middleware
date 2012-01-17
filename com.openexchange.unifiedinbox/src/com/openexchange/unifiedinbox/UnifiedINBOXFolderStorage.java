@@ -92,7 +92,9 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderStorage.class));
 
-    private final UnifiedINBOXAccess access;
+    // private final UnifiedINBOXAccess access;
+
+    private final int unifiedInboxId;
 
     private final Session session;
 
@@ -109,7 +111,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
      */
     public UnifiedINBOXFolderStorage(final UnifiedINBOXAccess access, final Session session) throws OXException {
         super();
-        this.access = access;
+        // this.access = access;
+        unifiedInboxId = access.getAccountId();
         this.session = session;
         ctx = ContextStorage.getStorageContext(session.getContextId());
     }
@@ -148,7 +151,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             return UnifiedINBOXFolderConverter.getRootFolder();
         }
         if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(fullname)) {
-            return UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(access.getAccountId(), session, fullname, getLocalizedName(fullname));
+            return UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(unifiedInboxId, session, fullname, getLocalizedName(fullname));
         }
         final String fn = startsWithKnownFullname(fullname);
         if (null != fn) {
@@ -164,7 +167,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                 final String nestedFullname = fa.getFullname();
                 final MailFolder mailFolder = mailAccess.getFolderStorage().getFolder(nestedFullname);
                 mailFolder.setFullname(UnifiedINBOXUtility.generateNestedFullname(
-                    access.getAccountId(),
+                    unifiedInboxId,
                     getStartingKnownFullname(fullname),
                     nestedAccountId,
                     nestedFullname));
@@ -220,7 +223,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
 
     private MailFolder[] getRootSubfoldersByAccount() throws OXException {
         // Determine accounts
-        final int unifiedINBOXAccountId = access.getAccountId();
+        final int unifiedINBOXAccountId = unifiedInboxId;
         final MailAccount[] accounts;
         {
             final MailAccountStorageService storageService =
@@ -290,7 +293,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
         for (int i = 0; i < retval.length; i++) {
             final int index = i;
             final String[] tmp = names[index];
-            completionService.submit(new LoggingCallable<Retval>(session, access.getAccountId()) {
+            completionService.submit(new LoggingCallable<Retval>(session, unifiedInboxId) {
 
                 public Retval call() throws Exception {
                     return new Retval(UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(
@@ -337,14 +340,14 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             final MailAccount[] tmp = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(tmp.length);
             for (final MailAccount mailAccount : tmp) {
-                if (access.getAccountId() != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
+                if (unifiedInboxId != mailAccount.getId() && mailAccount.isUnifiedINBOXEnabled()) {
                     l.add(mailAccount);
                 }
             }
             accounts = l.toArray(new MailAccount[l.size()]);
         }
         final Session s = session;
-        final int unifiedInboxAccountId = access.getAccountId();
+        final int unifiedInboxAccountId = unifiedInboxId;
         final int length = accounts.length;
         final Executor executor = ThreadPools.getThreadPool().getExecutor();
         final TrackingCompletionService<MailFolder> completionService = new UnifiedINBOXCompletionService<MailFolder>(executor);
@@ -373,6 +376,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                         mailFolder.setSubfolders(false);
                         mailFolder.setSubscribedSubfolders(false);
                         mailFolder.setName(mailAccount.getName());
+                        mailFolder.setDefaultFolder(false);
+                        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
                     } catch (final OXException e) {
                         getLogger().debug(e.getMessage(), e);
@@ -455,7 +460,7 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
             throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(fullname);
         }
         return new MailFolder[] {
-            UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(access.getAccountId(), session, fullname, getLocalizedName(fullname)),
+            UnifiedINBOXFolderConverter.getUnifiedINBOXFolder(unifiedInboxId, session, fullname, getLocalizedName(fullname)),
             UnifiedINBOXFolderConverter.getRootFolder() };
     }
 

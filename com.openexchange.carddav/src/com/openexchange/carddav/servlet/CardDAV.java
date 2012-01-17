@@ -80,7 +80,7 @@ public class CardDAV extends OXServlet {
 
     private static ServiceLookup services;
 
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
 
@@ -155,7 +155,7 @@ public class CardDAV extends OXServlet {
     }
 
     @Override
-    protected void doReport(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, Action.REPORT);
     }
 
@@ -180,12 +180,12 @@ public class CardDAV extends OXServlet {
         }
     }
 
-    private boolean checkPermission(ServerSession session) {
+    private boolean checkPermission(final ServerSession session) {
         try {
-            ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
-            return property.isDefined() && property.get();
+            final ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
+            return (!property.isDefined() || property.get().booleanValue());
 
-        } catch (OXException e) {
+        } catch (final OXException e) {
             return false;
         }
     }
@@ -201,6 +201,7 @@ public class CardDAV extends OXServlet {
 
     private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
 
+        @Override
         public boolean matches(final String cookieName) {
             return (COOKIE_SESSIONID.equals(cookieName) || Tools.JSESSIONID_COOKIE.equals(cookieName));
         }

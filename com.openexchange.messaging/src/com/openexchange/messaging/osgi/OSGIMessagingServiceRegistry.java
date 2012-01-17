@@ -83,9 +83,9 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     /**
      * The tracker instance.
      */
-    private ServiceTracker tracker;
+    private ServiceTracker<MessagingService,MessagingService> tracker;
 
-    private ServiceTracker configTracker;
+    private ServiceTracker<ConfigViewFactory,ConfigViewFactory> configTracker;
 
     /**
      * Initializes a new {@link OSGIMessagingServiceRegistry}.
@@ -102,11 +102,11 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
      */
     public void start(final BundleContext context) {
         if (null == tracker) {
-            tracker = new ServiceTracker(context, MessagingService.class.getName(), new Customizer(context));
+            tracker = new ServiceTracker<MessagingService,MessagingService>(context, MessagingService.class, new Customizer(context));
             tracker.open();
         }
         if (null == configTracker) {
-            configTracker = new ServiceTracker(context, ConfigViewFactory.class.getName(), null);
+            configTracker = new ServiceTracker<ConfigViewFactory,ConfigViewFactory>(context, ConfigViewFactory.class, null);
             configTracker.open();
         }
     }
@@ -150,13 +150,13 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
                 return false;
             }
             final ComposedConfigProperty<Boolean> configProperty = configView.property(id, boolean.class);
-            return (configProperty.isDefined() && configProperty.get());
+            return (!configProperty.isDefined() || configProperty.get().booleanValue());
         } catch (final OXException e) {
             throw e;
         }
     }
 
-    private List<MessagingService> filter(final ArrayList<MessagingService> arrayList, final int user, final int context) throws OXException {
+    private List<MessagingService> filter(final List<MessagingService> arrayList, final int user, final int context) throws OXException {
         final List<MessagingService> filteredList = new ArrayList<MessagingService>(arrayList.size());
         try {
             final ConfigView configView = getView(user, context);
@@ -165,7 +165,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
             }
             for (final MessagingService messagingService : arrayList) {
                 final ComposedConfigProperty<Boolean> configProperty = configView.property(messagingService.getId(), boolean.class);
-                if (configProperty.isDefined() && configProperty.get()) {
+                if (!configProperty.isDefined() || configProperty.get().booleanValue()) {
                     filteredList.add(messagingService);
                 }
             }
@@ -178,8 +178,8 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
 
     private boolean isMessagingEnabled(final ConfigView configView) throws OXException {
         try {
-            final ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.messaging.enabled", boolean.class);
-            if (property.isDefined() && property.get()) {
+            final ComposedConfigProperty<Boolean> configProperty = configView.property("com.openexchange.messaging.enabled", boolean.class);
+            if (!configProperty.isDefined() || configProperty.get().booleanValue()) {
                 return true;
             }
         } catch (final OXException e) {
@@ -189,7 +189,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
     }
 
     private ConfigView getView(final int user, final int context) throws OXException {
-        final ConfigViewFactory service = (ConfigViewFactory) configTracker.getService();
+        final ConfigViewFactory service = configTracker.getService();
         return service.getView(user, context);
     }
 
@@ -202,7 +202,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
     }
 
-    private final class Customizer implements ServiceTrackerCustomizer {
+    private final class Customizer implements ServiceTrackerCustomizer<MessagingService,MessagingService> {
 
         private final BundleContext context;
 
@@ -212,10 +212,10 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
 
         @Override
-        public Object addingService(final ServiceReference reference) {
-            final Object service = context.getService(reference);
-            if ((service instanceof MessagingService)) {
-                final MessagingService addMe = (MessagingService) service;
+        public MessagingService addingService(final ServiceReference<MessagingService> reference) {
+            final MessagingService service = context.getService(reference);
+            {
+                final MessagingService addMe = service;
                 if (null == map.putIfAbsent(addMe.getId(), addMe)) {
                     return service;
                 }
@@ -234,16 +234,16 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
         }
 
         @Override
-        public void modifiedService(final ServiceReference reference, final Object service) {
+        public void modifiedService(final ServiceReference<MessagingService> reference, final MessagingService service) {
             // Nothing to do
         }
 
         @Override
-        public void removedService(final ServiceReference reference, final Object service) {
+        public void removedService(final ServiceReference<MessagingService> reference, final MessagingService service) {
             if (null != service) {
                 try {
-                    if (service instanceof MessagingService) {
-                        final MessagingService removeMe = (MessagingService) service;
+                    {
+                        final MessagingService removeMe = service;
                         map.remove(removeMe.getId());
                     }
                 } finally {

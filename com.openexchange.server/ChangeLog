@@ -1,7 +1,19 @@
+* 2012-01-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 21255: Check if user with same login info exists in destination context
+
+* 2012-01-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 20013: Supporting IDN email addresses in user aliases
+ - Fix for bug 20299: Responding with proper HTML callback if "save=1" URL parameter is set
+ - Fix for bug 21249: Add "X-Mailer" header to messages sent by OLOX2
+ - Fix for bug 21254: Fixed possible NPE
+
 * 2012-01-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 21042: Fixed HTML pretty-printer
  - Fix for bug 21217: Deny creation of duplicate mail account
+ - Fix for bug 21233: Dealing with missing task module on ICal insert
 
 * 2012-01-12 - thorben.betten@open-xchange.com
 
@@ -17,7 +29,7 @@
 
 * 2012-01-10 - thorben.betten@open-xchange.com
 
- - Possible fix for bug 21149: Introduced reentrant-sensitive semaphore
+ - Fix for bug 21149: Introduced reentrant-sensitive semaphore
  - Fix for bug 20066: Fixed counter of reporting tool (except for *DAV)
 
 * 2011-01-06 - tobias.friedrich@open-xchange.com

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -37,10 +36,10 @@ public class ContactHaloImpl implements ContactHalo {
 
 	private final Map<String, HaloContactDataSource> contactDataSources = new ConcurrentHashMap<String, HaloContactDataSource>();
 
-	public ContactHaloImpl(UserService userService,
-			ContactInterfaceDiscoveryService contactDiscoveryService,
-			SessionSpecificContainerRetrievalService sessionScope,
-			ConfigViewFactory configViews) {
+	public ContactHaloImpl(final UserService userService,
+			final ContactInterfaceDiscoveryService contactDiscoveryService,
+			final SessionSpecificContainerRetrievalService sessionScope,
+			final ConfigViewFactory configViews) {
 		this.userService = userService;
 		this.contactDiscoveryService = contactDiscoveryService;
 		this.contactSearchMultiplexer = new ContactSearchMultiplexer(
@@ -49,9 +48,9 @@ public class ContactHaloImpl implements ContactHalo {
 	}
 
 	@Override
-	public AJAXRequestResult investigate(String provider, Contact contact,
-			AJAXRequestData req, ServerSession session) throws OXException {
-		HaloContactDataSource dataSource = contactDataSources.get(provider);
+	public AJAXRequestResult investigate(final String provider, final Contact contact,
+			final AJAXRequestData req, final ServerSession session) throws OXException {
+		final HaloContactDataSource dataSource = contactDataSources.get(provider);
 		if (dataSource == null) {
 			throw new OXException(1).setPrefix("HALO").setLogMessage(
 					"Unknown halo provider '" + provider + "'");
@@ -60,9 +59,9 @@ public class ContactHaloImpl implements ContactHalo {
 				session);
 	}
 
-	private HaloContactQuery buildQuery(Contact contact, ServerSession session)
+	private HaloContactQuery buildQuery(Contact contact, final ServerSession session)
 			throws OXException {
-		HaloContactQuery contactQuery = new HaloContactQuery();
+		final HaloContactQuery contactQuery = new HaloContactQuery();
 
 		// Try to find a user with a given eMail address
 
@@ -74,7 +73,7 @@ public class ContactHaloImpl implements ContactHalo {
 			try {
 				user = userService.searchUser(contact.getEmail1(),
 						session.getContext());
-			} catch (OXException x) {
+			} catch (final OXException x) {
 				// Don't care. This is all best effort anyway.
 			}
 		}
@@ -83,7 +82,7 @@ public class ContactHaloImpl implements ContactHalo {
 			try {
 				user = userService.searchUser(contact.getEmail2(),
 						session.getContext());
-			} catch (OXException x) {
+			} catch (final OXException x) {
 				// Don't care. This is all best effort anyway.
 			}
 		}
@@ -92,32 +91,32 @@ public class ContactHaloImpl implements ContactHalo {
 			try {
 				user = userService.searchUser(contact.getEmail3(),
 						session.getContext());
-			} catch (OXException x) {
+			} catch (final OXException x) {
 				// Don't care. This is all best effort anyway.
 			}
 		}
 
 
 		contactQuery.setUser(user);
-		List<Contact> contactsToMerge = new ArrayList<Contact>();
+		final List<Contact> contactsToMerge = new ArrayList<Contact>();
 		if (user != null) {
 			// Load the associated contact
-			ContactInterfaceProvider contactInterfaceProvider = contactDiscoveryService
+			final ContactInterfaceProvider contactInterfaceProvider = contactDiscoveryService
 					.getContactInterfaceProvider(6, session.getContextId());
-			ContactInterface contactInterface = contactInterfaceProvider
+			final ContactInterface contactInterface = contactInterfaceProvider
 					.newContactInterface(session);
 			contactsToMerge.add(contactInterface.getObjectById(
 					user.getContactId(), 6));
 
 		} else {
 			// Try to find a contact
-			ContactSearchObject cso = new ContactSearchObject();
+			final ContactSearchObject cso = new ContactSearchObject();
 			cso.setEmail1(contact.getEmail1());
 			cso.setEmail2(contact.getEmail1());
 			cso.setEmail3(contact.getEmail1());
 			cso.setOrSearch(true);
 
-			SearchIterator<Contact> result = contactSearchMultiplexer
+			final SearchIterator<Contact> result = contactSearchMultiplexer
 					.extendedSearch(session, cso, -1, null, null,
 							Contact.ALL_COLUMNS);
 			while (result.hasNext()) {
@@ -126,8 +125,8 @@ public class ContactHaloImpl implements ContactHalo {
 		}
 		contactQuery.setMergedContacts(contactsToMerge);
 
-		ContactMerger contactMerger = new ContactMerger(false);
-		for (Contact c : contactsToMerge) {
+		final ContactMerger contactMerger = new ContactMerger(false);
+		for (final Contact c : contactsToMerge) {
 			contact = contactMerger.merge(contact, c);
 		}
 		contactQuery.setContact(contact);
@@ -135,25 +134,25 @@ public class ContactHaloImpl implements ContactHalo {
 	}
 
 	@Override
-	public List<String> getProviders(ServerSession session) throws OXException {
-		ConfigView view = configViews.getView(session.getUserId(),
+	public List<String> getProviders(final ServerSession session) throws OXException {
+		final ConfigView view = configViews.getView(session.getUserId(),
 				session.getContextId());
-		List<String> providers = new ArrayList<String>();
-		for (String provider : contactDataSources.keySet()) {
-			ComposedConfigProperty<Boolean> property = view.property(provider,
+		final List<String> providers = new ArrayList<String>();
+		for (final String provider : contactDataSources.keySet()) {
+			final ComposedConfigProperty<Boolean> property = view.property(provider,
 					boolean.class);
-			if (property.isDefined() && property.get()) {
+			if (!property.isDefined() || property.get().booleanValue()) {
 				providers.add(provider);
 			}
 		}
 		return providers;
 	}
 
-	public void addContactDataSource(HaloContactDataSource ds) {
+	public void addContactDataSource(final HaloContactDataSource ds) {
 		contactDataSources.put(ds.getId(), ds);
 	}
 
-	public void removeContactDataSource(HaloContactDataSource ds) {
+	public void removeContactDataSource(final HaloContactDataSource ds) {
 		contactDataSources.remove(ds.getId());
 	}
 

@@ -1155,7 +1155,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
-    private final Response actionGetMessage(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) {
+    private final Response actionGetMessage(final ServerSession session, final ParamContainer paramContainer, final MailServletInterface mailInterfaceArg) throws JSONException {
         /*
          * Some variables
          */
@@ -1165,6 +1165,7 @@ public class Mail extends PermissionServlet implements UploadListener {
         /*
          * Start response
          */
+        boolean errorAsCallback = false;
         try {
             /*
              * Read in parameters
@@ -1193,6 +1194,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 ttlMillis = -1;
             }
             tmp = null;
+            errorAsCallback = saveToDisk;
             /*
              * Get message
              */
@@ -1407,10 +1409,36 @@ public class Mail extends PermissionServlet implements UploadListener {
                 LOG.error(e.getMessage(), e);
             }
             response.setException(e);
+            if (errorAsCallback) {
+                try {
+                    final HttpServletResponse resp = paramContainer.getHttpServletResponse();
+                    resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), ACTION_GET);
+                    final PrintWriter writer = resp.getWriter();
+                    writer.write(jsResponse);
+                    writer.flush();
+                    return null;
+                } catch (final Exception exc) {
+                    throw new JSONException(exc);
+                }
+            }
         } catch (final Exception e) {
             final OXException wrapper = getWrappingOXException(e);
             LOG.error(wrapper.getMessage(), wrapper);
             response.setException(wrapper);
+            if (errorAsCallback) {
+                try {
+                    final HttpServletResponse resp = paramContainer.getHttpServletResponse();
+                    resp.setContentType(MIME_TEXT_HTML_CHARSET_UTF_8);
+                    final String jsResponse = substituteJS(ResponseWriter.getJSON(response).toString(), ACTION_GET);
+                    final PrintWriter writer = resp.getWriter();
+                    writer.write(jsResponse);
+                    writer.flush();
+                    return null;
+                } catch (final Exception exc) {
+                    throw new JSONException(exc);
+                }
+            }
         }
         /*
          * Close response and flush print writer
@@ -3404,6 +3432,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                  * Drop special "x-original-headers" header
                  */
                 message.removeHeader("x-original-headers");
+                new MIMEMessageFiller(session, session.getContext()).setCommonHeaders(message);
                 /*
                  * Proceed...
                  */

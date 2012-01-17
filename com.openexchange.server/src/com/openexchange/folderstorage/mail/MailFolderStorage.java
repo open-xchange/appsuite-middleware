@@ -747,7 +747,7 @@ public final class MailFolderStorage implements FolderStorage {
                     mailAccess.getMailConfig(),
                     storageParameters,
                     new MailAccessFullnameProvider(mailAccess));
-                if (MailAccount.DEFAULT_ID == accountId) {
+                if (MailAccount.DEFAULT_ID == accountId || IGNORABLES.contains(mailAccount.getMailProtocol())) {
                     retval = mailFolderImpl;
                 } else {
                     retval = new RemoveAfterAccessFolderWrapper(mailFolderImpl, false);

@@ -463,7 +463,8 @@ public final class HTMLServiceImpl implements HTMLService {
         if (null != confName && !confName.endsWith(".properties")) {
             confName += ".properties";
         }
-        final String html = replaceHexEntities(htmlContent);
+        String html = replaceHexEntities(htmlContent);
+        html = processDownlevelRevealedConditionalComments(html);
         // html = replaceHexNbsp(html);
         final FilterJerichoHandler handler;
         {
@@ -478,7 +479,7 @@ public final class HTMLServiceImpl implements HTMLService {
         if (dropExternalImages && null != modified) {
             modified[0] |= handler.isImageURLFound();
         }
-        final String retval = processDownlevelRevealedConditionalComments(handler.getHTML());
+        final String retval = handler.getHTML();
         if (DEBUG) {
             final long dur = System.currentTimeMillis() - st;
             LOG.debug("\tHTMLServiceImpl.sanitize() took " + dur + "msec.");

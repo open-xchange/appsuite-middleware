@@ -84,11 +84,11 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
     /**
      * Denied deletion of default mail account of user %1$s in context %2$s.
      */
-    NO_DEFAULT_DELETE(MailAccountExceptionStrings.NO_DEFAULT_DELETE_MSG, Category.CATEGORY_ERROR, 6),
+    NO_DEFAULT_DELETE(MailAccountExceptionStrings.NO_DEFAULT_DELETE_MSG, Category.CATEGORY_PERMISSION_DENIED, 6),
     /**
      * Denied update of default mail account of user %1$s in context %2$s.
      */
-    NO_DEFAULT_UPDATE(MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG, Category.CATEGORY_ERROR, 7),
+    NO_DEFAULT_UPDATE(MailAccountExceptionStrings.NO_DEFAULT_UPDATE_MSG, Category.CATEGORY_PERMISSION_DENIED, 7),
     /**
      * No duplicate default account allowed.
      */
@@ -120,19 +120,19 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
     /**
      * Found two mail accounts with same email address %1$s for user %2$s in context %3$s.
      */
-    CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, Category.CATEGORY_ERROR, 15),
+    CONFLICT_ADDR(MailAccountExceptionStrings.CONFLICT_ADDR_MSG, Category.CATEGORY_USER_INPUT, 15),
     /**
      * Invalid mail account name: %1$s
      */
-    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CATEGORY_ERROR, 16),
+    INVALID_NAME(MailAccountExceptionStrings.INVALID_NAME_MSG, Category.CATEGORY_USER_INPUT, 16),
     /**
      * Duplicate mail account for user %1$s in context %2$s.
      */
-    DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG, Category.CATEGORY_ERROR, 17),
+    DUPLICATE_MAIL_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_MAIL_ACCOUNT_MSG, Category.CATEGORY_USER_INPUT, 17),
     /**
      * Duplicate transport account for user %1$s in context %2$s.
      */
-    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CATEGORY_ERROR, 17),
+    DUPLICATE_TRANSPORT_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_TRANSPORT_ACCOUNT_MSG, Category.CATEGORY_USER_INPUT, 17),
     /**
      * Unable to parse mail server URI "%1$s".
      */
