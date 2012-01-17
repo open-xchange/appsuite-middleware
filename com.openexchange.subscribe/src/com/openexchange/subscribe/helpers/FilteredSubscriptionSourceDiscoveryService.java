@@ -121,16 +121,16 @@ public class FilteredSubscriptionSourceDiscoveryService implements SubscriptionS
         try {
             final ComposedConfigProperty<Boolean> property = config.property(identifier, boolean.class);
             if(property.isDefined()) {
-                return property.get();
+                return property.get().booleanValue();
             }
-            return false;
+            return true;
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return false;
         }
     }
 
-    protected SubscriptionSource filter(SubscriptionSource source) {
+    protected SubscriptionSource filter(final SubscriptionSource source) {
         if (source == null) {
             return null;
         }
