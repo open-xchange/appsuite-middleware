@@ -62,6 +62,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -184,6 +185,15 @@ public final class CreatePerformer extends AbstractPerformer {
             for (final FolderStorage folderStorage : openedStorages) {
                 folderStorage.commitTransaction(storageParameters);
             }
+            /*
+             * Sanity check
+             */
+            if (!FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID()) && DuplicateCleaner.cleanDuplicates(treeId, storageParameters, newId)) {
+                throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(storageParameters.getUser().getLocale()), treeId);
+            }
+            /*
+             * Debug out
+             */
             if (DEBUG_ENABLED) {
                 final long duration = System.currentTimeMillis() - start;
                 LOG.debug(new StringBuilder().append("Create.doCreate() took ").append(duration).append("msec for folder: ").append(newId).toString());
