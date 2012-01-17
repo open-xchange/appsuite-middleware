@@ -202,7 +202,7 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      */
     RESERVED_NAME(FolderExceptionMessages.RESERVED_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1033),
     /**
-     * Found two folders named "%1$s" located below parent folder "%2$s". Please resolve this condition (via web interface).
+     * Found two folders named "%1$s" located below the parent folder "%2$s". Please rename one of the folders. There should be no two folders with the same name.
      */
     DUPLICATE_NAME(FolderExceptionMessages.DUPLICATE_NAME_MSG, Category.CATEGORY_PERMISSION_DENIED, 1034),
 
