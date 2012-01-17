@@ -153,7 +153,7 @@ public class UserCopyTask implements CopyUserTaskService {
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
     }
 
-    private boolean userExistsInDestinationCtx(final Context dstCtx, final User srcUser, final Connection dstCon) {
+    private boolean userExistsInDestinationCtx(final Context dstCtx, final User srcUser, final Connection dstCon) throws OXException {
         final int dstCtxId = dstCtx.getContextId();
         final String srcUserName = srcUser.getLoginInfo();
         PreparedStatement stmt = null;
@@ -171,7 +171,7 @@ public class UserCopyTask implements CopyUserTaskService {
                 return false;
             }
         } catch (final SQLException e) {
-            return true;
+            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
