@@ -56,6 +56,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.caldav.servlet.CaldavPerformer.Action;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.login.internal.LoginPerformer;
@@ -66,8 +68,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
 import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
@@ -80,7 +80,7 @@ public class CalDAV extends OXServlet {
 
     private static ServiceLookup services;
 
-    public static void setServiceLookup(ServiceLookup serviceLookup) {
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
 
@@ -181,12 +181,12 @@ public class CalDAV extends OXServlet {
         }
     }
 
-    private boolean checkPermission(ServerSession session) {
+    private boolean checkPermission(final ServerSession session) {
         try {
-            ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
-            return property.isDefined() && property.get();
+            final ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
+            return (!property.isDefined() || property.get().booleanValue());
 
-        } catch (OXException e) {
+        } catch (final OXException e) {
             return false;
         }
     }

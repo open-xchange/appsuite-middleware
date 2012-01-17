@@ -373,6 +373,8 @@ public final class UnifiedINBOXFolderStorage extends MailFolderStorage {
                         mailFolder.setSubfolders(false);
                         mailFolder.setSubscribedSubfolders(false);
                         mailFolder.setName(mailAccount.getName());
+                        mailFolder.setDefaultFolder(false);
+                        mailFolder.setDefaultFolderType(DefaultFolderType.NONE);
                         return mailFolder;
                     } catch (final OXException e) {
                         getLogger().debug(e.getMessage(), e);
