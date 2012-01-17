@@ -145,17 +145,16 @@ public class CopyTools {
      * Static methods
      */
     public static String replaceIdsInQuery(final String placeholder, final String statement, final Collection<Integer> ids) {
-        String folderIdString = null;
-        for (final int id : ids) {
-            if (folderIdString == null) {
-                folderIdString = String.valueOf(id);
-            } else {
-                folderIdString += ", ";
-                folderIdString += String.valueOf(id);
-            }
+        if (null == ids || ids.isEmpty()) {
+            // Nothing to replace with
+            return statement.replaceFirst(placeholder, "");
         }
-        
-        final String selectStatement = statement.replaceFirst(placeholder, folderIdString);
+        final StringBuilder folderIdString = new StringBuilder(32);
+        for (final int id : ids) {
+            folderIdString.append(',').append(id);
+        }
+        folderIdString.deleteCharAt(0);
+        final String selectStatement = statement.replaceFirst(placeholder, folderIdString.toString());
         return selectStatement;
     }
     
