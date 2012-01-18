@@ -1,3 +1,11 @@
+* 2012-01-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21257: Fixed forward-as-attachment operation with file attachments
+
+* 2012-01-17 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 21255: Check if user with same login info exists in destination context
+
 * 2012-01-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 20013: Supporting IDN email addresses in user aliases
@@ -5,6 +13,7 @@
  - Fix for bug 21249: Add "X-Mailer" header to messages sent by OLOX2
  - Fix for bug 21254: Fixed possible NPE
  - Fix for bug 20822: Added needed index to calendar tables
+ - Fix for bug 21069: Added database schema name (aka catalog) to log properties
 
 * 2012-01-16 - thorben.betten@open-xchange.com
 

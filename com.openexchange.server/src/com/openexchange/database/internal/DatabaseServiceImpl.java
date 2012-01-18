@@ -59,6 +59,8 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.log.ForceLog;
+import com.openexchange.log.LogProperties;
 import com.openexchange.pooling.PoolingException;
 
 /**
@@ -91,11 +93,13 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final Assignment assign = assignmentService.getAssignment(contextId);
+        LogProperties.putLogProperty("com.openexchange.database.schema", new ForceLog(assign.getSchema()));
         return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write || forceWriteOnly);
     }
 
     private void back(final Connection con) {
         if (null == con) {
+            LogProperties.putLogProperty("com.openexchange.database.schema", null);
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error(e.getMessage(), e);
             return;
@@ -105,6 +109,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             final OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             LOG.error(e1.getMessage(), e1);
+        } finally {
+            LogProperties.putLogProperty("com.openexchange.database.schema", null);
         }
     }
 
