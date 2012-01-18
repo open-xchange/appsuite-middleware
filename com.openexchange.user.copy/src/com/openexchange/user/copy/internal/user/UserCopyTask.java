@@ -50,6 +50,8 @@
 package com.openexchange.user.copy.internal.user;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 import com.openexchange.exception.OXException;
@@ -57,6 +59,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.RdbUserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -74,7 +77,9 @@ import com.openexchange.user.copy.internal.context.ContextLoadTask;
 public class UserCopyTask implements CopyUserTaskService {
 
     private final UserService service;
-    
+
+    private final static String USER_EXISTS = "SELECT COUNT(*) FROM login2user WHERE cid = ? AND uid = ?";
+
 
     /**
      * Initializes a new {@link UserCopyTask}.
@@ -112,13 +117,16 @@ public class UserCopyTask implements CopyUserTaskService {
         final Integer srcUsrId = tools.getSourceUserId();
         final Connection srcCon = tools.getSourceConnection();
         final Connection dstCon = tools.getDestinationConnection();
-        
+
         final UserMapping mapping = new UserMapping();
         try {
-            final User srcUser = service.getUser(srcCon, srcUsrId, srcCtx);
+            final User srcUser = service.getUser(srcCon, srcUsrId.intValue(), srcCtx);
+            if (userExistsInDestinationCtx(dstCtx, srcUser, dstCon)) {
+                throw UserCopyExceptionCodes.USER_ALREADY_EXISTS.create(srcUser.getLoginInfo(), Integer.valueOf(dstCtx.getContextId()));
+            }
             final int dstUsrId = service.createUser(dstCon, dstCtx, srcUser);
             final User dstUser = service.getUser(dstCon, dstUsrId, dstCtx);
-            
+
             /*
              * user configuration
              */
@@ -130,12 +138,12 @@ public class UserCopyTask implements CopyUserTaskService {
             } catch (final SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             }
-            
+
             mapping.addMapping(srcUser.getId(), srcUser, dstUsrId, dstUser);
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.USER_SERVICE_PROBLEM.create(e);
         }
-        
+
         return mapping;
     }
 
@@ -143,6 +151,30 @@ public class UserCopyTask implements CopyUserTaskService {
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
+    }
+
+    private boolean userExistsInDestinationCtx(final Context dstCtx, final User srcUser, final Connection dstCon) throws OXException {
+        final int dstCtxId = dstCtx.getContextId();
+        final String srcUserName = srcUser.getLoginInfo();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = dstCon.prepareStatement(USER_EXISTS);
+            stmt.setInt(1, dstCtxId);
+            stmt.setString(2, srcUserName);
+            rs = stmt.executeQuery();
+            rs.next();
+            final int count = rs.getInt(1);
+            if (count > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (final SQLException e) {
+            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
     }
 
 }

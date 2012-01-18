@@ -53,116 +53,192 @@ import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 
 
+/**
+ * {@link TargetFolderSession} - A {@link Session} based on a passed {@link TargetFolderDefinition} instance.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class TargetFolderSession implements Session {
-    private final TargetFolderDefinition target;
-    private final Map<String, Object> params = new HashMap<String, Object>();
 
-    public TargetFolderSession(final TargetFolderDefinition target){
-        this.target = target;
+    private final int contextId;
+    private final int userId;
+    private final Map<String, Object> params;
+    private final Session session;
+
+    public TargetFolderSession(final TargetFolderDefinition target) {
+        super();
+        contextId = target.getContext().getContextId();
+        userId = target.getUserId();
+        // Initialize
+        final SessiondService service = SessiondService.SERVICE_REFERENCE.get();
+        Session ses = null;
+        if (null != service && null != (ses = service.getAnyActiveSessionForUser(target.getUserId(), target.getContext().getContextId()))) {
+            session = ses;
+            params = null;
+        } else {
+            session = null;
+            params = new HashMap<String, Object>(8);
+        }
     }
 
-    //IMPLEMENTED:
     @Override
     public int getContextId() {
-        return target.getContext().getContextId();
+        return contextId;
     }
 
     @Override
     public int getUserId() {
-        return target.getUserId();
+        return userId;
     }
 
-    //NOT IMPLEMENTED AT ALL:
     @Override
     public String getLocalIp() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getLogin() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getLoginName() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object getParameter(final String name) {
-        return params.get(name);
-    }
-
-    @Override
-    public boolean containsParameter(final String name) {
-        return params.containsKey(name);
-    }
-
-    @Override
-    public String getPassword() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getSecret() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getSessionID() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getUserlogin() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void removeRandomToken() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void setParameter(final String name, final Object value) {
-        params.put(name, value);
-    }
-
-    @Override
-    public String getAuthId() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getHash() {
-        // TODO Auto-generated method stub
-        return null;
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getLocalIp()");
+        }
+        return session.getLocalIp();
     }
 
     @Override
     public void setLocalIp(final String ip) {
-        // Nothing to do here.
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.setLocalIp()");
+        }
+        session.setLocalIp(ip);
+    }
+
+    @Override
+    public String getLoginName() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getLoginName()");
+        }
+        return session.getLoginName();
+    }
+
+    @Override
+    public boolean containsParameter(final String name) {
+        if (null != params) {
+            return params.containsKey(name);
+        }
+        return session.containsParameter(name);
+    }
+
+    @Override
+    public Object getParameter(final String name) {
+        if (null != params) {
+            return params.get(name);
+        }
+        return session.getParameter(name);
+    }
+
+    @Override
+    public String getPassword() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getPassword()");
+        }
+        return session.getPassword();
+    }
+
+    @Override
+    public String getRandomToken() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getRandomToken()");
+        }
+        return session.getRandomToken();
+    }
+
+    @Override
+    public String getSecret() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getSecret()");
+        }
+        return session.getSecret();
+    }
+
+    @Override
+    public String getSessionID() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getSessionID()");
+        }
+        return session.getSessionID();
+    }
+
+    @Override
+    public String getUserlogin() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getUserlogin()");
+        }
+        return session.getUserlogin();
+    }
+
+    @Override
+    public String getLogin() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getLogin()");
+        }
+        return session.getLogin();
+    }
+
+    @Override
+    public void setParameter(final String name, final Object value) {
+        if (null != params) {
+            if (null == value) {
+                params.remove(name);
+            } else {
+                params.put(name, value);
+            }
+        } else {
+            session.setParameter(name, value);
+        }
+    }
+
+    @Override
+    public void removeRandomToken() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.removeRandomToken()");
+        }
+        session.removeRandomToken();
+    }
+
+    @Override
+    public String getAuthId() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getAuthId()");
+        }
+        return session.getAuthId();
+    }
+
+    @Override
+    public String getHash() {
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getHash()");
+        }
+        return session.getHash();
     }
 
     @Override
     public void setHash(final String hash) {
-        // TODO Auto-generated method stub
+        if (null != session) {
+            session.setHash(hash);
+        }
     }
 
     @Override
     public String getClient() {
-        return null;
+        if (null == session) {
+            throw new UnsupportedOperationException("TargetFolderSession.getClient()");
+        }
+        return session.getClient();
     }
 
     @Override
     public void setClient(final String client) {
-        // Nothing to do.
+        if (null != session) {
+            session.setClient(client);
+        }
     }
+
 }

@@ -820,7 +820,12 @@ public class MIMEMessageFiller {
                     final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(BUF_SIZE);
                     final byte[] bbuf = new byte[BUF_SIZE];
                     for (int i = 0; i < size; i++) {
-                        addNestedMessage(mail.getEnclosedMailPart(i), primaryMultipart, sb, out, bbuf);
+                        final MailPart enclosedMailPart = mail.getEnclosedMailPart(i);
+                        if (enclosedMailPart.getContentType().startsWith("message/rfc822")) {
+                            addNestedMessage(enclosedMailPart, primaryMultipart, sb, out, bbuf);
+                        } else {
+                            addMessageBodyPart(primaryMultipart, enclosedMailPart, false);
+                        }
                     }
                 } else {
                     /*

@@ -156,7 +156,17 @@ public abstract class Refresher<T extends Serializable> {
         final Lock lock = factory.getCacheLock();
         final Serializable key = factory.getKey();
         Condition cond = null;
-        lock.lock();
+        try {
+            if (!lock.tryLock(3, TimeUnit.SECONDS)) {
+                return factory.load();
+            }
+            // Lock obtained
+        } catch (final InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            LOG.error(e.getMessage(), e);
+            return factory.load();
+        }
         try {
             final Object tmp = cache.get(key);
             if (null == tmp) {

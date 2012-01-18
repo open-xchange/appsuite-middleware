@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordchange.PasswordMechanism;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.tools.Collections.SmartIntArray;
@@ -526,7 +527,15 @@ public class RdbUserStorage extends UserStorage {
                 if (aliases == null) {
                     user.setAliases(new String[0]);
                 } else {
-                    user.setAliases(aliases.toArray(new String[aliases.size()]));
+                    final List<String> tmp = new ArrayList<String>(aliases.size());
+                    for (final String alias : aliases) {
+                        try {
+                            tmp.add(new QuotedInternetAddress(alias, false).toUnicodeString());
+                        } catch (final Exception e) {
+                            tmp.add(alias);
+                        }
+                    }
+                    user.setAliases(tmp.toArray(new String[tmp.size()]));
                 }
             }
             // Apply attributes

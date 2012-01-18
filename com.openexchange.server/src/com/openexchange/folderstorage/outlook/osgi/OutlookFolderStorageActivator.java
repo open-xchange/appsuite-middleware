@@ -172,7 +172,7 @@ public class OutlookFolderStorageActivator extends DeferredActivator {
 
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
             dictionary.put("tree", OutlookFolderStorage.OUTLOOK_TREE_ID);
-            serviceRegistrations.add(context.registerService(FolderStorage.class, new OutlookFolderStorage(), dictionary));
+            serviceRegistrations.add(context.registerService(FolderStorage.class, OutlookFolderStorage.getInstance(), dictionary));
             {
                 final EventHandler pushMailEventHandler = new EventHandler() {
 
