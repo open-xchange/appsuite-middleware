@@ -47,34 +47,36 @@
  *
  */
 
-package com.openexchange.user.copy.internal.calendar;
+package com.openexchange.user.copy.internal.oauth;
 
 /**
- * {@link ExternalDate}
+ * {@link OAuthAccount}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ExternalDate {
+public class OAuthAccount {
 
-    private String mailAddress;
+    private int id;
 
     private String displayName;
 
-    private int confirm;
+    private String accessToken;
 
-    private String reason;
+    private String accessSecret;
+
+    private String serviceId;
     
 
-    public ExternalDate() {
+    public OAuthAccount() {
         super();
     }
 
-    public String getMailAddress() {
-        return mailAddress;
+    public int getId() {
+        return id;
     }
 
-    public void setMailAddress(final String mailAddress) {
-        this.mailAddress = mailAddress;
+    public void setId(final int id) {
+        this.id = id;
     }
 
     public String getDisplayName() {
@@ -85,30 +87,38 @@ public class ExternalDate {
         this.displayName = displayName;
     }
 
-    public int getConfirm() {
-        return confirm;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setConfirm(final int confirm) {
-        this.confirm = confirm;
+    public void setAccessToken(final String accessToken) {
+        this.accessToken = accessToken;
     }
 
-    public String getReason() {
-        return reason;
+    public String getAccessSecret() {
+        return accessSecret;
     }
 
-    public void setReason(final String reason) {
-        this.reason = reason;
+    public void setAccessSecret(final String accessSecret) {
+        this.accessSecret = accessSecret;
+    }
+
+    public String getServiceId() {
+        return serviceId;
+    }
+
+    public void setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + confirm;
+        result = prime * result + ((accessSecret == null) ? 0 : accessSecret.hashCode());
+        result = prime * result + ((accessToken == null) ? 0 : accessToken.hashCode());
         result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
-        result = prime * result + ((mailAddress == null) ? 0 : mailAddress.hashCode());
-        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
+        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
         return result;
     }
 
@@ -123,8 +133,19 @@ public class ExternalDate {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ExternalDate other = (ExternalDate) obj;
-        if (confirm != other.confirm) {
+        final OAuthAccount other = (OAuthAccount) obj;
+        if (accessSecret == null) {
+            if (other.accessSecret != null) {
+                return false;
+            }
+        } else if (!accessSecret.equals(other.accessSecret)) {
+            return false;
+        }
+        if (accessToken == null) {
+            if (other.accessToken != null) {
+                return false;
+            }
+        } else if (!accessToken.equals(other.accessToken)) {
             return false;
         }
         if (displayName == null) {
@@ -134,21 +155,22 @@ public class ExternalDate {
         } else if (!displayName.equals(other.displayName)) {
             return false;
         }
-        if (mailAddress == null) {
-            if (other.mailAddress != null) {
+        if (serviceId == null) {
+            if (other.serviceId != null) {
                 return false;
             }
-        } else if (!mailAddress.equals(other.mailAddress)) {
-            return false;
-        }
-        if (reason == null) {
-            if (other.reason != null) {
-                return false;
-            }
-        } else if (!reason.equals(other.reason)) {
+        } else if (!serviceId.equals(other.serviceId)) {
             return false;
         }
         return true;
+    }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "ID: " + id + ", Name: " + displayName + ", Token: " + accessToken + ", Secret: " + accessSecret + ", Service: " + serviceId;
     }
 
 }

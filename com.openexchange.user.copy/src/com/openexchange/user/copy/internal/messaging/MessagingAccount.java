@@ -47,34 +47,57 @@
  *
  */
 
-package com.openexchange.user.copy.internal.calendar;
+package com.openexchange.user.copy.internal.messaging;
+
+import java.util.List;
+import com.openexchange.user.copy.internal.genconf.ConfAttribute;
 
 /**
- * {@link ExternalDate}
+ * {@link MessagingAccount}
  * 
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ExternalDate {
+public class MessagingAccount {
 
-    private String mailAddress;
+    private int id;
+
+    private String service;
+
+    private int confId;
 
     private String displayName;
+    
+    private List<ConfAttribute> boolAttributes;
 
-    private int confirm;
-
-    private String reason;
+    private List<ConfAttribute> stringAttributes;
     
 
-    public ExternalDate() {
+    public MessagingAccount() {
         super();
     }
 
-    public String getMailAddress() {
-        return mailAddress;
+    public int getId() {
+        return id;
     }
 
-    public void setMailAddress(final String mailAddress) {
-        this.mailAddress = mailAddress;
+    public void setId(final int id) {
+        this.id = id;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(final String service) {
+        this.service = service;
+    }
+
+    public int getConfId() {
+        return confId;
+    }
+
+    public void setConfId(final int confId) {
+        this.confId = confId;
     }
 
     public String getDisplayName() {
@@ -84,31 +107,29 @@ public class ExternalDate {
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
-
-    public int getConfirm() {
-        return confirm;
+    
+    public List<ConfAttribute> getBoolAttributes() {
+        return boolAttributes;
     }
 
-    public void setConfirm(final int confirm) {
-        this.confirm = confirm;
+    public void setBoolAttributes(final List<ConfAttribute> boolAttributes) {
+        this.boolAttributes = boolAttributes;
     }
 
-    public String getReason() {
-        return reason;
+    public List<ConfAttribute> getStringAttributes() {
+        return stringAttributes;
     }
 
-    public void setReason(final String reason) {
-        this.reason = reason;
+    public void setStringAttributes(final List<ConfAttribute> stringAttributes) {
+        this.stringAttributes = stringAttributes;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + confirm;
         result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
-        result = prime * result + ((mailAddress == null) ? 0 : mailAddress.hashCode());
-        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
+        result = prime * result + ((service == null) ? 0 : service.hashCode());
         return result;
     }
 
@@ -123,10 +144,7 @@ public class ExternalDate {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ExternalDate other = (ExternalDate) obj;
-        if (confirm != other.confirm) {
-            return false;
-        }
+        final MessagingAccount other = (MessagingAccount) obj;
         if (displayName == null) {
             if (other.displayName != null) {
                 return false;
@@ -134,18 +152,11 @@ public class ExternalDate {
         } else if (!displayName.equals(other.displayName)) {
             return false;
         }
-        if (mailAddress == null) {
-            if (other.mailAddress != null) {
+        if (service == null) {
+            if (other.service != null) {
                 return false;
             }
-        } else if (!mailAddress.equals(other.mailAddress)) {
-            return false;
-        }
-        if (reason == null) {
-            if (other.reason != null) {
-                return false;
-            }
-        } else if (!reason.equals(other.reason)) {
+        } else if (!service.equals(other.service)) {
             return false;
         }
         return true;

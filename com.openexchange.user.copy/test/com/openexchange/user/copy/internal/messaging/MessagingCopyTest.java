@@ -47,41 +47,46 @@
  *
  */
 
-package com.openexchange.user.copy.internal.uwa;
+package com.openexchange.user.copy.internal.messaging;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.internal.AbstractUserCopyTest;
+import com.openexchange.user.copy.internal.IntegerMapping;
+import com.openexchange.user.copy.internal.genconf.ConfAttribute;
+import com.openexchange.user.copy.internal.oauth.OAuthAccount;
+import com.openexchange.user.copy.internal.oauth.OAuthCopyTest;
 
 
 /**
- * {@link UWACopyTest}
+ * {@link MessagingCopyTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UWACopyTest extends AbstractUserCopyTest {
-    
+public class MessagingCopyTest extends AbstractUserCopyTest {
+
     private int srcUsrId;
+    
+    private int srcCtxId;
+    
+    private int dstCtxId;
 
     private Connection srcCon;
 
     private Connection dstCon;
 
-    private ContextImpl srcCtx;
-
-    private ContextImpl dstCtx;
-
     private int dstUsrId;
-    
 
     /**
-     * Initializes a new {@link UWACopyTest}.
+     * Initializes a new {@link OAuthCopyTest}.
      * @param name
      */
-    public UWACopyTest(final String name) {
+    public MessagingCopyTest(final String name) {
         super(name);
     }
     
@@ -89,36 +94,69 @@ public class UWACopyTest extends AbstractUserCopyTest {
     protected void setUp() throws Exception {
         super.setUp();
         srcUsrId = getSourceUserId();
+        dstUsrId = getDestinationUserId();
         srcCon = getSourceConnection();
         dstCon = getDestinationConnection();
-        srcCtx = getSourceContext();
-        dstCtx = getDestinationContext();
-        dstUsrId = getDestinationUserId();
+        srcCtxId = getSourceContext().getContextId();
+        dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testCopyWidgets() throws Exception {
-        final UWACopyTask copyTask = new UWACopyTask();
-        final List<Widget> sourceWidgets = copyTask.loadWidgetsFromDB(srcCon, srcCtx.getContextId(), srcUsrId);
+    public void testMessagingAccountCopy() throws Exception {
+        final MessagingCopyTask copyTask = new MessagingCopyTask();
+        final List<MessagingAccount> originAccounts = copyTask.loadMessagingAccountsFromDB(srcCon, srcCtxId, srcUsrId);
+        copyTask.fillMessagingAccountsWithConfig(originAccounts, srcCon, srcCtxId);
         
-        DBUtils.startTransaction(dstCon);
-        try {
-            copyTask.copyUser(getBasicObjectMapping());
+        try {     
+            disableForeignKeyChecks(dstCon);
+            DBUtils.startTransaction(dstCon);
+            final Map<String, ObjectMapping<?>> map = getObjectMappingWithFolders();
+            addOAuthAccounts(map, originAccounts);
+            copyTask.copyUser(map);
+            dstCon.commit();
         } catch (final OXException e) {
             DBUtils.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
-        }        
-        dstCon.commit();
+        } finally {
+            enableForeignKeyChecks(dstCon);
+            dstCon.commit();
+        }
         
-        final List<Widget> targetWidgets = copyTask.loadWidgetsFromDB(dstCon, dstCtx.getContextId(), dstUsrId);
-        checkAndGetMatchingObjects(sourceWidgets, targetWidgets); 
+        final List<MessagingAccount> targetAccounts = copyTask.loadMessagingAccountsFromDB(dstCon, dstCtxId, dstUsrId);
+        checkAndGetMatchingObjects(originAccounts, targetAccounts);
     }
     
-    @Override
-    protected void tearDown() throws Exception {
-        DBUtils.autocommit(dstCon);
-        deleteAllFromTablesForCid(dstCtx.getContextId(), "cid", dstCon, "uwaWidget", "uwaWidgetPosition");
-        super.tearDown();
+    private List<Integer> prepareAccountIds(final List<MessagingAccount> accounts) {
+        final List<Integer> ids = new ArrayList<Integer>();
+        for (final MessagingAccount account : accounts) {
+            final List<ConfAttribute> stringAttributes = account.getStringAttributes();
+            if (stringAttributes != null) {
+                for (final ConfAttribute attribute : stringAttributes) {
+                    if (attribute.getName() != null && attribute.getName().equals("account")) {
+                        try {
+                            final int id = Integer.parseInt(attribute.getValue());
+                            ids.add(id);
+                        } catch (final NumberFormatException e) {
+                            // Skip this one
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return ids;
+    }
+    
+    private void addOAuthAccounts(final Map<String, ObjectMapping<?>> map, final List<MessagingAccount> accounts) {
+        final List<Integer> ids = prepareAccountIds(accounts);
+        final IntegerMapping mapping = new IntegerMapping();
+        for (final Integer id : ids) {
+            mapping.addMapping(id, id);
+        }
+        
+        map.put(OAuthAccount.class.getName(), mapping);
     }
 
     /**
@@ -127,6 +165,13 @@ public class UWACopyTest extends AbstractUserCopyTest {
     @Override
     protected String[] getSequenceTables() {
         return null;
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        DBUtils.autocommit(dstCon);
+        deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "messagingAccount");
+        super.tearDown();
     }
 
 }

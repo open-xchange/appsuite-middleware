@@ -47,68 +47,62 @@
  *
  */
 
-package com.openexchange.user.copy.internal.calendar;
+package com.openexchange.user.copy.internal.genconf;
+
 
 /**
- * {@link ExternalDate}
- * 
+ * {@link ConfAttribute}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ExternalDate {
-
-    private String mailAddress;
-
-    private String displayName;
-
-    private int confirm;
-
-    private String reason;
+public class ConfAttribute {
     
-
-    public ExternalDate() {
+    public static final int STRING = 1;
+    
+    public static final int BOOL = 2;
+    
+    private String name;
+    
+    private String value;
+    
+    private final int type;
+    
+    
+    public ConfAttribute(final int type) {
         super();
+        this.type = type;
+    }
+    
+    public int getType() {
+        return type;
     }
 
-    public String getMailAddress() {
-        return mailAddress;
+    public String getName() {
+        return name;
     }
 
-    public void setMailAddress(final String mailAddress) {
-        this.mailAddress = mailAddress;
+    public void setName(final String name) {
+        this.name = name;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getValue() {
+        return value;
     }
 
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    public int getConfirm() {
-        return confirm;
-    }
-
-    public void setConfirm(final int confirm) {
-        this.confirm = confirm;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(final String reason) {
-        this.reason = reason;
+    public void setValue(final String value) {
+        this.value = value;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + confirm;
-        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
-        result = prime * result + ((mailAddress == null) ? 0 : mailAddress.hashCode());
-        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + type;
+        if (!name.equals("account")) {
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+        }        
+
         return result;
     }
 
@@ -123,32 +117,37 @@ public class ExternalDate {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ExternalDate other = (ExternalDate) obj;
-        if (confirm != other.confirm) {
-            return false;
-        }
-        if (displayName == null) {
-            if (other.displayName != null) {
+        final ConfAttribute other = (ConfAttribute) obj;
+        if (name == null) {
+            if (other.name != null) {
                 return false;
             }
-        } else if (!displayName.equals(other.displayName)) {
+        } else if (!name.equals(other.name)) {
             return false;
         }
-        if (mailAddress == null) {
-            if (other.mailAddress != null) {
+        if (type != other.type) {
+            return false;
+        }
+        
+        if (!name.equals("account")) {
+            if (value == null) {
+                if (other.value != null) {
+                    return false;
+                }
+            } else if (!value.equals(other.value)) {
                 return false;
             }
-        } else if (!mailAddress.equals(other.mailAddress)) {
-            return false;
         }
-        if (reason == null) {
-            if (other.reason != null) {
-                return false;
-            }
-        } else if (!reason.equals(other.reason)) {
-            return false;
-        }
+        
         return true;
+    }
+    
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "Type: " + type + ", Name: " + name + ", Value: " + value;
     }
 
 }

@@ -78,18 +78,18 @@ public class CalendarAttachments implements  AttachmentListener, AttachmentAutho
 
     @Override
     public long attached(final AttachmentEvent e) throws Exception {
-        final AppointmentSQLInterface csql = getInterface();
+        final AppointmentSQLInterface csql = getInterface(e.getSession());
         return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), 1);
     }
 
     @Override
     public long detached(final AttachmentEvent e) throws Exception {
-        final AppointmentSQLInterface csql = getInterface();
+        final AppointmentSQLInterface csql = getInterface(e.getSession());
         return csql.attachmentAction(e.getFolderId(), e.getAttachedId(), e.getUser().getId(), e.getSession(), e.getContext(), -(e.getDetached().length));
     }
 
-    private AppointmentSQLInterface getInterface() {
-		return ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(null);
+    private static AppointmentSQLInterface getInterface(final Session session) {
+		return ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
 	}
 
 	@Override

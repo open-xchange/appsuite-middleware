@@ -47,47 +47,44 @@
  *
  */
 
-package com.openexchange.user.copy.internal;
+package com.openexchange.admin.user.copy.rmi;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.user.copy.internal.attachment.AttachmentCopyTest;
-import com.openexchange.user.copy.internal.calendar.CalendarCopyTest;
-import com.openexchange.user.copy.internal.contact.ContactCopyTest;
-import com.openexchange.user.copy.internal.folder.FolderCopyTest;
-import com.openexchange.user.copy.internal.infostore.InfostoreCopyTest;
-import com.openexchange.user.copy.internal.messaging.MessagingCopyTest;
-import com.openexchange.user.copy.internal.oauth.OAuthCopyTest;
-import com.openexchange.user.copy.internal.reminder.ReminderCopyTest;
-import com.openexchange.user.copy.internal.subscription.SubscriptionCopyTest;
-import com.openexchange.user.copy.internal.task.TaskCopyTest;
-import com.openexchange.user.copy.internal.user.UserCopyTest;
-import com.openexchange.user.copy.internal.uwa.UWACopyTest;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
+import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.exceptions.UserExistsException;
 
 
-/**
- * {@link UserCopyUnitTestSuite}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- */
-public class UserCopyUnitTestSuite extends TestSuite {
-    
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(UserCopyTest.class);
-        tests.addTestSuite(CopyToolsTest.class);
-        tests.addTestSuite(InfostoreCopyTest.class);
-        tests.addTestSuite(ReminderCopyTest.class);
-        tests.addTestSuite(SubscriptionCopyTest.class);
-        tests.addTestSuite(FolderCopyTest.class);
-        tests.addTestSuite(CalendarCopyTest.class);
-        tests.addTestSuite(TaskCopyTest.class);
-        tests.addTestSuite(ContactCopyTest.class);        
-        tests.addTestSuite(AttachmentCopyTest.class);
-        tests.addTestSuite(UWACopyTest.class);
-        tests.addTestSuite(OAuthCopyTest.class);
-        tests.addTestSuite(MessagingCopyTest.class);
-        return tests;
-    }
+public interface OXUserCopyInterface extends Remote {
 
+    /**
+     * RMI name to be used in the naming lookup.
+     */
+    public static final String RMI_NAME = "OXUserCopy";
+
+    /**
+     * Moves the user <code>user</code> from <code>src</code> context to <code>dest</code> context
+     * 
+     * @param user the user to copy
+     * @param src the context where the user was located before
+     * @param dest the context where the user should be copied to
+     * @return the resulting user object with the new identifier of the user in the context
+     * @throws RemoteException
+     * @throws InvalidDataException 
+     * @throws InvalidCredentialsException 
+     * @throws StorageException 
+     * @throws NoSuchUserException 
+     * @throws NoSuchContextException 
+     * @throws DatabaseUpdateException 
+     * @throws UserExistsException 
+     */
+    public User copyUser(final User user, final Context src, final Context dest, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, NoSuchUserException, DatabaseUpdateException, NoSuchContextException, UserExistsException;
 }

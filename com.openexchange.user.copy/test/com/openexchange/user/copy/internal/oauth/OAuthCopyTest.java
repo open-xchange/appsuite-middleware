@@ -47,41 +47,43 @@
  *
  */
 
-package com.openexchange.user.copy.internal.uwa;
+package com.openexchange.user.copy.internal.oauth;
 
 import java.sql.Connection;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.id.SimIDGenerator;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.internal.AbstractUserCopyTest;
 
 
 /**
- * {@link UWACopyTest}
+ * {@link OAuthCopyTest}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UWACopyTest extends AbstractUserCopyTest {
+public class OAuthCopyTest extends AbstractUserCopyTest {
     
     private int srcUsrId;
+    
+    private int srcCtxId;
+    
+    private int dstCtxId;
 
     private Connection srcCon;
 
     private Connection dstCon;
 
-    private ContextImpl srcCtx;
-
-    private ContextImpl dstCtx;
-
     private int dstUsrId;
-    
 
     /**
-     * Initializes a new {@link UWACopyTest}.
+     * Initializes a new {@link OAuthCopyTest}.
      * @param name
      */
-    public UWACopyTest(final String name) {
+    public OAuthCopyTest(final String name) {
         super(name);
     }
     
@@ -89,36 +91,35 @@ public class UWACopyTest extends AbstractUserCopyTest {
     protected void setUp() throws Exception {
         super.setUp();
         srcUsrId = getSourceUserId();
+        dstUsrId = getDestinationUserId();
         srcCon = getSourceConnection();
         dstCon = getDestinationConnection();
-        srcCtx = getSourceContext();
-        dstCtx = getDestinationContext();
-        dstUsrId = getDestinationUserId();
+        srcCtxId = getSourceContext().getContextId();
+        dstCtxId = getDestinationContext().getContextId(); 
     }
     
-    public void testCopyWidgets() throws Exception {
-        final UWACopyTask copyTask = new UWACopyTask();
-        final List<Widget> sourceWidgets = copyTask.loadWidgetsFromDB(srcCon, srcCtx.getContextId(), srcUsrId);
+    public void testOAuthCopy() throws Exception {
+        final IDGeneratorService idService = new SimIDGenerator();
+        final OAuthCopyTask copyTask = new OAuthCopyTask(idService);
+        final List<OAuthAccount> originAccounts = copyTask.loadOAuthAccountsFromDB(srcCon, srcUsrId, srcCtxId);
         
-        DBUtils.startTransaction(dstCon);
-        try {
-            copyTask.copyUser(getBasicObjectMapping());
+        try {     
+            disableForeignKeyChecks(dstCon);
+            DBUtils.startTransaction(dstCon);
+            final Map<String, ObjectMapping<?>> map = getObjectMappingWithFolders();
+            copyTask.copyUser(map);
+            dstCon.commit();
         } catch (final OXException e) {
             DBUtils.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
-        }        
-        dstCon.commit();
+        } finally {
+            enableForeignKeyChecks(dstCon);
+            dstCon.commit();
+        }
         
-        final List<Widget> targetWidgets = copyTask.loadWidgetsFromDB(dstCon, dstCtx.getContextId(), dstUsrId);
-        checkAndGetMatchingObjects(sourceWidgets, targetWidgets); 
-    }
-    
-    @Override
-    protected void tearDown() throws Exception {
-        DBUtils.autocommit(dstCon);
-        deleteAllFromTablesForCid(dstCtx.getContextId(), "cid", dstCon, "uwaWidget", "uwaWidgetPosition");
-        super.tearDown();
+        final List<OAuthAccount> targetAccounts = copyTask.loadOAuthAccountsFromDB(dstCon, dstUsrId, dstCtxId);
+        checkAndGetMatchingObjects(originAccounts, targetAccounts);
     }
 
     /**
@@ -127,6 +128,13 @@ public class UWACopyTest extends AbstractUserCopyTest {
     @Override
     protected String[] getSequenceTables() {
         return null;
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+        DBUtils.autocommit(dstCon);
+        deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "oauthAccounts");
+        super.tearDown();
     }
 
 }

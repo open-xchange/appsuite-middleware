@@ -47,47 +47,47 @@
  *
  */
 
-package com.openexchange.user.copy.internal;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.user.copy.internal.attachment.AttachmentCopyTest;
-import com.openexchange.user.copy.internal.calendar.CalendarCopyTest;
-import com.openexchange.user.copy.internal.contact.ContactCopyTest;
-import com.openexchange.user.copy.internal.folder.FolderCopyTest;
-import com.openexchange.user.copy.internal.infostore.InfostoreCopyTest;
-import com.openexchange.user.copy.internal.messaging.MessagingCopyTest;
-import com.openexchange.user.copy.internal.oauth.OAuthCopyTest;
-import com.openexchange.user.copy.internal.reminder.ReminderCopyTest;
-import com.openexchange.user.copy.internal.subscription.SubscriptionCopyTest;
-import com.openexchange.user.copy.internal.task.TaskCopyTest;
-import com.openexchange.user.copy.internal.user.UserCopyTest;
-import com.openexchange.user.copy.internal.uwa.UWACopyTest;
-
+package com.openexchange.admin.rmi.exceptions;
 
 /**
- * {@link UserCopyUnitTestSuite}
- *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author choeger
  */
-public class UserCopyUnitTestSuite extends TestSuite {
-    
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(UserCopyTest.class);
-        tests.addTestSuite(CopyToolsTest.class);
-        tests.addTestSuite(InfostoreCopyTest.class);
-        tests.addTestSuite(ReminderCopyTest.class);
-        tests.addTestSuite(SubscriptionCopyTest.class);
-        tests.addTestSuite(FolderCopyTest.class);
-        tests.addTestSuite(CalendarCopyTest.class);
-        tests.addTestSuite(TaskCopyTest.class);
-        tests.addTestSuite(ContactCopyTest.class);        
-        tests.addTestSuite(AttachmentCopyTest.class);
-        tests.addTestSuite(UWACopyTest.class);
-        tests.addTestSuite(OAuthCopyTest.class);
-        tests.addTestSuite(MessagingCopyTest.class);
-        return tests;
+public class UserExistsException extends Exception {
+
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -1916412104283975774L;
+
+    /**
+	 * 
+	 */
+    public UserExistsException() {
+        super("User already exists");
+    }
+
+    /**
+     * @param message
+     */
+    public UserExistsException(String message) {
+        super(message);
+
+    }
+
+    /**
+     * @param cause
+     */
+    public UserExistsException(Throwable cause) {
+        super(cause);
+
+    }
+
+    /**
+     * @param message
+     * @param cause
+     */
+    public UserExistsException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

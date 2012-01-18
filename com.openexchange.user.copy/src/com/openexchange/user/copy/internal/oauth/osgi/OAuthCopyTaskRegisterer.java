@@ -47,108 +47,62 @@
  *
  */
 
-package com.openexchange.user.copy.internal.calendar;
+package com.openexchange.user.copy.internal.oauth.osgi;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.id.IDGeneratorService;
+import com.openexchange.user.copy.CopyUserTaskService;
+import com.openexchange.user.copy.internal.oauth.OAuthCopyTask;
+
 
 /**
- * {@link ExternalDate}
- * 
+ * {@link OAuthCopyTaskRegisterer}
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class ExternalDate {
-
-    private String mailAddress;
-
-    private String displayName;
-
-    private int confirm;
-
-    private String reason;
+public class OAuthCopyTaskRegisterer implements ServiceTrackerCustomizer<IDGeneratorService, IDGeneratorService> {
     
+    private final BundleContext context;
+    
+    private ServiceRegistration<CopyUserTaskService> registerService;
 
-    public ExternalDate() {
+    private OAuthCopyTask task;
+    
+    
+    public OAuthCopyTaskRegisterer(final BundleContext context) {
         super();
+        this.context = context;
     }
 
-    public String getMailAddress() {
-        return mailAddress;
+    /**
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
+    public IDGeneratorService addingService(final ServiceReference<IDGeneratorService> reference) {
+        final IDGeneratorService service = context.getService(reference);
+        task = new OAuthCopyTask(service);
+        registerService = context.registerService(CopyUserTaskService.class, task, null);
+        
+        return service;
     }
 
-    public void setMailAddress(final String mailAddress) {
-        this.mailAddress = mailAddress;
+    /**
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void modifiedService(final ServiceReference<IDGeneratorService> reference, final IDGeneratorService service) {
     }
 
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(final String displayName) {
-        this.displayName = displayName;
-    }
-
-    public int getConfirm() {
-        return confirm;
-    }
-
-    public void setConfirm(final int confirm) {
-        this.confirm = confirm;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    public void setReason(final String reason) {
-        this.reason = reason;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + confirm;
-        result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
-        result = prime * result + ((mailAddress == null) ? 0 : mailAddress.hashCode());
-        result = prime * result + ((reason == null) ? 0 : reason.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
+    /**
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    public void removedService(final ServiceReference<IDGeneratorService> reference, final IDGeneratorService service) {
+        if (registerService != null) {
+            registerService.unregister();
+            task = null;
+            context.ungetService(reference);            
         }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ExternalDate other = (ExternalDate) obj;
-        if (confirm != other.confirm) {
-            return false;
-        }
-        if (displayName == null) {
-            if (other.displayName != null) {
-                return false;
-            }
-        } else if (!displayName.equals(other.displayName)) {
-            return false;
-        }
-        if (mailAddress == null) {
-            if (other.mailAddress != null) {
-                return false;
-            }
-        } else if (!mailAddress.equals(other.mailAddress)) {
-            return false;
-        }
-        if (reason == null) {
-            if (other.reason != null) {
-                return false;
-            }
-        } else if (!reason.equals(other.reason)) {
-            return false;
-        }
-        return true;
     }
 
 }

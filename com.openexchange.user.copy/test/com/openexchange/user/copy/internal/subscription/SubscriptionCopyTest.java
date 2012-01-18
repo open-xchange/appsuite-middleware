@@ -50,14 +50,17 @@
 package com.openexchange.user.copy.internal.subscription;
 
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.id.IDGeneratorService;
-import com.openexchange.id.SimIDGenerator;
 import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.internal.AbstractUserCopyTest;
+import com.openexchange.user.copy.internal.IntegerMapping;
+import com.openexchange.user.copy.internal.genconf.ConfAttribute;
+import com.openexchange.user.copy.internal.oauth.OAuthAccount;
 
 
 /**
@@ -103,16 +106,16 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
     }
     
     public void testSubscriptionCopy() throws Exception {
-        final IDGeneratorService idService = new SimIDGenerator();
-        final SubscriptionCopyTask copyTask = new SubscriptionCopyTask(idService);
+        final SubscriptionCopyTask copyTask = new SubscriptionCopyTask();
         final Map<Integer, Subscription> originSubscriptions = copyTask.loadSubscriptionsFromDB(srcCon, srcUsrId, srcCtxId);
         copyTask.fillSubscriptionsWithAttributes(originSubscriptions, srcCon, srcCtxId);
-        final List<OAuthAccount> originOAuthAccounts = copyTask.loadOAuthAccountsFromDB(originSubscriptions, srcCon, srcUsrId, srcCtxId);
         
         try {     
             disableForeignKeyChecks(dstCon);
             DBUtils.startTransaction(dstCon);
-            copyTask.copyUser(getObjectMappingWithFolders());
+            final Map<String, ObjectMapping<?>> map = getObjectMappingWithFolders();
+            addOAuthAccounts(map, originSubscriptions);
+            copyTask.copyUser(map);
             dstCon.commit();
         } catch (final OXException e) {
             DBUtils.rollback(dstCon);
@@ -125,18 +128,45 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
         
         final Map<Integer, Subscription> targetSubscriptions = copyTask.loadSubscriptionsFromDB(dstCon, dstUsrId, dstCtxId);
         copyTask.fillSubscriptionsWithAttributes(targetSubscriptions, dstCon, dstCtxId);
-        final List<OAuthAccount> targetOAuthAccounts = copyTask.loadOAuthAccountsFromDB(targetSubscriptions, dstCon, dstUsrId, dstCtxId);
         
         checkSubscriptions(originSubscriptions, targetSubscriptions);
-        checkOAuthAccounts(originOAuthAccounts, targetOAuthAccounts);
+    }
+    
+    private List<Integer> prepareAccountIds(final Map<Integer, Subscription> subscriptions) {
+        final List<Integer> ids = new ArrayList<Integer>();
+        for (final Subscription subscription : subscriptions.values()) {
+            final List<ConfAttribute> stringAttributes = subscription.getStringAttributes();
+            if (stringAttributes != null) {
+                for (final ConfAttribute attribute : stringAttributes) {
+                    if (attribute.getName() != null && attribute.getName().equals("account")) {
+                        try {
+                            final int id = Integer.parseInt(attribute.getValue());
+                            ids.add(id);
+                        } catch (final NumberFormatException e) {
+                            // Skip this one
+                        }
+
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return ids;
+    }
+    
+    private void addOAuthAccounts(final Map<String, ObjectMapping<?>> map, final Map<Integer, Subscription> originSubscriptions) {
+        final List<Integer> ids = prepareAccountIds(originSubscriptions);
+        final IntegerMapping mapping = new IntegerMapping();
+        for (final Integer id : ids) {
+            mapping.addMapping(id, id);
+        }
+        
+        map.put(OAuthAccount.class.getName(), mapping);
     }
     
     private void checkSubscriptions(final Map<Integer, Subscription> originSubscriptions, final Map<Integer, Subscription> targetSubscriptions) {
         checkAndGetMatchingObjects(originSubscriptions.values(), targetSubscriptions.values(), new SubscriptionComparator());
-    }
-    
-    private void checkOAuthAccounts(final List<OAuthAccount> originOAuthAccounts, final List<OAuthAccount> targetOAuthAccounts) {
-        checkAndGetMatchingObjects(originOAuthAccounts, targetOAuthAccounts);
     }
     
     /**
@@ -145,7 +175,7 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
     @Override
     protected void tearDown() throws Exception {
         DBUtils.autocommit(dstCon);
-        deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "subscriptions", "oauthAccounts", "genconf_attributes_strings", "genconf_attributes_bools");
+        deleteAllFromTablesForCid(dstCtxId, "cid", dstCon, "subscriptions", "genconf_attributes_strings", "genconf_attributes_bools");
         super.tearDown();
     }   
 
@@ -162,7 +192,7 @@ public class SubscriptionCopyTest extends AbstractUserCopyTest {
         /**
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
-        public int compare(Subscription o1, Subscription o2) {
+        public int compare(final Subscription o1, final Subscription o2) {
             if (o1.equals(o2)) {
                 final List<ConfAttribute> o1BoolAttributes = o1.getBoolAttributes();
                 final List<ConfAttribute> o2BoolAttributes = o2.getBoolAttributes();                

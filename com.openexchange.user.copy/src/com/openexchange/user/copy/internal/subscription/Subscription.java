@@ -50,6 +50,7 @@
 package com.openexchange.user.copy.internal.subscription;
 
 import java.util.List;
+import com.openexchange.user.copy.internal.genconf.ConfAttribute;
 
 /**
  * {@link Subscription}

@@ -47,47 +47,38 @@
  *
  */
 
-package com.openexchange.user.copy.internal;
+package com.openexchange.user.copy.internal.oauth.osgi;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.user.copy.internal.attachment.AttachmentCopyTest;
-import com.openexchange.user.copy.internal.calendar.CalendarCopyTest;
-import com.openexchange.user.copy.internal.contact.ContactCopyTest;
-import com.openexchange.user.copy.internal.folder.FolderCopyTest;
-import com.openexchange.user.copy.internal.infostore.InfostoreCopyTest;
-import com.openexchange.user.copy.internal.messaging.MessagingCopyTest;
-import com.openexchange.user.copy.internal.oauth.OAuthCopyTest;
-import com.openexchange.user.copy.internal.reminder.ReminderCopyTest;
-import com.openexchange.user.copy.internal.subscription.SubscriptionCopyTest;
-import com.openexchange.user.copy.internal.task.TaskCopyTest;
-import com.openexchange.user.copy.internal.user.UserCopyTest;
-import com.openexchange.user.copy.internal.uwa.UWACopyTest;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.id.IDGeneratorService;
 
 
 /**
- * {@link UserCopyUnitTestSuite}
+ * {@link OAuthCopyActivator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class UserCopyUnitTestSuite extends TestSuite {
-    
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(UserCopyTest.class);
-        tests.addTestSuite(CopyToolsTest.class);
-        tests.addTestSuite(InfostoreCopyTest.class);
-        tests.addTestSuite(ReminderCopyTest.class);
-        tests.addTestSuite(SubscriptionCopyTest.class);
-        tests.addTestSuite(FolderCopyTest.class);
-        tests.addTestSuite(CalendarCopyTest.class);
-        tests.addTestSuite(TaskCopyTest.class);
-        tests.addTestSuite(ContactCopyTest.class);        
-        tests.addTestSuite(AttachmentCopyTest.class);
-        tests.addTestSuite(UWACopyTest.class);
-        tests.addTestSuite(OAuthCopyTest.class);
-        tests.addTestSuite(MessagingCopyTest.class);
-        return tests;
+public class OAuthCopyActivator implements BundleActivator {
+
+    private ServiceTracker<IDGeneratorService, IDGeneratorService> tracker;
+
+    /**
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext context) throws Exception {
+        tracker = new ServiceTracker<IDGeneratorService, IDGeneratorService>(context, IDGeneratorService.class.getName(), new OAuthCopyTaskRegisterer(context));
+        tracker.open();
+    }
+
+    /**
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws Exception {
+        if (tracker != null) {
+            tracker.close();
+        }
     }
 
 }
