@@ -1,3 +1,7 @@
+* 2012-01-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21230: Passing the necessary objects to prevent the NullPointerException.
+
 * 2012-01-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 21257: Fixed forward-as-attachment operation with file attachments
