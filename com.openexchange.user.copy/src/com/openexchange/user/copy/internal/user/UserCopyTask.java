@@ -120,9 +120,9 @@ public class UserCopyTask implements CopyUserTaskService {
 
         final UserMapping mapping = new UserMapping();
         try {
-            final User srcUser = service.getUser(srcCon, srcUsrId, srcCtx);
+            final User srcUser = service.getUser(srcCon, srcUsrId.intValue(), srcCtx);
             if (userExistsInDestinationCtx(dstCtx, srcUser, dstCon)) {
-                throw UserCopyExceptionCodes.USER_SERVICE_PROBLEM.create("User exists in destination context.");
+                throw UserCopyExceptionCodes.USER_ALREADY_EXISTS.create(srcUser.getLoginInfo(), Integer.valueOf(dstCtx.getContextId()));
             }
             final int dstUsrId = service.createUser(dstCon, dstCtx, srcUser);
             final User dstUser = service.getUser(dstCon, dstUsrId, dstCtx);

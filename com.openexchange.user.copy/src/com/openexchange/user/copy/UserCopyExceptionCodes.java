@@ -49,16 +49,6 @@
 
 package com.openexchange.user.copy;
 
-import static com.openexchange.user.copy.UserCopyExceptionMessages.DB_POOLING_PROBLEM_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.FILE_STORAGE_PROBLEM_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.ID_PROBLEM_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.MISSING_PARENT_FOLDER_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.SAVE_MAIL_SETTINGS_PROBLEM_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.SQL_PROBLEM_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.UNKNOWN_PROBLEM_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.UNRESOLVABLE_DEPENDENCIES_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.USER_CONTACT_MISSING_MSG;
-import static com.openexchange.user.copy.UserCopyExceptionMessages.USER_SERVICE_PROBLEM_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -72,26 +62,27 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum UserCopyExceptionCodes implements OXExceptionCode {
 
     /** Unable to determine next update task to execute. Enqueued: %1$s. To sort: %2$s. */
-    UNRESOLVABLE_DEPENDENCIES(UNRESOLVABLE_DEPENDENCIES_MSG, Category.CATEGORY_ERROR, 1),
+    UNRESOLVABLE_DEPENDENCIES(UserCopyExceptionMessages.UNRESOLVABLE_DEPENDENCIES_MSG, Category.CATEGORY_ERROR, 1),
     /** SQL Problem. */
-    SQL_PROBLEM(SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 2),
+    SQL_PROBLEM(UserCopyExceptionMessages.SQL_PROBLEM_MSG, Category.CATEGORY_ERROR, 2),
     /** Severe problem occurred. */
-    UNKNOWN_PROBLEM(UNKNOWN_PROBLEM_MSG, Category.CATEGORY_ERROR, 3),
+    UNKNOWN_PROBLEM(UserCopyExceptionMessages.UNKNOWN_PROBLEM_MSG, Category.CATEGORY_ERROR, 3),
     /** Problem with UserService. */
-    USER_SERVICE_PROBLEM(USER_SERVICE_PROBLEM_MSG, Category.CATEGORY_ERROR, 4),
+    USER_SERVICE_PROBLEM(UserCopyExceptionMessages.USER_SERVICE_PROBLEM_MSG, Category.CATEGORY_ERROR, 4),
     /** A private folder (%1$s) without existing parent (%2$s) was found. */
-    MISSING_PARENT_FOLDER(MISSING_PARENT_FOLDER_MSG, Category.CATEGORY_ERROR, 5),
+    MISSING_PARENT_FOLDER(UserCopyExceptionMessages.MISSING_PARENT_FOLDER_MSG, Category.CATEGORY_ERROR, 5),
     /** Database pooling error. */
-    DB_POOLING_PROBLEM(DB_POOLING_PROBLEM_MSG, Category.CATEGORY_ERROR, 6),
+    DB_POOLING_PROBLEM(UserCopyExceptionMessages.DB_POOLING_PROBLEM_MSG, Category.CATEGORY_ERROR, 6),
     /** Problem with FileStorage. */
-    FILE_STORAGE_PROBLEM(FILE_STORAGE_PROBLEM_MSG, Category.CATEGORY_ERROR, 7),
+    FILE_STORAGE_PROBLEM(UserCopyExceptionMessages.FILE_STORAGE_PROBLEM_MSG, Category.CATEGORY_ERROR, 7),
     /** Could not generate a new sequence id for type %1$s. */
-    ID_PROBLEM(ID_PROBLEM_MSG, Category.CATEGORY_ERROR, 8),
+    ID_PROBLEM(UserCopyExceptionMessages.ID_PROBLEM_MSG, Category.CATEGORY_ERROR, 8),
     /** Did not find contact for user %1$s in context %2$s. */
-    USER_CONTACT_MISSING(USER_CONTACT_MISSING_MSG, Category.CATEGORY_ERROR, 9),
+    USER_CONTACT_MISSING(UserCopyExceptionMessages.USER_CONTACT_MISSING_MSG, Category.CATEGORY_ERROR, 9),
     /** Could not save users mail settings. */
-    SAVE_MAIL_SETTINGS_PROBLEM(SAVE_MAIL_SETTINGS_PROBLEM_MSG, Category.CATEGORY_ERROR, 10)
-     
+    SAVE_MAIL_SETTINGS_PROBLEM(UserCopyExceptionMessages.SAVE_MAIL_SETTINGS_PROBLEM_MSG, Category.CATEGORY_ERROR, 10),
+     /** A user named %1$s already exists in destination context %2$s. */
+    USER_ALREADY_EXISTS(UserCopyExceptionMessages.USER_ALREADY_EXISTS_MSG, Category.CATEGORY_USER_INPUT, 11),
     ;
 
     private final String message;
