@@ -67,6 +67,8 @@ import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.contact.Contacts;
@@ -74,6 +76,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.i18n.LocaleTools;
@@ -1312,6 +1315,18 @@ public final class OXFolderAdminHelper {
      * @throws SQLException If a SQL related error occurs
      */
     public static void propagateGroupModification(final int group, final Connection readCon, final Connection writeCon, final int cid) throws SQLException {
+        try {
+            final int[] members = GroupStorage.getInstance().getGroup(group, ContextStorage.getStorageContext(cid)).getMember();
+            for (final int member : members) {
+                CacheFolderStorage.getInstance().clearCache(member, cid);
+            }
+        } catch (final Exception e) {
+            // Ignore
+            LOG.error(e.getMessage(), e);
+        }
+        /*
+         * Update last-modified time stamp
+         */
         final long lastModified = System.currentTimeMillis();
         PreparedStatement stmt = null;
         ResultSet rs = null;

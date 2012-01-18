@@ -67,6 +67,7 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -320,6 +321,11 @@ public class CachingUserStorage extends UserStorage {
             } catch (final OXException e) {
                 throw UserExceptionCode.CACHE_PROBLEM.create(e);
             }
+        }
+        try {
+            UserConfigurationStorage.getInstance().removeUserConfiguration(userId, ctx);
+        } catch (final Exception e) {
+            // Ignore
         }
     }
 
