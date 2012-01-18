@@ -2170,16 +2170,14 @@ public final class MIMEMessageConverter {
         return headers;
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
+    private static boolean isEmpty(final String value) {
+        final int length = value.length();
+        boolean empty = true;
+        for (int i = 0; empty && i < length; i++) {
+            final char c = value.charAt(i);
+            empty = ((c == ' ') || (c == '\t'));
         }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
+        return empty;
     }
 
     /**
