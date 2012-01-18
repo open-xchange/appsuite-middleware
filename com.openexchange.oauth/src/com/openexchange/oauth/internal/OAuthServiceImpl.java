@@ -547,7 +547,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             account.setId(accountId);
             account.setDisplayName(rs.getString(1));
             account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
-            account.setSecret(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessSecret", contextId, accountId)));
+            account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
             account.setMetaData(registry.getService(rs.getString(4), user, contextId));
             return account;
         } catch (final SQLException e) {
