@@ -47,27 +47,38 @@
  *
  */
 
-package com.openexchange.admin.usermove.osgi;
+package com.openexchange.user.copy.internal.oauth.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.user.copy.UserCopyService;
+import com.openexchange.id.IDGeneratorService;
 
-public class Activator implements BundleActivator {
 
-    private ServiceTracker<UserCopyService, UserCopyService> tracker;
+/**
+ * {@link OAuthCopyActivator}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class OAuthCopyActivator implements BundleActivator {
 
-    public Activator() {
-        super();
-    }
+    private ServiceTracker<IDGeneratorService, IDGeneratorService> tracker;
 
-    public void start(BundleContext context) throws Exception {
-        tracker = new ServiceTracker<UserCopyService, UserCopyService>(context, UserCopyService.class, new RMIUserMoveRegisterer(context));
+    /**
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     */
+    public void start(final BundleContext context) throws Exception {
+        tracker = new ServiceTracker<IDGeneratorService, IDGeneratorService>(context, IDGeneratorService.class.getName(), new OAuthCopyTaskRegisterer(context));
         tracker.open();
     }
 
-    public void stop(BundleContext context) throws Exception {
-        tracker.close();
+    /**
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws Exception {
+        if (tracker != null) {
+            tracker.close();
+        }
     }
+
 }

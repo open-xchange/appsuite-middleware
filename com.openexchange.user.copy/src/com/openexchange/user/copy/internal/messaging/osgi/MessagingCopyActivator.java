@@ -47,40 +47,38 @@
  *
  */
 
-package com.openexchange.admin.usermove.rmi;
+package com.openexchange.user.copy.internal.messaging.osgi;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.usermove.rmi.exceptions.OXUserMoveException;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.user.copy.CopyUserTaskService;
+import com.openexchange.user.copy.internal.messaging.MessagingCopyTask;
 
 
-public interface OXUserMoveInterface extends Remote {
+/**
+ * {@link MessagingCopyActivator}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ */
+public class MessagingCopyActivator implements BundleActivator {
 
-    /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = "OXUserMove";
+    private ServiceRegistration<CopyUserTaskService> registerService;
 
     /**
-     * Moves the user <code>user</code> from <code>src</code> context to <code>dest</code> context
-     * 
-     * @param user the user to move
-     * @param src the context where the user was located before
-     * @param dest the context where the user should be moved to
-     * @return the resulting user object with the new identifier of the user in the context
-     * @throws RemoteException
-     * @throws InvalidDataException 
-     * @throws InvalidCredentialsException 
-     * @throws StorageException 
-     * @throws OXUserMoveException 
+     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
-    public User moveUser(final User user, final Context src, final Context dest, final Credentials auth) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, OXUserMoveException;
-    
-//    public Map<String, ObjectMapping<?>> getMapping();
+    public void start(final BundleContext context) throws Exception {
+        registerService = context.registerService(CopyUserTaskService.class, new MessagingCopyTask(), null);
+    }
+
+    /**
+     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
+     */
+    public void stop(final BundleContext context) throws Exception {
+        if (registerService != null) {
+            registerService.unregister();
+        }
+    }
+
 }

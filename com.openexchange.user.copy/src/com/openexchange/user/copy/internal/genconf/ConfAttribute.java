@@ -47,60 +47,107 @@
  *
  */
 
-package com.openexchange.admin.usermove.rmi.exceptions;
+package com.openexchange.user.copy.internal.genconf;
+
 
 /**
- * {@link OXUserMoveException}
+ * {@link ConfAttribute}
  *
- * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OXUserMoveException extends Exception {
+public class ConfAttribute {
+    
+    public static final int STRING = 1;
+    
+    public static final int BOOL = 2;
+    
+    private String name;
+    
+    private String value;
+    
+    private final int type;
+    
+    
+    public ConfAttribute(final int type) {
+        super();
+        this.type = type;
+    }
+    
+    public int getType() {
+        return type;
+    }
 
-    public enum Code {
-        /**
-         * Subadmin %1$s does not belong to %2$s
-         */
-        SUBADMIN_DOES_NOT_BELONG_TO_SUBADMIN("Subadmin %1$s does not belong to %2$s");
-        
-        private final String text;
-        
-        private Code(final String text) {
-            this.text = text;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(final String value) {
+        this.value = value;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + type;
+        if (!name.equals("account")) {
+            result = prime * result + ((value == null) ? 0 : value.hashCode());
+        }        
+
+        return result;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ConfAttribute other = (ConfAttribute) obj;
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (type != other.type) {
+            return false;
         }
         
-        public final String getText() {
-            return text;
+        if (!name.equals("account")) {
+            if (value == null) {
+                if (other.value != null) {
+                    return false;
+                }
+            } else if (!value.equals(other.value)) {
+                return false;
+            }
         }
+        
+        return true;
     }
     
     /**
-     * 
+     * @see java.lang.Object#toString()
      */
-    private static final long serialVersionUID = -3749789561669512300L;
-
-    /**
-     * Initializes a new {@link OXUserMoveException}.
-     * @param code
-     */
-    public OXUserMoveException(final Code code) {
-        super(code.getText());
-    }
-
-    /**
-     * Initializes a new {@link OXUserMoveException}.
-     * @param code
-     */
-    public OXUserMoveException(final Code code, final String... args) {
-        super(String.format(code.getText(), (Object[])args));
-    }
-    
-    /**
-     * Initializes a new {@link OXUserMoveException}.
-     * @param arg0
-     */
-    public OXUserMoveException(Throwable arg0) {
-        super(arg0);
+    @Override
+    public String toString() {
+        return "Type: " + type + ", Name: " + name + ", Value: " + value;
     }
 
 }
