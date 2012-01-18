@@ -49,16 +49,12 @@
 
 package com.openexchange.user.copy.internal.subscription;
 
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.user.copy.internal.CopyTools.getIntOrNegative;
-import static com.openexchange.user.copy.internal.CopyTools.replaceIdsInQuery;
-import static com.openexchange.user.copy.internal.CopyTools.setIntOrNull;
-import static com.openexchange.user.copy.internal.CopyTools.setStringOrNull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +63,6 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
-import com.openexchange.id.IDGeneratorService;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
@@ -76,6 +71,10 @@ import com.openexchange.user.copy.internal.CopyTools;
 import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
 import com.openexchange.user.copy.internal.folder.FolderCopyTask;
+import com.openexchange.user.copy.internal.genconf.ConfAttribute;
+import com.openexchange.user.copy.internal.genconf.GenconfCopyTool;
+import com.openexchange.user.copy.internal.oauth.OAuthAccount;
+import com.openexchange.user.copy.internal.oauth.OAuthCopyTask;
 import com.openexchange.user.copy.internal.user.UserCopyTask;
 
 
@@ -97,41 +96,6 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
        "AND " +
            "user_id = ?";
    
-   private static final String SELECT_ATTRIBUTES = 
-       "SELECT " +
-           "name, value " +
-       "FROM " +
-           "genconf_attributes_#TYPE# " +
-       "WHERE " +
-           "cid = ? " +
-       "AND " +
-           "id = ?";
-   
-   private static final String SELECT_ACCOUNTS =
-       "SELECT " +
-           "id, displayName, accessToken, accessSecret, " +
-           "serviceId FROM oauthAccounts " +
-       "WHERE " +
-           "cid = ? " +
-       "AND " +
-           "user = ? " +
-       "AND " +
-           "id IN (#IDS#)";
-   
-   private static final String INSERT_ACCOUNTS =
-       "INSERT INTO " +
-           "oauthAccounts " +
-           "(cid, user, id, displayName, accessToken, accessSecret, serviceId) " +
-       "VALUES " +
-           "(?, ?, ?, ?, ?, ?, ?)";
-   
-   private static final String INSERT_ATTRIBUTES =
-       "INSERT INTO " +
-           "genconf_attributes_#TYPE# " +
-           "(cid, id, name, value) " +
-       "VALUES " +
-           "(?, ?, ?, ?)";
-   
    private static final String INSERT_SUBSCRIPTION =
        "INSERT INTO " +
            "subscriptions " +
@@ -139,12 +103,9 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
        "VALUES " +
            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-   private final IDGeneratorService idService;
-    
    
-   public SubscriptionCopyTask(final IDGeneratorService idService) {
+   public SubscriptionCopyTask() {
        super();
-       this.idService = idService;
    }
 
     /**
@@ -155,7 +116,8 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
             UserCopyTask.class.getName(),
             ContextLoadTask.class.getName(),
             ConnectionFetcherTask.class.getName(),
-            FolderCopyTask.class.getName()
+            FolderCopyTask.class.getName(),
+            OAuthCopyTask.class.getName()
         };
     }
 
@@ -178,22 +140,15 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
         final Integer dstUsrId = copyTools.getDestinationUserId();
         final Connection srcCon = copyTools.getSourceConnection();
         final Connection dstCon = copyTools.getDestinationConnection();
-        final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();
+        final ObjectMapping<FolderObject> folderMapping = copyTools.getFolderMapping();           
         
         try {
             final boolean hasSubscriptions = DBUtils.tableExists(srcCon, "subscriptions");
             if (hasSubscriptions) {                
+                final ObjectMapping<Integer> accountMapping = copyTools.checkAndExtractGenericMapping(OAuthAccount.class.getName());     
                 final Map<Integer, Subscription> subscriptions = loadSubscriptionsFromDB(srcCon, i(srcUsrId), i(srcCtxId));
                 fillSubscriptionsWithAttributes(subscriptions, srcCon, i(srcCtxId));
-                
-                final boolean hasOAuth = DBUtils.tableExists(srcCon, "oauthAccounts");
-                if (hasOAuth) {
-                    final List<OAuthAccount> accounts = loadOAuthAccountsFromDB(subscriptions, srcCon, i(srcUsrId), i(srcCtxId));
-                    final Map<Integer, Integer> oAuthMapping = exchangeOAuthIds(dstCon, accounts, dstCtx);                    
-                    writeOAuthAccountsToDB(accounts, dstCon, i(dstCtxId), i(dstUsrId));
-                    setAccountIdsForSubscriptions(subscriptions, oAuthMapping);
-                }                
-                                
+                setAccountIdsForSubscriptions(subscriptions, accountMapping);
                 exchangeSubscriptionIds(subscriptions, dstCon, dstCtx, folderMapping);                
                 writeSubscriptionsToDB(subscriptions, dstCon, i(dstUsrId), i(dstCtxId));
             }
@@ -209,8 +164,8 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
         try {            
             stmt = con.prepareStatement(INSERT_SUBSCRIPTION);
             for (final Subscription subscription : subscriptions.values()) {
-                writeAttributesToDB(subscription.getBoolAttributes(), con, subscription.getConfigId(), cid, ConfAttribute.BOOL);
-                writeAttributesToDB(subscription.getStringAttributes(), con, subscription.getConfigId(), cid, ConfAttribute.STRING);
+                GenconfCopyTool.writeAttributesToDB(subscription.getBoolAttributes(), con, subscription.getConfigId(), cid, ConfAttribute.BOOL);
+                GenconfCopyTool.writeAttributesToDB(subscription.getStringAttributes(), con, subscription.getConfigId(), cid, ConfAttribute.STRING);
                 
                 int i = 1;
                 stmt.setInt(i++, subscription.getId());
@@ -233,71 +188,6 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
-    }
-    
-    private void writeAttributesToDB(final List<ConfAttribute> attributes, final Connection con, final int id, final int cid, final int type) throws OXException {
-        final String sql = replaceTableInAttributeStatement(INSERT_ATTRIBUTES, type);
-        PreparedStatement stmt = null;
-        try {            
-            stmt = con.prepareStatement(sql);
-            for (final ConfAttribute attribute : attributes) {
-                int i = 1;
-                stmt.setInt(i++, cid);
-                stmt.setInt(i++, id);
-                setStringOrNull(i++, stmt, attribute.getName());
-                if (type == ConfAttribute.BOOL) {
-                    setIntOrNull(i++, stmt, Integer.parseInt(attribute.getValue()));
-                } else {
-                    setStringOrNull(i++, stmt, attribute.getValue());
-                }
-                
-                stmt.addBatch();
-            }
-            
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-    
-    private void writeOAuthAccountsToDB(final List<OAuthAccount> accounts, final Connection con, final int cid, final int uid) throws OXException {
-        PreparedStatement stmt = null;
-        try {            
-            stmt = con.prepareStatement(INSERT_ACCOUNTS);
-            for (final OAuthAccount account : accounts) {
-                int i = 1;
-                stmt.setInt(i++, cid);
-                stmt.setInt(i++, uid);
-                stmt.setInt(i++, account.getId());
-                stmt.setString(i++, account.getDisplayName());
-                stmt.setString(i++, account.getAccessToken());
-                stmt.setString(i++, account.getAccessSecret());
-                stmt.setString(i++, account.getServiceId());
-                
-                stmt.addBatch();
-            }
-            
-            stmt.executeBatch();
-        } catch (final SQLException e) {
-            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-    
-    private Map<Integer, Integer> exchangeOAuthIds(final Connection con, final List<OAuthAccount> accounts, final Context ctx) throws OXException {
-        final Map<Integer, Integer> mapping = new HashMap<Integer, Integer>();
-        for (final OAuthAccount account : accounts) {
-            final int oldId = account.getId();
-            final int newId = idService.getId("com.openexchange.oauth.account", ctx.getContextId());
-            account.setId(newId);
-            
-            mapping.put(oldId, newId);
-        }
-        
-        return mapping;
     }
     
     private void exchangeSubscriptionIds(final Map<Integer, Subscription> subscriptions, final Connection con, final Context ctx, final ObjectMapping<FolderObject> folderMapping) throws OXException {
@@ -324,68 +214,14 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
         }
     }
     
-    List<OAuthAccount> loadOAuthAccountsFromDB(final Map<Integer, Subscription> subscriptions, final Connection con, final int uid, final int cid) throws OXException {
-        final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>();
-        final List<Integer> ids = prepareAccountIds(subscriptions);
-        if (!ids.isEmpty()) {
-            PreparedStatement stmt = null;
-            ResultSet rs = null;
-            try {
-                final String sql = replaceIdsInQuery("#IDS#", SELECT_ACCOUNTS, ids);
-                stmt = con.prepareStatement(sql);
-                stmt.setInt(1, cid);
-                stmt.setInt(2, uid);
-
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    int i = 1;
-                    final OAuthAccount account = new OAuthAccount();
-                    account.setId(rs.getInt(i++));
-                    account.setDisplayName(rs.getString(i++));
-                    account.setAccessToken(rs.getString(i++));
-                    account.setAccessSecret(rs.getString(i++));
-                    account.setServiceId(rs.getString(i++));
-
-                    accounts.add(account);
-                }
-            } catch (final SQLException e) {
-                throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-            } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
-            }
-        }
-        return accounts;
-    }
-    
-    List<Integer> prepareAccountIds(final Map<Integer, Subscription> subscriptions) {
-        final List<Integer> ids = new ArrayList<Integer>();
-        for (final Subscription subscription : subscriptions.values()) {
-            final List<ConfAttribute> stringAttributes = subscription.getStringAttributes();
-            for (final ConfAttribute attribute : stringAttributes) {
-                if (attribute.getName() != null && attribute.getName().equals("account")) {
-                    try {
-                        final int id = Integer.parseInt(attribute.getValue());
-                        ids.add(id);
-                    } catch (final NumberFormatException e) {
-                        // Skip this one
-                    }
-                    
-                    break;
-                }
-            }
-        }
-        
-        return ids;
-    }
-    
-    void setAccountIdsForSubscriptions(final Map<Integer, Subscription> subscriptions, final Map<Integer, Integer> accountMapping) {
+    void setAccountIdsForSubscriptions(final Map<Integer, Subscription> subscriptions, final ObjectMapping<Integer> accountMapping) {
         for (final Subscription subscription : subscriptions.values()) {
             final List<ConfAttribute> stringAttributes = subscription.getStringAttributes();
             for (final ConfAttribute attribute : stringAttributes) {
                 if (attribute.getName() != null && attribute.getName().equals("account")) {
                     try {
                         final int oldId = Integer.parseInt(attribute.getValue());
-                        final Integer newId = accountMapping.get(oldId);
+                        final Integer newId = accountMapping.getDestination(I(oldId));
                         if (newId != null) {
                             attribute.setValue(String.valueOf(newId));
                         }
@@ -435,56 +271,11 @@ public class SubscriptionCopyTask implements CopyUserTaskService {
     
     void fillSubscriptionsWithAttributes(final Map<Integer, Subscription> subscriptions, final Connection con, final int cid) throws OXException {
         for (final Subscription subscription : subscriptions.values()) {
-            final List<ConfAttribute> boolAttributes = loadAttributesFromDB(con, subscription.getConfigId(), cid, ConfAttribute.BOOL);
-            final List<ConfAttribute> stringAttributes = loadAttributesFromDB(con, subscription.getConfigId(), cid, ConfAttribute.STRING);
+            final List<ConfAttribute> boolAttributes = GenconfCopyTool.loadAttributesFromDB(con, subscription.getConfigId(), cid, ConfAttribute.BOOL);
+            final List<ConfAttribute> stringAttributes = GenconfCopyTool.loadAttributesFromDB(con, subscription.getConfigId(), cid, ConfAttribute.STRING);
             subscription.setBoolAttributes(boolAttributes);
             subscription.setStringAttributes(stringAttributes);
         }
-    }
-    
-    List<ConfAttribute> loadAttributesFromDB(final Connection con, final int id, final int cid, final int type) throws OXException {
-        final List<ConfAttribute> attributes = new ArrayList<ConfAttribute>();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            final boolean isBool = (type == ConfAttribute.BOOL);
-            final String sql = replaceTableInAttributeStatement(SELECT_ATTRIBUTES, type);
-            
-            stmt = con.prepareStatement(sql);
-            stmt.setInt(1, cid);
-            stmt.setInt(2, id);
-            
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                final ConfAttribute attribute = new ConfAttribute(type);
-                attribute.setName(rs.getString(1));
-                if (isBool) {
-                    attribute.setValue(String.valueOf(getIntOrNegative(2, rs)));
-                } else {
-                    attribute.setValue(rs.getString(2));
-                }
-                
-                attributes.add(attribute);
-            }
-        } catch (final SQLException e) {
-            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
-        
-        return attributes;
-    }
-    
-    String replaceTableInAttributeStatement(final String statement, final int type) {
-        final boolean isBool = (type == ConfAttribute.BOOL);
-        final String sql;
-        if (isBool) {
-            sql = statement.replaceFirst("#TYPE#", "bools");
-        } else {                
-            sql = statement.replaceFirst("#TYPE#", "strings");
-        }
-        
-        return sql;
     }
 
     /**

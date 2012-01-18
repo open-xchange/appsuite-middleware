@@ -107,7 +107,7 @@ public class UWACopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#copyUser(java.util.Map)
      */
-    public ObjectMapping<?> copyUser(Map<String, ObjectMapping<?>> copied) throws OXException {
+    public ObjectMapping<?> copyUser(final Map<String, ObjectMapping<?>> copied) throws OXException {
         final CopyTools copyTools = new CopyTools(copied);        
         final Integer srcCtxId = copyTools.getSourceContextId();
         final Integer dstCtxId = copyTools.getDestinationContextId();
@@ -217,7 +217,7 @@ public class UWACopyTask implements CopyUserTaskService {
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
-    public void done(Map<String, ObjectMapping<?>> copied, boolean failed) {        
+    public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {        
     }
 
 }

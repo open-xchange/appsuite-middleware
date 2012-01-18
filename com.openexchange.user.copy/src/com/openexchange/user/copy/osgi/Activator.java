@@ -60,6 +60,8 @@ import com.openexchange.user.copy.internal.context.osgi.ContextLoadActivator;
 import com.openexchange.user.copy.internal.folder.osgi.FolderCopyActivator;
 import com.openexchange.user.copy.internal.infostore.osgi.InfostoreCopyActivator;
 import com.openexchange.user.copy.internal.mailaccount.osgi.MailAccountCopyActivator;
+import com.openexchange.user.copy.internal.messaging.osgi.MessagingCopyActivator;
+import com.openexchange.user.copy.internal.oauth.osgi.OAuthCopyActivator;
 import com.openexchange.user.copy.internal.reminder.osgi.ReminderCopyActivator;
 import com.openexchange.user.copy.internal.subscription.osgi.SubscriptionCopyActivator;
 import com.openexchange.user.copy.internal.tasks.osgi.TaskCopyActivator;
@@ -87,6 +89,8 @@ public class Activator extends CompositeBundleActivator {
             new AttachmentCopyActivator(),
             new TaskCopyActivator(),
             new SubscriptionCopyActivator(),
+            new MessagingCopyActivator(),
+            new OAuthCopyActivator(),
             new InfostoreCopyActivator(),
             new AdditionalCopyActivator(),
             new CommandActivator(),

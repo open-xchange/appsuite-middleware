@@ -73,7 +73,7 @@ public class ExternalDate {
         return mailAddress;
     }
 
-    public void setMailAddress(String mailAddress) {
+    public void setMailAddress(final String mailAddress) {
         this.mailAddress = mailAddress;
     }
 
@@ -81,7 +81,7 @@ public class ExternalDate {
         return displayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
 
@@ -89,7 +89,7 @@ public class ExternalDate {
         return confirm;
     }
 
-    public void setConfirm(int confirm) {
+    public void setConfirm(final int confirm) {
         this.confirm = confirm;
     }
 
@@ -97,7 +97,7 @@ public class ExternalDate {
         return reason;
     }
 
-    public void setReason(String reason) {
+    public void setReason(final String reason) {
         this.reason = reason;
     }
 
@@ -113,31 +113,41 @@ public class ExternalDate {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        ExternalDate other = (ExternalDate) obj;
-        if (confirm != other.confirm)
+        }
+        final ExternalDate other = (ExternalDate) obj;
+        if (confirm != other.confirm) {
             return false;
+        }
         if (displayName == null) {
-            if (other.displayName != null)
+            if (other.displayName != null) {
                 return false;
-        } else if (!displayName.equals(other.displayName))
+            }
+        } else if (!displayName.equals(other.displayName)) {
             return false;
+        }
         if (mailAddress == null) {
-            if (other.mailAddress != null)
+            if (other.mailAddress != null) {
                 return false;
-        } else if (!mailAddress.equals(other.mailAddress))
+            }
+        } else if (!mailAddress.equals(other.mailAddress)) {
             return false;
+        }
         if (reason == null) {
-            if (other.reason != null)
+            if (other.reason != null) {
                 return false;
-        } else if (!reason.equals(other.reason))
+            }
+        } else if (!reason.equals(other.reason)) {
             return false;
+        }
         return true;
     }
 

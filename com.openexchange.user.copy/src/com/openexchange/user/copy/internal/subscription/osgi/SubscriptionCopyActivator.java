@@ -51,8 +51,9 @@ package com.openexchange.user.copy.internal.subscription.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.id.IDGeneratorService;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.user.copy.CopyUserTaskService;
+import com.openexchange.user.copy.internal.subscription.SubscriptionCopyTask;
 
 
 /**
@@ -62,22 +63,21 @@ import com.openexchange.id.IDGeneratorService;
  */
 public class SubscriptionCopyActivator implements BundleActivator {
 
-    private ServiceTracker<IDGeneratorService, IDGeneratorService> tracker;
+    private ServiceRegistration<CopyUserTaskService> registerService;
 
     /**
      * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
      */
     public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker<IDGeneratorService, IDGeneratorService>(context, IDGeneratorService.class, new SubscriptionTaskRegisterer(context));
-        tracker.open();
+        registerService = context.registerService(CopyUserTaskService.class, new SubscriptionCopyTask(), null);
     }
 
     /**
      * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
      */
     public void stop(final BundleContext context) throws Exception {
-        if (tracker != null) {
-            tracker.close();
+        if (registerService != null) {
+            registerService.unregister();
         }
     }
 

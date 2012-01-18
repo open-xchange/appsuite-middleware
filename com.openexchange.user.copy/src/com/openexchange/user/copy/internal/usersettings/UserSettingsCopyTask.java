@@ -155,7 +155,7 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
          */
         final ServerSetting serverSetting = loadServerSettingFromDB(srcCon, i(srcCtxId), i(srcUsrId));
         if (serverSetting != null) {
-            int srcCollectionFolderId = serverSetting.getFolder();
+            final int srcCollectionFolderId = serverSetting.getFolder();
             int dstCollectionFolderId = -1;
             if (srcCollectionFolderId != -1) {
                 final FolderObject srcCollectionFolder = folderMapping.getSource(srcCollectionFolderId);

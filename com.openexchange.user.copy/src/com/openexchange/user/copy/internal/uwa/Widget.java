@@ -83,7 +83,7 @@ public class Widget {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -91,7 +91,7 @@ public class Widget {
         return autorefresh;
     }
 
-    public void setAutorefresh(boolean autorefresh) {
+    public void setAutorefresh(final boolean autorefresh) {
         this.autorefresh = autorefresh;
     }
 
@@ -99,7 +99,7 @@ public class Widget {
         return standalone;
     }
 
-    public void setStandalone(boolean standalone) {
+    public void setStandalone(final boolean standalone) {
         this.standalone = standalone;
     }
 
@@ -107,7 +107,7 @@ public class Widget {
         return title;
     }
 
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         this.title = title;
     }
 
@@ -115,7 +115,7 @@ public class Widget {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(final String url) {
         this.url = url;
     }
 
@@ -123,7 +123,7 @@ public class Widget {
         return visible;
     }
 
-    public void setVisible(boolean visible) {
+    public void setVisible(final boolean visible) {
         this.visible = visible;
     }
 
@@ -131,7 +131,7 @@ public class Widget {
         return protectedAttr;
     }
 
-    public void setProtectedAttr(boolean protectedAttr) {
+    public void setProtectedAttr(final boolean protectedAttr) {
         this.protectedAttr = protectedAttr;
     }
 
@@ -139,7 +139,7 @@ public class Widget {
         return parameters;
     }
 
-    public void setParameters(String parameters) {
+    public void setParameters(final String parameters) {
         this.parameters = parameters;
     }
 
@@ -147,7 +147,7 @@ public class Widget {
         return adj;
     }
 
-    public void setAdj(String adj) {
+    public void setAdj(final String adj) {
         this.adj = adj;
     }
 
@@ -168,47 +168,64 @@ public class Widget {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        Widget other = (Widget) obj;
+        }
+        final Widget other = (Widget) obj;
         if (adj == null) {
-            if (other.adj != null)
+            if (other.adj != null) {
                 return false;
-        } else if (!adj.equals(other.adj))
+            }
+        } else if (!adj.equals(other.adj)) {
             return false;
-        if (autorefresh != other.autorefresh)
+        }
+        if (autorefresh != other.autorefresh) {
             return false;
+        }
         if (id == null) {
-            if (other.id != null)
+            if (other.id != null) {
                 return false;
-        } else if (!id.equals(other.id))
+            }
+        } else if (!id.equals(other.id)) {
             return false;
+        }
         if (parameters == null) {
-            if (other.parameters != null)
+            if (other.parameters != null) {
                 return false;
-        } else if (!parameters.equals(other.parameters))
+            }
+        } else if (!parameters.equals(other.parameters)) {
             return false;
-        if (protectedAttr != other.protectedAttr)
+        }
+        if (protectedAttr != other.protectedAttr) {
             return false;
-        if (standalone != other.standalone)
+        }
+        if (standalone != other.standalone) {
             return false;
+        }
         if (title == null) {
-            if (other.title != null)
+            if (other.title != null) {
                 return false;
-        } else if (!title.equals(other.title))
+            }
+        } else if (!title.equals(other.title)) {
             return false;
+        }
         if (url == null) {
-            if (other.url != null)
+            if (other.url != null) {
                 return false;
-        } else if (!url.equals(other.url))
+            }
+        } else if (!url.equals(other.url)) {
             return false;
-        if (visible != other.visible)
+        }
+        if (visible != other.visible) {
             return false;
+        }
         return true;
     }
 

@@ -79,7 +79,7 @@ public class ServerSetting {
         return folder;
     }
 
-    public void setFolder(int folder) {
+    public void setFolder(final int folder) {
         this.folder = folder;
     }
 
@@ -87,7 +87,7 @@ public class ServerSetting {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(final boolean enabled) {
         this.enabled = enabled;
     }
 
@@ -95,7 +95,7 @@ public class ServerSetting {
         return defaultStatusPrivate;
     }
 
-    public void setDefaultStatusPrivate(int defaultStatusPrivate) {
+    public void setDefaultStatusPrivate(final int defaultStatusPrivate) {
         this.defaultStatusPrivate = defaultStatusPrivate;
     }
 
@@ -103,7 +103,7 @@ public class ServerSetting {
         return defaultStatusPublic;
     }
 
-    public void setDefaultStatusPublic(int defaultStatusPublic) {
+    public void setDefaultStatusPublic(final int defaultStatusPublic) {
         this.defaultStatusPublic = defaultStatusPublic;
     }
 
@@ -111,7 +111,7 @@ public class ServerSetting {
         return contactCollectOnMailTransport;
     }
 
-    public void setContactCollectOnMailTransport(boolean contactCollectOnMailTransport) {
+    public void setContactCollectOnMailTransport(final boolean contactCollectOnMailTransport) {
         this.contactCollectOnMailTransport = contactCollectOnMailTransport;
     }
 
@@ -119,7 +119,7 @@ public class ServerSetting {
         return contactCollectOnMailAccess;
     }
 
-    public void setContactCollectOnMailAccess(boolean contactCollectOnMailAccess) {
+    public void setContactCollectOnMailAccess(final boolean contactCollectOnMailAccess) {
         this.contactCollectOnMailAccess = contactCollectOnMailAccess;
     }
 
@@ -127,7 +127,7 @@ public class ServerSetting {
         return folderTree;
     }
 
-    public void setFolderTree(int folderTree) {
+    public void setFolderTree(final int folderTree) {
         this.folderTree = folderTree;
     }
 

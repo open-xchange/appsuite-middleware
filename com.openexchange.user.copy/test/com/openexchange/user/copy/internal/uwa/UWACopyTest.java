@@ -81,7 +81,7 @@ public class UWACopyTest extends AbstractUserCopyTest {
      * Initializes a new {@link UWACopyTest}.
      * @param name
      */
-    public UWACopyTest(String name) {
+    public UWACopyTest(final String name) {
         super(name);
     }
     

@@ -56,6 +56,8 @@ import com.openexchange.user.copy.internal.calendar.CalendarCopyTest;
 import com.openexchange.user.copy.internal.contact.ContactCopyTest;
 import com.openexchange.user.copy.internal.folder.FolderCopyTest;
 import com.openexchange.user.copy.internal.infostore.InfostoreCopyTest;
+import com.openexchange.user.copy.internal.messaging.MessagingCopyTest;
+import com.openexchange.user.copy.internal.oauth.OAuthCopyTest;
 import com.openexchange.user.copy.internal.reminder.ReminderCopyTest;
 import com.openexchange.user.copy.internal.subscription.SubscriptionCopyTest;
 import com.openexchange.user.copy.internal.task.TaskCopyTest;
@@ -83,6 +85,8 @@ public class UserCopyUnitTestSuite extends TestSuite {
         tests.addTestSuite(ContactCopyTest.class);        
         tests.addTestSuite(AttachmentCopyTest.class);
         tests.addTestSuite(UWACopyTest.class);
+        tests.addTestSuite(OAuthCopyTest.class);
+        tests.addTestSuite(MessagingCopyTest.class);
         return tests;
     }
 
