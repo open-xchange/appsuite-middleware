@@ -115,7 +115,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
                 throw noSuchUserException;
             }
             if (tool.existsUserName(dest, user.getName())) {
-                final UserExistsException userExistsExeption = new UserExistsException("User " + user.getName() + " already exisis in context " + dest.getId());
+                final UserExistsException userExistsExeption = new UserExistsException("User " + user.getName() + " already exists in context " + dest.getId());
                 LOG.error(userExistsExeption.getMessage(), userExistsExeption);
                 throw userExistsExeption;
             }

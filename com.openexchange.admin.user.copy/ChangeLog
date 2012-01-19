@@ -1,3 +1,7 @@
+* 2012-01-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 21253: Changed description of CLT to indicate master admin credentials are necessary to copy a user.
+
 * 2012-01-18 - steffen.templin@open-xchange.com
 
  - Renamed to user-copy

@@ -76,7 +76,9 @@ public class UserCopy extends ObjectNamingAbstraction {
     protected static final String OPT_ID_USER_LONG="userid";
     protected static final String OPT_NAME_USER_DESCRIPTION="The name of the user which should be copied";
     protected static final String OPT_ID_USER_DESCRIPTION="The id of the user which should be copied";
-
+    protected static final String OPT_NAME_MASTERADMINPASS_DESCRIPTION="master Admin password";
+    protected static final String OPT_NAME_MASTERADMINUSER_DESCRIPTION="master Admin user name";
+    
     protected CLIOption fromContextOption = null;
     protected CLIOption toContextOption = null;
     protected CLIOption userNameOption = null;
@@ -186,6 +188,15 @@ public class UserCopy extends ObjectNamingAbstraction {
         this.userNameOption = setShortLongOpt(parser,OPT_NAME_USER_SHORT, OPT_NAME_USER_LONG, OPT_NAME_USER_DESCRIPTION, true, NeededQuadState.eitheror);
         this.userIdOption = setShortLongOpt(parser,OPT_ID_USER_SHORT, OPT_ID_USER_LONG, OPT_ID_USER_DESCRIPTION, true, NeededQuadState.eitheror);
     }
-
+    
+    @Override
+    protected void setAdminPassOption(final AdminParser admp) {
+        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_MASTERADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
+    }
+    
+    @Override
+    protected void setAdminUserOption(final AdminParser admp) {
+        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_MASTERADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
+    }
 
 }
