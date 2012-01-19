@@ -317,7 +317,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters params) throws OXException {
         final int contextId = params.getContextId();
         final int tree = unsignedInt(treeId);
-        Delete.deleteFolder(contextId, tree, params.getUserId(), folderId, true);
+        Delete.deleteFolder(contextId, tree, params.getUserId(), folderId, false);
         MemoryTable.getMemoryTableFor(params.getSession()).initializeTree(tree, params.getUserId(), contextId);
     }
 
