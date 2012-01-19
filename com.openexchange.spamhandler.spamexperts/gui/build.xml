@@ -1,0 +1,104 @@
+<project name="Spamexperts Custom i18n Build" default="all" basedir=".">
+    
+    <!-- Plugin name -->
+    <property name="name" value="com.openexchange.custom.spamexperts"/>
+    
+    <!-- Directory for temporary build files -->
+    <property name="builddir" value="${basedir}/build"/>
+
+    <!-- Output directory for language files -->
+    <property name="langdir" value="${basedir}/lang"/>
+    
+    <target name="all" depends="pot"/>
+    
+    <target name="clean">
+        <delete dir="${builddir}"/>
+        <delete dir="${langdir}" includes="*.pot"/>
+    </target>
+    
+    <target name="init">
+        <mkdir dir="${builddir}"/>
+        <mkdir dir="${langdir}"/>
+    </target>
+
+    <target name="pot" depends="init">
+        <property name="string" value="(?:&quot;((?:[^\n&quot;\\]|\\[^\n89])*)&quot;|&apos;((?:[^\n&apos;\\]|\\[^\n89])*)&apos;)"/>
+        <concat destfile="${builddir}/js.pot">
+            <fileset dir="${basedir}" includes ="**/*.js"/>
+            <filterchain>
+                <replaceregex pattern="(${string}|//#[^\n]*|/\*i18n( context)?\*/)|(/\*.*?\*/)|(//[^#][^\n]*)" replace="\1" flags="gs" byline="false"/>
+                
+                <replaceregex pattern="\b(?:_|gettext)\s*\(\s*${string}\s*\)"
+                              replace="&#10;msgid &quot;\1\2&quot;&#10;msgstr &quot;&quot;&#10;"
+                              flags="g" byline="false"/>
+                <replaceregex pattern="\bpgettext\s*\(\s*${string}\s,\s*${string}*\s*\)"
+                              replace="&#10;msgctxt &quot;\1\2&quot;&#10;msgid &quot;\3\4&quot;&#10;msgstr &quot;&quot;&#10;"
+                              flags="g" byline="false"/>
+                <replaceregex pattern="\bdpgettext\s*\(\s*${string}\s,\s*${string}*\s*,\s*${string}*\s*\)"
+                              replace="&#10;msgctxt &quot;\3\4&quot;#10;msgid &quot;\5\6&quot;&#10;msgstr &quot;&quot;&#10;"
+                              flags="g" byline="false"/>
+                
+                <replaceregex pattern="\bngettext\s*\(\s*${string}\s*,\s*${string}\s*,"
+                              replace="&#10;msgid &quot;\1\2&quot;&#10;msgid_plural &quot;\3\4&quot;&#10;msgstr[0] &quot;&quot;&#10;msgstr[1] &quot;&quot;&#10;"
+                              flags="g" byline="false"/>
+                <replaceregex pattern="\bnpgettext\s*\(\s*${string}\s*,\s*${string}\s*,\s*${string}\s*,"
+                              replace="&#10;msgctxt &quot;\1\2&quot;&#10;msgid &quot;\3\4&quot;&#10;msgid_plural &quot;\5\6&quot;&#10;msgstr[0] &quot;&quot;&#10;msgstr[1] &quot;&quot;&#10;"
+                              flags="g" byline="false"/>
+                <replaceregex pattern="\bdnpgettext\s*\(\s*${string}\s*,\s*${string}\s*,\s*${string}\s*,\s*${string}\s*,"
+                              replace="&#10;msgctxt &quot;\3\4&quot;&#10;msgid &quot;\5\6&quot;&#10;msgid_plural &quot;\7\8&quot;&#10;msgstr[0] &quot;&quot;&#10;msgstr[1] &quot;&quot;&#10;"
+                              flags="g" byline="false"/>
+                
+                <replaceregex pattern="//(#[^\n]*)" replace="&#10;\1"/>
+                <replaceregex pattern="${string}[^&quot;&apos;\n]*/\*i18n\*/"
+                              replace="&#10;msgid &quot;\1\2&quot;&#10;msgstr &quot;&quot;&#10;"
+                              flags="g"/>
+                <replaceregex pattern="${string}[^&quot;&apos;\n]*/\*i18n context\*/"
+                              replace="&#10;msgctxt &quot;\1\2&quot;&#10;"
+                              flags="g"/>
+                <linecontainsregexp>
+                    <regexp pattern="^(#.|msgctxt|msgid|msgstr|msgid_plural)"/>
+                </linecontainsregexp>
+            </filterchain>
+        </concat>
+        <tstamp>
+            <format property="timestamp" pattern="yyyy-MM-dd HH:mmZ"/>
+        </tstamp>
+        <concat destfile="${langdir}/${name}.pot">
+            <header filtering="no" trimleading="yes">
+				msgid ""
+				msgstr ""
+				"Project-Id-Version: NAME\n"
+				"POT-Creation-Date: ${timestamp}\n"
+				"PO-Revision-Date: DATE\n"
+				"Last-Translator: NAME &lt;EMAIL&gt;\n"
+				"Language-Team: NAME &lt;EMAIL&gt;\n"
+				"MIME-Version: 1.0\n"
+				"Content-Type: text/plain; charset=UTF-8\n"
+				"Content-Transfer-Encoding: 8bit\n"
+				"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+            </header>
+            <fileset dir="${builddir}" includes="**/*.pot"/>
+        </concat>
+        <exec executable="msguniq">
+            <arg value="--force-po"/>
+            <arg value="-o"/>
+            <arg value="${langdir}/${name}.pot"/>
+            <arg value="${langdir}/${name}.pot"/>
+        </exec>
+    </target>
+
+    <target name="updatePO" depends="pot">
+        <antcall target="msgmerge"><param name="lang" value="de_DE"/></antcall>
+    	<!-- Insert other languages here -->
+    </target>
+
+    <target name="msgmerge" depends="pot">
+        <exec executable="msgmerge">
+            <arg value="-U"/>
+            <arg value="--backup=existing"/>
+            <arg value="${langdir}/${lang}.po"/>
+            <arg value="${langdir}/${name}.pot"/>
+        </exec>
+    </target>
+
+</project>

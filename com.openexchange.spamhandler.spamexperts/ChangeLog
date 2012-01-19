@@ -1,0 +1,10 @@
+* 2012-01-19 - karsten.will@open-xchange.com
+  - moved to CVS_HEAD as it will be generally available from now on
+
+* 2012-01-12 - karsten.will@open-xchange.com
+  - Changed name to open-xchange-spamhandler-spamexperts
+  - runs with cvs_head again
+  
+* 2010-10-08 - manuel.kraft@open-xchange.com
+
+  - Initial Import

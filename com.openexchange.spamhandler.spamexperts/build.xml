@@ -1,0 +1,141 @@
+<project name="Spamexperts Custom Plugins" default="install" basedir=".">
+
+	<!-- Customizable values -->
+	<property name="destdir" value="" />
+	<property name="prefix" value="/opt/open-xchange" />
+	<property name="guiprefix" value="/var/www/ox6" />
+	
+	
+	<!-- Constants -->
+	<property name="tmp.dir" value="tmp" />
+
+	<property file="META-INF/MANIFEST.MF" />
+	<property file="build.properties" />
+
+	<property name="version" value="${Bundle-Version}" />
+	<property name="bundle.name" value="${Bundle-SymbolicName}.jar" />
+	<property name="composite.name" value="open-xchange-spamhandler-spamexperts-${version}" />
+
+	<!-- Install Constants -->	
+	<property name="bundlesdir" value="${prefix}/bundles" />
+	<property name="guipluginsdir" value="${guiprefix}/plugins" />
+	<property name="bundle.d" value="${prefix}/etc/groupware/osgi/bundle.d" />
+	<property name="commonlibdir" value="${bundlesdir}/com.openexchange.common/lib" />
+
+	<!-- Bundle dependencies -->
+	<property name="configreadBundle" value="com.openexchange.configread"/>
+	
+	<!-- JAR names for classpath -->
+	<property name="osgijar" value="org.eclipse.osgi_3.6.1.R36x_v20100806.jar" />
+	<property name="osgiservicesjar" value="org.eclipse.osgi.services_3.2.100.v20100503.jar" />
+	<property name="commonsloggingjar" value="org.apache.commons.logging_1.0.4.v200706111724.jar" />
+	<property name="globaljar" value="com.openexchange.global.jar" />
+	<property name="serverjar" value="com.openexchange.server.jar" />
+	<property name="configjar" value="com.openexchange.configread.jar" />
+	<property name="servletjar" value="javax.servlet_2.5.0.v201103041518.jar" />
+	<property name="mailjar" value="mail-1.4.2.jar" />
+	<property name="activationjar" value="activation-1.1.1.jar" />
+	<property name="jsonjar" value="json.jar" />
+	<property name="httpclientjar" value="commons-httpclient-3.1.jar" />
+	<property name="commonsiojar" value="commons-io-1.4.jar" />
+	
+
+	<!-- Classpath -->
+	<path id="project.classpath">
+		<pathelement location="${bundlesdir}/${osgijar}" />
+		<pathelement location="${bundlesdir}/${osgiservicesjar}" />
+		<pathelement location="${bundlesdir}/${commonsloggingjar}" />
+		<pathelement location="${bundlesdir}/${globaljar}" />
+		<pathelement location="${bundlesdir}/${serverjar}" />
+		<pathelement location="${bundlesdir}/${servletjar}" />
+		<pathelement location="${bundlesdir}/${configreadBundle}/${configjar}"/>
+		<pathelement location="${bundlesdir}/${servletjar}" />
+		<pathelement location="${commonlibdir}/${mailjar}" />
+		<pathelement location="${commonlibdir}/${activationjar}" />
+		<pathelement location="${commonlibdir}/${jsonjar}" />
+		<pathelement location="${commonlibdir}/${httpclientjar}" />
+		<pathelement location="${commonlibdir}/${commonsiojar}" />
+	</path>
+
+	<!-- Compile -->
+	<target name="prepare">
+		<mkdir dir="${output..}" />
+		<mkdir dir="${tmp.dir}" />
+	</target>
+
+	<target name="compile" depends="prepare">
+		<javac srcdir="${source..}" destdir="${output..}" debug="true" encoding="US-ASCII" source="1.5" compiler="javac1.5" target="1.5">
+			<classpath refid="project.classpath" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="prepare,compile">
+		<jar jarfile="${tmp.dir}/${bundle.name}" manifest="META-INF/MANIFEST.MF">
+			<fileset dir="${output..}" />
+		</jar>
+	</target>
+
+	<!-- Install -->
+	<target name="install" depends="installJar,installConfig,installGui" />
+
+
+	<!-- This installs the property file needed for the iframe gui plugin-->
+	<target name="installConfig">
+
+		<copy todir="${destdir}/${prefix}/etc/groupware/" overwrite="true">
+			<fileset dir="conf/" includes="spamexperts.properties" />
+		</copy>
+
+		<copy todir="${destdir}/${prefix}/etc/groupware/settings/" overwrite="true">
+			<fileset dir="conf/gui" />
+		</copy>
+
+		<mkdir dir="${destdir}/${bundle.d}" />
+		<echo file="${destdir}/${bundle.d}/${Bundle-SymbolicName}.ini" message="${bundlesdir}/${bundle.name}@start${line.separator}" />
+	</target>
+
+	<target name="installGui">
+		<mkdir dir="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}" />
+		<copy todir="${destdir}/${guipluginsdir}/${Bundle-SymbolicName}" overwrite="true">
+			<fileset dir="gui">
+				<exclude name="build.xml"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="installJar" depends="jar">
+		<mkdir dir="${destdir}/${bundlesdir}" />
+		<copy todir="${destdir}/${bundlesdir}">
+			<fileset dir="${tmp.dir}">
+				<include name="${bundle.name}" />
+			</fileset>
+		</copy>
+	</target>
+
+
+
+
+	<!-- Dist -->
+	<target name="dist" depends="clean">
+		<property name="dist-package" value="dist-package" />
+		<delete dir="${dist-package}" />
+		<mkdir dir="${dist-package}/${composite.name}" />
+		<copy todir="${dist-package}/${composite.name}">
+			<fileset dir=".">
+				<exclude name="**${dist-package}/**" />
+				<exclude name="**debian/**" />
+				<exclude name="**CVS/**" />
+				<exclude name="Todo" />
+			</fileset>
+		</copy>
+		<tar destfile="../${composite.name}.tar.gz" basedir="${dist-package}" includes="${composite.name}/" compression="gzip" />
+		<!-- dpkg-source does not like anything else -->
+		<delete dir="${dist-package}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${output..}" />
+		<delete dir="${tmp.dir}" />
+	</target>
+
+</project>
