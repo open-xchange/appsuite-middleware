@@ -317,7 +317,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters params) throws OXException {
         final int contextId = params.getContextId();
         final int tree = unsignedInt(treeId);
-        Delete.deleteFolder(contextId, tree, params.getUserId(), folderId, false);
+        Delete.deleteFolder(contextId, tree, params.getUserId(), folderId, false, params.getSession());
         MemoryTable.getMemoryTableFor(params.getSession()).initializeTree(tree, params.getUserId(), contextId);
     }
 
@@ -471,7 +471,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             final Folder realFolder = realFolders.get(folderId);
             if (null == realFolder) {
                 // Obviously non-existing folder
-                Delete.deleteFolder(contextId, tree, userId, folderId, false);
+                Delete.deleteFolder(contextId, tree, userId, folderId, false, params.getSession());
             } else {
                 ret.add(getFolder0(realFolder, treeId, folderId, memoryTree, locale));
             }
@@ -716,7 +716,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         final int tree = unsignedInt(folder.getTreeID());
         final int userId = params.getUserId();
         final int contextId = params.getContextId();
-        Update.updateFolder(contextId, tree, userId, folder);
+        Update.updateFolder(contextId, tree, userId, folder, params.getSession());
         MemoryTable.getMemoryTableFor(params.getSession()).initializeTree(tree, userId, contextId);
     }
 
