@@ -270,13 +270,6 @@ public final class VirtualFolderStorage implements FolderStorage {
         }
     }
 
-    public void createDefaultFolder(final Folder folder, final StorageParameters params) throws OXException {
-        final int tree = unsignedInt(folder.getTreeID());
-        final int contextId = params.getContextId();
-        Insert.insertFolder(contextId, tree, params.getUserId(), folder, "default");
-        MemoryTable.getMemoryTableFor(params.getSession()).initializeFolder(folder.getID(), tree, params.getUserId(), contextId);
-    }
-
     /**
      * Checks if given folder storage is already contained in collection of opened storages. If yes, this method terminates immediately.
      * Otherwise the folder storage is opened according to specified modify flag and is added to specified collection of opened storages.
@@ -815,6 +808,13 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void createDefaultFolder(final Folder folder, final StorageParameters params) throws OXException {
+        final int tree = unsignedInt(folder.getTreeID());
+        final int contextId = params.getContextId();
+        Insert.insertFolder(contextId, tree, params.getUserId(), folder, "default");
+        MemoryTable.getMemoryTableFor(params.getSession()).initializeFolder(folder.getID(), tree, params.getUserId(), contextId);
     }
 
     private static void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages, final StorageParameters storageParameters) throws OXException {
