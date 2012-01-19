@@ -79,7 +79,9 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     private final SecretService secretService;
 
-    private final int size;
+    private final int off;
+
+    private final PasswordSecretService passwordSecretService;
 
     /**
      * Initializes a new {@link CryptoSecretEncryptionService}.
@@ -95,7 +97,8 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
         this.secretService = secretService;
         this.strategy = strategy;
         this.tokenList = tokenList;
-        size = tokenList.size();
+        off = tokenList.size() - 2; // Start at end - 2
+        passwordSecretService = new PasswordSecretService();
     }
 
     @Override
@@ -131,17 +134,17 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
         try {
             return crypto.decrypt(toDecrypt, tokenList.peekLast().getSecret(session));
         } catch (final OXException x) {
-            // Ignore and try other secret
+            // Ignore and try other
         }
         /*
          * Try other secrets in list
          */
         String decrypted = null;
-        for (int i = size - 2; null == decrypted && i >= 0; i--) {
+        for (int i = off; null == decrypted && i >= 0; i--) {
             try {
                 decrypted = crypto.decrypt(toDecrypt, tokenList.get(i).getSecret(session));
             } catch (final OXException x) {
-                // Ignore and try other secret service
+                // Ignore and try other
             }
         }
         /*
@@ -159,7 +162,18 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                         LOG.debug("Decrypted password with former crypt mechanism");
                     }
                 } catch (final OXException x) {
-                    // Ignore and try other secret service
+                    // Ignore and try other
+                }
+                if (decrypted == null) {
+                    try {
+                        final String secret = passwordSecretService.getSecret(session);
+                        decrypted = crypto.decrypt(toDecrypt, secret);
+                        if (DEBUG) {
+                            LOG.debug("Decrypted password with former crypt mechanism");
+                        }
+                    } catch (final OXException x) {
+                        // Ignore and try other
+                    }
                 }
                 if (decrypted == null) {
                     final String secret = secretService.getSecret(session);
