@@ -49,10 +49,20 @@
 
 package com.openexchange.messaging.rss;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.htmlcleaner.CleanerProperties;
+import org.htmlcleaner.HtmlCleaner;
+import org.htmlcleaner.Serializer;
+import org.htmlcleaner.SimpleXmlSerializer;
+import org.htmlcleaner.TagNode;
+import org.xml.sax.InputSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.IndexRange;
 import com.openexchange.messaging.MessagingAccountManager;
@@ -68,7 +78,11 @@ import com.openexchange.messaging.generic.AttachmentFinderHandler;
 import com.openexchange.messaging.generic.MessageParser;
 import com.openexchange.messaging.generic.MessagingComparator;
 import com.openexchange.session.Session;
+import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.fetcher.FeedFetcher;
+import com.sun.syndication.fetcher.FetcherException;
+import com.sun.syndication.io.FeedException;
+import com.sun.syndication.io.SyndFeedInput;
 
 
 /**
@@ -242,9 +256,85 @@ public class RSSMessageAccess extends RSSCommon implements MessagingMessageAcces
         final String url = (String) accounts.getAccount(accountId, session).getConfiguration().get("url");
 
         try {
-            return feed = new FeedAdapter(feedFetcher.retrieveFeed(new URL(url)), "", session);
+            return feed = new FeedAdapter(retrieveFeed(new URL(url)), "", session);
         } catch (final Exception e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * The {@link HtmlCleaner} constant which is safe being used by multiple threads as of <a
+     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
+     */
+    private static final HtmlCleaner HTML_CLEANER;
+
+    /**
+     * The {@link Serializer} constant which is safe being used by multiple threads as of <a
+     * href="http://htmlcleaner.sourceforge.net/javause.php#example2">this example</a>.
+     */
+    private static final Serializer SERIALIZER;
+
+    static {
+        final CleanerProperties props = new CleanerProperties();
+        /*-
+         * 
+        props.setOmitDoctypeDeclaration(true);
+        props.setOmitXmlDeclaration(true);
+        props.setTransSpecialEntitiesToNCR(true);
+        props.setTransResCharsToNCR(true);
+        props.setRecognizeUnicodeChars(false);
+        props.setUseEmptyElementTags(false);
+        props.setIgnoreQuestAndExclam(false);
+        props.setUseCdataForScriptAndStyle(false);
+        props.setIgnoreQuestAndExclam(true);
+         * 
+         */
+        HTML_CLEANER = new HtmlCleaner(props);
+        SERIALIZER = new SimpleXmlSerializer(props);
+    }
+
+    private SyndFeed retrieveFeed(final URL url) throws IOException, FeedException, FetcherException {
+        try {
+            return feedFetcher.retrieveFeed(url);
+        } catch (final com.sun.syndication.io.ParsingFeedException e) {
+            // Retry using InputSource class
+            InputStream in = null;
+            try {
+                final SyndFeedInput input = new SyndFeedInput();
+                final URLConnection urlConnection = url.openConnection();
+                urlConnection.connect();
+                in = urlConnection.getInputStream();
+                /*
+                 * Read from stream
+                 */
+                final int initLen = 8192;
+                ByteArrayOutputStream tmp = new ByteArrayOutputStream(initLen);
+                final int blen = 2048;
+                final byte[] buf = new byte[blen];
+                for (int read; (read = in.read(buf, 0, blen)) > 0;) {
+                    tmp.write(buf, 0, read);
+                }
+                /*
+                 * Ensure well-formed
+                 */
+                final TagNode htmlNode = HTML_CLEANER.clean(new String(tmp.toByteArray())); // No charset needed???
+                tmp = null;
+                final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(initLen);
+                SERIALIZER.write(htmlNode, writer, "UTF-8");
+                final StringBuilder builder = writer.getBuffer();
+                /*
+                 * Return feed
+                 */
+                return input.build(new InputSource(new UnsynchronizedStringReader(builder.toString())));
+            } finally {
+                if (null != in) {
+                    try {
+                        in.close();
+                    } catch (final Exception ignore) {
+                        // Ignore
+                    }
+                }
+            }
         }
     }
 
