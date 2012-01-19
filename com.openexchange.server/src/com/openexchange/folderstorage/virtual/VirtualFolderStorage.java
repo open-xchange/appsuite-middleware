@@ -54,6 +54,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -85,7 +86,11 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.performers.InstanceStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.SessionStorageParametersProvider;
 import com.openexchange.folderstorage.internal.performers.StorageParametersProvider;
+import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
+import com.openexchange.folderstorage.mail.contentType.SentContentType;
+import com.openexchange.folderstorage.mail.contentType.SpamContentType;
+import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.outlook.memory.MemoryTable;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -147,6 +152,8 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     private final String realTreeId;
 
+    private final List<ContentType> defaultTypes;
+
     /**
      * Initializes a new {@link VirtualFolderStorage}.
      */
@@ -154,6 +161,11 @@ public final class VirtualFolderStorage implements FolderStorage {
         super();
         folderType = VirtualFolderType.getInstance();
         realTreeId = REAL_TREE_ID;
+        defaultTypes = Arrays.<ContentType> asList(
+            DraftsContentType.getInstance(),
+            SentContentType.getInstance(),
+            SpamContentType.getInstance(),
+            TrashContentType.getInstance());
     }
 
     @Override
@@ -214,17 +226,29 @@ public final class VirtualFolderStorage implements FolderStorage {
                     createFolder(folder, params);
                 }
                 /*
-                 * Default mail folder
+                 * Default mail folder(s)
                  */
                 realStorage = VirtualFolderStorageRegistry.getInstance().getFolderStorageByContentType(realTreeId, MailContentType.getInstance());
                 checkOpenedStorage(realStorage, params, true, openedStorages);
                 folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, MailContentType.getInstance(), PrivateType.getInstance(), params);
+                // INBOX
                 if (!tree.containsFolder(folderID)) {
                     final Folder folder = realStorage.getFolder(realTreeId, folderID, params);
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
                     folder.setSubscribed(true);
                     createFolder(folder, params);
+                }
+                // Trash, Drafts, Sent, Spam
+                for (final ContentType contentType : defaultTypes) {
+                    folderID = realStorage.getDefaultFolderID(params.getUser(), realTreeId, contentType, PrivateType.getInstance(), params);
+                    if (!tree.containsFolder(folderID)) {
+                        final Folder folder = realStorage.getFolder(realTreeId, folderID, params);
+                        folder.setTreeID(treeId);
+                        folder.setParentID(ROOT_ID);
+                        folder.setSubscribed(true);
+                        createFolder(folder, params);
+                    }
                 }
                 /*
                  * Commit
