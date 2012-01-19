@@ -98,7 +98,7 @@ public final class DuplicateCleaner {
      * @return <code>true</code> if look-up is contained in deleted IDs; otherwise <code>false</code>
      * @throws OXException If cleaning fails
      */
-    public static boolean cleanDuplicates(final String treeId, final StorageParameters storageParameters, final String lookUp) throws OXException {
+    public static String cleanDuplicates(final String treeId, final StorageParameters storageParameters, final String lookUp) throws OXException {
         final OutlookFolderStorage outlookFolderStorage = OutlookFolderStorage.getInstance();
         final FolderStorageDiscoverer folderStorageRegistry = outlookFolderStorage.folderStorageRegistry;
         final String realTreeId = outlookFolderStorage.realTreeId;
@@ -108,13 +108,13 @@ public final class DuplicateCleaner {
 
         final Map<String, List<String>> name2ids = Duplicate.lookupDuplicateNames(session.getContextId(), tree, session.getUserId());
         if (name2ids.isEmpty()) {
-            return false;
+            return null;
         }
-        boolean retval = false;
+        String first = null;
         for (final List<String> folderIds : name2ids.values()) {
             for (final String folderId : folderIds) {
-                if (!retval && null != lookUp) {
-                    retval = lookUp.equals(folderId);
+                if (null == first && null != lookUp && lookUp.equals(folderId)) {
+                    first = folderId;
                 }
                 final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
                 final boolean started = folderStorage.startTransaction(storageParameters, true);
@@ -136,7 +136,7 @@ public final class DuplicateCleaner {
                 }
             }
         }
-        return retval;
+        return first;
     }
 
 }
