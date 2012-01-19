@@ -88,7 +88,7 @@ public final class Update {
         try {
             con.setAutoCommit(false); // BEGIN
             Delete.deleteFolder(cid, tree, user, folder.getID(), false, con);
-            Insert.insertFolder(cid, tree, user, folder, con);
+            Insert.insertFolder(cid, tree, user, folder, null, con);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLLBACK

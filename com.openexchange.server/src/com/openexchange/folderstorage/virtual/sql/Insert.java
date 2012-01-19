@@ -92,15 +92,16 @@ public final class Insert {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param folder The folder
+     * @param shadow The optional shadow string
      * @throws FolderException If insertion fails
      */
-    public static void insertFolder(final int cid, final int tree, final int user, final Folder folder) throws OXException {
+    public static void insertFolder(final int cid, final int tree, final int user, final Folder folder, final String shadow) throws OXException {
         final DatabaseService databaseService = VirtualServiceRegistry.getServiceRegistry().getService(DatabaseService.class, true);
         // Get a connection
         final Connection con = databaseService.getWritable(cid);
         try {
             con.setAutoCommit(false); // BEGIN
-            insertFolder(cid, tree, user, folder, con);
+            insertFolder(cid, tree, user, folder, shadow, con);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
             DBUtils.rollback(con); // ROLLBACK
@@ -124,12 +125,13 @@ public final class Insert {
      * @param tree The tree identifier
      * @param user The user identifier
      * @param folder The folder
+     * @param shadow The optional shadow string
      * @param con The connection
      * @throws FolderException If insertion fails
      */
-    public static void insertFolder(final int cid, final int tree, final int user, final Folder folder, final Connection con) throws OXException {
+    public static void insertFolder(final int cid, final int tree, final int user, final Folder folder, final String shadow, final Connection con) throws OXException {
         if (null == con) {
-            insertFolder(cid, tree, user, folder);
+            insertFolder(cid, tree, user, folder, shadow);
             return;
         }
         final String folderId = folder.getID();
@@ -156,7 +158,7 @@ public final class Insert {
             } else {
                 stmt.setLong(pos++, lastModified.getTime());
             }
-            stmt.setString(pos, ""); // TODO: Shadow
+            stmt.setString(pos, null == shadow ? "" : shadow);
             stmt.executeUpdate();
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());

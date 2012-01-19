@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.virtual.sql;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -138,6 +139,28 @@ public final class Delete {
             return;
         }
         PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT shadow FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
+            int pos = 1;
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos++, tree);
+            stmt.setInt(pos++, user);
+            stmt.setString(pos, folderId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+            final String shadow = rs.getString(1);
+            if ("default".equals(shadow)) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(folderId, Integer.valueOf(user), Integer.valueOf(cid));
+            }
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            rs = null;
+        }
         if (backup) {
             /*
              * Backup folder data
