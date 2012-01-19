@@ -77,6 +77,7 @@ public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFac
      * @param patterns The patterns to parse
      */
     public CryptoSecretEncryptionFactoryService(final CryptoService crypto, final SecretService secretService, final String... patterns) {
+        super();
         this.crypto = crypto;
         this.secretService = secretService;
         this.tokenList = TokenList.parsePatterns(patterns);
@@ -90,6 +91,7 @@ public class CryptoSecretEncryptionFactoryService implements SecretEncryptionFac
      * @param tokenList The token list
      */
     public CryptoSecretEncryptionFactoryService(final CryptoService crypto, final SecretService secretService, final TokenList tokenList) {
+        super();
         this.crypto = crypto;
         this.secretService = secretService;
         this.tokenList = tokenList;
