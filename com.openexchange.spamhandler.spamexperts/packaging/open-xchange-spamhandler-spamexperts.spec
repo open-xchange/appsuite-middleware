@@ -102,6 +102,7 @@ ant -Dguiprefix=%{docroot}/ox6 -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange
 %config(noreplace) /opt/open-xchange/etc/groupware/*.properties
 
 %files gui
+%defattr(-,root,root)
 %{docroot}/ox6/plugins/com.openexchange.custom.spamexperts
 
 %changelog
