@@ -81,6 +81,8 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     private final int size;
 
+    private final PasswordSecretService passwordSecretService;
+
     /**
      * Initializes a new {@link CryptoSecretEncryptionService}.
      * 
@@ -96,6 +98,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
         this.strategy = strategy;
         this.tokenList = tokenList;
         size = tokenList.size();
+        passwordSecretService = new PasswordSecretService();
     }
 
     @Override
@@ -131,7 +134,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
         try {
             return crypto.decrypt(toDecrypt, tokenList.peekLast().getSecret(session));
         } catch (final OXException x) {
-            // Ignore and try other secret
+            // Ignore and try other
         }
         /*
          * Try other secrets in list
@@ -141,7 +144,7 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
             try {
                 decrypted = crypto.decrypt(toDecrypt, tokenList.get(i).getSecret(session));
             } catch (final OXException x) {
-                // Ignore and try other secret service
+                // Ignore and try other
             }
         }
         /*
@@ -159,7 +162,18 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                         LOG.debug("Decrypted password with former crypt mechanism");
                     }
                 } catch (final OXException x) {
-                    // Ignore and try other secret service
+                    // Ignore and try other
+                }
+                if (decrypted == null) {
+                    try {
+                        final String secret = passwordSecretService.getSecret(session);
+                        decrypted = crypto.decrypt(toDecrypt, secret);
+                        if (DEBUG) {
+                            LOG.debug("Decrypted password with former crypt mechanism");
+                        }
+                    } catch (final OXException x) {
+                        // Ignore and try other
+                    }
                 }
                 if (decrypted == null) {
                     final String secret = secretService.getSecret(session);
