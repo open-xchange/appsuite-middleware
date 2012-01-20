@@ -544,7 +544,7 @@ public final class DBChatAccess implements ChatAccess {
 
     @Override
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser member) throws OXException {
-        return openChat(chatId, listener, member);
+        return openChat(chatId, listener, new ChatUser[] { member });
     }
 
     @Override
