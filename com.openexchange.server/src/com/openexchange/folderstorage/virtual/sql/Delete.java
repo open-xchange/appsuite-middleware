@@ -279,21 +279,23 @@ public final class Delete {
         /*
          * Post event
          */
-        final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        final boolean postEvent = null == service ? true : service.getBoolProperty("com.openexchange.folderstorage.postEASFolderEvents", true);
-        if (postEvent) {
-            try {
-                if (MailFolderType.getInstance().servesFolderId(folderId)) {
-                    final FullnameArgument argument = prepareMailFolderParam(folderId);
-                    postEvent(argument.getAccountId(), argument.getFullname(), false, true, false, session);
-                } else {
-                    final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-                    new EventClient(serverSession).delete(new OXFolderAccess(con, serverSession.getContext()).getFolderObject(unsignedInt(folderId)));
+        if (null != session) {
+            final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            final boolean postEvent = null == service ? true : service.getBoolProperty("com.openexchange.folderstorage.postEASFolderEvents", true);
+            if (postEvent) {
+                try {
+                    if (MailFolderType.getInstance().servesFolderId(folderId)) {
+                        final FullnameArgument argument = prepareMailFolderParam(folderId);
+                        postEvent(argument.getAccountId(), argument.getFullname(), false, true, false, session);
+                    } else {
+                        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                        new EventClient(serverSession).delete(new OXFolderAccess(con, serverSession.getContext()).getFolderObject(unsignedInt(folderId)));
+                    }
+                } catch (final Exception e) {
+                    // Ignore
+                    final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(Delete.class));
+                    log.error(e.getMessage(), e);
                 }
-            } catch (final Exception e) {
-                // Ignore
-                final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(Delete.class));
-                log.error(e.getMessage(), e);
             }
         }
     }

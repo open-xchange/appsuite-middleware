@@ -304,7 +304,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     public void createFolder(final Folder folder, final StorageParameters params) throws OXException {
         final int tree = unsignedInt(folder.getTreeID());
         final int contextId = params.getContextId();
-        Insert.insertFolder(contextId, tree, params.getUserId(), folder, null);
+        Insert.insertFolder(contextId, tree, params.getUserId(), folder, null, params.getSession());
         MemoryTable.getMemoryTableFor(params.getSession()).initializeFolder(folder.getID(), tree, params.getUserId(), contextId);
     }
 
@@ -813,7 +813,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     private void createDefaultFolder(final Folder folder, final StorageParameters params) throws OXException {
         final int tree = unsignedInt(folder.getTreeID());
         final int contextId = params.getContextId();
-        Insert.insertFolder(contextId, tree, params.getUserId(), folder, "default");
+        Insert.insertFolder(contextId, tree, params.getUserId(), folder, "default", params.getSession());
         MemoryTable.getMemoryTableFor(params.getSession()).initializeFolder(folder.getID(), tree, params.getUserId(), contextId);
     }
 
