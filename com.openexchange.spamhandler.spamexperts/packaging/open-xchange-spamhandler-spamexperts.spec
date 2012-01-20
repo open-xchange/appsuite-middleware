@@ -40,7 +40,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 0
+%define		ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -106,6 +106,8 @@ ant -Dguiprefix=%{docroot}/ox6 -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange
 %{docroot}/ox6/plugins/com.openexchange.custom.spamexperts
 
 %changelog
+* Thu Jan 19 2012 - karsten.will@open-xchange.com
+  - moved to CVS_HEAD as it will be generally available from now on
 * Thu Jan 12 2012 - karsten.will@open-xchange.com
   - Changed name to open-xchange-spamhandler-spamexperts
   - runs with cvs_head again
