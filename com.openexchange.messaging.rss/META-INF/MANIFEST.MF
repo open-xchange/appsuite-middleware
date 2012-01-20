@@ -31,7 +31,8 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.xml.sax
-Bundle-ClassPath: lib/rome-1.0.jar,
+Bundle-ClassPath: lib/htmlcleaner-2.2.jar,
+ lib/rome-1.0.jar,
  lib/rome-fetcher-1.0.jar,
  extraClassPath/,
  .

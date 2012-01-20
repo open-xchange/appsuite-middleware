@@ -197,7 +197,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
                     folder.setSubscribed(true);
-                    createFolder(folder, params);
+                    createDefaultFolder(folder, params);
                 }
                 /*
                  * Default contact folder
@@ -210,7 +210,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
                     folder.setSubscribed(true);
-                    createFolder(folder, params);
+                    createDefaultFolder(folder, params);
                 }
                 /*
                  * Default task folder
@@ -223,7 +223,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
                     folder.setSubscribed(true);
-                    createFolder(folder, params);
+                    createDefaultFolder(folder, params);
                 }
                 /*
                  * Default mail folder(s)
@@ -237,7 +237,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                     folder.setTreeID(treeId);
                     folder.setParentID(ROOT_ID);
                     folder.setSubscribed(true);
-                    createFolder(folder, params);
+                    createDefaultFolder(folder, params);
                 }
                 // Trash, Drafts, Sent, Spam
                 for (final ContentType contentType : defaultTypes) {
@@ -247,7 +247,7 @@ public final class VirtualFolderStorage implements FolderStorage {
                         folder.setTreeID(treeId);
                         folder.setParentID(ROOT_ID);
                         folder.setSubscribed(true);
-                        createFolder(folder, params);
+                        createDefaultFolder(folder, params);
                     }
                 }
                 /*
@@ -304,7 +304,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     public void createFolder(final Folder folder, final StorageParameters params) throws OXException {
         final int tree = unsignedInt(folder.getTreeID());
         final int contextId = params.getContextId();
-        Insert.insertFolder(contextId, tree, params.getUserId(), folder);
+        Insert.insertFolder(contextId, tree, params.getUserId(), folder, null, params.getSession());
         MemoryTable.getMemoryTableFor(params.getSession()).initializeFolder(folder.getID(), tree, params.getUserId(), contextId);
     }
 
@@ -317,7 +317,7 @@ public final class VirtualFolderStorage implements FolderStorage {
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters params) throws OXException {
         final int contextId = params.getContextId();
         final int tree = unsignedInt(treeId);
-        Delete.deleteFolder(contextId, tree, params.getUserId(), folderId, true);
+        Delete.deleteFolder(contextId, tree, params.getUserId(), folderId, false, params.getSession());
         MemoryTable.getMemoryTableFor(params.getSession()).initializeTree(tree, params.getUserId(), contextId);
     }
 
@@ -471,7 +471,7 @@ public final class VirtualFolderStorage implements FolderStorage {
             final Folder realFolder = realFolders.get(folderId);
             if (null == realFolder) {
                 // Obviously non-existing folder
-                Delete.deleteFolder(contextId, tree, userId, folderId, false);
+                Delete.deleteFolder(contextId, tree, userId, folderId, false, params.getSession());
             } else {
                 ret.add(getFolder0(realFolder, treeId, folderId, memoryTree, locale));
             }
@@ -716,7 +716,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         final int tree = unsignedInt(folder.getTreeID());
         final int userId = params.getUserId();
         final int contextId = params.getContextId();
-        Update.updateFolder(contextId, tree, userId, folder);
+        Update.updateFolder(contextId, tree, userId, folder, params.getSession());
         MemoryTable.getMemoryTableFor(params.getSession()).initializeTree(tree, userId, contextId);
     }
 
@@ -808,6 +808,13 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void createDefaultFolder(final Folder folder, final StorageParameters params) throws OXException {
+        final int tree = unsignedInt(folder.getTreeID());
+        final int contextId = params.getContextId();
+        Insert.insertFolder(contextId, tree, params.getUserId(), folder, "default", params.getSession());
+        MemoryTable.getMemoryTableFor(params.getSession()).initializeFolder(folder.getID(), tree, params.getUserId(), contextId);
     }
 
     private static void checkOpenedStorage(final FolderStorage checkMe, final boolean modify, final java.util.Collection<FolderStorage> openedStorages, final StorageParameters storageParameters) throws OXException {

@@ -188,8 +188,12 @@ public final class CreatePerformer extends AbstractPerformer {
             /*
              * Sanity check
              */
-            if (!FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID()) && DuplicateCleaner.cleanDuplicates(treeId, storageParameters, newId)) {
-                throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(storageParameters.getUser().getLocale()), treeId);
+            if (!FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
+                final String duplicateId = DuplicateCleaner.cleanDuplicates(treeId, storageParameters, newId);
+                if (null != duplicateId) {
+                    // throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(storageParameters.getUser().getLocale()), treeId);
+                    return duplicateId;
+                }
             }
             /*
              * Debug out

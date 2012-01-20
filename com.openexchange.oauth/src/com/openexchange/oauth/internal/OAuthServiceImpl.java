@@ -791,7 +791,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     @Override
     public void update(final String recrypted, final PWUpdate customizationNote) throws OXException {
         final StringBuilder b = new StringBuilder();
-        b.append("UPDATE oauthAccount SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?");
+        b.append("UPDATE oauthAccounts SET ").append(customizationNote.field).append("= ? WHERE cid = ? AND id = ?");
         
         final Context context = getContext(customizationNote.cid);
         Connection con = null;
@@ -808,7 +808,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } finally {
             provider.releaseWriteConnection(context, con);
         }
-        
     }
 
     @Override
