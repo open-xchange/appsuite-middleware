@@ -18,6 +18,7 @@ CREATE TABLE `oxfolder_tree` (
   INDEX `parentIndex` (`cid`, `parent`),
   INDEX `typeIndex` (`cid`, `type`),
   INDEX `moduleIndex` (`cid`, `module`),
+  INDEX `lastModifiedIndex` (`cid`, `changing_date`),
   FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
   FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -82,6 +83,7 @@ CREATE TABLE `del_oxfolder_tree` (
   INDEX `parentIndex` (`cid`, `parent`),
   INDEX `typeIndex` (`cid`, `type`),
   INDEX `moduleIndex` (`cid`, `module`),
+  INDEX `lastModifiedIndex` (`cid`, `changing_date`),
   FOREIGN KEY (`cid`, `created_from`) REFERENCES user (`cid`, `id`),
   FOREIGN KEY (`cid`, `changed_from`) REFERENCES user (`cid`, `id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
