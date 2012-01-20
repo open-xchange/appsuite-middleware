@@ -183,10 +183,21 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                     }
                 }
             } else {
-                final String secret = secretService.getSecret(session);
-                decrypted = crypto.decrypt(toDecrypt, secret);
-                if (DEBUG) {
-                    LOG.debug("Decrypted password with former crypt mechanism");
+                try {
+                    final String secret = passwordSecretService.getSecret(session);
+                    decrypted = crypto.decrypt(toDecrypt, secret);
+                    if (DEBUG) {
+                        LOG.debug("Decrypted password with former crypt mechanism");
+                    }
+                } catch (final OXException x) {
+                    // Ignore and try other
+                }
+                if (decrypted == null) {
+                    final String secret = secretService.getSecret(session);
+                    decrypted = crypto.decrypt(toDecrypt, secret);
+                    if (DEBUG) {
+                        LOG.debug("Decrypted password with former crypt mechanism");
+                    }
                 }
             }
         }
