@@ -86,7 +86,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
         final Connection con = Database.getNoTimeout(contextId, true);
         try {
             con.setAutoCommit(false);
-            createMyIndex(con, new String[] { "oxfolder_tree", "del_oxfolder_tree" }, "changing_date", "lastModifiedIndex");
+            createMyIndex(con, new String[] { "oxfolder_tree", "del_oxfolder_tree" }, "lastModifiedIndex");
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -97,9 +97,9 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
         }
     }
 
-    private void createMyIndex(final Connection con, final String[] tables, final String fieldName, final String name) {
+    private void createMyIndex(final Connection con, final String[] tables, final String name) {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(FolderAddIndex2LastModified.class));
-        final String[] columns = { "cid", fieldName };
+        final String[] columns = { "cid", "changing_date", "module" };
         final StringBuilder sb = new StringBuilder(64);
         for (final String table : tables) {
             try {
@@ -109,9 +109,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
                         sb.setLength(0);
                         sb.append("Creating new index named \"");
                         sb.append(name);
-                        sb.append("\" with columns (cid,");
-                        sb.append(fieldName);
-                        sb.append(") on table ");
+                        sb.append("\" with columns (cid, changing_date, module) on table ");
                         sb.append(table);
                         sb.append('.');
                         log.info(sb.toString());
@@ -122,9 +120,8 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
                         sb.setLength(0);
                         sb.append("New index named \"");
                         sb.append(indexName);
-                        sb.append("\" with columns (cid,");
-                        sb.append(fieldName);
-                        sb.append(") already exists on table ");
+                        sb.append("\" with columns (cid, changing_date, module)");
+                        sb.append(" already exists on table ");
                         sb.append(table);
                         sb.append('.');
                         log.info(sb.toString());
