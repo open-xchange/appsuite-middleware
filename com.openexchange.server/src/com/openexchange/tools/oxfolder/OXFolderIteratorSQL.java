@@ -265,7 +265,7 @@ public final class OXFolderIteratorSQL {
      * @param orderBy The optional <code>ORDER BY</code> clause; pass <code>null</code> to ignore
      * @return The core SQL statement to query user-visible folders
      */
-    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy) {
+    private static String getSQLUserVisibleFolders(final String folderTable, final String permissionTable, final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String orderBy, final String... indexNames) {
         final StringBuilder sb = new StringBuilder(256);
         /*
          * Compose SELECT string prepended to each UNION statement
@@ -291,7 +291,19 @@ public final class OXFolderIteratorSQL {
              */
             preparedOrderBy = prepareOrderBy(orderBy);
         }
-        sb.append(" FROM ").append(folderTable).append(" AS ot ");
+        sb.append(" FROM ").append(folderTable).append(" AS ot");
+        /*
+         * Add index name
+         */
+        if (null != indexNames && indexNames.length > 0) {
+            //" FORCE INDEX (lastModifiedIndex)"
+            sb.append(" FORCE INDEX (");
+            sb.append(indexNames[0]);
+            for (int i = 1; i < indexNames.length; i++) {
+                sb.append(',').append(indexNames[i]);
+            }
+            sb.append(')');
+        }
         final String select = sb.toString();
         sb.setLength(0);
         /*
@@ -1846,9 +1858,7 @@ public final class OXFolderIteratorSQL {
         }
     }
 
-    private static final String SQL_SELECT_FOLDERS_START =
-        new StringBuilder(200).append(STR_SELECT).append(FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot").append(
-            " WHERE (cid = ?) ").toString();
+    private static final boolean useLastModifiedIndex = false;
 
     /**
      * Gets <b>all</b> modified folders since given time stamp.
@@ -1892,10 +1902,13 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      */
     public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx, final Connection con) throws OXException {
-        final String sqlSelectStr =
-            new StringBuilder(256).append(SQL_SELECT_FOLDERS_START).append("AND (changing_date > ?) AND (module IN ").append(
-                FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL).append(") ").append(
-                OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
+        final StringBuilder sb = new StringBuilder(256).append("SELECT ");
+        sb.append(FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot");
+        if (useLastModifiedIndex) {
+            sb.append(" FORCE INDEX (lastModifiedIndex)");
+        }
+        sb.append(" WHERE (cid = ?) AND (changing_date > ?) AND (module IN ").append(FolderObject.SQL_IN_STR_STANDARD_MODULES_ALL);
+        sb.append(") ").append(OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;
@@ -1906,7 +1919,7 @@ public final class OXFolderIteratorSQL {
                 readCon = DBPool.pickup(ctx);
                 closeCon = true;
             }
-            stmt = readCon.prepareStatement(sqlSelectStr);
+            stmt = readCon.prepareStatement(sb.toString());
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setLong(pos, since.getTime());
