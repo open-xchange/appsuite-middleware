@@ -572,7 +572,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          * Is a response expected?
          */
         if (Stage.STAGE_AWAIT != stage) {
-            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Request elapsed, try again.");
             action(ActionCode.CLIENT_FLUSH, null);
             action(ActionCode.CLOSE, Boolean.FALSE);
             action(ActionCode.STOP, null);
@@ -849,6 +849,10 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                         error = true;
                     } else {
                         servlet.service(request, response);
+                        if (!started) {
+                            // Stopped in the meantime
+                            return;
+                        }
                         response.flushBuffer();
                         listenerMonitor.addProcessingTime(System.currentTimeMillis() - request.getStartTime());
                         listenerMonitor.incrementNumRequests();
