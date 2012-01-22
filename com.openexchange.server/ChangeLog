@@ -1,3 +1,7 @@
+* 2012-01-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21288: Orderly stopping processing of elapsed threads
+
 * 2012-01-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 21303: Set <password> as default setting for encrypting passwords
