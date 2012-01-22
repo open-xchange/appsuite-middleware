@@ -435,14 +435,35 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     oclPermissions[0] = oclPerm;
                 } else {
                     final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con);
+                    final int userId = storageParameters.getUserId();
+                    final boolean isShared = parent.isShared(userId);
+                    final int owner = isShared ? parent.getCreatedBy() : userId;
+                    boolean ownerFound = false;
                     final List<OCLPermission> list = parent.getPermissions();
                     final List<OCLPermission> dest = new ArrayList<OCLPermission>(list.size());
                     for (final OCLPermission oclPermission : list) {
                         if (oclPermission.getSystem() <= 0) {
                             dest.add(oclPermission);
+                            if (!oclPermission.isGroupPermission() && owner == oclPermission.getEntity()) {
+                                ownerFound = true;
+                                oclPermission.setFolderAdmin(true);
+                            }
                         }
                     }
-                    oclPermissions = dest.toArray(new OCLPermission[0]);
+                    if (!ownerFound) {
+                        final OCLPermission oclPerm = new OCLPermission();
+                        oclPerm.setEntity(owner);
+                        oclPerm.setGroupPermission(false);
+                        oclPerm.setFolderAdmin(true);
+                        oclPerm.setAllPermission(
+                            OCLPermission.ADMIN_PERMISSION,
+                            OCLPermission.ADMIN_PERMISSION,
+                            OCLPermission.ADMIN_PERMISSION,
+                            OCLPermission.ADMIN_PERMISSION);
+                        oclPerm.setSystem(0);
+                        dest.add(oclPerm);
+                    }
+                    oclPermissions = dest.toArray(new OCLPermission[dest.size()]);
                 }
                 createMe.setPermissionsAsArray(oclPermissions);
             }
