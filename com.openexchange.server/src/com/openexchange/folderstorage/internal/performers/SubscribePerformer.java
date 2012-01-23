@@ -191,7 +191,7 @@ public final class SubscribePerformer extends AbstractPerformer {
             virtualFolder.setSubfolderIDs(null);
             folders.add(virtualFolder);
 
-            while (!targetStorage.containsFolder(targetTreeId, virtualFolder.getParentID(), storageParameters)) {
+            while (!FolderStorage.ROOT_ID.equals(virtualFolder.getParentID()) && !targetStorage.containsFolder(targetTreeId, virtualFolder.getParentID(), storageParameters)) {
                 sourceFolder = sourceStorage.getFolder(sourceTreeId, virtualFolder.getParentID(), storageParameters);
                 {
                     /*
