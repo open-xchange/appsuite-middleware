@@ -1,6 +1,17 @@
+* 2012-01-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21313: Properly obtaining a Writer to Servlet's OutputStream
+ - Fix for bug 21315: lowered log level to an appropriate level
+
+* 2012-01-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21288: Orderly stopping processing of elapsed threads
+ - Fix for bug 21292: Folder creator/owner becomes folder administrator
+
 * 2012-01-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 21303: Set <password> as default setting for encrypting passwords
+ - Fix for bug 21137: Added index to folder table
 
 * 2012-01-19 - thorben.betten@open-xchange.com
 

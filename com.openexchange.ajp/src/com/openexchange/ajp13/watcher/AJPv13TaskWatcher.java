@@ -332,16 +332,24 @@ public class AJPv13TaskWatcher {
             return null;
         }
 
+        private static final long MAX_PROC_TIME = 300000;
+
         private void handleExceededTask(final long currentProcTime) {
+            if (task.isLongRunning()) {
+                return;
+            }
             /*
              * Log exceeded task if it is not marked as a long-running task
              */
-            if (!task.isLongRunning() && logExceededTasks && info) {
+            if (logExceededTasks && info) {
                 final Throwable t = new Throwable();
                 t.setStackTrace(task.getStackTrace());
                 log.info(new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append(
                     "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
                     "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
+            }
+            if (currentProcTime > MAX_PROC_TIME) {
+                task.cancel();
             }
         }
 

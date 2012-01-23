@@ -433,7 +433,9 @@ public final class InternalList {
 
         // Adds index to prg_dates_members and del_dates_members
         new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembers(),
-        
+
+        // Adds index to oxfolder_tree and del_oxfolder_tree
+        new com.openexchange.groupware.update.tasks.FolderAddIndex2LastModified(),
         
     };
 }

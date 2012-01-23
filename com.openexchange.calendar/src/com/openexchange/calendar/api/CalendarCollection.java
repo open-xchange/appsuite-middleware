@@ -1748,6 +1748,13 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
                     }
                 }
             }
+        } catch (final OXException e) {
+            if (DEBUG) {
+                LOG.warn("ERROR getting read permissions: " + e.getMessage(), e);
+            } else {
+                LOG.warn("ERROR getting read permissions: " + e.getMessage());
+            }
+            return false;
         } catch (final RuntimeException e) {
             LOG.error("ERROR getting read permissions", e);
             return false;
