@@ -1329,7 +1329,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Context context = parameters.getContext();
             ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
             if (null != con) {
-                if (modify == con.readWrite) {
+                if (con.readWrite || modify == con.readWrite) {
                     // Connection already present in proper access mode
                     return false;
                 }
@@ -1338,7 +1338,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  *
                  * commit, restore auto-commit & push to pool
                  */
-                parameters.putParameter(getFolderType(), PARAM_CONNECTION, null);
+                parameters.putParameter(folderType, PARAM_CONNECTION, null);
                 try {
                     con.connection.commit();
                 } catch (final Exception e) {
