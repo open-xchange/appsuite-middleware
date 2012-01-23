@@ -253,7 +253,7 @@ public class FolderCopyTask implements CopyUserTaskService {
     private void checkAndCreateMailAttachmentFolder(final Context srcCtx, final Context dstCtx, final int userId, final Connection srcCon, final Connection dstCon, final String attachmentFolderName) throws OXException {      
         try {
             final int sourceAttachmentFolderId = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, attachmentFolderName, FolderObject.INFOSTORE, srcCon, srcCtx);
-            int destAttachmentFolderId = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, attachmentFolderName, FolderObject.INFOSTORE, dstCon, dstCtx);
+            int destAttachmentFolderId = OXFolderSQL.lookUpFolder(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, attachmentFolderName, FolderObject.INFOSTORE, srcCon, dstCtx);
             if (sourceAttachmentFolderId != -1 && destAttachmentFolderId == -1) {
                 destAttachmentFolderId = IDGenerator.getId(dstCtx.getContextId(), com.openexchange.groupware.Types.FOLDER, dstCon);
                 final Date date = new Date();

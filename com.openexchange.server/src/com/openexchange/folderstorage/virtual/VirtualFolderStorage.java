@@ -732,7 +732,13 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     @Override
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters params) throws OXException {
-        return Select.containsFolder(params.getContextId(), unsignedInt(treeId), params.getUserId(), folderId, storageType);
+        if (ROOT_ID.equals(folderId)) {
+            return true;
+        }
+        final ServerSession session = getServerSession(params);
+        return MemoryTable.getMemoryTableFor(session).getTree(unsignedInt(treeId), session).containsFolder(folderId);
+
+        // return Select.containsFolder(params.getContextId(), unsignedInt(treeId), params.getUserId(), folderId, storageType);
     }
 
     @Override
