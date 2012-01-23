@@ -270,6 +270,14 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
     }
 
+    private static PrintWriter writerFrom(final HttpServletResponse resp) throws IOException {
+        try {
+            return resp.getWriter();
+        } catch (final IllegalStateException ise) {
+            return new PrintWriter(resp.getOutputStream());
+        }
+    }
+
     private static final String UPLOAD_PARAM_MAILINTERFACE = "msint";
 
     private static final String UPLOAD_PARAM_WRITER = "writer";
@@ -350,7 +358,7 @@ public class Mail extends PermissionServlet implements UploadListener {
             actionGet(req, resp);
         } catch (final Exception e) {
             LOG.error("doGet", e);
-            writeError(e.toString(), new JSONWriter(resp.getWriter()));
+            writeError(e.toString(), new JSONWriter(writerFrom(resp)));
         }
     }
 
@@ -364,8 +372,8 @@ public class Mail extends PermissionServlet implements UploadListener {
         try {
             actionPut(req, resp);
         } catch (final Exception e) {
-            LOG.error("doGet", e);
-            writeError(e.toString(), new JSONWriter(resp.getWriter()));
+            LOG.error("doPut", e);
+            writeError(e.toString(), new JSONWriter(writerFrom(resp)));
         }
     }
 
