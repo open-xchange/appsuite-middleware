@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -141,7 +142,7 @@ public final class SubscribePerformer extends AbstractPerformer {
             openedStorages.add(sourceStorage);
         }
         try {
-            final Folder sourceFolder = sourceStorage.getFolder(sourceTreeId, folderId, storageParameters);
+            Folder sourceFolder = sourceStorage.getFolder(sourceTreeId, folderId, storageParameters);
             {
                 /*
                  * Check folder permission for parent folder
@@ -179,11 +180,44 @@ public final class SubscribePerformer extends AbstractPerformer {
                     }
                 }
             }
-            final Folder virtualFolder = (Folder) sourceFolder.clone();
+            /*
+             * List of folders
+             */
+            final LinkedList<Folder> folders = new LinkedList<Folder>();
+
+            Folder virtualFolder = (Folder) sourceFolder.clone();
             virtualFolder.setParentID(targetParentId);
             virtualFolder.setTreeID(targetTreeId);
             virtualFolder.setSubfolderIDs(null);
-            targetStorage.createFolder(virtualFolder, storageParameters);
+            folders.add(virtualFolder);
+
+            while (!targetStorage.containsFolder(targetTreeId, virtualFolder.getParentID(), storageParameters)) {
+                sourceFolder = sourceStorage.getFolder(sourceTreeId, virtualFolder.getParentID(), storageParameters);
+                {
+                    /*
+                     * Check folder permission for parent folder
+                     */
+                    final Permission parentPermission;
+                    if (null == getSession()) {
+                        parentPermission = CalculatePermission.calculate(sourceFolder, getUser(), getContext(), ALL_ALLOWED);
+                    } else {
+                        parentPermission = CalculatePermission.calculate(sourceFolder, getSession(), ALL_ALLOWED);
+                    }
+                    if (parentPermission.isVisible()) {
+                        virtualFolder = (Folder) sourceFolder.clone();
+                        virtualFolder.setParentID(sourceFolder.getParentID());
+                        virtualFolder.setTreeID(targetTreeId);
+                        virtualFolder.setSubfolderIDs(null);
+                        folders.addFirst(virtualFolder);
+                    } else {
+                        virtualFolder.setParentID(FolderStorage.ROOT_ID);
+                    }
+                }
+            }
+
+            for (final Folder folder : folders) {
+                targetStorage.createFolder(folder, storageParameters);
+            }
 
             for (final FolderStorage fs : openedStorages) {
                 fs.commitTransaction(storageParameters);
