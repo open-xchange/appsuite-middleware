@@ -164,25 +164,16 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                 } catch (final OXException x) {
                     // Ignore and try other
                 }
-                if (decrypted == null) {
-                    try {
-                        decrypted = decrypthWithPasswordSecretService(toDecrypt, session);
-                    } catch (final OXException x) {
-                        // Ignore and try other
-                    }
-                }
-                if (decrypted == null) {
-                    decrypted = decrypthWithSecretService(toDecrypt, session);
-                }
-            } else {
+            }
+            if (decrypted == null) {
                 try {
                     decrypted = decrypthWithPasswordSecretService(toDecrypt, session);
                 } catch (final OXException x) {
                     // Ignore and try other
                 }
-                if (decrypted == null) {
-                    decrypted = decrypthWithSecretService(toDecrypt, session);
-                }
+            }
+            if (decrypted == null) {
+                decrypted = decrypthWithSecretService(toDecrypt, session);
             }
         }
         /*
