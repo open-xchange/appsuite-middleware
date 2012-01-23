@@ -573,8 +573,8 @@ public final class PermissionLoaderService implements Runnable {
             try {
                 if (readConWrapper.obtain()) {
                     dec = true;
-                    final Connection con = readConWrapper.con;
-                    synchronized (con) {
+                    synchronized (readConWrapper) {
+                        final Connection con = readConWrapper.con;
                         for (final Pair pair : pairsChunk) {
                             permsMap.put(pair, loadFolderPermissions(pair.folderId, contextId, con), 60);
                         }
