@@ -145,8 +145,11 @@ public final class ListAction extends AbstractFolderAction {
             final Set<String> names = new HashSet<String>(length);
             for (int i = 0; i < length; i++) {
                 final UserizedFolder userizedFolder = subfolders[i];
-                final Locale locale = userizedFolder.getLocale();
-                if (errorOnDuplicateName && !names.add(userizedFolder.getLocalizedName(locale == null ? FolderWriter.DEFAULT_LOCALE : locale))) {
+                Locale locale = userizedFolder.getLocale();
+                if (null == locale) {
+                    locale = FolderWriter.DEFAULT_LOCALE;
+                }
+                if (errorOnDuplicateName && !names.add(userizedFolder.getLocalizedName(locale))) {
                     // Duplicate name
                     final String parentName = folderService.getFolder(treeId, parentId, session, null).getLocalizedName(locale);
                     throw FolderExceptionErrorMessage.DUPLICATE_NAME.create(userizedFolder.getLocalizedName(locale), parentName);
