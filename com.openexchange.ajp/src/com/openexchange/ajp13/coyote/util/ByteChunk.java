@@ -400,8 +400,14 @@ public final class ByteChunk {
         }
 
         int n = len;
-        if (len > getLength()) {
-            n = getLength();
+        {
+            final int length = getLength();
+            if (len > length) {
+                n = length;
+            }
+            if (0 == n) {
+                return 0;
+            }
         }
         System.arraycopy(buff, start, src, off, n);
         start += n;
