@@ -49,6 +49,8 @@
 
 package com.openexchange.folder.json.actions;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
@@ -156,7 +158,7 @@ public final class ListAction extends AbstractFolderAction {
                 }
             }
         } else {
-            for (int i = 0; i < length; i++) {
+            for (int i = length - 1; i >= 0; i--) {
                 final Date modified = subfolders[i].getLastModifiedUTC();
                 if (modified != null) {
                     final long time = modified.getTime();
@@ -174,12 +176,13 @@ public final class ListAction extends AbstractFolderAction {
         return new AJAXRequestResult(jsonArray, 0 == lastModified ? null : new Date(lastModified)).addWarnings(subfoldersResponse.getWarnings());
     }
 
+    private static Set<String> TRUES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "yes", "on", "1")));
+
     private static boolean parseBoolean(final String string, final boolean defaultValue) {
         if (null == string) {
             return defaultValue;
         }
-        final String s = string.toLowerCase(Locale.ENGLISH).trim();
-        return "true".equals(s) || "yes".equals(s) || "on".equals(s) || "1".equals(s);
+        return TRUES.contains(string.toLowerCase(Locale.ENGLISH).trim());
     }
 
 }
