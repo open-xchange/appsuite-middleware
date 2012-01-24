@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,17 @@
  *
  */
 
-package com.openexchange.oauth;
+package com.openexchange.oauth.facebook;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.oauth.internal.OAuthServiceImplDBTest;
 
 /**
- * Test suite for integrated unit tests of OAuth bundle.
+ * Test suite for integrated unit tests in OAuth Facebook bundle.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UnitTests {
+public final class UnitTests {
 
     public UnitTests() {
         super();
@@ -66,7 +65,7 @@ public class UnitTests {
 
     public static Test suite() {
         final TestSuite tests = new TestSuite();
-        tests.addTestSuite(OAuthServiceImplDBTest.class);
+        tests.addTestSuite(FacebookConnectionTest.class);
         return tests;
     }
 }

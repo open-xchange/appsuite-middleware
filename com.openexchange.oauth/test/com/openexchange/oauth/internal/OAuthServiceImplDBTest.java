@@ -66,7 +66,6 @@ import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.SimOAuthServiceMetaDataRegistry;
 import com.openexchange.tools.sql.SQLTestCase;
 
-
 /**
  * The {@link OAuthServiceImplDBTest} tests the DB interaction of the OAuthServiceImpl class, with the OAuth interactions
  * taken out through subclassing. The OAuth interactions are tested elsewhere.
@@ -93,10 +92,6 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             @Override
             public String getAPISecret() {
                 return "apiSecret";
-            }
-
-            public String getAuthorizationURL(final OAuthToken token) {
-                return "http://www.myService.invalid/initiateHandshake?token="+token.getToken()+"&secret="+token.getSecret();
             }
 
             @Override
