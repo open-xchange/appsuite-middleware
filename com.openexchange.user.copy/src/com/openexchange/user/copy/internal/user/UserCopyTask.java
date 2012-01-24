@@ -78,7 +78,7 @@ public class UserCopyTask implements CopyUserTaskService {
 
     private final UserService service;
 
-    private final static String USER_EXISTS = "SELECT COUNT(*) FROM login2user WHERE cid = ? AND uid = ?";
+    private final static String USER_EXISTS = "SELECT 1 FROM login2user WHERE cid = ? AND uid = ?";
 
 
     /**
@@ -151,6 +151,7 @@ public class UserCopyTask implements CopyUserTaskService {
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
     public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
+        //
     }
 
     private boolean userExistsInDestinationCtx(final Context dstCtx, final User srcUser, final Connection dstCon) throws OXException {
@@ -163,13 +164,7 @@ public class UserCopyTask implements CopyUserTaskService {
             stmt.setInt(1, dstCtxId);
             stmt.setString(2, srcUserName);
             rs = stmt.executeQuery();
-            rs.next();
-            final int count = rs.getInt(1);
-            if (count > 0) {
-                return true;
-            } else {
-                return false;
-            }
+            return rs.next();
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {

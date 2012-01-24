@@ -77,7 +77,7 @@ public interface ChatAccountManager {
      * @param session The session providing needed user data
      * @throws OXException If update fails
      */
-    void updateAccount(ChatAccount account, Session session) throws OXException;;
+    void updateAccount(ChatAccount account, Session session) throws OXException;
 
     /**
      * Deletes an existing account.
@@ -95,7 +95,7 @@ public interface ChatAccountManager {
      * @return All accounts associated with session user.
      * @throws OXException If listing fails
      */
-    List<ChatAccount> getAccounts(Session session) throws OXException;;
+    List<ChatAccount> getAccounts(Session session) throws OXException;
 
     /**
      * Gets an existing messaging account.

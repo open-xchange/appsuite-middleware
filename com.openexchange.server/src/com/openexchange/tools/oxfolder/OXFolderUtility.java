@@ -50,6 +50,7 @@
 package com.openexchange.tools.oxfolder;
 
 import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -230,7 +231,7 @@ public final class OXFolderUtility {
      */
     public static void checkFolderPermissions(final FolderObject folderObj, final int userId, final Context ctx) throws OXException {
         final boolean isPrivate = (folderObj.getType() == FolderObject.PRIVATE || folderObj.getType() == FolderObject.SHARED);
-        int adminPermissionCount = 0;
+        final TIntList adminEntities = new TIntArrayList(isPrivate ? 1 : 4);
         final int permissionsSize = folderObj.getPermissions().size();
         final Iterator<OCLPermission> iter = folderObj.getPermissions().iterator();
         final int creator = folderObj.containsCreatedBy() ? folderObj.getCreatedBy() : userId;
@@ -244,16 +245,32 @@ public final class OXFolderUtility {
                     Integer.valueOf(ctx.getContextId()));
             }
             if (oclPerm.isFolderAdmin()) {
-                adminPermissionCount++;
+                adminEntities.add(oclPerm.getEntity());
                 if (isPrivate && folderObj.getModule() != FolderObject.SYSTEM_MODULE) {
-                    checkPrivateAdminPerm(adminPermissionCount, creator, oclPerm);
+                    checkPrivateAdminPerm(adminEntities.size(), creator, oclPerm);
                 }
                 if (isDefaultFolder && !creatorIsAdmin) {
                     creatorIsAdmin = (oclPerm.getEntity() == creator);
                 }
             }
         }
-        if (adminPermissionCount == 0) {
+        if (!isPrivate && !adminEntities.contains(creator)) {
+            final OCLPermission oclPerm = new OCLPermission();
+            oclPerm.setEntity(creator);
+            oclPerm.setGroupPermission(false);
+            oclPerm.setFolderAdmin(true);
+            oclPerm.setAllPermission(
+                OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS,
+                OCLPermission.NO_PERMISSIONS);
+            oclPerm.setSystem(0);
+            final List<OCLPermission> nList = new ArrayList<OCLPermission>(folderObj.getPermissions());
+            nList.add(oclPerm);
+            adminEntities.add(creator);
+            folderObj.setPermissions(nList);
+        }
+        if (adminEntities.isEmpty()) {
             throw OXFolderExceptionCode.NO_FOLDER_ADMIN.create();
         } else if (isDefaultFolder && !creatorIsAdmin) {
             throw OXFolderExceptionCode.CREATOR_IS_NOT_ADMIN.create(getUserName(creator, ctx), getFolderName(

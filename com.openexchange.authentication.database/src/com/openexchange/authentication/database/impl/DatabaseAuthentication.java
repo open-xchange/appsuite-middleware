@@ -57,7 +57,9 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.user.UserService;
 
 /**
@@ -101,7 +103,10 @@ public class DatabaseAuthentication implements AuthenticationService {
             try {
                 userId = userService.getUserId(splitted[1], ctx);
             } catch (final OXException e) {
-                throw INVALID_CREDENTIALS.create();
+                if (UserExceptionCode.PROPERTY_MISSING.getPrefix().equals(e.getPrefix()) && LdapExceptionCode.USER_NOT_FOUND.getNumber() == e.getCode()) {
+                    throw INVALID_CREDENTIALS.create();
+                }
+                throw e;
             }
             final User user = userService.getUser(userId, ctx);
             if (!userService.authenticate(user, password)) {

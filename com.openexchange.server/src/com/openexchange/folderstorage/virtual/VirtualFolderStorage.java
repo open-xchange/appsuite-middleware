@@ -59,6 +59,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -317,8 +318,29 @@ public final class VirtualFolderStorage implements FolderStorage {
     public void deleteFolder(final String treeId, final String folderId, final StorageParameters params) throws OXException {
         final int contextId = params.getContextId();
         final int tree = unsignedInt(treeId);
-        Delete.deleteFolder(contextId, tree, params.getUserId(), folderId, false, params.getSession());
-        MemoryTable.getMemoryTableFor(params.getSession()).initializeTree(tree, params.getUserId(), contextId);
+        final Session session = params.getSession();
+        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
+        /*
+         * Collect subfolders
+         */
+        final List<String> list = new LinkedList<String>();
+        list.add(folderId);
+        gatherSubfolders(folderId, memoryTable.getTree(tree, session), list);
+        for (final String fid : list) {
+            Delete.deleteFolder(contextId, tree, params.getUserId(), fid, false, session);
+        }
+        /*
+         * Re-initialize memory tree
+         */
+        memoryTable.initializeTree(tree, params.getUserId(), contextId);
+    }
+
+    private static void gatherSubfolders(final String parentId, final MemoryTree memoryTree, final List<String> list) {
+        for (final String[] args : memoryTree.getSubfolderIds(parentId)) {
+            final String id = args[0];
+            list.add(id);
+            gatherSubfolders(id, memoryTree, list);
+        }
     }
 
     @Override
@@ -732,7 +754,13 @@ public final class VirtualFolderStorage implements FolderStorage {
 
     @Override
     public boolean containsFolder(final String treeId, final String folderId, final StorageType storageType, final StorageParameters params) throws OXException {
-        return Select.containsFolder(params.getContextId(), unsignedInt(treeId), params.getUserId(), folderId, storageType);
+        if (ROOT_ID.equals(folderId)) {
+            return true;
+        }
+        final ServerSession session = getServerSession(params);
+        return MemoryTable.getMemoryTableFor(session).getTree(unsignedInt(treeId), session).containsFolder(folderId);
+
+        // return Select.containsFolder(params.getContextId(), unsignedInt(treeId), params.getUserId(), folderId, storageType);
     }
 
     @Override

@@ -120,7 +120,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "creating_date, changing_date, fid, pflag, timestampfield01, timestampfield02, " +
             "timezone, intfield01, intfield02, intfield03, intfield04, intfield05, intfield06, " +
             "intfield07, intfield08, field01, field02, field04, field06, field07, field08, " +
-            "field09, uid, organizer, sequence " +
+            "field09, uid, organizer, sequence, organizerId, principal, principalId " +
         "FROM " +
             "prg_dates " +
         "WHERE " +
@@ -155,9 +155,9 @@ public class CalendarCopyTask implements CopyUserTaskService {
             "fid, pflag, cid, timestampfield01, timestampfield02, " +
             "timezone, intfield01, intfield02, intfield03, intfield04, intfield05, intfield06, " +
             "intfield07, intfield08, field01, field02, field04, field06, field07, field08, " +
-            "field09, uid, organizer, sequence) " +
+            "field09, uid, organizer, sequence, organizerId, principal, principalId) " +
         "VALUES " +
-            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     private static final String INSERT_MEMBER = 
         "INSERT INTO " +
@@ -228,7 +228,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
         final Map<Integer, CalendarDataObject> appointments = loadAppointmentsFromDB(appointmentIds, i(srcCtxId), srcCon);        
         checkAppointmentsForMissingRecurrenceMasters(appointments);
         addParticipants(appointments, srcCon, i(srcCtxId), i(srcUsrId));
-        exchangeIds(appointments, folderMapping, i(dstUsrId), i(dstCtxId), dstCon);
+        exchangeIds(appointments, folderMapping, i(dstUsrId), i(dstCtxId), dstCon, i(srcUsrId));
         writeAppointmentsToDB(dstCon, appointments, i(dstUsrId), i(dstCtxId));
         writeParticipantsToDB(dstCon, appointments, i(dstCtxId));
         
@@ -390,6 +390,9 @@ public class CalendarCopyTask implements CopyUserTaskService {
                 setStringOrNull(i++, stmt, appointment.getUid()); 
                 setStringOrNull(i++, stmt, appointment.getOrganizer());
                 setIntOrNull(i++, stmt, appointment.getSequence());
+                stmt.setInt(i++, appointment.getOrganizerId());
+                setStringOrNull(i++, stmt, appointment.getPrincipal());
+                stmt.setInt(i++, appointment.getPrincipalId());
                 
                 stmt.addBatch();
             }
@@ -402,7 +405,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
         }
     }
     
-    private void exchangeIds(final Map<Integer, CalendarDataObject> appointments, final ObjectMapping<FolderObject> folderMapping, final int dstUsrId, final int dstCtxId, final Connection dstCon) throws OXException {
+    private void exchangeIds(final Map<Integer, CalendarDataObject> appointments, final ObjectMapping<FolderObject> folderMapping, final int dstUsrId, final int dstCtxId, final Connection dstCon, final int srcUsrId) throws OXException {
         try {
             final Map<Integer, CalendarDataObject> seriesAppointments = new HashMap<Integer, CalendarDataObject>();
             for (final Integer appointmentId : appointments.keySet()) {
@@ -422,6 +425,17 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     newParentFolderId = destinationFolder.getObjectID();
                 }
                 appointment.setParentFolderID(newParentFolderId);
+                
+                if (appointment.getOrganizerId() == srcUsrId) {
+                    appointment.setOrganizerId(dstUsrId);
+                } else {
+                    appointment.setOrganizerId(0);
+                }                
+                if (appointment.getPrincipalId() == srcUsrId) {
+                    appointment.setPrincipalId(dstUsrId);
+                } else {
+                    appointment.setPrincipalId(0);
+                }
                 
                 final Participant[] participants = appointment.getParticipants();
                 if (participants != null) {
@@ -569,6 +583,9 @@ public class CalendarCopyTask implements CopyUserTaskService {
                     appointment.setUid(rs.getString(i++));
                     appointment.setOrganizer(rs.getString(i++));
                     appointment.setSequence(getIntOrNegative(i++, rs));
+                    appointment.setOrganizerId(getIntOrNegative(i++, rs));
+                    appointment.setPrincipal(rs.getString(i++));
+                    appointment.setPrincipalId(getIntOrNegative(i++, rs));
 
                     appointments.put(appointment.getObjectID(), appointment);
                 }

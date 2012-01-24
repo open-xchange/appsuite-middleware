@@ -55,8 +55,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.folderstorage.ContentType;
-import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
@@ -161,22 +161,22 @@ public final class VirtualFolder implements ParameterizedFolder {
 
     @Override
     public int getCreatedBy() {
-        return realFolder.getCreatedBy();
+        return null == realFolder ? -1 : realFolder.getCreatedBy();
     }
 
     @Override
     public Date getCreationDate() {
-        return realFolder.getCreationDate();
+        return null == realFolder ? null : realFolder.getCreationDate();
     }
 
     @Override
     public Date getLastModified() {
-        return lastModified == null ? realFolder.getLastModified() : cloneDate(lastModified);
+        return lastModified == null ? (null == realFolder ? null : realFolder.getLastModified()) : cloneDate(lastModified);
     }
 
     @Override
     public int getModifiedBy() {
-        return -1 == modifiedBy ? realFolder.getModifiedBy() : modifiedBy;
+        return -1 == modifiedBy ? (null == realFolder ? -1 : realFolder.getModifiedBy()) : modifiedBy;
     }
 
     @Override

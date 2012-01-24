@@ -435,14 +435,38 @@ public final class DatabaseFolderStorage implements FolderStorage {
                     oclPermissions[0] = oclPerm;
                 } else {
                     final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con);
+                    final int owner;
+                    {
+                        final int userId = storageParameters.getUserId();
+                        final boolean isShared = parent.isShared(userId);
+                        owner = isShared ? parent.getCreatedBy() : userId;
+                    }
+                    boolean ownerFound = false;
                     final List<OCLPermission> list = parent.getPermissions();
                     final List<OCLPermission> dest = new ArrayList<OCLPermission>(list.size());
                     for (final OCLPermission oclPermission : list) {
                         if (oclPermission.getSystem() <= 0) {
                             dest.add(oclPermission);
+                            if (!oclPermission.isGroupPermission() && owner == oclPermission.getEntity()) {
+                                ownerFound = true;
+                                oclPermission.setFolderAdmin(true);
+                            }
                         }
                     }
-                    oclPermissions = dest.toArray(new OCLPermission[0]);
+                    if (!ownerFound) {
+                        final OCLPermission oclPerm = new OCLPermission();
+                        oclPerm.setEntity(owner);
+                        oclPerm.setGroupPermission(false);
+                        oclPerm.setFolderAdmin(true);
+                        oclPerm.setAllPermission(
+                            OCLPermission.NO_PERMISSIONS,
+                            OCLPermission.NO_PERMISSIONS,
+                            OCLPermission.NO_PERMISSIONS,
+                            OCLPermission.NO_PERMISSIONS);
+                        oclPerm.setSystem(0);
+                        dest.add(oclPerm);
+                    }
+                    oclPermissions = dest.toArray(new OCLPermission[dest.size()]);
                 }
                 createMe.setPermissionsAsArray(oclPermissions);
             }
@@ -1305,7 +1329,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
             final Context context = parameters.getContext();
             ConnectionMode con = parameters.getParameter(folderType, PARAM_CONNECTION);
             if (null != con) {
-                if (modify == con.readWrite) {
+                if (con.readWrite || modify == con.readWrite) {
                     // Connection already present in proper access mode
                     return false;
                 }
@@ -1314,7 +1338,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  *
                  * commit, restore auto-commit & push to pool
                  */
-                parameters.putParameter(getFolderType(), PARAM_CONNECTION, null);
+                parameters.putParameter(folderType, PARAM_CONNECTION, null);
                 try {
                     con.connection.commit();
                 } catch (final Exception e) {

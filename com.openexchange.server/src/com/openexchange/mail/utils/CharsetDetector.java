@@ -99,7 +99,39 @@ public final class CharsetDetector {
      * @return <code>true</code> if given name is valid; otherwise <code>false</code>
      */
     public static boolean isValid(final String charset) {
-        return (null != charset && checkName(charset) && Charset.isSupported(charset));
+        try {
+            return (null != charset && checkName(charset) && Charset.isSupported(charset));
+        } catch (final RuntimeException rte) {
+            LOG.warn("RuntimeException while checking charset: " + charset, rte);
+            return false;
+        } catch (final Error e) {
+            handleThrowable(e);
+            LOG.warn("Error while checking charset: " + charset, e);
+            return false;
+        } catch (final Throwable t) {
+            handleThrowable(t);
+            LOG.warn("Unexpected error while checking charset: " + charset, t);
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether the supplied <tt>Throwable</tt> is one that needs to be rethrown and swallows all others.
+     *
+     * @param t The <tt>Throwable</tt> to check
+     */
+    private static void handleThrowable(final Throwable t) {
+        if (t instanceof ThreadDeath) {
+            LOG.fatal(" ---=== /!\\ ===--- Thread death ---=== /!\\ ===--- ", t);
+            throw (ThreadDeath) t;
+        }
+        if (t instanceof VirtualMachineError) {
+            LOG.fatal(
+                " ---=== /!\\ ===--- The Java Virtual Machine is broken or has run out of resources necessary for it to continue operating. ---=== /!\\ ===--- ",
+                t);
+            throw (VirtualMachineError) t;
+        }
+        // All other instances of Throwable will be silently swallowed
     }
 
     /**

@@ -745,7 +745,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         ContextSearcher[] searchers = null;
         searchers = new ContextSearcher[] {
             new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern),
-            new ContextSearcher(cache, "SELECT cid FROM context WHERE cid LIKE ?", sqlPattern),
+            new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern),
             new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern) };
         final CompletionFuture<Collection<Integer>> completion = threadPoolS.invoke(searchers);
         final Set<Integer> cids = new HashSet<Integer>();

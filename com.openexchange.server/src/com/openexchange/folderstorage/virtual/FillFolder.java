@@ -47,52 +47,30 @@
  *
  */
 
-package com.openexchange.messaging.facebook;
+package com.openexchange.folderstorage.virtual;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.messaging.MessagingAccount;
-import com.openexchange.messaging.MessagingService;
-import com.openexchange.messaging.generic.DefaultMessagingAccountManager;
+import com.openexchange.folderstorage.AbstractFolder;
 
 
 /**
- * {@link FacebookMessagingAccountManager}
+ * {@link FillFolder} - A fill-me folder.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FacebookMessagingAccountManager extends DefaultMessagingAccountManager {
+public final class FillFolder extends AbstractFolder {
+
+    private static final long serialVersionUID = 6942281551071710192L;
 
     /**
-     * Initializes a new {@link FacebookMessagingAccountManager}.
-     * @param service
+     * Initializes a new {@link FillFolder}.
      */
-    public FacebookMessagingAccountManager(final MessagingService service) {
-        super(service);
+    public FillFolder() {
+        super();
     }
 
     @Override
-    protected MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
-        final Map<String, Object> configuration = account.getConfiguration();
-        if (null != configuration) {
-            final Object id = configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
-            if (null != id) {
-                configuration.put(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT, id.toString());
-            }
-        }
-        return account;
-    }
-
-    @Override
-    protected MessagingAccount modifyOutgoing(final MessagingAccount account) throws OXException {
-        final Map<String, Object> configuration = account.getConfiguration();
-        if (null != configuration) {
-            final String id = (String) configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
-            if (null != id) {
-                configuration.put(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT, Integer.valueOf(id.trim()));
-            }
-        }
-        return account;
+    public boolean isGlobalID() {
+        return false;
     }
 
 }
