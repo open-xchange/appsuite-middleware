@@ -75,7 +75,7 @@ public final class FacebookMessagingAccountManager extends DefaultMessagingAccou
     protected MessagingAccount modifyIncoming(final MessagingAccount account) throws OXException {
         final Map<String, Object> configuration = account.getConfiguration();
         if (null != configuration) {
-            final Integer id = (Integer) configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
+            final Object id = configuration.get(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT);
             if (null != id) {
                 configuration.put(FacebookConstants.FACEBOOK_OAUTH_ACCOUNT, id.toString());
             }

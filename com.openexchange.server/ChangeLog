@@ -3,6 +3,8 @@
  - Fix for bug 21313: Properly obtaining a Writer to Servlet's OutputStream
  - Fix for bug 21315: lowered log level to an appropriate level
  - Fix for bug 21297: Added try-catch clause while checking a charset's validity
+ - Fix for bug 20930: Fixed possible ClassCastException
+ - Fix for bug 21248: Dealing with other error causes during authentication attempt
 
 * 2012-01-22 - thorben.betten@open-xchange.com
 

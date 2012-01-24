@@ -1065,7 +1065,9 @@ public final class OutlookFolderStorage implements FolderStorage {
             }
             outlookFolder = new OutlookFolder(realFolder);
             outlookFolder.setTreeID(treeId);
-            setSubfolders(treeId, folderId, storageParameters, user, tree, contextId, outlookFolder, realFolder);
+            if (!INFOSTORE.equals(folderId)) {
+                setSubfolders(treeId, folderId, storageParameters, user, tree, contextId, outlookFolder, realFolder);
+            }
         }
         /*
          * Load folder data from database
@@ -2370,6 +2372,7 @@ public final class OutlookFolderStorage implements FolderStorage {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (INFOSTORE.equals(id)) { // InfoStore folder
             folder.setParentID(FolderStorage.PRIVATE_ID);
+            folder.setSubfolderIDs(null);
         } else if (isDefaultMailFolder(folder)) {
             folder.setParentID(FolderStorage.PRIVATE_ID);
         } else if (isNonPrimaryMailAccountFolder(folder)) {
