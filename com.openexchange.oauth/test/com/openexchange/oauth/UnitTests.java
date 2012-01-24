@@ -53,13 +53,17 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.oauth.internal.OAuthServiceImplDBTest;
 
-
 /**
- * {@link UnitTests}
+ * Test suite for integrated unit tests of OAuth bundle.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class UnitTests {
+
+    public UnitTests() {
+        super();
+    }
+
     public static Test suite() {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(OAuthServiceImplDBTest.class);
