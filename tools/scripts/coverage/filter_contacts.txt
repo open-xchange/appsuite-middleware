@@ -1,0 +1,7 @@
++com.openexchange.goupware.container.ContactObject
++com.openexchange.ajax.parser.ContactParser
++com.openexchange.ajax.writer.ContactWriter
++com.openexchange.ajax.Contact
++com.openexchange.groupware.contact.*
++com.openexchange.ajax.ContactRequest
+-com.openexchange.groupware.contact.Classes

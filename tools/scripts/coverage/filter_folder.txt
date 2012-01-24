@@ -1,0 +1,12 @@
++com.openexchange.groupware.container.FolderObject
++com.openexchange.ajax.parser.FolderParser
++com.openexchange.ajax.writer.FolderWriter
++com.openexchange.ajax.Folder
++com.openexchange.api2.FolderSQLInterface
++com.openexchange.api2.RdbFolderSQLInterface
++com.openexchange.cache.impl.FolderCacheManager
++com.openexchange.cache.impl.FolderQueryCacheManager
++com.openexchange.tools.oxfolder.*
++com.openexchange.tools.oxfolder.deletelistener.*
++com.openexchange.tools.oxfolder.downgrade.*
++com.openexchange.tools.oxfolder.treeconsistency.*
