@@ -178,7 +178,7 @@ public final class ListAction extends AbstractFolderAction {
         if (null == string) {
             return defaultValue;
         }
-        final String s = string.toLowerCase(Locale.ENGLISH);
+        final String s = string.toLowerCase(Locale.ENGLISH).trim();
         return "true".equals(s) || "yes".equals(s) || "on".equals(s) || "1".equals(s);
     }
 

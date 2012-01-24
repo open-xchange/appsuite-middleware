@@ -52,22 +52,19 @@ package com.openexchange.authentication.imap.impl;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import static com.openexchange.authentication.LoginExceptionCodes.UNKNOWN;
 import static com.openexchange.authentication.imap.osgi.ImapAuthServiceRegistry.getServiceRegistry;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
-
+import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.security.auth.login.LoginException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -337,10 +334,14 @@ public class IMAPAuthentication implements AuthenticationService {
         } catch (final NoSuchProviderException e) {
             LOG.error("Error setup initial imap envorinment!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (final MessagingException e) {
+        } catch (final AuthenticationFailedException e) {
             LOG.info("Authentication error on host " + host + ":" + port + " for user " + user, e);
-            LOG.debug("Debug imap authentication, e");
+            LOG.debug("Debug imap authentication", e);
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
+        } catch (final MessagingException e) {
+            LOG.info("Messaging error on host " + host + ":" + port + " for user " + user, e);
+            LOG.debug("Debug imap error", e);
+            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {
             try {
                 if (imapconnection != null) {
