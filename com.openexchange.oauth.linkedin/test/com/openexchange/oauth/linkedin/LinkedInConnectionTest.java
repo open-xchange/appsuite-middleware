@@ -49,30 +49,27 @@
 
 package com.openexchange.oauth.linkedin;
 
-//import java.io.BufferedReader;
-//import java.io.FileInputStream;
-//import java.io.FileNotFoundException;
-//import java.io.IOException;
-//import java.io.InputStreamReader;
-//import java.util.Scanner;
-//import org.scribe.builder.ServiceBuilder;
-//import org.scribe.builder.api.LinkedInApi;
-//import org.scribe.model.Response;
-//import org.scribe.model.Token;
-//import org.scribe.model.Verb;
-//import org.scribe.model.Verifier;
-//import org.scribe.oauth.OAuthService;
-//import com.openexchange.oauth.DefaultOAuthToken;
-
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.builder.api.LinkedInApi;
+import org.scribe.model.Token;
+import org.scribe.model.Verifier;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.linkedin.osgi.Activator;
+
 /**
  * {@link LinkedInConnectionTest}
  *
@@ -82,85 +79,80 @@ public class LinkedInConnectionTest extends TestCase {
 
     private LinkedInServiceImpl linkedIn;
 
-    private final String apiKey = "";
-    private final String apiSecret = "";
-    private final String LI_ID_KLEIN = "a0EFOQ6WNm"; //LinkedIn ID of Marcus Klein - I assume every dev testing this will have either Marcus or Martin in their contact list
-    private final String LI_ID_KAUSS = "hzFnTZPLsz"; //LinkedIn ID of Martin Kauss - I assume every dev testing this will have either Marcus or Martin in their contact list
+    private final String apiKey = "PLEASE_INSERT_VALID_KEY_HERE";
+    private final String apiSecret = "PLEASE_INSERT_VALID_SECRET_HERE";
+    private final String LI_ID_KLEIN = "a0EFOQ6WNm";
+    private final String LI_ID_KAUSS = "hzFnTZPLsz";
 
     @Override
-    public void setUp(){
+    public void setUp() {
         final Activator activator = new Activator();
         linkedIn = new LinkedInServiceImpl(activator);
         activator.setOauthService(new MockOAuthService());
         activator.setConfigurationService(new MockConfigurationService(apiKey, apiSecret));
     }
 
-    @Override
-    public void tearDown(){
+    /**
+     * To activate this test enter above a valid API key.
+     */
+    public void _testAccountCreation(){
+        // This is basically scribes example
+        org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
 
+        System.out.println("=== LinkedIn's OAuth Workflow ===");
+        System.out.println();
+
+        // Obtain the Request Token
+        System.out.println("Fetching the Request Token...");
+        Token requestToken = service.getRequestToken();
+        System.out.println("Got the Request Token!");
+        System.out.println();
+
+        DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
+        oAuthToken.setToken(requestToken.getToken());
+        oAuthToken.setSecret(requestToken.getSecret());
+
+        System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
+        System.out.println("And paste the verifier here");
+        System.out.print(">>");
+
+        Scanner in = new Scanner(System.in);
+        Verifier verifier = new Verifier(in.nextLine());
+        System.out.println();
+
+        // Trade the Request Token and Verifier for the Access Token
+        System.out.println("Trading the Request Token for an Access Token...");
+        Token accessToken = service.getAccessToken(requestToken, verifier);
+        System.out.println("Got the Access Token!");
+        System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
+        System.out.println();
     }
 
-//    public void testAccountCreation(){
-//    	//8cede13f-0881-4e05-99aa-81dfc0f1aa08(Token), 16fb16ca-7fff-4de0-9663-5dc0185e8488(Secret)
-//
-//        // This is basically scribes example
-//        org.scribe.oauth.OAuthService service = new ServiceBuilder().provider(LinkedInApi.class).apiKey(apiKey).apiSecret(apiSecret).build();
-//
-//        System.out.println("=== LinkedIn's OAuth Workflow ===");
-//        System.out.println();
-//
-//        // Obtain the Request Token
-//        System.out.println("Fetching the Request Token...");
-//        Token requestToken = service.getRequestToken();
-//        System.out.println("Got the Request Token!");
-//        System.out.println();
-//
-//        DefaultOAuthToken oAuthToken = new DefaultOAuthToken();
-//        oAuthToken.setToken(requestToken.getToken());
-//        oAuthToken.setSecret(requestToken.getSecret());
-//
-//        System.out.println("https://api.linkedin.com/uas/oauth/authorize?oauth_token="+oAuthToken.getToken());
-//        System.out.println("And paste the verifier here");
-//        System.out.print(">>");
-//
-//        Scanner in = new Scanner(System.in);
-//        Verifier verifier = new Verifier(in.nextLine());
-//        System.out.println();
-//
-//        // Trade the Request Token and Verifier for the Access Token
-//        System.out.println("Trading the Request Token for an Access Token...");
-//        Token accessToken = service.getAccessToken(requestToken, verifier);
-//        System.out.println("Got the Access Token!");
-//        System.out.println("(if you're curious it looks like this: " + accessToken.getToken() + "(Token), "+accessToken.getSecret()+"(Secret) )");
-//        System.out.println();
-//    }
-//
-//    public void testXMLParsing(){
-//
-//        try {
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
-//            String string = "";
-//            String line;
-//            while ((line = reader.readLine()) != null) {
-//                string += line + "\n";
-//            }
-//            List<Contact> contacts = new LinkedInXMLParser().parseConnections(string);
-//            System.out.println("No of contacts : " + contacts.size());
-//            for (Contact contact : contacts){
-//                if (contact.getSurName().equals("Geck")){
-//                    System.out.println("Birthday : " + contact.getBirthday());
-//                    System.out.println("telephone_home1  : " + contact.getTelephoneHome1());
-//                    System.out.println("note  : " + contact.getNote());
-//                }
-//            }
-//        } catch (FileNotFoundException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public void testXMLParsing() {
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream("/Users/karstenwill/Documents/Development/ox_projectset_workspace/com.openexchange.oauth.linkedin/local_only/linkedin.xml"), "UTF8"));
+            String string = "";
+            String line;
+            while ((line = reader.readLine()) != null) {
+                string += line + "\n";
+            }
+            List<Contact> contacts = new LinkedInXMLParser().parseConnections(string);
+            System.out.println("No of contacts : " + contacts.size());
+            for (Contact contact : contacts) {
+                if (contact.getSurName().equals("Geck")) {
+                    System.out.println("Birthday : " + contact.getBirthday());
+                    System.out.println("telephone_home1  : " + contact.getTelephoneHome1());
+                    System.out.println("note  : " + contact.getNote());
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-    public void testGetMyContacts(){
+    public void testGetMyContacts() {
         final List<Contact> contacts = linkedIn.getContacts(null,1,1,1);
         boolean found = false;
         for (final Contact contact : contacts){
@@ -176,7 +168,7 @@ public class LinkedInConnectionTest extends TestCase {
     	linkedIn.getContacts(null,1,1,1);
     }
 
-    public void testGetProfileForEMail() throws OXException, JSONException{
+    public void testGetProfileForEMail() throws OXException, JSONException {
     	final JSONObject fullProfile = linkedIn.getFullProfileByEMail(Arrays.asList("tobiasprinz@gmx.net"),null,1,1,1);
     	assertEquals("Tobias", fullProfile.getString("firstName"));
     	assertEquals("Prinz", fullProfile.getString("lastName"));
