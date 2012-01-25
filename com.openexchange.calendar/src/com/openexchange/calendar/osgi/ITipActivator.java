@@ -1,0 +1,147 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.calendar.osgi;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.openexchange.calendar.api.AppointmentSqlFactory;
+import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.api.CalendarFeature;
+import com.openexchange.calendar.api.itip.CalendarITipIntegrationUtility;
+import com.openexchange.calendar.api.itip.DefaultNotificationParticipantResolver;
+import com.openexchange.calendar.itip.AppointmentNotificationPool;
+import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
+import com.openexchange.calendar.itip.ITipAnalyzerService;
+import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
+import com.openexchange.calendar.itip.ITipFeature;
+import com.openexchange.calendar.itip.NotifyFeature;
+import com.openexchange.calendar.itip.analyzers.DefaultITipAnalyzerService;
+import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
+import com.openexchange.calendar.itip.generators.NotificationMailGeneratorFactory;
+import com.openexchange.calendar.itip.performers.DefaultITipDingeMacherFactoryService;
+import com.openexchange.calendar.itip.sender.DefaultMailSenderService;
+import com.openexchange.calendar.itip.sender.MailSenderService;
+import com.openexchange.calendar.itip.sender.PoolingMailSenderService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.data.conversion.ical.itip.ITipEmitter;
+import com.openexchange.group.GroupService;
+import com.openexchange.html.HTMLService;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.templating.base.TemplateService;
+import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
+
+
+/**
+ * {@link ITipActivator}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ */
+public class ITipActivator extends HousekeepingActivator {
+
+    private static List<CalendarFeature> features = new ArrayList<CalendarFeature>(2);
+    private static AppointmentSqlFactory factory = null;
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HTMLService.class };
+    }
+
+
+    @Override
+    protected void startBundle() throws Exception {
+        final ContextService contexts = getService(ContextService.class);
+        final UserService users = getService(UserService.class);
+        final ResourceService resources = getService(ResourceService.class);
+        final GroupService groups = getService(GroupService.class);
+        final ConfigurationService config = getService(ConfigurationService.class);
+
+        
+        MailSenderService sender = new DefaultMailSenderService(getService(ITipEmitter.class), getService(HTMLService.class));
+
+        final AppointmentSqlFactory sqlFactory = new AppointmentSqlFactory();
+        final CalendarITipIntegrationUtility util = new CalendarITipIntegrationUtility(sqlFactory, new CalendarCollection(), contexts);
+        final DefaultNotificationParticipantResolver resolver = new DefaultNotificationParticipantResolver(groups, users, resources, config, util );
+        final NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this);
+
+        AppointmentNotificationPool pool = new AppointmentNotificationPool(getService(TimerService.class), mails, sender, config.getIntProperty("com.openexchange.calendar.notify.interval", 120000));
+        sender = new PoolingMailSenderService(pool, sender);
+        
+        
+        registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util, this));
+        registerService(ITipDingeMacherFactoryService.class, new DefaultITipDingeMacherFactoryService(util, sender, mails));
+
+        registerService(ITipMailGeneratorFactory.class, mails);
+
+        registerService(MailSenderService.class, sender);
+        
+        features.add(new NotifyFeature(mails, sender, this));
+        features.add(new ITipFeature(this));
+        setFeatureIfPossible();
+    }
+
+
+    public static void initFeatures(final AppointmentSqlFactory f) {
+        factory = f;
+        setFeatureIfPossible();
+    }
+
+    public static void setFeatureIfPossible() {
+        if (factory != null && !features.isEmpty()) {
+        	for (CalendarFeature feature : features) {
+				factory.addCalendarFeature(feature);
+			}
+        }
+    }
+
+}

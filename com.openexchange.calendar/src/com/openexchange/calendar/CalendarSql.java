@@ -354,9 +354,12 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    @Override
-    public CalendarDataObject getObjectById(final int oid, final int inFolder) throws OXException, SQLException {
-        return getObjectById(oid, inFolder, null);
+    public CalendarDataObject getObjectById(int oid) throws OXException, SQLException {
+        return getObjectById(oid, 0, null, false);
+    }
+
+    public CalendarDataObject getObjectById(final int oid, final int inFolder) throws OXException, SQLException, OXObjectNotFoundException, OXPermissionException {
+        return getObjectById(oid, inFolder, null, true);
     }
 
     /**
@@ -370,7 +373,7 @@ public class CalendarSql implements AppointmentSQLInterface {
      * @throws OXObjectNotFoundException
      * @throws OXPermissionException
      */
-    public CalendarDataObject getObjectById(final int oid, final int inFolder, final Connection readcon) throws OXException {
+    private CalendarDataObject getObjectById(final int oid, final int inFolder, final Connection readcon, boolean checkPermissions) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
@@ -387,7 +390,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             final CalendarOperation co = new CalendarOperation();
             prep = cimp.getPreparedStatement(rcon, cimp.loadAppointment(oid, ctx));
             rs = cimp.getResultSet(prep);
-            final CalendarDataObject cdao = co.loadAppointment(rs, oid, inFolder, cimp, rcon, session, ctx, CalendarOperation.READ, inFolder);
+            final CalendarDataObject cdao = co.loadAppointment(rs, oid, inFolder, cimp, rcon, session, ctx, CalendarOperation.READ, inFolder, checkPermissions);
             recColl.safelySetStartAndEndDateForRecurringAppointment(cdao);
             return cdao;
         } catch(final SQLException sqle) {
@@ -504,6 +507,10 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     @Override
     public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
+        return updateAppointmentObject(cdao, inFolder, clientLastModified, true);
+    }
+
+    public CalendarDataObject[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, boolean checkPermissions) throws OXException {
         RecurrenceChecker.check(cdao);
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
@@ -515,7 +522,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             writecon = DBPool.pickupWriteable(ctx);
 
             final CalendarOperation co = new CalendarOperation();
-            final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon);
+            final CalendarDataObject edao = cimp.loadObjectForUpdate(cdao, session, ctx, inFolder, writecon, checkPermissions);
             if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
                 // Insert-through-update detected
                 throw OXCalendarExceptionCodes.UPDATE_WITHOUT_OBJECT_ID.create();
@@ -630,8 +637,11 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
-    @Override
-    public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException, SQLException {
+    public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified) throws OXException {
+        deleteAppointmentObject(cdao, inFolder, clientLastModified, true);
+    }
+
+    public void deleteAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, boolean checkPermissions) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
