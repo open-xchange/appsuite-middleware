@@ -149,7 +149,7 @@ public final class ListAction extends AbstractFolderAction {
                 if (null == locale) {
                     locale = FolderWriter.DEFAULT_LOCALE;
                 }
-                if (errorOnDuplicateName && !names.add(userizedFolder.getLocalizedName(locale))) {
+                if (!names.add(userizedFolder.getLocalizedName(locale))) {
                     // Duplicate name
                     final String parentName = folderService.getFolder(treeId, parentId, session, null).getLocalizedName(locale);
                     throw FolderExceptionErrorMessage.DUPLICATE_NAME.create(userizedFolder.getLocalizedName(locale), parentName);
