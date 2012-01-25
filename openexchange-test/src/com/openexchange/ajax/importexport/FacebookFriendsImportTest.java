@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,56 +46,60 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.ajax.importexport;
 
-package com.openexchange.log;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
-/**
- * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
- * <p>
- * Useful to programmatically enforce logging of certain log values.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ForceLog {
+import org.json.JSONArray;
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     * 
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    public static ForceLog valueOf(final Object value) {
-        return new ForceLog(value);
-    }
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.FacebookArchiveImportRequest;
+import com.openexchange.ajax.importexport.actions.FacebookFriendsImportRequest;
+import com.openexchange.ajax.contact.action.AllRequest;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.groupware.container.Contact;
 
-    private final Object value;
+public class FacebookFriendsImportTest extends AbstractManagedContactTest {
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     *
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    private ForceLog(final Object value) {
-        super();
-        if (null == value) {
-            throw new NullPointerException("Value is null.");
-        }
-        this.value = value;
-    }
+	public FacebookFriendsImportTest(String name) {
+		super(name);
+	}
+	
+	public void testSimpleFile() throws Exception{
+		InputStream file = new FileInputStream(new File("/home/tobiasp/facebook-friends-export/rafael.laguna/html/friends.html"));
+		
+		getClient().execute(new FacebookFriendsImportRequest(folderID, file ));
+		
+		AllRequest allRequest = new AllRequest(folderID,Contact.ALL_COLUMNS);
+		CommonAllResponse allResponse = getClient().execute(allRequest);
+		
+		JSONArray all = (JSONArray) allResponse.getData();
+		
+		assertEquals(296, all.length());
+		
+		for(int i = 0; i < all.length(); i++){
+			System.out.println(all.getJSONArray(i));
+		}
+	}
 
-    /**
-     * Gets the associated value.
-     *
-     * @return The value
-     */
-    public Object getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return value.toString();
-    }
+	public void testCompressedArchive() throws Exception{
+		InputStream file = new FileInputStream(new File("/home/tobiasp/facebook-friends-export/facebook-rafael.laguna.zip"));
+		
+		getClient().execute(new FacebookArchiveImportRequest(folderID, file ));
+		
+		AllRequest allRequest = new AllRequest(folderID,Contact.ALL_COLUMNS);
+		CommonAllResponse allResponse = getClient().execute(allRequest);
+		
+		JSONArray all = (JSONArray) allResponse.getData();
+		
+		assertEquals(296, all.length());
+		
+		for(int i = 0; i < all.length(); i++){
+			System.out.println(all.getJSONArray(i));
+		}
+	}
 
 }
+

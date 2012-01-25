@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,56 +46,34 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.ajax.contact;
 
-package com.openexchange.log;
+import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
+import com.openexchange.ajax.importexport.actions.ICalImportRequest;
+import com.openexchange.ajax.importexport.actions.ICalImportResponse;
 
-/**
- * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
- * <p>
- * Useful to programmatically enforce logging of certain log values.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ForceLog {
+public class Bug19984Test extends ManagedAppointmentTest {
+	
+	public Bug19984Test(String name) {
+		super(name);
+	}
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     * 
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    public static ForceLog valueOf(final Object value) {
-        return new ForceLog(value);
-    }
-
-    private final Object value;
-
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     *
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    private ForceLog(final Object value) {
-        super();
-        if (null == value) {
-            throw new NullPointerException("Value is null.");
-        }
-        this.value = value;
-    }
-
-    /**
-     * Gets the associated value.
-     *
-     * @return The value
-     */
-    public Object getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return value.toString();
-    }
-
+	String ical = "BEGIN:VCALENDAR\n" + 
+			"BEGIN:VEVENT\n" + 
+			"DTSTART:20110726T183000\n" + 
+			"DTEND:20110726T200000\n" + 
+			"LOCATION;ENCODING=QUOTED-PRINTABLE:DLRG-Heim\n" + 
+			"CATEGORIES;ENCODING=QUOTED-PRINTABLE:DLRG WRD\n" + 
+			"DESCRIPTION;CHARSET=ISO-8859-1;ENCODING=QUOTED-PRINTABLE:Liebe Einsatzkräfte,=0A=0Awir laden ein zum Wasserretter-Treff. Dieser findet alle vier Wochen statt. Neben der Einteilung für den Wachdienst werden auch aktuelle Themen, wie Einsätze, abgearbeitet oder auch nur kleine Ausbildungsinhalte aus dem Bereich Fachausbildung Wasserrettung vermittelt.=0A=0AWir freuen uns daher über eine zahlreiche Teilnahme!=0A=0AEingeladen sind alle ab Rettungsschwimmabzeichen Bronze!!!\n" + 
+			"SUMMARY;ENCODING=QUOTED-PRINTABLE:Wasserretter-Treff [OG Hirschaid]\n" + 
+			"PRIORITY:3\n" + 
+			"END:VEVENT\n" + 
+			"END:VCALENDAR";
+	
+	public void testIt() throws Exception {
+		ICalImportRequest request = new ICalImportRequest(folder.getObjectID(), ical);
+		ICalImportResponse response = getClient().execute(request);
+		System.out.println(response.getData());
+		assertFalse(response.hasError());
+	}
 }

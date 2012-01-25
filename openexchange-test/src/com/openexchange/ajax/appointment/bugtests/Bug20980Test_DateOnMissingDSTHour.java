@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,56 +46,39 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.ajax.appointment.bugtests;
 
-package com.openexchange.log;
+import java.util.Date;
 
-/**
- * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
- * <p>
- * Useful to programmatically enforce logging of certain log values.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ForceLog {
+import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
+import com.openexchange.groupware.container.Appointment;
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     * 
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    public static ForceLog valueOf(final Object value) {
-        return new ForceLog(value);
-    }
+public class Bug20980Test_DateOnMissingDSTHour extends ManagedAppointmentTest {
+	public Bug20980Test_DateOnMissingDSTHour(String name) {
+		super(name);
+	}
 
-    private final Object value;
+	public void testBugWithDST() throws Exception{
+		int fid = folder.getObjectID();
+		Appointment series = generateDailyAppointment();
+		series.setStartDate(D("30/3/2008 01:00",utc));
+		series.setEndDate(D("30/3/2008 02:00", utc));
+		series.setTitle("A daily series");
+		series.setParentFolderID(fid);
+		calendarManager.insert(series);
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     *
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    private ForceLog(final Object value) {
-        super();
-        if (null == value) {
-            throw new NullPointerException("Value is null.");
-        }
-        this.value = value;
-    }
-
-    /**
-     * Gets the associated value.
-     *
-     * @return The value
-     */
-    public Object getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return value.toString();
-    }
+		Date lastMod = series.getLastModified();
+		for(int i = 1; i < 3; i++){
+			Appointment changeEx = new Appointment();
+			changeEx.setParentFolderID(series.getParentFolderID());
+			changeEx.setObjectID(series.getObjectID());
+			changeEx.setLastModified(lastMod);
+			changeEx.setRecurrencePosition(i);
+			changeEx.setTitle("Element # "+i+" of series that has different name");
+			calendarManager.update(changeEx);
+			assertNull("Problem with update #"+i, calendarManager.getLastException());
+			lastMod = new Date(calendarManager.getLastModification().getTime() +1);
+		}
+	}
 
 }

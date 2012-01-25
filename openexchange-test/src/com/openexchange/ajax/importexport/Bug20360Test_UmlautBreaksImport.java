@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,56 +46,51 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.ajax.importexport;
 
-package com.openexchange.log;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
-/**
- * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
- * <p>
- * Useful to programmatically enforce logging of certain log values.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ForceLog {
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     * 
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    public static ForceLog valueOf(final Object value) {
-        return new ForceLog(value);
-    }
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.VCardImportRequest;
+import com.openexchange.ajax.importexport.actions.VCardImportResponse;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 
-    private final Object value;
+public class Bug20360Test_UmlautBreaksImport extends AbstractManagedContactTest {
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     *
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    private ForceLog(final Object value) {
-        super();
-        if (null == value) {
-            throw new NullPointerException("Value is null.");
-        }
-        this.value = value;
-    }
+	private String vcard = 
+		"BEGIN:VCARD\n" + 
+		"VERSION:3.0\n" + 
+		"N;CHARSET=UTF-8:Täst;Üser\n" + 
+		"FN;CHARSET=UTF-8:Sträto\n" + 
+		"EMAIL;TYPE=PREF,INTERNET:schneider@sträto.de\n" +
+		"EMAIL:schneider@strato.de\n" +
+		"END:VCARD\n";
 
-    /**
-     * Gets the associated value.
-     *
-     * @return The value
-     */
-    public Object getValue() {
-        return value;
-    }
+	public Bug20360Test_UmlautBreaksImport(String name) {
+		super(name);
+	}
+	
+	public void testUmlaut() throws IOException, JSONException, OXException{
+		VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vcard.getBytes("UTF-8")));
+		VCardImportResponse importResponse = getClient().execute(importRequest);
+		
+		JSONArray data = (JSONArray) importResponse.getData();
+		JSONObject jsonObject = data.getJSONObject(0);
+		int objID = jsonObject.getInt("id");
+		
+		Contact actual = manager.getAction(folderID, objID);
 
-    @Override
-    public String toString() {
-        return value.toString();
-    }
+		assertTrue(actual.containsEmail1());
+		assertTrue(actual.containsEmail2());
+		assertEquals("schneider@sträto.de", actual.getEmail1());
+		assertEquals("schneider@strato.de", actual.getEmail2());
+
+	}
 
 }

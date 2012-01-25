@@ -89,7 +89,10 @@ public class MSNConnectionTest extends TestCase{
        }
     }
 
-    public void testGetAccessTokenViaOAuthServiceMetaDataMSNImpl(){
+    /**
+     * Deactivated because it needs manual interaction.
+     */
+    public void _testGetAccessTokenViaOAuthServiceMetaDataMSNImpl(){
         final String clientID = "0000000040052F00";
         final String clientSecret = "zCH5gYyMcZz6blXGM5M44kC6N98OQ1Uc";
         final String callbackURL = "http://www.open-xchange.com";

@@ -855,10 +855,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session) throws OXException {
+        updateMailAccount(mailAccount, attributes, user, cid, session, false);
+    }
+
+    private void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final boolean changePrimary) throws OXException {
         final Connection con = Database.get(cid, true);
         try {
             con.setAutoCommit(false);
-            updateMailAccount(mailAccount, attributes, user, cid, session, con, false);
+            updateMailAccount(mailAccount, attributes, user, cid, session, con, changePrimary);
             con.commit();
         } catch (final SQLException e) {
             rollback(con);
@@ -913,6 +917,10 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
+        if (null == con) {
+            updateMailAccount(mailAccount, attributes, user, cid, session, changePrimary);
+            return;
+        }
         dropPOP3StorageFolders(user, cid);
         if (attributes.contains(Attribute.NAME_LITERAL)) {
             // Check name

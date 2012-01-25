@@ -47,55 +47,25 @@
  *
  */
 
-package com.openexchange.log;
+package com.openexchange.oauth.msn;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
- * <p>
- * Useful to programmatically enforce logging of certain log values.
+ * {@link UnitTests}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ForceLog {
+public final class UnitTests {
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     * 
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    public static ForceLog valueOf(final Object value) {
-        return new ForceLog(value);
-    }
-
-    private final Object value;
-
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     *
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    private ForceLog(final Object value) {
+    public UnitTests() {
         super();
-        if (null == value) {
-            throw new NullPointerException("Value is null.");
-        }
-        this.value = value;
     }
 
-    /**
-     * Gets the associated value.
-     *
-     * @return The value
-     */
-    public Object getValue() {
-        return value;
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(MSNConnectionTest.class);
+        return tests;
     }
-
-    @Override
-    public String toString() {
-        return value.toString();
-    }
-
 }

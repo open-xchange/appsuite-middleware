@@ -306,19 +306,25 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (null == con) {
             return;
         }
-        try {
-            con.connection.commit();
-        } catch (final SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.autocommit(con.connection);
+        if (con.readWrite) {
+            try {
+                con.connection.commit();
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.autocommit(con.connection);
+                final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+                if (null != databaseService) {
+                    databaseService.backWritable(params.getContext(), con.connection);
+                }
+                final FolderType folderType = getFolderType();
+                params.putParameter(folderType, PARAM_CONNECTION, null);
+                params.markCommitted();
+            }
+        } else {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
             if (null != databaseService) {
-                if (con.readWrite) {
-                    databaseService.backWritable(params.getContext(), con.connection);
-                } else {
-                    databaseService.backReadOnly(params.getContext(), con.connection);
-                }
+                databaseService.backReadOnly(params.getContext(), con.connection);
             }
             final FolderType folderType = getFolderType();
             params.putParameter(folderType, PARAM_CONNECTION, null);
@@ -1305,19 +1311,22 @@ public final class DatabaseFolderStorage implements FolderStorage {
         if (null == con) {
             return;
         }
-        try {
-            DBUtils.rollback(con.connection);
-        } finally {
-            DBUtils.autocommit(con.connection);
+        if (con.readWrite) {
+            try {
+                DBUtils.rollback(con.connection);
+            } finally {
+                DBUtils.autocommit(con.connection);
+                final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
+                if (null != databaseService) {
+                    databaseService.backWritable(params.getContext(), con.connection);
+                }
+                params.putParameter(getFolderType(), PARAM_CONNECTION, null);
+            }
+        } else {
             final DatabaseService databaseService = DatabaseServiceRegistry.getServiceRegistry().getService(DatabaseService.class);
             if (null != databaseService) {
-                if (con.readWrite) {
-                    databaseService.backWritable(params.getContext(), con.connection);
-                } else {
-                    databaseService.backReadOnly(params.getContext(), con.connection);
-                }
+                databaseService.backReadOnly(params.getContext(), con.connection);
             }
-            params.putParameter(getFolderType(), PARAM_CONNECTION, null);
         }
     }
 
@@ -1339,28 +1348,32 @@ public final class DatabaseFolderStorage implements FolderStorage {
                  * commit, restore auto-commit & push to pool
                  */
                 parameters.putParameter(folderType, PARAM_CONNECTION, null);
-                try {
-                    con.connection.commit();
-                } catch (final Exception e) {
-                    // Ignore
-                    DBUtils.rollback(con.connection);
-                }
-                DBUtils.autocommit(con.connection);
                 if (con.readWrite) {
+                    try {
+                        con.connection.commit();
+                    } catch (final Exception e) {
+                        // Ignore
+                        DBUtils.rollback(con.connection);
+                    }
+                    DBUtils.autocommit(con.connection);
                     databaseService.backWritable(context, con.connection);
                 } else {
                     databaseService.backReadOnly(context, con.connection);
                 }
             }
-            con = modify ? new ConnectionMode(databaseService.getWritable(context), true) : new ConnectionMode(databaseService.getReadOnly(context), false);
-            con.connection.setAutoCommit(false);
+            if (modify) {
+                con = new ConnectionMode(databaseService.getWritable(context), true);
+                con.connection.setAutoCommit(false);
+            } else {
+                con = new ConnectionMode(databaseService.getReadOnly(context), false);
+            }
             // Put to parameters
             if (parameters.putParameterIfAbsent(folderType, PARAM_CONNECTION, con)) {
                 // Success
             } else {
                 // Fail
-                con.connection.setAutoCommit(true);
                 if (modify) {
+                    con.connection.setAutoCommit(true);
                     databaseService.backWritable(context, con.connection);
                 } else {
                     databaseService.backReadOnly(context, con.connection);

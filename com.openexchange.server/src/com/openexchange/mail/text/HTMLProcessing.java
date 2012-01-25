@@ -724,7 +724,7 @@ public final class HTMLProcessing {
                                 imageURL = imgSource.generateUrl(imageLocation, session);
                             }
                             linkBuilder.setLength(0);
-                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
+                            linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(filename).append('"');
                             mr.appendLiteralReplacement(strBuffer, linkBuilder.toString());
                         }
                         mr.appendTail(strBuffer);
@@ -765,7 +765,7 @@ public final class HTMLProcessing {
                     imageURL = imgSource.generateUrl(imageLocation, session);
                 }
                 linkBuilder.setLength(0);
-                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"');
+                linkBuilder.append(STR_SRC).append('"').append(imageURL).append('"').append(" id=\"").append(cid).append('"');
                 cidReplacer.appendLiteralReplacement(cidBuffer, linkBuilder.toString());
             } while (cidMatcher.find());
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,32 @@
  *
  */
 
-package com.openexchange.log;
+package com.openexchange.ajax.contact;
 
-/**
- * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
- * <p>
- * Useful to programmatically enforce logging of certain log values.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ForceLog {
+import com.openexchange.groupware.container.Contact;
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     * 
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    public static ForceLog valueOf(final Object value) {
-        return new ForceLog(value);
-    }
+public class Bug18862Test extends AbstractManagedContactTest {
+	
+	/**
+	 * Size of the contact image in bytes, should be larger than the 
+	 * configured <code>max_image_size</code>.
+	 */
+	private static final int IMAGE_SIZE = 100 * 1024;
+	
+	private static final String EXPECTED_CODE = "CON-0101";
 
-    private final Object value;
-
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     *
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    private ForceLog(final Object value) {
-        super();
-        if (null == value) {
-            throw new NullPointerException("Value is null.");
-        }
-        this.value = value;
-    }
-
-    /**
-     * Gets the associated value.
-     *
-     * @return The value
-     */
-    public Object getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return value.toString();
-    }
-
+	public Bug18862Test(String name) {
+		super(name);
+	}
+	
+	public void testUploadTooLargeImage() throws Exception {
+        final Contact contact = super.generateContact();
+        contact.setImage1(new byte[IMAGE_SIZE]);
+        contact.setImageContentType("image/jpg");
+        contact.setNumberOfImages(1);
+    	super.manager.newAction(contact);
+    	assertNotNull("got no response", super.manager.getLastResponse());
+    	assertNotNull("no exception thrown", super.manager.getLastResponse().getException());
+    	assertEquals("unexpected error code", EXPECTED_CODE, super.manager.getLastResponse().getException().getErrorCode());
+	}
 }

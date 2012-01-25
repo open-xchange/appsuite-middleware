@@ -181,9 +181,16 @@ public final class VirtualFolderStorage implements FolderStorage {
         return folder;
     }
 
+    private static final boolean ABORT = true;
+
     @Override
     public void checkConsistency(final String treeId, final StorageParameters params) throws OXException {
         if (FOLDER_TREE_EAS.equals(treeId)) {
+            // Not used yet
+            if (ABORT) {
+                return;
+            }
+
             final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
             try {
                 /*

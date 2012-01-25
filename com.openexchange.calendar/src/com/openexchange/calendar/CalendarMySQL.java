@@ -3450,6 +3450,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pidm.setInt(1, cid);
                     pidm.setInt(2, cdao.getObjectID());
                     pidm.execute();
+                } finally {
+                    closeSQLStuff(pidm);
+                }
+                try {
                     pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                     pidm.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
                     pidm.setInt(2, uid);

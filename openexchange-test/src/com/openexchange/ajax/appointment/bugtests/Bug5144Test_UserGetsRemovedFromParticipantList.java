@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,56 +46,57 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.ajax.appointment.bugtests;
 
-package com.openexchange.log;
+import java.util.Date;
 
-/**
- * {@link ForceLog} - The special log item which is going to be logged regardless of log configuration.
- * <p>
- * Useful to programmatically enforce logging of certain log values.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ForceLog {
+import com.openexchange.ajax.appointment.action.DeleteRequest;
+import com.openexchange.ajax.appointment.action.GetRequest;
+import com.openexchange.ajax.appointment.action.GetResponse;
+import com.openexchange.ajax.appointment.helper.AbstractAssertion;
+import com.openexchange.ajax.appointment.recurrence.ManagedAppointmentTest;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.CommonDeleteResponse;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.UserParticipant;
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     * 
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    public static ForceLog valueOf(final Object value) {
-        return new ForceLog(value);
-    }
+public class Bug5144Test_UserGetsRemovedFromParticipantList extends
+		ManagedAppointmentTest {
 
-    private final Object value;
+	public Bug5144Test_UserGetsRemovedFromParticipantList(String name) {
+		super(name);
+	}
+	
+	public void testIt() throws Exception{
+		AJAXClient client2 = new AJAXClient(User.User2);
+		int uid1 = getClient().getValues().getUserId();
+		int uid2 = client2.getValues().getUserId();
+		
+		UserParticipant other = new UserParticipant(client2.getValues().getUserId());
+		assertTrue(other.getIdentifier() > 0);
+		int fid1 = folder.getObjectID();
+		
+		Appointment app = AbstractAssertion.generateDefaultAppointment(fid1);
+		app.addParticipant(other);
+		
+		calendarManager.insert(app);
+		
+		int appId = app.getObjectID();
+		int fid2 = client2.getValues().getPrivateAppointmentFolder();
+		
+		GetResponse getResponse = client2.execute(new GetRequest(fid2,appId));
+		Date lastMod = getResponse.getTimestamp();
 
-    /**
-     * Initializes a new {@link ForceLog} for specified value.
-     *
-     * @param value The value which is forced being logged
-     * @throws NullPointerException If passed value is <code>null</code>
-     */
-    private ForceLog(final Object value) {
-        super();
-        if (null == value) {
-            throw new NullPointerException("Value is null.");
-        }
-        this.value = value;
-    }
-
-    /**
-     * Gets the associated value.
-     *
-     * @return The value
-     */
-    public Object getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return value.toString();
-    }
+		client2.execute(new DeleteRequest(appId, fid2, lastMod));
+		
+		Appointment actual = calendarManager.get(app);
+		
+		Participant[] participants = actual.getParticipants();
+		
+		assertEquals(1, participants.length);
+		assertEquals(uid1, participants[0].getIdentifier());
+	}
 
 }
