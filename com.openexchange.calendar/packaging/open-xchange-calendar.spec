@@ -4,7 +4,7 @@
 Name:           open-xchange-calendar
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
-BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ 
+BuildRequires:  ant open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-templating-base >= @OXVERSION@ open-xchange-configread >= @OXVERSION@ open-xchange-html >= @OXVERSION@ 
 %if 0%{?suse_version} && 0%{?sles_version} < 11
 %if %{?suse_version} <= 1010
 # SLES10
@@ -38,7 +38,7 @@ BuildRequires:  java-1.6.0-openjdk-devel saxon
 BuildRequires:  java-1.6.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define		ox_release 18
+%define		ox_release 4
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GNU General Public License (GPL)
@@ -46,7 +46,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 #URL:            
 Source:         %{name}_%{version}.orig.tar.gz
 Summary:        Calendar Module
-Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@
+Requires:       open-xchange-common >= @OXVERSION@ open-xchange-global >= @OXVERSION@ open-xchange-cache >= @OXVERSION@ open-xchange-server >= @OXVERSION@ open-xchange-sql >= @OXVERSION@ open-xchange-templating-base >= @OXVERSION@ open-xchange-html >= @OXVERSION@ 
 #
 
 %description
@@ -73,8 +73,10 @@ ant -Ddestdir=%{buildroot} -Dprefix=/opt/open-xchange install
 %files
 %defattr(-,root,root)
 %dir /opt/open-xchange/bundles/
+%dir /opt/open-xchange/templates/
 %dir /opt/open-xchange/etc/groupware/osgi/bundle.d/
 %dir /opt/open-xchange/etc/admindaemon/osgi/bundle.d/
 /opt/open-xchange/bundles/*
 /opt/open-xchange/etc/groupware/osgi/bundle.d/*
 /opt/open-xchange/etc/admindaemon/osgi/bundle.d/*
+%config(noreplace) /opt/open-xchange/templates/*
