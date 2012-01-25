@@ -388,6 +388,7 @@ public final class ByteChunk {
     }
 
     public int substract(final byte src[], final int off, final int len) throws IOException {
+
         final int length = getLength();
         if (length == 0) {
             if (in == null) {
