@@ -69,7 +69,6 @@ import com.openexchange.imap.cache.NamespaceFoldersCache;
 import com.openexchange.imap.cache.RootSubfolderCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.IMAPServiceRegistry;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.config.MailProperties;
@@ -280,16 +279,7 @@ public final class IMAPDefaultFolderChecker {
                     /*
                      * Get connection
                      */
-                    final DatabaseService databaseService = IMAPServiceRegistry.getService(DatabaseService.class, true);
-                    Connection con = null;
-                    boolean readOnly = false;
-                    try {
-                        con = databaseService.getWritable(session.getContextId());
-                    } catch (final OXException e) {
-                        con = databaseService.getReadOnly(session.getContextId());
-                        readOnly = true;
-                    }
-                    try {
+                    {
                         /*
                          * Get storage service
                          */
@@ -298,22 +288,10 @@ public final class IMAPDefaultFolderChecker {
                         while (keepgoing) {
                             keepgoing = false;
                             try {
-                                sequentiallyCheckFolders(prefix, sep, type, storageService, mailSessionCache, con);
+                                sequentiallyCheckFolders(prefix, sep, type, storageService, mailSessionCache);
                             } catch (final RetryOtherPrefixException e) {
-                                if (readOnly) { // Not possible to recover...
-                                    final Throwable cause = e.getCause();
-                                    if (cause instanceof MessagingException) {
-                                        throw MIMEMailException.handleMessagingException((MessagingException) cause);
-                                    }
-                                    throw MailExceptionCode.DEFAULT_FOLDER_CHECK_FAILED.create(
-                                        imapConfig.getServer(),
-                                        imapConfig.getLogin(),
-                                        Integer.valueOf(session.getUserId()),
-                                        Integer.valueOf(session.getContextId()),
-                                        null == cause ? "" : cause.getMessage());
-                                }
                                 prefix = e.getPrefix();
-                                final MailAccount mailAccount = getMailAccount(storageService, con);
+                                final MailAccount mailAccount = getMailAccount(storageService);
                                 final MailAccountDescription mad = new MailAccountDescription();
                                 final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);
                                 mad.setId(accountId);
@@ -383,14 +361,10 @@ public final class IMAPDefaultFolderChecker {
                                     session.getUserId(),
                                     session.getContextId(),
                                     session,
-                                    con,
+                                    null,
                                     true);
                                 keepgoing = true;
                             }
-                        }
-                    } finally {
-                        if (null != con) {
-                            databaseService.backWritable(session.getContextId(), con);
                         }
                     }
                     /*
@@ -404,8 +378,19 @@ public final class IMAPDefaultFolderChecker {
         }
     }
 
-    private MailAccount getMailAccount(final MailAccountStorageService storageService, final Connection con) throws OXException {
-            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId(), con);
+    private MailAccount getMailAccount(final MailAccountStorageService storageService) throws OXException {
+        final DatabaseService databaseService = IMAPServiceRegistry.getService(DatabaseService.class, true);
+        final int contextId = session.getContextId();
+        Connection con = null;
+        boolean readOnly = false;
+        try {
+            try {
+                con = databaseService.getWritable(contextId);
+            } catch (final OXException e) {
+                con = databaseService.getReadOnly(contextId);
+                readOnly = true;
+            }
+            final MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), contextId, con);
             for (final MailAccount acc : accounts) {
                 if (acc.getId() == accountId) {
                     return acc;
@@ -414,17 +399,24 @@ public final class IMAPDefaultFolderChecker {
             throw MailAccountExceptionCodes.NOT_FOUND.create(
                 Integer.valueOf(accountId),
                 Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId()));
-
+                Integer.valueOf(contextId));
+        } finally {
+            if (null != con) {
+                if (readOnly) {
+                    databaseService.backReadOnly(contextId, con);
+                } else {
+                    databaseService.backWritable(contextId, con);
+                }
+            }
+        }
     }
 
-
-    private void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailAccountStorageService storageService, final MailSessionCache mailSessionCache, final Connection con) throws OXException {
+    private void sequentiallyCheckFolders(final String prefix, final char sep, final int type, final MailAccountStorageService storageService, final MailSessionCache mailSessionCache) throws OXException {
         /*
          * Load mail account
          */
         final boolean isSpamOptionEnabled;
-        final MailAccount mailAccount = getMailAccount(storageService, con);
+        final MailAccount mailAccount = getMailAccount(storageService);
         {
             final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
             isSpamOptionEnabled = usm.isSpamOptionEnabled();
