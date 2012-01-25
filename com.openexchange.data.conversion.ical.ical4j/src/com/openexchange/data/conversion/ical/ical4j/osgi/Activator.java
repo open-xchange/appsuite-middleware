@@ -56,12 +56,16 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JITipEmitter;
+import com.openexchange.data.conversion.ical.ical4j.ICal4JITipParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.data.conversion.ical.itip.ITipEmitter;
+import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
@@ -93,7 +97,11 @@ public class Activator implements BundleActivator {
     /**
      * Service registration of the emitter service.
      */
-    private ServiceRegistration<ICalEmitter> emitterRegistration;
+    private ServiceRegistration emitterRegistration;
+
+    private ServiceRegistration itipParserRegistration;
+
+    private ServiceRegistration itipEmitterRegistration;
 
     /**
      * {@inheritDoc}
@@ -125,8 +133,10 @@ public class Activator implements BundleActivator {
                 new CalendarServiceTracker(context));
         calendarTracker.open();
 
-        parserRegistration = context.registerService(ICalParser.class, new ICal4JParser(), null);
-        emitterRegistration = context.registerService(ICalEmitter.class, new ICal4JEmitter(), null);
+        parserRegistration = context.registerService(ICalParser.class.getName(), new ICal4JParser(), null);
+        emitterRegistration = context.registerService(ICalEmitter.class.getName(), new ICal4JEmitter(), null);
+        itipParserRegistration = context.registerService(ITipParser.class.getName(), new ICal4JITipParser(), null);
+        itipEmitterRegistration = context.registerService(ITipEmitter.class.getName(), new ICal4JITipEmitter(), null);
     }
 
     /**
@@ -136,6 +146,8 @@ public class Activator implements BundleActivator {
     public void stop(final BundleContext context) throws Exception {
         emitterRegistration.unregister();
         parserRegistration.unregister();
+        itipParserRegistration.unregister();
+        itipEmitterRegistration.unregister();
         calendarTracker.close();
         resourceTracker.close();
         CreatedBy.userResolver = UserResolver.EMPTY;

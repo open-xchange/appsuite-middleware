@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: iCal4j implementation of iCal data conversion services
 Bundle-SymbolicName: com.openexchange.data.conversion.ical.ical4j
-Bundle-Version: 7.0.0.0
+Bundle-Version: 6.20.1.0
 Bundle-Activator: com.openexchange.data.conversion.ical.ical4j.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Import-Package: com.openexchange.api2,
  com.openexchange.data.conversion.ical,
- com.openexchange.exception,
+ com.openexchange.data.conversion.ical.itip,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
@@ -34,7 +34,8 @@ Import-Package: com.openexchange.api2,
  org.osgi.framework,
  org.osgi.util.tracker
 Bundle-ClassPath: .,
+ com.openexchange.data.conversion.ical.ical4j.jar,
  lib/ical4j-1.0.1.jar,
  lib/commons-lang-2.3.jar,
  lib/backport-util-concurrent-3.1.jar,
- lib/ical4j-zoneinfo-outlook-1.0.1.jar
+ lib/ical4j-zoneinfo-outlook-1.0.2.jar

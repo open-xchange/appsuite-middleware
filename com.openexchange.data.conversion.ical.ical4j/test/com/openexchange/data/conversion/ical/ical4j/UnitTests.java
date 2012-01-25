@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,59 +49,23 @@
 
 package com.openexchange.data.conversion.ical.ical4j;
 
-import net.fortuna.ical4j.model.Calendar;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
+ * {@link UnitTests}
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ICal4jSession implements ICalSession {
+public final class UnitTests {
 
-    private Calendar calendar = new Calendar();
-    private final Mode mode;
-    private int index;
-
-    /**
-     * Default constructor.
-     * @param mode
-     */
-    public ICal4jSession(Mode mode) {
+    public UnitTests() {
         super();
-        this.mode = mode;
     }
 
-    @Override
-    public Mode getMode() {
-        return mode;
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(ParserToolsTest.class);
+        return tests;
     }
-
-    @Override
-    public ZoneInfo getZoneInfo() {
-        return mode.getZoneInfo();
-    }
-
-    /**
-     * @return the calendar
-     */
-    public Calendar getCalendar() {
-        return calendar;
-    }
-
-    public void setCalendar(Calendar cal) {
-        calendar = cal;
-        index = 0;
-    }
-    
-    /**
-     * Counts the number of elements already parsed for error messages
-     * @return
-     */
-    public int getAndIncreaseIndex() {
-        return index++;
-    }
-
-
 }

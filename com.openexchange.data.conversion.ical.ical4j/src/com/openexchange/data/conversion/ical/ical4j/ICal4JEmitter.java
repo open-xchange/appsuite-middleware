@@ -71,7 +71,6 @@ import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalItem;
 import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.ITipContainer;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
@@ -79,6 +78,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverte
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
+import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -133,25 +133,14 @@ public class ICal4JEmitter implements ICalEmitter {
         return calendar.toString();
     }
 
-    private VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
+    protected VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
         return createEvent(mode, index, appointment, ctx, errors, warnings, new ITipContainer());
     }
 
-    private VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings, final ITipContainer iTip) {
+    protected VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings, final ITipContainer iTip) {
+
         final VEvent vevent = new VEvent();
-        AttributeConverter<VEvent, Appointment>[] converters = null;
-        switch (iTip.getMethod()) {
-        case NO_METHOD:
-            converters = AppointmentConverters.ALL; break;
-        case REQUEST:
-            converters = AppointmentConverters.REQUEST; break;
-        case REPLY:
-            converters = AppointmentConverters.REPLY; break;
-        case CANCEL:
-            converters = AppointmentConverters.CANCEL; break;
-        default:
-            converters = AppointmentConverters.ALL;
-        }
+        List<AttributeConverter<VEvent,Appointment>> converters = AppointmentConverters.getConverters(iTip.getMethod());
 
         for (final AttributeConverter<VEvent, Appointment> converter : converters) {
             if (converter.isSet(appointment)) {
@@ -214,13 +203,13 @@ public class ICal4JEmitter implements ICalEmitter {
             break;
         }
 
-        final VEvent event = createEvent(session.getMode(), getAndIncreaseIndex(session), appointment,ctx, errors, warnings, iTip);
+        final VEvent event = createEvent(session.getMode(), getAndIncreaseIndex(session),appointment, ctx, errors, warnings, iTip);
         calendar.getComponents().add(event);
         addVTimeZone(session.getZoneInfo(), calendar, appointment);
         return new ICal4jItem(event);
     }
 
-    private void addVTimeZone(final ZoneInfo zoneInfo, final Calendar calendar, final Appointment appointment) {
+    protected void addVTimeZone(ZoneInfo zoneInfo, Calendar calendar, Appointment appointment) {
         if (appointment.getTimezone() != null && !appointment.getTimezone().trim().equals("")) {
             String tzid = appointment.getTimezone().trim();
             for (Object o : calendar.getComponents(Component.VTIMEZONE)) {
@@ -258,9 +247,43 @@ public class ICal4JEmitter implements ICalEmitter {
             throw new ConversionError(-1, Code.VALIDATION, e);
         }
     }
+    
+    public void flush(final ICalSession session, final OutputStream stream) throws ConversionError {
+        final Calendar calendar = getCalendar(session);
+        final CalendarOutputter outputter = new CalendarOutputter(false);
+        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+        try {
+            outputter.output(calendar, temp);
+            String icalPart = removeTimezoneData(new String(temp.toByteArray()));
+            PrintWriter writer = new PrintWriter(stream);
+            writer.write("\n");
+            writer.write(icalPart);
+            writer.write("\n");
+            writer.flush();
+        } catch (final IOException e) {
+            throw new ConversionError(-1, Code.WRITE_PROBLEM, e);
+        } catch (final ValidationException e) {
+            throw new ConversionError(-1, Code.VALIDATION, e);
+        }
+        
+        if (!(session instanceof ICal4jSession)) {
+        	throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
+        }
+        Calendar newCal = new Calendar();
+        ((ICal4jSession) session).setCalendar(newCal);
 
-    @Override
-    public ICalItem writeTask(final ICalSession session, final Task task,
+    }
+
+    private String removeTimezoneData(String string) {
+		return Pattern
+			.compile("\n?BEGIN:VTIMEZONE.+?\nEND:VTIMEZONE\n?", 
+				  Pattern.CASE_INSENSITIVE 
+				| Pattern.DOTALL 
+				| Pattern.MULTILINE)
+			.matcher(string).replaceAll("");
+	}
+
+	public ICalItem writeTask(final ICalSession session, final Task task,
         final Context context, final List<ConversionError> errors,
         final List<ConversionWarning> warnings) throws ConversionError {
         final Calendar calendar = getCalendar(session);
@@ -269,7 +292,7 @@ public class ICal4JEmitter implements ICalEmitter {
         return new ICal4jItem(vToDo);
     }
 
-    private void initCalendar(final Calendar calendar) {
+    protected void initCalendar(final Calendar calendar) {
         final PropertyList properties = calendar.getProperties();
         final ProdId prodId = new ProdId();
         prodId.setValue(com.openexchange.server.impl.Version.NAME);
