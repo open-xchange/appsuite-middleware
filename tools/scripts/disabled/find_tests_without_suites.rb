@@ -1,143 +1,125 @@
 require 'find'
 
-$list_of_test_suites = []
-$used_tests = []
-$all_unittests = []
-$all_interfacetests = []
-$current_directory = ""
-
-$LOG = []
 $TESTPATTERN = /addTestSuite\s*\(\s*(.+?)\.class/
 $SUITEPATTERN = /addTest\s*\(\s*(.+?)\.suite/
 
-def debug(string)
-  puts string
+
+def getFilenameFor(classname)
+	packages = classname.split(/\./)
+	filename = packages.pop + ".java"
+	candidates = Dir["#{$START_DIR}/**/#{filename}"]
+
+	abort("Cannot find #{filename} in or below #{$START_DIR}") if(candidates.size < 1)
+	return candidates.first if candidates.size == 1
+	return candidates.select {|candidate| getPackageName(candidate) == packages.join(".")}.first
 end
 
 
-def get_file_name(suite)
-  $current_directory + suite.gsub(/\./,"/") + ".java"
-end
-
-def get_full_name_for_file(filename)
-  content = IO.read(filename)
-  package = content[/package\s+(.+?);/ , 1]
-  name = filename[/\/(\w+?)\.java/,1]
-  package + "." + name
-end
-
-def get_full_name_of_test(test, imports, package)
-  #it might have a full name already
-  if test =~ /^com\.openexchange/ 
-    return test
-  end
-  
-  #it might use a short name and the package name in the imports
-  imports.each do |import|
-    if import =~ /#{test}$/ 
-      return import
-    end
-  end
-
-  #it might be in the same package as the test
-  package + "." + test
+def getClassNameFor(test, imports, package)
+	return test if test =~ /^com\.openexchange/   			#it might have a full name already
+	imports.each { |import| return import if import =~ /#{test}$/ } #it might use a short name and the package name in the imports
+	package + "." + test   						#it might be in the same package as the test
 end
 
 
-def analyze_suite(suite, new_suites)
-  current_package = ""
-  imports = []
-  
-  filename = get_file_name(suite)
-  fh = File.open(filename)
-  fh.each_line do |line|
-    imports.push $1 if line =~ /import\s+(com\.openexchange.+?);/
-    current_package = $1 if line =~ /package\s+(.+?);/
-    
-    #these come later in the source code, so they can access the other variables which are already set
-    if line =~ $SUITEPATTERN
-      suitename = get_full_name_of_test($1, imports, current_package)
-      $LOG << "[Suite] Found #{suitename}"
-      new_suites.push(suitename) 
-    end
-    if line =~ $TESTPATTERN
-      testname = get_full_name_of_test($1, imports, current_package)
-      $LOG << "[Test] Stored #{testname}"
-      $used_tests.push(testname) 
-    end
-  end
+def getClassNameForFile(filename)
+	content = IO.read(filename)
+	package = content[/package\s+(.+?);/ , 1]
+	name = filename[/\/(\w+?)\.java/,1]
+	return package + "." + name
 end
 
 
-def is_test(filename)
+def getPackageName(filename)
+	content = IO.read(filename)
+	content =~ /package\s+(.+?);/
+	return $1 
+end
+
+
+def isTest?(filename)
   return false if filename =~ /Abstract/
-#  return true if filename =~ /Test\.java/
+  return true if filename =~ /Test\.java/
+  return true if filename =~ /Bug\d+Test.+?\.java/
   
   content = IO.read(filename)
+  return true if content =~ /extends\s+TestCase/
   return false if content =~ /abstract\s+class/
   return true if content =~ /public\s+void\s+test/
   return true if content =~ /@test/
+  return true if content =~ /extends\s+\w+Test/
+
   false
 end
 
 
-def find_all_unittests()
-	find_all_tests($all_unittests)
-end
-
-def find_all_interfacetests()
-	find_all_tests($all_interfacetests)
-end
-
-def find_all_tests(test_list)
-  Find.find($current_directory) do |file|
-    next unless file =~ /\.java$/
-    next unless is_test(file)
-    $test_list << get_full_name_for_file(file)
-  end
+def isTestsuite?(filename)
+  return true if (filename =~ /Suite\.java/)
+  content = IO.read(filename)
+  return true if (content =~ /extends\s+TestSuite/) #classist
+  return true if (content =~ /extends\s+\w+Suite/) #classist
+  return true if content =~ $TESTPATTERN #ducky
+  return true if content =~ $SUITEPATTERN #ducky
+  false
 end
 
 
-def find_test_suites(suites)
-  new_suites = []
-  
-  suites.each do |suite|
-    analyze_suite(suite, new_suites)
-  end
-  
-  new_suites.each do |suite|
-    unless $list_of_test_suites.find {|searched_suites| searched_suites == suite}
-      $list_of_test_suites << suite
-      $LOG << "[Suite] Stored #{suite}"
-      find_test_suites(suite)
-    end
-  end
-  
+def getTestsCoveredBy(suitename)
+	imports = []
+	filename = getFilenameFor(suitename)
+	current_package = getPackageName(filename)
+	tests = []
+	fh = File.open(filename)
+	fh.each_line do |line|
+		imports.push $1 if line =~ /import\s+(com\.openexchange.+?);/
+    		tests.push(getClassNameFor($1, imports, current_package)) if line =~ $TESTPATTERN
+	end
+	return tests
 end
 
 
-def find_unused_tests()
-  all = $all_tests.uniq
-  used = $used_tests.uniq
-  unused_tests =  all - used
-  puts "#{all.size} potential tests overall, #{used.size} tests in suites, #{all.size-used.size} probably unused tests:\n" 
-  unused_tests.each {|test| puts "#{test}\n" }
+def getSuitesRelatedTo(suitename, alreadyChecked=[])
+	imports = []
+	filename = getFilenameFor(suitename)
+	current_package = getPackageName(filename)
+	suites = [suitename]
+	fh = File.open(filename)
+	fh.each_line do |line|
+		imports.push $1 if line =~ /import\s+(com\.openexchange.+?);/
+    		suites.push(getClassNameFor($1, imports, current_package)) if line =~ $SUITEPATTERN
+	end
+	alreadyChecked << suitename
+	suites.each do |suite|
+		next if alreadyChecked.include?(suite)
+		suites = (suites + getSuitesRelatedTo(suite, alreadyChecked)).uniq!
+	end
+	return suites
 end
 
+########
+# MAIN #
+########
+abort("Usage: ruby find_tests_without_suites.rb [start directory] [suite 1]...[suite n]\n\nThis script searches through a given directory (first parameter) and finds all tests that\nare not linked in the test suites it is given (consecutive parameters, notation needs to\ninclude full package name, e.g. com.openexchange.test.UnitTests).") if ARGV.size < 2
+
+$START_DIR = ARGV.shift
+startSuites = ARGV.uniq
 
 
-puts "Unused interface- and unit-tests\n"
-puts("=" * 35)
+allTests = Dir["#{$START_DIR}/**/*.java"]
+		.select {|filename| isTest?(filename)}
+		.collect { |filename| getClassNameForFile(filename)}
 
-$current_directory = "../../src/"
-find_test_suites("com.openexchange.test.InterfaceTests")
-find_all_interfacetests()
+coveredTestSuites = startSuites
+		.collect{|suite| getSuitesRelatedTo(suite)}
+		.flatten
+		.uniq
 
-$current_directory = "../../unittests/"
-find_test_suites("com.openexchange.test.UnitTests")
-find_test_suites("com.openexchange.test.I18nTests")
-find_all_unittests()
+coveredTests = coveredTestSuites
+		.collect{|suite| getTestsCoveredBy(suite)}
+		.flatten
+		.uniq
 
-find_unused_tests()
+lonelyTests = (allTests - coveredTests).sort
 
-# puts "\n" + $LOG.join("\n")
+lonelyTests.each{|testname| puts testname+"\n"}
+puts "\n#{allTests.size} tests found, of which #{lonelyTests.size} (#{100*lonelyTests.size/allTests.size}%) are not included in the given suites.\n"
