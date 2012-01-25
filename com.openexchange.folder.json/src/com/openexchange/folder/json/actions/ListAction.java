@@ -115,7 +115,7 @@ public final class ListAction extends AbstractFolderAction {
         final java.util.List<ContentType> allowedContentTypes = parseOptionalContentTypeArrayParameter("allowed_modules", request);
         boolean errorOnDuplicateName = parseBoolean(request.getParameter("errorOnDuplicateName"), false);
         if (!errorOnDuplicateName) {
-            errorOnDuplicateName = parseBoolean(request.getParameter("errOnDuplicateName"), false);
+            errorOnDuplicateName = parseBoolean(request.getParameter("errOnDuplName"), false);
         }
         /*
          * Request subfolders from folder service
