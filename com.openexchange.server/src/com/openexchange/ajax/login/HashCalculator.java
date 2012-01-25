@@ -82,7 +82,7 @@ public class HashCalculator {
     public static String getHash(final HttpServletRequest req, final String userAgent, final String client) {
         try {
             final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update((null == userAgent ? "" : userAgent).getBytes(Charsets.UTF_8));
+            md.update((null == userAgent ? parseUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
             md.update(client.getBytes(Charsets.UTF_8));
             final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
             final String fieldList = null == service ? "" : service.getProperty("com.openexchange.cookie.hash.fields", "");
@@ -110,6 +110,11 @@ public class HashCalculator {
             return "default";
         }
         return parameter;
+    }
+
+    private static String parseUserAgent(final HttpServletRequest req, final String defaultValue) {
+        final String parameter = req.getParameter(LoginFields.USER_AGENT);
+        return null == parameter ? defaultValue : parameter;
     }
 
     private static String getUserAgent(final HttpServletRequest req) {
