@@ -388,8 +388,8 @@ public final class ByteChunk {
     }
 
     public int substract(final byte src[], final int off, final int len) throws IOException {
-
-        if ((end - start) == 0) {
+        final int length = getLength();
+        if (length == 0) {
             if (in == null) {
                 return -1;
             }
@@ -400,15 +400,13 @@ public final class ByteChunk {
         }
 
         int n = len;
-        {
-            final int length = getLength();
-            if (len > length) {
-                n = length;
-            }
-            if (n <= 0) {
-                return 0;
-            }
+        if (len > length) {
+            n = length;
         }
+        if (n <= 0) {
+            return 0;
+        }
+
         System.arraycopy(buff, start, src, off, n);
         start += n;
         return n;
