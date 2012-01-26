@@ -38,17 +38,10 @@ end
 
 
 def isTest?(filename)
-  return false if filename =~ /Abstract/
-  return true if filename =~ /Test\.java/
-  return true if filename =~ /Bug\d+Test.+?\.java/
-  
   content = IO.read(filename)
-  return true if content =~ /extends\s+TestCase/
   return false if content =~ /abstract\s+class/
   return true if content =~ /public\s+void\s+test/
-  return true if content =~ /@test/
-  return true if content =~ /extends\s+\w+Test/
-
+  return true if content =~ /\s+@Test/
   false
 end
 
@@ -121,5 +114,6 @@ coveredTests = coveredTestSuites
 
 lonelyTests = (allTests - coveredTests).sort
 
-lonelyTests.each{|testname| puts testname+"\n"}
+#lonelyTests.each{|testname| puts testname+"\n"}
+lonelyTests.each{|testname| puts "\ttests.addTestSuite(#{testname}.class);\n"}
 puts "\n#{allTests.size} tests found, of which #{lonelyTests.size} (#{100*lonelyTests.size/allTests.size}%) are not included in the given suites.\n"
