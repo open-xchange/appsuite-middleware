@@ -454,7 +454,7 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 if (!isSystem) {
                     final TIntSet ignore = new TIntHashSet(2); ignore.add(userId);
                     if (isShared) {
-                        ignore.add(userId);
+                        ignore.add(parent.getCreatedBy());
                     }
                     for (final OCLPermission permission : parentPermissions) {
                         if (permission.getSystem() <= 0 && (permission.isGroupPermission() || !ignore.contains(permission.getEntity()))) {

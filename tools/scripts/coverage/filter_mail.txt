@@ -1,0 +1,11 @@
++com.openexchange.ajax.mail.*
++com.openexchange.jsieve.*
++com.openexchange.mail.*
++com.openexchange.mailfilter.*
++com.openexchange.smtp.*
++com.openexchange.groupware.container.mail
++com.openexchange.imap.*
++com.openexchange.groupware.settings.tree.modules.mail.*
++com.openexchange.groupware.settings.tree.mail.* 
++com.openexchange.mail.netsol.*
++com.openexchange.mail.oneandone.*

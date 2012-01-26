@@ -49,17 +49,26 @@
 
 package com.openexchange.folderstorage.outlook;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Duplicate;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -106,11 +115,15 @@ public final class DuplicateCleaner {
         final Session session = storageParameters.getSession();
         final int tree = Tools.getUnsignedInteger(treeId);
 
-        final Map<String, List<String>> name2ids = Duplicate.lookupDuplicateNames(session.getContextId(), tree, session.getUserId());
+        final int contextId = session.getContextId();
+        final int userId = session.getUserId();
+        final Map<String, List<String>> name2ids = Duplicate.lookupDuplicateNames(contextId, tree, userId);
         if (name2ids.isEmpty()) {
             return null;
         }
+        boolean actionPerformed = false;
         String first = null;
+        final Set<String> ids = new HashSet<String>(name2ids.size());
         for (final List<String> folderIds : name2ids.values()) {
             for (final String folderId : folderIds) {
                 if (null == first && null != lookUp && lookUp.equals(folderId)) {
@@ -123,6 +136,8 @@ public final class DuplicateCleaner {
                     if (started) {
                         folderStorage.commitTransaction(storageParameters);
                     }
+                    actionPerformed = true;
+                    ids.add(folderId);
                 } catch (final OXException e) {
                     if (started) {
                         folderStorage.rollback(storageParameters);
@@ -135,6 +150,35 @@ public final class DuplicateCleaner {
                     LOG.warn("Deleting folder "+folderId+" failed for tree " + treeId, e);
                 }
             }
+        }
+        if (!ids.isEmpty()) {
+            Connection con = null;
+            try {
+                con = Database.get(contextId, true);
+                con.setAutoCommit(false); // BEGIN
+                for (final String folderId : ids) {
+                    Delete.deleteFolder(contextId, tree, userId, folderId, false, false, con);
+                }
+                con.commit(); // COMMIT
+                actionPerformed = true;
+            } catch (final OXException e) {
+                DBUtils.rollback(con);
+                throw e;
+            } catch (final SQLException e) {
+                DBUtils.rollback(con);
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } catch (final RuntimeException e) {
+                DBUtils.rollback(con);
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (null != con) {
+                    DBUtils.autocommit(con);
+                    Database.back(contextId, true, con);
+                }
+            }
+        }
+        if (actionPerformed) {
+            CacheFolderStorage.getInstance().clearCache(userId, contextId);
         }
         return first;
     }
