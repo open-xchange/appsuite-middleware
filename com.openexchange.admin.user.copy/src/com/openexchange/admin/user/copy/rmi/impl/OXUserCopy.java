@@ -137,7 +137,7 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             throw new StorageException(e.getMessage());
         }
 
-        LOG.info("User " + user.getName() + " successfully copied to Context " + dest.getId() + " from Context " + src.getId());
+        LOG.info("User " + user.getId() + " successfully copied to Context " + dest.getId() + " from Context " + src.getId());
         
         return new User(newUserId);
     }
