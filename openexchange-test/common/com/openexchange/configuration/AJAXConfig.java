@@ -152,7 +152,12 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Group Participant
          */
-        GROUP_PARTICIPANT("group_participant");
+        GROUP_PARTICIPANT("group_participant"),
+        
+        /**
+         * Echo header
+         */
+        ECHO_HEADER("echo_header");
         ;
 
         /**
