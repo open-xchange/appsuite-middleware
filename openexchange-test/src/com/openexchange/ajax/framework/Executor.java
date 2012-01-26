@@ -59,6 +59,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import junit.framework.Assert;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -141,6 +142,7 @@ public class Executor extends Assert {
         return execute(session, request, protocol, hostname, getSleep());
     }
 
+    private static final AtomicLong COUNTER = new AtomicLong(1);
 
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
             final String protocol, final String hostname, final int sleep) throws OXException, IOException,
@@ -176,12 +178,27 @@ public class Executor extends Assert {
         for (final Header header : request.getHeaders()) {
             httpRequest.addHeader(header.getName(), header.getValue());
         }
+        // Test echo header
+        final String echoHeaderName = AJAXConfig.getProperty(AJAXConfig.Property.ECHO_HEADER);
+        String echoValue = null;
+        if (!isEmpty(echoHeaderName)) {
+            echoValue = "pingMeBack-"+COUNTER.getAndIncrement();
+            httpRequest.addHeader(echoHeaderName, echoValue);
+        }
 
         final DefaultHttpClient httpClient = session.getHttpClient();
 
         final long startRequest = System.currentTimeMillis();
     	final HttpResponse response = httpClient.execute(httpRequest);
         final long requestDuration = System.currentTimeMillis() - startRequest;
+        if (null != echoValue) {
+            final org.apache.http.Header header = response.getFirstHeader(echoHeaderName);
+            if (null == header) {
+                fail("Missing echo header: " + echoHeaderName);
+            } else {
+                assertEquals("Wrong echo header", echoValue, header.getValue());
+            }
+        }
         syncCookies(httpClient, session.getConversation());
 
         try {
@@ -202,6 +219,18 @@ public class Executor extends Assert {
         retval.setParseDuration(parseDuration);
 
         return retval;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 	public static void syncCookies(final WebConversation conversation, final DefaultHttpClient httpClient, final String hostname) {

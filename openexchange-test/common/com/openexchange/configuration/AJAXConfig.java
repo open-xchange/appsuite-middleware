@@ -152,7 +152,12 @@ public class AJAXConfig extends AbstractConfig {
         /**
          * Group Participant
          */
-        GROUP_PARTICIPANT("group_participant");
+        GROUP_PARTICIPANT("group_participant"),
+        
+        /**
+         * Echo header; see property "com.openexchange.servlet.echoHeaderName" in file 'server.properties'
+         */
+        ECHO_HEADER("echo_header");
         ;
 
         /**
