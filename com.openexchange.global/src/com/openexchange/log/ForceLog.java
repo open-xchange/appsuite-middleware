@@ -58,6 +58,16 @@ package com.openexchange.log;
  */
 public final class ForceLog {
 
+    /**
+     * Initializes a new {@link ForceLog} for specified value.
+     * 
+     * @param value The value which is forced being logged
+     * @throws NullPointerException If passed value is <code>null</code>
+     */
+    public static ForceLog valueOf(final Object value) {
+        return new ForceLog(value);
+    }
+
     private final Object value;
 
     /**
@@ -66,7 +76,7 @@ public final class ForceLog {
      * @param value The value which is forced being logged
      * @throws NullPointerException If passed value is <code>null</code>
      */
-    public ForceLog(final Object value) {
+    private ForceLog(final Object value) {
         super();
         if (null == value) {
             throw new NullPointerException("Value is null.");

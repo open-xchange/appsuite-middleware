@@ -93,7 +93,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     private Connection get(final int contextId, final boolean write, final boolean noTimeout) throws OXException {
         final Assignment assign = assignmentService.getAssignment(contextId);
-        LogProperties.putLogProperty("com.openexchange.database.schema", new ForceLog(assign.getSchema()));
+        LogProperties.putLogProperty("com.openexchange.database.schema", ForceLog.valueOf(assign.getSchema()));
         return ReplicationMonitor.checkActualAndFallback(pools, assign, noTimeout, write || forceWriteOnly);
     }
 

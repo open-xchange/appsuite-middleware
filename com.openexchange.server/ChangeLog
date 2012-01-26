@@ -1,6 +1,11 @@
+* 2012-01-25 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21355: Fixed possible null dereference in HashCalculator
+
 * 2012-01-24 - thorben.betten@open-xchange.com
 
  - Fix for bug 21318: Introduced sanity check when parsing JSON array from a character sequence
+ - Fix for bug 21250: Dealing with MessagingException during IMAP authentication attempt
 
 * 2012-01-20 - marcus.klein@open-xchange.com
 

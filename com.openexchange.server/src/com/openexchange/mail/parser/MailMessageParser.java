@@ -279,15 +279,15 @@ public final class MailMessageParser {
                 final Map<String, Object> properties = LogProperties.getLogProperties();
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
-                    properties.put("com.openexchange.mail.accountId", new ForceLog(Integer.valueOf(accountId)));
+                    properties.put("com.openexchange.mail.accountId", ForceLog.valueOf(Integer.valueOf(accountId)));
                 }
                 final String mailId = mail.getMailId();
                 if (null != mailId) {
-                    properties.put("com.openexchange.mail.mailId", new ForceLog(mailId));
+                    properties.put("com.openexchange.mail.mailId", ForceLog.valueOf(mailId));
                 }
                 final String folder = mail.getFolder();
                 if (null != folder) {
-                    properties.put("com.openexchange.mail.folder", new ForceLog(folder));
+                    properties.put("com.openexchange.mail.folder", ForceLog.valueOf(folder));
                 }
             }
             /*
