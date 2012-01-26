@@ -152,8 +152,8 @@ public final class ReplicationMonitor {
             try {
                 retval = fetch.get(pools, assign, write, false);
                 incrementFetched(assign, write);
-            } catch (final PoolingException e) {
-                final OXException e1 = createException(assign, write, e);
+            } catch (PoolingException e) {
+                OXException e1 = createException(assign, write, e);
                 // Immediately fail if connection to master is wanted or no fallback is there.
                 if (write || assign.getWritePoolId() == assign.getReadPoolId()) {
                     throw e1;
@@ -163,7 +163,7 @@ public final class ReplicationMonitor {
                 try {
                     retval = fetch.get(pools, assign, true, true);
                     incrementInstead();
-                } catch (final PoolingException e2) {
+                } catch (PoolingException e2) {
                     throw createException(assign, true, e2);
                 }
             }
@@ -175,7 +175,7 @@ public final class ReplicationMonitor {
                     try {
                         retval.close();
                     } catch (final SQLException e1) {
-                        final OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+                        OXException e2 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                         LOG.error(e2.getMessage(), e2);
                     }
                     retval = null;
@@ -186,7 +186,7 @@ public final class ReplicationMonitor {
             throw createException(assign, write, null);
         }
         if (!write && assign.isTransactionInitialized() && !isUpToDate(assign.getTransaction(), clientTransaction)) {
-            LOG.debug("Slave " + assign.getReadPoolId() + " is outdated. Using master " + assign.getWritePoolId() + " instead.");
+            LOG.debug("Slave " + assign.getReadPoolId() + " is not actual. Using master " + assign.getWritePoolId() + " instead.");
             final Connection toReturn = retval;
             try {
                 retval = fetch.get(pools, assign, true, true);
