@@ -66,26 +66,33 @@ public final class MailTestSuite extends TestSuite {
     public static Test suite() {
         final TestSuite mailSuite = new TestSuite();
         mailSuite.addTestSuite(AllTest.class);
-        mailSuite.addTestSuite(ListTest.class);
-        mailSuite.addTestSuite(GetTest.class);
-        mailSuite.addTestSuite(SendTest.class);
-        mailSuite.addTestSuite(CountMailTest.class);
-        mailSuite.addTestSuite(MailSearchTest.class);
-        mailSuite.addTestSuite(ForwardMailTest.class);
-        mailSuite.addTestSuite(ReplyAllTest.class);
-        mailSuite.addTestSuite(ReplyTest.class);
-        mailSuite.addTestSuite(UpdateMailTest.class);
-        mailSuite.addTestSuite(MoveMailTest.class);
+        mailSuite.addTestSuite(AttachmentTest.class);
         mailSuite.addTestSuite(ClearTest.class);
         mailSuite.addTestSuite(CopyMailTest.class);
-        mailSuite.addTestSuite(ViewTest.class);
+        mailSuite.addTestSuite(CountMailTest.class);
+        mailSuite.addTestSuite(ForwardMailTest.class);
+        mailSuite.addTestSuite(GetTest.class);
+        mailSuite.addTestSuite(ListTest.class);
+        mailSuite.addTestSuite(MailSearchTest.class);
+        mailSuite.addTestSuite(MoveMailTest.class);
+        mailSuite.addTestSuite(NewMailTest.class);
         mailSuite.addTestSuite(MultipleAttachmentTest.class);
+        mailSuite.addTestSuite(ReplyAllTest.class);
+        mailSuite.addTestSuite(ReplyTest.class);
         mailSuite.addTestSuite(SearchTest.class);
+        mailSuite.addTestSuite(SendTest.class);
+        mailSuite.addTestSuite(ThreadSortTest.class);
+        mailSuite.addTestSuite(UpdateMailTest.class);
+        mailSuite.addTestSuite(ViewTest.class);
+        
         /*mailSuite.addTestSuite(AlwaysTest.class);*/
+        
+        mailSuite.addTestSuite(Bug12409Test.class);
+        mailSuite.addTestSuite(Bug14234Test.class);
         mailSuite.addTestSuite(Bug15608Test.class);
-        mailSuite.addTestSuite(Bug16087Test.class);
-        mailSuite.addTestSuite(Bug15901Test.class);
         mailSuite.addTestSuite(Bug15777Test.class);
+        mailSuite.addTestSuite(Bug15901Test.class);
+        mailSuite.addTestSuite(Bug16087Test.class);
         mailSuite.addTestSuite(Bug16141Test.class);
         mailSuite.addTestSuite(Bug19696Test.class);
         return mailSuite;

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.importexport;
 
+import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -60,6 +62,7 @@ public class VCardTestSuite extends TestSuite{
 		tests.addTestSuite( VCardExportTest.class );
 		tests.addTestSuite(Bug15229Test.class);
 		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
+		tests.addTestSuite(VCardMailPartAttachTest.class);
 		return tests;
 	}
 }
