@@ -69,6 +69,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 
 /**
  * {@link CheckPermissionOnRemove} - Checks for system permissions which shall be removed.
@@ -249,6 +250,7 @@ public final class CheckPermissionOnRemove extends CheckPermission {
             /*
              * Update caches
              */
+            ConditionTreeMapManagement.dropFor(ctx.getContextId());
             try {
                 if (FolderCacheManager.isEnabled()) {
                     FolderCacheManager.getInstance().removeFolderObject(fid, ctx);

@@ -59,6 +59,7 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.tools.oxfolder.deletelistener.OXFolderDeleteListenerHelper;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 
 /**
  * Implements interface {@link DeleteListener}.
@@ -161,6 +162,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    /*
 		     * Remove from cache
 		     */
+		    ConditionTreeMapManagement.dropFor(ctx.getContextId());
 		    if (FolderCacheManager.isInitialized()) {
 		        /*
 		         * Invalidate cache
@@ -287,6 +289,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		        /*
 		         * Remove from cache
 		         */
+		        ConditionTreeMapManagement.dropFor(ctx.getContextId());
 		        if (FolderCacheManager.isInitialized()) {
 		            /*
 		             * Invalidate cache

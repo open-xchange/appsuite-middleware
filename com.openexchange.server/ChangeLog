@@ -1,3 +1,7 @@
+* 2012-01-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21137 and bug 21330: Introduced volatile in-memory look-up of user-visible folders
+
 * 2012-01-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 21355: Fixed possible null dereference in HashCalculator

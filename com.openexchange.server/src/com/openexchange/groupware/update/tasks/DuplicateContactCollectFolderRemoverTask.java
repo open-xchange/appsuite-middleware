@@ -91,6 +91,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 
 /**
  * {@link DuplicateContactCollectFolderRemoverTask} - Removes duplicate contact collector folders.
@@ -491,6 +492,7 @@ public final class DuplicateContactCollectFolderRemoverTask extends UpdateTaskAd
         /*
          * Update caches
          */
+        ConditionTreeMapManagement.dropFor(ctx.getContextId());
         try {
             if (FolderCacheManager.isEnabled()) {
                 FolderCacheManager.getInstance().removeFolderObject(id, ctx);

@@ -77,6 +77,8 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMap;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 
 /**
  * {@link SystemSharedFolder} - Gets the system shared folder.
@@ -112,6 +114,24 @@ public final class SystemSharedFolder {
         final DatabaseFolder retval = new LocalizedDatabaseFolder(fo, false);
         retval.setName(FolderStrings.SYSTEM_SHARED_FOLDER_NAME);
         // Enforce getSubfolders() from storage if at least one shared folder is accessible for user
+        ConditionTreeMap treeMap;
+        try {
+            treeMap = ConditionTreeMapManagement.getInstance().optMapFor(ctx.getContextId());
+        } catch (final OXException e) {
+            treeMap = null;
+        }
+        if (null != treeMap) {
+            /*
+             * Set to null if a shared folder exists otherwise to empty array to indicate no subfolders
+             */
+            final boolean hasNext = treeMap.hasSharedFolder(user.getId(), user.getGroups(), userConfiguration.getAccessibleModules());
+            retval.setSubfolderIDs(hasNext ? null : new String[0]);
+            retval.setSubscribedSubfolders(hasNext);
+            return retval;
+        }
+        /*
+         * Query database
+         */
         final SearchIterator<FolderObject> searchIterator;
         try {
             searchIterator =
