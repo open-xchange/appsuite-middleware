@@ -409,6 +409,9 @@
         <delete dir="${simBinDir}"/>
         <delete dir="${testBinDir}"/>
         <delete file="${testJarFile}"/>
+    	<antcall target="postClean"/>
     </target>
+
+	<target name="postClean" description="Empty target that can be overwritten by some bundles."/>
 
 </project>
