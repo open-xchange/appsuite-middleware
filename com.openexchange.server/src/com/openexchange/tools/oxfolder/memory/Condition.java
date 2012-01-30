@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,20 @@
  *
  */
 
-package com.openexchange.cache.remote;
-
-import java.rmi.RemoteException;
-import com.openexchange.cache.impl.FolderCacheManager;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
-
+package com.openexchange.tools.oxfolder.memory;
 
 /**
- * FolderCacheInvalidation
- *
+ * {@link Condition} - Provides {@link #fulfilled(Permission)} method.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public class FolderCacheInvalidation implements GenericCacheInvalidationInterface {
+public interface Condition {
 
-	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
-			.getLog(FolderCacheInvalidation.class);
-
-	private static final String REMOTE_NAME = "FolderCacheInvalidation";
-
-	private static final String ERR = "Folder could not be remote-removed";
-
-	@Override
-    public String getRemoteName() {
-		return REMOTE_NAME;
-	}
-
-	@Override
-    public void invalidateCacheElement(final int contextId, final int objectId) throws RemoteException {
-	    ConditionTreeMapManagement.dropFor(contextId);
-	    if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
-			try {
-				FolderCacheManager.getInstance().removeFolderObject(objectId, ContextStorage.getInstance().getContext(contextId));
-			} catch (final OXException e) {
-				throw new RemoteException(ERR, e);
-			}
-		}
-
-	}
-
-	@Override
-    public void invalidateContext(final int contextId) throws RemoteException {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Method invalidateContext() not implemented");
-		}
-	}
-
+    /**
+     * Checks if specified permission fulfills this condition.
+     * 
+     * @param p The permission to check
+     * @return <code>true</code> if permission fulfills this condition; otherwise <code>false</code>
+     */
+    boolean fulfilled(Permission p);
 }

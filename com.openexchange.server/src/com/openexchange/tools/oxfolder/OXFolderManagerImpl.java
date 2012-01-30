@@ -102,6 +102,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnInsert;
 import com.openexchange.tools.oxfolder.treeconsistency.CheckPermissionOnRemove;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -438,6 +439,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         parentFolder.setSubfolderFlag(true);
         parentFolder.setLastModified(creatingDate);
         {
+            ConditionTreeMapManagement.dropFor(ctx.getContextId());
             Connection wc = writeCon;
             final boolean create = (wc == null);
             try {
@@ -551,6 +553,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * Finally update cache
          */
         {
+            ConditionTreeMapManagement.dropFor(ctx.getContextId());
             Connection wc = writeCon;
             final boolean create = (wc == null);
             try {
@@ -1150,6 +1153,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Update OLD parent in cache, cause this can only be done here
          */
+        ConditionTreeMapManagement.dropFor(ctx.getContextId());
         if (FolderCacheManager.isEnabled()) {
             Connection wc = writeCon;
             final boolean create = (wc == null);
@@ -1356,6 +1360,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         /*
          * Continue
          */
+        ConditionTreeMapManagement.dropFor(ctx.getContextId());
         try {
             Connection wc = writeCon;
             final boolean create = (wc == null);
@@ -1529,6 +1534,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         if (CalendarCache.isInitialized()) {
             CalendarCache.getInstance().invalidateGroup(ctx.getContextId());
         }
+        ConditionTreeMapManagement.dropFor(ctx.getContextId());
         if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
             try {
                 FolderCacheManager.getInstance().removeFolderObject(folderID, ctx);
@@ -1801,6 +1807,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         for (int i = 0; i < fuids.length; i++) {
             try {
                 OXFolderSQL.hardDeleteOXFolder(fuids[i], ctx, null);
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
                     try {
                         FolderCacheManager.getInstance().removeFolderObject(fuids[i], ctx);
