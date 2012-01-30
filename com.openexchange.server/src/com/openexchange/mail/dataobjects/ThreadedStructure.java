@@ -47,41 +47,44 @@
  *
  */
 
-package com.openexchange.mail.json.osgi;
+package com.openexchange.mail.dataobjects;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.mail.json.MailActionFactory;
-import com.openexchange.mail.json.converters.MailConverter;
-import com.openexchange.mail.json.converters.MailJSONConverter;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-
+import java.util.List;
 
 /**
- * {@link MailJSONActivator}
- *
+ * {@link ThreadedStructure}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailJSONActivator extends AJAXModuleActivator {
+public final class ThreadedStructure {
 
     /**
-     * Initializes a new {@link MailJSONActivator}.
+     * Creates a new {@link ThreadedStructure} for specified list of thread-sorted mails.
+     * 
+     * @param mails The thread-sorted mails
+     * @return A new {@link ThreadedStructure} instance
      */
-    public MailJSONActivator() {
+    public static ThreadedStructure valueOf(final List<ThreadSortMailMessage> mails) {
+        return new ThreadedStructure(mails);
+    }
+
+    private final List<ThreadSortMailMessage> mails;
+
+    /**
+     * Initializes a new {@link ThreadedStructure}.
+     */
+    private ThreadedStructure(final List<ThreadSortMailMessage> mails) {
         super();
+        this.mails = mails;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
-        final MailConverter converter = new MailConverter();
-        registerService(ResultConverter.class, converter);
-        registerService(ResultConverter.class, new MailJSONConverter(converter));
+    /**
+     * Gets the thread-sorted mails
+     * 
+     * @return The thread-sorted mails
+     */
+    public List<ThreadSortMailMessage> getMails() {
+        return mails;
     }
 
 }

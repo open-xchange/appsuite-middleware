@@ -69,9 +69,9 @@ public class MailJSONConverter implements ResultConverter {
     /**
      * Initializes a new {@link MailJSONConverter}.
      */
-    public MailJSONConverter() {
+    public MailJSONConverter(final MailConverter mailConverter) {
         super();
-        mailConverter = new MailConverter();
+        this.mailConverter = mailConverter;
     }
 
     @Override
