@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.mail.json.osgi;
+package com.openexchange.mail.api;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.mail.json.MailActionFactory;
-import com.openexchange.mail.json.converters.MailConverter;
-import com.openexchange.mail.json.converters.MailJSONConverter;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 
 
 /**
- * {@link MailJSONActivator}
+ * {@link ISimplifiedThreadStructure}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailJSONActivator extends AJAXModuleActivator {
+public interface ISimplifiedThreadStructure {
 
     /**
-     * Initializes a new {@link MailJSONActivator}.
+     * An <b>optional</b> convenience method that gets the messages located in given folder sorted by message thread reference. By default
+     * <code>null</code> is returned assuming that mailing system does not support message thread reference, but may be overridden if it
+     * does.
+     * <p>
+     * If underlying mailing system is IMAP, this method requires the IMAPv4 SORT extension or in detail the IMAP <code>CAPABILITY</code>
+     * command should contain "SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES".
+     *
+     * @param folder The folder full name
+     * @param sortField The sort field applied to thread root elements
+     * @param order Whether ascending or descending sort order
+     * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
+     * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
+     * @throws OXException If messages cannot be returned
      */
-    public MailJSONActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
-        final MailConverter converter = new MailConverter();
-        registerService(ResultConverter.class, converter);
-        registerService(ResultConverter.class, new MailJSONConverter(converter));
-    }
-
+    public List<ThreadSortMailMessage> getThreadSortedMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
+    
 }

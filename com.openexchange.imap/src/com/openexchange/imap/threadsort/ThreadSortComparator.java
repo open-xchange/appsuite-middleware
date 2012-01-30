@@ -60,6 +60,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 
 /**
  * {@link ThreadSortComparator} - Sorts according to <small><b><a href="http://tools.ietf.org/html/rfc5256">RFC5256</a></b></small>.

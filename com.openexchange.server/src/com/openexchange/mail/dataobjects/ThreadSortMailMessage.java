@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.imap.threadsort;
+package com.openexchange.mail.dataobjects;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,8 +61,6 @@ import javax.activation.DataHandler;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
-import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -877,7 +875,7 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public boolean hasHeaders(String... names) {
+    public boolean hasHeaders(final String... names) {
         return delegatee.hasHeaders(names);
     }
 
@@ -902,8 +900,18 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
-    public void setRecentCount(int recentCount) {
+    public void setRecentCount(final int recentCount) {
         delegatee.setRecentCount(recentCount);
+    }
+
+    /**
+     * Sets specified child messages.
+     *
+     * @param mailMessages The child messages
+     */
+    public void setChildMessages(final Collection<ThreadSortMailMessage> mailMessages) {
+        childMessages.clear();
+        childMessages.addAll(mailMessages);
     }
 
     /**
