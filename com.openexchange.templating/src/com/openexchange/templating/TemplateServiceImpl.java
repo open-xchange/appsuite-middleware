@@ -76,10 +76,14 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate.TemplateLevel;
 import com.openexchange.templating.impl.OXFolderHelper;
 import com.openexchange.templating.impl.OXInfostoreHelper;
+import com.openexchange.templating.impl.TemplatingHelperImpl;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
+
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
@@ -151,7 +155,14 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session) throws OXException {
+    public OXTemplate loadTemplate(String templateName,
+    		String defaultTemplateName, Session session) throws OXException {
+    	return loadTemplate(defaultTemplateName, defaultTemplateName, session, true);
+    }
+    
+    @Override
+    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session sess, boolean createCopy) throws OXException {
+    	ServerSession session = ServerSessionAdapter.valueOf(sess);
         if (isEmpty(templateName) || !isUserTemplatingEnabled(session)) {
             return loadTemplate(defaultTemplateName);
         }
@@ -360,8 +371,9 @@ public class TemplateServiceImpl implements TemplateService {
 	}
 
 	@Override
-    public List<String> getTemplateNames(final ServerSession session,
+    public List<String> getTemplateNames(final Session sess,
 			String... filter) throws OXException {
+    	ServerSession session = ServerSessionAdapter.valueOf(sess);
 		if(filter == null) {
 			filter = new String[0];
 		}
@@ -393,15 +405,19 @@ public class TemplateServiceImpl implements TemplateService {
 
     @Override
     public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
-
         return loadTemplate(templateName);
     }
 
     @Override
-    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
+    public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
         setExceptionHandler(exceptionHandler);
         return loadTemplate(templateName, defaultTemplateName, session);
     }
+    
+    public TemplatingHelper createHelper(Object rootObject, Session session) {
+        return new TemplatingHelperImpl(rootObject, session, this);
+    }
+
 
     private void setExceptionHandler(final OXTemplateExceptionHandler exceptionHandler) {
         final TemplateExceptionHandler wrapper = new TemplateExceptionHandlerWrapper(exceptionHandler);

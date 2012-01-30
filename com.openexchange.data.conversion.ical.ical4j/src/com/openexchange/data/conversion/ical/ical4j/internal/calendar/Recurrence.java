@@ -119,7 +119,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
 
     @Override
     public boolean isSet(final U calendar) {
-        return calendar.containsRecurrenceType();
+        return calendar.containsRecurrenceType() && calendar.getRecurrenceDatePosition() == null && calendar.getRecurrencePosition() == 0;
     }
 
     @Override
@@ -206,7 +206,9 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
             recur.append(";COUNT=").append(calendar.getOccurrence());
         } else if (calendar.containsUntil()) {
             synchronized (date) {
-                recur.append(";UNTIL=").append(date.format(calendar.getUntil()));
+                Date until = (Date) calendar.getUntil().clone();
+                addDayForUntil(until);
+                recur.append(";UNTIL=").append(date.format(until));
             }
         }
         return recur;
@@ -223,10 +225,18 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
         final Recur retval;
         if (calendar.containsOccurrence()) {
             retval = new Recur(frequency, calendar.getOccurrence());
+        } else if (calendar.containsUntil()) {
+            net.fortuna.ical4j.model.Date until = EmitterTools.toDate(calendar.getUntil());
+            addDayForUntil(until);
+            retval = new Recur(frequency, until);
         } else {
             retval = new Recur(frequency, EmitterTools.toDate(calendar.getUntil()));
         }
         return retval;
+    }
+
+    private void addDayForUntil(Date date) {
+        date.setTime(date.getTime() + 86400000L);
     }
 
     /**

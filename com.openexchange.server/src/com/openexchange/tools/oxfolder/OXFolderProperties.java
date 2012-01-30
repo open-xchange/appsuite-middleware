@@ -81,6 +81,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -139,6 +140,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
             FolderCacheManager.initInstance();
         }
         FolderQueryCacheManager.initInstance();
+        ConditionTreeMapManagement.startInstance();
     }
 
     @Override
@@ -162,6 +164,7 @@ public final class OXFolderProperties implements Initialization, CacheAvailabili
         if (reg != null) {
             reg.unregisterListener(this);
         }
+        ConditionTreeMapManagement.stopInstance();
         FolderCacheManager.releaseInstance();
         FolderQueryCacheManager.releaseInstance();
         PermissionLoaderService.dropInstance();

@@ -50,8 +50,11 @@
 package com.openexchange.groupware.calendar;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.Differ;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -80,6 +83,9 @@ public class CalendarDataObject extends Appointment {
     private boolean fill_folder_id;
     private boolean fillConfirmations;
     private boolean fillLastModifiedOfNewestAttachment;
+    
+    private boolean externalOrganizer;
+
 
     private CalendarCollectionService getCalendarCollectionService(){
     	return ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
@@ -196,7 +202,7 @@ public class CalendarDataObject extends Appointment {
         if (delete_execptions != null) {
             super.setDeleteExceptions(getCalendarCollectionService().convertString2Dates(delete_execptions));
         } else {
-            setDeleteExceptions(null);
+            setDeleteExceptions((Date[])null);
         }
     }
 
@@ -211,7 +217,7 @@ public class CalendarDataObject extends Appointment {
         if (change_exceptions != null) {
             super.setChangeExceptions(getCalendarCollectionService().convertString2Dates(change_exceptions));
         } else {
-            setChangeExceptions(null);
+            setChangeExceptions((Date[])null);
         }
     }
 
@@ -442,6 +448,15 @@ public class CalendarDataObject extends Appointment {
         return clone;
     }
 
+    public boolean isExternalOrganizer() {
+		return externalOrganizer;
+	}
+
+	public void setExternalOrganizer(boolean externalOrganizer) {
+		this.externalOrganizer = externalOrganizer;
+	}
+
+
     private static final Date[] copy(final Date[] copyMe) {
         if (copyMe == null) {
             return null;
@@ -503,5 +518,11 @@ public class CalendarDataObject extends Appointment {
         sb.append(STR_DELIM);
         sb.append(getDayInMonth());
         return sb.toString();
+    }
+
+    public static Set<Differ<? super CalendarDataObject>> differ = new HashSet<Differ<? super CalendarDataObject>>();
+    
+    static {
+        differ.addAll(Appointment.differ);
     }
 }

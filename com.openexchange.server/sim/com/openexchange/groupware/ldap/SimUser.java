@@ -57,5 +57,14 @@ package com.openexchange.groupware.ldap;
  */
 public class SimUser extends MockUser {
 
+	public SimUser() {
+		super();
+	}
+
+	public SimUser(int id) {
+		super(id);
+	}
+	
+	
 
 }

@@ -102,8 +102,13 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
             final CalendarDataObject cloned = (CalendarDataObject) appointment.clone();
             try {
                 calendarCollection.fillDAO(cloned);
-                cloned.setStartDate(parseSeriesStart(cloned.getRecurrence()));
-                date = EmitterTools.toDateTime(EmitterTools.calculateExactTime(cloned, changeException));
+                String recurrence = cloned.getRecurrence();
+                if (recurrence == null) {
+                	date = EmitterTools.toDate(changeException);
+                } else {
+    				cloned.setStartDate(parseSeriesStart(recurrence));
+                    date = EmitterTools.toDateTime(EmitterTools.calculateExactTime(cloned, changeException));
+                }
             } catch (final OXException e) {
                 LOG.warn(e.getMessage(), e);
                 date = EmitterTools.toDate(changeException);
@@ -118,6 +123,9 @@ public class ChangeExceptions extends AbstractVerifyingAttributeConverter<VEvent
     private static final Pattern startDatePattern = Pattern.compile("s\\|(\\d*)\\|");
 
     private java.util.Date parseSeriesStart(final String recurrenceString) throws OXException {
+    	if (recurrenceString == null)  {
+    		return null;
+    	}
         final Matcher matcher = startDatePattern.matcher(recurrenceString);
         final long start;
         if (matcher.find()) {
