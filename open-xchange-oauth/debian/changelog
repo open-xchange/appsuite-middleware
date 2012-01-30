@@ -1,0 +1,5 @@
+open-xchange-oauth (7.0.0-1) unstable; urgency=low
+
+  * Initial build.
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 30 Jan 2012 17:53:45 +0200
