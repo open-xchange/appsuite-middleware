@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.calendar.Constants;
 
@@ -77,7 +78,7 @@ public class Appointment extends CalendarObject implements Cloneable {
         // From CalendarObject
         TITLE, START_DATE, END_DATE, NOTE, ALARM, RECURRENCE_ID, RECURRENCE_POSITION, RECURRENCE_DATE_POSITION, RECURRENCE_TYPE,
         CHANGE_EXCEPTIONS, DELETE_EXCEPTIONS, DAYS, DAY_IN_MONTH, MONTH, INTERVAL, UNTIL, NOTIFICATION, RECURRENCE_CALCULATOR,
-        PARTICIPANTS, USERS, RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE,
+        PARTICIPANTS, USERS, CONFIRMATIONS, RECURRENCE_COUNT, UID, ORGANIZER, SEQUENCE, ORGANIZER_ID, PRINCIPAL, PRINCIPAL_ID,
         // From CommonObject
         CATEGORIES, PRIVATE_FLAG,
         COLOR_LABEL, NUMBER_OF_LINKS, NUMBER_OF_ATTACHMENTS,
@@ -340,6 +341,15 @@ public class Appointment extends CalendarObject implements Cloneable {
             if (containsOrganizer()) {
                 appointmentobject.setOrganizer(getOrganizer());
             }
+            if (containsPrincipal()) {
+                appointmentobject.setPrincipal(getPrincipal());
+            }
+            if (containsOrganizerId()) {
+                appointmentobject.setOrganizerId(getOrganizerId());
+            }
+            if (containsPrincipalId()) {
+                appointmentobject.setPrincipalId(getPrincipalId());
+            }
             return appointmentobject;
         } catch (final CloneNotSupportedException e) {
             /*
@@ -477,6 +487,12 @@ public class Appointment extends CalendarObject implements Cloneable {
         default:
             super.remove(field);
         }
+    }
+
+    public static Set<Differ<? super Appointment>> differ = new HashSet<Differ<? super Appointment>>();
+    
+    static {
+        differ.addAll(CalendarObject.differ);
     }
 
 }

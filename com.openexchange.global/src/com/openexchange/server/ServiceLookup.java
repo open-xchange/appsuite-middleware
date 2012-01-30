@@ -64,4 +64,6 @@ public interface ServiceLookup {
      * @throws IllegalStateException If an error occurs while returning the demanded service
      */
     public <S extends Object> S getService(final Class<? extends S> clazz);
+    
+    public <S extends Object> S getOptionalService(final Class<? extends S> clazz);
 }
