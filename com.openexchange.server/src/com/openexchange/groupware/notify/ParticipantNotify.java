@@ -81,10 +81,10 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.ITipContainer;
-import com.openexchange.data.conversion.ical.ITipMethod;
 import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
+import com.openexchange.data.conversion.ical.itip.ITipContainer;
+import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.event.impl.AppointmentEventInterface2;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
@@ -318,62 +318,27 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
     @Override
     public void appointmentCreated(final Appointment appointmentObj, final Session session) {
-        int folderOwner = session.getUserId();
-        try {
-            folderOwner = getFolderOwner(appointmentObj, new ServerSessionAdapter(session));
-        } catch (final OXException e) {
-            e.log(LOG);
-        }
-        /*
-         * Await attachments
-         */
-        try {
-            Thread.sleep(3000);
-        } catch (final InterruptedException e) {
-            // Ignore, but keep interrupted state
-            Thread.currentThread().interrupt();
-        }
-        sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
-            AppointmentActionReplacement.ACTION_NEW), folderOwner == session.getUserId() ? Notifications.APPOINTMENT_CREATE_MAIL : Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF, State.Type.NEW), false, false, false);
+
     }
 
     @Override
     public void appointmentModified(final Appointment appointmentObj, final Session session) {
-        sendNotification(null, appointmentObj, session, new AppointmentState(new AppointmentActionReplacement(
-            AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
     @Override
     public void appointmentModified(final Appointment oldAppointment, final Appointment newAppointment, final Session session) {
-        sendNotification(oldAppointment, newAppointment, session, new AppointmentState(new AppointmentActionReplacement(
-            AppointmentActionReplacement.ACTION_CHANGED), Notifications.APPOINTMENT_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
     @Override
     public void appointmentAccepted(final Appointment appointmentObj, final Session session) {
-        sendNotification(null, appointmentObj, session, new AppointmentState(
-            new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_ACCEPTED),
-            new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_ACCEPTED),
-            Notifications.APPOINTMENT_CONFIRMATION_MAIL,
-            State.Type.ACCEPTED), false, false, false);
     }
 
     @Override
     public void appointmentDeclined(final Appointment appointmentObj, final Session session) {
-        sendNotification(null, appointmentObj, session, new AppointmentState(
-            new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DECLINED),
-            new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_DECLINED),
-            Notifications.APPOINTMENT_CONFIRMATION_MAIL,
-            State.Type.DECLINED), false, false, false);
     }
 
     @Override
     public void appointmentTentativelyAccepted(final Appointment appointmentObj, final Session session) {
-        sendNotification(null, appointmentObj, session, new AppointmentState(
-            new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_TENTATIVE),
-            new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
-            Notifications.APPOINTMENT_CONFIRMATION_MAIL,
-            State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
     @Override

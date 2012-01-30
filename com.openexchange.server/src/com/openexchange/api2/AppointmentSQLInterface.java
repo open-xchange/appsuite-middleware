@@ -203,6 +203,18 @@ public interface AppointmentSQLInterface {
      * return the AppointmentObject
      * @throws OXException, OXPermissionException
      */
+    public CalendarDataObject getObjectById(int objectId) throws OXException, SQLException;
+
+    /**
+     * Loads one appointment by the given ID
+     * @param objectId
+     * The Object ID
+     * @param inFolder
+     * Object in folder
+     * @return
+     * return the AppointmentObject
+     * @throws OXException, OXPermissionException
+     */
     public CalendarDataObject getObjectById(int objectId, int inFolder) throws OXException, SQLException;
 
     /**
@@ -228,10 +240,19 @@ public interface AppointmentSQLInterface {
 
     /**
      * update the AppointmentObject
+     * @param checkPermissions 
      * @param Appointment
      * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
      */
     public Appointment[] updateAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified) throws OXException;
+
+    /**
+     * update the AppointmentObject
+     * @param checkPermissions 
+     * @param Appointment
+     * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException, OXObjectNotFoundException
+     */
+    public Appointment[] updateAppointmentObject(CalendarDataObject cdao, int inFolder, Date clientLastModified, boolean checkPermissions) throws OXException;
 
     /**
      * deletes the AppointmentObject
@@ -241,6 +262,7 @@ public interface AppointmentSQLInterface {
      */
     public void deleteAppointmentObject(CalendarDataObject appointmentObject, int inFolder, Date clientLastModified) throws OXException, SQLException;
 
+    public void deleteAppointmentObject(CalendarDataObject appointmentObject, int inFolder, Date clientLastModified, boolean checkPermissions) throws OXException, SQLException;
     /**
      * deletes all Appointments in given folder
      * @param folderid

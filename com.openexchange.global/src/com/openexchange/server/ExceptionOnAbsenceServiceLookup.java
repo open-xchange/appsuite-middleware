@@ -78,5 +78,10 @@ public final class ExceptionOnAbsenceServiceLookup implements ServiceLookup {
         }
         return service;
     }
+    
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+    	return serviceLookup.getOptionalService(clazz);
+    }
 
 }

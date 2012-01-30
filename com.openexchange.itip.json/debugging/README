@@ -1,0 +1,9 @@
+Put the folder "itip" into a path served by your webserver and open the index.html. 
+
+You can log in either 
+a) By logging in into the corresponding ox6 frontend and relying on autologin
+b) By specifying a session to use as a parameter (#session=...)
+or
+c) By specifying a login/password combination as parameters(#login=...&password=...)
+
+Paste an ITIP message into the textarea, hit "analyze" and see the resulting analysis.

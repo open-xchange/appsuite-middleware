@@ -132,6 +132,24 @@ public class Participants {
         }
     }
 
+    /**
+     * This method adds the given UserParticipant or the corresponding UserParticipant of the given array if present.
+     * (This is needed to override the Confirmation Information of a User)
+     * @param p
+     * @param users
+     */
+    public void add(UserParticipant p, UserParticipant[] users) {
+        if (users != null) {
+            for (UserParticipant user : users) {
+                if (user.getIdentifier() == p.getIdentifier()) {
+                    add(user);
+                    return;
+                }
+            }
+        }
+        add(p);
+    }
+
     public boolean containsUserParticipant(final UserParticipant up) {
         if (participants != null) {
             final int participantsSize = participants.size();

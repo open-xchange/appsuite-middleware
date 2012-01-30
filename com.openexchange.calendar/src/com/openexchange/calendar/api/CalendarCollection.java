@@ -210,6 +210,10 @@ public final class CalendarCollection implements CalendarCollectionService {
         fieldMap.put(Integer.valueOf(CalendarDataObject.ORGANIZER), "organizer");
         fieldMap.put(Integer.valueOf(CalendarDataObject.UID), "uid");
         fieldMap.put(Integer.valueOf(CalendarDataObject.SEQUENCE), "sequence");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.ORGANIZER_ID), "organizerId");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.PRINCIPAL), "principal");
+        fieldMap.put(Integer.valueOf(CalendarDataObject.PRINCIPAL_ID), "principalId");
+        
     }
 
     /**
@@ -505,8 +509,15 @@ public final class CalendarCollection implements CalendarCollectionService {
              * Determine recurrence date position from recurrence position
              */
             fillDAO(cdao);
-            final RecurringResultsInterface rrs = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition());
-            final RecurringResultInterface rr = rrs.getRecurringResult(0);
+            RecurringResultsInterface rrs = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition());
+            RecurringResultInterface rr = rrs.getRecurringResult(0);
+            if (rr == null) {
+                rrs = calculateRecurring(cdao, 0, 0, cdao.getRecurrencePosition(), MAX_OCCURRENCESE, true);
+                if (rrs == null) {
+                	return;
+                }
+                rr = rrs.getRecurringResult(0);
+            }
             if (rr != null) {
                 cdao.setRecurrenceDatePosition(new Date(rr.getNormalized()));
                 return;
@@ -524,6 +535,9 @@ public final class CalendarCollection implements CalendarCollectionService {
             final long rangeEnd = normalized + Constants.MILLI_WEEK;
 
             final RecurringResultsInterface rrs = calculateRecurring(cdao, rangeStart, rangeEnd, 0);
+            if (rrs == null) {
+            	return;
+            }
             final int x = rrs.getPositionByLong(cdao.getRecurrenceDatePosition().getTime());
             if (x > 0) {
                 cdao.setRecurrencePosition(x);
@@ -1657,6 +1671,9 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
     @Override
     public boolean checkPermissions(final CalendarDataObject cdao, final Session so, final Context ctx, final Connection readcon, final int action, final int inFolder) throws OXException {
         try {
+            if (inFolder <= 0) {
+                return false;
+            }
             final OXFolderAccess access = new OXFolderAccess(readcon, cdao.getContext());
             cdao.setFolderType(access.getFolderType(inFolder, so.getUserId()));
             //cdao.setFolderType(OXFolderTools.getFolderType(inFolder, so.getUserObject().getId(), cdao.getContext(), readcon));
