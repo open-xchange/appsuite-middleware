@@ -60,7 +60,7 @@ import com.openexchange.calendar.itip.Messages;
 import com.openexchange.calendar.itip.generators.TypeWrapper;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
@@ -83,7 +83,7 @@ public class InternalITipAnalyzer extends AbstractITipAnalyzer {
         return null;
     }
 
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws AbstractOXException {
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
         ITipAnalysis analysis = new ITipAnalysis();
         
         ITipAnnotation annotation = new ITipAnnotation(Messages.INTERNAL_MAIL, locale);

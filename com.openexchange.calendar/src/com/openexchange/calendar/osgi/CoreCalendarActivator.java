@@ -50,80 +50,55 @@
 package com.openexchange.calendar.osgi;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.ByteArrayInputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.caching.CacheService;
 import com.openexchange.calendar.CalendarAdministration;
-import com.openexchange.calendar.CalendarMySQL;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.api.itip.CalendarITipIntegrationUtility;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
-import com.openexchange.calendar.itip.ITipAnalyzerService;
-import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
-import com.openexchange.calendar.itip.analyzers.DefaultITipAnalyzerService;
-import com.openexchange.calendar.itip.performers.UpdatePerformer;
-import com.openexchange.calendar.itip.performers.DefaultITipDingeMacherFactoryService;
-import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.java.Streams;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 
+/**
+ * {@link CoreCalendarActivator}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
 public class CoreCalendarActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link CoreCalendarActivator}.
+     */
+    public CoreCalendarActivator() {
+        super();
+    }
+
     @Override
-    protected Class<?>[] getNeededServices() {
+    protected java.lang.Class<?>[] getNeededServices() {
         return new Class<?>[] { CacheService.class };
     }
 
     @Override
-    protected void handleAvailability(final Class<?> clazz) {
-        // Nope
-    }
-
-    @Override
-    protected void handleUnavailability(final Class<?> clazz) {
-        // Nope
-    }
-
-    private ServiceRegistration appointmentSqlFactoryRegistration;
-    private ServiceRegistration calendarCollectionRegistration;
-    private ServiceRegistration calendarAdministrationRegistration;
-    private ServiceRegistration calendarReminderDeleteRegistration;
-
-	@Override
     protected void startBundle() throws Exception {
-	    AppointmentSqlFactory factory = new AppointmentSqlFactory();
-	    ITipActivator.initFeatures(factory);
-	    CalendarMySQL.setApppointmentSqlFactory(factory);
-	    
-        appointmentSqlFactoryRegistration = context.registerService(AppointmentSqlFactoryService.class.getName(), factory, null);
-	    calendarCollectionRegistration = context.registerService(CalendarCollectionService.class.getName(), new CalendarCollection(), null);
-	    calendarAdministrationRegistration = context.registerService(CalendarAdministrationService.class.getName(), new CalendarAdministration(), null);
+        registerService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
+        registerService(CalendarCollectionService.class, new CalendarCollection());
+        registerService(CalendarAdministrationService.class, new CalendarAdministration());
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
-        calendarReminderDeleteRegistration = context.registerService(TargetService.class.getName(), new CalendarReminderDelete(), props);
+        registerService(TargetService.class, new CalendarReminderDelete(), props);
+
         registerCacheRegion();
-	}
+    }
 
-	@Override
-    protected void stopBundle() throws Exception {
-        unregisterCacheRegion();
-	    appointmentSqlFactoryRegistration.unregister();
-	    calendarCollectionRegistration.unregister();
-	    calendarAdministrationRegistration.unregister();
-	    calendarReminderDeleteRegistration.unregister();
-	    super.stopBundle();
-	}
-
-	private void registerCacheRegion() throws Exception {
+    private void registerCacheRegion() throws OXException {
         /*
          * Important cache configuration constants
          */
@@ -149,8 +124,14 @@ public class CoreCalendarActivator extends HousekeepingActivator {
                 "jcs.region."+regionName+".elementattributes.IsSpool=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsRemote=false\n" +
                 "jcs.region."+regionName+".elementattributes.IsLateral=false\n").getBytes();
-        getService(CacheService.class).loadConfiguration(new ByteArrayInputStream(ccf));
+        getService(CacheService.class).loadConfiguration(Streams.newByteArrayInputStream(ccf));
         CalendarVolatileCache.initInstance(context);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        unregisterCacheRegion();
+        super.stopBundle();
     }
 
     private void unregisterCacheRegion() {
@@ -159,7 +140,9 @@ public class CoreCalendarActivator extends HousekeepingActivator {
         if (null != cacheService) {
             try {
                 cacheService.freeCache(CalendarVolatileCache.REGION);
-            } catch (final Exception e) {
+            } catch (final OXException e) {
+                // Ignore
+            } catch (final RuntimeException e) {
                 // Ignore
             }
         }

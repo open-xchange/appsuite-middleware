@@ -53,23 +53,22 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.itip.generators.ITipMailGenerator;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.MailSenderService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
@@ -116,42 +115,42 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         return delegate.checkIfFolderContainsForeignObjects(user_id, inFolder);
     }
 
-    public void deleteAppointmentObject(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified) throws OXException {
+    public void deleteAppointmentObject(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified) throws OXException, SQLException {
         deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, true);
     }
 
-    public void deleteAppointmentObject(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
+    public void deleteAppointmentObject(final CalendarDataObject appointmentObject, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException, SQLException {
         CalendarDataObject original = null;
         try {
             original = getObjectById(appointmentObject.getObjectID());
             if (appointmentObject.containsNotification()) {
                 original.setNotification(appointmentObject.getNotification());
             }
-        } catch (final AbstractOXException x) {
+        } catch (final OXException x) {
             // IGNORE
         } catch (final SQLException e) {
             // IGNORE
         }
         delegate.deleteAppointmentObject(appointmentObject, inFolder, clientLastModified, checkPermissions);
+			
         if (original == null) {
             return;
         }
         calculateExceptionPosition(appointmentObject, original, true);
-        try {
-            final ITipMailGenerator generator = generators.create(null, original, session, onBehalfOf(inFolder));
-            final List<NotificationParticipant> recipients = generator.getRecipients();
-            for (final NotificationParticipant notificationParticipant : recipients) {
-                final NotificationMail mail = generator.generateDeleteMailFor(notificationParticipant);
-                if (mail != null) {
-                	if (mail.getStateType() == null) {
-                		mail.setStateType(State.Type.DELETED);
-                	}
-                    sender.sendMail(mail, session);
-                }
-            }
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
-        }
+		final ITipMailGenerator generator = generators.create(null, original,
+				session, onBehalfOf(inFolder));
+		final List<NotificationParticipant> recipients = generator
+				.getRecipients();
+		for (final NotificationParticipant notificationParticipant : recipients) {
+			final NotificationMail mail = generator
+					.generateDeleteMailFor(notificationParticipant);
+			if (mail != null) {
+				if (mail.getStateType() == null) {
+					mail.setStateType(State.Type.DELETED);
+				}
+				sender.sendMail(mail, session);
+			}
+		}
     }
 
     public void deleteAppointmentsInFolder(final int inFolder, final Connection writeCon) throws OXException, SQLException {
@@ -210,7 +209,7 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         return delegate.getModifiedAppointmentsInFolder(fid, cols, since);
     }
 
-    public CalendarDataObject getObjectById(final int objectId, final int inFolder) throws OXException, SQLException, OXObjectNotFoundException {
+    public CalendarDataObject getObjectById(final int objectId, final int inFolder) throws OXException, SQLException {
         return delegate.getObjectById(objectId, inFolder);
     }
 
@@ -243,10 +242,8 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                 }
             }
             return retval;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.SQL_ERROR, e);
+        	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
 
@@ -311,10 +308,8 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
             }
 
             return retval;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.SQL_ERROR, e);
+        	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
 
@@ -322,11 +317,27 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
         return updateAppointmentObject(cdao, inFolder, clientLastModified, true);
     }
 
-    public CalendarDataObject getObjectById(final int objectId) throws OXException, SQLException, OXObjectNotFoundException {
+    public CalendarDataObject getObjectById(final int objectId) throws OXException, SQLException {
         return delegate.getObjectById(objectId);
     }
+    
+    
 
-    public Appointment[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
+    public List<Appointment> getAppointmentsWithExternalParticipantBetween(
+			String email, int[] cols, Date start, Date end, int orderBy,
+			Order order) throws OXException {
+		return delegate.getAppointmentsWithExternalParticipantBetween(email,
+				cols, start, end, orderBy, order);
+	}
+
+	public List<Appointment> getAppointmentsWithUserBetween(User user,
+			int[] cols, Date start, Date end, int orderBy, Order order)
+			throws OXException {
+		return delegate.getAppointmentsWithUserBetween(user, cols, start, end,
+				orderBy, order);
+	}
+
+	public Appointment[] updateAppointmentObject(final CalendarDataObject cdao, final int inFolder, final Date clientLastModified, final boolean checkPermissions) throws OXException {
         try {
             final CalendarDataObject original = getObjectById(cdao.getObjectID());
             final Appointment[] retval = delegate.updateAppointmentObject(cdao, inFolder, clientLastModified, checkPermissions);
@@ -350,10 +361,8 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
                 }
             }
             return retval;
-        } catch (final AbstractOXException e) {
-            throw new OXException(e);
         } catch (final SQLException e) {
-            throw new OXCalendarException(OXCalendarException.Code.SQL_ERROR, e);
+            throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
 

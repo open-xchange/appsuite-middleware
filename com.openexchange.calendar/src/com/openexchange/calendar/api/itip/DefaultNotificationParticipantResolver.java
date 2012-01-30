@@ -65,8 +65,8 @@ import com.openexchange.calendar.itip.generators.NotificationConfiguration;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.generators.NotificationParticipantResolver;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -77,7 +77,6 @@ import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -114,7 +113,7 @@ public class DefaultNotificationParticipantResolver implements
 	// TODO: Principal
 	public List<NotificationParticipant> resolveAllRecipients(
 			Appointment original, Appointment appointment, User user,
-			User onBehalfOf, Context ctx) throws AbstractOXException {
+			User onBehalfOf, Context ctx) throws OXException {
 		NotificationConfiguration defaultConfiguration = getDefaultConfiguration(
 				user, ctx);
 
@@ -465,7 +464,7 @@ public class DefaultNotificationParticipantResolver implements
 		return retval;
 	}
 
-	private User discoverOrganizer(Appointment appointment, Context ctx) throws UserException {
+	private User discoverOrganizer(Appointment appointment, Context ctx) throws OXException {
 		if (appointment.getOrganizerId() > 0) {
 			return userService.getUser(appointment.getOrganizerId(), ctx);
 		} else {
@@ -478,14 +477,14 @@ public class DefaultNotificationParticipantResolver implements
 			}
 			try {
 				return userService.searchUser(organizer, ctx);
-			} catch (UserException x) {
+			} catch (OXException x) {
 				return null;
 			}
 		}
 	}
 
 	private String determineOrganizer(Appointment original,
-			Appointment appointment, Context ctx) throws AbstractOXException {
+			Appointment appointment, Context ctx) throws OXException {
 		String organizer = appointment.getOrganizer();
 		if (organizer == null && original != null) {
 			organizer = original.getOrganizer();
@@ -542,7 +541,7 @@ public class DefaultNotificationParticipantResolver implements
 	}
 
 	public List<NotificationParticipant> getResources(Appointment appointment,
-			Context ctx) throws AbstractOXException {
+			Context ctx) throws OXException {
 		Participant[] participants = appointment.getParticipants();
 		if (participants == null) {
 			return Collections.emptyList();

@@ -54,20 +54,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api.OXObjectNotFoundException;
 import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.AppointmentDiff;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
@@ -84,7 +81,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	static interface ITipStrategy {
 
 		void beforeUpdate(CalendarDataObject cdao)
-				throws OXObjectNotFoundException, OXException;
+				throws OXException;
 
 		void afterUpdate(CalendarDataObject cdao);
 
@@ -97,7 +94,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	private class InternalOrganizerStrategy implements ITipStrategy {
 
 		public void beforeUpdate(CalendarDataObject cdao)
-				throws OXObjectNotFoundException, OXException {
+				throws OXException {
 			// Increase the Sequence Number if dates, recurrences, full_time
 			// change or if this is a create exception
 			if (!cdao.containsSequence()) {
@@ -123,8 +120,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 						}
 					}
 				} catch (SQLException e) {
-					throw new OXCalendarException(
-							OXCalendarException.Code.SQL_ERROR, e);
+					throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
 				}
 			}
 		}
@@ -136,8 +132,12 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		public void delete(CalendarDataObject appointmentObject, int inFolder,
 				Date clientLastModified, boolean checkPermissions)
 				throws OXException {
-			delegate.deleteAppointmentObject(appointmentObject, inFolder,
-					clientLastModified, checkPermissions);
+			try {
+				delegate.deleteAppointmentObject(appointmentObject, inFolder,
+						clientLastModified, checkPermissions);
+			} catch (SQLException e) {
+				throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+			}
 		}
 
 	}
@@ -156,7 +156,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 
 		public void delete(CalendarDataObject appointmentObject, int inFolder,
 				Date clientLastModified, boolean checkPermissions)
-				throws OXObjectNotFoundException, OXException {
+				throws OXException {
 			try {
 				CalendarDataObject original = delegate
 						.getObjectById(appointmentObject.getObjectID());
@@ -170,8 +170,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 							clientLastModified, checkPermissions);
 				}
 			} catch (SQLException e) {
-				throw new OXCalendarException(
-						OXCalendarException.Code.SQL_ERROR);
+				throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
 			}
 		}
 
@@ -239,7 +238,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	}
 
 	public ITipConsistencyCalendar(AppointmentSQLInterface delegate,
-			Session session, ServiceLookup services) throws AbstractOXException {
+			Session session, ServiceLookup services) throws OXException {
 		super(session, services);
 		this.delegate = delegate;
 		this.users = services.getService(UserService.class);
@@ -312,25 +311,21 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	}
 
 	public CalendarDataObject getObjectById(int objectId) throws OXException,
-			SQLException, OXObjectNotFoundException {
+			SQLException {
 		return addOrganizer(delegate.getObjectById(objectId));
 	}
 
 	public CalendarDataObject getObjectById(int objectId, int inFolder)
-			throws OXException, SQLException, OXObjectNotFoundException {
+			throws OXException, SQLException {
 		return addOrganizer(delegate.getObjectById(objectId, inFolder));
 	}
 
 	private CalendarDataObject addOrganizer(CalendarDataObject objectById) throws OXException{
 		if (objectById.getOrganizer() == null) {
-			try {
-				User u = users.getUser(objectById.getCreatedBy(), ctx);
-				String mail = u.getMail();
-				objectById.setOrganizer(mail.toLowerCase());
-				objectById.setOrganizerId(u.getId());
-			} catch (UserException e) {
-				throw new OXException(e);
-			}
+			User u = users.getUser(objectById.getCreatedBy(), ctx);
+			String mail = u.getMail();
+			objectById.setOrganizer(mail.toLowerCase());
+			objectById.setOrganizerId(u.getId());
 		}
 		return objectById;
 	}
@@ -342,18 +337,12 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 
 	public Appointment[] insertAppointmentObject(CalendarDataObject cdao)
 			throws OXException {
-		try {
-			setOrganizer(cdao);
-			setPrincipal(cdao);
-		} catch (OXException x) {
-			throw x;
-		} catch (AbstractOXException e) {
-			throw new OXException(e);
-		}
+		setOrganizer(cdao);
+		setPrincipal(cdao);
 		return delegate.insertAppointmentObject(cdao);
 	}
 	
-	private void setPrincipal(CalendarDataObject cdao) throws AbstractOXException {
+	private void setPrincipal(CalendarDataObject cdao) throws OXException {
 		loadContext();
 		if (cdao.getPrincipal() == null) {
 			int onBehalfOf = onBehalfOf(cdao.getParentFolderID());
@@ -370,12 +359,12 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     			User result = users.searchUser(principal, ctx);
     			int uid = (result != null) ? result.getId() : 0;
     			cdao.setOrganizerId(uid);
-    		} catch (UserException e) {
+    		} catch (OXException e) {
     		}
 		}
 	}
 
-	private void setOrganizer(CalendarDataObject cdao) throws AbstractOXException {
+	private void setOrganizer(CalendarDataObject cdao) throws OXException {
         if (cdao.getOrganizer() == null) {
         	loadUser();
             cdao.setOrganizer(user.getMail().toLowerCase());
@@ -390,7 +379,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     			User result = users.searchUser(organizer, ctx);
     			int uid = (result != null) ? result.getId() : 0;
     			cdao.setOrganizerId(uid);
-    		} catch (UserException e) {
+    		} catch (OXException e) {
     		}
         }
 		
@@ -509,9 +498,25 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	public int getFolder(int objectId) throws OXException {
 		return delegate.getFolder(objectId);
 	}
+	
+	
+
+	public List<Appointment> getAppointmentsWithExternalParticipantBetween(
+			String email, int[] cols, Date start, Date end, int orderBy,
+			Order order) throws OXException {
+		return delegate.getAppointmentsWithExternalParticipantBetween(email,
+				cols, start, end, orderBy, order);
+	}
+
+	public List<Appointment> getAppointmentsWithUserBetween(User user,
+			int[] cols, Date start, Date end, int orderBy, Order order)
+			throws OXException {
+		return delegate.getAppointmentsWithUserBetween(user, cols, start, end,
+				orderBy, order);
+	}
 
 	private void setOrganizerType(CalendarDataObject appointment)
-			throws OXObjectNotFoundException, OXException {
+			throws OXException {
 		String organizer = appointment.getOrganizer();
 		if (organizer == null) {
 			Appointment loaded = null;
@@ -536,7 +541,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 		try {
 			User result = users.searchUser(organizer, ctx);
 			uid = (result != null) ? result.getId() : -1;
-		} catch (UserException e) {
+		} catch (OXException e) {
 		}
 
 		if (uid == -1) {
@@ -548,7 +553,7 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
 	}
 
 	private ITipStrategy chooseStrategy(CalendarDataObject appointment)
-			throws OXObjectNotFoundException, OXException {
+			throws OXException {
 		setOrganizerType(appointment);
 		if (appointment.isExternalOrganizer()) {
 			return new ExternalOrganizerStrategy();

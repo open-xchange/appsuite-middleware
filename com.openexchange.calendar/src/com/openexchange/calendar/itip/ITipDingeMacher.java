@@ -51,7 +51,8 @@ package com.openexchange.calendar.itip;
 
 import java.util.Collection;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 
@@ -62,7 +63,7 @@ import com.openexchange.session.Session;
  */
 public interface ITipDingeMacher {
 
-    List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws AbstractOXException;
+    List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException;
 
     Collection<ITipAction> getSupportedActions();
 

@@ -66,9 +66,9 @@ import com.openexchange.calendar.itip.Messages;
 import com.openexchange.calendar.itip.generators.ArgumentType;
 import com.openexchange.calendar.itip.generators.Sentence;
 import com.openexchange.calendar.itip.generators.changes.ChangeDescriptionGenerator;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.ConfirmationChange;
@@ -197,7 +197,7 @@ public class Participants implements ChangeDescriptionGenerator{
         this.stateChanges = stateChanges;
     }
 
-    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws AbstractOXException {
+    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException {
         
         List<Integer> userIds = new ArrayList<Integer>();
         List<Integer> groupIds = new ArrayList<Integer>();

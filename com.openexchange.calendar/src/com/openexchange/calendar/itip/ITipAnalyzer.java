@@ -54,7 +54,7 @@ import java.util.Map;
 
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 
@@ -65,5 +65,5 @@ import com.openexchange.session.Session;
  */
 public interface ITipAnalyzer {
     public List<ITipMethod> getMethods();
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, String style, Session session) throws AbstractOXException;
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, String style, Session session) throws OXException;
 }

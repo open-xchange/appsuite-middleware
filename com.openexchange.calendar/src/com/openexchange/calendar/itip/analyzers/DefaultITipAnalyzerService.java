@@ -59,7 +59,7 @@ import com.openexchange.calendar.itip.ITipAnalyzerService;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -93,7 +93,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
         }
     }
 
-    public List<ITipAnalysis> analyze(List<ITipMessage> messages, String format, Session session, Map<String, String> mailHeader) throws AbstractOXException {
+    public List<ITipAnalysis> analyze(List<ITipMessage> messages, String format, Session session, Map<String, String> mailHeader) throws OXException {
         List<ITipAnalysis> result = new ArrayList<ITipAnalysis>(messages.size());
         for (ITipMessage message : messages) {
             ITipMethod method = message.getMethod();

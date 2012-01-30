@@ -1,8 +1,7 @@
 package com.openexchange.calendar.itip;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -27,7 +26,7 @@ public class ITipCalendarWrapper {
 		this.services = services;
 	}
 
-	protected void loadUser() throws AbstractOXException {
+	protected void loadUser() throws OXException {
 		if (user != null) {
 			return;
 		}
@@ -37,7 +36,7 @@ public class ITipCalendarWrapper {
 
 	}
 
-	protected void loadContext() throws AbstractOXException {
+	protected void loadContext() throws OXException {
 		if (ctx != null) {
 			return;
 		}
@@ -49,13 +48,7 @@ public class ITipCalendarWrapper {
 	// Returns the user id for a certain folder, if it is a shared folder, -1
 	// otherwise
 	protected int onBehalfOf(final int parentFolderID) throws OXException {
-		try {
-			loadContext();
-		} catch (final OXException x) {
-			throw x;
-		} catch (final AbstractOXException e) {
-			throw new OXException(e);
-		}
+		loadContext();
 		final OXFolderAccess ofa = new OXFolderAccess(ctx);
 		if (!ofa.exists(parentFolderID)) {
 		    return -1;

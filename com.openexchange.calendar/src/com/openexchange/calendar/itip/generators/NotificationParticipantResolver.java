@@ -50,7 +50,8 @@
 package com.openexchange.calendar.itip.generators;
 
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -63,7 +64,7 @@ import com.openexchange.groupware.ldap.User;
  */
 public interface NotificationParticipantResolver {
 
-    List<NotificationParticipant> resolveAllRecipients(Appointment original, Appointment appointment, User user, User onBehalfOf, Context ctx) throws AbstractOXException;
+    List<NotificationParticipant> resolveAllRecipients(Appointment original, Appointment appointment, User user, User onBehalfOf, Context ctx) throws OXException;
     List<NotificationParticipant> getAllParticipants(List<NotificationParticipant> allRecipients, Appointment appointment, User user, Context ctx);
-    List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws AbstractOXException;
+    List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws OXException;
 }

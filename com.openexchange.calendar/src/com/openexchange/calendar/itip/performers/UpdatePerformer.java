@@ -49,7 +49,6 @@
 
 package com.openexchange.calendar.itip.performers;
 
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -65,7 +64,7 @@ import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.session.Session;
 
 
@@ -93,7 +91,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         return EnumSet.of(ITipAction.ACCEPT, ITipAction.ACCEPT_AND_IGNORE_CONFLICTS, ITipAction.ACCEPT_PARTY_CRASHER, ITipAction.ACCEPT_AND_REPLACE, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.UPDATE, ITipAction.CREATE, ITipAction.COUNTER);
     }
 
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws AbstractOXException {
+    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> result = new ArrayList<Appointment>(changes.size());
         
@@ -125,7 +123,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
 
     
 
-    private void updateAppointment(Appointment original, CalendarDataObject appointment, Session session) throws AbstractOXException {
+    private void updateAppointment(Appointment original, CalendarDataObject appointment, Session session) throws OXException {
         AppointmentDiff appointmentDiff = AppointmentDiff.compare(original, appointment);
         CalendarDataObject update = new CalendarDataObject();
         List<FieldUpdate> updates = appointmentDiff.getUpdates();
@@ -165,7 +163,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         appointment.setRecurrencePosition(update.getRecurrencePosition());
     }
 
-    private void saveConfirmations(Session session, AppointmentDiff appointmentDiff, Appointment update) throws AbstractOXException {
+    private void saveConfirmations(Session session, AppointmentDiff appointmentDiff, Appointment update) throws OXException {
         if (appointmentDiff.anyFieldChangedOf("confirmations")) {
             FieldUpdate fieldUpdate = appointmentDiff.getUpdateFor("confirmations");
             Difference extraInfo = (Difference) fieldUpdate.getExtraInfo();
@@ -178,7 +176,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         }
     }
 
-    private void createAppointment(CalendarDataObject appointment, Session session) throws AbstractOXException {
+    private void createAppointment(CalendarDataObject appointment, Session session) throws OXException {
         util.createAppointment(appointment, session);
         // Update Confirmations
         Appointment reloaded = util.reloadAppointment(appointment, session);

@@ -47,42 +47,20 @@
  *
  */
 
-package com.openexchange.data.conversion.ical;
+package com.openexchange.calendar.api;
 
-import com.openexchange.groupware.notify.State.Type;
+import com.openexchange.api2.AppointmentSQLInterface;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link ITipContainer}
+ * {@link CalendarFeature}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ITipContainer {
-
-    private final ITipMethod method;
-
-    private final Type type;
-
-    private final int userId;
-
-    public ITipContainer() {
-        this(ITipMethod.NO_METHOD, null, -1);
-    }
-
-    public ITipContainer(ITipMethod method, Type type, int userId) {
-        this.method = method;
-        this.type = type;
-        this.userId = userId;
-    }
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public int getUserId() {
-        return userId;
-    }
+public interface CalendarFeature {
+    public String getId();
+    
+    public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) throws OXException;
 }

@@ -54,7 +54,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.itip.generators.Sentence;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 
@@ -66,5 +66,5 @@ import com.openexchange.groupware.contexts.Context;
  */
 public interface ChangeDescriptionGenerator {
     public String[] getFields();
-    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws AbstractOXException;
+    public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException;
 }

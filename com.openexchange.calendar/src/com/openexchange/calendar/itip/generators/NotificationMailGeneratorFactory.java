@@ -51,13 +51,13 @@ package com.openexchange.calendar.itip.generators;
 
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.templating.base.TemplateService;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
 
@@ -82,7 +82,7 @@ public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactor
 
 
 
-    public ITipMailGenerator create(Appointment original, Appointment appointment, Session session, int onBehalfOfId) throws AbstractOXException {
+    public ITipMailGenerator create(Appointment original, Appointment appointment, Session session, int onBehalfOfId) throws OXException {
         Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
         User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
         User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);

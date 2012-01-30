@@ -66,7 +66,7 @@ import com.openexchange.calendar.itip.generators.TypeWrapper;
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -95,7 +95,7 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer{
         return Arrays.asList(ITipMethod.CANCEL);
     }
 
-    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws AbstractOXException {
+    public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
         
         ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);

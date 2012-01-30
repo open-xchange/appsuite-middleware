@@ -81,8 +81,8 @@ import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling
 import com.openexchange.calendar.itip.generators.changes.generators.Style;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
@@ -91,7 +91,6 @@ import com.openexchange.groupware.container.Difference;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -113,7 +112,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	protected ServiceLookup services;
 	
 	public ITipAnalysis analyze(ITipMessage message, Map<String, String> header,
-			String style, Session session) throws AbstractOXException {
+			String style, Session session) throws OXException {
 		if (header == null) {
 			header = new HashMap<String, String>();
 		}
@@ -141,7 +140,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 		return copy;
 	}
 
-	protected abstract ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws AbstractOXException;
+	protected abstract ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException;
 
 	public AbstractITipAnalyzer(ITipIntegrationUtility util,
 			ServiceLookup services) {
@@ -159,7 +158,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	
 
 	public void describeDiff(ITipChange change, TypeWrapper wrapper,
-			Session session) throws AbstractOXException {
+			Session session) throws OXException {
 		if (services == null) {
 			change.setDiffDescription(new ArrayList<String>());
 			return;
@@ -238,7 +237,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	}
 
 	private void deleteIntro(ITipChange change, UserService users, Context ctx,
-			TypeWrapper wrapper, Locale locale) throws AbstractOXException {
+			TypeWrapper wrapper, Locale locale) throws OXException {
 		String displayName = displayNameFor(change.getDeletedAppointment()
 				.getOrganizer(), users, ctx);
 		change.setIntroduction(new Sentence(Messages.DELETE_INTRO).add(
@@ -248,7 +247,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	}
 
 	private void updateIntro(ITipChange change, UserService users, Context ctx,
-			TypeWrapper wrapper, Locale locale) throws AbstractOXException {
+			TypeWrapper wrapper, Locale locale) throws OXException {
 		String displayName = displayNameFor(change.getCurrentAppointment()
 				.getOrganizer(), users, ctx);
 		if (onlyStateChanged(change.getDiff())) {
@@ -351,7 +350,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	}
 
 	private void createIntro(ITipChange change, UserService users, Context ctx,
-			TypeWrapper wrapper, Locale locale) throws AbstractOXException {
+			TypeWrapper wrapper, Locale locale) throws OXException {
 		String displayName = displayNameFor(change.getNewAppointment()
 				.getOrganizer(), users, ctx);
 		change.setIntroduction(new Sentence(Messages.CREATE_INTRO).add(
@@ -360,7 +359,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 	}
 
 	protected String displayNameFor(String organizer, UserService users,
-			Context ctx) throws AbstractOXException {
+			Context ctx) throws OXException {
 		if (organizer == null) {
 			return "unknown";
 		}
@@ -376,7 +375,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 					return result.getDisplayName();
 				}
 			}
-		} catch (UserException x) {
+		} catch (OXException x) {
 			return organizer;
 		}
 

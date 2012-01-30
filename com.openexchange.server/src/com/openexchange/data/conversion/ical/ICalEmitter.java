@@ -51,6 +51,8 @@ package com.openexchange.data.conversion.ical;
 
 import java.io.OutputStream;
 import java.util.List;
+
+import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -94,5 +96,7 @@ public interface ICalEmitter {
      * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
      */
     public void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
+
+	public void flush(ICalSession session, OutputStream stream) throws ConversionError;
 
 }

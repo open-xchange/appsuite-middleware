@@ -50,7 +50,7 @@
 package com.openexchange.calendar.itip.generators;
 
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 
@@ -62,6 +62,6 @@ import com.openexchange.session.Session;
  */
 public interface ITipMessageGenerator {
 
-    ITipMessage generate(Appointment original, Appointment updated, Session session) throws AbstractOXException;
+    ITipMessage generate(Appointment original, Appointment updated, Session session) throws OXException;
 
 }

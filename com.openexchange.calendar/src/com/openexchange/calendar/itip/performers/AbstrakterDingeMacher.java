@@ -63,7 +63,7 @@ import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.MailSenderService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
@@ -105,13 +105,13 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         return currentAppointment;
     }
     
-    protected void ensureFolderId(Appointment appointment, Session session) throws AbstractOXException {
+    protected void ensureFolderId(Appointment appointment, Session session) throws OXException {
         int privateCalendarFolderId = util.getPrivateCalendarFolderId(session);
         appointment.setParentFolderID(privateCalendarFolderId);
         
     }
     
-    protected void writeMail(ITipAction action, Appointment original, Appointment appointment, Session session) throws AbstractOXException {
+    protected void writeMail(ITipAction action, Appointment original, Appointment appointment, Session session) throws OXException {
         switch (action) {
         case COUNTER:
             return;

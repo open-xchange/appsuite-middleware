@@ -51,7 +51,8 @@ package com.openexchange.calendar.itip;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ConfirmationChange;
@@ -65,24 +66,24 @@ import com.openexchange.session.Session;
  */
 public interface ITipIntegrationUtility {
 
-    CalendarDataObject resolveUid(String uid, Session session) throws AbstractOXException;
+    CalendarDataObject resolveUid(String uid, Session session) throws OXException;
 
-    List<Appointment> getConflicts(CalendarDataObject appointment, Session session) throws AbstractOXException;
+    List<Appointment> getConflicts(CalendarDataObject appointment, Session session) throws OXException;
 
-    List<Appointment> getExceptions(Appointment original, Session session) throws AbstractOXException;
+    List<Appointment> getExceptions(Appointment original, Session session) throws OXException;
 
-    int getPrivateCalendarFolderId(Session session) throws AbstractOXException;
+    int getPrivateCalendarFolderId(Session session) throws OXException;
 
-    void createAppointment(CalendarDataObject appointment, Session session) throws AbstractOXException;
+    void createAppointment(CalendarDataObject appointment, Session session) throws OXException;
 
-    void updateAppointment(CalendarDataObject update, Session session, Date clientLastModified) throws AbstractOXException;
+    void updateAppointment(CalendarDataObject update, Session session, Date clientLastModified) throws OXException;
     
-    void changeConfirmationForExternalParticipant(Appointment update, ConfirmationChange change, Session session) throws AbstractOXException;
+    void changeConfirmationForExternalParticipant(Appointment update, ConfirmationChange change, Session session) throws OXException;
 
-    void deleteAppointment(Appointment appointment, Session session,  Date clientLastModified) throws AbstractOXException;
+    void deleteAppointment(Appointment appointment, Session session,  Date clientLastModified) throws OXException;
 
-    Appointment reloadAppointment(Appointment appointment, Session session) throws AbstractOXException;
+    Appointment reloadAppointment(Appointment appointment, Session session) throws OXException;
     
-    int getFolderIdForUser(int appId, int userId, int contextId) throws AbstractOXException;
+    int getFolderIdForUser(int appId, int userId, int contextId) throws OXException;
 
 }

@@ -60,10 +60,6 @@ import java.util.TimeZone;
 import com.openexchange.calendar.itip.HumanReadableRecurrences;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
-import com.openexchange.user.UserService;
 
 
 /**

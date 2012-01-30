@@ -51,7 +51,8 @@ package com.openexchange.calendar.itip;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ConfirmationChange;
@@ -84,44 +85,44 @@ public class MockITipIntegrationUtility implements ITipIntegrationUtility {
         this.appointment = appointment;
     }
 
-    public void changeConfirmationForExternalParticipant(Appointment update, ConfirmationChange change, Session session) throws AbstractOXException {
+    public void changeConfirmationForExternalParticipant(Appointment update, ConfirmationChange change, Session session) throws OXException {
 
     }
 
-    public void createAppointment(CalendarDataObject appointment, Session session) throws AbstractOXException {
+    public void createAppointment(CalendarDataObject appointment, Session session) throws OXException {
 
     }
 
-    public void deleteAppointment(Appointment appointment, Session session, Date clientLastModified) throws AbstractOXException {
+    public void deleteAppointment(Appointment appointment, Session session, Date clientLastModified) throws OXException {
 
     }
 
-    public List<Appointment> getConflicts(CalendarDataObject appointment, Session session) throws AbstractOXException {
+    public List<Appointment> getConflicts(CalendarDataObject appointment, Session session) throws OXException {
         return null;
     }
 
-    public List<Appointment> getExceptions(Appointment original, Session session) throws AbstractOXException {
+    public List<Appointment> getExceptions(Appointment original, Session session) throws OXException {
         return exceptions;
     }
 
-    public int getPrivateCalendarFolderId(Session session) throws AbstractOXException {
+    public int getPrivateCalendarFolderId(Session session) throws OXException {
         return 0;
     }
 
-    public Appointment reloadAppointment(Appointment address, Session session) throws AbstractOXException {
+    public Appointment reloadAppointment(Appointment address, Session session) throws OXException {
         return this.appointment;
     }
 
-    public CalendarDataObject resolveUid(String uid, Session session) throws AbstractOXException {
+    public CalendarDataObject resolveUid(String uid, Session session) throws OXException {
         return null;
     }
 
-    public void updateAppointment(CalendarDataObject update, Session session, Date clientLastModified) throws AbstractOXException {
+    public void updateAppointment(CalendarDataObject update, Session session, Date clientLastModified) throws OXException {
 
     }
 
 	public int getFolderIdForUser(int appId, int userId, int contextId)
-			throws AbstractOXException {
+			throws OXException {
 		// TODO Auto-generated method stub
 		return 0;
 	}

@@ -50,7 +50,7 @@
 package com.openexchange.calendar.itip;
 
 
-import com.openexchange.api2.OXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 

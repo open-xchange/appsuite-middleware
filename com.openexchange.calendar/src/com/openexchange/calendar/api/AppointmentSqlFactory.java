@@ -60,6 +60,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.session.Session;
 
@@ -82,7 +83,7 @@ public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
             if (!skip.contains(feature.getId())) {
                 try {
 					calendarSql = feature.wrap(calendarSql, session);
-				} catch (AbstractOXException e) {
+				} catch (OXException e) {
 					LOG.error(e.getMessage(), e);
 				}
             }

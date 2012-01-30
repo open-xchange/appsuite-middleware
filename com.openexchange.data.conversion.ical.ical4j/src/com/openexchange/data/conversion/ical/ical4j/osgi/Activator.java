@@ -97,11 +97,11 @@ public class Activator implements BundleActivator {
     /**
      * Service registration of the emitter service.
      */
-    private ServiceRegistration emitterRegistration;
+    private ServiceRegistration<ICalEmitter> emitterRegistration;
 
-    private ServiceRegistration itipParserRegistration;
+    private ServiceRegistration<ITipParser> itipParserRegistration;
 
-    private ServiceRegistration itipEmitterRegistration;
+    private ServiceRegistration<ITipEmitter> itipEmitterRegistration;
 
     /**
      * {@inheritDoc}
@@ -110,7 +110,7 @@ public class Activator implements BundleActivator {
     public void start(final BundleContext context) throws Exception {
         final OXUserResolver userResolver = new OXUserResolver();
         userTracker =
-            new ServiceTracker<UserService, UserService>(context, UserService.class.getName(), new UserServiceTrackerCustomizer(
+            new ServiceTracker<UserService, UserService>(context, UserService.class, new UserServiceTrackerCustomizer(
                 context,
                 userResolver));
         userTracker.open();
@@ -121,7 +121,7 @@ public class Activator implements BundleActivator {
         resourceTracker =
             new ServiceTracker<ResourceService, ResourceService>(
                 context,
-                ResourceService.class.getName(),
+                ResourceService.class,
                 new ResourceServiceTrackerCustomizer(context, resourceResolver));
         resourceTracker.open();
         Participants.resourceResolver = resourceResolver;
@@ -129,14 +129,13 @@ public class Activator implements BundleActivator {
         calendarTracker =
             new ServiceTracker<CalendarCollectionService, CalendarCollectionService>(
                 context,
-                CalendarCollectionService.class.getName(),
+                CalendarCollectionService.class,
                 new CalendarServiceTracker(context));
         calendarTracker.open();
-
-        parserRegistration = context.registerService(ICalParser.class.getName(), new ICal4JParser(), null);
-        emitterRegistration = context.registerService(ICalEmitter.class.getName(), new ICal4JEmitter(), null);
-        itipParserRegistration = context.registerService(ITipParser.class.getName(), new ICal4JITipParser(), null);
-        itipEmitterRegistration = context.registerService(ITipEmitter.class.getName(), new ICal4JITipEmitter(), null);
+        parserRegistration = context.registerService(ICalParser.class, new ICal4JParser(), null);
+        emitterRegistration = context.registerService(ICalEmitter.class, new ICal4JEmitter(), null);
+        itipParserRegistration = context.registerService(ITipParser.class, new ICal4JITipParser(), null);
+        itipEmitterRegistration = context.registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
     }
 
     /**

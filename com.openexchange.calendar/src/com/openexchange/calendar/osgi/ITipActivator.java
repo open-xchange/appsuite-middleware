@@ -77,7 +77,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.templating.base.TemplateService;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 

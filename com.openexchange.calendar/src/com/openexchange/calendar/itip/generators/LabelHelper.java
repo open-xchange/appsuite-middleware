@@ -59,13 +59,13 @@ import com.openexchange.calendar.itip.Messages;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserException;
 import com.openexchange.groupware.notify.EmailableParticipant;
 import com.openexchange.groupware.notify.LinkableState;
 import com.openexchange.groupware.notify.NotificationConfig;
@@ -318,11 +318,11 @@ public class LabelHelper {
     	return delegationState.getDeleteIntroduction();
     }
     
-    public String getCreator() throws UserException {
+    public String getCreator() throws OXException {
     	return mail.getOrganizer().getDisplayName();
     }
     
-    public String getModifier() throws UserException {
+    public String getModifier() throws OXException {
         if (mail.getAppointment().getModifiedBy() == 0) {
             return "Unknown";
         }

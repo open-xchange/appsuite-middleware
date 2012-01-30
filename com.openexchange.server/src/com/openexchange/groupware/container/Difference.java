@@ -47,40 +47,68 @@
  *
  */
 
-package com.openexchange.data.conversion.ical;
+package com.openexchange.groupware.container;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * {@link ITipMethod}
- *
+ * {@link Difference}
+ * 
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public enum ITipMethod {
+public class Difference {
 
-    NO_METHOD(""), REQUEST("request"), REPLY("reply"), CANCEL("cancel");
+    public static final int COMMON = -1;
 
-    private final String keyword;
+    private List<Object> added;
 
-    private ITipMethod(final String keyword) {
-        this.keyword = keyword;
+    private List<Object> removed;
+
+    private List<Change> changed;
+
+    private int field;
+
+    public Difference() {
+        this(COMMON);
     }
 
-    /**
-     * Gets the keyword.
-     *
-     * @return The keyword
-     */
-    public String getKeyword() {
-        return this.keyword;
+    public Difference(int field) {
+        added = new ArrayList<Object>();
+        removed = new ArrayList<Object>();
+        changed = new ArrayList<Change>();
+        this.field = field;
     }
 
-    /**
-     * Gets the method parameter read to append to "Content-Type" header: <code>"method=" + &lt;keyword&gt;</code>
-     *
-     * @return The method parameter; <code>"method=" + &lt;keyword&gt;</code>
-     */
-    public String getMethod() {
-        return "method=" + keyword.toUpperCase(Locale.US);
+    public List<Object> getAdded() {
+        return added;
+    }
+
+    public void setAdded(List<Object> added) {
+        this.added = added;
+    }
+
+    public List<Object> getRemoved() {
+        return removed;
+    }
+
+    public void setRemoved(List<Object> removed) {
+        this.removed = removed;
+    }
+
+    public List<Change> getChanged() {
+        return changed;
+    }
+
+    public void setChanged(List<Change> changed) {
+        this.changed = changed;
+    }
+
+    public int getField() {
+        return field;
+    }
+
+    public void setField(int field) {
+        this.field = field;
     }
 }

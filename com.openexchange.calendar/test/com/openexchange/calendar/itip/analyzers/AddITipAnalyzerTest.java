@@ -66,7 +66,7 @@ import com.openexchange.calendar.itip.Messages;
 import com.openexchange.calendar.itip.analyzers.AddITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.sim.SimBuilder;
@@ -85,7 +85,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testAddChangeException() throws AbstractOXException {
+    public void testAddChangeException() throws OXException {
         
         CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
@@ -125,7 +125,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testAddChangeExceptionWithoutRescheduling() throws AbstractOXException {
+    public void testAddChangeExceptionWithoutRescheduling() throws OXException {
         CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         
@@ -164,7 +164,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testAddChangeExceptionWithConflicts() throws AbstractOXException {
+    public void testAddChangeExceptionWithConflicts() throws OXException {
         CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         newException.setStartDate(D("Tomorrow at 09:00"));
@@ -202,7 +202,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     
     // Error Cases
     @Test
-    public void testAddChangeExceptionToNonexistingAppointment() throws AbstractOXException {
+    public void testAddChangeExceptionToNonexistingAppointment() throws OXException {
         CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         
@@ -229,7 +229,7 @@ public class AddITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testAddChangeWhereAlreadyAChangeExists() throws AbstractOXException {
+    public void testAddChangeWhereAlreadyAChangeExists() throws OXException {
         CalendarDataObject newException = appointment("123-123-123-123");
         newException.setRecurrenceDatePosition(new Date(12345));
         

@@ -436,6 +436,13 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
         return clazz.cast(service);
     }
+    
+    public final <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+    	ServiceReference<? extends S> serviceReference = context.getServiceReference(clazz);
+    	
+    	return context.getService(serviceReference);
+    }
+
 
     /**
      * Adds specified service (if absent).

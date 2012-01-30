@@ -63,7 +63,7 @@ import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.generators.NotificationParticipantResolver;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.ConfirmationChange;
@@ -87,7 +87,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
     SimSession session = new SimSession(12, 1337);
     
     @Test
-    public void create() throws AbstractOXException {
+    public void create() throws OXException {
         Appointment appointment = createTestAppointment();
         Appointment exc = createTestAppointment();
         exc.setObjectID(13);
@@ -114,7 +114,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
     }
 
     @Test
-    public void update() throws AbstractOXException {
+    public void update() throws OXException {
         Appointment appointment = createTestAppointment();
         appointment.setTitle("New Title");
         
@@ -145,7 +145,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
     }
     
     @Test
-    public void addChangeException() throws AbstractOXException {
+    public void addChangeException() throws OXException {
         Appointment appointment = createTestAppointment();
         appointment.setTitle("New Title");
         appointment.setRecurrenceDatePosition(appointment.getStartDate());
@@ -172,7 +172,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
     }
     
     @Test
-    public void addParticipant() throws AbstractOXException {
+    public void addParticipant() throws OXException {
         Appointment appointment = createTestAppointment();
         addParticipant(appointment, "external2@otherdomain.ox", 101);
         
@@ -201,7 +201,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
     }
     
     @Test
-    public void removeParticipant() throws AbstractOXException {
+    public void removeParticipant() throws OXException {
         Appointment appointment = createTestAppointment();
         removeExternalParticipant(appointment, "external1@otherdomain.ox");
         
@@ -230,7 +230,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
   
     
     @Test
-    public void deleteAppointment() throws AbstractOXException {
+    public void deleteAppointment() throws OXException {
         Appointment appointment = createTestAppointment();
         
         
@@ -308,7 +308,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         /* (non-Javadoc)
          * @see com.openexchange.calendar.itip.generators.NotificationParticipantResolver#getResources(com.openexchange.groupware.container.Appointment, com.openexchange.groupware.contexts.Context)
          */
-        public List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws AbstractOXException {
+        public List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }

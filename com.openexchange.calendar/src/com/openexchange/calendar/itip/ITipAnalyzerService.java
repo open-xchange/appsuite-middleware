@@ -52,7 +52,7 @@ package com.openexchange.calendar.itip;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 
@@ -62,5 +62,5 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface ITipAnalyzerService {
-    public List<ITipAnalysis> analyze(List<ITipMessage> messages, String format, Session session, Map<String, String> mailHeader) throws AbstractOXException;
+    public List<ITipAnalysis> analyze(List<ITipMessage> messages, String format, Session session, Map<String, String> mailHeader) throws OXException;
 }

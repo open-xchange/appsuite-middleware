@@ -358,7 +358,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         return getObjectById(oid, 0, null, false);
     }
 
-    public CalendarDataObject getObjectById(final int oid, final int inFolder) throws OXException, SQLException, OXObjectNotFoundException, OXPermissionException {
+    public CalendarDataObject getObjectById(final int oid, final int inFolder) throws OXException, SQLException {
         return getObjectById(oid, inFolder, null, true);
     }
 

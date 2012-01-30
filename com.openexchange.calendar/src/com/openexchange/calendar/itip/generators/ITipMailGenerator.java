@@ -50,7 +50,8 @@
 package com.openexchange.calendar.itip.generators;
 
 import java.util.List;
-import com.openexchange.groupware.AbstractOXException;
+
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ITipMailGenerator}
@@ -59,29 +60,29 @@ import com.openexchange.groupware.AbstractOXException;
  */
 public interface ITipMailGenerator {
 
-    NotificationMail generateCreateMailFor(NotificationParticipant participant) throws AbstractOXException;
+    NotificationMail generateCreateMailFor(NotificationParticipant participant) throws OXException;
 
-    NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws AbstractOXException;
+    NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException;
 
-    NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws AbstractOXException;
+    NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws OXException;
 
-    NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws AbstractOXException;
+    NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws OXException;
 
-	NotificationMail generateRefreshMailFor(NotificationParticipant p) throws AbstractOXException;
+	NotificationMail generateRefreshMailFor(NotificationParticipant p) throws OXException;
 
-	NotificationMail generateDeclineCounterMailFor(NotificationParticipant p) throws AbstractOXException;
+	NotificationMail generateDeclineCounterMailFor(NotificationParticipant p) throws OXException;
 
-	NotificationMail generateCreateMailFor(String email) throws AbstractOXException;
+	NotificationMail generateCreateMailFor(String email) throws OXException;
 
-    NotificationMail generateUpdateMailFor(String email) throws AbstractOXException;
+    NotificationMail generateUpdateMailFor(String email) throws OXException;
 
-    NotificationMail generateDeleteMailFor(String email) throws AbstractOXException;
+    NotificationMail generateDeleteMailFor(String email) throws OXException;
 
-    NotificationMail generateCreateExceptionMailFor(String email) throws AbstractOXException;
+    NotificationMail generateCreateExceptionMailFor(String email) throws OXException;
 
-	NotificationMail generateRefreshMailFor(String email) throws AbstractOXException;
+	NotificationMail generateRefreshMailFor(String email) throws OXException;
 
-	NotificationMail generateDeclineCounterMailFor(String email) throws AbstractOXException;
+	NotificationMail generateDeclineCounterMailFor(String email) throws OXException;
 
 	List<NotificationParticipant> getRecipients();
 

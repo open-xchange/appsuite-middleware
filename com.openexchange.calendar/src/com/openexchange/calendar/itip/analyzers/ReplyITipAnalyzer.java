@@ -80,7 +80,7 @@ import com.openexchange.calendar.itip.ParticipantChange;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
@@ -110,7 +110,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		super(util, services);
 	}
 
-	public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws AbstractOXException {
+	public ITipAnalysis analyze(ITipMessage message, Map<String, String> header, TypeWrapper wrapper, Locale locale, User user, Context ctx, Session session) throws OXException {
 
 		ITipAnalysis analysis = new ITipAnalysis();
 		analysis.setMessage(message);
@@ -191,7 +191,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 	}
 
 	private void describeReplyDiff(ITipMessage message, ITipChange change, TypeWrapper wrapper,
-			Session session) throws AbstractOXException {
+			Session session) throws OXException {
 		if (services == null) {
 			return;
 		}

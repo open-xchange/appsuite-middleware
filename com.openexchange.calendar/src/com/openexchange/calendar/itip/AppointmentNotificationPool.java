@@ -60,13 +60,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.itip.generators.ITipMailGenerator;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.calendar.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.MailSenderService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
@@ -311,7 +310,7 @@ public class AppointmentNotificationPool implements
 				}
 				
 			}
-		} catch (AbstractOXException e) {
+		} catch (OXException e) {
 			LOG.error(e.getMessage(), e);
 		}
 	}

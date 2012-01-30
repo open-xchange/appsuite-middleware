@@ -75,6 +75,8 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -373,7 +375,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.ORGANIZER), new StatementFiller() {
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
-                    throws OXCalendarException, SQLException {
+                    throws OXException, SQLException {
                 stmt.setString(pos, cdao.getOrganizer());
             }
         });
@@ -386,19 +388,19 @@ public class CalendarMySQL implements CalendarSqlImp {
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.ORGANIZER_ID), new StatementFiller() {
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
-                    throws OXCalendarException, SQLException {
+                    throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getOrganizerId());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.PRINCIPAL), new StatementFiller() {
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
-                    throws OXCalendarException, SQLException {
+                    throws OXException, SQLException {
                 stmt.setString(pos, cdao.getPrincipal());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.PRINCIPAL_ID), new StatementFiller() {
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
-                    throws OXCalendarException, SQLException {
+                    throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getPrincipalId());
             }
         });
@@ -2341,11 +2343,11 @@ public class CalendarMySQL implements CalendarSqlImp {
         return participants;
     }
 
-    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException {
+    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con) throws SQLException, OXException {
         return loadObjectForUpdate(cdao, so, ctx, inFolder, con, true);
     }
 
-    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con, final boolean checkPermissions) throws SQLException, LdapException, OXObjectNotFoundException, OXPermissionException, OXException {
+    public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con, final boolean checkPermissions) throws SQLException, OXException {
         final CalendarOperation co = new CalendarOperation();
         Connection readcon = null;
         boolean pushCon = false;
@@ -4351,7 +4353,7 @@ public class CalendarMySQL implements CalendarSqlImp {
          */
         return false;
     }
-    public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXObjectNotFoundException, OXPermissionException, OXException, OXConcurrentModificationException {
+    public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         deleteAppointment(uid, cdao, writecon, so, ctx, inFolder, clientLastModified, true);
     }
 

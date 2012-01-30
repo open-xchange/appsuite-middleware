@@ -62,7 +62,7 @@ import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.analyzers.RefreshITipAnalyzer;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.sim.SimBuilder;
@@ -81,7 +81,7 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testRefresh() throws AbstractOXException {
+    public void testRefresh() throws OXException {
         ITipMessage message = new ITipMessage();
         message.setAppointment(appointment("123-123-123-123"));
         
@@ -101,7 +101,7 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testRefreshException() throws AbstractOXException {
+    public void testRefreshException() throws OXException {
         ITipMessage message = new ITipMessage();
         CalendarDataObject requestedAppointment = appointment("123-123-123-123");
         requestedAppointment.setRecurrenceDatePosition(new Date(12345));
@@ -128,7 +128,7 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testRefreshUnknown() throws AbstractOXException {
+    public void testRefreshUnknown() throws OXException {
         ITipMessage message = new ITipMessage();
         message.setAppointment(appointment("123-123-123-123"));
         
@@ -146,7 +146,7 @@ public class RefreshITipAnalyzerTest extends AbstractITipAnalyzerTest {
     }
     
     @Test
-    public void testRefreshUnknownException() throws AbstractOXException {
+    public void testRefreshUnknownException() throws OXException {
         ITipMessage message = new ITipMessage();
         CalendarDataObject requestedAppointment = appointment("123-123-123-123");
         requestedAppointment.setRecurrenceDatePosition(new Date(12345));

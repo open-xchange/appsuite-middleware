@@ -51,10 +51,10 @@ package com.openexchange.calendar.itip;
 
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.itip.analyzers.AbstractITipAnalyzer;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;

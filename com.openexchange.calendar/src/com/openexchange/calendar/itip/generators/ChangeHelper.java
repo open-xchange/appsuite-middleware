@@ -58,8 +58,8 @@ import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Participants;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
 import com.openexchange.calendar.itip.generators.changes.generators.Style;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.AbstractOXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -110,7 +110,7 @@ public class ChangeHelper {
         
     }
     
-    public List<String> getChanges() throws AbstractOXException {
+    public List<String> getChanges() throws OXException {
         return describer.getChanges(ctx, original, update, diff, wrapper, locale, timezone);
     }
     

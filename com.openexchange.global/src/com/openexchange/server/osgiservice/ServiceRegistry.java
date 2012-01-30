@@ -128,6 +128,11 @@ public class ServiceRegistry implements ServiceLookup {
         }
         return clazz.cast(service);
     }
+    
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+    	return getService(clazz);
+    }
 
     /**
      * Gets the service defined by given class

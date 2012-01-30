@@ -61,7 +61,7 @@ import org.junit.Test;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -80,7 +80,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
     MockParticipantResolver resolver  = new MockParticipantResolver();
     
     @Test
-    public void update() throws AbstractOXException {
+    public void update() throws OXException {
         Appointment appointment = createTestAppointment();
         appointment.setTitle("New Title");
         
@@ -121,7 +121,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
     }
     
     @Test
-    public void changeState() throws AbstractOXException {
+    public void changeState() throws OXException {
         Appointment appointment = createTestAppointment();
         confirmFor("internal1@domain.ox", ConfirmStatus.ACCEPT, appointment);
         
@@ -159,7 +159,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
     }
     
     @Test
-    public void createException() throws AbstractOXException {
+    public void createException() throws OXException {
         Appointment master = createTestAppointment();
 
         Appointment appointment = createTestAppointment();
@@ -197,7 +197,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
     }
     
     @Test
-    public void addParticipant() throws AbstractOXException {
+    public void addParticipant() throws OXException {
         Appointment appointment = createTestAppointment();
         addParticipant(appointment, "external3@otherdomain.ox", 102);
         
@@ -226,7 +226,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
     
     
     @Test
-    public void removeParticipant() throws AbstractOXException {
+    public void removeParticipant() throws OXException {
         Appointment appointment = createTestAppointment();
         removeExternalParticipant(appointment, "external1@otherdomain.ox");
         
@@ -256,7 +256,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
     }
     
     @Test
-    public void deleteAppointment() throws AbstractOXException {
+    public void deleteAppointment() throws OXException {
         Appointment appointment = createTestAppointment();
         
         NotificationMailGenerator generator = new NotificationMailGenerator(null, resolver, util, null, appointment, user, user, null, session);
@@ -335,7 +335,7 @@ public class AttendeeOfAppointmentWithInternalOrganizerMailGeneratorTest extends
         /* (non-Javadoc)
          * @see com.openexchange.calendar.itip.generators.NotificationParticipantResolver#getResources(com.openexchange.groupware.container.Appointment, com.openexchange.groupware.contexts.Context)
          */
-        public List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws AbstractOXException {
+        public List<NotificationParticipant> getResources(Appointment appointment, Context ctx) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }

@@ -49,7 +49,7 @@
 
 package com.openexchange.calendar.itip.generators;
 
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.session.Session;
 
@@ -60,6 +60,6 @@ import com.openexchange.session.Session;
  */
 public interface ITipMailGeneratorFactory {
 
-    ITipMailGenerator create(Appointment original, Appointment appointment, Session session, int onBehalfOfId) throws AbstractOXException;
+    ITipMailGenerator create(Appointment original, Appointment appointment, Session session, int onBehalfOfId) throws OXException;
 
 }

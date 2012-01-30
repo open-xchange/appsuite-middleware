@@ -67,7 +67,7 @@ import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.datasources.MessageDataSource;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.mail.MailObject;
@@ -75,7 +75,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.notify.State;
 import com.openexchange.html.HTMLService;
-import com.openexchange.mail.MailException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
@@ -122,15 +121,17 @@ public class DefaultMailSenderService implements MailSenderService {
         try {
             addBody(mail, message, session);
             message.send();
-        } catch (MessagingException e) {
+        } catch (OXException e) {
             LOG.error("Unable to compose message", e);
-        } catch (AbstractOXException e) {
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Unable to compose message", e);
+        } catch (MessagingException e) {
             LOG.error("Unable to compose message", e);
         }
 
     }
 
-    private void addBody(NotificationMail mail, MailObject message, Session session) throws MessagingException, AbstractOXException {
+    private void addBody(NotificationMail mail, MailObject message, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
         NotificationConfiguration recipientConfig = mail.getRecipient().getConfiguration();
 
         String charset = MailProperties.getInstance().getDefaultMimeCharset();
@@ -158,7 +159,7 @@ public class DefaultMailSenderService implements MailSenderService {
         }
     }
 
-    private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(NotificationMail mail, String charset, Session session, boolean iCalAsAttachment) throws MessagingException, AbstractOXException {
+    private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(NotificationMail mail, String charset, Session session, boolean iCalAsAttachment) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textAndHtml = new MimeBodyPart();
         Multipart textAndHtmlAndIcalMultipart = generateTextAndIcalAndHtmlMultipart(mail, charset, session);
         textAndHtml.setContent(textAndHtmlAndIcalMultipart);
@@ -170,7 +171,7 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
     
-    private Multipart generateTextAndIcalAndHtmlMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, AbstractOXException {
+    private Multipart generateTextAndIcalAndHtmlMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textPart = generateTextPart(mail, charset);
         BodyPart htmlPart = generateHtmlPart(mail, charset);
         BodyPart iCalPart = generateIcalPart(mail, charset, session);
@@ -182,7 +183,7 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private Multipart generateTextAndIcalMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, AbstractOXException {
+    private Multipart generateTextAndIcalMultipart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textPart = generateTextPart(mail, charset);
         BodyPart iCalPart = generateIcalPart(mail, charset, session);
 
@@ -192,88 +193,90 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private BodyPart generateIcalPart(NotificationMail mail, String charset, Session session) throws MessagingException, AbstractOXException {
-        try {
-            MimeBodyPart icalPart = new MimeBodyPart();
-            Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final ContentType ct = new ContentType();
-            ct.setPrimaryType("text");
-            ct.setSubType("calendar");
-            if (mail.getMessage().getMethod() != ITipMethod.NO_METHOD) {
-                ct.setParameter("method", mail.getMessage().getMethod().getKeyword().toUpperCase(Locale.US));
-            }
-            ct.setCharsetParameter(charset);
-            /*
-             * Generate ICal text
-             */
-            final byte[] icalFile;
-            final boolean isAscii;
-            {
-                String message = iTipEmitter.writeMessage(mail.getMessage(), ctx, null, null);
-                message = trimICal(message);
-                icalFile = message.getBytes(charset);
-                isAscii = isAscii(icalFile);
-            }
-            final String contentType = ct.toString();
-            icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
-            icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
-            icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
-            return icalPart;
-        } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
-        }
+    private BodyPart generateIcalPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
+    	MimeBodyPart icalPart = new MimeBodyPart();
+        Context ctx = ContextStorage.getStorageContext(session.getContextId());
+		final ContentType ct = new ContentType();
+		ct.setPrimaryType("text");
+		ct.setSubType("calendar");
+		if (mail.getMessage().getMethod() != ITipMethod.NO_METHOD) {
+			ct.setParameter("method", mail.getMessage().getMethod()
+					.getKeyword().toUpperCase(Locale.US));
+		}
+		ct.setCharsetParameter(charset);
+		/*
+		 * Generate ICal text
+		 */
+		final byte[] icalFile;
+		final boolean isAscii;
+		{
+			String message = iTipEmitter.writeMessage(mail.getMessage(), ctx,
+					null, null);
+			message = trimICal(message);
+			icalFile = message.getBytes(charset);
+			isAscii = isAscii(icalFile);
+		}
+		final String contentType = ct.toString();
+		icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile,
+				contentType)));
+		icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE,
+				MIMEMessageUtility.foldContentType(contentType));
+		icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC,
+				isAscii ? "7bit" : "quoted-printable");
+		return icalPart;
     }
 
-    private BodyPart generateIcalAttachmentPart(NotificationMail mail, String charset, Session session) throws MessagingException, AbstractOXException {
-        try {
-            MimeBodyPart icalPart = new MimeBodyPart();
-            Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            /*
-             * Determine file name
-             */
-            final String fileName;
-            switch (mail.getMessage().getMethod()) {
-            case REQUEST:
-                fileName = "invite.ics";
-                break;
-            case CANCEL:
-                fileName = "cancel.ics";
-                break;
-            default:
-                fileName = "response.ics";
-                break;
-            }
-            /*
-             * Compose Content-Type
-             */
-            final ContentType ct = new ContentType();
-            ct.setPrimaryType("application");
-            ct.setSubType("ics");
-            ct.setNameParameter(fileName);
-            /*
-             * Generate ICal text
-             */
-            final byte[] icalFile;
-            {
-                String message = iTipEmitter.writeMessage(mail.getMessage(), ctx, null, null);
-                message = trimICal(message);
-                icalFile = message.getBytes(charset);
-            }
-            final String contentType = ct.toString();
-            icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
-            icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MIMEMessageUtility.foldContentType(contentType));
-            /*
-             * Content-Disposition & Content-Transfer-Encoding
-             */
-            ContentDisposition cd = new ContentDisposition();
-            cd.setAttachment();
-            cd.setFilenameParameter(fileName);
-            icalPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, cd.toString());
-            icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-            return icalPart;
-        } catch (final UnsupportedEncodingException e) {
-            throw new MailException(MailException.Code.ENCODING_ERROR, e, e.getMessage());
-        }
+    private BodyPart generateIcalAttachmentPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException, UnsupportedEncodingException {
+		MimeBodyPart icalPart = new MimeBodyPart();
+		Context ctx = ContextStorage.getStorageContext(session.getContextId());
+		/*
+		 * Determine file name
+		 */
+		final String fileName;
+		switch (mail.getMessage().getMethod()) {
+		case REQUEST:
+			fileName = "invite.ics";
+			break;
+		case CANCEL:
+			fileName = "cancel.ics";
+			break;
+		default:
+			fileName = "response.ics";
+			break;
+		}
+		/*
+		 * Compose Content-Type
+		 */
+		final ContentType ct = new ContentType();
+		ct.setPrimaryType("application");
+		ct.setSubType("ics");
+		ct.setNameParameter(fileName);
+		/*
+		 * Generate ICal text
+		 */
+		final byte[] icalFile;
+		{
+			String message = iTipEmitter.writeMessage(mail.getMessage(), ctx,
+					null, null);
+			message = trimICal(message);
+			icalFile = message.getBytes(charset);
+		}
+		final String contentType = ct.toString();
+		icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile,
+				contentType)));
+		icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE,
+				MIMEMessageUtility.foldContentType(contentType));
+		/*
+		 * Content-Disposition & Content-Transfer-Encoding
+		 */
+		ContentDisposition cd = new ContentDisposition();
+		cd.setAttachment();
+		cd.setFilenameParameter(fileName);
+		icalPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION,
+				cd.toString());
+		icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
+		return icalPart;
+
     }
 
     private Multipart generateTextAndHtmlMultipart(NotificationMail mail, String charset) throws MessagingException {

@@ -3,9 +3,9 @@ package com.openexchange.calendar.itip.sender;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.itip.AppointmentNotificationPoolService;
 import com.openexchange.calendar.itip.generators.NotificationMail;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.session.Session;
 

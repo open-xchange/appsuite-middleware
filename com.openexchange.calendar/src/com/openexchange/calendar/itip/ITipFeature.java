@@ -3,7 +3,7 @@ package com.openexchange.calendar.itip;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarFeature;
 import com.openexchange.context.ContextService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -30,7 +30,7 @@ public class ITipFeature implements CalendarFeature {
 	
 	
 	public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate,
-			Session session) throws AbstractOXException {
+			Session session) throws OXException {
 		
 		return new ITipConsistencyCalendar(delegate, session, services);
 	}

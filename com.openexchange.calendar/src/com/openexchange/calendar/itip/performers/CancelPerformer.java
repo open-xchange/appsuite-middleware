@@ -57,7 +57,6 @@ import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-import com.openexchange.api2.OXException;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
@@ -65,7 +64,7 @@ import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
-import com.openexchange.groupware.AbstractOXException;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -90,7 +89,7 @@ public class CancelPerformer extends AbstrakterDingeMacher {
     }
 
 
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws AbstractOXException {
+    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> deleted = new ArrayList<Appointment>();
         
@@ -108,7 +107,7 @@ public class CancelPerformer extends AbstrakterDingeMacher {
     }
 
 
-    private int determineRecurrencePosition(Appointment appointment, Appointment master) throws AbstractOXException {
+    private int determineRecurrencePosition(Appointment appointment, Appointment master) throws OXException {
         RecurringResultsInterface recurring = new CalendarCollection().calculateRecurring(master, startOfTheDay(appointment.getRecurrenceDatePosition()), endOfTheDay(appointment.getRecurrenceDatePosition()), 0);
         if (recurring.size() > 0) {
             RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
