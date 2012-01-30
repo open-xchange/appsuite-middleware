@@ -1,0 +1,18 @@
+BEGIN:VCALENDAR
+PRODID:-//ACME/DesktopCalendar//EN
+METHOD:ADD
+VERSION:2.0
+BEGIN:VEVENT
+ORGANIZER:Mailto:A@example.com
+ATTENDEE;ROLE=CHAIR;PARTSTAT=ACCEPTED;CN=BIG A:Mailto:A@example.com
+ATTENDEE;RSVP=TRUE;TYPE=INDIVIDUAL;CN=B:mailto:{{user.email1}}
+DTSTAMP:19970611T190000Z
+DTSTART:{{#dateEval}}Date.parse("next monday").add({hours: 22}){{/dateEval}}
+DTEND:{{#dateEval}}Date.parse("next monday").add({hours: 23}){{/dateEval}}
+RECURRENCE-ID:{{#dateEval}}Date.parse("next monday").add({hours: 20}){{/dateEval}}
+SUMMARY:app
+UID:{{app.uid}}
+SEQUENCE:1
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR

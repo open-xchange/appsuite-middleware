@@ -318,7 +318,7 @@ public class Contact extends CommonObject implements Serializable {
     /**
      * UID field.
      */
-    public static final int UID = 616;
+    public static final int UID = 223;
 
     /**
      * Sorted array of fields belonging to business address.
@@ -3419,6 +3419,11 @@ public class Contact extends CommonObject implements Serializable {
         if ((!containsYomiCompany() && other.containsYomiCompany()) || (containsYomiCompany() && other.containsYomiCompany() && getYomiCompany() != other.getYomiCompany() && (getYomiCompany() == null || !getYomiCompany().equals(
             other.getYomiCompany())))) {
             differingFields.add(I(YOMI_COMPANY));
+        }
+
+        if ((!containsCompany() && other.containsCompany()) || (containsCompany() && other.containsCompany() && getCompany() != other.getCompany() && (getCompany() == null || !getCompany().equals(
+            other.getCompany())))) {
+            differingFields.add(I(COMPANY));
         }
 
         if ((!containsAddressBusiness() && other.containsAddressBusiness()) || (containsAddressBusiness() && other.containsAddressBusiness() && getAddressBusiness() != other.getAddressBusiness() && (getAddressBusiness() == null || !getAddressBusiness().equals(

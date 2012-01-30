@@ -72,14 +72,14 @@ public final class CalendarVolatileCache {
      * References the volatily cached query, element, whatever. 
      */
     public static enum CacheType {
-        getAllPrivateAppointmentAndFolderIdsForUser(),
+        getAllPrivateAppointmentAndFolderIdsForUser(1),
         
         ;
 
         private final int num;
 
-        private CacheType() {
-            this.num = ordinal() + 1;
+        private CacheType(final int num) {
+            this.num = num;
         }
 
         protected int getNum() {

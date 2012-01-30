@@ -239,7 +239,7 @@ public class ICal4JParser implements ICalParser {
         return tasks;
     }
 
-    private static void closeSafe(final Closeable closeable) {
+    protected static void closeSafe(final Closeable closeable) {
         if (closeable != null) {
             try {
                 closeable.close();
@@ -249,25 +249,27 @@ public class ICal4JParser implements ICalParser {
         }
     }
 
-
-    protected CalendarDataObject convertAppointment(final int index, final VEvent vevent, final TimeZone defaultTZ, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+    protected CalendarDataObject convertAppointment(int index, VEvent vevent, TimeZone defaultTZ, List<AttributeConverter<VEvent,Appointment>> all, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
 
         final CalendarDataObject appointment = new CalendarDataObject();
 
         final TimeZone tz = determineTimeZone(vevent, defaultTZ);
 
-        for (final AttributeConverter<VEvent, Appointment> converter : AppointmentConverters.ALL) {
+        for (final AttributeConverter<VEvent, Appointment> converter : all) {
             if (converter.hasProperty(vevent)) {
                 converter.parse(index, vevent, appointment, tz, ctx, warnings);
             }
             converter.verify(index, appointment, warnings);
         }
 
-
-
-        appointment.setTimezone(getTimeZoneID(tz));
+        appointment.setTimezone(getTimeZoneID(defaultTZ));
 
         return appointment;
+    }
+
+
+    protected CalendarDataObject convertAppointment(final int index, final VEvent vevent, final TimeZone defaultTZ, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+        return convertAppointment(index, vevent, defaultTZ, AppointmentConverters.ALL, ctx, warnings);
     }
 
     protected Task convertTask(final int index, final VToDo vtodo, final TimeZone defaultTZ, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError{
@@ -292,7 +294,7 @@ public class ICal4JParser implements ICalParser {
             }
         }
 
-        return null;
+        return defaultTZ;
     }
 
     private static final TimeZone chooseTimeZone(final DateProperty dateProperty, final TimeZone defaultTZ) {
@@ -329,7 +331,7 @@ public class ICal4JParser implements ICalParser {
         return tz.getID();
     }
 
-    private net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {
+    protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {
         final CalendarBuilder builder = new CalendarBuilder();
 
         try {

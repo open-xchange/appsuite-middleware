@@ -49,8 +49,18 @@
 
 package com.openexchange.calendar.api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.session.Session;
 
@@ -61,6 +71,31 @@ import com.openexchange.session.Session;
  */
 public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
 
+	private static final Log LOG = LogFactory.getLog(AppointmentSqlFactory.class);
+	
+    private List<CalendarFeature> features = new ArrayList<CalendarFeature>();
+    
+    public AppointmentSQLInterface createAppointmentSqlOmittingFeatures(Session session, String...omitFeatures) {
+        Set<String> skip = new HashSet<String>(Arrays.asList(omitFeatures));
+        AppointmentSQLInterface calendarSql = new TransactionallyCachingCalendar(new CalendarSql(session)); 
+
+        for (CalendarFeature feature : features) {
+            if (!skip.contains(feature.getId())) {
+                try {
+					calendarSql = feature.wrap(calendarSql, session);
+				} catch (OXException e) {
+					LOG.error(e.getMessage(), e);
+				}
+            }
+        }
+        
+        return calendarSql;
+    }
+    
+    public void addCalendarFeature(CalendarFeature feature) {
+        features.add(feature);
+    }
+
     /**
      * Facrory method for creating a new Instance.
      *
@@ -69,6 +104,7 @@ public class AppointmentSqlFactory implements AppointmentSqlFactoryService {
      */
     @Override
     public AppointmentSQLInterface createAppointmentSql(Session session) {
-        return new CalendarSql(session);
+        return createAppointmentSqlOmittingFeatures(session);
     }
+    
 }
