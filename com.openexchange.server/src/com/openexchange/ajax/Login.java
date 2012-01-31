@@ -873,9 +873,16 @@ public class Login extends AJAXServlet {
      * @param session The session providing the secret cookie identifier
      */
     protected void writeSecretCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure) {
-        final Cookie cookie = new Cookie(SECRET_PREFIX + hash, session.getSecret());
+        Cookie cookie = new Cookie(SECRET_PREFIX + hash, session.getSecret());
         configureCookie(cookie, secure);
         resp.addCookie(cookie);
+
+        final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null != altId) {
+            cookie = new Cookie(PUBLIC_SESSION_NAME, altId);
+            configureCookie(cookie, secure);
+            resp.addCookie(cookie);
+        }
     }
 
     protected void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure) {
