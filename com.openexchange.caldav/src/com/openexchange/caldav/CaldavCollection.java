@@ -53,17 +53,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.caldav.GroupwareCaldavFactory.State;
 import com.openexchange.caldav.mixins.CTag;
+import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedReportSet;
-import com.openexchange.exception.OXException;
+import com.openexchange.caldav.mixins.SyncToken;
+import com.openexchange.caldav.query.Filter;
+import com.openexchange.caldav.query.FilterAnalyzer;
+import com.openexchange.caldav.query.FilterAnalyzerBuilder;
+import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.Appointment;
@@ -80,61 +89,53 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 
 /**
- * A {@link CaldavCollection} bridges OX calendar folders to caldav collections.
+ * A {@link CaldavCollection} bridges OX calendar folders to caldav collections. 
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CaldavCollection extends AbstractCollection {
-
+public class CaldavCollection extends AbstractCollection implements FilteringResource {
+    
     private final UserizedFolder folder;
     private final GroupwareCaldavFactory factory;
     private final WebdavPath url;
     private int id = -1;
+    
+    private static final Log LOG = LogFactory.getLog(CaldavCollection.class);
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavCollection.class));
-
-    public CaldavCollection(final AbstractStandardCaldavCollection parent, final UserizedFolder folder, final GroupwareCaldavFactory factory) {
+    public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory) {
         super();
         this.folder = folder;
         this.factory = factory;
-        url = parent.getUrl().dup().append(getFolderName(folder));
+        url = parent.getUrl().dup().append(folder.getID());
 
         includeProperties(
             new CurrentUserPrivilegeSet(folder.getOwnPermission()),
             new SupportedReportSet(),
             new SupportedCalendarComponentSet(),
-            new CTag(factory.getState().getFolder(getId()), getId())
+            new CTag(getId(), factory),
+            new SyncToken(getId(), factory)
         );
-
-
-    }
-    private String getFolderName(final UserizedFolder f) {
-        final Type type = f.getType();
-        if (type.equals(SharedType.getInstance())) {
-            return f.getName()+" ("+getOwnerName(f)+")";
-        }
-        return f.getName();
     }
 
-    private String getOwnerName(final UserizedFolder f) {
-        final Permission[] permissions = f.getPermissions();
-        for (final Permission permission : permissions) {
-            if (permission.isAdmin()) {
-                final int entity = permission.getEntity();
-                try {
-                    return factory.resolveUser(entity).getDisplayName();
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                    return new Integer(entity).toString();
-                }
-            }
-        }
+    public CaldavCollection(AbstractStandardCaldavCollection parent, UserizedFolder folder, GroupwareCaldavFactory factory, int order) {
+        super();
+        this.folder = folder;
+        this.factory = factory;
+        url = parent.getUrl().dup().append(folder.getID());
 
-        return null;
+        includeProperties(
+            new CurrentUserPrivilegeSet(folder.getOwnPermission()),
+            new SupportedReportSet(),
+            new SupportedCalendarComponentSet(),
+            new CTag(getId(), factory),
+            new SyncToken(getId(), factory),
+            new CalendarOrder(order)
+        );
     }
+
     @Override
-    protected void internalDelete() throws OXException {
-        // throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+    protected void internalDelete() throws WebdavProtocolException {
+        // throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override
@@ -143,27 +144,27 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws OXException {
+    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
+    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(final WebdavProperty prop) throws OXException {
+    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected void internalRemoveProperty(final String namespace, final String name) throws OXException {
+    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    protected boolean isset(final Property p) {
+    protected boolean isset(Property p) {
         if (p.getId() == Protocol.GETCONTENTLANGUAGE || p.getId() == Protocol.GETCONTENTLENGTH || p.getId() == Protocol.GETETAG) {
             return false;
         }
@@ -171,37 +172,53 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     @Override
-    public void setCreationDate(final Date date) throws OXException {
+    public void setCreationDate(Date date) throws WebdavProtocolException {
         // IGNORE, this is not writable
     }
 
     @Override
-    public List<WebdavResource> getChildren() throws OXException {
+	public List<WebdavResource> getChildren() throws WebdavProtocolException {
         State state = factory.getState();
         List<Appointment> appointments = state.getFolder(getId());
         List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
 
-        for (final Appointment appointment : appointments) {
-            final CaldavResource resource = new CaldavResource(this, appointment, factory);
+        for (Appointment appointment : appointments) {
+            CaldavResource resource = new CaldavResource(this, appointment, factory);
             children.add(resource);
         }
-
+        
         return children;
-
+        
     }
 
 
-    private static final Pattern NAME_PATTERN = Pattern.compile("(.+?)\\.ics");
-
-    public CaldavResource getChild(final String name) throws OXException {
-        final Matcher matcher = NAME_PATTERN.matcher(name);
+    private static final Pattern NAME_PATTERN = Pattern.compile("^(\\d+)\\.ics");
+    private static final Pattern UUID_PATTERN = Pattern.compile("(.+?)\\.ics");
+    
+    public CaldavResource getChild(String name) throws WebdavProtocolException {
+        Matcher matcher = NAME_PATTERN.matcher(name);
+        int id = -1;
         if (!matcher.find()) {
-            throw WebdavProtocolException.generalError(getUrl().dup().append(name), 404);
+            // Try UUID
+            matcher = UUID_PATTERN.matcher(name);
+            if (!matcher.find()) {
+                return new CaldavResource(this, getUrl().dup().append(name), factory);
+            }
+            String uuid = matcher.group(1);
+            if (null != uuid && uuid.endsWith("googlecom")) {
+            	uuid = uuid.substring(0, uuid.length() - 9) + "google.com";            	
+            	LOG.warn("Helping out iCal client to properly URL-encode dots in by assuming a value of '" + uuid + "'.");
+            }                        
+            id = factory.getState().resolveUUID(uuid, getId());
+            if (id == -1) {
+                return new CaldavResource(this, getUrl().dup().append(name), factory);
+            }
+        } else {
+            id = new Integer(matcher.group(1));
         }
-
-        final String uid = matcher.group(1);
-
-        final Appointment appointment = factory.getState().get(uid, getId());
+        
+        
+        Appointment appointment = factory.getState().get(id , getId());
         if (appointment == null) {
             // Not Found
             return new CaldavResource(this, getUrl().dup().append(name), factory);
@@ -210,90 +227,157 @@ public class CaldavCollection extends AbstractCollection {
     }
 
     @Override
-    public void create() throws OXException {
-        // throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+	public void create() throws WebdavProtocolException {
+        // throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override
-    public boolean exists() throws OXException {
+	public boolean exists() throws WebdavProtocolException {
         return true;
     }
 
     @Override
-    public Date getCreationDate() throws OXException {
+	public Date getCreationDate() throws WebdavProtocolException {
         return folder.getCreationDate();
     }
 
-    @Override
-    public String getDisplayName() throws OXException {
-        return getFolderName(folder);
-    }
+	@Override
+	public String getDisplayName() throws WebdavProtocolException {
+		if (this.exists()) {
+	    	final Locale locale = this.factory.getSessionHolder().getUser().getLocale();
+	    	final String name = null != locale ? this.folder.getLocalizedName(locale) : this.folder.getName();
+	    	if (SharedType.getInstance().equals(this.folder.getType())) {
+	    		String ownerName = null;
+	            final Permission[] permissions = this.folder.getPermissions();
+	            for (final Permission permission : permissions) {
+	                if (permission.isAdmin()) {
+	                    int entity = permission.getEntity();
+	                    try {
+	                        ownerName = factory.resolveUser(entity).getDisplayName();
+	                    } catch (WebdavProtocolException e) {
+	                        LOG.error(e.getMessage(), e);
+	                        ownerName = new Integer(entity).toString();
+	                    }
+	                    break;
+	                }
+	            }	    		
+	    		return String.format("%s (%s)", name, ownerName);
+	    	} else {
+	    		return name;
+	    	}
+		} else {
+	    	return null;
+		}
+	}
 
     @Override
-    public Date getLastModified() throws OXException {
+	public Date getLastModified() throws WebdavProtocolException {
         return folder.getLastModified();
     }
 
     @Override
-    public WebdavLock getLock(final String token) throws OXException {
+	public WebdavLock getLock(String token) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public List<WebdavLock> getLocks() throws OXException {
+	public List<WebdavLock> getLocks() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    public WebdavLock getOwnLock(final String token) throws OXException {
+	public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public List<WebdavLock> getOwnLocks() throws OXException {
+	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    public String getSource() throws OXException {
+	public String getSource() throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public WebdavPath getUrl() {
+	public WebdavPath getUrl() {
         return url;
     }
 
     @Override
-    public void lock(final WebdavLock lock) throws OXException {
+	public void lock(WebdavLock lock) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    public void save() throws OXException {
-//        throw new OXException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
+	public void save() throws WebdavProtocolException {
+//        throw new WebdavProtocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override
-    public void setDisplayName(final String displayName) throws OXException {
+	public void setDisplayName(String displayName) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    public void unlock(final String token) throws OXException {
+	public void unlock(String token) throws WebdavProtocolException {
         // IGNORE
     }
-
+    
     public int getId() {
         if (id == -1) {
             return id = Integer.parseInt(folder.getID());
         }
         return id;
     }
-
+    
     @Override
-    public String getResourceType() throws OXException {
+    public String getResourceType() throws WebdavProtocolException {
         return super.getResourceType()+CaldavProtocol.CALENDAR;
+    }
+
+    public boolean isShared() {
+        return folder.getType() == SharedType.getInstance();
+    }
+
+    private static final FilterAnalyzer RANGE_QUERY_ANALYZER = new FilterAnalyzerBuilder()
+        .compFilter("VCALENDAR")
+            .compFilter("VEVENT")
+                .timeRange().capture().end()
+            .end()
+        .end()
+    .build();
+    
+    
+    @Override
+	public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
+        List<Object> arguments = new ArrayList<Object>(2);
+        if (RANGE_QUERY_ANALYZER.match(filter, arguments) && ! arguments.isEmpty()) {
+            State state = factory.getState();
+            Date start = toDate(arguments.get(0));
+            Date end = toDate(arguments.get(1));
+            
+            List<Appointment> appointments = state.getAppointmentsInFolderAndRange(getId(), start, end);
+            List<WebdavResource> children = new ArrayList<WebdavResource>(appointments.size());
+
+            for (Appointment appointment : appointments) {
+                CaldavResource resource = new CaldavResource(this, appointment, factory);
+                children.add(resource);
+            }
+            
+            return children;
+
+        }
+        throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_NOT_IMPLEMENTED);
+    }
+
+    private Date toDate(Object object) {
+        long tstamp = (Long) object;
+        if (tstamp == -1) {
+            return null;
+        }
+        return new Date(tstamp);
     }
 
 

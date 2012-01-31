@@ -47,28 +47,44 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.caldav.query;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
- * {@link SupportedReportSet}
+ * A {@link FilterAnalyzer} is a sort of regular expression for a calendar query. It finds out whether a given filter matches
+ * the structure of this builder and optionally extracts certain attributes of the query.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
+public class FilterAnalyzer {
 
-    private static final String NAME = "supported-report-set";
+    private List<AnalyzerElement> analyzers;
 
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+    public FilterAnalyzer(List<AnalyzerElement> analyzers) {
+        super();
+        this.analyzers = analyzers;
     }
 
-    @Override
-    protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+    public boolean match(Filter filter, List<Object> arguments) {
+        List<AnalyzerElement> copy = new ArrayList<AnalyzerElement>(analyzers);
+        for (Filter childFilter : filter.getFilters()) {
+            boolean matchedOnce = false;
+            for (AnalyzerElement analyzer : new ArrayList<AnalyzerElement>(copy)) {
+                List<Object> extracted = new ArrayList<Object>(5);
+                if (analyzer.matches(childFilter, extracted)) {
+                    arguments.addAll(extracted);
+                    matchedOnce = true;
+                    copy.remove(analyzer);
+                }
+            }
+            if (!matchedOnce) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

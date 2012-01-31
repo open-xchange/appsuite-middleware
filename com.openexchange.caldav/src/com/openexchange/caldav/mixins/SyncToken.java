@@ -49,26 +49,35 @@
 
 package com.openexchange.caldav.mixins;
 
+import java.util.Date;
+import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link SupportedReportSet}
+ * {@link SyncToken}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
+public class SyncToken extends SingleXMLPropertyMixin {
 
-    private static final String NAME = "supported-report-set";
-
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+    private final int folderId;
+    private final GroupwareCaldavFactory factory;
+    private String value;
+    
+    public SyncToken(int folderId, GroupwareCaldavFactory factory) {
+        super(Protocol.DAV_NS.getURI(), "sync-token");
+        this.folderId = folderId;
+        this.factory = factory;
     }
-
+    
     @Override
     protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+    	if (null == this.value) {
+    		final Date lastModification = this.factory.getState().getLastModification(this.folderId);
+    		this.value = null != lastModification ? Long.toString(lastModification.getTime()) : "0";
+    	}
+    	return this.value;
     }
-
 }

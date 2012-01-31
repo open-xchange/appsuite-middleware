@@ -744,10 +744,28 @@ public final class DBChat implements Chat {
         final Connection con = databaseService.getReadOnly(contextId);
         PreparedStatement stmt = null;
         ResultSet rs = null;
+        /*
+         * Get current chunkId
+         */
+        int currentChunkId = 1;
         try {
-            stmt = con.prepareStatement("SELECT user FROM chatMember WHERE cid = ? AND chatId = ?");
+            stmt = con.prepareStatement("SELECT MAX(chunkId) FROM chatChunk WHERE cid = ? AND chatId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, chatId);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                currentChunkId = rs.getInt(1);
+            }
+        } catch (final SQLException e) {
+            throw ChatExceptionCodes.ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+        }
+        try {
+            stmt = con.prepareStatement("SELECT user FROM chatMember WHERE cid = ? AND chatId = ? AND chunkId = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, chatId);
+            stmt.setInt(3, currentChunkId);
             rs = stmt.executeQuery();
             final List<String> ret = new LinkedList<String>();
             while (rs.next()) {
@@ -1217,7 +1235,7 @@ public final class DBChat implements Chat {
             for (final String messageId : messageIds) {
                 pos = 1;
                 {
-                    final String sql = "SELECT user, message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE cid = ? AND chatId = ? AND user = ?) AND messageId = " + DBChatUtility.getUnhexReplaceString();
+                    final String sql = "SELECT message, createdAt FROM chatMessage WHERE cid = ? AND chatId = ? AND chunkId IN (SELECT chunkId FROM chatMember WHERE cid = ? AND chatId = ? AND user = ?) AND messageId = " + DBChatUtility.getUnhexReplaceString();
                     stmt = con.prepareStatement(sql);
                     stmt.setInt(pos++, contextId);
                     stmt.setInt(pos++, chatId);

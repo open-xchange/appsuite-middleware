@@ -49,26 +49,32 @@
 
 package com.openexchange.caldav.mixins;
 
-import com.openexchange.webdav.protocol.Protocol;
+import org.jdom.Namespace;
+
+import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
- * {@link SupportedReportSet}
+ * {@link CalendarOrder} 
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
+public class CalendarOrder extends SingleXMLPropertyMixin {
 
-    private static final String NAME = "supported-report-set";
-
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+    public static final String PROPERTY_NAME = "calendar-order";
+    public static final Namespace NAMESPACE = CaldavProtocol.APPLE_NS;
+    
+    private final int order;
+    
+    public CalendarOrder(final int order) {
+        super(NAMESPACE.getURI(), PROPERTY_NAME);
+        this.order = order;
     }
 
     @Override
     protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+        return Integer.toString(this.order);
     }
 
 }

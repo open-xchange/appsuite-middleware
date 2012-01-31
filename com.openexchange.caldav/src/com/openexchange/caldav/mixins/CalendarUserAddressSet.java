@@ -55,14 +55,14 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * The {@link CalendarUserAddressSet} mixin extends resources and collections to list the aliases of a user
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "calendar-user-address-set";
 
-    private final SessionHolder sessionHolder;
+    private SessionHolder sessionHolder;
 
     public CalendarUserAddressSet(SessionHolder sessionHolder) {
         super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
@@ -75,9 +75,9 @@ public class CalendarUserAddressSet extends SingleXMLPropertyMixin {
 
         StringBuilder addresses = new StringBuilder();
         addresses.append("<D:href>mailto:").append(mail).append("</D:href>");
-
+        
         addresses.append("<D:href>/principals/users/"+sessionHolder.getUser().getLoginInfo()+"</D:href>");
-
+        
         return addresses.toString();
     }
 

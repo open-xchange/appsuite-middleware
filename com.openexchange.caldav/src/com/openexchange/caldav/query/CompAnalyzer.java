@@ -47,28 +47,35 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.caldav.query;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.List;
 
 
 /**
- * {@link SupportedReportSet}
+ * {@link CompAnalyzer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
-
-    private static final String NAME = "supported-report-set";
-
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+public class CompAnalyzer extends AnalyzerElement {
+    private String name;
+    
+    public CompAnalyzer(String name) {
+        super();
+        this.name = name;
     }
 
     @Override
-    protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+    protected boolean apply(Filter filter) {
+        if (CompFilter.class.isInstance(filter)) {
+            return ((CompFilter)filter).getName().equals(name);
+        }
+        return false;
+    }
+
+    @Override
+    protected boolean applyAndExtract(Filter filter, List<Object> extracted) {
+        return apply(filter);
     }
 
 }

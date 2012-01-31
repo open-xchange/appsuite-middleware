@@ -1,3 +1,7 @@
+* 2012-01-31 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21374: Correctly mapping a contact's profession to vCard TITLE field
+
 * 2012-01-27 - thorben.betten@open-xchange.com
 
  - Fix for bug 21137 and bug 21330: Introduced volatile in-memory look-up of user-visible folders

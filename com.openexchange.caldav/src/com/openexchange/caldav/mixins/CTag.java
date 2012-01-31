@@ -49,40 +49,46 @@
 
 package com.openexchange.caldav.mixins;
 
-import java.util.List;
-import com.openexchange.groupware.container.Appointment;
+import java.util.Date;
+import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 
 /**
  * {@link CTag}
+ * 
+ * getctag xmlns="http://calendarserver.org/ns/"
+ * 
+ * The "calendar-ctag" is like a resource "etag"; it changes when anything in the calendar has changed. This allows the client to quickly 
+ * determine that it does not need to synchronize any changed events.
+ * @see <a href="https://trac.calendarserver.org/browser/CalendarServer/trunk/doc/Extensions/caldav-ctag.txt">caldav-ctag-02</a>
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CTag extends SingleXMLPropertyMixin {
-
+	
+	private static final String CTAG_PREFIX = "http://www.open-xchange.com/caldav/ctag/";
+	
+    private final int folderId;
+    private final GroupwareCaldavFactory factory;
     private String value;
-
-    public CTag(List<Appointment> appointments, int folderId) {
-        super("http://calendarserver.org/ns/", "getctag");
-
-        Appointment youngest = null;
-        for (Appointment appointment : appointments) {
-            if (youngest == null || youngest.getLastModified().before(appointment.getLastModified())) {
-                youngest = appointment;
-            }
-        }
-        if (youngest != null) {
-            value = "http://www.open-xchange.com/caldav/ctag/"+folderId+"_"+youngest.getLastModified().getTime();
-        } else {
-            value = "http://www.open-xchange.com/caldav/ctag/"+folderId;
-
-        }
-    }
-
+    
+    public CTag(final int folderId, final GroupwareCaldavFactory factory) {
+    	super("http://calendarserver.org/ns/", "getctag");
+        this.folderId = folderId;
+        this.factory = factory;
+    }	
+	
     @Override
     protected String getValue() {
-        return value;
+    	if (null == this.value) {
+    		final Date lastModification = this.factory.getState().getLastModification(this.folderId);
+    		if (null != lastModification) {
+    			this.value = String.format("%s%d_%d", CTag.CTAG_PREFIX, this.folderId, lastModification.getTime());
+    		} else {
+    			this.value = String.format("%s%d", CTag.CTAG_PREFIX, this.folderId);
+    		}
+    	}
+    	return this.value;
     }
-
 }

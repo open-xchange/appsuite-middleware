@@ -80,6 +80,8 @@ public final class ChatTest extends AbstractAJAXSession {
 
     private AJAXClient client3;
 
+    private final String DELIM = "-";
+
     /**
      * Initializes a new {@link ChatTest}.
      */
@@ -140,7 +142,7 @@ public final class ChatTest extends AbstractAJAXSession {
                 boolean found = false;
                 chatId = chat.getChatId();
                 for (final ConversationID conversationId : conversationIds) {
-                    if (conversationId.getChatId().equals(chatId)) {
+                    if (conversationId.toString().equals(chatId)) {
                         found = true;
                         break;
                     }
@@ -151,8 +153,10 @@ public final class ChatTest extends AbstractAJAXSession {
              * Request chat
              */
             {
+                final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
                 final GetChatConversationRequest getRequest = new GetChatConversationRequest();
-                getRequest.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId()));
+                getRequest.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId));
                 final GetChatConversationResponse getResponse = client.execute(getRequest);
                 final JSONChat fetchedChat = getResponse.getChat(timeZone);
                 assertEquals("Chat identifier mismatch.", chatId, fetchedChat.getChatId());
@@ -166,20 +170,24 @@ public final class ChatTest extends AbstractAJAXSession {
              * Update chat
              */
             {
+                final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
                 final UpdateChatConversationRequest request = new UpdateChatConversationRequest();
-                final ChatDescription chatDescription = new ChatDescription(chatId);
+                final ChatDescription chatDescription = new ChatDescription(currentChatId);
                 chatDescription.setSubject("Changed subject");
                 chatDescription.addNewMember(String.valueOf(client3.getValues().getUserId()));
                 request.setChatDescription(chatDescription);
-                request.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId()));
+                request.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId));
                 client.execute(request);
             }
             /*
              * Request chat
              */
             {
+                final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
                 final GetChatConversationRequest getRequest = new GetChatConversationRequest();
-                getRequest.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId()));
+                getRequest.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId));
                 final GetChatConversationResponse getResponse = client.execute(getRequest);
                 final JSONChat fetchedChat = getResponse.getChat(timeZone);
                 assertEquals("Chat identifier mismatch.", chatId, fetchedChat.getChatId());
@@ -199,20 +207,24 @@ public final class ChatTest extends AbstractAJAXSession {
              * Update chat
              */
             {
+                final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
                 final UpdateChatConversationRequest request = new UpdateChatConversationRequest();
-                final ChatDescription chatDescription = new ChatDescription(chatId);
+                final ChatDescription chatDescription = new ChatDescription(currentChatId);
                 chatDescription.setSubject("Changed subject again");
                 chatDescription.addDeleteMember(String.valueOf(client3.getValues().getUserId()));
                 request.setChatDescription(chatDescription);
-                request.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId()));
+                request.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId));
                 client.execute(request);
             }
             /*
              * Request chat
              */
             {
+                final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
                 final GetChatConversationRequest getRequest = new GetChatConversationRequest();
-                getRequest.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId()));
+                getRequest.setConversationId(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId));
                 final GetChatConversationResponse getResponse = client.execute(getRequest);
                 final JSONChat fetchedChat = getResponse.getChat(timeZone);
                 assertEquals("Chat identifier mismatch.", chatId, fetchedChat.getChatId());
@@ -234,8 +246,10 @@ public final class ChatTest extends AbstractAJAXSession {
         } finally {
             if (null != chat) {
                 try {
+                    final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                    final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
                     final DeleteChatConversationRequest req = new DeleteChatConversationRequest();
-                    req.addConversationIds(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId()));
+                    req.addConversationIds(new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId));
                     client.execute(req);
                 } catch (final Exception e) {
                     // Ignore

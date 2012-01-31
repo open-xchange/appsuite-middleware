@@ -47,28 +47,67 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.caldav.query;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import static com.openexchange.time.TimeTools.D;
+import java.util.ArrayList;
+import java.util.Date;
+import junit.framework.TestCase;
 
 
 /**
- * {@link SupportedReportSet}
+ * {@link FilterMatchTest}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
-
-    private static final String NAME = "supported-report-set";
-
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+public class FilterMatchTest extends TestCase {
+    
+    public void testMatcherForTimeSpanQuery() {
+        FilterAnalyzer analyzer = new FilterAnalyzerBuilder()
+            .compFilter("VCALENDAR")
+              .compFilter("VEVENT")
+                .timeRange().capture().end()
+              .end()
+            .end()
+        .build();
+        
+        Filter filter = new Filter().addFilter(
+            compFilter("VCALENDAR").addFilter(
+                compFilter("VEVENT").addFilter(
+                    timeSpan(D("08.09.2011 22:00"))
+                )
+            )
+        );
+        
+        ArrayList<Object> captured = new ArrayList<Object>(); 
+        boolean matches = analyzer.match(filter, captured);
+        assertTrue(matches);
+        assertEquals(2, captured.size());
+        assertEquals(D("08.09.2011 22:00").getTime(), captured.get(0));
+        assertEquals(-1l, captured.get(1));
+        
+        filter = new Filter().addFilter(
+            compFilter("VCALENDAR").addFilter(
+                compFilter("VBLUPP").addFilter(
+                    timeSpan(D("08.09.2011 22:00"))
+                )
+            )
+        );
+        
+        assertFalse(analyzer.match(filter, new ArrayList<Object>()));
+        
     }
 
-    @Override
-    protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+    private Filter timeSpan(Date start) {
+        TimeRange tr = new TimeRange();
+        tr.setStart(start.getTime());
+        return tr;
     }
 
+    private Filter compFilter(String string) {
+        CompFilter compFilter = new CompFilter();
+        compFilter.setName(string);
+        return compFilter;
+    }
+    
 }

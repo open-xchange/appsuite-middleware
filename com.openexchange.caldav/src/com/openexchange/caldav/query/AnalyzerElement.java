@@ -47,28 +47,58 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.caldav.query;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
- * {@link SupportedReportSet}
+ * An {@link AnalyzerElement} matches a given filter
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
-
-    private static final String NAME = "supported-report-set";
-
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+public abstract class AnalyzerElement {
+    
+    private List<AnalyzerElement> children = new ArrayList<AnalyzerElement>();
+    protected boolean capturing;
+    
+    protected abstract boolean applyAndExtract(Filter filter, List<Object> extracted);
+    protected abstract boolean apply(Filter filter);
+    
+    public void addChildAnalyzer(AnalyzerElement analyzer) {
+        children.add(analyzer);
+    }
+    
+    public boolean matches(Filter filter, List<Object> extracted) {
+        boolean match = false;
+        if (capturing) {
+            match = applyAndExtract(filter, extracted);
+        } else {
+            match = apply(filter);
+        }
+        if (!match) {
+            return false;
+        }
+        
+        List<AnalyzerElement> copy = new ArrayList<AnalyzerElement>(children);
+        for (Filter childFilter : filter.getFilters()) {
+            boolean matchedOnce = false;
+            for (AnalyzerElement analyzer : new ArrayList<AnalyzerElement>(copy)) {
+                if (analyzer.matches(childFilter, extracted)) {
+                    matchedOnce = true;
+                    copy.remove(analyzer);
+                }
+            }
+            if (!matchedOnce) {
+                return false;
+            }
+        }
+        return match;
     }
 
-    @Override
-    protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+    public void setCapturing(boolean b) {
+        capturing = b;
     }
 
 }

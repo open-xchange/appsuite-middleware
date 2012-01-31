@@ -159,7 +159,12 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             } else {
                 change.setType(ITipChange.Type.CREATE);
             }
-            if (differ) {
+            if (master == null) {
+            	ITipAnnotation annotation = new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale); // FIXME: Choose better message once we can introduce new sentences again.
+            	annotation.setAppointment(exception);
+            	analysis.addAnnotation(annotation);
+            	break;
+            } else if (differ) {
                 change.setNewAppointment(exception);
                 change.setConflicts(util.getConflicts(exception, session));
 

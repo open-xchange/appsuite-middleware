@@ -51,37 +51,37 @@ package com.openexchange.caldav.reports;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
-import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.WebdavStatus;
+import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
- * A {@link CaldavMultigetReport} allows clients to retrieve properties of certain named resources. It is conceptually similar to a propfind.
- * 
+ * {@link SyncCollection}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CaldavMultigetReport extends WebdavPropfindAction {
+public class SyncCollection extends WebdavPropfindAction {
+    public static final String NAMESPACE = Protocol.DEFAULT_NAMESPACE;
 
-    public static final String NAMESPACE = CaldavProtocol.CAL_NS.getURI();
+    public static final String NAME = "sync-collection";
 
-    public static final String NAME = "calendar-multiget";
-
-    public CaldavMultigetReport(Protocol protocol) {
+    public SyncCollection(Protocol protocol) {
         super(protocol);
     }
-
+    
+    @Override
     public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
 
@@ -101,20 +101,40 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
         } catch (IOException e) {
             forceAllProp = true;
         }
-
         ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
 
-        List<WebdavPath> paths = getPaths(req, requestBody);
-
+        String token = getSyncToken(req, requestBody);
+        
+        Syncstatus<WebdavResource> syncStatus = ((GroupwareCaldavFactory) req.getFactory()).getSyncStatusSince(req.getCollection(), token);
+        
         List<Element> all = new ArrayList<Element>();
 
-        for (WebdavPath webdavPath : paths) {
-            List<Element> marshalled = marshaller.marshal(req.getFactory().resolveResource(webdavPath));
-            all.addAll(marshalled);
+        
+        int[] statusCodes = syncStatus.getStatusCodes();
+        
+        PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
+        
+        for (int sc : statusCodes) {
+            if (sc == 404) {
+                for(WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
+                    WebdavResource resource = status.getAdditional();
+                    final Element r =  new Element("response",DAV_NS);
+                    r.addContent(helper.marshalHREF(resource.getUrl(), resource.getResourceType() != null));
+                    r.addContent(helper.marshalStatus(404));
+                    all.add(r);
+                }
+            } else {
+                for(WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
+                    List<Element> marshalled = marshaller.marshal(status.getAdditional());
+                    all.addAll(marshalled);
+                }
+            }
         }
-
+        Element syncToken = new Element("sync-token", DAV_NS);
+        syncToken.setText(syncStatus.getToken());
+        response.addContent(syncToken);
         response.addContent(all);
-
+        
         try {
             res.setStatus(Protocol.SC_MULTISTATUS);
             res.setContentType("text/xml; charset=UTF-8");
@@ -125,26 +145,14 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
 
     }
 
-    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
-        if (requestBody == null) {
-            return Collections.emptyList();
-        }
+    private String getSyncToken(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
 
-        List children = requestBody.getRootElement().getChildren("href", DAV_NS);
+        List children = requestBody.getRootElement().getChildren("sync-token", DAV_NS);
         if (children == null || children.isEmpty()) {
-            return Collections.emptyList();
+            return null;
         }
 
-        List<WebdavPath> paths = new ArrayList<WebdavPath>(children.size());
-        int length = req.getURLPrefix().length();
-        for (Object object : children) {
-            Element href = (Element) object;
-            String url = href.getText();
-            url = url.substring(length);
-            paths.add(((GroupwareCaldavFactory) req.getFactory()).decode(new WebdavPath(url)));
-        }
-
-        return paths;
+        Element tokenElement = (Element) children.get(0);
+        return tokenElement.getText();
     }
-
 }

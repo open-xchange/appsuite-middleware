@@ -86,7 +86,7 @@ public final class AllChatConversationResponse extends AbstractAJAXResponse {
         final List<ConversationID> list = new ArrayList<ConversationID>(len);
         for (int i = 0; i < len; i++) {
             try {
-                list.add(ConversationID.valueOf(ids.getString(i)));
+                list.add(ConversationID.valueOf(ids.getJSONObject(i).get("id").toString()));
             } catch (final OXException e) {
                 // Ignore...
             }
