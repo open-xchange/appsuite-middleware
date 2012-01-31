@@ -62,35 +62,29 @@ public class ServletWebdavResponse implements WebdavResponse {
 		this.res = res;
 	}
 
-	@Override
-    public OutputStream getOutputStream() throws IOException {
+	public OutputStream getOutputStream() throws IOException {
 		return res.getOutputStream();
 	}
 
-	@Override
-    public void setHeader(final String header, final String value) {
+	public void setHeader(final String header, final String value) {
 		res.setHeader(header, value);
 	}
 
-	@Override
-    public void setStatus(final int status) {
+	public void setStatus(final int status) {
 		res.setStatus(status);
 		this.status = status;
 	}
 
-	@Override
-    public int getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
-	@Override
-    public void setContentType(final String s) {
+	public void setContentType(final String s) {
 		res.setContentType(s);
 	}
 
-    @Override
     public void sendString(final String notFound) throws IOException {
-        final byte[] bytes = notFound.getBytes(com.openexchange.java.Charsets.UTF_8);
+        final byte[] bytes = notFound.getBytes("UTF-8");
         setHeader("Content-Length", String.valueOf(bytes.length));
         getOutputStream().write(bytes);
     }

@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.action.ifheader;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 
@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class IgnoreLocksIfHeaderApply extends StandardIfHeaderApply {
     @Override
-    public boolean matches(final IfHeaderEntity entity, final WebdavResource resource) throws OXException {
+    public boolean matches(final IfHeaderEntity entity, final WebdavResource resource) throws WebdavProtocolException {
         if(entity.isLockToken()) {
             return true;
         }

@@ -55,18 +55,19 @@ import java.util.List;
 import java.util.Map;
 import org.jdom.Document;
 import org.jdom.JDOMException;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.ifheader.IfHeader;
+import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public interface WebdavRequest {
 
-	WebdavResource getResource() throws OXException;
+	WebdavResource getResource() throws WebdavProtocolException;
 
-	WebdavCollection getCollection() throws OXException;
+	WebdavCollection getCollection() throws WebdavProtocolException;
 
 	WebdavPath getUrl();
 
@@ -80,15 +81,15 @@ public interface WebdavRequest {
 
 	String getURLPrefix();
 
-	IfHeader getIfHeader() throws OXException;
+	IfHeader getIfHeader() throws IfHeaderParseException;
 
-	WebdavResource getDestination() throws OXException;
+	WebdavResource getDestination() throws WebdavProtocolException;
 
 	WebdavPath getDestinationUrl();
 
 	int getDepth(int def);
 
-	WebdavFactory getFactory() throws OXException;
+	WebdavFactory getFactory() throws WebdavProtocolException;
 
 	String getCharset();
 
