@@ -149,9 +149,10 @@ public final class ImageUtility {
      * @param session The session
      * @param imageDataSource The data source
      * @param preferRelativeUrl Whether to prefer a relative image URL
+     * @param addRoute <code>true</code> to add AJP route; otherwise <code>false</code>
      * @param sb The string builder to write to
      */
-    public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final StringBuilder sb) {
+    public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final boolean addRoute, final StringBuilder sb) {
         final String prefix;
         final String route;
         {
