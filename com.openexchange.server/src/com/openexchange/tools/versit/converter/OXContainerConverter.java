@@ -581,7 +581,7 @@ public class OXContainerConverter {
         // TZ is ignored
         // GEO is ignored
         // TITLE
-        StringProperty(contactContainer, object, "TITLE", Contact.EMPLOYEE_TYPE);
+        StringProperty(contactContainer, object, "TITLE", Contact.PROFESSION);
         // ROLE
         StringProperty(contactContainer, object, "ROLE", Contact.POSITION);
         // LOGO is ignored
