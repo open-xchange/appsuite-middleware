@@ -53,6 +53,7 @@ import java.rmi.RemoteException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 
 
 /**
@@ -70,20 +71,15 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 
 	private static final String ERR = "Folder could not be remote-removed";
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.cache.remote.GenericCacheInvalidationInterface#getRemoteName()
-	 */
 	@Override
     public String getRemoteName() {
 		return REMOTE_NAME;
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.cache.remote.GenericCacheInvalidationInterface#invalidateCacheElement(int, int)
-	 */
 	@Override
     public void invalidateCacheElement(final int contextId, final int objectId) throws RemoteException {
-		if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
+	    ConditionTreeMapManagement.dropFor(contextId);
+	    if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
 			try {
 				FolderCacheManager.getInstance().removeFolderObject(objectId, ContextStorage.getInstance().getContext(contextId));
 			} catch (final OXException e) {
@@ -93,9 +89,6 @@ public class FolderCacheInvalidation implements GenericCacheInvalidationInterfac
 
 	}
 
-	/* (non-Javadoc)
-	 * @see com.openexchange.cache.remote.GenericCacheInvalidationInterface#invalidateContext(int)
-	 */
 	@Override
     public void invalidateContext(final int contextId) throws RemoteException {
 		if (LOG.isTraceEnabled()) {

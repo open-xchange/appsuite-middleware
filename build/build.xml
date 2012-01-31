@@ -65,7 +65,6 @@
                     </else>
                 </if>
                 <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
-                <!-- TODO include the dist build as a normal buildType in build-project.xml -->
             	<if>
             		<available file="${destDir}/${bundlesDir}" type="dir"/>
             		<then>
@@ -79,6 +78,7 @@
         				<path id="buildClasspath" refid="classpath"/>
             		</else>
             	</if>
+                <!-- TODO include the dist build as a normal buildType in build-project.xml -->
                 <if>
                     <equals arg1="dist" arg2="${buildType}"/>
                     <then>

@@ -49,17 +49,15 @@
 
 package com.openexchange.webdav.protocol;
 
-import com.openexchange.exception.OXException;
-
 public interface WebdavFactory{
 
-	public WebdavResource resolveResource(WebdavPath url) throws OXException;
+	public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException;
 
-	public WebdavCollection resolveCollection(WebdavPath url) throws OXException;
+	public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException;
 
-    public WebdavResource resolveResource(String url) throws OXException;
+    public WebdavResource resolveResource(String url) throws WebdavProtocolException;
 
-    public WebdavCollection resolveCollection(String url) throws OXException;
+    public WebdavCollection resolveCollection(String url) throws WebdavProtocolException;
 
 	public Protocol getProtocol();
 

@@ -50,15 +50,15 @@
 package com.openexchange.webdav.action;
 
 import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public abstract class AbstractAction implements WebdavAction {
 	private WebdavAction next;
 	private BulkLoader bulkLoader;
 
-	public void yield(final WebdavRequest req, final WebdavResponse res) throws OXException {
+	public void yield(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		next.perform(req, res);
 	}
 
@@ -70,7 +70,7 @@ public abstract class AbstractAction implements WebdavAction {
 		this.next = next;
 	}
 
-	public void setBuldLoader(final BulkLoader loader) {
+	public void setBulkLoader(final BulkLoader loader) {
 		this.bulkLoader = loader;
 	}
 

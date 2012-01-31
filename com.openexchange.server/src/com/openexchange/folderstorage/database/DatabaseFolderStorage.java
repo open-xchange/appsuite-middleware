@@ -50,6 +50,12 @@
 package com.openexchange.folderstorage.database;
 
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
+import static com.openexchange.groupware.container.FolderObject.SYSTEM_MODULE;
+import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
+import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
+import static com.openexchange.server.impl.OCLPermission.WRITE_ALL_OBJECTS;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
@@ -357,6 +363,8 @@ public final class DatabaseFolderStorage implements FolderStorage {
         }
     }
 
+    private static final TIntSet SPECIALS = new TIntHashSet(new int[] { FolderObject.SYSTEM_PRIVATE_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID });
+
     @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
         final ConnectionProvider provider = getConnection(true, storageParameters);
@@ -424,57 +432,37 @@ public final class DatabaseFolderStorage implements FolderStorage {
                 }
                 createMe.setPermissionsAsArray(oclPermissions);
             } else {
-                final OCLPermission[] oclPermissions;
                 final int parentFolderID = createMe.getParentFolderID();
-                if (parentFolderID < FolderObject.MIN_FOLDER_ID) {
-                    oclPermissions = new OCLPermission[1];
-                    final OCLPermission oclPerm = new OCLPermission();
-                    oclPerm.setEntity(storageParameters.getUserId());
-                    oclPerm.setGroupPermission(false);
-                    oclPerm.setFolderAdmin(true);
-                    oclPerm.setAllPermission(
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION,
-                        OCLPermission.ADMIN_PERMISSION);
-                    oclPerm.setSystem(0);
-                    oclPermissions[0] = oclPerm;
+                /*
+                 * Prepare
+                 */
+                final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con);
+                final int userId = storageParameters.getUserId();
+                final boolean isShared = parent.isShared(userId);
+                final boolean isSystem = (SYSTEM_MODULE == parent.getModule());
+                final List<OCLPermission> parentPermissions = parent.getPermissions();
+                /*
+                 * Create permission list
+                 */
+                final List<OCLPermission> permissions = new ArrayList<OCLPermission>((isSystem ? 0 : parentPermissions.size()) + 1);
+                if (isShared) {
+                    permissions.add(newMaxPermissionFor(parent.getCreatedBy()));
+                    permissions.add(newStandardPermissionFor(userId));
                 } else {
-                    final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con);
-                    final int owner;
-                    {
-                        final int userId = storageParameters.getUserId();
-                        final boolean isShared = parent.isShared(userId);
-                        owner = isShared ? parent.getCreatedBy() : userId;
+                    permissions.add(newMaxPermissionFor(userId));
+                }
+                if (!isSystem) {
+                    final TIntSet ignore = new TIntHashSet(2); ignore.add(userId);
+                    if (isShared) {
+                        ignore.add(parent.getCreatedBy());
                     }
-                    boolean ownerFound = false;
-                    final List<OCLPermission> list = parent.getPermissions();
-                    final List<OCLPermission> dest = new ArrayList<OCLPermission>(list.size());
-                    for (final OCLPermission oclPermission : list) {
-                        if (oclPermission.getSystem() <= 0) {
-                            dest.add(oclPermission);
-                            if (!oclPermission.isGroupPermission() && owner == oclPermission.getEntity()) {
-                                ownerFound = true;
-                                oclPermission.setFolderAdmin(true);
-                            }
+                    for (final OCLPermission permission : parentPermissions) {
+                        if (permission.getSystem() <= 0 && (permission.isGroupPermission() || !ignore.contains(permission.getEntity()))) {
+                            permissions.add(permission);
                         }
                     }
-                    if (!ownerFound) {
-                        final OCLPermission oclPerm = new OCLPermission();
-                        oclPerm.setEntity(owner);
-                        oclPerm.setGroupPermission(false);
-                        oclPerm.setFolderAdmin(true);
-                        oclPerm.setAllPermission(
-                            OCLPermission.NO_PERMISSIONS,
-                            OCLPermission.NO_PERMISSIONS,
-                            OCLPermission.NO_PERMISSIONS,
-                            OCLPermission.NO_PERMISSIONS);
-                        oclPerm.setSystem(0);
-                        dest.add(oclPerm);
-                    }
-                    oclPermissions = dest.toArray(new OCLPermission[dest.size()]);
                 }
-                createMe.setPermissionsAsArray(oclPermissions);
+                createMe.setPermissions(permissions);
             }
             // Create
             final OXFolderManager folderManager = OXFolderManager.getInstance(session, con, con);
@@ -487,6 +475,26 @@ public final class DatabaseFolderStorage implements FolderStorage {
         } finally {
             provider.close();
         }
+    }
+
+    private static OCLPermission newMaxPermissionFor(final int entity) {
+        final OCLPermission oclPerm = new OCLPermission();
+        oclPerm.setEntity(entity);
+        oclPerm.setGroupPermission(false);
+        oclPerm.setFolderAdmin(true);
+        oclPerm.setAllPermission(ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION);
+        oclPerm.setSystem(0);
+        return oclPerm;
+    }
+
+    private static OCLPermission newStandardPermissionFor(final int entity) {
+        final OCLPermission oclPerm = new OCLPermission();
+        oclPerm.setEntity(entity);
+        oclPerm.setGroupPermission(false);
+        oclPerm.setFolderAdmin(false);
+        oclPerm.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
+        oclPerm.setSystem(0);
+        return oclPerm;
     }
 
     private static final int[] PUBLIC_FOLDER_IDS =

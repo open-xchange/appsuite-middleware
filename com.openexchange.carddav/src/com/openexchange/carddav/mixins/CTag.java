@@ -49,40 +49,66 @@
 
 package com.openexchange.carddav.mixins;
 
-import java.util.List;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * {@link CTag}
- *
+ * 
+ * Specifies a "synchronization" token used to indicate when the contents of 
+ * a calendar or scheduling Inbox or Outbox collection have changed.
+ * 
+ * Used by the Apple Addressbook client in Mac OS 10.6 for CardDAV purposes, too. 
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CTag extends SingleXMLPropertyMixin {
 
-    private String value;
+    private static final Log LOG = LogFactory.getLog(CTag.class);
 
-    public CTag(List<Contact> contacts, int folderId) {
+    private long timestamp = -1;
+    private final GroupwareCarddavFactory factory;
+    
+    public CTag(GroupwareCarddavFactory factory) {
         super("http://calendarserver.org/ns/", "getctag");
-
-        Contact youngest = null;
-        for (Contact contact : contacts) {
-            if (youngest == null || youngest.getLastModified().before(contact.getLastModified())) {
-                youngest = contact;
-            }
-        }
-        if (youngest != null) {
-            value = "http://www.open-xchange.com/carddav/ctag/"+folderId+"_"+youngest.getLastModified().getTime();
-        } else {
-            value = "http://www.open-xchange.com/carddav/ctag/"+folderId;
-
-        }
+        this.factory = factory;
     }
 
     @Override
     protected String getValue() {
-        return value;
+        return "http://www.open-xchange.com/carddav/ctag/aggr_" + getTimestamp();
     }
 
+    public long getTimestamp() {
+		if (-1 == this.timestamp) {
+				try {
+					String token = null;
+					final String overrrideSyncToken = this.factory.getOverrideNextSyncToken();
+					if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
+						this.factory.setOverrideNextSyncToken(null);
+						token = overrrideSyncToken;
+					}
+					if (null != token) {
+					try {
+						this.timestamp = Long.parseLong(token);
+						LOG.debug("Overriding timestamp property to '" + this.timestamp + "' for user '" + this.factory.getUser() + "'.");
+					} catch (final NumberFormatException e) {
+						LOG.warn("Invalid sync token: '" + token + "'.");
+					}
+					}
+					if (-1 == this.timestamp) {
+						this.timestamp = this.factory.getState().getLastModified().getTime();
+					}
+			} catch (final OXException e) {
+		        LOG.error(e.getMessage(), e);
+		        this.timestamp = 0;
+			}
+		}
+		return this.timestamp;
+	}    
 }

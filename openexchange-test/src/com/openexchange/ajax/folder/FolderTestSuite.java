@@ -56,6 +56,7 @@ import com.openexchange.ajax.folder.api2.Bug15980Test;
 import com.openexchange.ajax.folder.api2.Bug15995Test;
 import com.openexchange.ajax.folder.api2.Bug16163Test;
 import com.openexchange.ajax.folder.api2.Bug16243Test;
+import com.openexchange.ajax.folder.api2.Bug16284Test;
 import com.openexchange.ajax.folder.api2.Bug16303Test;
 import com.openexchange.ajax.folder.api2.Bug17225Test;
 import com.openexchange.ajax.folder.api2.Bug17261Test;
@@ -64,6 +65,7 @@ import com.openexchange.ajax.folder.api2.CreateTest;
 import com.openexchange.ajax.folder.api2.GetTest;
 import com.openexchange.ajax.folder.api2.MoveTest;
 import com.openexchange.ajax.folder.api2.PathTest;
+import com.openexchange.ajax.folder.api2.SubscribeTest;
 import com.openexchange.ajax.folder.api2.UpdateTest;
 import com.openexchange.ajax.folder.api2.UpdatesTest;
 import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
@@ -106,6 +108,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(UpdatesTest.class);
         tests.addTestSuite(UpdateTest.class);
         tests.addTestSuite(VisibleFoldersTest.class);
+        tests.addTestSuite(SubscribeTest.class);
 
         // And finally bug tests.
         tests.addTestSuite(Bug12393Test.class);
@@ -117,6 +120,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug15980Test.class);
         tests.addTestSuite(Bug16163Test.class);
         tests.addTestSuite(Bug16243Test.class);
+        tests.addTestSuite(Bug16284Test.class);
         tests.addTestSuite(Bug16303Test.class);
         tests.addTestSuite(Bug16724Test.class);
         tests.addTestSuite(Bug17027Test.class);

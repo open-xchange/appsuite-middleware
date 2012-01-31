@@ -117,6 +117,16 @@ public final class SMALServiceLookup implements ServiceLookup {
         }
         return serviceLookup.getService(clazz);
     }
+    
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = serviceLookupReference.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
+    }
+    
 
     /**
      * Sets the service look-up

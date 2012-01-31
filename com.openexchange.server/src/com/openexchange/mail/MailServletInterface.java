@@ -50,6 +50,7 @@
 package com.openexchange.mail;
 
 import java.util.Collection;
+import java.util.List;
 import com.openexchange.api2.MailInterfaceMonitor;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
@@ -193,6 +194,11 @@ public abstract class MailServletInterface {
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
     public abstract SearchIterator<MailMessage> getAllThreadedMessages(String folder, int sortCol, int order, int[] fields, int[] fromToIndices) throws OXException;
+
+    /**
+     * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
+     */
+    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, int sortCol, int order, int[] fields) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.

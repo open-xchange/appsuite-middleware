@@ -50,11 +50,13 @@
 package com.openexchange.webdav.action;
 
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
-import com.openexchange.exception.OXException;
+
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -68,32 +70,30 @@ public class WebdavReportAction extends AbstractAction {
 
     private final Protocol protocol;
 
-    public WebdavReportAction(final Protocol protocol) {
+    public WebdavReportAction(Protocol protocol) {
         this.protocol = protocol;
     }
 
     @Override
-    public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
+	public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         try {
-            final Document reportQuery = req.getBodyAsDocument();
-            final Element root = reportQuery.getRootElement();
-            final String ns = root.getNamespace().getURI();
-            final String name = root.getName();
+            Document reportQuery = req.getBodyAsDocument();
+            Element root = reportQuery.getRootElement();
+            String ns = root.getNamespace().getURI();
+            String name = root.getName();
 
-            final WebdavAction reportAction = protocol.getReportAction(ns, name);
+            WebdavAction reportAction = protocol.getReportAction(ns, name);
 
             if (reportAction == null) {
-                throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            	throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
             }
 
             reportAction.perform(req, res);
 
-        } catch (final JDOMException e) {
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        } catch (final IOException e) {
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        } catch (JDOMException e) {
+        	throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        } catch (IOException e) {
+        	throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
     }
-
 }

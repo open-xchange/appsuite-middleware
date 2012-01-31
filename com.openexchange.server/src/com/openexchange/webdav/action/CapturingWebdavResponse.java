@@ -52,6 +52,7 @@ package com.openexchange.webdav.action;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 public class CapturingWebdavResponse implements WebdavResponse {
@@ -62,26 +63,22 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		this.delegate = delegate;
 	}
 
-	@Override
-    public OutputStream getOutputStream() throws IOException {
+	public OutputStream getOutputStream() throws IOException {
 		if(stream != null) {
 			return stream;
 		}
 		return stream = new CapturingOutputStream(delegate.getOutputStream());
 	}
 
-	@Override
-    public int getStatus() {
+	public int getStatus() {
 		return delegate.getStatus();
 	}
 
-	@Override
-    public void setHeader(final String header, final String value) {
+	public void setHeader(final String header, final String value) {
 		delegate.setHeader(header, value);
 	}
 
-	@Override
-    public void setStatus(final int status) {
+	public void setStatus(final int status) {
 		delegate.setStatus(status);
 	}
 
@@ -146,17 +143,19 @@ public class CapturingWebdavResponse implements WebdavResponse {
 		if(stream == null) {
 			return "No Body";
 		}
-		return new String(stream.getCapture().toByteArray(), com.openexchange.java.Charsets.UTF_8);
+		try {
+			return new String(stream.getCapture().toByteArray(), "UTF-8");
+		} catch (final UnsupportedEncodingException e) {
+			return e.toString();
+		}
 	}
 
-	@Override
-    public void setContentType(final String s) {
+	public void setContentType(final String s) {
 		delegate.setContentType(s);
 	}
 
-    @Override
     public void sendString(final String notFound) throws IOException {
-        final byte[] bytes = notFound.getBytes(com.openexchange.java.Charsets.UTF_8);
+        final byte[] bytes = notFound.getBytes("UTF-8");
         setHeader("Content-Length", String.valueOf(bytes.length));
         getOutputStream().write(bytes);
     }

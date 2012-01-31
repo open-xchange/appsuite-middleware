@@ -57,10 +57,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 import java.util.Set;
+
+import junit.framework.JUnit4TestAdapter;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
 import com.openexchange.concurrent.ConcurrentHashSet;
 
 /**
@@ -240,4 +244,9 @@ public class ConfigDBUniqueIDTest {
             con.setAutoCommit(true);
         }
     }
+    
+    //workaround for JUnit 3 runner
+	public static junit.framework.Test suite() {
+		return new JUnit4TestAdapter(ConfigDBUniqueIDTest.class);
+	}
 }

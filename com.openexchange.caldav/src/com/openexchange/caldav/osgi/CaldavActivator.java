@@ -80,12 +80,12 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
  */
 public class CaldavActivator extends HousekeepingActivator {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavActivator.class));
-
-    private static final Class<?>[] NEEDED = new Class<?>[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class};
+    private static final Log LOG = LogFactory.getLog(CaldavActivator.class);
+    
+    private static final Class[] NEEDED = new Class[]{ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class, UserService.class, ConfigViewFactory.class};
 
     private OSGiPropertyMixin mixin;
-
+    
     @Override
     protected Class<?>[] getNeededServices() {
         return NEEDED;
@@ -96,32 +96,31 @@ public class CaldavActivator extends HousekeepingActivator {
         try {
             CalDAV.setServiceLookup(this);
             CaldavPerformer.setServices(this);
-
+            
             rememberTracker(new ServletRegistration(context, new CalDAV(), "/servlet/dav/caldav"));
             rememberTracker(new ServletRegistration(context, new DevNullServlet(), "/servlet/dav/dev/null")); // FIXME activate this elsewhere
-
-            final CaldavPerformer performer = CaldavPerformer.getInstance();
+            
+            CaldavPerformer performer = CaldavPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
-
+            
             registerService(PropertyMixin.class, new CalendarHomeSet());
             registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
 
-                @Override
-                public PropertyMixin create(final SessionHolder sessionHolder) {
+                public PropertyMixin create(SessionHolder sessionHolder) {
                     return new CalendarUserAddressSet(sessionHolder);
                 }
-
+                
             });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
-
+            
             registerService(PathRegistration.class, new PathRegistration("caldav"));
             openTrackers();
-        } catch (final Throwable t) {
+        } catch (Throwable t) {
             LOG.error(t.getMessage(), t);
         }
     }
-
+    
     @Override
     protected void stopBundle() throws Exception {
         mixin.close();

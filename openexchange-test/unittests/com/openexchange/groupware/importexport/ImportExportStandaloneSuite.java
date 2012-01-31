@@ -76,6 +76,7 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTestSuite( ContactFieldTester.class );
 		tests.addTestSuite( ContactSwitcherTester.class );
 		tests.addTestSuite( VersitParserTest.class );
+		tests.addTest( CSVParserTest.suite() );
 		//tests.addTestSuite( com.openexchange.groupware.importexport.OXContainerConverterTest.class );
 		//tests.addTestSuite( com.openexchange.tools.versit.OXContainerConverterTest.class );
 		tests.addTest( SizedInputStreamTest.suite() );

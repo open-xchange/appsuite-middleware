@@ -545,10 +545,42 @@ public class ServerUserSetting {
     private <T> void insertAttribute(final int cid, final int user, final Attribute<T> attribute, final T value, final Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("INSERT INTO user_setting_server (" + attribute.getColumnName() + ",cid,user) VALUES (?,?,?)");
-            attribute.setAttribute(stmt, value);
-            stmt.setInt(2, cid);
-            stmt.setInt(3, user);
+            int pos = 2;
+            {
+                final String start = "INSERT INTO user_setting_server (" + attribute.getColumnName();
+                if (CONTACT_COLLECT_ON_MAIL_ACCESS.equals(attribute)) {
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailTransport,cid,user) VALUES (?,?,?,?)");
+                    attribute.setAttribute(stmt, value);
+                    /*
+                     * As configured
+                     */
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final boolean b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailTransport", false);
+                    stmt.setBoolean(pos++, b);
+                } else if (CONTACT_COLLECT_ON_MAIL_TRANSPORT.equals(attribute)) {
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,cid,user) VALUES (?,?,?,?)");
+                    attribute.setAttribute(stmt, value);
+                    /*
+                     * As configured
+                     */
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final boolean b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailAccess", false);
+                    stmt.setBoolean(pos++, b);
+                } else {
+                    stmt = con.prepareStatement(start + ",contactCollectOnMailAccess,contactCollectOnMailTransport,cid,user) VALUES (?,?,?,?,?)");
+                    attribute.setAttribute(stmt, value);
+                    /*
+                     * As configured
+                     */
+                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    boolean b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailAccess", false);
+                    stmt.setBoolean(pos++, b);
+                    b = null == service ? false : service.getBoolProperty("com.openexchange.user.contactCollectOnMailTransport", false);
+                    stmt.setBoolean(pos++, b);
+                }
+            }
+            stmt.setInt(pos++, cid);
+            stmt.setInt(pos, user);
             stmt.execute();
         } catch (final SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);

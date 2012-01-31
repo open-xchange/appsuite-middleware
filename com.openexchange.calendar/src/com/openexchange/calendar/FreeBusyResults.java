@@ -373,6 +373,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
 
     private final boolean checkPermissions() {
+        boolean isVisible = isVisible();
         if ((pflag == 0 && isVisible()) || (pflag == 1 && owner == uid)) {
             return true;
         }

@@ -83,6 +83,7 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.Collections.SmartIntArray;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -1684,6 +1685,7 @@ public final class OXFolderSQL {
             /*
              * Remove from cache
              */
+            ConditionTreeMapManagement.dropFor(ctx.getContextId());
             if (FolderCacheManager.isInitialized()) {
                 /*
                  * Invalidate cache
@@ -2036,6 +2038,7 @@ public final class OXFolderSQL {
             /*
              * Remove from cache
              */
+            ConditionTreeMapManagement.dropFor(ctx.getContextId());
             if (FolderCacheManager.isInitialized()) {
                 /*
                  * Invalidate cache

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="OSGi bundles override" basedir=".">
+
+	<description>
+		Removes afterwards the bundle.d file for the OSGi system bundle. It must not be part of the bundle list.
+	</description>
+
+    <import file="build-project.xml"/>
+
+	<target name="postInstall">
+		<delete dir="${destDir}/${bundle.dDir}">
+			<include name="org.eclipse.osgi_*"/>
+		</delete>
+    </target>
+
+</project>

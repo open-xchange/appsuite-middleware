@@ -117,4 +117,7 @@ public class Property {
         return invalid;
     }
 
+    public String getName() {
+        return name;
+    }
 }

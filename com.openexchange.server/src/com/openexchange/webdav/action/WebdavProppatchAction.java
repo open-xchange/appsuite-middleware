@@ -52,7 +52,9 @@ package com.openexchange.webdav.action;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
@@ -60,7 +62,7 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.output.XMLOutputter;
-import com.openexchange.exception.OXException;
+
 import com.openexchange.tools.UnsynchronizedStringWriter;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -86,14 +88,14 @@ public class WebdavProppatchAction extends AbstractAction {
 
 
 	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		try {
 			final Document requestDoc = req.getBodyAsDocument();
 			final Document responseDoc = new Document();
 			final Element multistatus = new Element("multistatus",DAV_NS);
 
-			final List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-			for (final Namespace namespace : namespaces) {
+			List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+			for (Namespace namespace : namespaces) {
                 multistatus.addNamespaceDeclaration(namespace);
             }
 
@@ -152,7 +154,7 @@ public class WebdavProppatchAction extends AbstractAction {
 		}
 
 		@Override
-        public Element perform(final Element propElement, final WebdavResource resource) {
+		public Element perform(final Element propElement, final WebdavResource resource) {
 			int status = 200;
 
 			if(propElement.getChildren().isEmpty()) {
@@ -192,9 +194,7 @@ public class WebdavProppatchAction extends AbstractAction {
 					resource.putProperty(property);
 				} catch (final WebdavProtocolException e) {
 					status = e.getStatus();
-				} catch (final OXException e) {
-                    status = 500;
-                }
+				}
 			}
 
 			final Element propstat = new Element("propstat", DAV_NS);
@@ -218,7 +218,7 @@ public class WebdavProppatchAction extends AbstractAction {
 	private static final class RemoveAction implements PropertyAction {
 
 		@Override
-        public Element perform(final Element propElement, final WebdavResource resource) {
+		public Element perform(final Element propElement, final WebdavResource resource) {
 			int status = 200;
 			if(propElement.getChildren().isEmpty()) {
 				final Element propstat = new Element("propstat", DAV_NS);
@@ -234,9 +234,7 @@ public class WebdavProppatchAction extends AbstractAction {
 				resource.removeProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
 			} catch (final WebdavProtocolException e) {
 				status = e.getStatus();
-			} catch (final OXException e) {
-                status = 500;
-            }
+			}
 
 			final Element propstat = new Element("propstat", DAV_NS);
 

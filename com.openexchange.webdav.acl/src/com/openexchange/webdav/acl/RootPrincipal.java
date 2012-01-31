@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.user.UserService;
@@ -86,7 +87,7 @@ public class RootPrincipal extends AbstractCollection {
     }
 
     @Override
-    protected void internalDelete() throws OXException {
+    protected void internalDelete() throws WebdavProtocolException {
         throw WebdavProtocolException.generalError(getUrl(), 403);
     }
 
@@ -96,22 +97,22 @@ public class RootPrincipal extends AbstractCollection {
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws OXException {
+    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    protected void internalPutProperty(final WebdavProperty prop) throws OXException {
+    protected void internalPutProperty(final WebdavProperty prop) throws WebdavProtocolException {
 
     }
 
     @Override
-    protected void internalRemoveProperty(final String namespace, final String name) throws OXException {
+    protected void internalRemoveProperty(final String namespace, final String name) throws WebdavProtocolException {
 
     }
 
@@ -121,12 +122,12 @@ public class RootPrincipal extends AbstractCollection {
     }
 
     @Override
-    public void setCreationDate(final Date date) throws OXException {
+    public void setCreationDate(final Date date) throws WebdavProtocolException {
 
     }
 
     @Override
-    public List<WebdavResource> getChildren() throws OXException {
+    public List<WebdavResource> getChildren() throws WebdavProtocolException {
         final UserService users = factory.getUserService();
         try {
             User[] user = users.getUser(factory.getContext());
@@ -140,7 +141,7 @@ public class RootPrincipal extends AbstractCollection {
         }
     }
 
-    public UserPrincipalResource resolveUser(WebdavPath url) throws OXException {
+    public UserPrincipalResource resolveUser(WebdavPath url) throws WebdavProtocolException {
         String name = url.name();
         if (name.contains("@")) {
             name = name.split("@")[0];
@@ -158,52 +159,52 @@ public class RootPrincipal extends AbstractCollection {
     }
 
     @Override
-    public void create() throws OXException {
+    public void create() throws WebdavProtocolException {
         // NOPE
     }
 
     @Override
-    public boolean exists() throws OXException {
+    public boolean exists() throws WebdavProtocolException {
         return true;
     }
 
     @Override
-    public Date getCreationDate() throws OXException {
+    public Date getCreationDate() throws WebdavProtocolException {
         return new Date(0);
     }
 
     @Override
-    public String getDisplayName() throws OXException {
+    public String getDisplayName() throws WebdavProtocolException {
         return "";
     }
 
     @Override
-    public Date getLastModified() throws OXException {
+    public Date getLastModified() throws WebdavProtocolException {
         return new Date(0);
     }
 
     @Override
-    public WebdavLock getLock(final String token) throws OXException {
+    public WebdavLock getLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public List<WebdavLock> getLocks() throws OXException {
+    public List<WebdavLock> getLocks() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    public WebdavLock getOwnLock(final String token) throws OXException {
+    public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public List<WebdavLock> getOwnLocks() throws OXException {
+    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    public String getSource() throws OXException {
+    public String getSource() throws WebdavProtocolException {
         return null;
     }
 
@@ -213,22 +214,22 @@ public class RootPrincipal extends AbstractCollection {
     }
 
     @Override
-    public void lock(final WebdavLock lock) throws OXException {
+    public void lock(final WebdavLock lock) throws WebdavProtocolException {
         //IGNORE
     }
 
     @Override
-    public void save() throws OXException {
+    public void save() throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    public void setDisplayName(final String displayName) throws OXException {
+    public void setDisplayName(final String displayName) throws WebdavProtocolException {
         // IGNORE
     }
 
     @Override
-    public void unlock(final String token) throws OXException {
+    public void unlock(final String token) throws WebdavProtocolException {
         // IGNORE
     }
 

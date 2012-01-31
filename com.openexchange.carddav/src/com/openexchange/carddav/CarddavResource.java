@@ -50,26 +50,20 @@
 package com.openexchange.carddav;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
 import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -80,311 +74,284 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * {@link CarddavResource}
- *
+ * 
+ * Common base class for CardDAV resources.
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CarddavResource extends AbstractResource {
+public abstract class CarddavResource extends AbstractResource {
 
-    private final GroupwareCarddavFactory factory;
+	/**
+	 * Named logger instance
+	 */
+    protected static final Log LOG = LogFactory.getLog(CarddavResource.class);
+    
+    /**
+     * The prefix to be applied to all OX CardDAV entities
+     */
+	protected static final String ETAG_PREFIX = "http://www.open-xchange.com/carddav/";
+	
+	/**
+	 * The content type for CardDAV resources
+	 */
+	protected static final String CONTENT_TYPE = "text/vcard; charset=utf-8";
+	
+	/**
+	 * The used {@link GroupwareCarddavFactory}
+	 */
+	protected final GroupwareCarddavFactory factory;
 
-    private final AggregatedCollection parent;
-
-    private WebdavPath url;
-
-    private Contact contact;
-
-    private final OXContainerConverter converter = new OXContainerConverter((TimeZone) null, (String) null);
-
-    private final boolean exists;
-
-    public static final Log LOG = LogFactory.getLog(CarddavResource.class);
-
-    public CarddavResource(AggregatedCollection parent, Contact contact, GroupwareCarddavFactory factory) {
-        super();
-        this.factory = factory;
-        this.parent = parent;
-        this.url = parent.getUrl().dup().append(contact.getObjectID() + ".vcf");
-        this.contact = contact;
-        this.exists = true;
-    }
-
-    public CarddavResource(AggregatedCollection parent, GroupwareCarddavFactory factory) {
-        super();
-        this.factory = factory;
-        this.parent = parent;
-        this.exists = false;
-    }
-
-    @Override
-    protected WebdavFactory getFactory() {
-        return factory;
-    }
-
-    @Override
-    public boolean hasBody() throws WebdavProtocolException {
-        return true;
-    }
-
-    @Override
-    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
-        return Collections.emptyList();
-    }
-
-    @Override
-    protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
-        if (namespace.equals(CarddavProtocol.CARD_NS.getURI()) && name.equals("address-data")) {
-            WebdavProperty property = new WebdavProperty(namespace, name);
-            property.setValue(generateVCard());
-            return property;
-        }
-        return null;
-    }
-
-    @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-        // Empty
-    }
-
-    @Override
-    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
-        // Empty
-    }
-
-    @Override
-    protected boolean isset(Property p) {
-        return true;
-    }
-
-    @Override
-    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-        // parse vcard
-        try {
+	/**
+	 * The parent collection of this resource
+	 */
+	protected final AggregatedCollection parent;
+		
+	private String cachedVCard = null;
+	
+	/**
+	 * 
+	 * @param parent
+	 * @param factory
+	 */
+	public CarddavResource(final AggregatedCollection parent, final GroupwareCarddavFactory factory) { 
+		super();
+		this.parent = parent;
+		this.factory = factory;		
+	}
+	
+	private String getVCard() throws WebdavProtocolException {
+		if (null == this.cachedVCard) {
+			this.cachedVCard = this.generateVCard();
+		}
+		return this.cachedVCard;
+	}
+	
+/*    private VersitObject readBodyOLD(final InputStream body) throws WebdavProtocolException {
+    	try {
             final int buflen = 2048;
             final byte[] buf = new byte[buflen];
             final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(8192);
             for (int read = body.read(buf, 0, buflen); read > 0; read = body.read(buf, 0, buflen)) {
                 baos.write(buf, 0, read);
             }
-            final byte[] vcard = baos.toByteArray();
+            byte[] vcard = baos.toByteArray();
+            vcard = Patches.IncomingFile.removeCropParameter(new String(vcard, "UTF-8")).getBytes("UTF-8");
             final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-            VersitDefinition.Reader versitReader;
-            versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(vcard), "UTF-8");
-            final VersitObject versitObject = def.parse(versitReader);
-            Contact newContact = converter.convertContact(versitObject);
-            if (exists) {
-                newContact.setParentFolderID(contact.getParentFolderID());
-                newContact.setContextId(contact.getContextId());
-                newContact.setLastModified(contact.getLastModified());
-                newContact.setObjectID(contact.getObjectID());
-            } else {
-                newContact.setParentFolderID(parent.getStandardFolder());
-                newContact.setContextId(factory.getSession().getContextId());
-            }
-            contact = newContact;
-        } catch (final VersitException e) {
-            LOG.error(e.getMessage(), e);
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
-        } catch (final ConverterException e) {
-            LOG.error(e.getMessage(), e);
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
+            final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(vcard), "UTF-8");
+            return def.parse(versitReader);
         } catch (final IOException e) {
-            LOG.error(e.getMessage(), e);
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
+        	throw this.internalError(e);
         } finally {
             try {
                 body.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOG.error(e);
             }
         }
-    }
-
-    @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
-        // Empty
-    }
-
-    @Override
-    public void create() throws WebdavProtocolException {
-        // save Contact
-        try {
-            factory.getContactInterface().insertContactObject(contact);
-            this.url = parent.getUrl().dup().append(contact.getObjectID()+".vcf");
-        } catch (OXException e) {
-            LOG.error(e);
+    }*/
+	
+    private VersitObject readBody(final InputStream body) throws WebdavProtocolException {
+    	try {
+            final VersitDefinition def = Versit.getDefinition("text/vcard");
+            final VersitDefinition.Reader versitReader = def.getReader(body, "UTF-8");
+            return def.parse(versitReader);
+        } catch (final IOException e) {
+        	throw this.internalError(e);
+        } finally {
+            try {
+                body.close();
+            } catch (final IOException e) {
+                LOG.error(e);
+            }
         }
-    }
+    }	
+    
+	protected WebdavProtocolException protocolException(final Throwable cause, final int status) {
+		LOG.error(this.getUrl() + ": " + cause.getMessage(), cause);
+		return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), status, cause);
+	}
+	
+	protected WebdavProtocolException protocolException(final int status) {
+		LOG.debug(this.getUrl() + ": " + status);
+		return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), status);
+	}
+	
+	protected WebdavProtocolException internalError(final Throwable cause) throws WebdavProtocolException {
+		return this.protocolException(cause, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
+		
+	@Override
+	public abstract void create() throws WebdavProtocolException;
 
-    @Override
-    public void delete() throws WebdavProtocolException {
-        // delete contact
-        try {
-            factory.getContactInterface().deleteContactObject(contact.getObjectID(), contact.getParentFolderID(), contact.getLastModified());
-        } catch (OXException e) {
-            LOG.error(e);
-        }
-    }
+	@Override
+	public abstract boolean exists();
 
-    @Override
-    public boolean exists() throws WebdavProtocolException {
-        return exists;
-    }
+	@Override
+	public abstract void delete() throws WebdavProtocolException;
 
-    @Override
-    public InputStream getBody() throws WebdavProtocolException {
-        // generate VCard File
-        String outputString = generateVCard();
+	@Override
+	public abstract void save() throws WebdavProtocolException;
 
-        return new ByteArrayInputStream(outputString.getBytes());
-    }
+	@Override
+	public abstract Date getCreationDate() throws WebdavProtocolException;
 
-    /**
-     * @return
-     */
-    private String generateVCard() {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
-        VersitDefinition.Writer versitWriter;
-        try {
-            versitWriter = contactDef.getWriter(byteArrayOutputStream, "UTF-8");
-            final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+	@Override
+	public abstract Date getLastModified() throws WebdavProtocolException;
 
-            final VersitObject versitObject = oxContainerConverter.convertContact(contact, "3.0");
-            contactDef.write(versitWriter, versitObject);
-            versitWriter.flush();
+	@Override
+	public abstract String getDisplayName() throws WebdavProtocolException;
 
-            String outputString = new String(byteArrayOutputStream.toByteArray(), com.openexchange.java.Charsets.UTF_8);
-            outputString = removeXOPENXCHANGEAttributes(outputString);
-            return outputString;
-        } catch (IOException e) {
-            LOG.error(e);
-        } catch (ConverterException e) {
-            LOG.error(e);
-        }
-        return "";
-    }
+	@Override
+	public abstract void setDisplayName(final String displayName) throws WebdavProtocolException;
 
-    Pattern customAttributes = Pattern.compile("^X-OPEN-XCHANGE.*?\\r?\\n", Pattern.MULTILINE);
-    private String removeXOPENXCHANGEAttributes(String outputString) {
-        return customAttributes.matcher(outputString).replaceAll("");
-    }
+	protected abstract void applyVersitObject(final VersitObject versitObject) throws WebdavProtocolException;
+	
+	protected abstract String generateVCard() throws WebdavProtocolException;
+	
+	protected abstract String getUID();	
+		
+	@Override
+	public WebdavPath getUrl() {
+		if (this.exists()) {
+			final String uid = this.getUID();
+			if (null != uid && 0 < uid.length()) {
+				return parent.getUrl().dup().append(uid + ".vcf");
+			}
+		}
+		return new WebdavPath("UNSET");
+	}
 
-    @Override
-    public String getContentType() throws WebdavProtocolException {
-        return "text/vcard";
-    }
+	@Override
+	public String getLanguage() throws WebdavProtocolException {
+		return null;
+	}
 
-    @Override
-    public Date getCreationDate() throws WebdavProtocolException {
-        return contact.getCreationDate();
-    }
+	@Override
+	public void setLanguage(final String language) throws WebdavProtocolException {
+	}
 
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return contact.getDisplayName();
-    }
+	@Override
+	public Long getLength() throws WebdavProtocolException {
+		if (this.exists()) {
+			final String vCard = this.getVCard();
+			if (null != vCard && 0 < vCard.length()) {
+				return new Long(vCard.getBytes().length);
+			}			
+		}		
+		return 0L;
+	}
 
-    @Override
-    public String getETag() throws WebdavProtocolException {
-        if (!exists) {
-            return "";
-        }
-        return "http://www.open-xchange.com/carddav/" + contact.getObjectID() + "_" + contact.getLastModified().getTime();
-    }
+	@Override
+	public void setLength(Long length) throws WebdavProtocolException {
+	}
 
-    @Override
-    public String getLanguage() throws WebdavProtocolException {
-        return null;
-    }
+	@Override
+	public void setContentType(String type) throws WebdavProtocolException {
+	}
 
-    @Override
-    public Date getLastModified() throws WebdavProtocolException {
-        return contact.getLastModified();
-    }
+	@Override
+	public String getContentType() throws WebdavProtocolException {
+		return CarddavResource.CONTENT_TYPE;
+	}
 
-    @Override
-    public Long getLength() throws WebdavProtocolException {
-        // generate vcard file and count bytes
-        String outputString = generateVCard();
-        return new Long(outputString.getBytes().length);
-    }
+	@Override
+	public String getETag() throws WebdavProtocolException {
+    	if (this.exists()) {
+    		return String.format("%s%s_%d", ETAG_PREFIX, this.getUID(), this.getLastModified().getTime());
+    	} else {
+    		return "";
+    	}
+	}
 
-    @Override
-    public WebdavLock getLock(String token) throws WebdavProtocolException {
-        return null;
-    }
+	@Override
+	public String getSource() throws WebdavProtocolException {
+		return null;
+	}
 
-    @Override
-    public List<WebdavLock> getLocks() throws WebdavProtocolException {
+	@Override
+	public void setSource(String source) throws WebdavProtocolException {
+	}
+
+	@Override
+	public InputStream getBody() throws WebdavProtocolException {
+        return new ByteArrayInputStream(this.getVCard().getBytes());
+	}
+
+	@Override
+	public void lock(WebdavLock lock) throws WebdavProtocolException {
+	}
+
+	@Override
+	public List<WebdavLock> getLocks() throws WebdavProtocolException {
         return Collections.emptyList();
-    }
+	}
 
-    @Override
-    public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
-        return null;
-    }
+	@Override
+	public WebdavLock getLock(String token) throws WebdavProtocolException {
+		return null;
+	}
 
-    @Override
-    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
-        return null;
-    }
+	@Override
+	public void unlock(String token) throws WebdavProtocolException {
+	}
 
-    @Override
-    public String getSource() throws WebdavProtocolException {
-        return null;
-    }
+	@Override
+	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+		return null;
+	}
 
-    @Override
-    public WebdavPath getUrl() {
-        if (url == null) {
-            return new WebdavPath("UNSET");
+	@Override
+	public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+		return null;
+	}
+
+	@Override
+	public void putBody(final InputStream body, final boolean guessSize) throws WebdavProtocolException {
+    	final VersitObject versitObject = this.readBody(body);
+    	this.applyVersitObject(versitObject);
+	}
+
+	@Override
+	public boolean hasBody() throws WebdavProtocolException {
+		return true;
+	}
+
+	@Override
+	public void setCreationDate(Date date) throws WebdavProtocolException {
+	}
+
+	@Override
+	protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
+        return Collections.emptyList();
+	}
+
+	@Override
+	protected WebdavFactory getFactory() {
+		return this.factory;
+	}
+
+	@Override
+	protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
+	}
+
+	@Override
+	protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
+	}
+
+	@Override
+	protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
+        if (CarddavProtocol.CARD_NS.getURI().equals(namespace) && "address-data".equals(name)) {
+            final WebdavProperty property = new WebdavProperty(namespace, name);
+            property.setValue(this.getVCard());
+            return property;
+        } else {
+        	return null;
         }
-        return url;
-    }
+	}
 
-    @Override
-    public void lock(WebdavLock lock) throws WebdavProtocolException {
-
-    }
-
-    @Override
-    public void save() throws WebdavProtocolException {
-        try {
-            factory.getContactInterface().updateContactObject(contact, parent.getStandardFolder(), contact.getLastModified());
-        } catch (OXException e) {
-            LOG.error(e.getMessage(), e);
-            throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
-        }
-    }
-
-    @Override
-    public void setContentType(String type) throws WebdavProtocolException {
-
-    }
-
-    @Override
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
-        contact.setDisplayName(displayName);
-    }
-
-    @Override
-    public void setLanguage(String language) throws WebdavProtocolException {
-
-    }
-
-    @Override
-    public void setLength(Long length) throws WebdavProtocolException {
-
-    }
-
-    @Override
-    public void setSource(String source) throws WebdavProtocolException {
-
-    }
-
-    @Override
-    public void unlock(String token) throws WebdavProtocolException {
-
-    }
-
+	@Override
+	protected boolean isset(Property p) {
+		return true;
+	}    
 }

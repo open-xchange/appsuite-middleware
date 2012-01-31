@@ -119,7 +119,7 @@ public class BinDirModule extends DirModule {
     }
 
     @Override
-    public Set<String> getExportedClasspath() {
+    protected Set<String> getExportedClasspath() {
         final Set<String> retval = new HashSet<String>();
         for (final String classpathEntry : exportedClasspath) {
             retval.add(dir.getAbsolutePath() + File.separatorChar + classpathEntry);

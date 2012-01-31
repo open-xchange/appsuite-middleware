@@ -378,7 +378,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         final Iterator<Entry<String, String>> iter = propertiesFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
-            fldName = dir.getAbsolutePath() + "/" + fldName + "/";
+            fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
                 final Entry<String, String> entry = iter.next();
                 if (entry.getValue().startsWith(fldName)) {

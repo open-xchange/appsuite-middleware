@@ -51,15 +51,13 @@ package com.openexchange.webdav.action;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavRequestCycleAction extends AbstractAction {
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavRequestCycleAction.class));
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res)
+			throws WebdavProtocolException {
 
 
 		req.getFactory().beginRequest();

@@ -141,7 +141,7 @@ public class ContactWriter extends CommonWriter {
             final byte[] imageData = contact.getImage1();
             if (imageData != null) {
                 try {
-                    final ContactImageDataSource imgSource = new ContactImageDataSource();
+                    final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
                     final ImageLocation imageLocation =
                         new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(
                             String.valueOf(contact.getObjectID())).build();
@@ -693,7 +693,7 @@ public class ContactWriter extends CommonWriter {
                         writeValueNull(jsonArray);
                     } else {
                         try {
-                            final ContactImageDataSource imgSource = new ContactImageDataSource();
+                            final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
                             final ImageLocation imageLocation =
                                 new ImageLocation.Builder().folder(String.valueOf(contactObject.getParentFolderID())).id(
                                     String.valueOf(contactObject.getObjectID())).build();

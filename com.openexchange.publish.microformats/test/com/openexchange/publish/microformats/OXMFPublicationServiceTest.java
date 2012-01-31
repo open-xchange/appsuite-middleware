@@ -58,9 +58,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationTarget;
+import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.templating.TemplatingHelper;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -283,32 +285,42 @@ public class OXMFPublicationServiceTest extends TestCase {
     private static final class FindEverythingTemplateService implements TemplateService {
 
         @Override
-        public OXTemplate loadTemplate(final String templateName) throws OXException {
+        public OXTemplate loadTemplate(final String templateName) {
             return null;
         }
 
         @Override
-        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session) throws OXException {
+        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session session) {
             return null;
         }
 
         @Override
-        public List<String> getBasicTemplateNames(final String...filter) throws OXException {
+        public List<String> getBasicTemplateNames(final String...filter) {
             return new ArrayList<String>(0);
         }
 
         @Override
-        public List<String> getTemplateNames(final ServerSession session, final String...filter) throws OXException {
-            return new ArrayList<String>(0);
-        }
-
-        @Override
-        public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
+        public List<String> getTemplateNames(final Session session, final String... filter) {
             return null;
         }
 
         @Override
-        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final ServerSession session, final OXTemplateExceptionHandler exceptionHandler) throws OXException {
+        public OXTemplate loadTemplate(final String templateName, final OXTemplateExceptionHandler exceptionHandler) {
+            return null;
+        }
+
+        @Override
+        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session session, final OXTemplateExceptionHandler exceptionHandler) {
+            return null;
+        }
+
+        @Override
+        public OXTemplate loadTemplate(final String templateName, final String defaultTemplateName, final Session session, final boolean createCopy) {
+            return null;
+        }
+
+        @Override
+        public TemplatingHelper createHelper(final Object rootObject, final Session session) {
             return null;
         }
     }

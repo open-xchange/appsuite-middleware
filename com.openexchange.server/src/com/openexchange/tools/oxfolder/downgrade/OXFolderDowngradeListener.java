@@ -82,6 +82,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.downgrade.sql.OXFolderDowngradeSQL;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -489,6 +490,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         /*
          * Remove from cache
          */
+        ConditionTreeMapManagement.dropFor(ctx.getContextId());
         if (FolderCacheManager.isEnabled() && FolderCacheManager.isInitialized()) {
             try {
                 FolderCacheManager.getInstance().removeFolderObjects(folderIDs, ctx);

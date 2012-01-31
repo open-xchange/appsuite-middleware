@@ -85,7 +85,7 @@ public class JarModule extends AbstractModule {
     }
 
     @Override
-    public Set<String> getExportedClasspath() {
+    protected Set<String> getExportedClasspath() {
         final Set<String> retval = new HashSet<String>();
         retval.add(file.getAbsolutePath());
         return Collections.unmodifiableSet(retval);

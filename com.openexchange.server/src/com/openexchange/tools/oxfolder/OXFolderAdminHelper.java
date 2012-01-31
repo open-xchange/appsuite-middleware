@@ -83,6 +83,7 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.StringCollection;
+import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -278,6 +279,7 @@ public final class OXFolderAdminHelper {
                 /*
                  * Update caches
                  */
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 try {
                     if (FolderCacheManager.isEnabled()) {
                         FolderCacheManager.getInstance().removeFolderObject(id, ctx);
@@ -537,6 +539,7 @@ public final class OXFolderAdminHelper {
                 /*
                  * Update caches
                  */
+                ConditionTreeMapManagement.dropFor(ctx.getContextId());
                 try {
                     if (FolderCacheManager.isEnabled()) {
                         FolderCacheManager.getInstance().removeFolderObject(globalAddressBookId, ctx);

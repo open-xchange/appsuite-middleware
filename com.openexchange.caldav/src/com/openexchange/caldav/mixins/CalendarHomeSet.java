@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class CalendarHomeSet extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "calendar-home-set";
-
+    
     public CalendarHomeSet() {
         super(CaldavProtocol.CAL_NS.getURI(), PROPERTY_NAME);
     }

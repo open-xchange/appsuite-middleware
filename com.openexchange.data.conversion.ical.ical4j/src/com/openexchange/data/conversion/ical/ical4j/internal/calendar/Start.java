@@ -59,6 +59,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.property.DtEnd;
 import net.fortuna.ical4j.model.property.DtStart;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
@@ -109,24 +110,29 @@ public final class Start<T extends CalendarComponent, U extends CalendarObject> 
         final Date start = parseDateConsideringDateType(component, dtStart, timeZone);
 
         calendar.setStartDate(start);
-        // If an end is specified end date will be overwritten.
-        if (isDateTime) {
-            /* RFC 2445 4.6.1:
-             * For cases where a "VEVENT" calendar component specifies a "DTSTART"
-             * property with a DATE-TIME data type but no "DTEND" property, the
-             * event ends on the same calendar date and time of day specified by
-             * the "DTSTART" property.
-             */
-            calendar.setEndDate(start);
-        } else if (calendar instanceof Appointment) {
-            // Only the date is specified. Then we have to set the end to at
-            // least 1 day later. Will be overwritten if DTEND is specified.
-            final Calendar calendarUTC = new GregorianCalendar();
-            calendarUTC.setTimeZone(UTC);
-            calendarUTC.setTime(start);
-            calendarUTC.add(Calendar.DATE, 1);
-            calendar.setEndDate(calendarUTC.getTime());
-            // Special flag for appointments.
+        if (component.getProperty(DtEnd.DTEND) == null) {
+            // If an end is specified end date will be overwritten.
+            if (isDateTime) {
+                /* RFC 2445 4.6.1:
+                 * For cases where a "VEVENT" calendar component specifies a "DTSTART"
+                 * property with a DATE-TIME data type but no "DTEND" property, the
+                 * event ends on the same calendar date and time of day specified by
+                 * the "DTSTART" property.
+                 */
+                calendar.setEndDate(start);
+            } else if (calendar instanceof Appointment) {
+                // Only the date is specified. Then we have to set the end to at
+                // least 1 day later. Will be overwritten if DTEND is specified.
+                final Calendar calendarUTC = new GregorianCalendar();
+                calendarUTC.setTimeZone(UTC);
+                calendarUTC.setTime(start);
+                calendarUTC.add(Calendar.DATE, 1);
+                calendar.setEndDate(calendarUTC.getTime());
+                // Special flag for appointments.
+            }
+        }
+        
+        if (!isDateTime && calendar instanceof Appointment) {
             final Appointment appointment = (Appointment) calendar;
             appointment.setFullTime(true);
         }

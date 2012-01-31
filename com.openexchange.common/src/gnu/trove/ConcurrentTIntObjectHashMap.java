@@ -120,6 +120,33 @@ public final class ConcurrentTIntObjectHashMap<V> extends TIntObjectHashMap<V> i
         }
     }
 
+    /**
+     * Gets the read-write lock associated with this map
+     * 
+     * @return The read-write lock
+     */
+    public ReadWriteLock getReadWriteLock() {
+        return readWriteLock;
+    }
+
+    /**
+     * Copies entries to specified map
+     * 
+     * @param map The map to copy to
+     */
+    public void copySafeTo(final TIntObjectMap<V> map) {
+        if (null == map) {
+            return;
+        }
+        final Lock l = readWriteLock.writeLock();
+        l.lock();
+        try {
+            map.putAll(this.map);
+        } finally {
+            l.unlock();
+        }
+    }
+
     @Override
     public TIntObjectIterator<V> iterator() {
         final Lock l = readWriteLock.readLock();

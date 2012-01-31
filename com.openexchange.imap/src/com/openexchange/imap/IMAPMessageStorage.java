@@ -53,6 +53,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import static com.openexchange.mail.mime.utils.MIMEMessageUtility.fold;
 import static com.openexchange.mail.mime.utils.MIMEStorageUtility.getFetchProfile;
+import gnu.trove.list.TIntList;
 import gnu.trove.map.TLongIntMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
@@ -61,6 +62,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -97,11 +99,11 @@ import com.openexchange.imap.command.FetchIMAPCommand.FetchProfileModifier;
 import com.openexchange.imap.command.FlagsIMAPCommand;
 import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.command.NewFetchIMAPCommand;
+import com.openexchange.imap.command.SimpleFetchIMAPCommand;
 import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.services.IMAPServiceRegistry;
 import com.openexchange.imap.sort.IMAPSort;
-import com.openexchange.imap.threadsort.ThreadSortMailMessage;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
@@ -117,9 +119,11 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -155,7 +159,7 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch {
+public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class));
 
@@ -923,6 +927,118 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
+
+    @Override
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+        try {
+            if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
+                throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
+            }
+            imapFolder = setAndOpenFolder(imapFolder, fullName, Folder.READ_ONLY);
+            final TIntList seqNums;
+            final List<ThreadSortNode> threadList;
+            {
+                /*
+                 * Sort messages by thread reference
+                 */
+                final long start = System.currentTimeMillis();
+                final String threadResp = ThreadSortUtil.getThreadResponse(imapFolder, "ALL");
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                /*
+                 * Parse THREAD response to a list structure and extract sequence numbers
+                 */
+                threadList = ThreadSortUtil.parseThreadResponse(threadResp);
+                seqNums = ThreadSortUtil.getSeqNumsFromThreadResponse(threadResp);
+            }
+            /*
+             * Fetch messages
+             */
+            final MailFields usedFields = new MailFields();
+            // Add desired fields
+            usedFields.addAll(mailFields);
+            usedFields.add(MailField.THREAD_LEVEL);
+            // Add sort field
+            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
+            final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
+            final boolean descending = OrderDirection.DESC.equals(order);
+            if (!body) {
+                final long start = System.currentTimeMillis();
+                final TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapFolder, getSeparator(imapFolder), imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums.toArray(), fetchProfile).doCommand();
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                /*
+                 * Apply account identifier
+                 */
+                for (final MailMessage mail : messages.valueCollection()) {
+                    mail.setAccountId(accountId);
+                }
+                /*
+                 * Generate structure
+                 */
+                final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, messages);
+                final List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
+                /*
+                 * Sort according to order direction
+                 */
+                final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+                final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+                    
+                    @Override
+                    public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                        return comparator.compare(o1.get(0), o2.get(0));
+                    }
+                };
+                Collections.sort(list, listComparator);
+                return list;
+            }
+            /*
+             * Include body
+             */
+            final Message[] msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
+            /*
+             * Apply thread level
+             */
+            applyThreadLevel(threadList, 0, msgs, 0);
+            /*
+             * Generate structured list
+             */
+            final List<ThreadSortMailMessage> structuredList;
+            {
+                final MailMessage[] mails;
+                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
+                    mails = setAccountInfo(convert2Mails(msgs, usedFields.toArray(), body));
+                } else {
+                    mails = convert2Mails(msgs, usedFields.toArray(), body);
+                }
+                structuredList = ThreadSortUtil.toThreadSortStructure(mails);
+            }
+            /*
+             * Sort according to order direction
+             */
+            final List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
+            /*
+             * Sort according to order direction
+             */
+            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
+            final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+                
+                @Override
+                public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                    return comparator.compare(o1.get(0), o2.get(0));
+                }
+            };
+            Collections.sort(list, listComparator);
+            return list;
+        } catch (final MessagingException e) {
+            throw MIMEMailException.handleMessagingException(e, imapConfig, session);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
     @Override
     public MailMessage[] getThreadSortedMessages(final String fullName, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] mailFields) throws OXException {
         try {
@@ -945,7 +1061,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return EMPTY_RETVAL;
                 }
             }
-            final int[] seqnums;
+            final TIntList seqnums;
             final List<ThreadSortNode> threadList;
             {
                 /*
@@ -991,6 +1107,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
+            final boolean descending = OrderDirection.DESC.equals(order);
+            if (!body) {
+                final long start = System.currentTimeMillis();
+                final TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapFolder, getSeparator(imapFolder), imapConfig.getImapCapabilities().hasIMAP4rev1(), seqnums.toArray(), fetchProfile).doCommand();
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, messages);
+                /*
+                 * Sort according to order direction
+                 */
+                Collections.sort(
+                    structuredList,
+                    new MailMessageComparator(MailSortField.RECEIVED_DATE, descending, null));
+                /*
+                 * Output as flat list
+                 */
+                final List<MailMessage> flatList = new ArrayList<MailMessage>(messages.size());
+                ThreadSortUtil.toFlatList(structuredList, flatList);
+                return flatList.toArray(new MailMessage[flatList.size()]);
+            }
+            /*
+             * Include body
+             */
             Message[] msgs =
                 new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqnums, fetchProfile, false, true, body).doCommand();
             /*
@@ -1041,7 +1179,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             Collections.sort(
                 structuredList,
-                new MailMessageComparator(MailSortField.RECEIVED_DATE, OrderDirection.DESC.equals(order), null));
+                new MailMessageComparator(MailSortField.RECEIVED_DATE, descending, null));
             /*
              * Output as flat list
              */

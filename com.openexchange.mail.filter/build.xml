@@ -35,7 +35,7 @@
         <delete file="${srcDir}/${jSievePrefix}/jsieve/parser/generated/sieve.jj"/>
     </target>
 
-	<target name="clean" depends="main.clean">
+	<target name="postClean">
 		<delete dir="${mainSrcDir}/${jSievePrefix}/jsieve/parser/generated"/>
 	</target>
 

@@ -56,12 +56,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class PropertyHelper {
 
@@ -86,12 +90,12 @@ public class PropertyHelper {
 		this.url = url;
 	}
 
-	public List<WebdavProperty> getAllProps() throws OXException {
+	public List<WebdavProperty> getAllProps() throws WebdavProtocolException {
 		loadAllProperties();
 		return new ArrayList<WebdavProperty>(properties.values());
 	}
 
-	public WebdavProperty getProperty(final String namespace, final String name) throws OXException {
+	public WebdavProperty getProperty(final String namespace, final String name) throws WebdavProtocolException {
 		loadProperty(namespace, name);
 		return properties.get(new WebdavProperty(namespace, name));
 	}
@@ -134,7 +138,7 @@ public class PropertyHelper {
         return changed;
     }
 
-    private void loadProperty(final String namespace, final String name) throws OXException {
+    private void loadProperty(final String namespace, final String name) throws WebdavProtocolException {
 		if(removedProperties.contains(new WebdavProperty(namespace, name))) {
 			return;
 		}
@@ -151,11 +155,11 @@ public class PropertyHelper {
 			properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 
 		} catch (final OXException e) {
-		    throw e;
+			throw WebdavProtocolException.generalError(e, url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	private void loadAllProperties() throws OXException {
+	private void loadAllProperties() throws WebdavProtocolException {
 		if(loadedAllProps) {
 			return;
 		}
@@ -167,7 +171,7 @@ public class PropertyHelper {
 				properties.put(new WebdavProperty(prop.getNamespace(), prop.getName()), prop);
 			}
 		} catch (final OXException e) {
-		    throw e;
+		    throw WebdavProtocolException.Code.GENERAL_ERROR.create(url, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
 		}
 	}
 

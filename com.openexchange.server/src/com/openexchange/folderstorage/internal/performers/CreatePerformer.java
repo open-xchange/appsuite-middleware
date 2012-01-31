@@ -60,6 +60,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
@@ -83,6 +84,8 @@ public final class CreatePerformer extends AbstractPerformer {
     private static final boolean DEBUG_ENABLED = LOG.isDebugEnabled();
 
     private static final String CONTENT_TYPE_MAIL = MailContentType.getInstance().toString();
+
+    private static final String CONTENT_TYPE_INFOSTORE = InfostoreContentType.getInstance().toString();
 
     /**
      * Initializes a new {@link CreatePerformer}.
@@ -163,14 +166,15 @@ public final class CreatePerformer extends AbstractPerformer {
                     getUserInfo4Error(),
                     getContextInfo4Error());
             }
+            final String cts = toCreate.getContentType().toString();
             if ((FolderStorage.PUBLIC_ID.equals(parent.getID()) || PublicType.getInstance().equals(parent.getType())) && CONTENT_TYPE_MAIL.equals(
-                toCreate.getContentType().toString())) {
+                cts)) {
                 throw FolderExceptionErrorMessage.NO_PUBLIC_MAIL_FOLDER.create();
             }
             /*
              * Check for duplicates for OLOX-covered folders
              */
-            if (!"infostore".equals(toCreate.getContentType().toString())) {
+            if (!CONTENT_TYPE_INFOSTORE.equals(cts)) {
                 checkForDuplicate(toCreate.getName(), treeId, parentId, openedStorages);
             }
             /*
@@ -191,8 +195,8 @@ public final class CreatePerformer extends AbstractPerformer {
             if (!FolderStorage.REAL_TREE_ID.equals(toCreate.getTreeID())) {
                 final String duplicateId = DuplicateCleaner.cleanDuplicates(treeId, storageParameters, newId);
                 if (null != duplicateId) {
-                    // throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(storageParameters.getUser().getLocale()), treeId);
-                    return duplicateId;
+                    throw FolderExceptionErrorMessage.EQUAL_NAME.create(toCreate.getName(), parent.getLocalizedName(storageParameters.getUser().getLocale()), treeId);
+                    // return duplicateId;
                 }
             }
             /*

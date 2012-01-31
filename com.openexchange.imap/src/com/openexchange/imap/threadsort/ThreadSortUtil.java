@@ -49,13 +49,19 @@
 
 package com.openexchange.imap.threadsort;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TLongObjectMap;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
-import com.openexchange.tools.Collections.SmartIntArray;
+import com.openexchange.mail.utils.MailMessageComparator;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -85,23 +91,41 @@ public final class ThreadSortUtil {
      *            <code>&quot;&#042;&nbsp;THREAD&nbsp;(1&nbsp;(2)(3)(4)(5))(6)(7)(8)((9)(10)(11)(12)(13)(14)(15)(16)(17)(18)(19))&quot;</code>
      * @return A newly allocated array of <code>int</code> filled with message's sequence number
      */
-    public static int[] getSeqNumsFromThreadResponse(final String threadResponse) {
+    public static TIntList getSeqNumsFromThreadResponse(final String threadResponse) {
         final char[] chars = threadResponse.toCharArray();
-        final SmartIntArray sia = new SmartIntArray();
+        final TIntList list = new TIntArrayList(256);
         final StringBuilder sb = new StringBuilder(8);
         int i = 0;
         while (i < chars.length) {
             char c = chars[i++];
-            while (Character.isDigit(c)) {
+            if (isDigit(c)) {
                 sb.append(c);
-                c = chars[i++];
+                while (i < chars.length && isDigit((c = chars[i++]))) {
+                    sb.append(c);
+                }
             }
             if (sb.length() > 0) {
-                sia.append(Integer.parseInt(sb.toString()));
+                list.add(Integer.parseInt(sb.toString()));
                 sb.setLength(0);
             }
         }
-        return sia.toArray();
+        return list;
+    }
+
+    private static final char DIGIT_START = '\u0030';
+
+    private static final char DIGIT_END = '\u0039';
+
+    /**
+     * Determines if the specified character is a ISO-LATIN-1 digit.
+     * <p>
+     * '\u0030' through '\u0039', ISO-LATIN-1 digits ('0' through '9');
+     * 
+     * @param c The character to check for a digit
+     * @return <code>true</code> if character is a ISO-LATIN-1 digit; otherwise <code>false</code>
+     */
+    private static boolean isDigit(final char c) {
+        return c >= DIGIT_START && c <= DIGIT_END;
     }
 
     // private static final Pattern PATTERN_THREAD_RESP = Pattern.compile("[0-9]+");
@@ -252,6 +276,84 @@ public final class ThreadSortUtil {
             final List<ThreadSortMailMessage> children = tsmm.getChildMessages();
             toFlatList(children, flatList);
         }
+    }
+
+    /**
+     * Converts specified structured list to simplified structure.
+     * 
+     * @param structuredList The structured list to convert
+     * @param comparator The comparator to use to sort child messages
+     */
+    public static List<List<MailMessage>> toSimplifiedStructure(final List<ThreadSortMailMessage> structuredList, final MailMessageComparator comparator) {
+        final List<List<MailMessage>> retval = new ArrayList<List<MailMessage>>(structuredList.size());
+        for (final ThreadSortMailMessage root : structuredList) {
+            // Create flat list
+            final LinkedList<MailMessage> flatList = new LinkedList<MailMessage>();
+            flatList.add(root.getOriginalMessage());
+            toFlatList0(root.getChildMessages(), flatList);
+            // Sort list
+            Collections.sort(flatList, comparator);
+            retval.add(flatList);
+        }
+        return retval;
+    }
+
+    private static void toFlatList0(final List<ThreadSortMailMessage> structuredList, final List<MailMessage> flatList) {
+        if (null == structuredList || structuredList.isEmpty()) {
+            return;
+        }
+        for (final ThreadSortMailMessage tsmm : structuredList) {
+            // Add to list
+            flatList.add(tsmm.getOriginalMessage());
+            // Recursive invocation
+            toFlatList0(tsmm.getChildMessages(), flatList);
+        }
+    }
+
+    /**
+     * Generates a structured list from specified mails.
+     *
+     * @param threadList The thread list
+     * @param map The map providing mails by sequence number
+     * @return A structured list reflecting thread-order structure
+     */
+    public static List<ThreadSortMailMessage> toThreadSortStructure(final List<ThreadSortNode> threadList, final TLongObjectMap<MailMessage> map) {
+        final List<ThreadSortMailMessage> list = new ArrayList<ThreadSortMailMessage>(threadList.size());
+        for (final ThreadSortNode node : threadList) {
+            final MailMessage rootMail = map.get(node.msgNum);
+            rootMail.setThreadLevel(0);
+            final ThreadSortMailMessage tsmm = new ThreadSortMailMessage(rootMail);
+            list.add(tsmm);
+
+            final List<ThreadSortNode> subnodes = node.getChilds();
+            if (null != subnodes && !subnodes.isEmpty()) {
+                processSubnodes(subnodes, 1, tsmm, map);
+            }
+            
+        }
+        return list;
+    }
+
+    private static void processSubnodes(final List<ThreadSortNode> nodes, final int level, final ThreadSortMailMessage parent, final TLongObjectMap<MailMessage> map) {
+        for (final ThreadSortNode node : nodes) {
+            final ThreadSortMailMessage tsmm = tsmmFor(map.get(node.msgNum), level);
+            if (null != tsmm) {
+                parent.addChildMessage(tsmm);
+
+                final List<ThreadSortNode> subnodes = node.getChilds();
+                if (null != subnodes && !subnodes.isEmpty()) {
+                    processSubnodes(subnodes, level + 1, tsmm, map);
+                }
+            }
+        }
+    }
+
+    private static ThreadSortMailMessage tsmmFor(final MailMessage mail, final int level) {
+        if (null == mail) {
+            return null;
+        }
+        mail.setThreadLevel(level);
+        return new ThreadSortMailMessage(mail);
     }
 
     /**
