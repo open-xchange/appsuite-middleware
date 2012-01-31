@@ -50,6 +50,7 @@
 package com.openexchange.webdav.protocol;
 
 import org.apache.webdav.lib.WebdavException;
+
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -188,11 +189,11 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         }
     }
 
-    public static OXException generalError(final Throwable t, final WebdavPath url, final int status) {
+    public static WebdavProtocolException generalError(final Throwable t, final WebdavPath url, final int status) {
         return Code.GENERAL_ERROR.create(url, status, t);
     }
 
-    public static OXException generalError(final WebdavPath url, final int status) {
+    public static WebdavProtocolException generalError(final WebdavPath url, final int status) {
         return Code.GENERAL_ERROR.create(url, status);
     }
 

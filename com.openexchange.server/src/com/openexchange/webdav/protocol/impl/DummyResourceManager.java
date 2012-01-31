@@ -51,9 +51,10 @@ package com.openexchange.webdav.protocol.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
+
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -75,10 +76,7 @@ public final class DummyResourceManager implements WebdavFactory {
 			resolveCollection("/").create();
 		} catch (final WebdavProtocolException e) {
 			LOG.error("Can't resolve root", e);
-		} catch (final OXException e) {
-		    LOG.error("Can't resolve root", e);
         }
-
 	}
 
 	private static final Protocol PROTOCOL = new Protocol();

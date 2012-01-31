@@ -50,18 +50,17 @@
 package com.openexchange.webdav.protocol;
 
 import java.util.List;
-import com.openexchange.exception.OXException;
 
 public interface WebdavCollection extends WebdavResource, Iterable<WebdavResource>{
 
 	public static final int  INFINITY = -1;
 
-	WebdavResource resolveResource(WebdavPath subPath) throws OXException;
+	WebdavResource resolveResource(WebdavPath subPath) throws WebdavProtocolException;
 
-	WebdavCollection resolveCollection(WebdavPath subPath) throws OXException;
+	WebdavCollection resolveCollection(WebdavPath subPath) throws WebdavProtocolException;
 
-	List<WebdavResource> getChildren() throws OXException;
+	List<WebdavResource> getChildren() throws WebdavProtocolException;
 
-	Iterable<WebdavResource> toIterable(int depth) throws OXException;
+	Iterable<WebdavResource> toIterable(int depth) throws WebdavProtocolException;
 
 }

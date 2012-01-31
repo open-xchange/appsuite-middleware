@@ -50,14 +50,18 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import static com.openexchange.java.Autoboxing.I;
+
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
@@ -154,7 +158,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public boolean hasBody() throws OXException {
+    public boolean hasBody() throws WebdavProtocolException {
         try {
             loadMetadata();
         } catch (final OXException e) {
@@ -167,7 +171,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    protected List<WebdavProperty> internalGetAllProps() throws OXException {
+    protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
         try {
             return propertyHelper.getAllProps();
         } catch (final OXException e) {
@@ -179,7 +183,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws OXException {
+    protected WebdavProperty internalGetProperty(final String namespace, final String name) throws WebdavProtocolException {
         try {
             return propertyHelper.getProperty(namespace, name);
         } catch (final OXException e) {
@@ -216,7 +220,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void create() throws OXException {
+    public void create() throws WebdavProtocolException {
         if (exists) {
             throw WebdavProtocolException.Code.DIRECTORY_ALREADY_EXISTS.create(getUrl(),
                 HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -234,7 +238,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void delete() throws OXException {
+    public void delete() throws WebdavProtocolException {
         if (exists) {
             try {
                 lockHelper.deleteLocks();
@@ -259,7 +263,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public InputStream getBody() throws OXException {
+    public InputStream getBody() throws WebdavProtocolException {
         final ServerSession session = getSession();
         try {
             return database.getDocument(id, InfostoreFacade.CURRENT_VERSION, session.getContext(), UserStorage.getStorageUser(
@@ -278,19 +282,19 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public String getContentType() throws OXException {
+    public String getContentType() throws WebdavProtocolException {
         loadMetadata();
         return metadata.getFileMIMEType();
     }
 
     @Override
-    public Date getCreationDate() throws OXException {
+    public Date getCreationDate() throws WebdavProtocolException {
         loadMetadata();
         return metadata.getCreationDate();
     }
 
     @Override
-    public String getDisplayName() throws OXException {
+    public String getDisplayName() throws WebdavProtocolException {
         loadMetadata();
         return metadata.getFileName();
     }
@@ -317,19 +321,19 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public Date getLastModified() throws OXException {
+    public Date getLastModified() throws WebdavProtocolException {
         loadMetadata();
         return metadata.getLastModified();
     }
 
     @Override
-    public Long getLength() throws OXException {
+    public Long getLength() throws WebdavProtocolException {
         loadMetadata();
         return Long.valueOf(metadata.getFileSize());
     }
 
     @Override
-    public WebdavLock getLock(final String token) throws OXException {
+    public WebdavLock getLock(final String token) throws WebdavProtocolException {
         WebdavLock lock;
         try {
             lock = lockHelper.getLock(token);
@@ -346,14 +350,14 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public List<WebdavLock> getLocks() throws OXException {
+    public List<WebdavLock> getLocks() throws WebdavProtocolException {
         final List<WebdavLock> lockList = getOwnLocks();
         addParentLocks(lockList);
         return lockList;
     }
 
     @Override
-    public WebdavLock getOwnLock(final String token) throws OXException {
+    public WebdavLock getOwnLock(final String token) throws WebdavProtocolException {
         try {
             return injectOwner(lockHelper.getLock(token));
         } catch (final OXException e) {
@@ -365,7 +369,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public List<WebdavLock> getOwnLocks() throws OXException {
+    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
         try {
             return injectOwner(lockHelper.getAllLocks());
         } catch (final OXException e) {
@@ -376,7 +380,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    private WebdavLock injectOwner(final WebdavLock lock) throws OXException {
+    private WebdavLock injectOwner(final WebdavLock lock) throws WebdavProtocolException {
         if(lock.getOwner() == null || "".equals(lock.getOwner())) {
             loadMetadata();
             final int userId = metadata.getModifiedBy();
@@ -398,7 +402,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         return lock;
     }
 
-    private List<WebdavLock> injectOwner(final List<WebdavLock> allLocks) throws OXException {
+    private List<WebdavLock> injectOwner(final List<WebdavLock> allLocks) throws WebdavProtocolException {
         for (final WebdavLock webdavLock : allLocks) {
             injectOwner(webdavLock);
         }
@@ -416,7 +420,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void lock(final WebdavLock lock) throws OXException {
+    public void lock(final WebdavLock lock) throws WebdavProtocolException {
         try {
             if (!exists) {
                 new InfostoreLockNullResource(this, factory).lock(lock);
@@ -435,7 +439,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void unlock(final String token) throws OXException {
+    public void unlock(final String token) throws WebdavProtocolException {
         lockHelper.removeLock(token);
         try {
             lockHelper.dumpLocksToDB();
@@ -449,7 +453,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void save() throws OXException {
+    public void save() throws WebdavProtocolException {
         try {
             dumpMetadataToDB();
             if (propertyHelper.mustWrite()) {
@@ -522,7 +526,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     //
 
     @Override
-    public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
+    public WebdavResource move(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
         WebdavResource res;
         try {
             res = factory.resolveResource(dest);
@@ -584,7 +588,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws OXException {
+    public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
 
         try {
             final WebdavPath parent = dest.parent();
@@ -641,7 +645,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
 
     }
 
-    private void copyMetadata(final DocumentMetadataResource copy) throws OXException {
+    private void copyMetadata(final DocumentMetadataResource copy) throws WebdavProtocolException {
         loadMetadata();
         copy.metadata = new DocumentMetadataImpl(metadata);
         copy.metadata.setFilestoreLocation(null); // No file attachment in original version
@@ -650,20 +654,20 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         copy.setMetadata.addAll(Metadata.VALUES);
     }
 
-    private void copyProperties(final DocumentMetadataResource copy) throws OXException {
+    private void copyProperties(final DocumentMetadataResource copy) throws WebdavProtocolException {
         for (final WebdavProperty prop : internalGetAllProps()) {
             copy.putProperty(prop);
         }
     }
 
-    private void copyBody(final DocumentMetadataResource copy) throws OXException {
+    private void copyBody(final DocumentMetadataResource copy) throws WebdavProtocolException {
         final InputStream in = getBody();
         if (in != null) {
             copy.putBody(in);
         }
     }
 
-    private void loadMetadata() throws OXException {
+    private void loadMetadata() throws WebdavProtocolException {
         if (!exists) {
             return;
         }
@@ -714,7 +718,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void putBody(final InputStream body, final boolean guessSize) throws OXException {
+    public void putBody(final InputStream body, final boolean guessSize) throws WebdavProtocolException {
         try {
             if (!exists && !existsInDB) {
                 // CREATE WITH FILE
@@ -773,7 +777,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         }
     }
 
-    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws OXException, OXException, TransactionException {
+    private void dumpMetadataToDB(final InputStream fileData, final boolean guessSize) throws WebdavProtocolException, OXException, TransactionException {
         if ((exists || existsInDB) && !metadataChanged) {
             return;
         }
@@ -844,7 +848,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         metadataChanged = false;
     }
 
-    private void touch() throws OXException {
+    private void touch() throws WebdavProtocolException {
         try {
             if (!existsInDB && !exists) {
                 return;
@@ -866,11 +870,11 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
         metadata.setTitle(metadata.getFileName());
     }
 
-    private void dumpMetadataToDB() throws OXException, OXException, TransactionException {
+    private void dumpMetadataToDB() throws WebdavProtocolException, OXException, TransactionException {
         dumpMetadataToDB(null, false);
     }
 
-    private void deleteMetadata() throws OXException {
+    private void deleteMetadata() throws WebdavProtocolException {
         try {
             final ServerSession session = getSession();
             database.startTransaction();
@@ -901,7 +905,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public int getParentId() throws OXException {
+    public int getParentId() throws WebdavProtocolException {
         if (metadata == null) {
             loadMetadata();
         }
@@ -909,7 +913,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void removedParent() throws OXException {
+    public void removedParent() throws WebdavProtocolException {
         try {
             exists = false;
             factory.removed(this);
@@ -922,7 +926,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     @Override
-    public void transferLock(final WebdavLock lock) throws OXException {
+    public void transferLock(final WebdavLock lock) throws WebdavProtocolException {
         try {
             lockHelper.transferLock(lock);
         } catch (final OXException e) {

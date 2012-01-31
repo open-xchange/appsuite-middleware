@@ -55,7 +55,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -94,12 +96,12 @@ public abstract class LockHelper {
 		this.id = id;
 	}
 
-	public WebdavLock getLock(final String token) throws OXException {
+	public WebdavLock getLock(final String token) throws WebdavProtocolException {
 		loadLocks();
 		return locks.get(token);
 	}
 
-	public List<WebdavLock> getAllLocks() throws OXException {
+	public List<WebdavLock> getAllLocks() throws WebdavProtocolException {
 		loadLocks();
 		final List<WebdavLock> lockList = new ArrayList<WebdavLock>(locks.values());
 		final List<WebdavLock> notExpired = new ArrayList<WebdavLock>();
@@ -115,7 +117,7 @@ public abstract class LockHelper {
 		return notExpired;
 	}
 
-	public void addLock(final WebdavLock lock) throws OXException {
+	public void addLock(final WebdavLock lock) throws WebdavProtocolException {
 		try {
 			loadLocks();
 			if(lock.getToken()!= null && locks.containsKey(lock.getToken())) {
@@ -134,7 +136,7 @@ public abstract class LockHelper {
 
 	protected abstract void relock(WebdavLock lock) throws OXException;
 
-	protected abstract int saveLock(WebdavLock lock) throws OXException ;
+	protected abstract int saveLock(WebdavLock lock) throws OXException;
 
 	public void removeLock(final String token) {
 		locks.remove(token);
@@ -151,7 +153,7 @@ public abstract class LockHelper {
 	protected abstract WebdavLock toWebdavLock(Lock lock);
 	protected abstract Lock toLock(WebdavLock lock);
 
-	private synchronized void loadLocks() throws OXException {
+	private synchronized void loadLocks() throws WebdavProtocolException {
 		if(loadedLocks) {
 			return;
 		}
