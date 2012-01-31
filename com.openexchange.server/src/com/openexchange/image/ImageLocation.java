@@ -62,6 +62,8 @@ public final class ImageLocation {
 
     public static final String PROPERTY_REGISTRATION_NAME = "registrationName";
 
+    public static final String PROPERTY_ROUTE = "__route";
+
     /**
      * The builder for a {@link ImageLocation}.
      */

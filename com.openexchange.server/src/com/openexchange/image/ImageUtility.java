@@ -189,7 +189,8 @@ public final class ImageUtility {
         if (null != alias) {
             sb.append(alias);
         }
-        if (null != route) {
+        final Boolean addRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_ROUTE);
+        if (null != addRoute && addRoute.booleanValue() && null != route) {
             sb.append(";jsessionid=").append(route);
         }
         boolean first = true;
