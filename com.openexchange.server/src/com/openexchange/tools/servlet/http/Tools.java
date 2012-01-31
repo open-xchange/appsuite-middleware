@@ -134,19 +134,23 @@ public final class Tools {
         setETag(eTag, null, resp);
     }
 
+    private static final long MILLIS_WEEK = 604800000L;
+
+    private static final long MILLIS_YEAR = 56 * MILLIS_WEEK;
+
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
      *
      * @param eTag The ETag value
-     * @param expires The optional expires date, pass <code>null</code> to not set any expiry
+     * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
      * @param resp The HTTP servlet response to apply to
      */
     public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
         removeCachingHeader(resp);
         resp.setHeader("ETag", eTag);
         if (null == expires) {
-            resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
+            resp.setHeader(EXPIRES_KEY, Long.toString(System.currentTimeMillis() + MILLIS_YEAR));
         } else {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));

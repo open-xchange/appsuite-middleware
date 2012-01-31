@@ -99,7 +99,7 @@ public final class ContactImageDataSource implements ImageDataSource {
     @Override
     public String generateUrl(final ImageLocation imageLocation, final Session session) throws OXException {
         final StringBuilder sb = new StringBuilder(64);
-        ImageUtility.startImageUrl(imageLocation, session, this, true, false, sb);
+        ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
         final Contact contact = getContact(imageLocation, session);
         sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
         return sb.toString();
@@ -126,15 +126,17 @@ public final class ContactImageDataSource implements ImageDataSource {
     @Override
     public String getETag(final ImageLocation imageLocation, final Session session) throws OXException {
         final Contact contact = getContact(imageLocation, session);
-        final char delim = '#';
-        final StringBuilder builder = new StringBuilder(128);
-        builder.append(delim).append(imageLocation.getFolder());
-        builder.append(delim).append(imageLocation.getId());
-        builder.append(delim).append(session.getUserId());
-        builder.append(delim).append(session.getContextId());
-        builder.append(delim).append(contact.getLastModified().getTime());
-        builder.append(delim);
-        return ImageUtility.getMD5(builder.toString(), "hex");
+        return ImageUtility.getMD5(Long.toString(contact.getLastModified().getTime()), "hex");
+
+        // final char delim = '#';
+        // final StringBuilder builder = new StringBuilder(128);
+        // builder.append(delim).append(imageLocation.getFolder());
+        // builder.append(delim).append(imageLocation.getId());
+        // builder.append(delim).append(session.getUserId());
+        // builder.append(delim).append(session.getContextId());
+        // builder.append(delim).append(contact.getLastModified().getTime());
+        // builder.append(delim);
+        // return ImageUtility.getMD5(builder.toString(), "hex");
     }
 
     @Override

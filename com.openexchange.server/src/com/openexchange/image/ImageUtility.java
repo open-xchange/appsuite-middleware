@@ -152,7 +152,7 @@ public final class ImageUtility {
      * @param addRoute <code>true</code> to add AJP route; otherwise <code>false</code>
      * @param sb The string builder to write to
      */
-    public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final boolean addRoute, final StringBuilder sb) {
+    public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final StringBuilder sb) {
         final String prefix;
         final String route;
         {
@@ -190,8 +190,8 @@ public final class ImageUtility {
         if (null != alias) {
             sb.append(alias);
         }
-        final Boolean addRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_ROUTE);
-        if (null != addRoute && addRoute.booleanValue() && null != route) {
+        final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
+        if ((null == noRoute || !noRoute.booleanValue()) && null != route) {
             sb.append(";jsessionid=").append(route);
         }
         boolean first = true;
