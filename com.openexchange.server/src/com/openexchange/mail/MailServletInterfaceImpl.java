@@ -2036,7 +2036,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Handle update of permission or subscription
              */
             final String prepareFullname = prepareFullname(accountId, mailAccess.getFolderStorage().updateFolder(fullname, mailFolder));
-            postEvent(accountId, fullname, false);
+            postEvent(accountId, fullname, false, true);
             return prepareFullname;
         }
         /*
@@ -2045,7 +2045,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = mailFolder.getParentAccountId();
         initConnection(accountId);
         final String prepareFullname = prepareFullname(accountId, mailAccess.getFolderStorage().createFolder(mailFolder));
-        postEvent(accountId, mailFolder.getParentFullname(), false);
+        postEvent(accountId, mailFolder.getParentFullname(), false, true);
         return prepareFullname;
     }
 
