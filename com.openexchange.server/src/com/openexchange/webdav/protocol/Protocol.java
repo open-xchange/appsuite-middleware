@@ -52,8 +52,9 @@ package com.openexchange.webdav.protocol;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import org.jdom.Namespace;
-import com.openexchange.exception.OXException;
+
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.util.PropertySwitch;
 
@@ -81,7 +82,7 @@ public class Protocol {
 			this.namespace = namespace;
 		}
 
-		public Object doSwitch(final PropertySwitch sw) throws OXException {
+		public Object doSwitch(final PropertySwitch sw) throws WebdavProtocolException {
 			switch(id) {
 			case CREATIONDATE : return sw.creationDate();
 			case DISPLAYNAME : return sw.displayName();

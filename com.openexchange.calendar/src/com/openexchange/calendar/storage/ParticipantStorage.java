@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.contexts.Context;
 
 /**
@@ -90,10 +91,22 @@ public abstract class ParticipantStorage {
     }
 
     public static final ExternalUserParticipant[] extractExternal(Participant[] participants) {
+        return extractExternal(participants, null);
+    }
+    public static final ExternalUserParticipant[] extractExternal(Participant[] participants, ConfirmableParticipant[] confirmations) {
         List<ExternalUserParticipant> retval = new ArrayList<ExternalUserParticipant>();
         if (null != participants) {
             for (Participant participant : participants) {
                 if (participant instanceof ExternalUserParticipant) {
+                    ExternalUserParticipant external = (ExternalUserParticipant) participant;
+                    if (confirmations != null) {
+                        for (ConfirmableParticipant confirmation : confirmations) {
+                            if (external.getEmailAddress().equals(confirmation.getEmailAddress())) {
+                                external.setConfirm(confirmation.getConfirm());
+                                external.setMessage(confirmation.getMessage());
+                            }
+                        }
+                    }
                     retval.add((ExternalUserParticipant) participant);
                 }
             }

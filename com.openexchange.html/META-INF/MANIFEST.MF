@@ -27,5 +27,6 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.w3c.dom
-Export-Package: com.openexchange.html
+Export-Package: com.openexchange.html,
+ com.openexchange.html.tools
 Bundle-Activator: com.openexchange.html.osgi.HTMLServiceActivator

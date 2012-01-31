@@ -54,13 +54,13 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jdom.Document;
 import org.jdom.JDOMException;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.webdav.action.ifheader.IfHeader;
 import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.xml.jdom.JDOMParser;
 
@@ -68,23 +68,21 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
     private WebdavResource res;
     private WebdavResource dest;
     private final WebdavFactory factory;
-    private final Map<String, Object> userInfo = new HashMap<String, Object>();
+    private Map<String, Object> userInfo = new HashMap<String, Object>();
     private Document bodyDocument;
 
     public AbstractWebdavRequest(final WebdavFactory factory) {
         this.factory = factory;
     }
 
-    @Override
-    public WebdavResource getResource() throws OXException {
+    public WebdavResource getResource() throws WebdavProtocolException {
         if(res != null) {
             return res;
         }
         return res = factory.resolveResource(getUrl());
     }
 
-    @Override
-    public WebdavResource getDestination() throws OXException {
+    public WebdavResource getDestination() throws WebdavProtocolException {
         if(null == getDestinationUrl()) {
             return null;
         }
@@ -94,15 +92,13 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         return dest = factory.resolveResource(getDestinationUrl());
     }
 
-    @Override
-    public WebdavCollection getCollection() throws OXException {
+    public WebdavCollection getCollection() throws WebdavProtocolException {
         if(res != null && res.isCollection()) {
             return (WebdavCollection) res;
         }
         return (WebdavCollection) (res = factory.resolveCollection(getUrl()));
     }
 
-    @Override
     public Document getBodyAsDocument() throws JDOMException, IOException {
         if (bodyDocument != null) {
             return bodyDocument;
@@ -110,20 +106,14 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         return bodyDocument = ServerServiceRegistry.getInstance().getService(JDOMParser.class).parse(getBody());
     }
 
-    @Override
-    public IfHeader getIfHeader() throws OXException {
+    public IfHeader getIfHeader() throws IfHeaderParseException {
         final String ifHeader = getHeader("If");
         if(ifHeader == null) {
             return null;
         }
-        try {
-        	return new IfHeaderParser().parse(getHeader("If"));
-        } catch (IfHeaderParseException e) {
-        	throw new OXException(e);
-        }
+        return new IfHeaderParser().parse(getHeader("If"));
     }
 
-    @Override
     public int getDepth(final int def){
         final String depth = getHeader("depth");
         if(null == depth) {
@@ -132,12 +122,10 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         return "Infinity".equalsIgnoreCase(depth) ? WebdavCollection.INFINITY : Integer.parseInt(depth);
     }
 
-    @Override
     public WebdavFactory getFactory(){
         return factory;
     }
 
-    @Override
     public boolean hasBody() {
         if(getHeader("Content-Length") == null) {
             return false;
@@ -145,13 +133,12 @@ public abstract class AbstractWebdavRequest implements WebdavRequest {
         int length;
         try {
             length = Integer.parseInt(getHeader("Content-Length"));
-        } catch (final NumberFormatException e) {
+        } catch (NumberFormatException e) {
             length = -1;
         }
         return length > 0;
     }
 
-    @Override
     public Map<String, Object> getUserInfo() {
         return userInfo;
     }

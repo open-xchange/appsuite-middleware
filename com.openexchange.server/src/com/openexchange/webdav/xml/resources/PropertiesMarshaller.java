@@ -55,6 +55,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdom.Document;
@@ -62,12 +65,13 @@ import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import org.jdom.input.SAXBuilder;
-import com.openexchange.exception.OXException;
+
 import com.openexchange.webdav.action.behaviour.BehaviourLookup;
 import com.openexchange.webdav.protocol.Multistatus;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.protocol.util.Utils;
@@ -100,24 +104,28 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	}
 
 	@Override
-    public List<Element> marshal(final WebdavResource resource) throws OXException {
+	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException {
 		final Element response =  new Element("response",DAV_NS);
 		response.addContent(marshalHREF(resource.getUrl(), resource.getResourceType() != null)); //TODO: Fix the new bug here
-		final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
-		for(final int statusCode : multistatus.getStatusCodes()) {
-			for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
-				final Element propstat = new Element("propstat",DAV_NS);
-				final Element prop = new Element("prop", DAV_NS);
+		if (resource.exists()) {
+			final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
+			for(final int statusCode : multistatus.getStatusCodes()) {
+				for(final WebdavStatus<Iterable<WebdavProperty>> status : multistatus.toIterable(statusCode)) {
+					final Element propstat = new Element("propstat",DAV_NS);
+					final Element prop = new Element("prop", DAV_NS);
 
-				for(final WebdavProperty p : status.getAdditional()) {
-					if(p != null) {
-						prop.addContent(marshalProperty(p, resource.getProtocol()));
+					for(final WebdavProperty p : status.getAdditional()) {
+						if(p != null) {
+							prop.addContent(marshalProperty(p, resource.getProtocol()));
+						}
 					}
+					propstat.addContent(prop);
+					propstat.addContent(marshalStatus(statusCode));
+					response.addContent(propstat);
 				}
-				propstat.addContent(prop);
-				propstat.addContent(marshalStatus(statusCode));
-				response.addContent(propstat);
 			}
+		} else {
+			response.addContent(this.marshalStatus(HttpServletResponse.SC_NOT_FOUND));
 		}
 		return Arrays.asList(response);
 	}

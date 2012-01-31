@@ -9,6 +9,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
@@ -16,8 +17,8 @@ import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 public class CarddavActivator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(CarddavActivator.class);
-
-    private static final Class<?>[] NEEDED = new Class[]{FolderService.class, ConfigViewFactory.class};
+    
+    private static final Class<?>[] NEEDED = new Class[]{FolderService.class, ConfigViewFactory.class, UserService.class};
     private OSGiPropertyMixin mixin;
 
     @Override
@@ -30,13 +31,13 @@ public class CarddavActivator extends HousekeepingActivator {
         try {
             CardDAV.setServiceLookup(this);
             CarddavPerformer.setServices(this);
-
+            
             rememberTracker(new ServletRegistration(context, new CardDAV(), "/servlet/dav/carddav"));
-
+            
             CarddavPerformer performer = CarddavPerformer.getInstance();
             mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
-
+            
             registerService(PropertyMixin.class, new AddressbookHomeSet());
             registerService(PathRegistration.class, new PathRegistration("carddav"));
 
@@ -45,7 +46,7 @@ public class CarddavActivator extends HousekeepingActivator {
             LOG.error(t.getMessage(), t);
         }
     }
-
+    
     @Override
     protected void stopBundle() throws Exception {
         mixin.close();

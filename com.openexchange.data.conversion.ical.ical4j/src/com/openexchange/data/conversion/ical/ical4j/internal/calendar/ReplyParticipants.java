@@ -62,7 +62,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
-import com.openexchange.data.conversion.ical.ITipContainer;
+import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;

@@ -1,0 +1,4 @@
+opt/open-xchange/etc/caldav.properties
+opt/open-xchange/etc/contextSets/caldav.yml
+opt/open-xchange/etc/carddav.properties
+opt/open-xchange/etc/contextSets/carddav.yml

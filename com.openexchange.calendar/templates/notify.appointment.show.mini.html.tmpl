@@ -1,0 +1,29 @@
+		<div class="calendar-detail">
+            <div class="date">
+                <div class="interval">
+                    ${formatters.interval}
+                </div>
+                <div class="day">
+                    ${formatters.dateSpec}
+                </div>
+            </div>
+            <div class="title clear-title">
+                ${(mail.appointment.title!"")?html}
+            </div>
+            <div class="location">
+                ${(mail.appointment.location!"")?html}
+            </div>
+            <div class="note">
+                ${(mail.appointment.note!"")?html}
+            </div>
+        </div>
+		<div>
+	     	<div class="label">
+	            ${labels.detailsLabel}
+	        </div><span class="detail-label">${labels.showAsLabel}&nbsp;</span><span class="detail"><span class="shown_as_label ${labels.showAsClass}">${labels.showAs}</span></span><br>
+	        <span class="detail-label">${labels.createdLabel}&nbsp;</span><span class="detail"><span>${formatters.created}</span> <span>-</span> <span>${labels.creator}</span></span>
+	    </div>
+		<div class="justification">
+			${labels.justification!""}
+		</div>
+		

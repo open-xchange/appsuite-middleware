@@ -1,0 +1,24 @@
+====[       ${mail.appointment.title!""}       ]====
+
+${labels.timezoneInfo!""}
+
+${labels.whenLabel} ${formatters.dateSpec} ${formatters.interval}
+<#if mail.appointment.location??>
+${labels.whereLabel} ${mail.appointment.location!""}
+</#if>
+
+
+<#if mail.appointment.note??>
+====================================
+${mail.appointment.note!""}
+====================================
+</#if>
+
+
+== ${labels.detailsLabel} ==
+
+${labels.showAsLabel} ${labels.showAs}
+${labels.createdLabel} ${formatters.created} - ${formatters.created}
+
+
+${labels.justification!""}

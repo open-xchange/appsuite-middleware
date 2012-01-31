@@ -49,8 +49,8 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavMoveAction extends WebdavStructureAction {
 
@@ -58,9 +58,8 @@ public class WebdavMoveAction extends WebdavStructureAction {
 		super(factory);
 	}
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res)
+			throws WebdavProtocolException {
 		checkOverwrite(req);
 		checkSame(req);
 		final int rc = chooseReturnCode(req);

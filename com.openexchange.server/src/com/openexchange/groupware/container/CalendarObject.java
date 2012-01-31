@@ -58,1270 +58,1505 @@ import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
  * CalendarObject
- *
+ * 
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  */
 public abstract class CalendarObject extends CommonObject {
 
-    public static final int TITLE = 200;
+	public static final int TITLE = 200;
 
-    public static final int START_DATE = 201;
+	public static final int START_DATE = 201;
 
-    public static final int END_DATE = 202;
+	public static final int END_DATE = 202;
 
-    public static final int NOTE = 203;
+	public static final int NOTE = 203;
 
-    public static final int ALARM = 204;
+	public static final int ALARM = 204;
 
-    public static final int RECURRENCE_ID = 206;
+	public static final int RECURRENCE_ID = 206;
 
-    public static final int RECURRENCE_POSITION = 207;
+	public static final int RECURRENCE_POSITION = 207;
 
-    public static final int RECURRENCE_DATE_POSITION = 208;
+	public static final int RECURRENCE_DATE_POSITION = 208;
 
-    public static final int RECURRENCE_TYPE = 209;
+	public static final int RECURRENCE_TYPE = 209;
 
-    public static final int CHANGE_EXCEPTIONS = 210;
+	public static final int CHANGE_EXCEPTIONS = 210;
 
-    public static final int DELETE_EXCEPTIONS = 211;
+	public static final int DELETE_EXCEPTIONS = 211;
 
-    public static final int DAYS = 212;
+	public static final int DAYS = 212;
 
-    public static final int DAY_IN_MONTH = 213;
+	public static final int DAY_IN_MONTH = 213;
 
-    public static final int MONTH = 214;
+	public static final int MONTH = 214;
 
-    public static final int INTERVAL = 215;
+	public static final int INTERVAL = 215;
 
-    public static final int UNTIL = 216;
+	public static final int UNTIL = 216;
 
-    public static final int NOTIFICATION = 217;
+	public static final int NOTIFICATION = 217;
 
-    public static final int RECURRENCE_CALCULATOR = 218;
+	public static final int RECURRENCE_CALCULATOR = 218;
 
-    public static final int PARTICIPANTS = 220;
+	public static final int PARTICIPANTS = 220;
 
-    public static final int USERS = 221;
+	public static final int USERS = 221;
 
-    /**
-     * Attribute number indicating the times an object in a recurrence has to occur.
-     */
-    public static final int RECURRENCE_COUNT = 222;
+	/**
+	 * Attribute number indicating the times an object in a recurrence has to
+	 * occur.
+	 */
+	public static final int RECURRENCE_COUNT = 222;
 
-    public static final int UID = 223;
+	public static final int UID = 223;
 
-    public static final int ORGANIZER = 224;
+	public static final int ORGANIZER = 224;
 
-    public static final int SEQUENCE = 225;
+	public static final int SEQUENCE = 225;
 
-    public static final int CONFIRMATIONS = 226;
+	public static final int CONFIRMATIONS = 226;
+	
+	public static final int ORGANIZER_ID = 227;
+	
+	public static final int PRINCIPAL = 228;
+	
+	public static final int PRINCIPAL_ID = 229;
 
-    public static final int NONE = 0;
+	public static final int NONE = 0;
 
-    public static final int ACCEPT = 1;
+	public static final int ACCEPT = 1;
 
-    public static final int DECLINE = 2;
+	public static final int DECLINE = 2;
 
-    public static final int TENTATIVE = 3;
+	public static final int TENTATIVE = 3;
 
-    public static final int SUNDAY = 1;
+	public static final int SUNDAY = 1;
 
-    public static final int MONDAY = 2;
+	public static final int MONDAY = 2;
 
-    public static final int TUESDAY = 4;
+	public static final int TUESDAY = 4;
 
-    public static final int WEDNESDAY = 8;
+	public static final int WEDNESDAY = 8;
 
-    public static final int THURSDAY = 16;
+	public static final int THURSDAY = 16;
 
-    public static final int FRIDAY = 32;
+	public static final int FRIDAY = 32;
 
-    public static final int SATURDAY = 64;
+	public static final int SATURDAY = 64;
 
-    public static final int DAY = 127;
+	public static final int DAY = 127;
 
-    public static final int WEEKDAY = 62;
+	public static final int WEEKDAY = 62;
 
-    public static final int WEEKENDDAY = 65;
+	public static final int WEEKENDDAY = 65;
 
-    public static final int NO_RECURRENCE = 0;
+	public static final int NO_RECURRENCE = 0;
 
-    public static final int DAILY = 1;
+	public static final int DAILY = 1;
 
-    public static final int WEEKLY = 2;
+	public static final int WEEKLY = 2;
 
-    public static final int MONTHLY = 3;
+	public static final int MONTHLY = 3;
 
-    public static final int YEARLY = 4;
+	public static final int YEARLY = 4;
 
-    protected Participant participants[];
+	protected Participant participants[];
 
-    protected UserParticipant[] users;
+	protected UserParticipant[] users;
 
-    protected ConfirmableParticipant[] confirmations;
+	protected ConfirmableParticipant[] confirmations;
 
-    protected String title;
+	protected String title;
 
-    protected Date start_date;
+	protected Date start_date;
 
-    protected Date end_date;
+	protected Date end_date;
 
-    protected String note;
+	protected String note;
 
-    protected int recurrence_id;
+	protected int recurrence_id;
 
-    protected int recurrence_position;
+	protected int recurrence_position;
 
-    protected Date recurrence_date_position;
+	protected Date recurrence_date_position;
 
-    protected int recurrence_type = NO_RECURRENCE;
+	protected int recurrence_type = NO_RECURRENCE;
 
-    protected Date[] change_exceptions;
+	protected Date[] change_exceptions;
 
-    protected Date[] delete_exceptions;
+	protected Date[] delete_exceptions;
 
-    protected int days;
+	protected int days;
 
-    protected int day_in_month;
+	protected int day_in_month;
 
-    protected int month;
+	protected int month;
 
-    protected int interval;
+	protected int interval;
 
-    protected Date until;
+	protected Date until;
 
-    protected boolean notification;
+	protected boolean notification;
 
-    protected int recurrence_calculator;
+	protected int recurrence_calculator;
 
-    protected boolean alarmFlag;
+	protected boolean alarmFlag;
 
-    protected int occurrence;
+	protected int occurrence;
 
-    /**
-     * The end of a recurrence can be defined either through the until date or through this count value. If this count value is used the
-     * object must occur count times until the recurrence ends.
-     */
-    protected int recurrence_count;
+	/**
+	 * The end of a recurrence can be defined either through the until date or
+	 * through this count value. If this count value is used the object must
+	 * occur count times until the recurrence ends.
+	 */
+	protected int recurrence_count;
 
-    protected int confirm;
+	protected int confirm;
 
-    protected String confirmMessage;
+	protected String confirmMessage;
 
-    protected String uid;
+	protected String uid;
 
-    protected String organizer;
+	protected String organizer;
 
-    protected int sequence;
+	protected int sequence;
 
-    protected boolean b_title;
+    protected int organizerId;
 
-    protected boolean b_start_date;
+    protected String principal;
 
-    protected boolean b_end_date;
+    protected int principalId;
 
-    protected boolean b_note;
+	protected boolean b_title;
 
-    protected boolean b_recurrence_id;
+	protected boolean b_start_date;
 
-    protected boolean b_recurrence_position;
+	protected boolean b_end_date;
 
-    protected boolean b_recurrence_date_position;
+	protected boolean b_note;
 
-    /**
-     * Indicates that the attribute <code>recurrence_count</code> has been set or is empty.
-     */
-    protected boolean b_recurrence_count;
+	protected boolean b_recurrence_id;
 
-    protected boolean b_change_exceptions;
+	protected boolean b_recurrence_position;
 
-    protected boolean b_delete_exceptions;
+	protected boolean b_recurrence_date_position;
 
-    protected boolean b_days;
+	/**
+	 * Indicates that the attribute <code>recurrence_count</code> has been set
+	 * or is empty.
+	 */
+	protected boolean b_recurrence_count;
 
-    protected boolean b_day_in_month;
+	protected boolean b_change_exceptions;
 
-    protected boolean b_month;
+	protected boolean b_delete_exceptions;
 
-    protected boolean b_interval;
+	protected boolean b_days;
 
-    protected boolean b_recurrence_type;
+	protected boolean b_day_in_month;
 
-    protected boolean b_until;
+	protected boolean b_month;
 
-    protected boolean b_notification;
+	protected boolean b_interval;
 
-    protected boolean b_participants;
+	protected boolean b_recurrence_type;
 
-    protected boolean b_users;
+	protected boolean b_until;
 
-    protected boolean bConfirmations;
+	protected boolean b_notification;
 
-    protected boolean b_confirm;
+	protected boolean b_participants;
 
-    protected boolean b_confirmMessage;
+	protected boolean b_users;
 
-    protected boolean b_occurrence;
+	protected boolean bConfirmations;
 
-    protected boolean b_uid;
+	protected boolean b_confirm;
 
-    protected boolean b_organizer;
+	protected boolean b_confirmMessage;
 
-    protected boolean b_sequence;
+	protected boolean b_occurrence;
 
-    // GET METHODS
-    public String getTitle() {
-        return title;
+	protected boolean b_uid;
+
+	protected boolean b_organizer;
+
+	protected boolean b_sequence;
+
+    protected boolean b_organizerId;
+
+    protected boolean b_principal;
+
+    protected boolean b_principalId;
+
+	// GET METHODS
+	public String getTitle() {
+		return title;
+	}
+
+	public Date getStartDate() {
+		return start_date;
+	}
+
+	public Date getEndDate() {
+		return end_date;
+	}
+
+	public String getNote() {
+		return note;
+	}
+
+	public int getRecurrenceID() {
+		return recurrence_id;
+	}
+
+	public int getRecurrencePosition() {
+		return recurrence_position;
+	}
+
+	public Date getRecurrenceDatePosition() {
+		return recurrence_date_position;
+	}
+
+	public int getRecurrenceType() {
+		return recurrence_type;
+	}
+
+	public Date[] getChangeException() {
+		return change_exceptions;
+	}
+
+	public Date[] getDeleteException() {
+		return delete_exceptions;
+	}
+
+	public int getDays() {
+		return days;
+	}
+
+	public int getDayInMonth() {
+		return day_in_month;
+	}
+
+	public int getMonth() {
+		return month;
+	}
+
+	public int getInterval() {
+		return interval;
+	}
+
+	public Date getUntil() {
+		return until;
+	}
+
+	public boolean getNotification() {
+		return notification;
+	}
+
+	public int getRecurrenceCalculator() {
+		return recurrence_calculator;
+	}
+
+	public void setRecurrenceCalculator(final int recurrence_calculator) {
+		this.recurrence_calculator = recurrence_calculator;
+	}
+
+	public int getConfirm() {
+		return confirm;
+	}
+
+	public String getConfirmMessage() {
+		return confirmMessage;
+	}
+
+	public boolean getAlarmFlag() {
+		return alarmFlag;
+	}
+
+	public int getOccurrence() {
+		return occurrence;
+	}
+
+	public String getUid() {
+		return uid;
+	}
+
+	public String getOrganizer() {
+		return organizer;
+	}
+
+	public int getSequence() {
+		return this.sequence;
+	}
+
+    public int getOrganizerId() {
+        return this.organizerId;
     }
 
-    public Date getStartDate() {
-        return start_date;
+    public String getPrincipal() {
+        return this.principal;
     }
 
-    public Date getEndDate() {
-        return end_date;
+    public int getPrincipalId() {
+        return this.principalId;
     }
 
-    public String getNote() {
-        return note;
+	// SET METHODS
+	public void setTitle(final String title) {
+		this.title = title;
+		b_title = true;
+	}
+
+	public void setStartDate(final Date start_date) {
+		this.start_date = start_date;
+		b_start_date = true;
+	}
+
+	public void setEndDate(final Date end_date) {
+		this.end_date = end_date;
+		b_end_date = true;
+	}
+
+	public void setNote(final String note) {
+		this.note = note;
+		b_note = true;
+	}
+
+	public void setRecurrenceID(final int recurrence_id) {
+		this.recurrence_id = recurrence_id;
+		b_recurrence_id = true;
+	}
+
+	public void setRecurrencePosition(final int recurrence_position) {
+		this.recurrence_position = recurrence_position;
+		b_recurrence_position = true;
+	}
+
+	public void setRecurrenceDatePosition(final Date recurrence_date_position) {
+		this.recurrence_date_position = recurrence_date_position;
+		b_recurrence_date_position = true;
+	}
+
+	public void setRecurrenceType(final int recurrence_type) {
+		this.recurrence_type = recurrence_type;
+		b_recurrence_type = true;
+	}
+
+	public void setChangeExceptions(final Date[] change_exceptions) {
+		this.change_exceptions = change_exceptions;
+		b_change_exceptions = true;
+	}
+
+	public void setChangeExceptions(List<? extends Date> change_exceptions) {
+		this.change_exceptions = change_exceptions
+				.toArray(new Date[change_exceptions.size()]);
+		b_change_exceptions = true;
+	}
+
+	public void addChangeException(final Date change_exception) {
+		if (change_exceptions == null) {
+			setChangeExceptions(new Date[] { change_exception });
+		} else {
+			final Date[] tmp = change_exceptions;
+			change_exceptions = new Date[tmp.length + 1];
+			System.arraycopy(tmp, 0, change_exceptions, 0, tmp.length);
+			change_exceptions[change_exceptions.length - 1] = change_exception;
+		}
+	}
+
+	public void setDeleteExceptions(final Date[] delete_exceptions) {
+		this.delete_exceptions = delete_exceptions;
+		b_delete_exceptions = true;
+	}
+
+	public void setDeleteExceptions(List<? extends Date> delete_exceptions) {
+		this.delete_exceptions = delete_exceptions
+				.toArray(new Date[delete_exceptions.size()]);
+		b_delete_exceptions = true;
+	}
+
+	public void addDeleteException(final Date delete_exception) {
+		if (delete_exceptions == null) {
+			setDeleteExceptions(new Date[] { delete_exception });
+		} else {
+			final Date[] tmp = delete_exceptions;
+			delete_exceptions = new Date[tmp.length + 1];
+			System.arraycopy(tmp, 0, delete_exceptions, 0, tmp.length);
+			delete_exceptions[delete_exceptions.length - 1] = delete_exception;
+		}
+	}
+
+	public void setDays(final int days) {
+		this.days = days;
+		b_days = true;
+	}
+
+	public void setDayInMonth(final int day_in_month) {
+		this.day_in_month = day_in_month;
+		b_day_in_month = true;
+	}
+
+	public void setMonth(final int month) {
+		this.month = month;
+		b_month = true;
+	}
+
+	public void setInterval(final int interval) {
+		this.interval = interval;
+		b_interval = true;
+	}
+
+	public void setUntil(final Date until) {
+		this.until = until;
+		b_until = true;
+	}
+
+	public void setNotification(final boolean notification) {
+		this.notification = notification;
+		b_notification = true;
+	}
+
+	public void setConfirm(final int confirm) {
+		this.confirm = confirm;
+		b_confirm = true;
+	}
+
+	public void setConfirmMessage(final String confirmMessage) {
+		this.confirmMessage = confirmMessage;
+		b_confirmMessage = true;
+	}
+
+	public void setAlarmFlag(final boolean alarmFlag) {
+		this.alarmFlag = alarmFlag;
+	}
+
+	public void setOccurrence(final int occurrence) {
+		this.occurrence = occurrence;
+		b_occurrence = true;
+	}
+
+	public void setUid(String uid) {
+		this.uid = uid;
+		b_uid = true;
+	}
+
+	public void setOrganizer(String organizer) {
+		this.organizer = organizer;
+		b_organizer = true;
+	}
+
+	public void setSequence(int sequence) {
+		this.sequence = sequence;
+		b_sequence = true;
+	}
+
+    public void setOrganizerId(int organizerId) {
+        this.organizerId = organizerId;
+        b_organizerId = true;
     }
 
-    public int getRecurrenceID() {
-        return recurrence_id;
+    public void setPrincipal(String principal) {
+        this.principal = principal;
+        b_principal = true;
     }
 
-    public int getRecurrencePosition() {
-        return recurrence_position;
+    public void setPrincipalId(int principalId) {
+        this.principalId = principalId;
+        b_principalId = true;
     }
 
-    public Date getRecurrenceDatePosition() {
-        return recurrence_date_position;
+	// REMOVE METHODS
+	public void removeTitle() {
+		title = null;
+		b_title = false;
+	}
+
+	public void removeStartDate() {
+		start_date = null;
+		b_start_date = false;
+	}
+
+	public void removeEndDate() {
+		end_date = null;
+		b_end_date = false;
+	}
+
+	public void removeNote() {
+		note = null;
+		b_note = false;
+	}
+
+	public void removeRecurrenceID() {
+		recurrence_id = 0;
+		b_recurrence_id = false;
+	}
+
+	public void removeRecurrencePosition() {
+		recurrence_position = 0;
+		b_recurrence_position = false;
+	}
+
+	public void removeRecurrenceDatePosition() {
+		recurrence_date_position = null;
+		b_recurrence_date_position = false;
+	}
+
+	public void removeRecurrenceType() {
+		recurrence_type = 0;
+		b_recurrence_type = false;
+	}
+
+	public void removeChangeExceptions() {
+		change_exceptions = null;
+		b_change_exceptions = false;
+	}
+
+	public void removeDeleteExceptions() {
+		delete_exceptions = null;
+		b_delete_exceptions = false;
+	}
+
+	public void removeDays() {
+		days = 0;
+		b_days = false;
+	}
+
+	public void removeDayInMonth() {
+		day_in_month = 0;
+		b_day_in_month = false;
+	}
+
+	public void removeMonth() {
+		month = 0;
+		b_month = false;
+	}
+
+	public void removeInterval() {
+		interval = 0;
+		b_interval = false;
+	}
+
+	public void removeUntil() {
+		until = null;
+		b_until = false;
+	}
+
+	public void removeNotification() {
+		notification = false;
+		b_notification = false;
+	}
+
+	public void removeConfirm() {
+		confirm = 0;
+		b_confirm = false;
+	}
+
+	public void removeConfirmMessage() {
+		confirmMessage = null;
+		b_confirmMessage = false;
+	}
+
+	public void removeOccurrence() {
+		occurrence = 0;
+		b_occurrence = false;
+	}
+
+	public void removeUid() {
+		uid = null;
+		b_uid = false;
+	}
+
+	public void removeOrganizer() {
+		organizer = null;
+		b_organizer = false;
+	}
+
+	public void removeSequence() {
+		sequence = 0;
+		b_sequence = false;
+	}
+
+    public void removeOrganizerId() {
+        organizerId = 0;
+        b_organizerId = false;
     }
 
-    public int getRecurrenceType() {
-        return recurrence_type;
+    public void removePrincipal() {
+        principal = null;
+        b_principal = false;
     }
 
-    public Date[] getChangeException() {
-        return change_exceptions;
+    public void removePrincipalId() {
+        principalId = 0;
+        b_principalId = false;
     }
 
-    public Date[] getDeleteException() {
-        return delete_exceptions;
+	// CONTAINS METHODS
+	public boolean containsTitle() {
+		return b_title;
+	}
+
+	public boolean containsStartDate() {
+		return b_start_date;
+	}
+
+	public boolean containsEndDate() {
+		return b_end_date;
+	}
+
+	public boolean containsNote() {
+		return b_note;
+	}
+
+	public boolean containsRecurrenceID() {
+		return b_recurrence_id;
+	}
+
+	public boolean containsRecurrencePosition() {
+		return b_recurrence_position;
+	}
+
+	public boolean containsRecurrenceDatePosition() {
+		return b_recurrence_date_position;
+	}
+
+	public boolean containsRecurrenceType() {
+		return b_recurrence_type;
+	}
+
+	public boolean containsChangeExceptions() {
+		return b_change_exceptions;
+	}
+
+	public boolean containsDeleteExceptions() {
+		return b_delete_exceptions;
+	}
+
+	public boolean containsDays() {
+		return b_days;
+	}
+
+	public boolean containsDayInMonth() {
+		return b_day_in_month;
+	}
+
+	public boolean containsMonth() {
+		return b_month;
+	}
+
+	public boolean containsInterval() {
+		return b_interval;
+	}
+
+	public boolean containsUntil() {
+		return b_until;
+	}
+
+	public boolean containsNotification() {
+		return b_notification;
+	}
+
+	public boolean containsConfirm() {
+		return b_confirm;
+	}
+
+	public boolean containsConfirmMessage() {
+		return b_confirmMessage;
+	}
+
+	public boolean containsOccurrence() {
+		return b_occurrence;
+	}
+
+	public void setParticipants(final Participant[] participants) {
+		this.participants = participants;
+		b_participants = true;
+	}
+
+	public boolean containsUid() {
+		return b_uid;
+	}
+
+	public boolean containsOrganizer() {
+		return b_organizer;
+	}
+
+	public boolean containsSequence() {
+		return b_sequence;
+	}
+
+    public boolean containsOrganizerId() {
+        return b_organizerId;
     }
 
-    public int getDays() {
-        return days;
+    public boolean containsPrincipal() {
+        return b_principal;
     }
 
-    public int getDayInMonth() {
-        return day_in_month;
+    public boolean containsPrincipalId() {
+        return b_principalId;
     }
 
-    public int getMonth() {
-        return month;
-    }
+	public void setParticipants(final List<? extends Participant> participants) {
+		this.participants = participants.toArray(new Participant[participants
+				.size()]);
+		b_participants = true;
+	}
 
-    public int getInterval() {
-        return interval;
-    }
+	public Participant[] getParticipants() {
+		return participants;
+	}
 
-    public Date getUntil() {
-        return until;
-    }
+	public void removeParticipants() {
+		participants = null;
+		b_participants = false;
+	}
 
-    public boolean getNotification() {
-        return notification;
-    }
+	public boolean containsParticipants() {
+		return b_participants;
+	}
 
-    public int getRecurrenceCalculator() {
-        return recurrence_calculator;
-    }
+	public void addParticipant(final Participant p) {
+		if (participants == null) {
+			setParticipants(new Participant[] { p });
+		} else {
+			final int newLength = participants.length + 1;
+			final Participant[] tmp = participants;
+			participants = new Participant[newLength];
+			System.arraycopy(tmp, 0, participants, 0, tmp.length);
+			participants[newLength - 1] = p;
+		}
+	}
 
-    public void setRecurrenceCalculator(final int recurrence_calculator) {
-        this.recurrence_calculator = recurrence_calculator;
-    }
+	public void setUsers(final UserParticipant[] users) {
+		this.users = users;
+		b_users = true;
+	}
 
-    public int getConfirm() {
-        return confirm;
-    }
+	public void setUsers(final List<UserParticipant> users) {
+		this.users = users.toArray(new UserParticipant[users.size()]);
+		b_users = true;
+	}
 
-    public String getConfirmMessage() {
-        return confirmMessage;
-    }
+	public UserParticipant[] getUsers() {
+		return users;
+	}
 
-    public boolean getAlarmFlag() {
-        return alarmFlag;
-    }
+	public void removeUsers() {
+		users = null;
+		b_users = false;
+	}
 
-    public int getOccurrence() {
-        return occurrence;
-    }
+	public boolean containsUserParticipants() {
+		return b_users;
+	}
 
-    public String getUid() {
-        return uid;
-    }
+	public ConfirmableParticipant[] getConfirmations() {
+		return confirmations;
+	}
 
-    public String getOrganizer() {
-        return organizer;
-    }
+	public void setConfirmations(ConfirmableParticipant[] confirmations) {
+		this.confirmations = confirmations;
+		bConfirmations = true;
+	}
+	
+	public void removeConfirmations() {
+		this.confirmations = null;
+		bConfirmations = false;
+	}
 
-    public int getSequence() {
-        return this.sequence;
-    }
+	public void setConfirmations(List<ConfirmableParticipant> value) {
+		setConfirmations(value
+				.toArray(new ConfirmableParticipant[value.size()]));
+	}
 
-    // SET METHODS
-    public void setTitle(final String title) {
-        this.title = title;
-        b_title = true;
-    }
+	public void removeConfigurations() {
+		this.confirmations = null;
+		bConfirmations = false;
+	}
 
-    public void setStartDate(final Date start_date) {
-        this.start_date = start_date;
-        b_start_date = true;
-    }
+	public boolean containsConfirmations() {
+		return bConfirmations;
+	}
 
-    public void setEndDate(final Date end_date) {
-        this.end_date = end_date;
-        b_end_date = true;
-    }
+	@Override
+	public void reset() {
+		super.reset();
 
-    public void setNote(final String note) {
-        this.note = note;
-        b_note = true;
-    }
+		title = null;
+		start_date = null;
+		end_date = null;
+		recurrence_id = 0;
+		recurrence_position = 0;
+		recurrence_date_position = null;
+		change_exceptions = null;
+		delete_exceptions = null;
+		days = 0;
+		day_in_month = 0;
+		month = 0;
+		until = null;
+		recurrence_count = 0;
+		notification = false;
+		participants = null;
+		users = null;
+		confirmations = null;
+		occurrence = 0;
+		uid = null;
+		organizer = null;
+		sequence = 0;
+		organizerId = 0;
+		principal = null;
+		principalId = 0;
 
-    public void setRecurrenceID(final int recurrence_id) {
-        this.recurrence_id = recurrence_id;
-        b_recurrence_id = true;
-    }
+		b_title = false;
+		b_start_date = false;
+		b_end_date = false;
+		b_recurrence_id = false;
+		b_recurrence_position = false;
+		b_recurrence_date_position = false;
+		b_change_exceptions = false;
+		b_delete_exceptions = false;
+		b_days = false;
+		b_day_in_month = false;
+		b_month = false;
+		b_until = false;
+		b_recurrence_count = false;
+		b_notification = false;
+		b_participants = false;
+		b_users = false;
+		b_occurrence = false;
+		b_uid = false;
+		b_organizer = false;
+		b_sequence = false;
+		b_organizerId = false;
+		b_principal = false;
+		b_principalId = false;
+	}
 
-    public void setRecurrencePosition(final int recurrence_position) {
-        this.recurrence_position = recurrence_position;
-        b_recurrence_position = true;
-    }
+	/**
+	 * @return the recurrence count.
+	 */
+	public int getRecurrenceCount() {
+		return recurrence_count;
+	}
 
-    public void setRecurrenceDatePosition(final Date recurrence_date_position) {
-        this.recurrence_date_position = recurrence_date_position;
-        b_recurrence_date_position = true;
-    }
+	/**
+	 * @param recurrenceCount
+	 *            the recurrence count to set.
+	 */
+	public void setRecurrenceCount(final int recurrenceCount) {
+		recurrence_count = recurrenceCount;
+		b_recurrence_count = true;
+	}
 
-    public void setRecurrenceType(final int recurrence_type) {
-        this.recurrence_type = recurrence_type;
-        b_recurrence_type = true;
-    }
+	/**
+	 * Removes the value of the recurrence count.
+	 */
+	public void removeRecurrenceCount() {
+		recurrence_count = 0;
+		b_recurrence_count = false;
+	}
 
-    public void setChangeExceptions(final Date[] change_exceptions) {
-        this.change_exceptions = change_exceptions;
-        b_change_exceptions = true;
-    }
+	/**
+	 * @return if the attribute <code>recurrence_count</code> has been set or
+	 *         not.
+	 */
+	public boolean containsRecurrenceCount() {
+		return b_recurrence_count;
+	}
 
-    public void addChangeException(final Date change_exception) {
-        if (change_exceptions == null) {
-            setChangeExceptions(new Date[] { change_exception });
-        } else {
-            final Date[] tmp = change_exceptions;
-            change_exceptions = new Date[tmp.length + 1];
-            System.arraycopy(tmp, 0, change_exceptions, 0, tmp.length);
-            change_exceptions[change_exceptions.length - 1] = change_exception;
+	/*-
+	 * ----------------- Recurrence Diagnosis -----------------
+	 */
+
+	/**
+	 * Tests if this event is either a recurring event or a part of a recurring
+	 * event (change exception).
+	 * <p>
+	 * This test checks if recurrence ID is different to zero.
+	 * 
+	 * @return <code>true</code> if this event is either a recurring event or a
+	 *         part of a recurring event (change exception); otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isPartOfSeries() {
+		return (getRecurrenceID() != 0);
+	}
+
+	/**
+	 * Tests if this event denotes a specific occurrence within a recurring
+	 * event.
+	 * 
+	 * @return <code>true</code> if this event denotes a specific occurrence
+	 *         within a recurring event; otherwise <code>false</code>
+	 */
+	public boolean isSpecificOcurrence() {
+		return isException();
+	}
+
+	/**
+	 * Tests if this event denotes a change exception.
+	 * 
+	 * @return <code>true</code> if this event denotes a change exception;
+	 *         otherwise <code>false</code>
+	 */
+	public boolean isException() {
+		return isPartOfSeries()
+				&& ((getRecurrencePosition() != 0) || (getRecurrenceDatePosition() != null));
+	}
+
+	/**
+	 * Tests if this event denotes a recurring event (and <b>not</b> a change
+	 * exception).
+	 * 
+	 * @return <code>true</code> if this event denotes a recurring event (and
+	 *         <b>not</b> a change exception); otherwise <code>false</code>
+	 */
+	public boolean isMaster() {
+		return (getRecurrenceID() == getObjectID()) && !isSpecificOcurrence();
+	}
+
+	/**
+	 * Tests if this event is neither a recurring event nor a part of a
+	 * recurring event (change exception).
+	 * <p>
+	 * This test checks if recurrence ID is equal to zero.
+	 * 
+	 * @return <code>true</code> if this event is a single event; otherwise
+	 *         <code>false</code>
+	 */
+	public boolean isSingle() {
+		return !isPartOfSeries();
+	}
+
+	@Override
+	public Set<Integer> findDifferingFields(final DataObject dataObject) {
+
+		final Set<Integer> differingFields = super
+				.findDifferingFields(dataObject);
+
+		if (!getClass().isAssignableFrom(dataObject.getClass())) {
+			return differingFields;
+		}
+
+		final CalendarObject other = (CalendarObject) dataObject;
+
+		if ((!containsChangeExceptions() && other.containsChangeExceptions())
+				|| (containsChangeExceptions()
+						&& other.containsChangeExceptions()
+						&& getChangeException() != other.getChangeException() && (getChangeException() == null || isDifferent(
+						getChangeException(), other.getChangeException())))) {
+			differingFields.add(I(CHANGE_EXCEPTIONS));
+		}
+
+		if ((!containsDayInMonth() && other.containsDayInMonth())
+				|| (containsDayInMonth() && other.containsDayInMonth() && getDayInMonth() != other
+						.getDayInMonth())) {
+			differingFields.add(I(DAY_IN_MONTH));
+		}
+
+		if ((!containsDays() && other.containsDays())
+				|| (containsDays() && other.containsDays() && getDays() != other
+						.getDays())) {
+			differingFields.add(I(DAYS));
+		}
+
+		if ((!containsDeleteExceptions() && other.containsDeleteExceptions())
+				|| (containsDeleteExceptions()
+						&& other.containsDeleteExceptions()
+						&& getDeleteException() != other.getDeleteException() && (getDeleteException() == null || isDifferent(
+						getDeleteException(), other.getDeleteException())))) {
+			differingFields.add(I(DELETE_EXCEPTIONS));
+		}
+
+		if ((!containsEndDate() && other.containsEndDate())
+				|| (containsEndDate() && other.containsEndDate()
+						&& getEndDate() != other.getEndDate() && (getEndDate() == null || getEndDate()
+						.getTime() != other.getEndDate().getTime()))) {
+			differingFields.add(I(END_DATE));
+		}
+
+		if ((!containsInterval() && other.containsInterval())
+				|| (containsInterval() && other.containsInterval() && getInterval() != other
+						.getInterval())) {
+			differingFields.add(I(INTERVAL));
+		}
+
+		if ((!containsMonth() && other.containsMonth())
+				|| (containsMonth() && other.containsMonth() && getMonth() != other
+						.getMonth())) {
+			differingFields.add(MONTH);
+		}
+
+		if ((!containsNote() && other.containsNote())
+				|| (containsNote() && other.containsNote()
+						&& getNote() != other.getNote() && (getNote() == null || !getNote()
+						.equals(other.getNote())))) {
+			differingFields.add(NOTE);
+		}
+
+		if ((!containsNotification() && other.containsNotification())
+				|| (containsNotification() && other.containsNotification() && getNotification() != other
+						.getNotification())) {
+			differingFields.add(NOTIFICATION);
+		}
+
+		if ((!containsOccurrence() && other.containsOccurrence())
+				|| (containsOccurrence() && other.containsOccurrence() && getOccurrence() != other
+						.getOccurrence())) {
+			differingFields.add(RECURRENCE_COUNT);
+		}
+
+		if ((!containsParticipants() && other.containsParticipants())
+				|| (containsParticipants() && other.containsParticipants()
+						&& getParticipants() != other.getParticipants() && (getParticipants() == null || isDifferent(
+						getParticipants(), other.getParticipants())))) {
+			differingFields.add(PARTICIPANTS);
+		}
+
+		if ((!containsRecurrenceCount() && other.containsRecurrenceCount())
+				|| (containsRecurrenceCount()
+						&& other.containsRecurrenceCount() && getRecurrenceCount() != other
+						.getRecurrenceCount())) {
+			differingFields.add(RECURRENCE_COUNT);
+		}
+
+		if ((!containsRecurrenceDatePosition() && other
+				.containsRecurrenceDatePosition())
+				|| (containsRecurrenceDatePosition()
+						&& other.containsRecurrenceDatePosition()
+						&& getRecurrenceDatePosition() != other
+								.getRecurrenceDatePosition() && (getRecurrenceDatePosition() == null || !getRecurrenceDatePosition()
+						.equals(other.getRecurrenceDatePosition())))) {
+			differingFields.add(RECURRENCE_DATE_POSITION);
+		}
+
+		if ((!containsRecurrenceID() && other.containsRecurrenceID())
+				|| (containsRecurrenceID() && other.containsRecurrenceID() && getRecurrenceID() != other
+						.getRecurrenceID())) {
+			differingFields.add(RECURRENCE_ID);
+		}
+
+		if (getRecurrenceCalculator() != other.getRecurrenceCalculator()) {
+			differingFields.add(RECURRENCE_CALCULATOR);
+		}
+
+		if ((!containsRecurrencePosition() && other
+				.containsRecurrencePosition())
+				|| (containsRecurrencePosition()
+						&& other.containsRecurrencePosition() && getRecurrencePosition() != other
+						.getRecurrencePosition())) {
+			differingFields.add(RECURRENCE_POSITION);
+		}
+
+		if ((!containsRecurrenceType() && other.containsRecurrenceType())
+				|| (containsRecurrenceType() && other.containsRecurrenceType() && getRecurrenceType() != other
+						.getRecurrenceType())) {
+			differingFields.add(RECURRENCE_TYPE);
+		}
+
+		if ((!containsStartDate() && other.containsStartDate())
+				|| (containsStartDate() && other.containsStartDate()
+						&& getStartDate() != other.getStartDate() && (getStartDate() == null || getStartDate()
+						.getTime() != other.getStartDate().getTime()))) {
+			differingFields.add(START_DATE);
+		}
+
+		if ((!containsTitle() && other.containsTitle())
+				|| (containsTitle() && other.containsTitle()
+						&& getTitle() != other.getTitle() && (getTitle() == null || !getTitle()
+						.equals(other.getTitle())))) {
+			differingFields.add(TITLE);
+		}
+
+		if ((!containsUntil() && other.containsUntil())
+				|| (containsUntil() && other.containsUntil()
+						&& getUntil() != other.getUntil() && (getUntil() == null || !getUntil()
+						.equals(other.getUntil())))) {
+			differingFields.add(UNTIL);
+		}
+
+		if ((!containsUserParticipants() && other.containsUserParticipants())
+				|| (containsUserParticipants()
+						&& other.containsUserParticipants()
+						&& getUsers() != other.getUsers() && (getUsers() == null || isDifferent(
+						getUsers(), other.getUsers())))) {
+			differingFields.add(USERS);
+		}
+
+		if ((!containsUid() && other.containsUid())
+				|| (containsUid() && other.containsUid()
+						&& getUid() != other.getUid() && (getUid() == null || !getUid()
+						.equals(other.getUid())))) {
+			differingFields.add(UID);
+		}
+
+		if ((!containsOrganizer() && other.containsOrganizer())
+				|| (containsOrganizer() && other.containsOrganizer()
+						&& getOrganizer() != other.getOrganizer() && (getOrganizer() == null || !getOrganizer()
+						.equals(other.getOrganizer())))) {
+			differingFields.add(ORGANIZER);
+		}
+
+		if ((!containsSequence() && other.containsSequence()) || (containsSequence() && other.containsSequence() && getSequence() != other.getSequence())) {
+			differingFields.add(SEQUENCE);
+		}
+
+        if ((!containsPrincipal() && other.containsPrincipal()) || (containsPrincipal() && other.containsPrincipal() && getPrincipal() != other.getPrincipal() && (getPrincipal() == null || !getPrincipal().equals(other.getPrincipal())))) {
+            differingFields.add(PRINCIPAL);
         }
-    }
-
-    public void setDeleteExceptions(final Date[] delete_exceptions) {
-        this.delete_exceptions = delete_exceptions;
-        b_delete_exceptions = true;
-    }
-
-    public void addDeleteException(final Date delete_exception) {
-        if (delete_exceptions == null) {
-            setDeleteExceptions(new Date[] { delete_exception });
-        } else {
-            final Date[] tmp = delete_exceptions;
-            delete_exceptions = new Date[tmp.length + 1];
-            System.arraycopy(tmp, 0, delete_exceptions, 0, tmp.length);
-            delete_exceptions[delete_exceptions.length - 1] = delete_exception;
+        
+        if ((!containsOrganizerId() && other.containsOrganizerId()) || (containsOrganizerId() && other.containsOrganizerId() && getOrganizerId() != other.getOrganizerId())) {
+            differingFields.add(ORGANIZER_ID);
         }
-    }
-
-    public void setDays(final int days) {
-        this.days = days;
-        b_days = true;
-    }
-
-    public void setDayInMonth(final int day_in_month) {
-        this.day_in_month = day_in_month;
-        b_day_in_month = true;
-    }
-
-    public void setMonth(final int month) {
-        this.month = month;
-        b_month = true;
-    }
-
-    public void setInterval(final int interval) {
-        this.interval = interval;
-        b_interval = true;
-    }
-
-    public void setUntil(final Date until) {
-        this.until = until;
-        b_until = true;
-    }
-
-    public void setNotification(final boolean notification) {
-        this.notification = notification;
-        b_notification = true;
-    }
-
-    public void setConfirm(final int confirm) {
-        this.confirm = confirm;
-        b_confirm = true;
-    }
-
-    public void setConfirmMessage(final String confirmMessage) {
-        this.confirmMessage = confirmMessage;
-        b_confirmMessage = true;
-    }
-
-    public void setAlarmFlag(final boolean alarmFlag) {
-        this.alarmFlag = alarmFlag;
-    }
-
-    public void setOccurrence(final int occurrence) {
-        this.occurrence = occurrence;
-        b_occurrence = true;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-        b_uid = true;
-    }
-
-    public void setOrganizer(String organizer) {
-        this.organizer = organizer;
-        b_organizer = true;
-    }
-
-    public void setSequence(int sequence) {
-        this.sequence = sequence;
-        b_sequence = true;
-    }
-
-    // REMOVE METHODS
-    public void removeTitle() {
-        title = null;
-        b_title = false;
-    }
-
-    public void removeStartDate() {
-        start_date = null;
-        b_start_date = false;
-    }
-
-    public void removeEndDate() {
-        end_date = null;
-        b_end_date = false;
-    }
-
-    public void removeNote() {
-        note = null;
-        b_note = false;
-    }
-
-    public void removeRecurrenceID() {
-        recurrence_id = 0;
-        b_recurrence_id = false;
-    }
-
-    public void removeRecurrencePosition() {
-        recurrence_position = 0;
-        b_recurrence_position = false;
-    }
-
-    public void removeRecurrenceDatePosition() {
-        recurrence_date_position = null;
-        b_recurrence_date_position = false;
-    }
-
-    public void removeRecurrenceType() {
-        recurrence_type = 0;
-        b_recurrence_type = false;
-    }
-
-    public void removeChangeExceptions() {
-        change_exceptions = null;
-        b_change_exceptions = false;
-    }
-
-    public void removeDeleteExceptions() {
-        delete_exceptions = null;
-        b_delete_exceptions = false;
-    }
-
-    public void removeDays() {
-        days = 0;
-        b_days = false;
-    }
-
-    public void removeDayInMonth() {
-        day_in_month = 0;
-        b_day_in_month = false;
-    }
-
-    public void removeMonth() {
-        month = 0;
-        b_month = false;
-    }
-
-    public void removeInterval() {
-        interval = 0;
-        b_interval = false;
-    }
-
-    public void removeUntil() {
-        until = null;
-        b_until = false;
-    }
-
-    public void removeNotification() {
-        notification = false;
-        b_notification = false;
-    }
-
-    public void removeConfirm() {
-        confirm = 0;
-        b_confirm = false;
-    }
-
-    public void removeConfirmMessage() {
-        confirmMessage = null;
-        b_confirmMessage = false;
-    }
-
-    public void removeOccurrence() {
-        occurrence = 0;
-        b_occurrence = false;
-    }
-
-    public void removeUid() {
-        uid = null;
-        b_uid = false;
-    }
-
-    public void removeOrganizer() {
-        organizer = null;
-        b_organizer = false;
-    }
-
-    public void removeSequence() {
-        sequence = 0;
-        b_sequence = false;
-    }
-
-    // CONTAINS METHODS
-    public boolean containsTitle() {
-        return b_title;
-    }
-
-    public boolean containsStartDate() {
-        return b_start_date;
-    }
-
-    public boolean containsEndDate() {
-        return b_end_date;
-    }
-
-    public boolean containsNote() {
-        return b_note;
-    }
-
-    public boolean containsRecurrenceID() {
-        return b_recurrence_id;
-    }
-
-    public boolean containsRecurrencePosition() {
-        return b_recurrence_position;
-    }
-
-    public boolean containsRecurrenceDatePosition() {
-        return b_recurrence_date_position;
-    }
-
-    public boolean containsRecurrenceType() {
-        return b_recurrence_type;
-    }
-
-    public boolean containsChangeExceptions() {
-        return b_change_exceptions;
-    }
-
-    public boolean containsDeleteExceptions() {
-        return b_delete_exceptions;
-    }
-
-    public boolean containsDays() {
-        return b_days;
-    }
-
-    public boolean containsDayInMonth() {
-        return b_day_in_month;
-    }
-
-    public boolean containsMonth() {
-        return b_month;
-    }
-
-    public boolean containsInterval() {
-        return b_interval;
-    }
-
-    public boolean containsUntil() {
-        return b_until;
-    }
-
-    public boolean containsNotification() {
-        return b_notification;
-    }
-
-    public boolean containsConfirm() {
-        return b_confirm;
-    }
-
-    public boolean containsConfirmMessage() {
-        return b_confirmMessage;
-    }
-
-    public boolean containsOccurrence() {
-        return b_occurrence;
-    }
-
-    public void setParticipants(final Participant[] participants) {
-        this.participants = participants;
-        b_participants = true;
-    }
-
-    public boolean containsUid() {
-        return b_uid;
-    }
-
-    public boolean containsOrganizer() {
-        return b_organizer;
-    }
-
-    public boolean containsSequence() {
-        return b_sequence;
-    }
-
-    public void setParticipants(final List<? extends Participant> participants) {
-        this.participants = participants.toArray(new Participant[participants.size()]);
-        b_participants = true;
-    }
-
-    public Participant[] getParticipants() {
-        return participants;
-    }
-
-    public void removeParticipants() {
-        participants = null;
-        b_participants = false;
-    }
-
-    public boolean containsParticipants() {
-        return b_participants;
-    }
-
-    public void addParticipant(final Participant p) {
-        if (participants == null) {
-            setParticipants(new Participant[] { p });
-        } else {
-            final int newLength = participants.length + 1;
-            final Participant[] tmp = participants;
-            participants = new Participant[newLength];
-            System.arraycopy(tmp, 0, participants, 0, tmp.length);
-            participants[newLength - 1] = p;
-        }
-    }
-
-    public void setUsers(final UserParticipant[] users) {
-        this.users = users;
-        b_users = true;
-    }
-
-    public void setUsers(final List<UserParticipant> users) {
-        this.users = users.toArray(new UserParticipant[users.size()]);
-        b_users = true;
-    }
-
-    public UserParticipant[] getUsers() {
-        return users;
-    }
-
-    public void removeUsers() {
-        users = null;
-        b_users = false;
-    }
-
-    public boolean containsUserParticipants() {
-        return b_users;
-    }
-
-    public ConfirmableParticipant[] getConfirmations() {
-        return confirmations;
-    }
-
-    public void setConfirmations(ConfirmableParticipant[] confirmations) {
-        this.confirmations = confirmations;
-        bConfirmations = true;
-    }
-
-    public void removeConfigurations() {
-        this.confirmations = null;
-        bConfirmations = false;
-    }
-
-    public boolean containsConfirmations() {
-        return bConfirmations;
-    }
-
-    @Override
-    public void reset() {
-        super.reset();
-
-        title = null;
-        start_date = null;
-        end_date = null;
-        recurrence_id = 0;
-        recurrence_position = 0;
-        recurrence_date_position = null;
-        change_exceptions = null;
-        delete_exceptions = null;
-        days = 0;
-        day_in_month = 0;
-        month = 0;
-        until = null;
-        recurrence_count = 0;
-        notification = false;
-        participants = null;
-        users = null;
-        confirmations = null;
-        occurrence = 0;
-        uid = null;
-        organizer = null;
-        sequence = 0;
-
-        b_title = false;
-        b_start_date = false;
-        b_end_date = false;
-        b_recurrence_id = false;
-        b_recurrence_position = false;
-        b_recurrence_date_position = false;
-        b_change_exceptions = false;
-        b_delete_exceptions = false;
-        b_days = false;
-        b_day_in_month = false;
-        b_month = false;
-        b_until = false;
-        b_recurrence_count = false;
-        b_notification = false;
-        b_participants = false;
-        b_users = false;
-        b_occurrence = false;
-        b_uid = false;
-        b_organizer = false;
-        b_sequence = false;
-    }
-
-    /**
-     * @return the recurrence count.
-     */
-    public int getRecurrenceCount() {
-        return recurrence_count;
-    }
-
-    /**
-     * @param recurrenceCount the recurrence count to set.
-     */
-    public void setRecurrenceCount(final int recurrenceCount) {
-        recurrence_count = recurrenceCount;
-        b_recurrence_count = true;
-    }
-
-    /**
-     * Removes the value of the recurrence count.
-     */
-    public void removeRecurrenceCount() {
-        recurrence_count = 0;
-        b_recurrence_count = false;
-    }
-
-    /**
-     * @return if the attribute <code>recurrence_count</code> has been set or not.
-     */
-    public boolean containsRecurrenceCount() {
-        return b_recurrence_count;
-    }
-
-    /*-
-     * ----------------- Recurrence Diagnosis -----------------
-     */
-
-    /**
-     * Tests if this event is either a recurring event or a part of a recurring event (change exception).
-     * <p>
-     * This test checks if recurrence ID is different to zero.
-     *
-     * @return <code>true</code> if this event is either a recurring event or a part of a recurring event (change exception); otherwise
-     *         <code>false</code>
-     */
-    public boolean isPartOfSeries() {
-        return (getRecurrenceID() != 0);
-    }
-
-    /**
-     * Tests if this event denotes a specific occurrence within a recurring event.
-     *
-     * @return <code>true</code> if this event denotes a specific occurrence within a recurring event; otherwise <code>false</code>
-     */
-    public boolean isSpecificOcurrence() {
-        return isException();
-    }
-
-    /**
-     * Tests if this event denotes a change exception.
-     *
-     * @return <code>true</code> if this event denotes a change exception; otherwise <code>false</code>
-     */
-    public boolean isException() {
-        return isPartOfSeries() && ((getRecurrencePosition() != 0) || (getRecurrenceDatePosition() != null));
-    }
-
-    /**
-     * Tests if this event denotes a recurring event (and <b>not</b> a change exception).
-     *
-     * @return <code>true</code> if this event denotes a recurring event (and <b>not</b> a change exception); otherwise <code>false</code>
-     */
-    public boolean isMaster() {
-        return (getRecurrenceID() == getObjectID()) && !isSpecificOcurrence();
-    }
-
-    /**
-     * Tests if this event is neither a recurring event nor a part of a recurring event (change exception).
-     * <p>
-     * This test checks if recurrence ID is equal to zero.
-     *
-     * @return <code>true</code> if this event is a single event; otherwise <code>false</code>
-     */
-    public boolean isSingle() {
-        return !isPartOfSeries();
-    }
-
-    @Override
-    public Set<Integer> findDifferingFields(final DataObject dataObject) {
-
-        final Set<Integer> differingFields = super.findDifferingFields(dataObject);
-
-        if (!getClass().isAssignableFrom(dataObject.getClass())) {
-            return differingFields;
+        
+        if ((!containsPrincipalId() && other.containsPrincipalId()) || (containsPrincipalId() && other.containsPrincipalId() && getPrincipalId() != other.getPrincipalId())) {
+            differingFields.add(PRINCIPAL_ID);
         }
 
-        final CalendarObject other = (CalendarObject) dataObject;
+		return differingFields;
+	}
 
-        if ((!containsChangeExceptions() && other.containsChangeExceptions()) || (containsChangeExceptions() && other.containsChangeExceptions() && getChangeException() != other.getChangeException() && (getChangeException() == null || isDifferent(
-            getChangeException(),
-            other.getChangeException())))) {
-            differingFields.add(I(CHANGE_EXCEPTIONS));
-        }
+	private boolean isDifferent(final Participant[] p1, final Participant[] p2) {
+		if (p1.length != p2.length) {
+			return true;
+		}
+		final Set<Integer> ids = new HashSet<Integer>(p1.length);
+		for (final Participant participant : p1) {
+			ids.add(participant.getIdentifier());
+		}
 
-        if ((!containsDayInMonth() && other.containsDayInMonth()) || (containsDayInMonth() && other.containsDayInMonth() && getDayInMonth() != other.getDayInMonth())) {
-            differingFields.add(I(DAY_IN_MONTH));
-        }
+		for (final Participant participant : p2) {
+			if (!ids.remove(participant.getIdentifier())) {
+				return true;
+			}
+		}
 
-        if ((!containsDays() && other.containsDays()) || (containsDays() && other.containsDays() && getDays() != other.getDays())) {
-            differingFields.add(I(DAYS));
-        }
+		return false;
+	}
 
-        if ((!containsDeleteExceptions() && other.containsDeleteExceptions()) || (containsDeleteExceptions() && other.containsDeleteExceptions() && getDeleteException() != other.getDeleteException() && (getDeleteException() == null || isDifferent(
-            getDeleteException(),
-            other.getDeleteException())))) {
-            differingFields.add(I(DELETE_EXCEPTIONS));
-        }
+	private boolean isDifferent(final UserParticipant[] u1,
+			final UserParticipant[] u2) {
+		if (u1 == u2) {
+			return false;
+		}
+		if (u1 == null && u2 != null) {
+			return true;
+		}
+		if (u2 == null && u1 != null) {
+			return true;
+		}
+		if (u1.length != u2.length) {
+			return true;
+		}
 
-        if ((!containsEndDate() && other.containsEndDate()) || (containsEndDate() && other.containsEndDate() && getEndDate() != other.getEndDate() && (getEndDate() == null || getEndDate().getTime() != other.getEndDate().getTime()))) {
-            differingFields.add(I(END_DATE));
-        }
+		final Set<Integer> ids = new HashSet<Integer>(u1.length);
+		for (final Participant participant : u1) {
+			if (participant == null) {
+				continue;
+			} // Ignore nulls
+			ids.add(participant.getIdentifier());
+		}
 
-        if ((!containsInterval() && other.containsInterval()) || (containsInterval() && other.containsInterval() && getInterval() != other.getInterval())) {
-            differingFields.add(I(INTERVAL));
-        }
+		for (final Participant participant : u2) {
+			if (participant == null) {
+				continue;
+			} // Ignore nulls
+			if (!ids.remove(participant.getIdentifier())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-        if ((!containsMonth() && other.containsMonth()) || (containsMonth() && other.containsMonth() && getMonth() != other.getMonth())) {
-            differingFields.add(MONTH);
-        }
+	private boolean isDifferent(final Date[] dates1, final Date[] dates2) {
+		if (dates1 == dates2) {
+			return false;
+		}
+		if (dates1 == null && dates2 != null) {
+			return true;
+		}
+		if (dates2 == null && dates1 != null) {
+			return true;
+		}
+		if (dates1.length != dates2.length) {
+			return true;
+		}
 
-        if ((!containsNote() && other.containsNote()) || (containsNote() && other.containsNote() && getNote() != other.getNote() && (getNote() == null || !getNote().equals(
-            other.getNote())))) {
-            differingFields.add(NOTE);
-        }
+		if (dates1.length != dates2.length) {
+			return true;
+		}
 
-        if ((!containsNotification() && other.containsNotification()) || (containsNotification() && other.containsNotification() && getNotification() != other.getNotification())) {
-            differingFields.add(NOTIFICATION);
-        }
+		for (int i = 0; i < dates1.length; i++) {
+			if (dates1[i] != dates2[i] && dates1[i] != null
+					&& !dates1[i].equals(dates2[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-        if ((!containsOccurrence() && other.containsOccurrence()) || (containsOccurrence() && other.containsOccurrence() && getOccurrence() != other.getOccurrence())) {
-            differingFields.add(RECURRENCE_COUNT);
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.container.CommonObject#set(int,
+	 * java.lang.Object)
+	 */
+	@Override
+	public void set(final int field, final Object value) {
+		switch (field) {
+		case UNTIL:
+			setUntil((Date) value);
+			break;
+		case USERS:
+			if (List.class.isInstance(value)) {
+				setUsers((List<UserParticipant>) value);
+			} else {
+				setUsers((UserParticipant[]) value);
+			}
+			break;
+		case NOTE:
+			setNote((String) value);
+			break;
+		case RECURRENCE_DATE_POSITION:
+			setRecurrenceDatePosition((Date) value);
+			break;
+		case END_DATE:
+			setEndDate((Date) value);
+			break;
+		case RECURRENCE_POSITION:
+			setRecurrencePosition((Integer) value);
+			break;
+		case RECURRENCE_CALCULATOR:
+			setRecurrenceCalculator((Integer) value);
+			break;
+		case DAYS:
+			setDays((Integer) value);
+			break;
+		case NOTIFICATION:
+			setNotification((Boolean) value);
+			break;
+		case MONTH:
+			setMonth((Integer) value);
+			break;
+		case RECURRENCE_COUNT:
+			setRecurrenceCount((Integer) value);
+			setOccurrence(getRecurrenceCount());
+			break;
+		case DAY_IN_MONTH:
+			setDayInMonth((Integer) value);
+			break;
+		case RECURRENCE_TYPE:
+			setRecurrenceType((Integer) value);
+			break;
+		case START_DATE:
+			setStartDate((Date) value);
+			break;
+		case INTERVAL:
+			setInterval((Integer) value);
+			break;
+		case TITLE:
+			setTitle((String) value);
+			break;
+		case RECURRENCE_ID:
+			setRecurrenceID((Integer) value);
+			break;
+		case PARTICIPANTS:
+			if (List.class.isInstance(value)) {
+				setParticipants((List<Participant>) value);
+			} else {
+				setParticipants((Participant[]) value);
+			}
+			break;
+		case CONFIRMATIONS:
+			if (List.class.isInstance(value)) {
+				setConfirmations((List<ConfirmableParticipant>) value);
+			} else {
+				setConfirmations((ConfirmableParticipant[]) value);
+			}
+			break;
+		case CHANGE_EXCEPTIONS:
+			if (List.class.isInstance(value)) {
+				setChangeExceptions((List<Date>) value);
+			} else {
+				setChangeExceptions((Date[]) value);
+			}
+			break;
+		case DELETE_EXCEPTIONS:
+			if (List.class.isInstance(value)) {
+				setDeleteExceptions((List<Date>) value);
+			} else {
+				setDeleteExceptions((Date[]) value);
+			}
+			break;
+		case UID:
+			setUid((String) value);
+			break;
+		case ORGANIZER:
+			setOrganizer((String) value);
+			break;
+		case SEQUENCE:
+			setSequence((Integer) value);
+			break;
+		case ORGANIZER_ID:
+		    setOrganizerId((Integer) value);
+		    break;
+		case PRINCIPAL:
+		    setPrincipal((String) value);
+		    break;
+		case PRINCIPAL_ID:
+		    setPrincipalId((Integer) value);
+		    break;
+		default:
+			super.set(field, value);
+		}
+	}
 
-        if ((!containsParticipants() && other.containsParticipants()) || (containsParticipants() && other.containsParticipants() && getParticipants() != other.getParticipants() && (getParticipants() == null || isDifferent(
-            getParticipants(),
-            other.getParticipants())))) {
-            differingFields.add(PARTICIPANTS);
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.container.CommonObject#get(int)
+	 */
+	@Override
+	public Object get(final int field) {
+		switch (field) {
+		case UNTIL:
+			return getUntil();
+		case USERS:
+			return getUsers();
+		case NOTE:
+			return getNote();
+		case RECURRENCE_DATE_POSITION:
+			return getRecurrenceDatePosition();
+		case END_DATE:
+			return getEndDate();
+		case RECURRENCE_POSITION:
+			return getRecurrencePosition();
+		case RECURRENCE_CALCULATOR:
+			return getRecurrenceCalculator();
+		case DAYS:
+			return getDays();
+		case NOTIFICATION:
+			return getNotification();
+		case MONTH:
+			return getMonth();
+		case RECURRENCE_COUNT:
+			if (containsRecurrenceCount())
+				return getRecurrenceCount();
+			else
+				return getOccurrence();
+		case DAY_IN_MONTH:
+			return getDayInMonth();
+		case RECURRENCE_TYPE:
+			return getRecurrenceType();
+		case START_DATE:
+			return getStartDate();
+		case INTERVAL:
+			return getInterval();
+		case TITLE:
+			return getTitle();
+		case RECURRENCE_ID:
+			return getRecurrenceID();
+		case PARTICIPANTS:
+			return getParticipants();
+		case CHANGE_EXCEPTIONS:
+			return getChangeException();
+		case DELETE_EXCEPTIONS:
+			return getDeleteException();
+		case UID:
+			return getUid();
+		case ORGANIZER:
+			return getOrganizer();
+		case SEQUENCE:
+			return getSequence();
+		case CONFIRMATIONS:
+			return getConfirmations();
+		case ORGANIZER_ID:
+		    return getOrganizerId();
+		case PRINCIPAL:
+		    return getPrincipal();
+		case PRINCIPAL_ID:
+		    return getPrincipalId();
+		default:
+			return super.get(field);
+		}
+	}
 
-        if ((!containsRecurrenceCount() && other.containsRecurrenceCount()) || (containsRecurrenceCount() && other.containsRecurrenceCount() && getRecurrenceCount() != other.getRecurrenceCount())) {
-            differingFields.add(RECURRENCE_COUNT);
-        }
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.container.CommonObject#contains(int)
+	 */
+	@Override
+	public boolean contains(final int field) {
+		switch (field) {
+		case UNTIL:
+			return containsUntil();
+		case USERS:
+			return containsUserParticipants();
+		case NOTE:
+			return containsNote();
+		case RECURRENCE_DATE_POSITION:
+			return containsRecurrenceDatePosition();
+		case END_DATE:
+			return containsEndDate();
+		case RECURRENCE_POSITION:
+			return containsRecurrencePosition();
+		case DAYS:
+			return containsDays();
+		case NOTIFICATION:
+			return containsNotification();
+		case MONTH:
+			return containsMonth();
+		case RECURRENCE_COUNT:
+			return containsRecurrenceCount() || containsOccurrence();
+		case DAY_IN_MONTH:
+			return containsDayInMonth();
+		case RECURRENCE_TYPE:
+			return containsRecurrenceType();
+		case START_DATE:
+			return containsStartDate();
+		case INTERVAL:
+			return containsInterval();
+		case TITLE:
+			return containsTitle();
+		case RECURRENCE_ID:
+			return containsRecurrenceID();
+		case PARTICIPANTS:
+			return containsParticipants();
+		case CONFIRMATIONS:
+			return containsConfirmations();
+		case CHANGE_EXCEPTIONS:
+			return containsChangeExceptions();
+		case DELETE_EXCEPTIONS:
+			return containsDeleteExceptions();
+		case RECURRENCE_CALCULATOR:
+			return true;
+		case UID:
+			return containsUid();
+		case ORGANIZER:
+			return containsOrganizer();
+		case SEQUENCE:
+			return containsSequence();
+		case ORGANIZER_ID:
+		    return containsOrganizerId();
+		case PRINCIPAL:
+		    return containsPrincipal();
+		case PRINCIPAL_ID:
+		    return containsPrincipalId();
+		default:
+			return super.contains(field);
+		}
+	}
 
-        if ((!containsRecurrenceDatePosition() && other.containsRecurrenceDatePosition()) || (containsRecurrenceDatePosition() && other.containsRecurrenceDatePosition() && getRecurrenceDatePosition() != other.getRecurrenceDatePosition() && (getRecurrenceDatePosition() == null || !getRecurrenceDatePosition().equals(
-            other.getRecurrenceDatePosition())))) {
-            differingFields.add(RECURRENCE_DATE_POSITION);
-        }
-
-        if ((!containsRecurrenceID() && other.containsRecurrenceID()) || (containsRecurrenceID() && other.containsRecurrenceID() && getRecurrenceID() != other.getRecurrenceID())) {
-            differingFields.add(RECURRENCE_ID);
-        }
-
-        if (getRecurrenceCalculator() != other.getRecurrenceCalculator()) {
-            differingFields.add(RECURRENCE_CALCULATOR);
-        }
-
-        if ((!containsRecurrencePosition() && other.containsRecurrencePosition()) || (containsRecurrencePosition() && other.containsRecurrencePosition() && getRecurrencePosition() != other.getRecurrencePosition())) {
-            differingFields.add(RECURRENCE_POSITION);
-        }
-
-        if ((!containsRecurrenceType() && other.containsRecurrenceType()) || (containsRecurrenceType() && other.containsRecurrenceType() && getRecurrenceType() != other.getRecurrenceType())) {
-            differingFields.add(RECURRENCE_TYPE);
-        }
-
-        if ((!containsStartDate() && other.containsStartDate()) || (containsStartDate() && other.containsStartDate() && getStartDate() != other.getStartDate() && (getStartDate() == null || getStartDate().getTime() != other.getStartDate().getTime()))) {
-            differingFields.add(START_DATE);
-        }
-
-        if ((!containsTitle() && other.containsTitle()) || (containsTitle() && other.containsTitle() && getTitle() != other.getTitle() && (getTitle() == null || !getTitle().equals(
-            other.getTitle())))) {
-            differingFields.add(TITLE);
-        }
-
-        if ((!containsUntil() && other.containsUntil()) || (containsUntil() && other.containsUntil() && getUntil() != other.getUntil() && (getUntil() == null || !getUntil().equals(
-            other.getUntil())))) {
-            differingFields.add(UNTIL);
-        }
-
-        if ((!containsUserParticipants() && other.containsUserParticipants()) || (containsUserParticipants() && other.containsUserParticipants() && getUsers() != other.getUsers() && (getUsers() == null || isDifferent(
-            getUsers(),
-            other.getUsers())))) {
-            differingFields.add(USERS);
-        }
-
-        if ((!containsUid() && other.containsUid()) || (containsUid() && other.containsUid() && getUid() != other.getUid() && (getUid() == null || !getUid().equals(other.getUid())))) {
-            differingFields.add(UID);
-        }
-
-        if ((!containsOrganizer() && other.containsOrganizer()) || (containsOrganizer() && other.containsOrganizer() && getOrganizer() != other.getOrganizer() && (getOrganizer() == null || !getOrganizer().equals(other.getOrganizer())))) {
-            differingFields.add(ORGANIZER);
-        }
-
-        if ((!containsSequence() && other.containsSequence()) || (containsSequence() && other.containsSequence() && getSequence() != other.getSequence())) {
-            differingFields.add(SEQUENCE);
-        }
-
-
-        return differingFields;
-    }
-
-    private boolean isDifferent(final Participant[] p1, final Participant[] p2) {
-        if (p1.length != p2.length) {
-            return true;
-        }
-        final Set<Integer> ids = new HashSet<Integer>(p1.length);
-        for (final Participant participant : p1) {
-            ids.add(participant.getIdentifier());
-        }
-
-        for (final Participant participant : p2) {
-            if (!ids.remove(participant.getIdentifier())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private boolean isDifferent(final UserParticipant[] u1, final UserParticipant[] u2) {
-        if (u1 == u2) {
-            return false;
-        }
-        if (u1 == null && u2 != null) {
-            return true;
-        }
-        if (u2 == null && u1 != null) {
-            return true;
-        }
-        if (u1.length != u2.length) {
-            return true;
-        }
-
-        final Set<Integer> ids = new HashSet<Integer>(u1.length);
-        for (final Participant participant : u1) {
-            if (participant == null) {
-                continue;
-            } // Ignore nulls
-            ids.add(participant.getIdentifier());
-        }
-
-        for (final Participant participant : u2) {
-            if (participant == null) {
-                continue;
-            } // Ignore nulls
-            if (!ids.remove(participant.getIdentifier())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isDifferent(final Date[] dates1, final Date[] dates2) {
-        if (dates1 == dates2) {
-            return false;
-        }
-        if (dates1 == null && dates2 != null) {
-            return true;
-        }
-        if (dates2 == null && dates1 != null) {
-            return true;
-        }
-        if (dates1.length != dates2.length) {
-            return true;
-        }
-
-        if (dates1.length != dates2.length) {
-            return true;
-        }
-
-        for (int i = 0; i < dates1.length; i++) {
-            if (dates1[i] != dates2[i] && dates1[i] != null && !dates1[i].equals(dates2[i])) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.container.CommonObject#set(int, java.lang.Object)
-     */
-    @Override
-    public void set(final int field, final Object value) {
-        switch (field) {
-        case UNTIL:
-            setUntil((Date) value);
-            break;
-        case USERS:
-            setUsers((UserParticipant[]) value);
-            break;
-        case NOTE:
-            setNote((String) value);
-            break;
-        case RECURRENCE_DATE_POSITION:
-            setRecurrenceDatePosition((Date) value);
-            break;
-        case END_DATE:
-            setEndDate((Date) value);
-            break;
-        case RECURRENCE_POSITION:
-            setRecurrencePosition((Integer) value);
-            break;
-        case RECURRENCE_CALCULATOR:
-            setRecurrenceCalculator((Integer) value);
-            break;
-        case DAYS:
-            setDays((Integer) value);
-            break;
-        case NOTIFICATION:
-            setNotification((Boolean) value);
-            break;
-        case MONTH:
-            setMonth((Integer) value);
-            break;
-        case RECURRENCE_COUNT:
-            setRecurrenceCount((Integer) value);
-            setOccurrence(getRecurrenceCount());
-            break;
-        case DAY_IN_MONTH:
-            setDayInMonth((Integer) value);
-            break;
-        case RECURRENCE_TYPE:
-            setRecurrenceType((Integer) value);
-            break;
-        case START_DATE:
-            setStartDate((Date) value);
-            break;
-        case INTERVAL:
-            setInterval((Integer) value);
-            break;
-        case TITLE:
-            setTitle((String) value);
-            break;
-        case RECURRENCE_ID:
-            setRecurrenceID((Integer) value);
-            break;
-        case PARTICIPANTS:
-            setParticipants((Participant[]) value);
-            break;
-        case CHANGE_EXCEPTIONS:
-            setChangeExceptions((Date[]) value);
-            break;
-        case DELETE_EXCEPTIONS:
-            setDeleteExceptions((Date[]) value);
-            break;
-        case UID:
-            setUid((String) value);
-            break;
-        case ORGANIZER:
-            setOrganizer((String) value);
-            break;
-        case SEQUENCE:
-            setSequence((Integer) value);
-            break;
-        default:
-            super.set(field, value);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.container.CommonObject#get(int)
-     */
-    @Override
-    public Object get(final int field) {
-        switch (field) {
-        case UNTIL:
-            return getUntil();
-        case USERS:
-            return getUsers();
-        case NOTE:
-            return getNote();
-        case RECURRENCE_DATE_POSITION:
-            return getRecurrenceDatePosition();
-        case END_DATE:
-            return getEndDate();
-        case RECURRENCE_POSITION:
-            return getRecurrencePosition();
-        case RECURRENCE_CALCULATOR:
-            return getRecurrenceCalculator();
-        case DAYS:
-            return getDays();
-        case NOTIFICATION:
-            return getNotification();
-        case MONTH:
-            return getMonth();
-        case RECURRENCE_COUNT:
-            if (containsRecurrenceCount()) {
-                return getRecurrenceCount();
-            } else {
-                return getOccurrence();
-            }
-        case DAY_IN_MONTH:
-            return getDayInMonth();
-        case RECURRENCE_TYPE:
-            return getRecurrenceType();
-        case START_DATE:
-            return getStartDate();
-        case INTERVAL:
-            return getInterval();
-        case TITLE:
-            return getTitle();
-        case RECURRENCE_ID:
-            return getRecurrenceID();
-        case PARTICIPANTS:
-            return getParticipants();
-        case CHANGE_EXCEPTIONS:
-            return getChangeException();
-        case DELETE_EXCEPTIONS:
-            return getDeleteException();
-        case UID:
-            return getUid();
-        case ORGANIZER:
-            return getOrganizer();
-        case SEQUENCE:
-            return getSequence();
-        default:
-            return super.get(field);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.container.CommonObject#contains(int)
-     */
-    @Override
-    public boolean contains(final int field) {
-        switch (field) {
-        case UNTIL:
-            return containsUntil();
-        case USERS:
-            return containsUserParticipants();
-        case NOTE:
-            return containsNote();
-        case RECURRENCE_DATE_POSITION:
-            return containsRecurrenceDatePosition();
-        case END_DATE:
-            return containsEndDate();
-        case RECURRENCE_POSITION:
-            return containsRecurrencePosition();
-        case DAYS:
-            return containsDays();
-        case NOTIFICATION:
-            return containsNotification();
-        case MONTH:
-            return containsMonth();
-        case RECURRENCE_COUNT:
-            return containsRecurrenceCount() || containsOccurrence();
-        case DAY_IN_MONTH:
-            return containsDayInMonth();
-        case RECURRENCE_TYPE:
-            return containsRecurrenceType();
-        case START_DATE:
-            return containsStartDate();
-        case INTERVAL:
-            return containsInterval();
-        case TITLE:
-            return containsTitle();
-        case RECURRENCE_ID:
-            return containsRecurrenceID();
-        case PARTICIPANTS:
-            return containsParticipants();
-        case CHANGE_EXCEPTIONS:
-            return containsChangeExceptions();
-        case DELETE_EXCEPTIONS:
-            return containsDeleteExceptions();
-        case RECURRENCE_CALCULATOR:
-            return true;
-        case UID:
-            return containsUid();
-        case ORGANIZER:
-            return containsOrganizer();
-        case SEQUENCE:
-            return containsSequence();
-        default:
-            return super.contains(field);
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.groupware.container.CommonObject#remove(int)
-     */
-    @Override
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.openexchange.groupware.container.CommonObject#remove(int)
+	 */
+	@Override
     public void remove(final int field) {
         switch (field) {
         case UNTIL:
@@ -1376,6 +1611,9 @@ public abstract class CalendarObject extends CommonObject {
         case PARTICIPANTS:
             removeParticipants();
             break;
+        case CONFIRMATIONS:
+        	removeConfirmations();
+        	break;
         case CHANGE_EXCEPTIONS:
             removeChangeExceptions();
         case DELETE_EXCEPTIONS:
@@ -1391,14 +1629,33 @@ public abstract class CalendarObject extends CommonObject {
         case SEQUENCE:
             removeSequence();
             break;
+        case ORGANIZER_ID:
+            removeOrganizerId();
+            break;
+        case PRINCIPAL:
+            removePrincipal();
+            break;
+        case PRINCIPAL_ID:
+            removePrincipalId();
+            break;
         default:
             super.remove(field);
 
         }
     }
 
-    @Override
-    public String toString() {
-        return "[" + this.getObjectID() + "] " + this.getTitle();
-    }
+	public static Set<Differ<? super CalendarObject>> differ = new HashSet<Differ<? super CalendarObject>>();
+
+	static {
+		differ.add(new ChangeExceptionsDiffer());
+		differ.add(new DeleteExceptionsDiffer());
+		differ.add(new ParticipantsDiffer());
+		differ.add(new UsersDiffer());
+		differ.add(new ConfirmationsDiffer());
+	}
+
+	@Override
+	public String toString() {
+		return "[" + this.getObjectID() + "] " + this.getTitle();
+	}
 }

@@ -51,6 +51,7 @@ package com.openexchange.carddav;
 
 import java.util.Arrays;
 import java.util.List;
+import com.openexchange.carddav.mixins.DummySyncToken;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -59,13 +60,14 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
  * {@link RootCollection}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class RootCollection extends AbstractCarddavCollection {
 
     public RootCollection(GroupwareCarddavFactory factory) {
         super(factory, new WebdavPath());
+        includeProperties(new DummySyncToken());
     }
 
     public String getDisplayName() throws WebdavProtocolException {

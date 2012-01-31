@@ -83,9 +83,21 @@ public class IndexServiceLookup implements ServiceLookup {
 
         return serviceLookup.getService(clazz);
     }
+    
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = serviceLookupRef.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+
+        return serviceLookup.getOptionalService(clazz);
+    }
 
     public void setServiceLookup(final ServiceLookup serviceLookup) {
         serviceLookupRef.set(serviceLookup);
     }
+    
+    
 
 }

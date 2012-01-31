@@ -50,7 +50,7 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.exception.OXException;
+
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -67,7 +67,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 	}
 
 	// Returns the status for a successful move/copy
-	protected void checkOverwrite(final WebdavRequest req) throws OXException{
+	protected void checkOverwrite(final WebdavRequest req) throws WebdavProtocolException{
 		if(req.getHeader("Overwrite") != null && "F".equals(req.getHeader("Overwrite"))){
 			final LoadingHints loadingHints = new LoadingHints();
 			loadingHints.setUrl(req.getDestinationUrl());
@@ -91,7 +91,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 					WebdavPath url = res.getUrl();
 					url = destUrl.dup().append(url.subpath(sourceUrlLength));
 					final WebdavResource d = factory.resolveResource(url);
-					if(d.exists() && !d.isCollection()) {
+					if (d.exists() && !d.isCollection()) {
 						throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 					}
 				}
@@ -104,11 +104,11 @@ public abstract class WebdavStructureAction extends AbstractAction {
 		return;
 	}
 
-	protected int chooseReturnCode(final WebdavRequest req) throws OXException {
+	protected int chooseReturnCode(final WebdavRequest req) throws WebdavProtocolException {
 		return (req.getDestination().exists()) ? HttpServletResponse.SC_NO_CONTENT : HttpServletResponse.SC_CREATED;
 	}
 
-	protected void checkSame(final WebdavRequest req) throws OXException {
+	protected void checkSame(final WebdavRequest req) throws WebdavProtocolException {
 		if(req.getUrl().equals(req.getDestinationUrl())) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
 		}

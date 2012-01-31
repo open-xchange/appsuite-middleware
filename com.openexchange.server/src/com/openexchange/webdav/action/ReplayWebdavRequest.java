@@ -58,12 +58,13 @@ import java.util.Map;
 import org.jdom.Document;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.webdav.action.ifheader.IfHeader;
+import com.openexchange.webdav.action.ifheader.IfHeaderParseException;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class ReplayWebdavRequest implements WebdavRequest{
@@ -74,8 +75,7 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		this.delegate = req;
 	}
 
-	@Override
-    public InputStream getBody() throws IOException {
+	public InputStream getBody() throws IOException {
 		if(this.body != null) {
 			return new ByteArrayInputStream(this.body);
 		}
@@ -96,78 +96,63 @@ public class ReplayWebdavRequest implements WebdavRequest{
 		return new ByteArrayInputStream(this.body);
 	}
 
-	@Override
-    public Document getBodyAsDocument() throws JDOMException, IOException {
+	public Document getBodyAsDocument() throws JDOMException, IOException {
 		return new SAXBuilder().build(getBody());
 	}
 
-	@Override
-    public WebdavCollection getCollection() throws OXException {
+	public WebdavCollection getCollection() throws WebdavProtocolException {
 		return delegate.getCollection();
 	}
 
-	@Override
-    public WebdavResource getDestination() throws OXException {
+	public WebdavResource getDestination() throws WebdavProtocolException {
 		return delegate.getDestination();
 	}
 
-	@Override
-    public WebdavPath getDestinationUrl() {
+	public WebdavPath getDestinationUrl() {
 		return delegate.getDestinationUrl();
 	}
 
-	@Override
-    public String getHeader(final String header) {
+	public String getHeader(final String header) {
 		return delegate.getHeader(header);
 	}
 
-	@Override
-    public List<String> getHeaderNames() {
+	public List<String> getHeaderNames() {
 		return delegate.getHeaderNames();
 	}
 
-	@Override
-    public IfHeader getIfHeader() throws OXException {
+	public IfHeader getIfHeader() throws IfHeaderParseException {
 		return delegate.getIfHeader();
 	}
 
-	@Override
-    public WebdavResource getResource() throws OXException {
+	public WebdavResource getResource() throws WebdavProtocolException {
 		return delegate.getResource();
 	}
 
-	@Override
-    public WebdavPath getUrl() {
+	public WebdavPath getUrl() {
 		return delegate.getUrl();
 	}
 
-	@Override
-    public String getURLPrefix() {
+	public String getURLPrefix() {
 		return delegate.getURLPrefix();
 	}
 
-	@Override
-    public int getDepth(final int depth) {
+	public int getDepth(final int depth) {
 		return delegate.getDepth(depth);
 	}
 
-	@Override
-    public WebdavFactory getFactory() throws OXException {
+	public WebdavFactory getFactory() throws WebdavProtocolException {
 		return delegate.getFactory();
 	}
 
-	@Override
-    public String getCharset() {
+	public String getCharset() {
 		return delegate.getCharset();
 	}
 
-	@Override
-    public boolean hasBody() {
+	public boolean hasBody() {
 	    return delegate.hasBody();
 	}
 
-	@Override
-    public Map<String, Object> getUserInfo() {
+	public Map<String, Object> getUserInfo() {
 	    return delegate.getUserInfo();
 	}
 }

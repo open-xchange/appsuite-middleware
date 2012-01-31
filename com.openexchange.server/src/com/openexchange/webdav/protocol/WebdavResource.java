@@ -52,92 +52,90 @@ package com.openexchange.webdav.protocol;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.exception.OXException;
-
 
 public interface WebdavResource {
 
-	void create() throws OXException;
+	void create() throws WebdavProtocolException;
 
-	boolean exists() throws OXException;
+	boolean exists() throws WebdavProtocolException;
 
-	void delete() throws OXException;
+	void delete() throws WebdavProtocolException;
 
-	WebdavResource move(WebdavPath newUri) throws OXException;
+	WebdavResource move(WebdavPath newUri) throws WebdavProtocolException;
 
-	WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws OXException;
+	WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException;
 
-	WebdavResource copy(WebdavPath string) throws OXException;
+	WebdavResource copy(WebdavPath string) throws WebdavProtocolException;
 
-	WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws OXException;
+	WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException;
 
 	boolean isCollection();
 
-	void putProperty(WebdavProperty prop) throws OXException;
+	void putProperty(WebdavProperty prop) throws WebdavProtocolException;
 
-	void removeProperty(String namespace, String name) throws OXException;
+	void removeProperty(String namespace, String name) throws WebdavProtocolException;
 
-	public List<WebdavProperty> getAllProps() throws OXException;
+	public List<WebdavProperty> getAllProps() throws WebdavProtocolException;
 
-	void save() throws OXException;
+	void save() throws WebdavProtocolException;
 
 	WebdavPath getUrl();
 
-	WebdavProperty getProperty(String namespace, String name) throws OXException;
+	WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException;
 
-	Date getCreationDate() throws OXException;
+	Date getCreationDate() throws WebdavProtocolException;
 
-	Date getLastModified() throws OXException;
+	Date getLastModified() throws WebdavProtocolException;
 
-	String getDisplayName() throws OXException;
+	String getDisplayName() throws WebdavProtocolException;
 
-	void setDisplayName(String displayName) throws OXException;
+	void setDisplayName(String displayName) throws WebdavProtocolException;
 
-	String getResourceType() throws OXException;
+	String getResourceType() throws WebdavProtocolException;
 
-	String getLanguage() throws OXException;
+	String getLanguage() throws WebdavProtocolException;
 
-	void setLanguage(String language) throws OXException;
+	void setLanguage(String language) throws WebdavProtocolException;
 
-	Long getLength() throws OXException;
+	Long getLength() throws WebdavProtocolException;
 
-	void setLength(Long length) throws OXException;
+	void setLength(Long length) throws WebdavProtocolException;
 
-	void setContentType(String type) throws OXException;
+	void setContentType(String type) throws WebdavProtocolException;
 
-	String getContentType() throws OXException;
+	String getContentType() throws WebdavProtocolException;
 
-	String getETag() throws OXException;
+	String getETag() throws WebdavProtocolException;
 
-	String getSource() throws OXException;
+	String getSource() throws WebdavProtocolException;
 
-	void setSource(String source) throws OXException;
+	void setSource(String source) throws WebdavProtocolException;
 
-	void putBody(InputStream data) throws OXException;
+	void putBody(InputStream data) throws WebdavProtocolException;
 
-	void putBodyAndGuessLength(InputStream body) throws OXException;
+	void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException;
 
-	InputStream getBody() throws OXException;
+	InputStream getBody() throws WebdavProtocolException;
 
 	WebdavCollection toCollection();
 
-	void lock(WebdavLock lock) throws OXException;
+	void lock(WebdavLock lock) throws WebdavProtocolException;
 
-	List<WebdavLock> getLocks() throws OXException;
+	List<WebdavLock> getLocks() throws WebdavProtocolException;
 
-	WebdavLock getLock(String token) throws OXException;
+	WebdavLock getLock(String token) throws WebdavProtocolException;
 
-	void unlock(String token) throws OXException;
+	void unlock(String token) throws WebdavProtocolException;
 
-	List<WebdavLock> getOwnLocks() throws OXException;
+	List<WebdavLock> getOwnLocks() throws WebdavProtocolException;
 
-	WebdavLock getOwnLock(String token) throws OXException;
+	WebdavLock getOwnLock(String token) throws WebdavProtocolException;
 
-	Protocol.WEBDAV_METHOD[] getOptions() throws OXException;
+	Protocol.WEBDAV_METHOD[] getOptions() throws WebdavProtocolException;
 
 	boolean isLockNull();
 
-	WebdavResource reload() throws OXException;
+	WebdavResource reload() throws WebdavProtocolException;
 
     Protocol getProtocol();
 

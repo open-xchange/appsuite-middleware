@@ -73,14 +73,15 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[0];
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerModule(new MailActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "mail");
-        registerService(ResultConverter.class, new MailConverter());
-        registerService(ResultConverter.class, new MailJSONConverter());
+        final MailConverter converter = new MailConverter();
+        registerService(ResultConverter.class, converter);
+        registerService(ResultConverter.class, new MailJSONConverter(converter));
     }
 
 }

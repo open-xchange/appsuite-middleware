@@ -49,18 +49,17 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavHeadAction extends AbstractAction {
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res)
+			throws WebdavProtocolException {
 		head(res,req.getResource(),-1);
 	}
 
-	protected final void head(final WebdavResponse res, final WebdavResource resource, final long overrideLength) throws OXException {
+	protected final void head(final WebdavResponse res, final WebdavResource resource, final long overrideLength) throws WebdavProtocolException {
 		if(resource == null) {
 			return;
 		}

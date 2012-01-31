@@ -107,6 +107,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
+import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -115,6 +116,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.TextBodyMailPart;
@@ -607,6 +609,26 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     @Override
     public SearchIterator<MailMessage> getAllMessages(final String folder, final int sortCol, final int order, final int[] fields, final int[] fromToIndices) throws OXException {
         return getMessages(folder, fromToIndices, sortCol, order, null, null, false, fields);
+    }
+
+    @Override
+    public List<ThreadSortMailMessage> getAllSimpleThreadStructuredMessages(final String folder, final int sortCol, final int order, final int[] fields) throws OXException {
+        final FullnameArgument argument = prepareMailFolderParam(folder);
+        final int accountId = argument.getAccountId();
+        initConnection(accountId);
+        final String fullname = argument.getFullname();
+        // Check message storage
+        final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        if (messageStorage instanceof ISimplifiedThreadStructure) {
+            final ISimplifiedThreadStructure simplifiedThreadStructure = (ISimplifiedThreadStructure) messageStorage;
+            // Effective fields
+            final MailFields mailFields = new MailFields(MailField.getFields(fields));
+            mailFields.add(MailField.toField(MailListField.getField(sortCol)));
+            // Perform operation
+            return simplifiedThreadStructure.getThreadSortedMessages(fullname, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
+        }
+        // Not yet supported
+        throw MailExceptionCode.UNEXPECTED_ERROR.create("Simplified thread structure not supported by message storage: " + messageStorage.getClass().getName());
     }
 
     @Override
@@ -2014,7 +2036,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Handle update of permission or subscription
              */
             final String prepareFullname = prepareFullname(accountId, mailAccess.getFolderStorage().updateFolder(fullname, mailFolder));
-            postEvent(accountId, fullname, false);
+            postEvent(accountId, fullname, false, true);
             return prepareFullname;
         }
         /*
@@ -2023,7 +2045,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         final int accountId = mailFolder.getParentAccountId();
         initConnection(accountId);
         final String prepareFullname = prepareFullname(accountId, mailAccess.getFolderStorage().createFolder(mailFolder));
-        postEvent(accountId, mailFolder.getParentFullname(), false);
+        postEvent(accountId, mailFolder.getParentFullname(), false, true);
         return prepareFullname;
     }
 

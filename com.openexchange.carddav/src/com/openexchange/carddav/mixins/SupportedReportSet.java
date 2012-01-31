@@ -68,7 +68,7 @@ public class SupportedReportSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<supported-report><report><addressbook-multiget/></report></supported-report>";
+        return "<D:supported-report><D:report><CARD:addressbook-multiget/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
     }
 
 }

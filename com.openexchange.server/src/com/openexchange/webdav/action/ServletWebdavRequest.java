@@ -71,7 +71,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	private final WebdavPath url;
 	private WebdavPath destUrl;
 
-	private final ApacheURLDecoder decoder = new ApacheURLDecoder();
+	private ApacheURLDecoder decoder = new ApacheURLDecoder();
 
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServletWebdavRequest.class));
 
@@ -86,18 +86,15 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         this.url = toWebdavURL(req.getRequestURI());
 	}
 
-	@Override
-    public InputStream getBody() throws IOException {
+	public InputStream getBody() throws IOException {
 		return req.getInputStream();
 	}
 
-	@Override
-    public String getHeader(final String header) {
+	public String getHeader(final String header) {
 		return req.getHeader(header);
 	}
 
-	@Override
-    public List<String> getHeaderNames() {
+	public List<String> getHeaderNames() {
 		final List<String> headers = new ArrayList<String>();
 		final Enumeration enumeration = req.getHeaderNames();
 		while(enumeration.hasMoreElements()) {
@@ -106,8 +103,7 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 		return headers;
 	}
 
-	@Override
-    public String getURLPrefix() {
+	public String getURLPrefix() {
 		return urlPrefix;
 	}
 
@@ -115,13 +111,11 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         this.urlPrefix = urlPrefix;
     }
 
-	@Override
-    public WebdavPath getUrl() {
+	public WebdavPath getUrl() {
 		return url;
 	}
 
-	@Override
-    public WebdavPath getDestinationUrl() {
+	public WebdavPath getDestinationUrl() {
 		if(destUrl != null) {
 			return destUrl;
 		}
@@ -164,7 +158,6 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
         return decoder.decode(component, encoding);
     }
 
-    @Override
     public String getCharset() {
 		return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
 	}

@@ -51,10 +51,12 @@ package com.openexchange.webdav.action;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
+
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.tools.io.SizeAwareInputStream;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -65,7 +67,7 @@ public class WebdavPutAction extends AbstractAction {
 	private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(WebdavPutAction.class));
 
 	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res) throws OXException {
+	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final WebdavResource resource = req.getResource();
 		if(null != req.getHeader("content-length")) {
 			resource.setLength(new Long(req.getHeader("content-length")));
@@ -98,7 +100,7 @@ public class WebdavPutAction extends AbstractAction {
 		} catch (final IOException e) {
 			LOG.debug("Client Gone?", e);
 		} catch (final WebdavProtocolException x) {
-			if(in != null && in.hasExceeded()) {
+			if (in != null && in.hasExceeded()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
 			} else {
 				throw x;
