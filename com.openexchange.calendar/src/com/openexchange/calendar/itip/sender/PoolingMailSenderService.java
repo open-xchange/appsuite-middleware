@@ -22,6 +22,9 @@ public class PoolingMailSenderService implements MailSenderService {
 	}
 	
 	public void sendMail(NotificationMail mail, Session session) {
+		if (!mail.shouldBeSent()) {
+			return;
+		}
 		try {
 			
 			// Pool messages if this is a create mail or a modify mail
