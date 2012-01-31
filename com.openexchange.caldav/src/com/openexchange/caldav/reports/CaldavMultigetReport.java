@@ -59,17 +59,17 @@ import org.jdom.JDOMException;
 import org.jdom.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
  * A {@link CaldavMultigetReport} allows clients to retrieve properties of certain named resources. It is conceptually similar to a propfind.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavMultigetReport extends WebdavPropfindAction {
@@ -82,8 +82,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
         super(protocol);
     }
 
-    @Override
-    public void perform(WebdavRequest req, WebdavResponse res) throws OXException {
+    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
 
         List<Namespace> namespaces = protocol.getAdditionalNamespaces();
@@ -126,7 +125,7 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
 
     }
 
-    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws OXException {
+    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
         if (requestBody == null) {
             return Collections.emptyList();
         }

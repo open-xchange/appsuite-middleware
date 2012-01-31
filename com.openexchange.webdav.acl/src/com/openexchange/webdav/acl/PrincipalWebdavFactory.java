@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.acl;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
@@ -86,7 +85,7 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
     }
 
     @Override
-    public WebdavCollection resolveCollection(final WebdavPath url) throws OXException {
+    public WebdavCollection resolveCollection(final WebdavPath url) throws WebdavProtocolException {
         if (url.size() != 0) {
             throw WebdavProtocolException.generalError(url, 404);
         }
@@ -94,7 +93,7 @@ public class PrincipalWebdavFactory extends AbstractWebdavFactory {
     }
 
     @Override
-    public WebdavResource resolveResource(final WebdavPath url) throws OXException {
+    public WebdavResource resolveResource(final WebdavPath url) throws WebdavProtocolException {
         if (url.size() == 0) {
             return mixin(new RootPrincipal(this));
         }

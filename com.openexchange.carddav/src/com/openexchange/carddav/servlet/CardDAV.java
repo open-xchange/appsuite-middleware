@@ -50,11 +50,14 @@
 package com.openexchange.carddav.servlet;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.carddav.servlet.CarddavPerformer.Action;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -71,22 +74,24 @@ import com.openexchange.tools.webdav.OXServlet;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CardDAV extends OXServlet {
 
-    private static final transient Log LOG = LogFactory.getLog(CardDAV.class);
+	private static final long serialVersionUID = -6381396333467867154L;
 
+	private static final transient Log LOG = LogFactory.getLog(CardDAV.class);
+    
     private static ServiceLookup services;
-
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+    
+    public static void setServiceLookup(ServiceLookup serviceLookup) {
         services = serviceLookup;
     }
 
     @Override
     protected Interface getInterface() {
-        return Interface.WEBDAV_VCARD;
+        return Interface.CARDDAV;
     }
 
     @Override
@@ -155,7 +160,7 @@ public class CardDAV extends OXServlet {
     }
 
     @Override
-    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doReport(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         doIt(req, resp, Action.REPORT);
     }
 
@@ -180,12 +185,12 @@ public class CardDAV extends OXServlet {
         }
     }
 
-    private boolean checkPermission(final ServerSession session) {
+    private boolean checkPermission(ServerSession session) {
         try {
-            final ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
-            return (!property.isDefined() || property.get().booleanValue());
+            ComposedConfigProperty<Boolean> property = services.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.carddav.enabled", boolean.class);
+            return property.isDefined() && property.get() && session.getUserConfiguration().hasContact();
 
-        } catch (final OXException e) {
+        } catch (OXException e) {
             return false;
         }
     }
@@ -202,7 +207,7 @@ public class CardDAV extends OXServlet {
     private static final transient Tools.CookieNameMatcher COOKIE_MATCHER = new Tools.CookieNameMatcher() {
 
         @Override
-        public boolean matches(final String cookieName) {
+		public boolean matches(final String cookieName) {
             return (COOKIE_SESSIONID.equals(cookieName) || Tools.JSESSIONID_COOKIE.equals(cookieName));
         }
     };
@@ -225,9 +230,9 @@ public class CardDAV extends OXServlet {
         // TODO Auto-generated method stub
     }
 
-
+    
     private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-
+    
     @Override
     protected LoginCustomizer getLoginCustomizer() {
         return ALLOW_ASTERISK;

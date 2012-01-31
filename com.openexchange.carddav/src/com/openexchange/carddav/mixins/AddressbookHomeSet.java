@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 public class AddressbookHomeSet extends SingleXMLPropertyMixin {
 
     private static final String PROPERTY_NAME = "addressbook-home-set";
-
+    
     public AddressbookHomeSet() {
         super(CarddavProtocol.CARD_NS.getURI(), PROPERTY_NAME);
     }

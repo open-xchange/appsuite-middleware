@@ -147,7 +147,7 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
          * @return The newly created {@link WebdavProtocolException} instance
          */
         public WebdavProtocolException create(final WebdavPath url, final int status) {
-            return create(url, status);
+            return create(url, status, new Object[0]);
         }
 
         /**

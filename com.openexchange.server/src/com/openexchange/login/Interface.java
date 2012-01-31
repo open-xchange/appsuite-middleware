@@ -70,5 +70,9 @@ public enum Interface {
 
     MOBILECONFIG,
 
-    MAC_UPDATER
+    MAC_UPDATER,
+    
+    CALDAV,
+    
+    CARDDAV
 }

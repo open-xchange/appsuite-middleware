@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.jdom.Namespace;
 import com.openexchange.carddav.reports.AddressbookMultigetReport;
+import com.openexchange.carddav.reports.SyncCollection;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
 
@@ -70,16 +71,26 @@ public class CarddavProtocol extends Protocol {
     public static final String CARD_NAMESPACE = "CARD:";
 
     public static final String ADDRESSBOOK = "<CARD:addressbook />";
-
+    
+    /**
+     * Indicates whether the reduced folder set is used for synchronization, 
+     * i.e. the personal contacts folder and the global address book. 
+     */
+	public static final boolean REDUCED_FOLDER_SET = true; 
+			
+    
     @Override
     public List<Namespace> getAdditionalNamespaces() {
         return ADDITIONAL_NAMESPACES;
     }
-
+    
     @Override
     public WebdavAction getReportAction(String ns, String name) {
         if (ns.equals(AddressbookMultigetReport.NAMESPACE) && name.equals(AddressbookMultigetReport.NAME)) {
             return new AddressbookMultigetReport(this);
+        }
+        if (ns.equals(SyncCollection.NAMESPACE) && name.equals(SyncCollection.NAME)) {
+            return new SyncCollection(this);
         }
         return null;
     }

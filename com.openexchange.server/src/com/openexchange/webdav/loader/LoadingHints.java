@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.webdav.loader;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 
@@ -102,5 +103,37 @@ public class LoadingHints {
 	public boolean getLoadLocks(){
 		return loadLocks;
 	}
+
+    public boolean mustLoad(String namespace, String name) {
+        return properties.contains(new WebdavProperty(namespace, name));
+    }
+
+    public boolean mustLoad(com.openexchange.webdav.protocol.Protocol.Property p) {
+        return mustLoad(p.getNamespace(), p.getName());
+    }
+
+    public boolean loadOnly(Object...propertyDefinitions) {
+        Set<WebdavProperty> propDefs = new HashSet<WebdavProperty>(propertyDefinitions.length);
+        Object cache = null;
+        for (Object o : propertyDefinitions) {
+            if (String.class.isInstance(o)) {
+                if (cache == null) {
+                    cache = o;
+                } else {
+                    propDefs.add(new WebdavProperty((String) cache, (String) o));
+                    cache = null;
+                }
+            }
+
+            if (com.openexchange.webdav.protocol.Protocol.Property.class.isInstance(o)) {
+                cache = null;
+
+                com.openexchange.webdav.protocol.Protocol.Property p = (com.openexchange.webdav.protocol.Protocol.Property) o;
+                propDefs.add(new WebdavProperty(p.getNamespace(), p.getName()));
+            }
+        }
+
+        return properties.containsAll(propDefs);
+    }
 
 }

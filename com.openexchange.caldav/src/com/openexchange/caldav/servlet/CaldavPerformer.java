@@ -60,7 +60,6 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -84,7 +83,6 @@ import com.openexchange.webdav.action.WebdavExistsAction;
 import com.openexchange.webdav.action.WebdavGetAction;
 import com.openexchange.webdav.action.WebdavHeadAction;
 import com.openexchange.webdav.action.WebdavIfAction;
-import com.openexchange.webdav.action.WebdavIfMatchAction;
 import com.openexchange.webdav.action.WebdavLockAction;
 import com.openexchange.webdav.action.WebdavLogAction;
 import com.openexchange.webdav.action.WebdavMkcolAction;
@@ -102,24 +100,24 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
  * The {@link CaldavPerformer} contains all the wiring for caldav actions. This is the central entry point for caldav requests.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavPerformer implements SessionHolder {
 
-    private static final Log LOG = com.openexchange.exception.Log.valueOf(LogFactory.getLog(CaldavPerformer.class));
+    private static final Log LOG = LogFactory.getLog(CaldavPerformer.class);
 
     private static CaldavPerformer INSTANCE = null;
 
     private static ServiceLookup services;
 
-    public static void setServices(final ServiceLookup lookup) {
+    public static void setServices(ServiceLookup lookup) {
         services = lookup;
     }
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     *
+     * 
      * @return The instance of {@link InfostorePerformer}.
      */
     public static CaldavPerformer getInstance() {
@@ -187,7 +185,7 @@ public class CaldavPerformer implements SessionHolder {
         final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction();
         oxWebdavMaxUploadSize.setSessionHolder(this);
 
-        put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0, false, false), oxWebdavMaxUploadSize);
+        put = prepare(oxWebdavPut, false, true, oxWebdavMaxUploadSize);
         trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false));
 
         actions.put(Action.UNLOCK, unlock);
@@ -238,30 +236,30 @@ public class CaldavPerformer implements SessionHolder {
         logAction.setLogResponseBody(logResponse);
 
         final AbstractAction lifeCycle = new WebdavRequestCycleAction();
+        lifeCycle.setBulkLoader(factory);
         final AbstractAction defaultHeader = new WebdavDefaultHeaderAction();
-        final AbstractAction ifMatch = new WebdavIfMatchAction();
-
+        defaultHeader.setBulkLoader(factory);
         if (logAction.isEnabled()) {
             lifeCycle.setNext(logAction);
             logAction.setNext(defaultHeader);
         } else {
             lifeCycle.setNext(defaultHeader);
         }
-        defaultHeader.setNext(ifMatch);
 
-        AbstractAction a = ifMatch;
+        AbstractAction a = defaultHeader;
 
         for (final AbstractAction a2 : additionals) {
             a.setNext(a2);
+            a.setBulkLoader(factory);
             a = a2;
         }
 
         a.setNext(action);
+        a.setBulkLoader(factory);
 
         return lifeCycle;
     }
 
-    @Override
     public ServerSession getSessionObject() {
         sessionNotNull();
         return session.get();
@@ -274,12 +272,10 @@ public class CaldavPerformer implements SessionHolder {
         }
     }
 
-    @Override
     public Context getContext() {
         return session.get().getContext();
     }
 
-    @Override
     public User getUser() {
         return session.get().getUser();
     }
@@ -295,13 +291,8 @@ public class CaldavPerformer implements SessionHolder {
                 LOG.debug("Executing " + action);
             }
             actions.get(action).perform(webdavRequest, webdavResponse);
-        } catch (final OXException x) {
-            if (x instanceof WebdavProtocolException) {
-                final WebdavProtocolException we = (WebdavProtocolException) x;
-                resp.setStatus(we.getStatus());
-            } else {
-                LOG.error("Error detected.", x);
-            }
+        } catch (final WebdavProtocolException x) {
+            resp.setStatus(x.getStatus());
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);
         } finally {
@@ -313,7 +304,7 @@ public class CaldavPerformer implements SessionHolder {
         return factory;
     }
 
-    public void setGlobalMixins(final PropertyMixin... mixins) {
+    public void setGlobalMixins(PropertyMixin... mixins) {
         factory.setGlobalMixins(mixins);
     }
 }

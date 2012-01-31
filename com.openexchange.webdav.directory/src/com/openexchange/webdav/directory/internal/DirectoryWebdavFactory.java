@@ -49,7 +49,6 @@
 
 package com.openexchange.webdav.directory.internal;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -85,7 +84,7 @@ public class DirectoryWebdavFactory extends AbstractWebdavFactory{
     }
 
     @Override
-    public WebdavCollection resolveCollection(WebdavPath url) throws OXException {
+    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
         Node n = ROOT;
         for(String component : url) {
             n = n.getChild(component, false);
@@ -97,7 +96,7 @@ public class DirectoryWebdavFactory extends AbstractWebdavFactory{
     }
 
     @Override
-    public WebdavResource resolveResource(WebdavPath url) throws OXException {
+    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
         return resolveCollection(url);
     }
 

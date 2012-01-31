@@ -63,6 +63,7 @@ import java.util.UUID;
 
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
+import net.sourceforge.cardme.vcard.errors.VCardException;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
@@ -88,9 +89,9 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.carddav.reports.AddressbookMultiGetReportInfo;
 import com.openexchange.carddav.reports.SyncCollectionReportInfo;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
-import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.test.ContactTestManager;
@@ -397,13 +398,15 @@ public abstract class CardDAVTest extends AbstractAJAXSession {
     	final ReportInfo reportInfo = new AddressbookMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
     	final MultiStatusResponse[] responses = this.getCardDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/Contacts/");
         for (final MultiStatusResponse response : responses) {
-        	final String href = response.getHref();
-        	assertNotNull("got no href from response", href);
-        	final String data = this.extractTextContent(PropertyNames.ADDRESS_DATA, response);
-        	assertNotNull("got no address data from response", data);
-        	final String eTag = this.extractTextContent(PropertyNames.GETETAG, response);
-        	assertNotNull("got no etag data from response", eTag);
-        	addressData.add(new VCardResource(data, href, eTag));
+        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
+	        	final String href = response.getHref();
+	        	assertNotNull("got no href from response", href);
+	        	final String data = this.extractTextContent(PropertyNames.ADDRESS_DATA, response);
+	        	assertNotNull("got no address data from response", data);
+	        	final String eTag = this.extractTextContent(PropertyNames.GETETAG, response);
+	        	assertNotNull("got no etag data from response", eTag);
+	        	addressData.add(new VCardResource(data, href, eTag));
+        	}
 		}
 		return addressData;
 	}

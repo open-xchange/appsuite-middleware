@@ -53,33 +53,41 @@ import java.util.Arrays;
 import java.util.List;
 import org.jdom.Namespace;
 import com.openexchange.caldav.reports.CaldavMultigetReport;
+import com.openexchange.caldav.reports.CalendarQueryReport;
+import com.openexchange.caldav.reports.SyncCollection;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
 
 /**
  * The {@link CaldavProtocol} contains constants useful for our caldav implementation
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CaldavProtocol extends Protocol {
 
     public static final Namespace CAL_NS = Namespace.getNamespace("CAL", "urn:ietf:params:xml:ns:caldav");
 
-    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CAL_NS);
+    public static final Namespace APPLE_NS = Namespace.getNamespace("APPLE", "http://apple.com/ns/ical/");
+    
+    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CAL_NS, APPLE_NS);
 
     public static final String CAL_NAMESPACE = "CAL:";
 
     public static final String CALENDAR = "<CAL:calendar />";
-
+    
     @Override
     public List<Namespace> getAdditionalNamespaces() {
         return ADDITIONAL_NAMESPACES;
     }
-
+    
     @Override
     public WebdavAction getReportAction(String ns, String name) {
         if (ns.equals(CaldavMultigetReport.NAMESPACE) && name.equals(CaldavMultigetReport.NAME)) {
             return new CaldavMultigetReport(this);
+        } else if (ns.equals(CalendarQueryReport.NAMESPACE) && name.equals(CalendarQueryReport.NAME)) {
+            return new CalendarQueryReport(this);
+        } else if (ns.equals(SyncCollection.NAMESPACE) && name.equals(SyncCollection.NAME)) {
+            return new SyncCollection(this);
         }
         return null;
     }

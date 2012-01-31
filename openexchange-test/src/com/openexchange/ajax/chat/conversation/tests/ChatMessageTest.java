@@ -85,6 +85,9 @@ public final class ChatMessageTest extends AbstractAJAXSession {
 
     private AJAXClient client2;
 
+    private final String DELIM = "-";
+
+
     /**
      * Initializes a new {@link ChatMessageTest}.
      */
@@ -126,7 +129,9 @@ public final class ChatMessageTest extends AbstractAJAXSession {
                 newChatRequest.setOptServiceId(ChatService.DEFAULT_SERVICE);
                 final NewChatConversationResponse newChatResponse = client.execute(newChatRequest);
                 chat = newChatResponse.getChat(timeZone);
-                conversationId = new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId());
+                final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
+                conversationId = new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId);
             }
             /*
              * Post a new message
@@ -229,7 +234,9 @@ public final class ChatMessageTest extends AbstractAJAXSession {
                 newChatRequest.setOptServiceId(ChatService.DEFAULT_SERVICE);
                 final NewChatConversationResponse newChatResponse = client.execute(newChatRequest);
                 chat = newChatResponse.getChat(timeZone);
-                conversationId = new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, chat.getChatId());
+                final int indexOfChatId = chat.getChatId().lastIndexOf(DELIM);
+                final String currentChatId = chat.getChatId().substring(indexOfChatId + 1);
+                conversationId = new ConversationID(ChatService.DEFAULT_SERVICE, ChatService.DEFAULT_ACCOUNT, currentChatId);
             }
             /*
              * Post a new message

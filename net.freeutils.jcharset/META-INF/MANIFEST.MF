@@ -6,7 +6,7 @@ Bundle-Version: 7.0.0.0
 Bundle-Vendor: freeutils.net
 Bundle-Activator: net.freeutils.charset.osgi.JCharsetActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: net.freeutils.jcharset.osgi.jar,
+Bundle-ClassPath: .,
  lib/jcharset-1.3.jar
 Export-Package: net.freeutils.charset
 Import-Package: org.apache.commons.logging,

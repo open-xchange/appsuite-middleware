@@ -55,7 +55,7 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 /**
  * The {@link ScheduleOutboxURL} mixin extends the properties of resources to include the URL where the client may POST imip messages.
  * Currently these messages are ignored (but the client insists on sending them).
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ScheduleOutboxURL extends SingleXMLPropertyMixin {
