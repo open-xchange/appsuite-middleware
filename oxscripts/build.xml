@@ -2,7 +2,7 @@
 <project name="oxscript overrides" basedir=".">
 
     <description>
-        This build file overrides the installConf target to patch a lot of configuration files before installing them.
+        This build file uses the postInstall target to patch a lot of script files before installing them.
     </description>
 
     <!-- Customizable values -->
@@ -61,7 +61,6 @@
         <property name="patchSbinDir" value="${tmpDir}/${sbinDir}"/>
         <mkdir dir="${patchSbinDir}"/>
         <antcall target="moveAndPatchScripts">
-            <param name="common.conf.subst.patch" value="${conf.install.dir}"/>
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
             <param name="lib.subst.patch" value="${lib.install.dir}"/>
         </antcall>
@@ -72,19 +71,8 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
-        <!--
-        <move tofile="${patchSbinDir}/checkconsistency" file="${patchSbinDir}/checkconsistency.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/checkconfigconsistency" file="${patchSbinDir}/checkconfigconsistency.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/forceupdatetask" file="${patchSbinDir}/forceupdatetask.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/listExecutedUpdateTasks" file="${patchSbinDir}/listExecutedUpdateTasks.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/logincounter" file="${patchSbinDir}/logincounter.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/open-xchange-groupware" file="${patchSbinDir}/open-xchange-groupware.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/oxreport" file="${patchSbinDir}/oxreport.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/restoregabdefaults" file="${patchSbinDir}/restoregabdefaults.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/runupdate" file="${patchSbinDir}/runupdate.in" overwrite="true"/>
-        -->
         <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency forceupdatetask listExecutedUpdateTasks logincounter open-xchange-groupware restoregabdefaults runupdate">
-            <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
+            <replacefilter token="@oxfunctions@" value="${prefix}/${sbinDir}/oxfunctions.sh"/>
             <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
             <replacefilter token="@consolelogfile@" value="${log.install.dir}/open-xchange-console.log"/>
