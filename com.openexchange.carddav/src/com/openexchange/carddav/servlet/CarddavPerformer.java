@@ -57,14 +57,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.webdav.InfostorePerformer;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
 import com.openexchange.webdav.action.OXWebdavPutAction;
@@ -96,7 +96,7 @@ import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
  * The {@link CarddavPerformer} contains all the wiring for Carddav actions. This is the central entry point for Carddav requests.
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class CarddavPerformer implements SessionHolder {
@@ -113,7 +113,7 @@ public class CarddavPerformer implements SessionHolder {
 
     /**
      * Gets the instance of {@link InfostorePerformer}.
-     *
+     * 
      * @return The instance of {@link InfostorePerformer}.
      */
     public static CarddavPerformer getInstance() {
@@ -151,11 +151,11 @@ public class CarddavPerformer implements SessionHolder {
         WebdavAction head;
         WebdavAction put;
         WebdavAction trace;
+        
+        this.factory = new GroupwareCarddavFactory(services.getService(FolderService.class), this, services.getService(ConfigViewFactory.class), services.getService(UserService.class));
 
-        this.factory = new GroupwareCarddavFactory(services.getService(FolderService.class), this);
-
-
-
+        
+        
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
         propFind = prepare(new WebdavPropfindAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false));
@@ -175,7 +175,7 @@ public class CarddavPerformer implements SessionHolder {
         final OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction();
         oxWebdavMaxUploadSize.setSessionHolder(this);
 
-        put = prepare(oxWebdavPut, false, true, new WebdavIfAction(0, false, false), oxWebdavMaxUploadSize);
+        put = prepare(oxWebdavPut, false, true, oxWebdavMaxUploadSize);
         trace = prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false));
 
         actions.put(Action.UNLOCK, unlock);
@@ -236,16 +236,17 @@ public class CarddavPerformer implements SessionHolder {
             lifeCycle.setNext(defaultHeader);
         }
         defaultHeader.setNext(ifMatch);
-
         AbstractAction a = ifMatch;
-
         for (final AbstractAction a2 : additionals) {
             a.setNext(a2);
             a = a2;
         }
-
+//        AbstractAction a = defaultHeader;
+//        for (final AbstractAction a2 : additionals) {
+//            a.setNext(a2);
+//            a = a2;
+//        }
         a.setNext(action);
-
         return lifeCycle;
     }
 
@@ -284,8 +285,6 @@ public class CarddavPerformer implements SessionHolder {
             resp.setStatus(x.getStatus());
         } catch (final NullPointerException x) {
             LOG.error("Null reference detected.", x);
-        } catch (OXException e) {
-            LOG.error("OX error detected.", e);
         } finally {
             session.set(null);
         }

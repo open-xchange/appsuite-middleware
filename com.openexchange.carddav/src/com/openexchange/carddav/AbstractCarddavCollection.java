@@ -52,8 +52,12 @@ package com.openexchange.carddav;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
@@ -65,7 +69,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * {@link AbstractCarddavResource}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractCarddavCollection extends AbstractCollection {
@@ -84,7 +88,7 @@ public abstract class AbstractCarddavCollection extends AbstractCollection {
 
     @Override
     protected void internalDelete() throws WebdavProtocolException {
-        // Nope
+
     }
 
     @Override
@@ -97,7 +101,7 @@ public abstract class AbstractCarddavCollection extends AbstractCollection {
 
     @Override
     public void setCreationDate(Date date) throws WebdavProtocolException {
-        // Empty
+
     }
 
     @Override
@@ -117,7 +121,7 @@ public abstract class AbstractCarddavCollection extends AbstractCollection {
 
     @Override
     protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-        // Empty
+
     }
 
     @Override
@@ -127,76 +131,76 @@ public abstract class AbstractCarddavCollection extends AbstractCollection {
 
     public WebdavProtocolException internalError(Throwable t) {
         LOG.error(t.getMessage(), t);
-        return WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), 500);
+        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     @Override
-    public void create() throws WebdavProtocolException {
-        // Empty
+	public void create() throws WebdavProtocolException {
+
     }
 
     @Override
-    public boolean exists() throws WebdavProtocolException {
+	public boolean exists() throws WebdavProtocolException {
         return true;
     }
 
     @Override
-    public Date getCreationDate() throws WebdavProtocolException {
+	public Date getCreationDate() throws WebdavProtocolException {
         return new Date(0);
     }
 
     @Override
-    public Date getLastModified() throws WebdavProtocolException {
+	public Date getLastModified() throws WebdavProtocolException {
         return new Date(0);
     }
 
     @Override
-    public WebdavLock getLock(String token) throws WebdavProtocolException {
+	public WebdavLock getLock(String token) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public List<WebdavLock> getLocks() throws WebdavProtocolException {
+	public List<WebdavLock> getLocks() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
+	public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
+	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
         return Collections.emptyList();
     }
 
     @Override
-    public String getSource() throws WebdavProtocolException {
+	public String getSource() throws WebdavProtocolException {
         return null;
     }
 
     @Override
-    public WebdavPath getUrl() {
+	public WebdavPath getUrl() {
         return url;
     }
 
     @Override
-    public void lock(WebdavLock lock) throws WebdavProtocolException {
-        // Empty
+	public void lock(WebdavLock lock) throws WebdavProtocolException {
+
     }
 
     @Override
-    public void save() throws WebdavProtocolException {
-        // Empty
+	public void save() throws WebdavProtocolException {
+
     }
 
     @Override
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
-        // Empty
+	public void setDisplayName(String displayName) throws WebdavProtocolException {
+
     }
 
     @Override
-    public void unlock(String token) throws WebdavProtocolException {
-        // Empty
+	public void unlock(String token) throws WebdavProtocolException {
+
     }
 }

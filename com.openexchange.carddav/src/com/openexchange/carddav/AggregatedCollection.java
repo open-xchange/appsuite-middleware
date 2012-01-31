@@ -50,96 +50,141 @@
 package com.openexchange.carddav;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.carddav.GroupwareCarddavFactory.State;
 import com.openexchange.carddav.mixins.CTag;
 import com.openexchange.carddav.mixins.SupportedReportSet;
+import com.openexchange.carddav.mixins.SyncToken;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * {@link CarddavCollection}
- *
+ * {@link AggregatedCollection}
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AggregatedCollection extends AbstractCarddavCollection {
 
-    /**
-     * Initializes a new {@link CarddavCollection}.
-     *
-     * @param rootCollection
-     * @param folder
-     * @param factory
-     * @throws WebdavProtocolException
-     */
-    public AggregatedCollection(WebdavPath url, GroupwareCarddavFactory factory) throws WebdavProtocolException {
-        super(factory, url);
+    private static final Log LOG = LogFactory.getLog(AggregatedCollection.class);
 
+	/**
+	 * Initializes a new {@link AggregatedCollection}
+	 * @param url
+	 * @param factory
+	 * @throws WebdavProtocolException
+	 */
+    public AggregatedCollection(final WebdavPath url, final GroupwareCarddavFactory factory) throws WebdavProtocolException {
+        super(factory, url);
         try {
-            includeProperties(new SupportedReportSet(), new CTag(factory.getState().getAggregatedContacts(), factory.getSession().getUserId()));
-        } catch (OXException e) {
+        	final UserizedFolder folder = this.factory.getState().getFolder(
+        			Integer.toString(this.factory.getState().getDefaultFolderId()));
+        	final Permission permission = folder.getOwnPermission();        	
+            super.includeProperties(
+            		new SupportedReportSet(), 
+            		new CTag(factory), 
+            		new SyncToken(factory), 
+            		new CurrentUserPrivilegeSet(permission))
+            ;
+        } catch (final Exception e) {
             throw internalError(e);
         }
-
     }
 
     @Override
-    public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        State state = factory.getState();
-        List<Contact> contacts;
+	public List<WebdavResource> getChildren() throws WebdavProtocolException {
         try {
-            contacts = state.getAggregatedContacts();
-
-            List<WebdavResource> children = new ArrayList<WebdavResource>(contacts.size());
-
-            for (Contact contact : contacts) {
+        	/*
+        	 * get child resources
+        	 */
+            final State state = factory.getState();
+            final Collection<Contact> contacts = state.getContacts();
+            final List<UserizedFolder> folders = state.getFolders();
+            final List<WebdavResource> children = new ArrayList<WebdavResource>(
+            		(null != contacts ? contacts.size() : 0) + (null != folders ? folders.size() : 0));
+            /*
+             * add contacts
+             */
+            for (final Contact contact : contacts) {
                 if (contact.getMarkAsDistribtuionlist()) {
                     continue;
                 }
-                CarddavResource resource = new CarddavResource(this, contact, factory);
-                children.add(resource);
+                children.add(new ContactResource(this, factory, contact));
             }
-
+            if (LOG.isDebugEnabled()) {
+            	LOG.debug(this.getUrl() + ": added " + contacts.size() + " contact resources.");
+            }
+            /*
+             * add folders
+             */
+            for (final UserizedFolder userizedFolder : folders) {
+    			children.add(new FolderGroupResource(this, this.factory, userizedFolder));
+            }            
+            if (LOG.isDebugEnabled()) {
+            	LOG.debug(this.getUrl() + ": added " + folders.size() + " folder group resources.");
+            }
             return children;
-        } catch (OXException e) {
+		} catch (final OXException e) {
             throw internalError(e);
-        }
+		}
     }
 
-
     @Override
-    public String getDisplayName() throws WebdavProtocolException {
+	public String getDisplayName() throws WebdavProtocolException {
         return "Contacts";
     }
 
-    public CarddavResource getChild(String name) throws WebdavProtocolException {
-        List<WebdavResource> children = getChildren();
-        for (WebdavResource resource : children) {
-            if (resource.getUrl().name().equals(name)) {
-                return (CarddavResource) resource;
+    /**
+     * Gets a child resource by its name
+     * 
+     * @param name
+     * @return
+     * @throws WebdavProtocolException
+     */
+    public AbstractResource getChild(final String name) throws WebdavProtocolException {
+    	try {
+	    	final String folderId = Tools.extractFolderId(name);
+	    	if (null != folderId) {
+	    		final UserizedFolder folder = this.factory.getState().getFolder(folderId);
+	    		if (null != folder) {
+	    			return new FolderGroupResource(this, this.factory, folder);
+	    		}
+	    	} else {
+	        	final String uid = Tools.extractUID(name);
+	        	if (null != uid) {        	
+	        		final Contact contact = this.factory.getState().load(uid);
+	        		if (null != contact) {
+	        			return new ContactResource(this, factory, contact);	
+	        		}
+	        	}
+	    	}
+            if (LOG.isDebugEnabled()) {
+            	LOG.debug(this.getUrl() + ": child '" + name + "' not found, generating UndecidedResource.");
             }
-        }
-        return new CarddavResource(this, factory);
+	    	return new UndecidedResource(this, factory, getUrl().dup().append(name));
+    	} catch (OXException e) {
+    		throw internalError(e);
+		}
     }
-
+    
     @Override
     public String getResourceType() throws WebdavProtocolException {
-        try {
-            return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
-        } catch (OXException e) {
-            throw internalError(e);
-        }
+        return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
     }
 
-    public int getStandardFolder() {
-        try {
-            return factory.getState().getStandardContactFolderId();
-        } catch (OXException e) {
-            return -1;
-        }
+    public int getStandardFolder() throws OXException {
+    	return this.factory.getState().getDefaultFolderId();
     }
-
 }
