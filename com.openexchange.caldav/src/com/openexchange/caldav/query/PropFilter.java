@@ -47,28 +47,14 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
-
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+package com.openexchange.caldav.query;
 
 
 /**
- * {@link SupportedReportSet}
+ * {@link PropFilter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
-
-    private static final String NAME = "supported-report-set";
-
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
-    }
-
-    @Override
-    protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
-    }
+public class PropFilter {
 
 }

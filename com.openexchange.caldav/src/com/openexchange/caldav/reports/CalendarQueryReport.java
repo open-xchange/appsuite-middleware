@@ -53,40 +53,47 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.Namespace;
+
 import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.query.Filter;
+import com.openexchange.caldav.query.FilterParser;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
+
 /**
- * A {@link CaldavMultigetReport} allows clients to retrieve properties of certain named resources. It is conceptually similar to a propfind.
- * 
+ * {@link CalendarQueryReport}
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CaldavMultigetReport extends WebdavPropfindAction {
+public class CalendarQueryReport extends WebdavPropfindAction {
 
     public static final String NAMESPACE = CaldavProtocol.CAL_NS.getURI();
 
-    public static final String NAME = "calendar-multiget";
+    public static final String NAME = "calendar-query";
 
-    public CaldavMultigetReport(Protocol protocol) {
+    public CalendarQueryReport(final Protocol protocol) {
         super(protocol);
     }
 
-    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
+    @Override
+    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
         final Element response = new Element("multistatus", DAV_NS);
 
-        List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-        for (Namespace namespace : namespaces) {
+        final List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+        for (final Namespace namespace : namespaces) {
             response.addNamespaceDeclaration(namespace);
         }
 
@@ -96,20 +103,20 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
         Document requestBody = null;
         try {
             requestBody = req.getBodyAsDocument();
-        } catch (JDOMException e) {
+        } catch (final JDOMException e) {
             forceAllProp = true;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             forceAllProp = true;
         }
 
-        ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
+        final ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
 
-        List<WebdavPath> paths = getPaths(req, requestBody);
+        final List<WebdavResource> resources = getMatching(req, requestBody);
 
-        List<Element> all = new ArrayList<Element>();
+        final List<Element> all = new ArrayList<Element>();
 
-        for (WebdavPath webdavPath : paths) {
-            List<Element> marshalled = marshaller.marshal(req.getFactory().resolveResource(webdavPath));
+        for (final WebdavResource resource : resources) {
+            final List<Element> marshalled = marshaller.marshal(resource);
             all.addAll(marshalled);
         }
 
@@ -122,29 +129,22 @@ public class CaldavMultigetReport extends WebdavPropfindAction {
         } catch (final IOException e) {
             // IGNORE
         }
-
     }
 
-    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
+    private List<WebdavResource> getMatching(final WebdavRequest req, final Document requestBody) throws WebdavProtocolException {
         if (requestBody == null) {
             return Collections.emptyList();
         }
-
-        List children = requestBody.getRootElement().getChildren("href", DAV_NS);
-        if (children == null || children.isEmpty()) {
+        final Element filterDef = requestBody.getRootElement().getChild("filter", CaldavProtocol.CAL_NS);
+        if (filterDef == null) {
             return Collections.emptyList();
         }
 
-        List<WebdavPath> paths = new ArrayList<WebdavPath>(children.size());
-        int length = req.getURLPrefix().length();
-        for (Object object : children) {
-            Element href = (Element) object;
-            String url = href.getText();
-            url = url.substring(length);
-            paths.add(((GroupwareCaldavFactory) req.getFactory()).decode(new WebdavPath(url)));
+        final Filter filter = new FilterParser().parse(filterDef);
+        try {
+            return ((FilteringResource) req.getResource()).filter(filter);
+        } catch (final ClassCastException x) {
+            throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
-        return paths;
     }
-
 }

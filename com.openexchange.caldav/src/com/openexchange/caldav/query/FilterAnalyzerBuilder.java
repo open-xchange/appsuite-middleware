@@ -47,28 +47,64 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.caldav.query;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
 
 
 /**
- * {@link SupportedReportSet}
+ * A {@link FilterAnalyzerBuilder} is a builder for a {@link FilterAnalyzer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SupportedReportSet extends SingleXMLPropertyMixin {
-
-    private static final String NAME = "supported-report-set";
-
-    public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+public class FilterAnalyzerBuilder {
+    private List<AnalyzerElement> analyzers = new ArrayList<AnalyzerElement>();
+    
+    private AnalyzerElement top;
+    private Stack<AnalyzerElement> stack = new Stack<AnalyzerElement>();
+    
+    
+    public FilterAnalyzerBuilder compFilter(String name) {
+        CompAnalyzer compAnalyzer = new CompAnalyzer(name);
+        if (top != null) {
+            top.addChildAnalyzer(compAnalyzer);
+            stack.push(top);
+        }
+        top = compAnalyzer;
+        return this;
     }
 
-    @Override
-    protected String getValue() {
-        return "<D:supported-report><D:report><CAL:calendar-multiget/></D:report></D:supported-report><D:supported-report><D:report><CAL:calendar-query/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+    public FilterAnalyzerBuilder timeRange() {
+        TimeRangeAnalyzer analyzer = new TimeRangeAnalyzer();
+        if (top != null) {
+            top.addChildAnalyzer(analyzer);
+            stack.push(top);
+        }
+        top = analyzer;
+        return this;
     }
 
+    public FilterAnalyzerBuilder capture() {
+        if (top != null) {
+            top.setCapturing(true);
+        }
+        return this;
+    }
+
+    public FilterAnalyzerBuilder end() {
+        if (stack.isEmpty()) {
+            analyzers.add(top);
+            top = null;
+        } else {
+            top = stack.pop();
+        }
+        return this;
+    }
+
+    public FilterAnalyzer build() {
+        return new FilterAnalyzer(analyzers);
+    }
+    
 }

@@ -47,66 +47,76 @@
  *
  */
 
-package com.openexchange.caldav;
+package com.openexchange.caldav.query;
 
-import java.util.ArrayList;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
-import com.openexchange.caldav.mixins.CalendarHomeSet;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.webdav.protocol.Protocol.Property;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.jdom.Attribute;
+import org.jdom.Element;
+
+import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+
 
 /**
- * The {@link RootCollection} is a caldav collection containing, as its subcollections, all calendars of a user.
+ * {@link FilterParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RootCollection extends AbstractStandardCaldavCollection {
+public class FilterParser {
+    private static final Log LOG = LogFactory.getLog(FilterParser.class);
     
-    public RootCollection(GroupwareCaldavFactory factory) {
-        super(factory);
-        includeProperties(new CalendarHomeSet());
-    }
-
-    @Override
-	public List<WebdavResource> getChildren() throws WebdavProtocolException {
-    	List<UserizedFolder> folders;
-		try {
-			folders = this.factory.getState().getVisibleFolders();
-		} catch (final OXException e) {
-            throw internalError(e);
-		}
-    	final List<WebdavResource> children = new ArrayList<WebdavResource>(folders.size());
-    	int order = 0;
-    	for (final UserizedFolder folder : folders) {
-			children.add(new CaldavCollection(this, folder, this.factory, ++order));
-		}
-        return children;
-    }
-
-    @Override
-	public WebdavPath getUrl() {
-        return GroupwareCaldavFactory.ROOT_URL;
-    }
-
-    @Override
-	public String getDisplayName() throws WebdavProtocolException {
-        return "";
+    public Filter parse(Element rootElement) throws WebdavProtocolException {
+        Filter filter = new Filter();
+        initChildFilters(filter, rootElement);
+        return filter;
     }
     
-    @Override
-	protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
-        return null;
+    private static final String DATETIME_PATTERN = "yyyyMMdd'T'HHmmss'Z'";
+
+    private void initChildFilters(Filter filter, Element rootElement) throws WebdavProtocolException {
+        List children = rootElement.getChildren("comp-filter", CaldavProtocol.CAL_NS);
+        for (Object cObj : children) {
+            Element compFilterElement = (Element) cObj;
+            CompFilter compFilter = new CompFilter();
+            compFilter.setName(compFilterElement.getAttributeValue("name"));
+            initChildFilters(compFilter, compFilterElement);
+            filter.addFilter(compFilter);
+        }
+        
+        children = rootElement.getChildren("time-range", CaldavProtocol.CAL_NS);
+        for (Object cObj : children) {
+            Element timeRangeElement = (Element) cObj;
+            TimeRange tr = new TimeRange();
+
+            tr.setStart(parseDate(timeRangeElement.getAttribute("start")));
+            tr.setEnd(parseDate(timeRangeElement.getAttribute("end")));
+
+            filter.addFilter(tr);
+        }
     }
 
-    @Override
-    protected boolean isset(Property p) {
-        return true;
+    private long parseDate(Attribute startAttr) throws WebdavProtocolException {
+        SimpleDateFormat format = new SimpleDateFormat(DATETIME_PATTERN);
+        format.setTimeZone(TimeZone.getTimeZone("utc"));
+        if (startAttr != null && startAttr.getValue() != null) {
+            try {
+                Date startDate = format.parse(startAttr.getValue());
+                return startDate.getTime();
+            } catch (ParseException e) {
+                LOG.error(e.getMessage(), e);
+                throw WebdavProtocolException.generalError(new WebdavPath(), HttpServletResponse.SC_BAD_REQUEST);
+            }
+        }
+        return TimeRange.NOT_SET;
     }
 }
