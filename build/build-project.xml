@@ -279,16 +279,7 @@
         </antcall>
     </target>
 
-	<target name="testForInstallOther" description="Tests if postInstall needs to be executed.">
-		<condition property="installOther">
-			<or>
-			    <available file="build-project.xml" type="file"/>
-				<available file="${confDir}" type="dir"/>
-			</or>
-		</condition>
-	</target>
-
-	<target name="installOther" depends="testForInstallOther" if="installOther" description="Calls postInstall and installs therefore everything else except the bundle.">
+	<target name="installOther" description="Calls postInstall and installs therefore everything else except the bundle.">
 		<antcall target="installConf" inheritrefs="true"/>
 		<antcall target="postInstall" inheritrefs="true"/>
 	</target>
