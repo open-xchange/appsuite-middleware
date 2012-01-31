@@ -50,6 +50,7 @@
 package com.openexchange.tools.versit.converter;
 
 import static com.openexchange.tools.io.IOUtils.closeStreamStuff;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -75,11 +76,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+
 import javax.activation.MimetypesFileTypeMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
+
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -612,15 +616,8 @@ public class OXContainerConverter {
         // SOUND is ignored
         // URL
         StringProperty(contactContainer, object, "URL", Contact.URL);
-        // TODO UID
-        // property = object.getProperty("UID");
-        // if (property != null) {
-        // String uid = property.getValue().toString();
-        // if (uid.endsWith(atdomain))
-        // contact.setObjectID(Integer.parseInt(uid.substring(0, uid
-        // .length()
-        // - atdomain.length())));
-        // }
+        // UID
+        StringProperty(contactContainer, object, "UID", Contact.UID);
         // VERSION is ignored
         // TODO CLASS
         // KEY is ignored
@@ -1634,7 +1631,7 @@ public class OXContainerConverter {
         // URL
         addProperty(object, "URL", contact.getURL());
         // UID
-        addProperty(object, "UID", contact.getObjectID() + atdomain);
+        addProperty(object, "UID", contact.getUid());
         // TODO CLASS
         // KEY is ignored
         return object;
