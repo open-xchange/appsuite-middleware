@@ -194,9 +194,11 @@ public class Login extends AJAXServlet {
 
     }
 
-    public static final String SESSION_PREFIX = "open-xchange-session-";
+    public static final String SESSION_PREFIX = "open-xchange-session-".intern();
 
-    public static final String SECRET_PREFIX = "open-xchange-secret-";
+    public static final String SECRET_PREFIX = "open-xchange-secret-".intern();
+
+    public static final String PUBLIC_SESSION_NAME = "open-xchange-public-session".intern();
 
     private static final String ACTION_FORMLOGIN = "formlogin";
     public static final String ACTION_CHANGEIP = "changeip";

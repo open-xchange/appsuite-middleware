@@ -143,7 +143,15 @@ public interface SessiondService {
      * @param sessionId The Session identifier
      * @return Return the session object or null if no session exists for the given identifier or if the session is expired
      */
-    public Session getSession(final String sessionId);
+    public Session getSession(String sessionId);
+
+    /**
+     * Get the session object related to the given alternative identifier.
+     *
+     * @param altId The alternative identifier
+     * @return Return the session object or null if no session exists for the given alternative identifier or if the session is expired
+     */
+    public Session getSessionByAlternativeId(String altId);
 
     /**
      * Get the session object related to the given random token.

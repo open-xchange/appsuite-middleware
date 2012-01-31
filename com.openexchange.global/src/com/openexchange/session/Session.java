@@ -79,20 +79,27 @@ public interface Session {
      * }
      * </pre>
      */
-    public static final String PARAM_LOCK = "session.lock";
+    public static final String PARAM_LOCK = "session.lock".intern();
 
     /**
      * The parameter name for request counter currently active on session. The parameter value is an instance of
      * <code>java.util.concurrent.atomic.AtomicInteger</code>.
      */
-    public static final String PARAM_COUNTER = "com.openexchange.session.counter";
+    public static final String PARAM_COUNTER = "com.openexchange.session.counter".intern();
 
     /**
      * The parameter for client capabilities.
      *
      * @type <code>java.util.List&lt;String&gt;</code>
      */
-    public static final String PARAM_CAPABILITIES = "session.clientCapabilities";
+    public static final String PARAM_CAPABILITIES = "session.clientCapabilities".intern();
+
+    /**
+     * The parameter for optional alternative identifier.
+     *
+     * @type <code>java.lang.String</code>
+     */
+    public static final String PARAM_ALTERNATIVE_ID = "__session.altId".intern();
 
     /**
      * @return the context identifier.

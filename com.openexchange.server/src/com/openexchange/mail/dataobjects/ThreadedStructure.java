@@ -64,16 +64,16 @@ public final class ThreadedStructure {
      * @param mails The thread-sorted mails
      * @return A new {@link ThreadedStructure} instance
      */
-    public static ThreadedStructure valueOf(final List<ThreadSortMailMessage> mails) {
+    public static ThreadedStructure valueOf(final List<List<MailMessage>> mails) {
         return new ThreadedStructure(mails);
     }
 
-    private final List<ThreadSortMailMessage> mails;
+    private final List<List<MailMessage>> mails;
 
     /**
      * Initializes a new {@link ThreadedStructure}.
      */
-    private ThreadedStructure(final List<ThreadSortMailMessage> mails) {
+    private ThreadedStructure(final List<List<MailMessage>> mails) {
         super();
         this.mails = mails;
     }
@@ -83,7 +83,7 @@ public final class ThreadedStructure {
      * 
      * @return The thread-sorted mails
      */
-    public List<ThreadSortMailMessage> getMails() {
+    public List<List<MailMessage>> getMails() {
         return mails;
     }
 

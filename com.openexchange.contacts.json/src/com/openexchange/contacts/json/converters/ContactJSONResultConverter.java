@@ -253,7 +253,7 @@ public class ContactJSONResultConverter implements ResultConverter {
             {
                 final byte[] imageData = contact.getImage1();
                 if (imageData != null) {
-                    final ContactImageDataSource imgSource = new ContactImageDataSource();
+                    final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
                     final ImageLocation il =
                         new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(
                             String.valueOf(contact.getObjectID())).build();

@@ -57,8 +57,8 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
-import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -110,7 +110,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction {
              * Start response
              */
             final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-            final List<ThreadSortMailMessage> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns);
+            final List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, sortCol, orderDir, columns);
             return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
