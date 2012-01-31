@@ -129,7 +129,7 @@ public final class ManagedFileImageDataSource implements ImageDataSource {
         /*
          * Nothing special...
          */
-        ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
+        ImageUtility.startImageUrl(imageLocation, session, this, true, false, sb);
         return sb.toString();
     }
 
