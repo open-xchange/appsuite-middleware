@@ -88,6 +88,6 @@
             <fileset dir="system"/>
             <mapper type="glob" from="*.${distribution}" to="*"/>
         </copy>
-        <chmod perm="755" file="${destDir}/etc/init.d/open-xchange-groupware"/>
+        <!-- chmod perm="755" file="${destDir}/etc/init.d/open-xchange-groupware"/ -->
 	</target>
 </project>
