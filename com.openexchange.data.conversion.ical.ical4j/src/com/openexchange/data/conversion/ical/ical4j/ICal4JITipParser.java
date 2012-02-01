@@ -105,7 +105,7 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             net.fortuna.ical4j.model.Calendar calendar = parse(reader);
 
             Method method = (Method) calendar.getProperty(Method.METHOD);
-            ITipMethod methodValue = ITipMethod.get(method.getValue());
+            ITipMethod methodValue = (method == null) ? ITipMethod.NO_METHOD : ITipMethod.get(method.getValue());
             
             List<AttributeConverter<VEvent, Appointment>> converters = AppointmentConverters.getConverters(methodValue);
 
