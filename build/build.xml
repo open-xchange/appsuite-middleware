@@ -196,7 +196,6 @@
             <files>
                 <fileset dir="${tmpDir}">
                     <exclude name="${packageName}-${version}/**"/>
-                    <exclude name="${packageName}_${version}.orig.tar.bz2"/>
                     <include name="${packageName}_${version}*"/>
                 </fileset>
             </files>
