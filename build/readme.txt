@@ -11,6 +11,9 @@ build-project.xml:
   - <bundleIdentifier>.requiredClasspath
   - <bundleIdentifier>.deepClasspath
   The first is necessary to build the bundle, the second is necessary to execute the integrated unit tests.
+  And it needs all source folders of the bundle:
+  - <bundleIdentifier>.sourceDirs
+  This is added to allow several source code folders to easily maintain API incompatible versions.
 
 buildAll.xml:
   Currently reads the packages.txt file and calls then build.xml for every ProjectSet named there. This should be replaced later on by
