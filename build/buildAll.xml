@@ -8,6 +8,7 @@
     <!-- Constants -->
     <property name="mainDir" value=".."/>
     <property name="checkoutDir" value="${mainDir}"/>
+	<property name="bsProject" value="open-xchange-7-test"/>
 
     <import file="antExtensions.xml"/>
 
@@ -26,7 +27,9 @@
         </ant>
         <ant antfile="build.xml" target="${allBuildType}">
             <property name="packageName" value="${packageName}"/>
+        	<property name="bsProject" value="${bsProject}"/>
         </ant>
+    	<sleep seconds="1"/>
         <ant antfile="build.xml" target="clean">
             <property name="packageName" value="${packageName}"/>
         </ant>
