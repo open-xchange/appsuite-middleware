@@ -1,5 +1,4 @@
 #!/usr/bin/make -f
-# Build open-xchange-oauth
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1

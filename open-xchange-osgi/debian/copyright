@@ -1,36 +1,25 @@
-This package was debianized by Marcus Klein <marcus.kein@open-xchange.com> on
-Tue,  4 Okt 2011 16:44:02 +0200.
+The source code of the Open-Xchange server -- serverpack/adminpack -- is
+licensed under the GNU General Public License Version 2.
+
+The webpack which contains the digital content and the JavaScript Source code
+needed to access the Open-Xchange server using a variety of web browsers is
+licensed under the Creative Commons License,
+Attribution-NonCommercial-ShareAlike 2.5
+
+IMPORTANT: The definition of 'Noncommercial' is still being debated and defined
+within the Creative Commons community. Open-Xchange interprets Noncommercial to
+mean all INTERNAL individual, not-for-profit and for-profit use. EXTERNAL
+individual, not-for-profit and for-profit use such a resale, rent and lease as
+well as inclusion of the digital content in an advertising model is considered
+COMMERCIAL use and prohibited under our interpretation of the license. We view
+the performance of professional services as a NONCOMMERCIAL INTERNAL use of the
+digital content and it is allowed. For additional information, please visit our
+Creative Commons FAQ.
 
 
+Trademarks
 
-Java, JavaMail, JavaBeans and all their acronyms are
-trademarks of Sun Microsystems, Inc. OPEN-XCHANGE is a trademark of
-OPEN-XCHANGE Inc., and all other brand and product names are or may be
-trademarks of, and are used to identify products or services of, their
-respective owners.
- 
-
-Third party licenses and packages can be found in the according license
-files, see the directory /usr/share/doc/open-xchange-common for more
-information.
-
-
-The JavaMail library are Copyright © Sun Microsystems Inc.
-The MySQL JDBC driver is Copyright © 2002-2004 MySQL AB.
-The JSON in Java is Copyright © 2002 JSON.org.
-Jakarta Slide application and
-Jakarta Commons are all Copyright © The Apache Software Foundation.
-The Java TNEF library is Copyright © 1999-2007 by Amichai Rothman.
-Eclipse Equinox is Copyright © 2006 Eclipse Foundation and others.
-
-Canonical is Copyright © 2004, Canonical Ltd.
-Ubuntu is Copyright © 2004-2005 The Ubuntu Documenation Team, and is licensed
-under both the GPL and the Creative Commons ShareAlike 2.0 License (CC-BY-SA)
-
-
-These components are distributed unmodified and according to grants in their
-license; the licenses and the original files are included with the packages.
-
-
-Please make sure that third-party modules and libraries are used according to
-their respective licenses.
+OPEN-XCHANGE(tm) is a trademark of Open-Xchange Inc. OX(tm) is a registered
+international trademark of Open-Xchange Inc. All other brand and product names
+are or may be trademarks of, and are used to identify products or services of,
+their respective owners.
