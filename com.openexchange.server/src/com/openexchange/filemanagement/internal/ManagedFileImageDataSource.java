@@ -134,8 +134,8 @@ public final class ManagedFileImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public String getSignature(final ImageLocation imageLocation, final Session session) {
-        return imageLocation.getImageId();
+    public ImageLocation parseUrl(final String url) {
+        return ImageUtility.parseImageLocationFrom(url);
     }
 
     @Override
@@ -146,6 +146,13 @@ public final class ManagedFileImageDataSource implements ImageDataSource {
     @Override
     public String getETag(final ImageLocation imageLocation, final Session session) throws OXException {
         return imageLocation.getImageId();
+    }
+
+    private static final String ALIAS = "/mfile/picture";
+
+    @Override
+    public String getAlias() {
+        return ALIAS;
     }
 
 }

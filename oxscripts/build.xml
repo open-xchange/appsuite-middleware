@@ -2,14 +2,16 @@
 <project name="oxscript overrides" basedir=".">
 
     <description>
-        This build file overrides the installConf target to patch a lot of configuration files before installing them.
+        This build file uses the postInstall target to patch a lot of script files before installing them.
     </description>
 
     <!-- Customizable values -->
     <!-- This values must be changed for defining other installation places -->
     <property name="logInstallDir" value="/var/log/open-xchange"/>
+	<property name="distribution" value="debian"/>
 
     <!-- Constants -->
+	<property name="libDir" value="lib"/>
     <property name="osgiDir" value="osgi"/>
     <property name="sbinDir" value="sbin"/>
 
@@ -18,6 +20,7 @@
     <target name="postInstall">
         <antcall target="patchAndInstallConfigIniTemplate"/>
         <antcall target="patchAndInstallScripts"/>
+    	<antcall target="installSystemFiles"/>
     </target>
 
     <target name="patchAndInstallConfigIniTemplate" description="Patches and installs config.ini.template file.">
@@ -36,32 +39,30 @@
     </target>
 
     <target name="patchAndInstallScripts" depends="patchScripts">
-        <property name="sbinInstallCopyDir" value="${destDir}/${prefix}/${sbinDir}"/>
-        <copy todir="${sbinInstallCopyDir}" overwrite="true">
+    	<property name="libInstallDir" value="${destDir}/${prefix}/${libDir}"/>
+    	<copy todir="${libInstallDir}" overwrite="true">
+    		<fileset dir="${libDir}"/>
+    	</copy>
+        <property name="sbinInstallDir" value="${destDir}/${prefix}/${sbinDir}"/>
+        <copy todir="${sbinInstallDir}" overwrite="true">
             <fileset dir="${patchSbinDir}"/>
         </copy>
-        <chmod perm="755" file="${sbinInstallCopyDir}/checkconsistency"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/checkconfigconsistency"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/forceupdatetask"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/listExecutedUpdateTasks"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/logincounter"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/open-xchange-groupware"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/oxreport"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/restoregabdefaults"/>
-        <chmod perm="755" file="${sbinInstallCopyDir}/runupdate"/>
+        <chmod perm="755" file="${sbinInstallDir}/checkconsistency"/>
+        <chmod perm="755" file="${sbinInstallDir}/checkconfigconsistency"/>
+        <chmod perm="755" file="${sbinInstallDir}/forceupdatetask"/>
+        <chmod perm="755" file="${sbinInstallDir}/listExecutedUpdateTasks"/>
+        <chmod perm="755" file="${sbinInstallDir}/logincounter"/>
+        <chmod perm="755" file="${sbinInstallDir}/open-xchange-groupware"/>
+        <chmod perm="755" file="${sbinInstallDir}/oxreport"/>
+        <chmod perm="755" file="${sbinInstallDir}/restoregabdefaults"/>
+        <chmod perm="755" file="${sbinInstallDir}/runupdate"/>
 
-        <!-- TODO <copy todir="${destdir}/" overwrite="true">
-            <fileset dir="system"/>
-            <mapper type="glob" from="*.${distribution}" to="*"/>
-        </copy>
-        <chmod perm="755" file="${destdir}/etc/init.d/open-xchange-groupware"/> -->
     </target>
 
     <target name="patchScripts">
         <property name="patchSbinDir" value="${tmpDir}/${sbinDir}"/>
         <mkdir dir="${patchSbinDir}"/>
         <antcall target="moveAndPatchScripts">
-            <param name="common.conf.subst.patch" value="${conf.install.dir}"/>
             <param name="conf.subst.patch" value="${conf.install.dir}"/>
             <param name="lib.subst.patch" value="${lib.install.dir}"/>
         </antcall>
@@ -72,25 +73,21 @@
             <fileset dir="${sbinDir}"/>
             <mapper type="glob" from="*.in" to="*"/>
         </copy>
-        <!--
-        <move tofile="${patchSbinDir}/checkconsistency" file="${patchSbinDir}/checkconsistency.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/checkconfigconsistency" file="${patchSbinDir}/checkconfigconsistency.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/forceupdatetask" file="${patchSbinDir}/forceupdatetask.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/listExecutedUpdateTasks" file="${patchSbinDir}/listExecutedUpdateTasks.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/logincounter" file="${patchSbinDir}/logincounter.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/open-xchange-groupware" file="${patchSbinDir}/open-xchange-groupware.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/oxreport" file="${patchSbinDir}/oxreport.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/restoregabdefaults" file="${patchSbinDir}/restoregabdefaults.in" overwrite="true"/>
-        <move tofile="${patchSbinDir}/runupdate" file="${patchSbinDir}/runupdate.in" overwrite="true"/>
-        -->
         <replace dir="${patchSbinDir}" includes="checkconsistency checkconfigconsistency forceupdatetask listExecutedUpdateTasks logincounter open-xchange-groupware restoregabdefaults runupdate">
-            <replacefilter token="@oxfunctions@" value="${common.conf.install.dir}/oxfunctions.sh"/>
-            <replacefilter token="@oxscriptconf@" value="${conf.subst.patch}/ox-scriptconf.sh"/>
+            <replacefilter token="@oxfunctions@" value="${prefix}/${libDir}/oxfunctions.sh"/>
+            <replacefilter token="@oxscriptconf@" value="${confInstallDir}/ox-scriptconf.sh"/>
             <replacefilter token="@prefix@" value="${prefix}"/>
-            <replacefilter token="@consolelogfile@" value="${log.install.dir}/open-xchange-console.log"/>
-            <replacefilter token="@configini@" value="${conf.subst.patch}/osgi/config.ini"/>
-            <replacefilter token="@bundle.d@" value="${gwbundle.d}"/>
+            <replacefilter token="@consolelogfile@" value="${logInstallDir}/open-xchange-console.log"/>
+            <replacefilter token="@configini@" value="${prefix}/osgi/config.ini"/>
+            <replacefilter token="@bundle.d@" value="${bundle.dDir}"/>
         </replace>
     </target>
 
+	<target name="installSystemFiles">
+        <copy todir="${destDir}/" overwrite="true">
+            <fileset dir="system"/>
+            <mapper type="glob" from="*.${distribution}" to="*"/>
+        </copy>
+        <!-- chmod perm="755" file="${destDir}/etc/init.d/open-xchange-groupware"/ -->
+	</target>
 </project>

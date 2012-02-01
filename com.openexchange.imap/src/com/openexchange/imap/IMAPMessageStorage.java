@@ -62,6 +62,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
@@ -926,8 +927,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
     }
 
+    private static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
+
     @Override
-    public List<ThreadSortMailMessage> getThreadSortedMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
         try {
             if (!imapConfig.getImapCapabilities().hasThreadReferences()) {
                 throw IMAPException.create(IMAPException.Code.THREAD_SORT_NOT_SUPPORTED, imapConfig, session, new Object[0]);
@@ -964,17 +967,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final long start = System.currentTimeMillis();
                 final TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapFolder, getSeparator(imapFolder), imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums.toArray(), fetchProfile).doCommand();
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-
+                /*
+                 * Apply account identifier
+                 */
+                for (final MailMessage mail : messages.valueCollection()) {
+                    mail.setAccountId(accountId);
+                }
+                /*
+                 * Generate structure
+                 */
                 final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, messages);
-                
-                ThreadSortUtil.toSimplifiedStructure(structuredList, new MailMessageComparator(MailSortField.RECEIVED_DATE, descending, null));
+                final List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
                 /*
                  * Sort according to order direction
                  */
                 final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
                 final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
-                Collections.sort(structuredList, comparator);
-                return structuredList;
+                final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+                    
+                    @Override
+                    public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                        return comparator.compare(o1.get(0), o2.get(0));
+                    }
+                };
+                Collections.sort(list, listComparator);
+                return list;
             }
             /*
              * Include body
@@ -1000,14 +1017,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Sort according to order direction
              */
-            ThreadSortUtil.toSimplifiedStructure(structuredList, new MailMessageComparator(MailSortField.RECEIVED_DATE, descending, null));
+            final List<List<MailMessage>> list = ThreadSortUtil.toSimplifiedStructure(structuredList, COMPARATOR);
             /*
              * Sort according to order direction
              */
             final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
             final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
-            Collections.sort(structuredList, comparator);
-            return structuredList;
+            final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+                
+                @Override
+                public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
+                    return comparator.compare(o1.get(0), o2.get(0));
+                }
+            };
+            Collections.sort(list, listComparator);
+            return list;
         } catch (final MessagingException e) {
             throw MIMEMailException.handleMessagingException(e, imapConfig, session);
         } catch (final RuntimeException e) {

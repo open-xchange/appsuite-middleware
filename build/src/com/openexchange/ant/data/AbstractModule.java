@@ -207,5 +207,5 @@ public abstract class AbstractModule {
         return name;
     }
 
-    public abstract Set<String> getExportedClasspath();
+    protected abstract Set<String> getExportedClasspath();
 }

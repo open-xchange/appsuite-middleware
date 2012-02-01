@@ -72,6 +72,7 @@ import org.jdom.input.SAXBuilder;
 public class SrcDirModule extends DirModule {
 
     private File dir;
+    private Set<String> sourceDirs = new HashSet<String>();
     private List<String> classpathDependencies = new LinkedList<String>();
     private Set<String> exportedClasspath = new HashSet<String>();
     private Set<String> requiredClasspath = new HashSet<String>();
@@ -116,6 +117,8 @@ public class SrcDirModule extends DirModule {
                         if ("true".equals(entry.getAttributeValue("exported"))) {
                             exportedClasspath.add(path);
                         }
+                    } else if (entry.getAttributeValue("kind").equals("src")) {
+                        sourceDirs.add(entry.getAttributeValue("path"));
                     }
                 }
             }
@@ -142,7 +145,7 @@ public class SrcDirModule extends DirModule {
     }
 
     @Override
-    public Set<String> getExportedClasspath() {
+    protected Set<String> getExportedClasspath() {
         final Set<String> retval = new HashSet<String>();
         retval.add(dir.getAbsolutePath() + File.separatorChar + "<bin>");
         for (final String classpathEntry : exportedClasspath) {
@@ -163,5 +166,15 @@ public class SrcDirModule extends DirModule {
             retval = Collections.unmodifiableSet(tmp); 
         }
         return retval;
+    }
+
+    public Set<String> getSourceDirs() {
+        final Set<String> retval = new HashSet<String>();
+        for (final String sourceDir : sourceDirs) {
+            if (!"test".equals(sourceDir) && !"sim".equals(sourceDir)) {
+                retval.add(dir.getAbsolutePath() + File.separatorChar + sourceDir);
+            }
+        }
+        return Collections.unmodifiableSet(retval);
     }
 }

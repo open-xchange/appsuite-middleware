@@ -284,23 +284,29 @@ public final class ThreadSortUtil {
      * @param structuredList The structured list to convert
      * @param comparator The comparator to use to sort child messages
      */
-    public static void toSimplifiedStructure(final List<ThreadSortMailMessage> structuredList, final MailMessageComparator comparator) {
+    public static List<List<MailMessage>> toSimplifiedStructure(final List<ThreadSortMailMessage> structuredList, final MailMessageComparator comparator) {
+        final List<List<MailMessage>> retval = new ArrayList<List<MailMessage>>(structuredList.size());
         for (final ThreadSortMailMessage root : structuredList) {
-            final List<ThreadSortMailMessage> flatList = new LinkedList<ThreadSortMailMessage>();
+            // Create flat list
+            final LinkedList<MailMessage> flatList = new LinkedList<MailMessage>();
+            flatList.add(root.getOriginalMessage());
             toFlatList0(root.getChildMessages(), flatList);
+            // Sort list
             Collections.sort(flatList, comparator);
-            root.setChildMessages(flatList);
+            retval.add(flatList);
         }
+        return retval;
     }
 
-    private static void toFlatList0(final List<ThreadSortMailMessage> structuredList, final List<ThreadSortMailMessage> flatList) {
+    private static void toFlatList0(final List<ThreadSortMailMessage> structuredList, final List<MailMessage> flatList) {
         if (null == structuredList || structuredList.isEmpty()) {
             return;
         }
         for (final ThreadSortMailMessage tsmm : structuredList) {
-            flatList.add(tsmm);
-            final List<ThreadSortMailMessage> children = tsmm.getChildMessages();
-            toFlatList0(children, flatList);
+            // Add to list
+            flatList.add(tsmm.getOriginalMessage());
+            // Recursive invocation
+            toFlatList0(tsmm.getChildMessages(), flatList);
         }
     }
 

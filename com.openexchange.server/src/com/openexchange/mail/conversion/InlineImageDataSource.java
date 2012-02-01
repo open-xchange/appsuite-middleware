@@ -76,6 +76,17 @@ import com.openexchange.session.Session;
  */
 public final class InlineImageDataSource implements ImageDataSource {
 
+    private static final InlineImageDataSource INSTANCE = new InlineImageDataSource();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static InlineImageDataSource getInstance() {
+        return INSTANCE;
+    }
+
     private static final long EXPIRES = ImageDataSource.YEAR_IN_MILLIS * 50;
 
     /**
@@ -94,7 +105,7 @@ public final class InlineImageDataSource implements ImageDataSource {
     /**
      * Initializes a new {@link InlineImageDataSource}
      */
-    public InlineImageDataSource() {
+    private InlineImageDataSource() {
         super();
     }
 
@@ -137,17 +148,8 @@ public final class InlineImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public String getSignature(final ImageLocation imageLocation, final Session session) {
-        final char delim = '#';
-        final StringBuilder builder = new StringBuilder(128);
-        builder.append(delim).append(imageLocation.getFolder());
-        builder.append(delim).append(imageLocation.getId());
-        builder.append(delim).append(imageLocation.getImageId());
-        builder.append(delim).append(session.getUserId());
-        builder.append(delim).append(session.getContextId());
-        builder.append(delim).append(session.getSecret());
-        builder.append(delim);
-        return ImageUtility.getMD5(builder.toString(), "hex");
+    public ImageLocation parseUrl(final String url) {
+        return ImageUtility.parseImageLocationFrom(url);
     }
 
     @Override
@@ -247,4 +249,13 @@ public final class InlineImageDataSource implements ImageDataSource {
     public String getRegistrationName() {
         return REGISTRATION_NAME;
     }
+
+    private static final String ALIAS = "/mail/picture";
+
+    @Override
+    public String getAlias() {
+        return ALIAS;
+    }
+
 }
+

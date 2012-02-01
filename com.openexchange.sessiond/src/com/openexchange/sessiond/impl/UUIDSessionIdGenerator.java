@@ -54,7 +54,7 @@ import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link UUIDSessionIdGenerator} - The session ID generator based on {@link UUID#randomUUID()}.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UUIDSessionIdGenerator extends SessionIdGenerator {
@@ -84,7 +84,7 @@ public final class UUIDSessionIdGenerator extends SessionIdGenerator {
     /**
      * Generates a UUID using {@link UUID#randomUUID()} and removes all dashes; e.g.:<br>
      * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i> would be <i>a5aa65cb6c7e40899ce2b107d21b9d15</i>
-     *
+     * 
      * @return A UUID string
      */
     static String randomUUID() {

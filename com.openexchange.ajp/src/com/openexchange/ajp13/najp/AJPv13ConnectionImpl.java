@@ -292,9 +292,9 @@ final class AJPv13ConnectionImpl implements AJPv13Connection, Blockable {
     }
 
     /**
-     * Gets the number of actual AJP package.
+     * Gets the number of current AJP package.
      *
-     * @return The number of actual AJP package.
+     * @return The number of current AJP package.
      */
     @Override
     public int getPackageNumber() {

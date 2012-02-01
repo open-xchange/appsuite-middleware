@@ -67,7 +67,6 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.actions.AbstractMailAction;
@@ -196,10 +195,10 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         try {
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
-            for (final ThreadSortMailMessage mail : structure.getMails()) {
-                if (mail != null) {
+            for (final List<MailMessage> mails : structure.getMails()) {
+                if (mails != null && !mails.isEmpty()) {
                     final JSONObject jo = new JSONObject();
-                    writeThreadSortedMail(mail, jo, writers, headerWriters, userId, contextId);
+                    writeThreadSortedMail(mails, jo, writers, headerWriters, userId, contextId);
                     jsonWriter.value(jo);
                 }
             }
@@ -209,8 +208,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonWriter.getObject(), "json");
     }
 
-    private void writeThreadSortedMail(final ThreadSortMailMessage mail, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final int userId, final int contextId) throws OXException, JSONException {
-        final int accountID = mail.getAccountId();
+    private void writeThreadSortedMail(final List<MailMessage> mails, final JSONObject jMail, final MailFieldWriter[] writers, final MailFieldWriter[] headerWriters, final int userId, final int contextId) throws OXException, JSONException {
+        final MailMessage mail = mails.get(0);
+        int accountID = mail.getAccountId();
         for (int j = 0; j < writers.length; j++) {
             writers[j].writeField(jMail, mail, 0, true, accountID, userId, contextId);
         }
@@ -219,16 +219,22 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                 headerWriters[j].writeField(jMail, mail, 0, true, accountID, userId, contextId);
             }
         }
-        final List<ThreadSortMailMessage> childMessages = mail.getChildMessages();
-        if (null != childMessages && !childMessages.isEmpty()) {
-            final JSONArray jChildMessages = new JSONArray();
-            for (final ThreadSortMailMessage child : childMessages) {
-                final JSONObject jChild = new JSONObject();
-                writeThreadSortedMail(child, jChild, writers, headerWriters, userId, contextId);
-                jChildMessages.put(jChild);
+        // Add child nodes
+        final JSONArray jChildMessages = new JSONArray();
+        for (final MailMessage child : mails) {
+            final JSONObject jChild = new JSONObject();
+            accountID = child.getAccountId();
+            for (int j = 0; j < writers.length; j++) {
+                writers[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
             }
-            jMail.put("thread", jChildMessages);
+            if (null != headerWriters) {
+                for (int j = 0; j < headerWriters.length; j++) {
+                    headerWriters[j].writeField(jChild, child, 0, true, accountID, userId, contextId);
+                }
+            }
+            jChildMessages.put(jChild);
         }
+        jMail.put("thread", jChildMessages);
     }
 
     private void convertMultiple4List(final Collection<MailMessage> mails, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException, JSONException {

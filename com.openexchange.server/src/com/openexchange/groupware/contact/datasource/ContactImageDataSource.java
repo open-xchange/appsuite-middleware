@@ -76,12 +76,23 @@ public final class ContactImageDataSource implements ImageDataSource {
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ContactImageDataSource.class));
 
+    private static final ContactImageDataSource INSTANCE = new ContactImageDataSource();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static ContactImageDataSource getInstance() {
+        return INSTANCE;
+    }
+
     private static final String[] ARGS = { "com.openexchange.groupware.contact.folder", "com.openexchange.groupware.contact.id" };
 
     /**
      * Initializes a new {@link ContactImageDataSource}
      */
-    public ContactImageDataSource() {
+    private ContactImageDataSource() {
         super();
     }
 
@@ -108,16 +119,8 @@ public final class ContactImageDataSource implements ImageDataSource {
     }
 
     @Override
-    public String getSignature(final ImageLocation imageLocation, final Session session) {
-        final char delim = '#';
-        final StringBuilder builder = new StringBuilder(128);
-        builder.append(delim).append(imageLocation.getFolder());
-        builder.append(delim).append(imageLocation.getId());
-        builder.append(delim).append(session.getUserId());
-        builder.append(delim).append(session.getContextId());
-        builder.append(delim).append(session.getSecret());
-        builder.append(delim);
-        return ImageUtility.getMD5(builder.toString(), "hex");
+    public ImageLocation parseUrl(final String url) {
+        return ImageUtility.parseImageLocationFrom(url);
     }
 
     @Override
@@ -227,6 +230,13 @@ public final class ContactImageDataSource implements ImageDataSource {
     @Override
     public String getRegistrationName() {
         return REGISTRATION_NAME;
+    }
+
+    private static final String ALIAS = "/contact/picture";
+
+    @Override
+    public String getAlias() {
+        return ALIAS;
     }
 
 }

@@ -90,6 +90,8 @@ public class AppointmentNotificationPool implements
 
 	private MailSenderService notificationMailer;
 
+	private int interval;
+
 	public AppointmentNotificationPool(TimerService timer,
 			NotificationMailGeneratorFactory generatorFactory,
 			MailSenderService notificationMailer, int interval) {
@@ -98,7 +100,8 @@ public class AppointmentNotificationPool implements
 		this.generatorFactory = generatorFactory;
 		this.notificationMailer = notificationMailer;
 
-		timer.scheduleAtFixedRate(this, 1000, interval);
+		timer.scheduleAtFixedRate(this, 1000, interval/2);
+		this.interval = interval;
 	}
 	
 	private OldNew get(int contextId, int apptId, int userId) {
@@ -169,6 +172,13 @@ public class AppointmentNotificationPool implements
 		return retval;
 		
 	}
+	
+	private void enqueue(OldNew value) {
+		int contextId = value.session.getContextId();
+		int apptId = (value.neww != null) ? value.neww.getObjectID() : value.old.getObjectID();
+		int userId = value.session.getUserId();
+		set(contextId, apptId, userId, value);
+	}
 
 	public void enqueue(Appointment original, Appointment newAppointment,
 			Session session) throws OXException {
@@ -206,7 +216,7 @@ public class AppointmentNotificationPool implements
 			}
 			List<OldNew> values = removeAll(session.getContextId(), appointment.getObjectID());
 			
-			notify(values);
+			notify(values, null, false);
 
 		} finally {
 			lock.writeLock().unlock();
@@ -229,46 +239,57 @@ public class AppointmentNotificationPool implements
 	public void run() {
 		lock.writeLock().lock();
 		try {
-			if (pool.isEmpty()) {
-				return;
-			}
-
-			Set<Integer> poolKeySet = pool.keySet();
-			for (Integer contextId : poolKeySet) {
-				Map<Integer, Map<Integer, OldNew>> contextPool = pool.get(contextId);
-				Set<Integer> contextKeySet = contextPool.keySet();
-				for (Integer objectId : contextKeySet) {
-					List<OldNew> values = removeAll(contextId, objectId);
-					notify(values);
+			List<OldNew> enqueueAgainList = new ArrayList<OldNew>();
+			try {
+				if (pool.isEmpty()) {
+					return;
 				}
+				Set<Integer> poolKeySet = pool.keySet();
+				for (Integer contextId : poolKeySet) {
+					Map<Integer, Map<Integer, OldNew>> contextPool = pool.get(contextId);
+					Set<Integer> contextKeySet = contextPool.keySet();
+					for (Integer objectId : contextKeySet) {
+						List<OldNew> values = removeAll(contextId, objectId);
+						notify(values, enqueueAgainList, true);
+					}
+				}
+			} catch (Throwable t) {
+				LOG.error(t.getMessage(), t);
+			} finally {
+				pool.clear();
 			}
-		} catch (Throwable t) {
-			LOG.error(t.getMessage(), t);
+			for (OldNew oldNew : enqueueAgainList) {
+				enqueue(oldNew);
+			}
 		} finally {
-			pool.clear();
 			lock.writeLock().unlock();
 		}
+
 	}
 
-	private void notify(List<OldNew> values) {
+	private void notify(List<OldNew> values, List<OldNew> enqueueAgainList, boolean enqueueAgain) {
 		try {
 			if (values.isEmpty()) {
 				return;
 			}
 			if (values.size() == 1) {
 				OldNew oldNew = values.get(0);
-				int onBehalfOf = (oldNew.old != null) ? oldNew.old.getPrincipalId() : oldNew.neww.getPrincipalId();
-				ITipMailGenerator generator = generatorFactory.create(oldNew.old, oldNew.neww,
-						oldNew.session, onBehalfOf);
-				List<NotificationParticipant> recipients = generator
-						.getRecipients();
-				for (NotificationParticipant participant : recipients) {
+				if (enqueueAgain && keepAnotherRound(oldNew.updated)) {
+					enqueueAgainList.add(oldNew);
+				} else {
+					int onBehalfOf = (oldNew.old != null) ? oldNew.old.getPrincipalId() : oldNew.neww.getPrincipalId();
+					ITipMailGenerator generator = generatorFactory.create(oldNew.old, oldNew.neww,
+							oldNew.session, onBehalfOf);
+					List<NotificationParticipant> recipients = generator
+							.getRecipients();
+					for (NotificationParticipant participant : recipients) {
 
-					NotificationMail mail = (oldNew.old == null) ? generator
-							.generateCreateMailFor(participant) : generator
-							.generateUpdateMailFor(participant);
-					if (mail != null) {
-						notificationMailer.sendMail(mail, oldNew.session);
+						NotificationMail mail = (oldNew.old == null) ? generator
+								.generateCreateMailFor(participant) : generator
+								.generateUpdateMailFor(participant);
+						if (mail != null) {
+							notificationMailer.sendMail(mail, oldNew.session);
+						}
 					}
 				}
 				
@@ -314,6 +335,11 @@ public class AppointmentNotificationPool implements
 			LOG.error(e.getMessage(), e);
 		}
 	}
+	
+	private boolean keepAnotherRound(long updated) {
+		return System.currentTimeMillis() - updated < interval;
+	}
+
 
 	private class OldNew {
 

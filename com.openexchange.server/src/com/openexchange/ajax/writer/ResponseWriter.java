@@ -49,17 +49,7 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.DATA;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
-import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
-import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
-import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
-import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
-import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
+import static com.openexchange.ajax.fields.ResponseFields.*;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
@@ -283,17 +273,19 @@ public final class ResponseWriter {
         if (Category.CATEGORY_TRUNCATED.equals(exception.getCategory())) {
             addTruncated(json, exception.getProblematics());
         }
+        // Write exception
+        final JSONArray jsonStack = new JSONArray();
+        jsonStack.put(exception.getSoleMessage());
         final StackTraceElement[] traceElements = exception.getStackTrace();
-        if (null != traceElements && traceElements.length > 0) {
-            final JSONArray jsonStack = new JSONArray();
+        if (null != traceElements && traceElements.length > 0) {            
             final StringBuilder tmp = new StringBuilder(64);
             for (final StackTraceElement stackTraceElement : traceElements) {
                 tmp.setLength(0);
                 writeElementTo(stackTraceElement, tmp);
                 jsonStack.put(tmp.toString());
             }
-            json.put(ERROR_STACK, jsonStack);
         }
+        json.put(ERROR_STACK, jsonStack);
     }
 
     private static void writeElementTo(final StackTraceElement element, final StringBuilder sb) {
@@ -502,20 +494,22 @@ public final class ResponseWriter {
         writer.key(ERROR_ID).value(exc.getExceptionId());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
-        final StackTraceElement[] traceElements = exc.getStackTrace();
-        if (null != traceElements && traceElements.length > 0) {
-            writer.key(ERROR_STACK);
-            writer.array();
-            try {
+        // Write stack trace
+        writer.key(ERROR_STACK);
+        writer.array();
+        try {
+            writer.value(exc.getSoleMessage());
+            final StackTraceElement[] traceElements = exc.getStackTrace();
+            if (null != traceElements && traceElements.length > 0) {
                 final StringBuilder tmp = new StringBuilder(64);
                 for (final StackTraceElement stackTraceElement : traceElements) {
                     tmp.setLength(0);
                     writeElementTo(stackTraceElement, tmp);
                     writer.value(tmp.toString());
                 }
-            } finally {
-                writer.endArray();
             }
+        } finally {
+            writer.endArray();
         }
     }
 

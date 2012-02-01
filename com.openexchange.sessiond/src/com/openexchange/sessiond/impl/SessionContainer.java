@@ -70,7 +70,7 @@ final class SessionContainer {
 
     private static final Object PRESENT = new Object();
 
-    private final ConcurrentMap<String, SessionControl> sessionIdMap;
+    private final SessionMap sessionMap;
 
     private final Lock sessionIdMapLock = new ReentrantLock();
 
@@ -78,7 +78,7 @@ final class SessionContainer {
 
     SessionContainer() {
         super();
-        sessionIdMap = new ConcurrentHashMap<String, SessionControl>();
+        sessionMap = new SessionMap();
         userSessions = new ConcurrentHashMap<UserKey, Map<String, Object>>();
     }
 
@@ -88,7 +88,7 @@ final class SessionContainer {
      * @return The current number of sessions held by this container
      */
     int size() {
-        return sessionIdMap.size();
+        return sessionMap.size();
     }
 
     /**
@@ -98,7 +98,17 @@ final class SessionContainer {
      * @return <code>true</code> if this container contains an entry for specified session ID; otherwise <code>false</code>
      */
     boolean containsSessionId(final String sessionId) {
-        return sessionIdMap.containsKey(sessionId);
+        return sessionMap.containsBySessionId(sessionId);
+    }
+
+    /**
+     * Checks if this container contains an entry for specified alternative identifier.
+     *
+     * @param altId The alternative identifier
+     * @return <code>true</code> if this container contains an entry for specified alternative identifier; otherwise <code>false</code>
+     */
+    boolean containsAlternativeId(final String altId) {
+        return sessionMap.containsByAlternativeId(altId);
     }
 
     /**
@@ -131,7 +141,17 @@ final class SessionContainer {
      * @return The session bound to specified session ID, or <code>null</code> if there's no session for specified session ID.
      */
     SessionControl getSessionById(final String sessionId) {
-        return sessionIdMap.get(sessionId);
+        return sessionMap.getBySessionId(sessionId);
+    }
+
+    /**
+     * Gets the session bound to specified alternative identifier.
+     *
+     * @param altId The alternative identifier
+     * @return The session bound to specified alternative identifier, or <code>null</code> if there's no session for specified alternative identifier.
+     */
+    SessionControl getSessionByAlternativeId(final String altId) {
+        return sessionMap.getByAlternativeId(altId);
     }
 
     /**
@@ -148,18 +168,18 @@ final class SessionContainer {
         }
         final List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
         for (final String sessionId : sessionIds.keySet()) {
-            l.add(sessionIdMap.get(sessionId));
+            l.add(sessionMap.getBySessionId(sessionId));
         }
         return l.toArray(new SessionControl[sessionIds.size()]);
     }
 
-    public SessionControl getAnySessionByUser(int userId, int contextId) {
+    public SessionControl getAnySessionByUser(final int userId, final int contextId) {
         final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
         if (sessionIds == null) {
         	return null;
         }
         for (final String sessionId : sessionIds.keySet()) {
-            return sessionIdMap.get(sessionId);
+            return sessionMap.getBySessionId(sessionId);
         }
         return null;
     }
@@ -177,10 +197,10 @@ final class SessionContainer {
         SessionControl sessionControl;
         sessionIdMapLock.lock();
         try {
-            sessionControl = sessionIdMap.get(sessionId);
+            sessionControl = sessionMap.getBySessionId(sessionId);
             if (null == sessionControl) {
                 final SessionControl newSessionControl = new SessionControl(session);
-                sessionControl = sessionIdMap.putIfAbsent(sessionId, newSessionControl);
+                sessionControl = sessionMap.putIfAbsentBySessionId(sessionId, newSessionControl);
                 if (null == sessionControl) {
                     sessionControl = newSessionControl;
                 } else {
@@ -219,7 +239,7 @@ final class SessionContainer {
     void putSessionControl(final SessionControl sessionControl) throws OXException {
         final Session session = sessionControl.getSession();
         final String sessionId = session.getSessionID();
-        final SessionControl oldSessionControl = sessionIdMap.putIfAbsent(sessionId, sessionControl);
+        final SessionControl oldSessionControl = sessionMap.putIfAbsentBySessionId(sessionId, sessionControl);
         if (null != oldSessionControl) {
             final String login1 = oldSessionControl.getSession().getLogin();
             final String login2 = sessionControl.getSession().getLogin();
@@ -244,7 +264,7 @@ final class SessionContainer {
      * @return The {@link SessionControl session control} previously associated with specified session ID, or <code>null</code>.
      */
     SessionControl removeSessionById(final String sessionId) {
-        final SessionControl sessionControl = sessionIdMap.remove(sessionId);
+        final SessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
         if (sessionControl != null) {
             final Session session = sessionControl.getSession();
             final UserKey key = new UserKey(session.getUserId(), session.getContextId());
@@ -272,7 +292,7 @@ final class SessionContainer {
         }
         final List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
         for (final String sessionId : sessionIds.keySet()) {
-            final SessionControl sc = sessionIdMap.remove(sessionId);
+            final SessionControl sc = sessionMap.removeBySessionId(sessionId);
             if (sc != null) {
                 l.add(sc);
             }
@@ -288,7 +308,7 @@ final class SessionContainer {
      * @return A collection view of the {@link SessionControl} objects contained in this container.
      */
     Collection<SessionControl> getSessionControls() {
-        return new ArrayList<SessionControl>(sessionIdMap.values());
+        return sessionMap.values();
     }
 
 }

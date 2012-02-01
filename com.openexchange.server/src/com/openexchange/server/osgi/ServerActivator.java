@@ -145,6 +145,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -616,21 +617,24 @@ public final class ServerActivator extends DeferredActivator {
             registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
         }
         {
-            final InlineImageDataSource dataSource = new InlineImageDataSource();
+            final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
             registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
         }
         {
-            final ContactImageDataSource dataSource = new ContactImageDataSource();
+            final ContactImageDataSource dataSource = ContactImageDataSource.getInstance();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
             registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
         }
         {
             final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
+            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
             registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
         }
         /*

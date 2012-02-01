@@ -1,112 +1,131 @@
 package com.openexchange.calendar.api.itip;
 
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.session.Session;
 
 public class ITipSession implements Session {
 
-	private int ctxId;
-	private int userId;
+	private final int ctxId;
+	private final int userId;
 
-	public ITipSession(int uid, int ctxId) {
+	public ITipSession(final int uid, final int ctxId) {
 		this.userId = uid;
 		this.ctxId = ctxId;
 	}
 
-	public int getContextId() {
+	@Override
+    public int getContextId() {
 		return ctxId;
 	}
 
-	public String getLocalIp() {
+	@Override
+    public String getLocalIp() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void setLocalIp(String ip) {
+	@Override
+    public void setLocalIp(final String ip) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public String getLoginName() {
+	@Override
+    public String getLoginName() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public boolean containsParameter(String name) {
+	@Override
+    public boolean containsParameter(final String name) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	public Object getParameter(String name) {
+	@Override
+    public Object getParameter(final String name) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public String getPassword() {
+	@Override
+    public String getPassword() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public String getRandomToken() {
+	@Override
+    public String getRandomToken() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public String getSecret() {
+	@Override
+    public String getSecret() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public String getSessionID() {
+	@Override
+    public String getSessionID() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public int getUserId() {
+	@Override
+    public int getUserId() {
 		return userId;
 	}
 
-	public String getUserlogin() {
+	@Override
+    public String getUserlogin() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public String getLogin() {
+	@Override
+    public String getLogin() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void setParameter(String name, Object value) {
+	@Override
+    public void setParameter(final String name, final Object value) {
 		// TODO Auto-generated method stub
 
 	}
 
-	public void removeRandomToken() {
+	@Override
+    public void removeRandomToken() {
 		// TODO Auto-generated method stub
 
 	}
 
-	public String getAuthId() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String getHash() {
+	@Override
+    public String getAuthId() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void setHash(String hash) {
-		// TODO Auto-generated method stub
-
-	}
-
-	public String getClient() {
+	@Override
+    public String getHash() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	public void setClient(String client) {
+	@Override
+    public void setHash(final String hash) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+    public String getClient() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+    public void setClient(final String client) {
 		// TODO Auto-generated method stub
 
 	}
