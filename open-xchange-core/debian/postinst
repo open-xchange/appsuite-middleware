@@ -40,11 +40,9 @@ case "$1" in
                 postFix "$2"
                 exit 0
         }
-
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
-
     ;;
 
     *)
