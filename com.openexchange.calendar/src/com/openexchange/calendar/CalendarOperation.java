@@ -73,6 +73,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -705,7 +706,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 // Constants.MILLI_DAY)));
                 cdao.setEndDate(calculateRealRecurringEndDate(cdao));
             } else {
-                cdao.setRecurrence(recColl.NO_DS);
+                cdao.setRecurrence(CalendarCollectionService.NO_DS);
             }
 
             cdao.setCreatedBy(uid);
@@ -1581,7 +1582,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         if (cdao.containsPrivateFlag()) {
             if (cdao.getPrivateFlag()) {
-                if (cdao.getFolderType() != recColl.PRIVATE) {
+                if (cdao.getFolderType() != CalendarCollectionService.PRIVATE) {
                     throw OXCalendarExceptionCodes.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER.create();
                 }
                 if (edao == null || (edao.containsPrivateFlag() && edao.getPrivateFlag())) {
@@ -1600,7 +1601,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateFlag()) {
             if (cdao.getSharedFolderOwner() != uid) {
-                if (cdao.getFolderType() != recColl.PRIVATE) {
+                if (cdao.getFolderType() != CalendarCollectionService.PRIVATE) {
                     throw OXCalendarExceptionCodes.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED.create();
                 }
             }
@@ -1622,7 +1623,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (!edao.containsRecurrenceType() && !cdao.containsRecurrenceType()) {
-            return recColl.RECURRING_NO_ACTION;
+            return CalendarCollectionService.RECURRING_NO_ACTION;
         }
         if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() != edao.getObjectID()) {
             /*
@@ -1631,11 +1632,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (RecurrenceChecker.containsRecurrenceInformation(cdao)) {
                 throw OXCalendarExceptionCodes.CHANGE_EXCEPTION_TO_RECURRENCE.create();
             }
-            return recColl.RECURRING_NO_ACTION;
+            return CalendarCollectionService.RECURRING_NO_ACTION;
         }
         if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
             int ret = recColl.getRecurringAppoiontmentUpdateAction(cdao, edao);
-            if (ret == recColl.RECURRING_NO_ACTION) {
+            if (ret == CalendarCollectionService.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!
                 if (!cdao.containsStartDate() || !cdao.containsEndDate()) {
                     final CalendarDataObject temp = edao.clone();
@@ -1660,7 +1661,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 if (cdao.getFolderMove()) {
                     throw OXCalendarExceptionCodes.RECURRING_EXCEPTION_MOVE_EXCEPTION.create();
                 }
-                if (recColl.RECURRING_EXCEPTION_DELETE_EXISTING == ret && (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao.getObjectID())) {
+                if (CalendarCollectionService.RECURRING_EXCEPTION_DELETE_EXISTING == ret && (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao.getObjectID())) {
                     /*
                      * A formerly created change exception shall be deleted through an update on master recurring appointment
                      */
@@ -1676,7 +1677,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && cdao.getRecurrenceType() != edao.getRecurrenceType()) {
             // Recurring Pattern changed! TODO: Remove all exceptions
             if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) || (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
-                return recColl.RECURRING_CREATE_EXCEPTION;
+                return CalendarCollectionService.RECURRING_CREATE_EXCEPTION;
             }
             cdao.setRecurrenceID(edao.getObjectID());
             if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
@@ -1700,7 +1701,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             recColl.changeRecurrenceString(cdao);
             cdao.setExceptions(null);
             cdao.setDelExceptions(null);
-            return recColl.CHANGE_RECURRING_TYPE;
+            return CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else if (!edao.containsRecurrenceType() && cdao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE) {
             // TODO: Change from normal apointment to sequence
             if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrence() != null) {
@@ -1721,11 +1722,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         } else if (edao.containsRecurrenceType() && cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
             // Sequence reset, this means to delete all existing exceptions
             if (cdao.containsRecurrencePosition() || cdao.containsRecurrenceDatePosition()) {
-                return recColl.RECURRING_CREATE_EXCEPTION;
+                return CalendarCollectionService.RECURRING_CREATE_EXCEPTION;
             }
-            return recColl.RECURRING_EXCEPTION_DELETE;
+            return CalendarCollectionService.RECURRING_EXCEPTION_DELETE;
         }
-        return recColl.RECURRING_NO_ACTION;
+        return CalendarCollectionService.RECURRING_NO_ACTION;
     }
 
     private void calculateEndDateForNoType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
@@ -1736,7 +1737,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private void calculateEndDateForNewType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         Date occurrenceDate;
         if (cdao.getOccurrence() <= 0) {
-            occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAX_OCCURRENCESE);
+            occurrenceDate = recColl.getOccurenceDate(cdao, CalendarCollectionService.MAX_OCCURRENCESE);
         } else {
             occurrenceDate = recColl.getOccurenceDate(cdao);
         }
@@ -1810,7 +1811,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             // Calculate occurrence's time
             final Date occurrenceDate;
             if (cdao.getOccurrence() <= 0) {
-                occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAX_OCCURRENCESE);
+                occurrenceDate = recColl.getOccurenceDate(cdao, CalendarCollectionService.MAX_OCCURRENCESE);
             } else {
                 occurrenceDate = recColl.getOccurenceDate(cdao);
             }
@@ -1870,7 +1871,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             /*
              * Indicate change of recurring type
              */
-            retval = recColl.CHANGE_RECURRING_TYPE;
+            retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
             //checkAndRemoveRecurrenceFields(cdao);

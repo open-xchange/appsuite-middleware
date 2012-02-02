@@ -293,7 +293,7 @@ public final class MessageUtility {
         }
         if ("GB18030".equalsIgnoreCase(charset)) {
             /*
-             * Special treatment for possible BIG5 encoded stream
+             * Special treatment for possible GB18030 encoded stream
              */
             return readGB18030Bytes(getBytesFrom(inStream));
         }
