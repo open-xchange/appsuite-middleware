@@ -9,7 +9,7 @@
     <property name="mainDir" value=".."/>
     <property name="checkoutDir" value="${mainDir}"/>
     <property name="logDir" value="${mainDir}/log"/>
-
+ 
     <target name="cpd" description="Find copied and pasted code.">
         <mkdir dir="${logDir}"/>
         <taskdef name="cpd" classname="net.sourceforge.pmd.cpd.CPDTask"/>
