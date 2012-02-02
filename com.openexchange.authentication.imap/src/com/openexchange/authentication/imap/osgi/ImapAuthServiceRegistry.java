@@ -49,7 +49,7 @@
 
 package com.openexchange.authentication.imap.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
 * {@link ImapAuthServiceRegistry} - A registry for services 

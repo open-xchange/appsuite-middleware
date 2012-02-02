@@ -7,7 +7,7 @@ Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.log,
- com.openexchange.server.osgiservice,
+ com.openexchange.osgi,
  javax.activation,
  javax.annotation,
  javax.imageio,

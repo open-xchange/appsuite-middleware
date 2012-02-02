@@ -50,17 +50,14 @@
 package com.openexchange.authentication.ldap;
 
 import java.util.Properties;
-
 import javax.security.auth.login.LoginException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceRegistration;
-
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.osgi.DeferredActivator;
 
 /**
  * {@link AuthLDAPActivator}
