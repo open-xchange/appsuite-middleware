@@ -51,8 +51,8 @@ package com.openexchange.voipnow.json.osgi;
 
 import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.osgi.AbstractServiceRegistry;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.voipnow.json.actions.StaticVoipNowServerSetting;
 
 /**
