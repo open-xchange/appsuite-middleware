@@ -50,130 +50,83 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link AbstractSimSessiondService}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AbstractSimSessiondService implements SessiondService{
+public class AbstractSimSessiondService implements SessiondService {
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#addSession(com.openexchange.sessiond.AddSessionParameter)
-     */
     @Override
-    public String addSession(AddSessionParameter parameterObject) throws OXException {
-        // TODO Auto-generated method stub
+    public String addSession(AddSessionParameter parameterObject) {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#changeSessionPassword(java.lang.String, java.lang.String)
-     */
     @Override
-    public void changeSessionPassword(String sessionId, String newPassword) throws OXException {
+    public void changeSessionPassword(String sessionId, String newPassword) {
         // TODO Auto-generated method stub
-
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#getNumberOfActiveSessions()
-     */
     @Override
     public int getNumberOfActiveSessions() {
-        // TODO Auto-generated method stub
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#getSession(java.lang.String)
-     */
     @Override
     public Session getSession(final String sessionId) {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#getSessionByRandomToken(java.lang.String, java.lang.String)
-     */
+    @Override
+    public Session getSessionByAlternativeId(String altId) {
+        return null;
+    }
+
     @Override
     public Session getSessionByRandomToken(final String randomToken, final String localIp) {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#getSessionByRandomToken(java.lang.String)
-     */
     @Override
     public Session getSessionByRandomToken(final String randomToken) {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#getUserSessions(int, int)
-     */
     @Override
     public int getUserSessions(final int userId, final int contextId) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#refreshSession(java.lang.String)
-     */
     @Override
     public boolean refreshSession(final String sessionId) {
-        // TODO Auto-generated method stub
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#removeSession(java.lang.String)
-     */
     @Override
     public boolean removeSession(final String sessionId) {
-        // TODO Auto-generated method stub
         return false;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#removeUserSessions(int, com.openexchange.groupware.contexts.Context)
-     */
     @Override
     public int removeUserSessions(final int userId, final Context ctx) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public Collection<Session> getSessions(final int userId, final int contextId) {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#getAnyActiveSessionForUser(int, int)
-     */
     @Override
     public Session getAnyActiveSessionForUser(int userId, int contextId) {
-        // TODO Auto-generated method stub
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.sessiond.SessiondService#findFirstSessionForUser(int, int, com.openexchange.sessiond.SessionMatcher)
-     */
     @Override
     public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher) {
-        // TODO Auto-generated method stub
         return null;
     }
-
 }
