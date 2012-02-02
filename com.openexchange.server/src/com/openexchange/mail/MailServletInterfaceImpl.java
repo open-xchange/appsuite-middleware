@@ -110,6 +110,7 @@ import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
@@ -630,6 +631,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             // Perform operation
             return simplifiedThreadStructure.getThreadSortedMessages(fullname, MailSortField.getField(sortCol), OrderDirection.getOrderDirection(order), mailFields.toArray());
         }
+        /*
+         * Check for needed capability
+         */
+        final MailCapabilities capabilities = mailAccess.getMailConfig().getCapabilities();
+        final boolean retry = !capabilities.hasThreadReferences();
         /*-
          * 1. send 'all' request with id, folder_id, level, and received_date - you need all that data.
          * 
@@ -642,9 +648,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * 5. Generate the real list of all threads. This must be again ordered by received_date, so that the most recent threads show up
          *    first. id and folder_id refer to the most recent mail.
          */
-        final int allSort = MailSortField.RECEIVED_DATE.getField();
-        final int allOrder = OrderDirection.DESC.getOrder();
-        final SearchIterator<MailMessage> searchIterator = getAllThreadedMessages(folder, allSort, allOrder, fields, null);
+        SearchIterator<MailMessage> searchIterator;
+        try {
+            final int allSort = MailSortField.RECEIVED_DATE.getField();
+            final int allOrder = OrderDirection.DESC.getOrder();
+            searchIterator = getAllThreadedMessages(folder, allSort, allOrder, fields, null);
+        } catch (final OXException e) {
+            if (!retry) {
+                throw e;
+            }
+            searchIterator = getAllMessages(folder, sortCol, order, fields, null);
+        }
         try {
             final List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
             List<MailMessage> current = new LinkedList<MailMessage>();
