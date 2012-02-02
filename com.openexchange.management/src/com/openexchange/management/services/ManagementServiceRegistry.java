@@ -49,7 +49,7 @@
 
 package com.openexchange.management.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ManagementServiceRegistry} - The service registry for management bundle

@@ -7,7 +7,7 @@ Bundle-Activator: com.openexchange.scripting.rhino.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.log,
- com.openexchange.server.osgiservice,
+ com.openexchange.osgi,
  org.apache.commons.logging,
  org.osgi.framework;version="1.3.0",
  org.osgi.util.tracker;version="1.5.0"

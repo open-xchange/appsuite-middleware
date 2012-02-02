@@ -50,12 +50,11 @@
 
 package com.openexchange.templating.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.server.osgiservice.ServiceDependentRegistration;
-import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceDependentRegistration;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.templating.TemplateServiceImpl;
 import com.openexchange.templating.impl.OXIntegration;
@@ -63,14 +62,14 @@ import com.openexchange.templating.impl.OXIntegration;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private Whiteboard whiteboard;
     private ServiceDependentRegistration<TemplateServiceImpl> serviceRegistration;
 
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         whiteboard = new Whiteboard(context);
 
 
@@ -104,9 +103,15 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         serviceRegistration.close();
         whiteboard.close();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.config.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ConfigFileStorageServiceRegistry} - The service registry for <code>com.openexchange.file.storage.config</code> bundle.

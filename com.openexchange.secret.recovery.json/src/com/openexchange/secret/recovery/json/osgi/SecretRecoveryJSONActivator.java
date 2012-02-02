@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
@@ -60,7 +61,6 @@ import com.openexchange.secret.recovery.json.SecretRecoveryActionFactory;
 import com.openexchange.secret.recovery.json.action.AbstractSecretRecoveryAction;
 import com.openexchange.secret.recovery.json.preferences.Enabled;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
-import com.openexchange.server.osgiservice.Whiteboard;
 
 public class SecretRecoveryJSONActivator extends AJAXModuleActivator {
 

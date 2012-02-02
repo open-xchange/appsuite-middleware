@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,18 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
-import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
 
 /**
- * {@link SimpleRegistryListener}
+ * {@link SimpleServiceTrackerCustomizer}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SimpleRegistryListener<T> {
+public interface SimpleServiceTrackerCustomizer<S> extends ServiceTrackerCustomizer<S, S> {
 
-    /**
-     * The service is being added to this {@code SimpleRegistryListener}.
-     *
-     * @param ref The reference to the service being added
-     * @param service The (tracked) service object
-     */
-    public void added(ServiceReference<T> ref, T service);
-
-    /**
-     * The service is being removed from this {@code SimpleRegistryListener}.
-     *
-     * @param ref The reference to the service being removed
-     * @param service The (tracked) service object
-     */
-    public void removed(ServiceReference<T> ref, T service);
+    // Nope
 
 }

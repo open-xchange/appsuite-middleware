@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.cache;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link CacheServiceRegistry} - The service registry for cache folder storage.

@@ -8,8 +8,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.log,
  com.openexchange.oauth,
+ com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.server.osgiservice,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-Activator: com.openexchange.oauth.twitter.osgi.TwitterOAuthActivator

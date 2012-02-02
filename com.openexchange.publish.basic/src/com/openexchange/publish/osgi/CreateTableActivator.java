@@ -49,10 +49,8 @@
 
 package com.openexchange.publish.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.database.CreatePublicationTables;
 
 /**
@@ -60,17 +58,21 @@ import com.openexchange.publish.database.CreatePublicationTables;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CreateTableActivator implements BundleActivator {
-
-    private ServiceRegistration<CreateTableService> registration;
+public class CreateTableActivator extends HousekeepingActivator {
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        registration = context.registerService(CreateTableService.class, new CreatePublicationTables(), null);
+    public void startBundle() throws Exception {
+        registerService(CreateTableService.class, new CreatePublicationTables(), null);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        registration.unregister();
+    public void stopBundle() throws Exception {
+        unregisterServices();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

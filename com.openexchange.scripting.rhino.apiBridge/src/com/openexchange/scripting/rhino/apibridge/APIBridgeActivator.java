@@ -19,8 +19,8 @@ public class APIBridgeActivator extends AJAXModuleActivator {
 		registerService(ResolveEnhancement.class, new ResolveEnhancement() {
 
 			@Override
-			public void enhance(DependencyResolver resolver,
-					JSConverter jsConverter) {
+			public void enhance(final DependencyResolver resolver,
+					final JSConverter jsConverter) {
 				resolver.remember("httpAPI", jsConverter.toJS(new HTTPAPISupport(APIBridgeActivator.this)));
 			}
 

@@ -87,5 +87,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chat.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.importexport"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.osgi"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

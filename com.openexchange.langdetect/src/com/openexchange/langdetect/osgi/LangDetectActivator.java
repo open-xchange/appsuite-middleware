@@ -49,50 +49,42 @@
 
 package com.openexchange.langdetect.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.langdetect.internal.Lc4jLanguageDetectionService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link LangDetectActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class LangDetectActivator implements BundleActivator {
-
-    private List<ServiceRegistration<?>> registrations;
-
-    private List<ServiceTracker<?, ?>> trackers;
+public class LangDetectActivator extends HousekeepingActivator {
 
     @Override
-    public void start(final BundleContext bundleContext) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(LangDetectActivator.class));
         logger.info("Starting bundle: com.openexchange.langdetect");
         try {
-            final List<ServiceRegistration<?>> registrations = this.registrations = new ArrayList<ServiceRegistration<?>>(1);
-            trackers = new ArrayList<ServiceTracker<?, ?>>(1);
             /*
              * Open tracker
              */
-            trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(
-                bundleContext,
-                ConfigurationService.class,
-                new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
+            track(ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
 
                     @Override
                     public ConfigurationService addingService(final ServiceReference<ConfigurationService> reference) {
-                        final ConfigurationService service = bundleContext.getService(reference);
+                        final ConfigurationService service = context.getService(reference);
                         final Lc4jLanguageDetectionService languageDetectionService = Lc4jLanguageDetectionService.getInstance();
                         /*
                          * Load language codes
@@ -106,7 +98,7 @@ public class LangDetectActivator implements BundleActivator {
                          * Set language model directory
                          */
                         languageDetectionService.setLanguageModelsDir(service.getProperty("com.openexchange.langdetect.languageModelsDir"));
-                        registrations.add(bundleContext.registerService(LanguageDetectionService.class, languageDetectionService, null));
+                        registerService(LanguageDetectionService.class, languageDetectionService, null);
                         return service;
                     }
 
@@ -117,12 +109,10 @@ public class LangDetectActivator implements BundleActivator {
 
                     @Override
                     public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
-                        bundleContext.ungetService(reference);
+                        context.ungetService(reference);
                     }
-                }));
-            for (final ServiceTracker<?, ?> tracker : trackers) {
-                tracker.open();
-            }
+                });
+            openTrackers();
         } catch (final Exception e) {
             cleanUp();
             logger.error("Starting bundle failed: com.openexchange.langdetect", e);
@@ -131,29 +121,16 @@ public class LangDetectActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext bundleContext) throws Exception {
+    protected void stopBundle() throws Exception {
         final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(LangDetectActivator.class));
         logger.info("Stopping bundle: com.openexchange.langdetect");
         try {
+            unregisterServices();
+            closeTrackers();
             cleanUp();
         } catch (final Exception e) {
             logger.error("Stopping bundle failed: com.openexchange.langdetect", e);
             throw e;
-        }
-    }
-
-    private void cleanUp() {
-        if (null != trackers) {
-            while (!trackers.isEmpty()) {
-                trackers.remove(0).close();
-            }
-            trackers = null;
-        }
-        if (null != registrations) {
-            while (!registrations.isEmpty()) {
-                registrations.remove(0).unregister();
-            }
-            registrations = null;
         }
     }
 

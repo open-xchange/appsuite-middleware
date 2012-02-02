@@ -56,7 +56,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
 import com.openexchange.spamhandler.spamassassin.api.SpamdService;

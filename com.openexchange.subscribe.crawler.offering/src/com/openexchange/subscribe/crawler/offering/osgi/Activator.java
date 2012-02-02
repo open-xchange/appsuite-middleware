@@ -1,15 +1,14 @@
 package com.openexchange.subscribe.crawler.offering.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.Whiteboard;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.crawler.offering.CrawlerOfferingServlet;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.service.ServletRegistration;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
 	private static final String ALIAS = "/publications/crawler";
 
@@ -18,7 +17,7 @@ public class Activator implements BundleActivator {
     private ServletRegistration servletRegistration;
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
 	    whiteboard = new Whiteboard(context);
 
 	    CrawlerOfferingServlet.setSources(whiteboard.getService(SubscriptionSourceDiscoveryService.class));
@@ -28,9 +27,15 @@ public class Activator implements BundleActivator {
     }
 
 	@Override
-    public void stop(BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         servletRegistration.remove();
 	    whiteboard.close();
 	}
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

@@ -53,7 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.http.jetty.JettyHttpService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.systemname.SystemNameService;
 
 
@@ -62,7 +62,7 @@ import com.openexchange.systemname.SystemNameService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class JettyActivator extends HousekeepingActivator{
+public class JettyActivator extends HousekeepingActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(JettyActivator.class));
 
     @Override
@@ -73,7 +73,7 @@ public class JettyActivator extends HousekeepingActivator{
     @Override
     protected void startBundle() throws Exception {
         try {
-            JettyHttpService httpService = new JettyHttpService(8088);
+            final JettyHttpService httpService = new JettyHttpService(8088);
 
             httpService.start();
 
@@ -88,7 +88,7 @@ public class JettyActivator extends HousekeepingActivator{
 
             });
 
-        } catch (Throwable t) {
+        } catch (final Throwable t) {
             LOG.fatal(t.getMessage(), t);
         }
     }

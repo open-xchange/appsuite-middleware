@@ -60,7 +60,7 @@ import com.openexchange.chat.ChatServiceRegistry;
 import com.openexchange.chat.json.account.ChatAccountActionFactory;
 import com.openexchange.chat.json.conversation.ChatConversationActionFactory;
 import com.openexchange.chat.json.roster.ChatRosterActionFactory;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 
 /**

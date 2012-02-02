@@ -49,7 +49,7 @@
 
 package com.openexchange.push.mail.notify.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link PushServiceRegistry} - A registry for services needed by push bundle

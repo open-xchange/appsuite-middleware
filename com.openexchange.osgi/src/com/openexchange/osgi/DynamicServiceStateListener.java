@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,18 +47,15 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
-
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+package com.openexchange.osgi;
 
 
 /**
- * {@link SimpleServiceTrackerCustomizer}
+ * {@link DynamicServiceStateListener}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public interface SimpleServiceTrackerCustomizer<S> extends ServiceTrackerCustomizer<S, S> {
-
-    // Nope
-
+public interface DynamicServiceStateListener {
+    public void stateChanged();
 }

@@ -52,7 +52,7 @@ package com.openexchange.user.json.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.Constants;
 import com.openexchange.user.json.actions.UserActionFactory;

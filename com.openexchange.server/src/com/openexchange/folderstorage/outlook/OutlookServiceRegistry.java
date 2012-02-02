@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.outlook;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link OutlookServiceRegistry} - The service registry for MS Outlook folder storage.

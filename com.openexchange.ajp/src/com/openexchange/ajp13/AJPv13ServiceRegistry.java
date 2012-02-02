@@ -49,7 +49,7 @@
 
 package com.openexchange.ajp13;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link AJPv13ServiceRegistry} - Container class for the service registry of <i>com.openexchange.ajp13</i> bundle.

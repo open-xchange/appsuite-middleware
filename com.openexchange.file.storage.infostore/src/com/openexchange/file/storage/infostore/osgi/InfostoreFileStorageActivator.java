@@ -53,7 +53,7 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.infostore.InfostoreFileStorageService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**

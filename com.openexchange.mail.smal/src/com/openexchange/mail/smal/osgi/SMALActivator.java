@@ -77,7 +77,7 @@ import com.openexchange.mail.smal.internal.tasks.SMALCreateTableTask;
 import com.openexchange.mail.smal.jobqueue.JobQueue;
 import com.openexchange.mail.smal.jobqueue.internal.JobQueueEventHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;

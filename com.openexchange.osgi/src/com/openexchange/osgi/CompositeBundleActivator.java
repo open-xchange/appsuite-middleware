@@ -47,15 +47,67 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
+import java.util.Stack;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 /**
- * {@link DynamicServiceStateListener}
+ * With this abstract class multiple activators in a bundle can be joined.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
  */
-public interface DynamicServiceStateListener {
-    public void stateChanged();
+public abstract class CompositeBundleActivator implements BundleActivator {
+
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompositeBundleActivator.class));
+    private final Stack<BundleActivator> activated = new Stack<BundleActivator>();
+
+    @Override
+    public void start(final BundleContext context) throws Exception {
+        Exception first = null;
+        for (final BundleActivator activator : getActivators()) {
+            try {
+                activator.start(context);
+                activated.push(activator);
+            } catch (final Exception e) {
+                if (null == first) {
+                    first = e;
+                }
+                LOG.error("Exception while running activator " + activator.getClass().getName(), e);
+            }
+        }
+        if (null != first) {
+            throw first;
+        }
+    }
+
+    @Override
+    public void stop(final BundleContext context) throws Exception {
+        Exception first = null;
+        while (!activated.isEmpty()) {
+            final BundleActivator activator = activated.pop();
+            try {
+                activator.stop(context);
+            } catch (final Exception e) {
+                if (null == first) {
+                    first = e;
+                }
+                LOG.error("Exception while stopping activator " + activator.getClass().getName(), e);
+            }
+        }
+        if (null != first) {
+            throw first;
+        }
+    }
+
+    /**
+     * Gets the joined {@link BundleActivator activators} which shall be started sequentially.
+     *
+     * @return The joined {@link BundleActivator activators}
+     */
+    protected abstract BundleActivator[] getActivators();
+
 }

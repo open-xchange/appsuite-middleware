@@ -49,7 +49,7 @@
 
 package com.openexchange.folder.json.services;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
  * {@link ServiceRegistry} remembers needed services.

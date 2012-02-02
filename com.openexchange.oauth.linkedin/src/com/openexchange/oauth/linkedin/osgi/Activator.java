@@ -49,30 +49,19 @@
 
 package com.openexchange.oauth.linkedin.osgi;
 
-import java.util.ArrayList;
-import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private BundleContext bundleContext;
-
-    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
-
-    private ArrayList<ServiceRegistration<?>> services;
 
     private OAuthService oauthService;
 
@@ -82,58 +71,21 @@ public class Activator implements BundleActivator {
 
     }
 
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        bundleContext = context;
-        services = new ArrayList<ServiceRegistration<?>>(2);
-
-        // react dynamically to the appearance/disappearance of ConfigurationService
-        trackers.push(new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new ConfigurationServiceRegisterer(context, this)));
-
-        // react dynamically to the appearance/disappearance of OauthService
-        trackers.push(new ServiceTracker<OAuthService,OAuthService>(context, OAuthService.class, new OAuthServiceRegisterer(context, this)));
-
-        for (final ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
-    @Override
-    public void stop(final BundleContext context) throws Exception {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
-    }
-
     public void registerServices() {
         if (null != oauthService && null != configurationService) {
             final OAuthServiceMetaDataLinkedInImpl linkedInMetaDataService = new OAuthServiceMetaDataLinkedInImpl(this);
-            final ServiceRegistration<OAuthServiceMetaData> serviceRegistration = bundleContext.registerService(
-                OAuthServiceMetaData.class,
-                linkedInMetaDataService,
-                null);
-            services.add(serviceRegistration);
+            registerService(OAuthServiceMetaData.class, linkedInMetaDataService, null);
             LOG.info("OAuthServiceMetaData for LinkedIn was started");
 
             final LinkedInService linkedInService = new LinkedInServiceImpl(this);
-            final ServiceRegistration<LinkedInService> serviceRegistration2 = bundleContext.registerService(
-                LinkedInService.class,
-                linkedInService,
-                null);
-            services.add(serviceRegistration2);
+            registerService(LinkedInService.class, linkedInService, null);
             LOG.info("LinkedInService was started.");
-
         }
     }
 
+    @Override
     public void unregisterServices() {
-        for (final ServiceRegistration<?> serviceRegistration : services) {
-            serviceRegistration.unregister();
-        }
+        unregisterServices();
     }
 
     public OAuthService getOauthService() {
@@ -154,6 +106,25 @@ public class Activator implements BundleActivator {
 
     public ConfigurationService getConfigurationService() {
         return configurationService;
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        track(ConfigurationService.class, new ConfigurationServiceRegisterer(context, this));
+        track(OAuthService.class, new OAuthServiceRegisterer(context, this));
+        openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() {
+        closeTrackers();
+        cleanUp();
     }
 
 

@@ -3,8 +3,8 @@ package com.openexchange.webdav.directory.osgi;
 
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.directory.servlets.WebdavDirectoryPerformer;

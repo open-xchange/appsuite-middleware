@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.xml
 Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: javax.xml,
+Import-Package: com.openexchange.osgi,
+ com.openexchange.server,
+ javax.xml,
  javax.xml.namespace,
  javax.xml.parsers,
  javax.xml.transform,

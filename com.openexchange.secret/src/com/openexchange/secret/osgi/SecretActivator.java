@@ -56,6 +56,7 @@ import java.util.List;
 import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
@@ -66,7 +67,6 @@ import com.openexchange.secret.impl.SessionSecretService;
 import com.openexchange.secret.impl.Token;
 import com.openexchange.secret.impl.TokenList;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link SecretActivator}

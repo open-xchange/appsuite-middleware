@@ -49,18 +49,17 @@
 
 package com.openexchange.proxy.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ProxyActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ProxyActivator implements BundleActivator {
+public class ProxyActivator extends HousekeepingActivator {
 
 	@Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
 	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -73,7 +72,7 @@ public class ProxyActivator implements BundleActivator {
 	}
 
 	@Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
 	    final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -84,5 +83,11 @@ public class ProxyActivator implements BundleActivator {
             throw e;
         }
 	}
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

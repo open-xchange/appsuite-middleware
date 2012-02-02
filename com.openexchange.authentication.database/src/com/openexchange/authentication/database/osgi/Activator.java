@@ -49,37 +49,34 @@
 
 package com.openexchange.authentication.database.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
-public class Activator implements BundleActivator {
-
-    private ServiceTracker<Object,Object> tracker;
+public class Activator extends HousekeepingActivator {
 
     public Activator() {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void start(final BundleContext context) throws Exception {
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
-        tracker = new ServiceTracker<Object,Object>(context, filter, new AuthenticationRegisterer(context));
-        tracker.open();
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        tracker.close();
+    protected void startBundle() throws Exception {
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + UserService.class.getName() + "))");
+        track(filter, new AuthenticationRegisterer(context));
+        openTrackers();
+    }
+
+    @Override
+    public void stopBundle() {
+        closeTrackers();
+        cleanUp();
     }
 }

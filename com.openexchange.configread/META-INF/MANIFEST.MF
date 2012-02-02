@@ -8,10 +8,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.tools.strings,
  org.apache.commons.logging,
- com.openexchange.log,
  org.apache.commons.logging.impl,
  org.osgi.framework
 Export-Package: com.openexchange.config

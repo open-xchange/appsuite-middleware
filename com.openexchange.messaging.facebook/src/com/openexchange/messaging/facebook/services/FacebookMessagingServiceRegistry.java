@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.facebook.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link FacebookMessagingServiceRegistry} - Container class for the service registry of <i>com.openexchange.messaging.facebook</i> bundle.

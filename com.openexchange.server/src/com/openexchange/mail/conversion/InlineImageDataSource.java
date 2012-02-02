@@ -164,8 +164,8 @@ public final class InlineImageDataSource implements ImageDataSource {
         builder.append(delim).append(imageLocation.getFolder());
         builder.append(delim).append(imageLocation.getId());
         builder.append(delim).append(imageLocation.getImageId());
-        builder.append(delim).append(session.getUserId());
-        builder.append(delim).append(session.getContextId());
+        // builder.append(delim).append(session.getUserId());
+        // builder.append(delim).append(session.getContextId());
         builder.append(delim);
         return ImageUtility.getMD5(builder.toString(), "hex");
     }

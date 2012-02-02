@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.services.FileStorageRdbServiceRegistry;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
 
 /**

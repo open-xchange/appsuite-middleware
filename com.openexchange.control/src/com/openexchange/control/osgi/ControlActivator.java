@@ -52,26 +52,23 @@ package com.openexchange.control.osgi;
 import static com.openexchange.control.internal.GeneralControl.shutdown;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.control.internal.GeneralControl;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ControlActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ControlActivator implements BundleActivator {
+public final class ControlActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ControlActivator.class));
-
-    private ServiceTracker<ManagementService, ManagementService> managementServiceTracker;
 
     private Thread shutdownHookThread;
 
@@ -83,18 +80,20 @@ public final class ControlActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.control");
         try {
             /*
              * Create & open service tracker
              */
-            managementServiceTracker =
-                new ServiceTracker<ManagementService, ManagementService>(
-                    context,
-                    ManagementService.class,
-                    new ManagementServiceTrackerCustomizer(context, LOG));
-            managementServiceTracker.open();
+            track(ManagementService.class, new ManagementServiceTrackerCustomizer(context, LOG));
+            openTrackers();
             /*
              * Add shutdown hook
              */
@@ -108,9 +107,8 @@ public final class ControlActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         LOG.info("stopping bundle: com.openexchange.control");
-
         try {
             if (null != shutdownHookThread) {
                 if (!shutdownHookThread.isAlive()) {
@@ -131,13 +129,12 @@ public final class ControlActivator implements BundleActivator {
                 shutdownHookThread = null;
             }
 
-            if (null != managementServiceTracker) {
-                managementServiceTracker.close();
-                managementServiceTracker = null;
-            }
+                closeTrackers();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
+        } finally {
+            cleanUp();
         }
     }
 
@@ -222,4 +219,5 @@ public final class ControlActivator implements BundleActivator {
         }
 
     } // End of ControlShutdownHookThread
+
 }

@@ -61,7 +61,7 @@ import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.impl.ConfigCascade;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.strings.StringParser;
 
 

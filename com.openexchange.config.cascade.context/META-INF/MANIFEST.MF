@@ -13,7 +13,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.userconfiguration,
- com.openexchange.server.osgiservice,
+ com.openexchange.osgi,
  com.openexchange.userconf,
  org.osgi.framework
 Bundle-Activator: com.openexchange.config.cascade.context.osgi.ContextConfigCascadeActivator

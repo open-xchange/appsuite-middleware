@@ -64,7 +64,7 @@ import com.openexchange.frontend.uwa.internal.groupware.CreateWidgetTableTask;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**

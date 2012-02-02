@@ -47,81 +47,59 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
-import java.util.Dictionary;
+import java.util.LinkedList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.global.OXCloseable;
 
 
 /**
- * {@link ConditionalRegistration}
+ * {@link Whiteboard}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class ConditionalRegistration {
-    protected BundleContext context;
-    protected String serviceName;
-    protected Object service;
-    protected Dictionary dictionary;
-    protected ServiceRegistration registration;
-    private boolean running;
+public class Whiteboard implements OXCloseable {
 
-    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConditionalRegistration.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Whiteboard.class));
 
-    public ConditionalRegistration(final BundleContext context, final String serviceName, final Object service, final Dictionary dict) {
+    private final List<OXCloseable> closeables = new LinkedList<OXCloseable>();
+
+    private final BundleContext context;
+
+    private final DynamicWhiteboardFactory factory;
+
+    public Whiteboard(final BundleContext context) {
         this.context = context;
-        this.serviceName = serviceName;
-        this.service = service;
-        dictionary = dict;
+        factory = new DynamicWhiteboardFactory(context);
+        closeables.add(factory);
     }
 
-    public void check() {
-        if(!running) {
-            return;
-        }
-        if(!registered() && mustRegister()) {
-            register();
-        } else if (registered() && ! mustRegister()) {
-            unregister();
-        }
+    public <T> T getService(final Class<T> klass) {
+        return factory.createWhiteboardService(context, klass, closeables, null);
     }
 
-    private synchronized void unregister() {
-        if(registration != null) {
-            LOG.info("Unregistering "+service+" as "+serviceName+". ");
-            registration.unregister();
-            registration = null;
-        }
+    public <T> T getService(final Class<T> klass, final DynamicServiceStateListener listener) {
+        return factory.createWhiteboardService(context, klass, closeables, listener);
     }
 
+    public boolean isActive(final Object o) {
+        return factory.isActive(o);
+    }
 
-    private synchronized void register() {
-        if(registration == null && service != null && running) {
-            registration = context.registerService(serviceName, service, dictionary);
-            LOG.info("Registering "+service+" as "+serviceName);
+    @Override
+    public void close() throws OXException {
+        for(final OXCloseable closeable : closeables) {
+            try {
+                closeable.close();
+            } catch (final OXException x) {
+                LOG.error(x);
+            }
         }
     }
-
-    protected boolean mustRegister() {
-        return true;
-    }
-
-    private synchronized boolean registered() {
-        return registration != null;
-    }
-
-    public void start() {
-        running = true;
-        check();
-    }
-
-    public void close() {
-        running = false;
-        unregister();
-    }
-
 }

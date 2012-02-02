@@ -54,10 +54,7 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.context.osgi.WhiteboardContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.provider.DBProvider;
@@ -70,10 +67,11 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
@@ -94,13 +92,9 @@ import com.openexchange.userconf.UserConfigurationService;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class DiscoveryActivator implements BundleActivator {
+public class DiscoveryActivator extends HousekeepingActivator {
 
     private OSGiSubscriptionSourceCollector collector;
-
-    private ServiceRegistration<SubscriptionSourceDiscoveryService> discoveryRegistration;
-
-    private ServiceRegistration<SubscriptionExecutionService> executionRegistration;
 
     private WhiteboardContextService contextService;
 
@@ -108,10 +102,8 @@ public class DiscoveryActivator implements BundleActivator {
 
     private Whiteboard whiteboard;
 
-    private ServiceRegistration<FolderUpdaterRegistry> folderUpdaterRegistryRegistration;
-
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         whiteboard = new Whiteboard(context);
         collector = new OSGiSubscriptionSourceCollector(context);
         contextService = new WhiteboardContextService(context);
@@ -126,8 +118,7 @@ public class DiscoveryActivator implements BundleActivator {
         final OSGiSubscriptionSourceDiscoveryCollector discoveryCollector = new OSGiSubscriptionSourceDiscoveryCollector(context);
         discoveryCollector.addSubscriptionSourceDiscoveryService(collector);
 
-        discoveryRegistration =
-            context.registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, discoveryDict);
+        registerService(SubscriptionSourceDiscoveryService.class, discoveryCollector, discoveryDict);
 
         final List<FolderUpdaterService<?>> folderUpdaters = new ArrayList<FolderUpdaterService<?>>(5);
         folderUpdaters.add(new StrategyFolderUpdaterService<Contact>(new ContactFolderUpdaterStrategy()));
@@ -140,10 +131,8 @@ public class DiscoveryActivator implements BundleActivator {
             infostore)));
 
         final SubscriptionExecutionServiceImpl executor = new SubscriptionExecutionServiceImpl(collector, folderUpdaters, contextService);
-        executionRegistration = context.registerService(SubscriptionExecutionService.class, executor, null);
-
-        folderUpdaterRegistryRegistration = context.registerService(FolderUpdaterRegistry.class, executor, null);
-
+        registerService(SubscriptionExecutionService.class, executor);
+        registerService(FolderUpdaterRegistry.class, executor);
 
         final DBProvider provider = whiteboard.getService(DBProvider.class);
         genconfStorage = new WhiteboardGenericConfigurationStorageService(context);
@@ -159,15 +148,15 @@ public class DiscoveryActivator implements BundleActivator {
         listener.setStorageService(genconfStorage);
         listener.setDiscoveryService(discoveryCollector);
 
-        context.registerService(DeleteListener.class.getName(), listener, null);
+        registerService(DeleteListener.class, listener);
 
         final SubscriptionSecretHandling secretHandling = new SubscriptionSecretHandling(discoveryCollector);
-        context.registerService(EncryptedItemDetectorService.class.getName(), secretHandling, null);
-        context.registerService(SecretMigrator.class.getName(), secretHandling, null);
+        registerService(EncryptedItemDetectorService.class, secretHandling);
+        registerService(SecretMigrator.class, secretHandling);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         whiteboard.close();
         whiteboard = null;
         genconfStorage.close();
@@ -176,12 +165,13 @@ public class DiscoveryActivator implements BundleActivator {
         collector = null;
         contextService.close();
         contextService = null;
-        discoveryRegistration.unregister();
-        discoveryRegistration = null;
-        executionRegistration.unregister();
-        executionRegistration = null;
-        folderUpdaterRegistryRegistration.unregister();
-        folderUpdaterRegistryRegistration = null;
+        unregisterServices();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -63,7 +63,7 @@ import com.openexchange.log.LogPropertyName.LogLevel;
 import com.openexchange.log.LogService;
 import com.openexchange.log.internal.LogServiceImpl;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.internal.QueueProvider;
 import com.openexchange.threadpool.internal.ThreadPoolProperties;

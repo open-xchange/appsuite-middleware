@@ -58,7 +58,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link YahooOAuthActivator}

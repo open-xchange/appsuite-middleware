@@ -49,9 +49,6 @@
 
 package com.openexchange.datatypes.genericonf.storage.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.osgiservice.WhiteboardDBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -59,32 +56,29 @@ import com.openexchange.datatypes.genericonf.storage.impl.ClearGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.CreateGenConfTables;
 import com.openexchange.datatypes.genericonf.storage.impl.MySQLGenericConfigurationStorage;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
-
-    private ServiceRegistration<GenericConfigurationStorageService> serviceRegistration;
-
-    private ServiceRegistration<DeleteListener> clearTablesServiceRegistration;
-
-    private ServiceRegistration<CreateTableService> createTablesServiceRegistration;
+public class Activator extends HousekeepingActivator {
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
-        mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
-        clearTablesServiceRegistration = context.registerService(DeleteListener.class, new ClearGenConfTables(), null);
-        createTablesServiceRegistration = context.registerService(CreateTableService.class, new CreateGenConfTables(), null);
-        serviceRegistration = context.registerService(
-            GenericConfigurationStorageService.class,
-            mySQLGenericConfigurationStorage,
-            null);
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception{
-        serviceRegistration.unregister();
-        createTablesServiceRegistration.unregister();
-        clearTablesServiceRegistration.unregister();
+    protected void startBundle() throws Exception {
+        final MySQLGenericConfigurationStorage mySQLGenericConfigurationStorage = new MySQLGenericConfigurationStorage();
+        mySQLGenericConfigurationStorage.setDBProvider(new WhiteboardDBProvider(context));
+        registerService(DeleteListener.class, new ClearGenConfTables(), null);
+        registerService(CreateTableService.class, new CreateGenConfTables(), null);
+        registerService(GenericConfigurationStorageService.class, mySQLGenericConfigurationStorage, null);
+    }
+
+    @Override
+    public void stopBundle() {
+        unregisterServices();
+        cleanUp();
     }
 
 }

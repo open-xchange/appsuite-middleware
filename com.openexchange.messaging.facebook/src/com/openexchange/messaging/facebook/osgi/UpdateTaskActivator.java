@@ -49,32 +49,34 @@
 
 package com.openexchange.messaging.facebook.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * Registers the update task.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UpdateTaskActivator implements BundleActivator {
-
-    private ServiceTracker<DatabaseService,DatabaseService> tracker;
+public class UpdateTaskActivator extends HousekeepingActivator {
 
     public UpdateTaskActivator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker<DatabaseService,DatabaseService>(context, DatabaseService.class, new UpdateTaskRegisterer(context));
-        tracker.open();
+    public void startBundle() throws Exception {
+        track(DatabaseService.class, new UpdateTaskRegisterer(context));
+        openTrackers();
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        tracker.close();
+    public void stopBundle() throws Exception {
+        closeTrackers();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

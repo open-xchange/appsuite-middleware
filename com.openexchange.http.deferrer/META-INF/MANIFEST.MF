@@ -6,7 +6,8 @@ Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
- com.openexchange.server.osgiservice,
+ com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.tools.service,
  javax.servlet,
  javax.servlet.http,

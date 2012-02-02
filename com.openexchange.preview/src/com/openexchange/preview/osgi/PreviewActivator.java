@@ -68,11 +68,11 @@ import com.itextpdf.text.pdf.PdfTemplate;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.html.HTMLService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.preview.internal.DelegationPreviewService;
 import com.openexchange.preview.internal.TikaPreviewService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 /**
  * {@link PreviewActivator}

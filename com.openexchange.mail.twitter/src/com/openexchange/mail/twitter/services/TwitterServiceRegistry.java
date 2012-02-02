@@ -49,7 +49,7 @@
 
 package com.openexchange.mail.twitter.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link TwitterServiceRegistry} - A registry for services needed by POP3 bundle

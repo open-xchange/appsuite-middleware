@@ -4,7 +4,7 @@ import java.util.Hashtable;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.user.UserConfigProvider;
 import com.openexchange.context.ContextService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
 public class UserConfigCascadeActivator extends HousekeepingActivator {

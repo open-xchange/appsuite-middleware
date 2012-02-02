@@ -52,17 +52,12 @@ package com.openexchange.subscribe.microformats.osgi;
 import static com.openexchange.subscribe.microformats.FormStrings.FORM_LABEL_URL;
 import static com.openexchange.subscribe.microformats.FormStrings.SOURCE_NAME_CONTACTS;
 import static com.openexchange.subscribe.microformats.FormStrings.SOURCE_NAME_INFOSTORE;
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.microformats.MicroformatSubscribeService;
@@ -82,11 +77,7 @@ import com.openexchange.subscribe.microformats.transformers.MapToDocumentMetadat
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SubcriptionServicesActivator implements BundleActivator {
-
-    private List<ServiceRegistration<?>> registrations;
-
-    private List<ServiceTracker<?,?>> trackers;
+public class SubcriptionServicesActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link SubcriptionServicesActivator}.
@@ -96,7 +87,7 @@ public class SubcriptionServicesActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final HTTPOXMFDataSource dataSource = new HTTPOXMFDataSource();
         final HTMLMicroformatParserFactory parserFactory = new HTMLMicroformatParserFactory();
         final MapToContactObjectTransformer mapToContactObject = new MapToContactObjectTransformer();
@@ -142,46 +133,33 @@ public class SubcriptionServicesActivator implements BundleActivator {
         /*
          * Add and register services
          */
-        registrations = new ArrayList<ServiceRegistration<?>>(4);
+        registerService(SubscribeService.class, subscribeService, null);
+        registerService(SubscribeService.class, infostoreService, null);
 
-        registrations.add(context.registerService(SubscribeService.class, subscribeService, null));
-        registrations.add(context.registerService(SubscribeService.class, infostoreService, null));
-
-        registrations.add(context.registerService(OXMFParserFactoryService.class, parserFactory, null));
-        registrations.add(context.registerService(OXMFFormParser.class, new CybernekoOXMFFormParser(), null));
+        registerService(OXMFParserFactoryService.class, parserFactory, null);
+        registerService(OXMFFormParser.class, new CybernekoOXMFFormParser(), null);
         /*
          * Add and open service trackers
          */
-        trackers = new ArrayList<ServiceTracker<?,?>>(1);
-        trackers.add(new ServiceTracker<ConfigurationService,ConfigurationService>(
-            context,
+        track(
             ConfigurationService.class,
             new RegistryServiceTrackerCustomizer<ConfigurationService>(
                 context,
                 OXMFServiceRegistry.getInstance(),
-                ConfigurationService.class)));
-
-        for (final ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
+                ConfigurationService.class));
+        openTrackers();
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        if (null != registrations) {
-            for (final ServiceRegistration<?> registration : registrations) {
-                registration.unregister();
-            }
-            registrations.clear();
-            registrations = null;
-        }
-        if (null != trackers) {
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.close();
-            }
-            trackers.clear();
-            trackers = null;
-        }
+    public void stopBundle() throws Exception {
+        unregisterServices();
+        closeTrackers();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

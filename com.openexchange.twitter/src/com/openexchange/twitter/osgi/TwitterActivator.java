@@ -49,13 +49,8 @@
 
 package com.openexchange.twitter.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.twitter.TwitterService;
 import com.openexchange.twitter.internal.TwitterServiceImpl;
 
@@ -64,11 +59,7 @@ import com.openexchange.twitter.internal.TwitterServiceImpl;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TwitterActivator implements BundleActivator {
-
-    private List<ServiceTracker<?,?>> trackers;
-
-    private List<ServiceRegistration<?>> registrations;
+public final class TwitterActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link TwitterActivator}.
@@ -78,7 +69,7 @@ public final class TwitterActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -87,17 +78,12 @@ public final class TwitterActivator implements BundleActivator {
             /*
              * Service trackers
              */
-            trackers = new ArrayList<ServiceTracker<?,?>>(1);
-            trackers.add(new ServiceTracker<ConfigurationService,ConfigurationService>(context, ConfigurationService.class, new ConfigurationServiceTrackerCustomizer(
-                context)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            track(ConfigurationService.class, new ConfigurationServiceTrackerCustomizer(context));
+            openTrackers();
             /*
              * Register
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(1);
-            registrations.add(context.registerService(TwitterService.class, new TwitterServiceImpl(), null));
+            registerService(TwitterService.class, new TwitterServiceImpl());
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.twitter: " + e.getMessage(), e);
             throw e;
@@ -105,7 +91,7 @@ public final class TwitterActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(TwitterActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -114,25 +100,21 @@ public final class TwitterActivator implements BundleActivator {
             /*
              * Unregister
              */
-            if (null != registrations) {
-                for (final ServiceRegistration<?> registration : registrations) {
-                    registration.unregister();
-                }
-                registrations = null;
-            }
+            unregisterServices();
             /*
              * Close trackers
              */
-            if (null != trackers) {
-                for (final ServiceTracker<?,?> tracker : trackers) {
-                    tracker.close();
-                }
-                trackers = null;
-            }
+            closeTrackers();
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.twitter: " + e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

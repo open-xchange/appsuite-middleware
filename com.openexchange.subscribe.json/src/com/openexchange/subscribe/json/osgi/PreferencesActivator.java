@@ -49,27 +49,29 @@
 
 package com.openexchange.subscribe.json.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.json.preferences.Enabled;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class PreferencesActivator implements BundleActivator {
-
-    private ServiceRegistration<PreferencesItemService> userConfigFlagRegistration;
+public class PreferencesActivator extends HousekeepingActivator {
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        userConfigFlagRegistration = context.registerService(PreferencesItemService.class, new Enabled(), null);
+    public void startBundle() throws Exception {
+        registerService(PreferencesItemService.class, new Enabled());
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        userConfigFlagRegistration.unregister();
+    public void stopBundle() throws Exception {
+        closeTrackers();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

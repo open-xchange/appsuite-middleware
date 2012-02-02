@@ -50,7 +50,7 @@
 package com.openexchange.user.copy.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
 import com.openexchange.user.copy.internal.additional.osgi.AdditionalCopyActivator;
 import com.openexchange.user.copy.internal.attachment.osgi.AttachmentCopyActivator;
 import com.openexchange.user.copy.internal.calendar.osgi.CalendarCopyActivator;

@@ -9,6 +9,7 @@ Export-Package: com.openexchange.dataretention
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,
+ com.openexchange.osgi,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-Activator: com.openexchange.dataretention.osgi.DataRetentionActivator

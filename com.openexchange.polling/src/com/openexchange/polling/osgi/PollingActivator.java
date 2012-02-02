@@ -50,9 +50,9 @@
 package com.openexchange.polling.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.polling.PollService;
 import com.openexchange.polling.impl.PollServiceImpl;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 
 /**

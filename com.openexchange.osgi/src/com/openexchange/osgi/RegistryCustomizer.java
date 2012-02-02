@@ -47,67 +47,47 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
-import java.util.Stack;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 /**
- * With this abstract class multiple activators in a bundle can be joined.
+ * {@link RegistryCustomizer}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class CompositeBundleActivator implements BundleActivator {
+public class RegistryCustomizer<S> implements ServiceTrackerCustomizer<S, S> {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(CompositeBundleActivator.class));
-    private final Stack<BundleActivator> activated = new Stack<BundleActivator>();
+    private final BundleContext context;
 
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        Exception first = null;
-        for (final BundleActivator activator : getActivators()) {
-            try {
-                activator.start(context);
-                activated.push(activator);
-            } catch (final Exception e) {
-                if (null == first) {
-                    first = e;
-                }
-                LOG.error("Exception while running activator " + activator.getClass().getName(), e);
-            }
-        }
-        if (null != first) {
-            throw first;
-        }
+    private final Class<S> clazz;
+
+    private final ServiceRegistry registry;
+
+    public RegistryCustomizer(final BundleContext context, final Class<S> clazz, final ServiceRegistry registry) {
+        super();
+        this.context = context;
+        this.clazz = clazz;
+        this.registry = registry;
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        Exception first = null;
-        while (!activated.isEmpty()) {
-            final BundleActivator activator = activated.pop();
-            try {
-                activator.stop(context);
-            } catch (final Exception e) {
-                if (null == first) {
-                    first = e;
-                }
-                LOG.error("Exception while stopping activator " + activator.getClass().getName(), e);
-            }
-        }
-        if (null != first) {
-            throw first;
-        }
+    public S addingService(final ServiceReference<S> reference) {
+        final S service = context.getService(reference);
+        registry.addService(clazz, service);
+        return service;
     }
 
-    /**
-     * Gets the joined {@link BundleActivator activators} which shall be started sequentially.
-     *
-     * @return The joined {@link BundleActivator activators}
-     */
-    protected abstract BundleActivator[] getActivators();
+    @Override
+    public void modifiedService(final ServiceReference<S> reference, final S service) {
+        // Nothing to do.
+    }
 
+    @Override
+    public void removedService(final ServiceReference<S> reference, final S service) {
+        registry.removeService(clazz);
+        context.ungetService(reference);
+    }
 }

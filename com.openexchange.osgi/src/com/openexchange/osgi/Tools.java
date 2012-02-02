@@ -47,47 +47,40 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
 
 /**
- * {@link RegistryCustomizer}
+ * {@link Tools}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class RegistryCustomizer<S> implements ServiceTrackerCustomizer<S, S> {
+public class Tools {
 
-    private final BundleContext context;
+    /**
+     * Generates an OR filter matching the services given in the classes varargs.
+     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
+     */
+    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
+        if (classes.length < 2) {
+            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
+        }
+        final StringBuilder sb = new StringBuilder("(|(");
+        for (final Class<?> clazz : classes) {
+            sb.append(Constants.OBJECTCLASS);
+            sb.append('=');
+            sb.append(clazz.getName());
+            sb.append(")(");
+        }
+        sb.setCharAt(sb.length() - 1, ')');
+        return context.createFilter(sb.toString());
+    }
 
-    private final Class<S> clazz;
-
-    private final ServiceRegistry registry;
-
-    public RegistryCustomizer(final BundleContext context, final Class<S> clazz, final ServiceRegistry registry) {
+    private Tools() {
         super();
-        this.context = context;
-        this.clazz = clazz;
-        this.registry = registry;
-    }
-
-    @Override
-    public S addingService(final ServiceReference<S> reference) {
-        final S service = context.getService(reference);
-        registry.addService(clazz, service);
-        return service;
-    }
-
-    @Override
-    public void modifiedService(final ServiceReference<S> reference, final S service) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(final ServiceReference<S> reference, final S service) {
-        registry.removeService(clazz);
-        context.ungetService(reference);
     }
 }

@@ -55,7 +55,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.msn.MSNService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.msn.MSNSubscribeService;
 

@@ -54,7 +54,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.server.osgiservice.Tools;
+import com.openexchange.osgi.Tools;
 import com.openexchange.tools.file.external.FileStorageFactory;
 
 public class DBQuotaFileStorageActivator implements BundleActivator {

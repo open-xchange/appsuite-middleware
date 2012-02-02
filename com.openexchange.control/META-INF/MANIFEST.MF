@@ -7,14 +7,14 @@ Bundle-Activator: com.openexchange.control.osgi.ControlActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
+ com.openexchange.log,
  com.openexchange.management,
+ com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.server.impl,
- com.openexchange.server.osgiservice,
  javax.management,
  org.apache.commons.codec.binary,
  org.apache.commons.logging,
- com.openexchange.log,
  org.osgi.framework,
  org.osgi.service.packageadmin,
  org.osgi.util.tracker

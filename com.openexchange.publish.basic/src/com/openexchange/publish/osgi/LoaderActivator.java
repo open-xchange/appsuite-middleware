@@ -49,18 +49,16 @@
 
 package com.openexchange.publish.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.impl.CachingLoader;
 import com.openexchange.publish.impl.CompositeLoaderService;
 import com.openexchange.publish.impl.ContactFolderLoader;
 import com.openexchange.publish.impl.InfostoreDocumentLoader;
 import com.openexchange.publish.impl.InfostoreFolderLoader;
-import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
@@ -69,14 +67,12 @@ import com.openexchange.userconf.UserConfigurationService;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class LoaderActivator implements BundleActivator {
+public class LoaderActivator extends HousekeepingActivator {
 
     private Whiteboard whiteboard;
 
-    private ServiceRegistration<PublicationDataLoaderService> dataLoaderRegistration;
-
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         whiteboard = new Whiteboard(context);
 
         final CompositeLoaderService compositeLoader = new CompositeLoaderService();
@@ -90,16 +86,20 @@ public class LoaderActivator implements BundleActivator {
         final ContactFolderLoader contactLoader = new ContactFolderLoader(whiteboard.getService(ContactInterfaceFactory.class));
         compositeLoader.registerLoader("contacts", contactLoader);
 
-        dataLoaderRegistration =
-            context.registerService(PublicationDataLoaderService.class, new CachingLoader(whiteboard, compositeLoader), null);
+        registerService(PublicationDataLoaderService.class, new CachingLoader(whiteboard, compositeLoader), null);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        dataLoaderRegistration.unregister();
-        dataLoaderRegistration = null;
+    public void stopBundle() throws Exception {
+        unregisterServices();
         whiteboard.close();
         whiteboard = null;
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

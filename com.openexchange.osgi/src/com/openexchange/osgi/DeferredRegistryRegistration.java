@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
 import java.util.ArrayList;
 import java.util.Iterator;

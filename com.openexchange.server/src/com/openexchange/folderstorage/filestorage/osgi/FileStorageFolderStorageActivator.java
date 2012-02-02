@@ -60,8 +60,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.filestorage.FileStorageFolderStorage;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link FileStorageFolderStorageActivator} - {@link BundleActivator Activator} for file storage folder storage.

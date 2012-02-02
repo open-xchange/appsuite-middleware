@@ -1,30 +1,24 @@
 
 package com.openexchange.appstore.json.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
-    private static BundleContext context;
-
-    static BundleContext getContext() {
-        return context;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return null;
     }
 
     @Override
-    public void start(BundleContext bundleContext) throws Exception {
-        Activator.context = bundleContext;
-    }
+    protected void startBundle() throws Exception {
+        // TODO Auto-generated method stub
 
-    @Override
-    public void stop(BundleContext bundleContext) throws Exception {
-        Activator.context = null;
     }
 
 }

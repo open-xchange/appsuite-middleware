@@ -47,19 +47,81 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
-import java.util.Collection;
+import java.util.Dictionary;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
-import com.openexchange.tools.global.OXCloseable;
+import org.osgi.framework.ServiceRegistration;
+
 
 /**
- * {@link WhiteboardFactoryService}
+ * {@link ConditionalRegistration}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface WhiteboardFactoryService<T> {
-    public T create(BundleContext context, Collection<OXCloseable> closeables);
-    public Class<T> getType();
+public class ConditionalRegistration {
+    protected BundleContext context;
+    protected String serviceName;
+    protected Object service;
+    protected Dictionary dictionary;
+    protected ServiceRegistration registration;
+    private boolean running;
+
+    protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConditionalRegistration.class));
+
+    public ConditionalRegistration(final BundleContext context, final String serviceName, final Object service, final Dictionary dict) {
+        this.context = context;
+        this.serviceName = serviceName;
+        this.service = service;
+        dictionary = dict;
+    }
+
+    public void check() {
+        if(!running) {
+            return;
+        }
+        if(!registered() && mustRegister()) {
+            register();
+        } else if (registered() && ! mustRegister()) {
+            unregister();
+        }
+    }
+
+    private synchronized void unregister() {
+        if(registration != null) {
+            LOG.info("Unregistering "+service+" as "+serviceName+". ");
+            registration.unregister();
+            registration = null;
+        }
+    }
+
+
+    private synchronized void register() {
+        if(registration == null && service != null && running) {
+            registration = context.registerService(serviceName, service, dictionary);
+            LOG.info("Registering "+service+" as "+serviceName);
+        }
+    }
+
+    protected boolean mustRegister() {
+        return true;
+    }
+
+    private synchronized boolean registered() {
+        return registration != null;
+    }
+
+    public void start() {
+        running = true;
+        check();
+    }
+
+    public void close() {
+        running = false;
+        unregister();
+    }
+
 }

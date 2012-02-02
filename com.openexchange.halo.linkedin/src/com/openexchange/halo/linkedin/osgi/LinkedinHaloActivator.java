@@ -55,7 +55,7 @@ import com.openexchange.halo.linkedin.LinkedinProfileDataSource;
 import com.openexchange.halo.linkedin.LinkedinUpdatesDataSource;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
 public class LinkedinHaloActivator extends HousekeepingActivator {

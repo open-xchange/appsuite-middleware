@@ -49,31 +49,20 @@
 
 package com.openexchange.subscribe.linkedin.osgi;
 
-import java.util.ArrayList;
-import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.linkedin.LinkedInService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.linkedin.LinkedInSubscribeService;
 import com.openexchange.subscribe.linkedin.groupware.LinkedInSubscriptionsOAuthAccountDeleteListener;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
-
-    private BundleContext bundleContext;
-
-    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
-
-    private ArrayList<ServiceRegistration<?>> services;
 
     private OAuthServiceMetaData oAuthServiceMetadata;
 
@@ -82,41 +71,32 @@ public class Activator implements BundleActivator {
     private ContextService contextService;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        bundleContext = context;
-        services = new ArrayList<ServiceRegistration<?>>();
+    public void startBundle() throws Exception {
+
         // react dynamically to the appearance/disappearance of LinkedinService
-        trackers.push(new ServiceTracker<LinkedInService,LinkedInService>(context, LinkedInService.class, new LinkedInServiceRegisterer(context, this)));
+        track(LinkedInService.class, new LinkedInServiceRegisterer(context, this));
 
         // react dynamically to the appearance/disappearance of OAuthServiceMetadata
-        trackers.push(new ServiceTracker<OAuthServiceMetaData,OAuthServiceMetaData>(context, OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this)));
+        track(OAuthServiceMetaData.class, new OAuthServiceMetaDataRegisterer(context, this));
 
         // react dynamically to the appearance/disappearance of ContextService
-        trackers.push(new ServiceTracker<ContextService,ContextService>(context, ContextService.class, new ContextServiceRegisterer(context, this)));
+        track(ContextService.class, new ContextServiceRegisterer(context, this));
 
-        for (final ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
+        openTrackers();
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
+    public void stopBundle() throws Exception {
+        closeTrackers();
     }
 
     public void registerServices() {
         if (null != oAuthServiceMetadata && null != linkedInService && null != contextService){
             final LinkedInSubscribeService linkedInSubscribeService = new LinkedInSubscribeService(this);
-            final ServiceRegistration<SubscribeService> serviceRegistration = bundleContext.registerService(
-                SubscribeService.class,
-                linkedInSubscribeService,
-                null);
-            services.add(serviceRegistration);
+            registerService(SubscribeService.class, linkedInSubscribeService);
 
             try {
-                services.add(bundleContext.registerService(OAuthAccountDeleteListener.class.getName(), new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService), null));
+                registerService(OAuthAccountDeleteListener.class, new LinkedInSubscriptionsOAuthAccountDeleteListener(linkedInSubscribeService, contextService));
             } catch (final Throwable t) {
                 t.printStackTrace();
             }
@@ -125,12 +105,9 @@ public class Activator implements BundleActivator {
         }
     }
 
+    @Override
     public void unregisterServices() {
-        final ArrayList<ServiceRegistration<?>> registrations = new ArrayList<ServiceRegistration<?>>(services);
-        services.clear();
-        for (final ServiceRegistration<?> serviceRegistration : registrations) {
-            serviceRegistration.unregister();
-        }
+        unregisterServices();
     }
 
     public OAuthServiceMetaData getOAuthServiceMetadata() {
@@ -151,6 +128,12 @@ public class Activator implements BundleActivator {
 
     public void setContextService(final ContextService contexts) {
         this.contextService = contexts;
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -50,7 +50,7 @@
 package com.openexchange.folderstorage.database;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link DatabaseServiceRegistry} - The service registry for database folder storage.

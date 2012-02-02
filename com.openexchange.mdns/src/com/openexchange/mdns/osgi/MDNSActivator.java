@@ -49,26 +49,20 @@
 
 package com.openexchange.mdns.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.mdns.MDNSService;
 import com.openexchange.mdns.internal.MDNSCommandProvider;
 import com.openexchange.mdns.internal.MDNSServiceImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link MDNSActivator} - The mDNS activator.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MDNSActivator implements BundleActivator {
-
-    private List<ServiceRegistration<?>> registrations;
+public final class MDNSActivator extends HousekeepingActivator {
 
     private MDNSServiceImpl service;
 
@@ -80,7 +74,13 @@ public final class MDNSActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
         log.info("Starting bundle: com.openexchange.mdns");
         try {
@@ -88,9 +88,8 @@ public final class MDNSActivator implements BundleActivator {
              * Create mDNS service
              */
             service = new MDNSServiceImpl();
-            registrations = new ArrayList<ServiceRegistration<?>>(2);
-            registrations.add(context.registerService(MDNSService.class.getName(), service, null));
-            registrations.add(context.registerService(CommandProvider.class.getName(), new MDNSCommandProvider(service), null));
+            registerService(MDNSService.class, service, null);
+            registerService(CommandProvider.class, new MDNSCommandProvider(service), null);
         } catch (final Exception e) {
             log.error("Starting bundle failed: com.openexchange.mdns", e);
             throw e;
@@ -98,16 +97,11 @@ public final class MDNSActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(MDNSActivator.class));
         log.info("Stopping bundle: com.openexchange.mdns");
         try {
-            if (registrations != null) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            unregisterServices();
             if (service != null) {
                 service.close();
                 service = null;

@@ -129,9 +129,9 @@ public final class ContactImageDataSource implements ImageDataSource {
         final char delim = '#';
         final StringBuilder builder = new StringBuilder(128);
         builder.append(delim).append(imageLocation.getFolder());
-        builder.append(delim).append(imageLocation.getId());
-        builder.append(delim).append(session.getUserId());
-        builder.append(delim).append(session.getContextId());
+        // builder.append(delim).append(imageLocation.getId());
+        // builder.append(delim).append(session.getUserId());
+        // builder.append(delim).append(session.getContextId());
         builder.append(delim).append(contact.getLastModified().getTime());
         builder.append(delim);
         return ImageUtility.getMD5(builder.toString(), "hex");

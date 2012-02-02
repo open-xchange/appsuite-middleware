@@ -52,7 +52,7 @@ package com.openexchange.groupware.dataRetrieval.attachments.osgi;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.dataRetrieval.DataProvider;
 import com.openexchange.groupware.dataRetrieval.attachments.PIMAttachmentDataProvider;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**

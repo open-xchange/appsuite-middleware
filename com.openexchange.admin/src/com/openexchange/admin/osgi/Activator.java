@@ -49,20 +49,15 @@
 
 package com.openexchange.admin.osgi;
 
-import java.rmi.Remote;
 import java.rmi.registry.Registry;
 import java.util.Dictionary;
 import java.util.Stack;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.daemons.osgi.RMITracker;
 import com.openexchange.admin.exceptions.OXGenericException;
@@ -71,41 +66,26 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static Log log = LogFactory.getLog(AdminDaemon.class);
 
     private AdminDaemon daemon = null;
 
-    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
+    private final Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
 
-    public void start(BundleContext context) throws Exception {
-        
-        trackers.push(new ServiceTracker(
-            context,
-            PipesAndFiltersService.class.getName(),
-            new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(
-                context,
-                AdminServiceRegistry.getInstance(),
-                PipesAndFiltersService.class)));
-        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new RegistryServiceTrackerCustomizer<ContextService>(
-            context,
-            AdminServiceRegistry.getInstance(),
-            ContextService.class)));
-        trackers.push(new ServiceTracker(
-            context,
-            MailAccountStorageService.class.getName(),
-            new RegistryServiceTrackerCustomizer<MailAccountStorageService>(
-                context,
-                AdminServiceRegistry.getInstance(),
-                MailAccountStorageService.class)));
-        trackers.push(new ServiceTracker(context, CreateTableService.class.getName(), new CreateTableCustomizer(context)));
-        for (int i = trackers.size() - 1; i >= 0; i--) {
-            trackers.get(i).open();
-        }
+    @Override
+    public void startBundle() throws Exception {
+
+        track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
+        track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
+        track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
+        track(CreateTableService.class, new CreateTableCustomizer(context));
+        openTrackers();
 
         log.info("Starting Admindaemon...");
         this.daemon = new AdminDaemon();
@@ -114,20 +94,20 @@ public class Activator implements BundleActivator {
         try {
             this.daemon.initCache();
             this.daemon.initAccessCombinationsInCache();
-        } catch (OXGenericException e) {
+        } catch (final OXGenericException e) {
             log.fatal(e.getMessage(), e);
             throw e;
-        } catch (ClassNotFoundException e) {
+        } catch (final ClassNotFoundException e) {
             log.fatal(e.getMessage(), e);
             throw e;
         }
         this.daemon.initRMI(context);
-        
-        Registry registry = AdminDaemon.getRegistry();
-        RMITracker rmiTracker = new RMITracker(context, registry);
+
+        final Registry registry = AdminDaemon.getRegistry();
+        final RMITracker rmiTracker = new RMITracker(context, registry);
         trackers.push(rmiTracker);
         rmiTracker.open();
-        
+
 
         if (log.isInfoEnabled()) {
             final Dictionary<?, ?> headers = context.getBundle().getHeaders();
@@ -138,8 +118,8 @@ public class Activator implements BundleActivator {
         log.info("Admindaemon successfully started.");
 
         // The listener which is called if a new plugin is registered
-        ServiceListener sl = new ServiceListener() {
-            public void serviceChanged(ServiceEvent ev) {
+        final ServiceListener sl = new ServiceListener() {
+            public void serviceChanged(final ServiceEvent ev) {
                 if (log.isInfoEnabled()) {
                     log.info("Service: " + ev.getServiceReference().getBundle().getSymbolicName() + ", " + ev.getType());
                 }
@@ -154,10 +134,10 @@ public class Activator implements BundleActivator {
                 }
             }
         };
-        String filter = "(objectclass=" + OXUserPluginInterface.class.getName() + ")";
+        final String filter = "(objectclass=" + OXUserPluginInterface.class.getName() + ")";
         try {
             context.addServiceListener(sl, filter);
-        } catch (InvalidSyntaxException e) {
+        } catch (final InvalidSyntaxException e) {
             e.printStackTrace();
         }
     }
@@ -165,13 +145,21 @@ public class Activator implements BundleActivator {
     /**
      * {@inheritDoc}
      */
-    public void stop(BundleContext context) throws Exception {
+    @Override
+    public void stopBundle() throws Exception {
+        closeTrackers();
         while (!trackers.isEmpty()) {
-            ServiceTracker tracker = trackers.pop();
+            final ServiceTracker tracker = trackers.pop();
             tracker.close();
         }
         log.info("Stopping RMI...");
         this.daemon.unregisterRMI();
         log.info("Thanks for using Open-Xchange AdminDaemon");
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

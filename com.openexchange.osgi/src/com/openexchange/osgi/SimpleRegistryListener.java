@@ -47,40 +47,31 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 
 /**
- * {@link Tools}
+ * {@link SimpleRegistryListener}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Tools {
+public interface SimpleRegistryListener<T> {
 
     /**
-     * Generates an OR filter matching the services given in the classes varargs.
-     * @throws InvalidSyntaxException if the syntax of the generated filter is not correct.
+     * The service is being added to this {@code SimpleRegistryListener}.
+     *
+     * @param ref The reference to the service being added
+     * @param service The (tracked) service object
      */
-    public static final Filter generateServiceFilter(final BundleContext context, final Class<?>... classes) throws InvalidSyntaxException {
-        if (classes.length < 2) {
-            throw new IllegalArgumentException("At least the classes of 2 services must be given.");
-        }
-        final StringBuilder sb = new StringBuilder("(|(");
-        for (final Class<?> clazz : classes) {
-            sb.append(Constants.OBJECTCLASS);
-            sb.append('=');
-            sb.append(clazz.getName());
-            sb.append(")(");
-        }
-        sb.setCharAt(sb.length() - 1, ')');
-        return context.createFilter(sb.toString());
-    }
+    public void added(ServiceReference<T> ref, T service);
 
-    private Tools() {
-        super();
-    }
+    /**
+     * The service is being removed from this {@code SimpleRegistryListener}.
+     *
+     * @param ref The reference to the service being removed
+     * @param service The (tracked) service object
+     */
+    public void removed(ServiceReference<T> ref, T service);
+
 }

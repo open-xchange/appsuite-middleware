@@ -51,8 +51,8 @@ package com.openexchange.spellcheck.osgi;
 
 import static com.openexchange.spellcheck.services.SpellCheckServletServiceRegistry.getServiceRegistry;
 import org.osgi.service.http.HttpService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.spellcheck.SpellCheckService;
 import com.openexchange.spellcheck.servlet.SpellCheckServlet;
 import com.openexchange.tools.service.SessionServletRegistration;
@@ -62,7 +62,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SpellCheckServletActivator extends DeferredActivator {
+public final class SpellCheckServletActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(SpellCheckServletActivator.class));
 

@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.ajp13.AJPv13ServiceRegistry;
 import com.openexchange.ajp13.monitoring.AJPv13Monitors;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
+import com.openexchange.osgi.BundleServiceTracker;
 
 /**
  * {@link ManagementServiceTracker}

@@ -62,10 +62,8 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.i18n.I18nService;
@@ -75,10 +73,11 @@ import com.openexchange.i18n.impl.POTranslationsDiscoverer;
 import com.openexchange.i18n.impl.ResourceBundleDiscoverer;
 import com.openexchange.i18n.impl.TranslationsI18N;
 import com.openexchange.i18n.parsing.Translations;
+import com.openexchange.osgi.BundleServiceTracker;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceHolderListener;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
 
-public class I18nActivator implements BundleActivator {
+public class I18nActivator extends HousekeepingActivator {
 
     protected static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(I18nActivator.class));
 
@@ -212,25 +211,22 @@ public class I18nActivator implements BundleActivator {
 
     private I18nServiceHolderListener listener;
 
-    private final List<ServiceTracker<?,?>> serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-
+    protected void startBundle() throws Exception {
         if (DEBUG) {
             LOG.debug("I18n Starting");
         }
         try {
             csh = ConfigurationServiceHolder.newInstance();
 
-            serviceTrackerList.add(new ServiceTracker<ConfigurationService,ConfigurationService>(
-                context,
-                ConfigurationService.class.getName(),
-                new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class)));
-
-            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
-                tracker.open();
-            }
+            track(ConfigurationService.class, new BundleServiceTracker<ConfigurationService>(context, csh, ConfigurationService.class));
+            openTrackers();
 
             listener = new I18nServiceHolderListener(context, csh);
             csh.addServiceHolderListener(listener);
@@ -245,7 +241,7 @@ public class I18nActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         if (DEBUG) {
             LOG.debug("Stopping I18n");
         }
@@ -263,10 +259,8 @@ public class I18nActivator implements BundleActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
-                tracker.close();
-            }
-            serviceTrackerList.clear();
+            closeTrackers();
+            cleanUp();
         } catch (final Throwable e) {
             LOG.error("I18nActivator: stop: ", e);
             throw e instanceof Exception ? (Exception) e : new Exception(e);

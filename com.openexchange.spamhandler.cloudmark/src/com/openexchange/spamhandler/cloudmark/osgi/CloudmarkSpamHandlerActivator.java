@@ -53,8 +53,8 @@ import static com.openexchange.spamhandler.cloudmark.osgi.CloudmarkSpamHandlerSe
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.cloudmark.CloudmarkSpamHandler;
 

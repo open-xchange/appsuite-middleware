@@ -65,8 +65,8 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.messaging.MessagingFolderStorage;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MessagingFolderStorageActivator} - {@link BundleActivator Activator} for messaging folder storage.

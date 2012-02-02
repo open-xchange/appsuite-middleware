@@ -68,13 +68,13 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewPolicy;
 import com.openexchange.preview.PreviewService;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
 import com.openexchange.session.Session;
 
 

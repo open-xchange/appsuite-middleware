@@ -50,7 +50,7 @@
 package com.openexchange.twitter.osgi;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link TwitterServiceRegistry} - The service registry for twitter bundle.

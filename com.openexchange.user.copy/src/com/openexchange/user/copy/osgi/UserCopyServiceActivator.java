@@ -49,9 +49,7 @@
 
 package com.openexchange.user.copy.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.copy.CopyUserTaskService;
 
 /**
@@ -59,21 +57,26 @@ import com.openexchange.user.copy.CopyUserTaskService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UserCopyServiceActivator implements BundleActivator {
-
-    private ServiceTracker<CopyUserTaskService, CopyUserTaskService> tracker;
-    
+public class UserCopyServiceActivator extends HousekeepingActivator {
 
     public UserCopyServiceActivator() {
         super();
     }
 
-    public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker<CopyUserTaskService, CopyUserTaskService>(context, CopyUserTaskService.class, new CopyUserServiceRegisterer(context));
-        tracker.open();
+    @Override
+    public void startBundle() throws Exception {
+        track(CopyUserTaskService.class, new CopyUserServiceRegisterer(context));
+        openTrackers();
     }
 
-    public void stop(final BundleContext context) throws Exception {
-        tracker.close();
+    @Override
+    public void stopBundle() throws Exception {
+        closeTrackers();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

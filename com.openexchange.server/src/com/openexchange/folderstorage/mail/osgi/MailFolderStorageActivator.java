@@ -59,8 +59,8 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.mail.MailFolderStorage;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MailFolderStorageActivator} - {@link BundleActivator Activator} for mail folder storage.

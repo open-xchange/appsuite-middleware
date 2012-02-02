@@ -49,14 +49,12 @@
 
 package com.openexchange.oauth.facebook.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
@@ -65,27 +63,29 @@ import com.openexchange.oauth.OAuthService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public final class Activator implements BundleActivator{
-
-    private ServiceTracker<Object,Object> tracker;
+public final class Activator extends HousekeepingActivator {
 
     public Activator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DeferringURLService.class.getName() + "))");
-        tracker = new ServiceTracker<Object,Object>(context, filter, new FacebookRegisterer(context));
-        tracker.open();
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        tracker.close();
+    protected void startBundle() throws Exception {
+        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + OAuthService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DeferringURLService.class.getName() + "))");
+        track(filter);
+        openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() {
+        closeTrackers();
+        cleanUp();
     }
 
 }

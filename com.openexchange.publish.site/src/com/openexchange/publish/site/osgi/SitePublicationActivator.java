@@ -51,11 +51,11 @@ package com.openexchange.publish.site.osgi;
 
 import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.site.Constants;
 import com.openexchange.publish.site.SitePublicationService;
 import com.openexchange.publish.site.SiteServlet;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
 
 

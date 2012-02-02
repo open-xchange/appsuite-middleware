@@ -86,25 +86,38 @@ public final class Tools {
      */
     private static final DateFormat HEADER_DATEFORMAT;
 
-    /**
-     * Cache-Control HTTP header name.
+    /*-
+     * ------------------ Header names -------------------------
      */
-    private static final String CACHE_CONTROL_KEY = "Cache-Control";
 
     /**
-     * Cache-Control value.
+     * <code>"Cache-Control"</code> HTTP header name.
      */
-    private static final String CACHE_VALUE = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
+    private static final String NAME_CACHE_CONTROL = "Cache-Control";
 
     /**
-     * Expires HTTP header name.
+     * <code>"Expires"</code> HTTP header name.
      */
-    private static final String EXPIRES_KEY = "Expires";
+    private static final String NAME_EXPIRES = "Expires";
+
+    /**
+     * <code>"ETag"</code> HTTP header name.
+     */
+    private static final String NAME_ETAG = "ETag";
+
+    /*-
+     * ------------------ Header values -------------------------
+     */
 
     /**
      * Expires HTTP header value.
      */
     private static final String EXPIRES_DATE;
+
+    /**
+     * Cache-Control value.
+     */
+    private static final String CACHE_VALUE = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0";
 
     /**
      * Pragma HTTP header key.
@@ -115,6 +128,17 @@ public final class Tools {
      * Pragma HTTP header value.
      */
     private static final String PRAGMA_VALUE = "no-cache";
+
+    static {
+        /*
+         * Pattern for the HTTP header date format.
+         */
+        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
+        HEADER_DATEFORMAT.setTimeZone(getTimeZone("GMT"));
+        EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
+    }
+
+    // ------------------------------------------------------------------------------
 
     /**
      * Prevent instantiation
@@ -134,6 +158,10 @@ public final class Tools {
         setETag(eTag, null, resp);
     }
 
+    private static final long MILLIS_WEEK = 604800000L;
+
+    private static final long MILLIS_YEAR = 52 * MILLIS_WEEK;
+
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
@@ -144,13 +172,17 @@ public final class Tools {
      */
     public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
         removeCachingHeader(resp);
-        resp.setHeader("ETag", eTag);
+        resp.setHeader(NAME_ETAG, eTag); // ETag
         if (null == expires) {
-            resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
+            synchronized (HEADER_DATEFORMAT) {
+                resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
+            }
+            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
         } else {
             synchronized (HEADER_DATEFORMAT) {
-                resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));
+                resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(expires));
             }
+            resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
         }
     }
 
@@ -162,8 +194,8 @@ public final class Tools {
      * @see #removeCachingHeader(HttpServletResponse)
      */
     public static void disableCaching(final HttpServletResponse resp) {
-        resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
-        resp.setHeader(CACHE_CONTROL_KEY, CACHE_VALUE);
+        resp.setHeader(NAME_EXPIRES, EXPIRES_DATE);
+        resp.setHeader(NAME_CACHE_CONTROL, CACHE_VALUE);
         resp.setHeader(PRAGMA_KEY, PRAGMA_VALUE);
     }
 
@@ -175,8 +207,8 @@ public final class Tools {
      */
     public static void removeCachingHeader(final HttpServletResponse resp) {
         resp.setHeader(PRAGMA_KEY, null);
-        resp.setHeader(CACHE_CONTROL_KEY, null);
-        resp.setHeader(EXPIRES_KEY, null);
+        resp.setHeader(NAME_CACHE_CONTROL, null);
+        resp.setHeader(NAME_EXPIRES, null);
     }
 
     /**
@@ -338,15 +370,6 @@ public final class Tools {
 
     private static String escapeBackslashAndQuote(final String str) {
         return PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"");
-    }
-
-    static {
-        /*
-         * Pattern for the HTTP header date format.
-         */
-        HEADER_DATEFORMAT = new SimpleDateFormat("EEE',' dd MMMM yyyy HH:mm:ss z", Locale.ENGLISH);
-        HEADER_DATEFORMAT.setTimeZone(getTimeZone("GMT"));
-        EXPIRES_DATE = HEADER_DATEFORMAT.format(new Date(799761600000L));
     }
 
     public static interface CookieNameMatcher {

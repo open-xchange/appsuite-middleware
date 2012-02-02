@@ -57,8 +57,8 @@ import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link DatabaseFolderStorageActivator} - {@link BundleActivator Activator} for database folder storage.

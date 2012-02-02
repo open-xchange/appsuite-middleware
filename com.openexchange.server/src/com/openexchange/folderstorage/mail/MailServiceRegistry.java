@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.mail;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MailServiceRegistry} - The service registry for mail folder storage.

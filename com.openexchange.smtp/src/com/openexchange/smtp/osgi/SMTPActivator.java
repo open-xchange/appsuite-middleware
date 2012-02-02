@@ -57,9 +57,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.RegistryCustomizer;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RegistryCustomizer;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.smtp.SMTPProvider;
 
 /**

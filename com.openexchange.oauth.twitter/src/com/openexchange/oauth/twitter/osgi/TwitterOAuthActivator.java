@@ -53,7 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.twitter.OAuthServiceMetaDataTwitterImpl;
 import com.openexchange.oauth.twitter.TwitterOAuthServiceRegistry;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**

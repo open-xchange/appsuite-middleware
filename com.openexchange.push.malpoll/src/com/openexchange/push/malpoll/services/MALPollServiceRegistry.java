@@ -49,7 +49,7 @@
 
 package com.openexchange.push.malpoll.services;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
  * {@link MALPollServiceRegistry} - A registry for services needed by MAL poll bundle

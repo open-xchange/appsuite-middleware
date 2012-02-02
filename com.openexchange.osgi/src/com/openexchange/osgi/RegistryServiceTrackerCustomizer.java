@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.server.osgiservice;
+package com.openexchange.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;

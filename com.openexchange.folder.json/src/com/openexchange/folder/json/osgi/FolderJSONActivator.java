@@ -64,7 +64,7 @@ import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 
 /**
  * {@link FolderJSONActivator} - Activator for JSON folder interface.

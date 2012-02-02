@@ -54,8 +54,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.mail.MailMessageService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MailMessagingActivator}

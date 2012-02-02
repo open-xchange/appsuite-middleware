@@ -49,51 +49,51 @@
 
 package com.openexchange.admin.osgi;
 
-import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.admin.PluginStarter;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
 
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = LogFactory.getLog(Activator.class);
 
     private PluginStarter starter = null;
 
-    private Stack<ServiceTracker> trackers = new Stack<ServiceTracker>();
-
-    public void start(BundleContext context) throws Exception {
-        trackers.push(new ServiceTracker(context, ThreadPoolService.class.getName(), new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class)));
-        trackers.push(new ServiceTracker(context, ContextService.class.getName(), new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class)));
-        trackers.push(new ServiceTracker(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
-        trackers.push(new ServiceTracker(context, ManagementService.class.getName(), new ManagementCustomizer(context)));
-        trackers.push(new ServiceTracker(context, PipesAndFiltersService.class.getName(), new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class)));
-        for (ServiceTracker tracker : trackers) {
-            tracker.open();
-        }
+    @Override
+    public void startBundle() throws Exception {
+        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
+        track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
+        track(I18nService.class, new I18nServiceCustomizer(context));
+        track(ManagementService.class, new ManagementCustomizer(context));
+        track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
+        openTrackers();
         this.starter = new PluginStarter();
         try {
             this.starter.start(context);
-        } catch (OXGenericException e) {
+        } catch (final OXGenericException e) {
             LOG.fatal(e.getMessage(), e);
         }
     }
 
-    public void stop(BundleContext context) throws Exception {
+    @Override
+    public void stopBundle() throws Exception {
         this.starter.stop();
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
+        closeTrackers();
+        cleanUp();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

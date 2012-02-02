@@ -55,10 +55,10 @@ import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.context.ContextService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.servlet.PasswordChangeServlet;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link PasswordChangeServletActivator}

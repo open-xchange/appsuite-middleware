@@ -49,7 +49,7 @@
 
 package com.openexchange.pop3.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link POP3ServiceRegistry} - A registry for services needed by POP3 bundle

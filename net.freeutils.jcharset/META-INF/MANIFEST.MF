@@ -9,5 +9,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/jcharset-1.3.jar
 Export-Package: net.freeutils.charset
-Import-Package: org.apache.commons.logging,
+Import-Package: com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
  org.osgi.framework
