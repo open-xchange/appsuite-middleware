@@ -154,7 +154,7 @@ public class ICalEmitterTest extends TestCase {
 
     public void testDeleteExceptionsMayBeNull() throws Exception {
         final Appointment app = new Appointment();
-        app.setDeleteExceptions(null);
+        app.setDeleteExceptions((Date[]) null);
         serialize(app);
         assertTrue("Just testing survival", true);
     }

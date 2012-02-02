@@ -306,7 +306,7 @@ public class CollectionTest extends ResourceTest {
     }
 
     @Override
-	protected WebdavResource createResource() throws OXException{
+	protected WebdavResource createResource() throws WebdavProtocolException{
 		WebdavResource resource = FACTORY.resolveCollection(testCollection+"/testResource"+Math.random());
 		assertFalse(resource.exists());
 		resource.create();
@@ -321,7 +321,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object resourceType() throws OXException {
+	public Object resourceType() throws WebdavProtocolException {
 		final WebdavCollection coll = createResource().toCollection();
 		assertEquals(Protocol.COLLECTION, coll.getResourceType());
 		assertEquals(coll.getResourceType(), coll.getProperty("DAV:", "resourcetype").getValue());
@@ -329,7 +329,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object contentLanguage() throws OXException {
+	public Object contentLanguage() throws WebdavProtocolException {
 		final WebdavResource res = createResource();
 		final String defaultLanguage = null;
 		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage"));
@@ -356,7 +356,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object contentLength() throws OXException {
+	public Object contentLength() throws WebdavProtocolException {
 		final WebdavResource res = createResource();
 		assertEquals(res.getLength(), res.getProperty("DAV:", "getcontentlength"));
 		assertEquals(null, res.getLength());
@@ -383,7 +383,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object etag() throws OXException{
+	public Object etag() throws WebdavProtocolException{
 		final WebdavResource res = createResource();
 		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag"));
 		assertEquals(null, res.getETag());
@@ -392,7 +392,7 @@ public class CollectionTest extends ResourceTest {
 	}
 
 	@Override
-	public Object contentType() throws OXException {
+	public Object contentType() throws WebdavProtocolException {
 		final WebdavResource res = createResource();
 		try {
 			res.setContentType("text/plain");
