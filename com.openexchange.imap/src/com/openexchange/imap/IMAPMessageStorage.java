@@ -143,6 +143,7 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.textxtraction.TextXtractService;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
@@ -156,12 +157,13 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(IMAPMessageStorage.class));
 
     private static final boolean DEBUG = LOG.isDebugEnabled();
 
@@ -212,7 +214,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Initializes a new {@link IMAPMessageStorage}.
-     *
+     * 
      * @param imapStore The IMAP store
      * @param imapAccess The IMAP access
      * @param session The session providing needed user data
@@ -238,8 +240,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private Locale getLocale() throws OXException {
         if (locale == null) {
             try {
-                final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
-                locale = userService.getUser(session.getUserId(), ctx).getLocale();
+                if (session instanceof ServerSession) {
+                    locale = ((ServerSession) session).getUser().getLocale();
+                } else {
+                    final UserService userService = IMAPServiceRegistry.getService(UserService.class, true);
+                    locale = userService.getUser(session.getUserId(), ctx).getLocale();
+                }
             } catch (final RuntimeException e) {
                 throw handleRuntimeException(e);
             }
@@ -321,14 +327,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return content;
                 }
                 if (subtype.startsWith("htm")) {
-                    //content = htmlService.getConformHTML(content, "UTF-8");
+                    // content = htmlService.getConformHTML(content, "UTF-8");
                     content = PATTERN_CRLF.matcher(content).replaceAll("");// .replaceAll("(  )+", "");
                 }
                 try {
                     return extractPlainText(content);
                 } catch (final OXException e) {
                     if (!subtype.startsWith("htm")) {
-                        final StringBuilder sb = new StringBuilder("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
+                        final StringBuilder sb =
+                            new StringBuilder("Failed extracting plain text from \"text/").append(subtype).append("\" part:\n");
                         sb.append(" context=").append(session.getContextId());
                         sb.append(", user=").append(session.getUserId());
                         sb.append(", account=").append(accountId);
@@ -421,7 +428,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Composes part's sequence ID from given prefix and part's count
-     *
+     * 
      * @param prefix The prefix (may be <code>null</code>)
      * @param partCount The part count
      * @return The sequence ID
@@ -585,12 +592,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private TLongObjectHashMap<MailMessage> fetchValidFor(final Object array, final int len, final FetchProfile fetchProfile, final boolean isRev1, final boolean seqnum, final boolean byContentType) throws MessagingException, OXException {
         final TLongObjectHashMap<MailMessage> map = new TLongObjectHashMap<MailMessage>(len);
-        //final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false, false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
+        // final MailMessage[] tmp = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, array, fetchProfile, false,
+        // false, false).setDetermineAttachmentByHeader(byContentType).doCommand();
         final NewFetchIMAPCommand command;
         if (array instanceof long[]) {
-            command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+            command =
+                new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
         } else {
-            command = new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+            command =
+                new NewFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
         }
         final long start = System.currentTimeMillis();
         final MailMessage[] tmp = command.doCommand();
@@ -965,13 +975,19 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final boolean descending = OrderDirection.DESC.equals(order);
             if (!body) {
                 final long start = System.currentTimeMillis();
-                final TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapFolder, getSeparator(imapFolder), imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums.toArray(), fetchProfile).doCommand();
+                final TLongObjectMap<MailMessage> messages =
+                    new SimpleFetchIMAPCommand(
+                        imapFolder,
+                        getSeparator(imapFolder),
+                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                        seqNums.toArray(),
+                        fetchProfile).doCommand();
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 /*
                  * Apply account identifier
                  */
                 for (final MailMessage mail : messages.valueCollection()) {
-                    mail.setAccountId(accountId);
+                    setAccountInfo(mail);
                 }
                 /*
                  * Generate structure
@@ -984,7 +1000,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
                 final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
                 final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-                    
+
                     @Override
                     public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
                         return comparator.compare(o1.get(0), o2.get(0));
@@ -996,7 +1012,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Include body
              */
-            final Message[] msgs = new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
+            final Message[] msgs =
+                new FetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
             /*
              * Apply thread level
              */
@@ -1006,12 +1023,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             final List<ThreadSortMailMessage> structuredList;
             {
-                final MailMessage[] mails;
-                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
-                    mails = setAccountInfo(convert2Mails(msgs, usedFields.toArray(), body));
-                } else {
-                    mails = convert2Mails(msgs, usedFields.toArray(), body);
-                }
+                final MailMessage[] mails = setAccountInfo(convert2Mails(msgs, usedFields.toArray(), body));
                 structuredList = ThreadSortUtil.toThreadSortStructure(mails);
             }
             /*
@@ -1024,7 +1036,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
             final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null);
             final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
-                
+
                 @Override
                 public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
                     return comparator.compare(o1.get(0), o2.get(0));
@@ -1061,6 +1073,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     return EMPTY_RETVAL;
                 }
             }
+            final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
+            final boolean descending = OrderDirection.DESC.equals(order);
             final TIntList seqnums;
             final List<ThreadSortNode> threadList;
             {
@@ -1104,25 +1118,33 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             usedFields.addAll(mailFields);
             usedFields.add(MailField.THREAD_LEVEL);
             // Add sort field
-            usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            usedFields.add(MailField.toField(effectiveSortField.getListField()));
             final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), getIMAPProperties().isFastFetch());
             final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
-            final boolean descending = OrderDirection.DESC.equals(order);
             if (!body) {
                 final long start = System.currentTimeMillis();
-                final TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapFolder, getSeparator(imapFolder), imapConfig.getImapCapabilities().hasIMAP4rev1(), seqnums.toArray(), fetchProfile).doCommand();
+                final TLongObjectMap<MailMessage> messages =
+                    new SimpleFetchIMAPCommand(
+                        imapFolder,
+                        getSeparator(imapFolder),
+                        imapConfig.getImapCapabilities().hasIMAP4rev1(),
+                        seqnums.toArray(),
+                        fetchProfile).doCommand();
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 final List<ThreadSortMailMessage> structuredList = ThreadSortUtil.toThreadSortStructure(threadList, messages);
                 /*
                  * Sort according to order direction
                  */
-                Collections.sort(
-                    structuredList,
-                    new MailMessageComparator(MailSortField.RECEIVED_DATE, descending, null));
+                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, getLocale()));
                 /*
                  * Output as flat list
                  */
                 final List<MailMessage> flatList = new ArrayList<MailMessage>(messages.size());
+                if (usedFields.contains(MailField.ACCOUNT_NAME) || usedFields.contains(MailField.FULL)) {
+                    for (final MailMessage mail : flatList) {
+                        setAccountInfo(mail);
+                    }
+                }
                 ThreadSortUtil.toFlatList(structuredList, flatList);
                 return flatList.toArray(new MailMessage[flatList.size()]);
             }
@@ -1177,9 +1199,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Sort according to order direction
              */
-            Collections.sort(
-                structuredList,
-                new MailMessageComparator(MailSortField.RECEIVED_DATE, descending, null));
+            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, getLocale()));
             /*
              * Output as flat list
              */
@@ -1740,7 +1760,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Convert messages to JavaMail message objects
              */
-            msgs = MIMEMessageConverter.convertMailMessages(mailMessages, MIMEMessageConverter.BEHAVIOR_CLONE | MIMEMessageConverter.BEHAVIOR_STREAM2FILE);
+            msgs =
+                MIMEMessageConverter.convertMailMessages(
+                    mailMessages,
+                    MIMEMessageConverter.BEHAVIOR_CLONE | MIMEMessageConverter.BEHAVIOR_STREAM2FILE);
             /*
              * Drop special "x-original-headers" header
              */
@@ -2324,7 +2347,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Performs the FETCH command on currently active IMAP folder on all messages using the 1:* sequence range argument.
-     *
+     * 
      * @param fullName The IMAP folder's full name
      * @param lowCostFields The low-cost fields
      * @param order The order direction (needed to possibly flip the results)
@@ -2475,7 +2498,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Determines the corresponding UIDs in destination folder
-     *
+     * 
      * @param msgUIDs The UIDs in source folder
      * @param destFullName The destination folder's full name
      * @return The corresponding UIDs in destination folder
@@ -2593,7 +2616,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Checks and converts specified APPENDUID response.
-     *
+     * 
      * @param appendUIDs The APPENDUID response
      * @return An array of long for each valid {@link AppendUID} element or a zero size array of long if an invalid {@link AppendUID}
      *         element was detected.
@@ -2617,7 +2640,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Removes all user flags from given message's flags
-     *
+     * 
      * @param message The message whose user flags shall be removed
      * @throws MessagingException If removing user flags fails
      */
@@ -2641,7 +2664,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     /**
      * Generates a UUID using {@link UUID#randomUUID()}; e.g.:<br>
      * <i>a5aa65cb-6c7e-4089-9ce2-b107d21b9d15</i>
-     *
+     * 
      * @return A UUID string
      */
     private static String randomUUID() {
@@ -2650,7 +2673,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instance of {@link MailMessage}.
-     *
+     * 
      * @param mailMessages The {@link MailMessage} instance
      * @return The given instance of {@link MailMessage} with account ID and name set
      * @throws OXException If mail account cannot be obtained
@@ -2669,7 +2692,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
-     *
+     * 
      * @param mailMessages The {@link MailMessage} instances
      * @return The given instances of {@link MailMessage} each with account ID and name set
      * @throws OXException If mail account cannot be obtained
