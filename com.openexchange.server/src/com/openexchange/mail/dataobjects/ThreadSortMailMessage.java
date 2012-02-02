@@ -911,7 +911,9 @@ public final class ThreadSortMailMessage extends MailMessage {
      */
     public void setChildMessages(final Collection<ThreadSortMailMessage> mailMessages) {
         childMessages.clear();
-        childMessages.addAll(mailMessages);
+        if (null != mailMessages && !mailMessages.isEmpty()) {
+            childMessages.addAll(mailMessages);
+        }
     }
 
     /**

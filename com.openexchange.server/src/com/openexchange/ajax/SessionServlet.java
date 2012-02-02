@@ -635,7 +635,7 @@ public abstract class SessionServlet extends AJAXServlet {
         if (cookies == null) {
             return;
         }
-        final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash);
+        final List<String> cookieNames = Arrays.asList(Login.SESSION_PREFIX + hash, Login.SECRET_PREFIX + hash, Login.PUBLIC_SESSION_NAME);
         for (final Cookie cookie : cookies) {
             final String name = cookie.getName();
 

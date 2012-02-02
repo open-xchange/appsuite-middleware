@@ -93,6 +93,9 @@ public enum ITipMethod {
     }
 
     public static ITipMethod get(String keyword) {
+    	if (keyword == null) {
+    		return NO_METHOD;
+    	}
         keyword = keyword.trim().toLowerCase(Locale.US);
 
         if (keyword.equals(REQUEST.getKeyword()))

@@ -144,6 +144,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.html.HTMLService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
@@ -559,22 +560,25 @@ public final class ServerActivator extends HousekeepingActivator {
             registerService(DataSource.class, new ContactDataSource(), props);
         }
         {
-            final InlineImageDataSource dataSource = new InlineImageDataSource();
+            final InlineImageDataSource dataSource = InlineImageDataSource.getInstance();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
             registerService(DataSource.class, dataSource, props);
+            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
         }
         {
-            final ContactImageDataSource dataSource = new ContactImageDataSource();
+            final ContactImageDataSource dataSource = ContactImageDataSource.getInstance();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
             registerService(DataSource.class, dataSource, props);
+            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
         }
         {
             final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
             registerService(DataSource.class, dataSource, props);
+            ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
         }
         /*
          * Register data handlers

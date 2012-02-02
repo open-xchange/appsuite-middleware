@@ -112,7 +112,7 @@ public final class SetBundleProperties extends Task {
         }
 
         // Read bundle to build
-        DirModule module = new SrcDirModule(currentBundle);
+        final SrcDirModule module = new SrcDirModule(currentBundle);
         module.readLocalFiles(getProject(), dir);
 
         final List<AbstractModule> allModules = new ArrayList<AbstractModule>(classpathModules.size() + 1);
@@ -169,5 +169,15 @@ public final class SetBundleProperties extends Task {
         }
         log(module.getName() + ".deepClasspath: " + deepClasspath, Project.MSG_DEBUG);
         getProject().setInheritedProperty(module.getName() + ".deepClasspath", deepClasspath.toString());
+        // Bundles may have multiple source directories for easier adoption to incompatible APIs.
+        final StringBuilder sourceDirs = new StringBuilder();
+        for (final String sourceDir : module.getSourceDirs()) {
+            sourceDirs.append(sourceDir);
+            sourceDirs.append(',');
+        }
+        if (sourceDirs.length() > 0) {
+            sourceDirs.setLength(sourceDirs.length() - 1);
+        }
+        getProject().setInheritedProperty(module.getName() + ".sourceDirs", sourceDirs.toString());
     }
 }

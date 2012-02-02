@@ -1,5 +1,4 @@
 #!/usr/bin/make -f
-# Builds OSGi bundles package
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -15,7 +14,6 @@ build: build-stamp
 
 build-stamp: configure-stamp 
 	dh_testdir
-	# Nothing to do to compile the package contents.
 	touch build-stamp
 
 clean:

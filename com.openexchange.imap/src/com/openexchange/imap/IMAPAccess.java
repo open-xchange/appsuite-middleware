@@ -536,7 +536,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return true;
         } catch (final OXException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString());
+                LOG.debug(new StringBuilder("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString(), e);
             }
             return false;
         }
@@ -573,7 +573,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Check for already failed authentication
              */
-            final String login = config.getLogin();
+            String login;
+            try {
+                login = new String(config.getLogin().getBytes(Charsets.forName(imapConfProps.getImapAuthEnc())), Charsets.ISO_8859_1);
+            } catch (final UnsupportedCharsetException e) {
+                LOG.error(e.getMessage(), e);
+                login = config.getLogin();
+            }
             String user = login;
             String proxyUser = null;
             boolean isProxyAuth = false;

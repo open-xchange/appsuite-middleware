@@ -154,6 +154,16 @@ public class SessiondServiceImpl implements SessiondService {
     }
 
     @Override
+    public Session getSessionByAlternativeId(final String altId) {
+        final SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId);
+        if (null == sessionControl) {
+            LOG.info("Session not found by alternative identifier. Alternative ID: " + altId);
+            return null;
+        }
+        return sessionControl.touch().getSession();
+    }
+
+    @Override
     public Session getSessionByRandomToken(final String randomToken, final String localIp) {
         return SessionHandler.getSessionByRandomToken(randomToken, localIp);
     }

@@ -59,11 +59,10 @@ import jonelo.jacksum.JacksumAPI;
 import jonelo.jacksum.algorithm.AbstractChecksum;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.image.servlet.ImageServlet;
+import com.openexchange.java.Charsets;
 import com.openexchange.session.Session;
 
 /**
@@ -94,11 +93,11 @@ public final class ImageUtility {
         if (null == imageUri) {
             return null;
         }
-        final int queryStringStart = imageUri.indexOf(ImageDataSource.ALIAS);
+        final int queryStringStart = imageUri.indexOf('?');
         if (queryStringStart < 0) {
             return null;
         }
-        final String[] nvps = SPLIT.split(imageUri.substring(queryStringStart + ImageDataSource.ALIAS.length() + 1/*Advance starting '?'*/), 0);
+        final String[] nvps = SPLIT.split(imageUri.substring(queryStringStart + 1/*Consume starting '?'*/), 0);
         String accountId = null;
         String folder = null;
         String id = null;
@@ -126,6 +125,12 @@ public final class ImageUtility {
             }
         }
         final ImageLocation il = new ImageLocation.Builder(imageId).accountId(accountId).folder(folder).id(id).build();
+        if (null == registrationName) {
+            registrationName = ImageServlet.getRegistrationNameFor(imageUri);
+            if (null == registrationName) {
+                throw new IllegalArgumentException("No knwon registration name for: " + imageUri);
+            }
+        }
         il.setRegistrationName(registrationName);
         return il;
     }
@@ -145,6 +150,7 @@ public final class ImageUtility {
      * @param session The session
      * @param imageDataSource The data source
      * @param preferRelativeUrl Whether to prefer a relative image URL
+     * @param addRoute <code>true</code> to add AJP route; otherwise <code>false</code>
      * @param sb The string builder to write to
      */
     public static void startImageUrl(final ImageLocation imageLocation, final Session session, final ImageDataSource imageDataSource, final boolean preferRelativeUrl, final StringBuilder sb) {
@@ -178,49 +184,44 @@ public final class ImageUtility {
             }
         }
         /*
-         * Compose signature
-         */
-        String signParam;
-        {
-            final String signature = imageDataSource.getSignature(imageLocation, session);
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
-            sb.append(contextId).append('.').append(signature).append('.').append(userId);
-            try {
-                final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
-                signParam = cryptoService.encrypt(sb.toString(), imageDataSource.getRegistrationName());
-            } catch (final OXException e) {
-                signParam = sb.toString();
-            }
-            sb.setLength(0);
-        }
-        /*
          * Compose URL parameters
          */
         sb.append(prefix).append('/').append(ImageDataSource.ALIAS);
-        if (null != route) {
+        final String alias = imageDataSource.getAlias();
+        if (null != alias) {
+            sb.append(alias);
+        }
+        final Boolean noRoute = (Boolean) imageLocation.getProperty(ImageLocation.PROPERTY_NO_ROUTE);
+        if ((null == noRoute || !noRoute.booleanValue()) && null != route) {
             sb.append(";jsessionid=").append(route);
         }
-        sb.append('?').append("signature=").append(urlEncodeSafe(signParam));
-        sb.append('&').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
+        boolean first = true;
+        if (null == alias) {
+            sb.append('?').append("source=").append(urlEncodeSafe(imageDataSource.getRegistrationName()));
+            first = false;
+        }
         /*
          * Image location data
          */
         final String folder = imageLocation.getFolder();
         if (null != folder) {
-            sb.append('&').append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(urlEncodeSafe(folder));
+            sb.append(first ? '?' : '&').append(AJAXServlet.PARAMETER_FOLDERID).append('=').append(urlEncodeSafe(folder));
+            first = false;
         }
         final String objectId = imageLocation.getId();
         if (null != objectId) {
-            sb.append('&').append(AJAXServlet.PARAMETER_ID).append('=').append(urlEncodeSafe(objectId));
+            sb.append(first ? '?' : '&').append(AJAXServlet.PARAMETER_ID).append('=').append(urlEncodeSafe(objectId));
+            first = false;
         }
         final String imageId = imageLocation.getImageId();
         if (null != imageId) {
-            sb.append('&').append(AJAXServlet.PARAMETER_UID).append('=').append(urlEncodeSafe(imageId));
+            sb.append(first ? '?' : '&').append(AJAXServlet.PARAMETER_UID).append('=').append(urlEncodeSafe(imageId));
+            first = false;
         }
         final String accountId = imageLocation.getAccountId();
         if (null != accountId) {
-            sb.append('&').append("accountId=").append(urlEncodeSafe(accountId));
+            sb.append(first ? '?' : '&').append("accountId=").append(urlEncodeSafe(accountId));
+            first = false;
         }
     }
 
@@ -252,11 +253,9 @@ public final class ImageUtility {
         try {
             final AbstractChecksum checksum = new MD("MD5");
             checksum.setEncoding(encoding);
-            checksum.update(string.getBytes(UTF_8));
+            checksum.update(string.getBytes(Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
-        } catch (final UnsupportedEncodingException e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
         }
         return null;

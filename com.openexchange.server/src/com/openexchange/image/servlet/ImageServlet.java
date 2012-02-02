@@ -52,8 +52,10 @@ package com.openexchange.image.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
 import java.util.Date;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -61,7 +63,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.ServiceException;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.helper.CombinedInputStream;
@@ -71,7 +72,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
-import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -111,9 +111,54 @@ public final class ImageServlet extends HttpServlet {
      */
     public static final String PARAMETER_UID = "uid";
 
+    private static final ConcurrentMap<String, String> regName2Alias = new ConcurrentHashMap<String, String>(8);
+
+    private static final ConcurrentMap<String, String> alias2regName = new ConcurrentHashMap<String, String>(8);
+
+    /**
+     * Adds specified mapping
+     * 
+     * @param registrationName The registration name
+     * @param alias The alias
+     */
+    public static void addMapping(final String registrationName, final String alias) {
+        regName2Alias.put(registrationName, alias);
+        alias2regName.put(alias, registrationName);
+    }
+
+    /**
+     * Gets the registration name for given URL.
+     * 
+     * @param url The url
+     * @return The associated registration name or <code>null</code>
+     */
+    public static String getRegistrationNameFor(final String url) {
+        if (null == url) {
+            return null;
+        }
+        String s = url;
+        final int pos = s.indexOf(ALIAS);
+        if (pos > 0) {
+            s = s.substring(pos + ALIAS.length());
+        }
+        for (final Entry<String, String> entry : alias2regName.entrySet()) {
+            final String alias = entry.getKey();
+            if (s.startsWith(alias)) {
+                return entry.getValue();
+            }
+        }
+        return null;
+    }
+
+    /*-
+     * ------------------------------- Member stuff ----------------------------------
+     */
+
     private volatile CookieHashSource hashSource;
 
     private final String secretPrefix;
+
+    private final String publicSessionCookie;
 
     /**
      * Initializes a new {@link ImageServlet}
@@ -121,6 +166,7 @@ public final class ImageServlet extends HttpServlet {
     public ImageServlet() {
         super();
         secretPrefix = Login.SECRET_PREFIX;
+        publicSessionCookie = Login.PUBLIC_SESSION_NAME;
     }
 
     @Override
@@ -137,60 +183,49 @@ public final class ImageServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final String registrationName = req.getParameter("source");
-        if (null == registrationName) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing source parameter.");
-            return;
-        }
-        final String signParam;
-        try {
-            final CryptoService cryptoService = ServerServiceRegistry.getInstance().getService(CryptoService.class);
-            final String param = req.getParameter("signature");
-            if (null == param) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing signature parameter.");
+        // Check registration name
+        String registrationName = null;
+        {
+            final String pathInfo = req.getPathInfo();
+            for (final Entry<String, String> entry : alias2regName.entrySet()) {
+                final String alias = entry.getKey();
+                if (pathInfo.startsWith(alias)) {
+                    registrationName = entry.getValue();
+                    break;
+                }
+            }
+            if (null == registrationName) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknwon image location.");
                 return;
             }
-            signParam = cryptoService.decrypt(param, registrationName);
+        }
+        // Parse path
+        final ImageDataSource dataSource;
+        try {
+            final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
+            dataSource = (ImageDataSource) conversionService.getDataSource(registrationName);
+            if (null == dataSource) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid image location.");
+                return;
+            }
         } catch (final OXException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid signature parameter.");
+            LOG.error(e.getMessage(), e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        if (null == signParam) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing signature parameter.");
-            return;
+        final ImageLocation imageLocation;
+        {
+            final StringBuilder sb = new StringBuilder(req.getRequestURI());
+            final String queryString = req.getQueryString();
+            if (!isEmpty(queryString)) {
+                if ('?' != queryString.charAt(0)) {
+                    sb.append('?');
+                }
+                sb.append(queryString);
+            }
+            imageLocation = dataSource.parseUrl(sb.toString());
         }
-        int beginIndex = 0;
-        int endIndex = signParam.indexOf('.');
-        if (endIndex <= 0) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid signature parameter.");
-            return;
-        }
-        final Context context = getContext(signParam.substring(beginIndex, endIndex));
-        if (null == context) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine context.");
-            return;
-        }
-        beginIndex = endIndex;
-        endIndex = signParam.indexOf('.', beginIndex + 1);
-        if (endIndex <= 0) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid signature parameter.");
-            return;
-        }
-        final String signature = signParam.substring(beginIndex + 1, endIndex);
-        final User user = getUser(signParam.substring(endIndex + 1), context);
-        if (null == user) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine user.");
-            return;
-        }
-        if (!context.isEnabled() || !user.isMailEnabled()) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
-            return;
-        }
-        /*
-         * Look-up up cookies
-         */
-        String secret = null;
-        String secretCookieName = null;
+        // Now check for appropriate permission
         Session session = null;
         try {
             final Cookie[] cookies = req.getCookies();
@@ -199,39 +234,32 @@ public final class ImageServlet extends HttpServlet {
                 return;
             }
             /*
-             * Get user's sessions
+             * Get user's session
              */
             final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class, true);
-            final Collection<Session> sessions = sessiondService.getSessions(user.getId(), context.getContextId());
-            /*
-             * Find secret cookie
-             */
-            NextCookie: for (final Cookie cookie : cookies) {
-                final String cookieName = cookie.getName();
-                if (cookieName.startsWith(secretPrefix)) {
-                    secret = cookie.getValue();
-                    /*
-                     * Find an appropriate session for secret
-                     */
-                    for (final Session ses : sessions) {
-                        if (secret.equals(ses.getSecret())) {
-                            secretCookieName = cookieName;
-                            session = ses;
-                            break NextCookie;
-                        }
-                    }
+            for (final Cookie cookie : cookies) {
+                if (publicSessionCookie.equals(cookie.getName())) {
+                    session = sessiondService.getSessionByAlternativeId(cookie.getValue());
+                    break;
                 }
             }
             if (null == session) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid secret cookie.");
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "No such session found.");
                 return;
             }
             /*
-             * Verify hash
+             * Find appropriate secret cookie
              */
-            final String expectedSecretCookieName = secretPrefix + SessionServlet.getHash(hashSource, req, session.getHash(), session.getClient());
-            if (null == secretCookieName || !secretCookieName.equals(expectedSecretCookieName)) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid secret cookie.");
+            final String cookieName = secretPrefix + SessionServlet.getHash(hashSource, req, session.getHash(), session.getClient());
+            String secret = null;
+            for (final Cookie cookie : cookies) {
+                if (cookieName.equals(cookie.getName())) {
+                    secret = cookie.getValue();
+                    break;
+                }
+            }
+            if (null == secret || !session.getSecret().equals(secret)) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid secret cookie.");
                 return;
             }
         } catch (final OXException e) {
@@ -239,37 +267,18 @@ public final class ImageServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        /*
-         * Get image data source
-         */
-        final ImageDataSource dataSource;
-        try {
-            final ConversionService conversionService = ServerServiceRegistry.getInstance().getService(ConversionService.class, true);
-            dataSource = (ImageDataSource) conversionService.getDataSource(registrationName);
-            if (null == dataSource) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid source parameter.");
-                return;
-            }
-        } catch (final OXException e) {
-            LOG.error(e.getMessage(), e);
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        final Context context = getContext(session.getContextId());
+        if (null == context) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine context.");
             return;
         }
-        /*
-         * Generate image location
-         */
-        final ImageLocation imageLocation;
-        {
-            final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String id = req.getParameter(AJAXServlet.PARAMETER_ID);
-            final String imageId = req.getParameter(AJAXServlet.PARAMETER_UID);
-            imageLocation = new ImageLocation.Builder(imageId).folder(folder).id(id) .build();
+        final User user = getUser(session.getUserId(), context);
+        if (null == user) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Unable to determine user.");
+            return;
         }
-        /*
-         * Check signature equality
-         */
-        if (!signature.equals(dataSource.getSignature(imageLocation, session))) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Signature does not match.");
+        if (!context.isEnabled() || !user.isMailEnabled()) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid credentials.");
             return;
         }
         /*
@@ -282,6 +291,8 @@ public final class ImageServlet extends HttpServlet {
             final String eTag = req.getHeader("If-None-Match");
             if (null != eTag && dataSource.getETag(imageLocation, session).equals(eTag) ) {
                 resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                final long expires = dataSource.getExpires();
+                Tools.setETag(dataSource.getETag(imageLocation, session), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
                 return;
             }
             outputImageData(dataSource, imageLocation, session, resp);
@@ -290,50 +301,6 @@ public final class ImageServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-    }
-
-    private static User getUser(final String sUserId, final Context context) {
-        final int userId;
-        try {
-            userId = Integer.parseInt(sUserId.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Unable to parse user identifier.", e);
-            return null;
-        }
-        try {
-            return ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(userId, context);
-        } catch (final OXException e) {
-            LOG.debug("User '" + sUserId + "' not found.");
-            return null;
-        }
-    }
-
-    private static Context getContext(final String sContextId) {
-        final int contextId;
-        try {
-            contextId = Integer.parseInt(sContextId.trim());
-        } catch (final NumberFormatException e) {
-            LOG.error("Unable to parse context identifier.", e);
-            return null;
-        }
-        try {
-            return ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
-        } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        } catch (final OXException e) {
-            LOG.error("Can not load context.", e);
-            return null;
-        }
-    }
-
-    private static String getMailAddress(final HttpServletRequest request) {
-        final String userName = request.getParameter("username");
-        final String serverName = request.getParameter("server");
-        if (null == userName || null == serverName) {
-            return null;
-        }
-        return userName + '@' + serverName;
     }
 
     private static void outputImageData(final ImageDataSource dataSource, final ImageLocation imageLocation, final Session session, final HttpServletResponse resp) throws IOException, OXException {
@@ -404,12 +371,7 @@ public final class ImageServlet extends HttpServlet {
              * Set ETag
              */
             final long expires = dataSource.getExpires();
-            if (expires > 0) {
-                final long millis = System.currentTimeMillis() + (expires);
-                Tools.setETag(dataSource.getETag(imageLocation, session), new Date(millis), resp);
-            } else {
-                Tools.setETag(dataSource.getETag(imageLocation, session), resp);
-            }
+            Tools.setETag(dataSource.getETag(imageLocation, session), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
             /*
              * Select response's output stream
              */
@@ -434,8 +396,51 @@ public final class ImageServlet extends HttpServlet {
         }
         try {
             in.close();
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(e.getMessage(), e);
         }
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static User getUser(final int userId, final Context context) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(userId, context);
+        } catch (final OXException e) {
+            LOG.debug("User '" + userId + "' not found.");
+            return null;
+        }
+    }
+
+    private static Context getContext(final int contextId) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (final OXException e) {
+            LOG.error("Can not load context.", e);
+            return null;
+        }
+    }
+
+    private static String getMailAddress(final HttpServletRequest request) {
+        final String userName = request.getParameter("username");
+        final String serverName = request.getParameter("server");
+        if (null == userName || null == serverName) {
+            return null;
+        }
+        return userName + '@' + serverName;
+    }
+
 }

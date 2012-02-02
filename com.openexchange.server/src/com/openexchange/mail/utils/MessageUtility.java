@@ -291,6 +291,12 @@ public final class MessageUtility {
              */
             return readBig5Bytes(getBytesFrom(inStream));
         }
+        if ("GB18030".equalsIgnoreCase(charset)) {
+            /*
+             * Special treatment for possible GB18030 encoded stream
+             */
+            return readGB18030Bytes(getBytesFrom(inStream));
+        }
         if (isGB2312(charset)) {
             /*
              * Special treatment for possible GB2312 encoded stream
@@ -320,6 +326,27 @@ public final class MessageUtility {
             return new String(bytes, Charsets.forName(detectedCharset));
         }
         return readStream0(inStream, charset);
+    }
+
+    private static String readGB18030Bytes(final byte[] bytes) throws Error {
+        if (bytes.length == 0) {
+            return STR_EMPTY;
+        }
+        final String retval = new String(bytes, Charsets.forName("GB18030"));
+        if (retval.indexOf(UNKNOWN) < 0) {
+            return retval;
+        }
+        /*
+         * Detect the charset
+         */
+        final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
+        if (DEBUG) {
+            LOG.debug("Mapped \"GB18030\" charset to \"" + detectedCharset + "\".");
+        }
+        if (isBig5(detectedCharset)) {
+            return readBig5Bytes(bytes);
+        }
+        return new String(bytes, Charsets.forName(detectedCharset));
     }
 
     private static String readBig5Bytes(final byte[] bytes) throws Error {

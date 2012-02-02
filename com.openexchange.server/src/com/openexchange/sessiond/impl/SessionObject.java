@@ -51,9 +51,11 @@ package com.openexchange.sessiond.impl;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
 
 /**
@@ -112,6 +114,7 @@ public class SessionObject implements Session {
         parameters = new ConcurrentHashMap<String, Object>();
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
+        parameters.put(PARAM_ALTERNATIVE_ID, UUIDs.getUnformattedString(UUID.randomUUID()));
     }
 
     public void setUsername(final String username) {

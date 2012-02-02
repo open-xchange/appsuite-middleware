@@ -331,6 +331,38 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets the session associated with given alternative identifier
+     *
+     * @param alternative identifier The alternative identifier
+     * @return The session associated with given alternative identifier; otherwise <code>null</code> if expired or none found
+     */
+    protected static SessionControl getSessionByAlternativeId(final String altId) {
+        if (DEBUG) {
+            LOG.debug(new StringBuilder("getSessionByAlternativeId <").append(altId).append('>').toString());
+        }
+        final SessionControl sessionControl = sessionData.getSessionByAlternativeId(altId);
+        if (null == sessionControl) {
+            return null;
+        }
+        // Look-up cache if current session wrapped by session-control is marked for removal
+        try {
+            final SessionCache cache = SessionCache.getInstance();
+            final Session session = sessionControl.getSession();
+            final CachedSession cachedSession = cache.getCachedSessionByUser(session.getUserId(), session.getContextId());
+            if (null != cachedSession) {
+                if (cachedSession.isMarkedAsRemoved()) {
+                    cache.removeCachedSession(cachedSession.getSecret());
+                    removeUserSessions(cachedSession.getUserId(), cachedSession.getContextId(), false);
+                    return null;
+                }
+            }
+        } catch (final OXException e) {
+            LOG.error("Unable to look-up session cache", e);
+        }
+        return sessionControl;
+    }
+
+    /**
      * Gets (and removes) the session bound to given session identifier in cache.
      * <p>
      * Session is going to be added to local session containers on a cache hit.

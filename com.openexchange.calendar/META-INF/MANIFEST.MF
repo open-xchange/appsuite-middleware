@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.calendar
 Bundle-Version: 6.20.1.0
 Bundle-Activator: com.openexchange.calendar.osgi.CalendarActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.fields,
  com.openexchange.api2,
  com.openexchange.cache.impl,

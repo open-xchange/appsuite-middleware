@@ -608,6 +608,35 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Gets the sole message.
+     *
+     * @return The sole message
+     */
+    public String getSoleMessage() {
+        /*
+         * Log details
+         */
+        final StringBuilder sb = new StringBuilder(256);
+        /*
+         * Append message
+         */
+        if (null == logMessage) {
+            final String str = getDisplayMessage0(Locale.US);
+            if (null == str) {
+                sb.append(EMPTY_MSG);
+            } else {
+                sb.append(str);
+            }
+        } else {
+            sb.append(logMessage);
+        }
+        /*
+         * Finally return
+         */
+        return sb.toString();
+    }
+
+    /**
      * Checks if this {@link OXException} is loggable for specified log level.
      *
      * @param logLevel The log level

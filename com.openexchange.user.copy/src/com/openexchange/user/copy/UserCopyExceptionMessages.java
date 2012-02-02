@@ -76,7 +76,7 @@ public class UserCopyExceptionMessages implements LocalizableStrings {
     
     public static final String USER_CONTACT_MISSING_MSG = "Did not find contact for user %1$s in context %2$s.";
     
-    public static final String SAVE_MAIL_SETTINGS_PROBLEM_MSG = "Could not save users mail settings.";
+    public static final String SAVE_MAIL_SETTINGS_PROBLEM_MSG = "Could not save user's mail settings.";
 
     public static final String USER_ALREADY_EXISTS_MSG = "A user named %1$s already exists in destination context %2$s.";
     

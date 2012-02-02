@@ -1,5 +1,5 @@
 open-xchange-osgi (7.0.0-1) unstable; urgency=low
 
-  * Initial build.
+  * Initial release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Tue,  4 Oct 2011 16:44:02 +0200

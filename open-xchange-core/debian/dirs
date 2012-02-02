@@ -1,6 +1,2 @@
-opt/open-xchange/bundles
-opt/open-xchange/etc
-opt/open-xchange/importCSV
-opt/open-xchange/osgi
-opt/open-xchange/osgi/bundle.d
-opt/open-xchange/sbin
+var/log/open-xchange
+var/spool/open-xchange/uploads

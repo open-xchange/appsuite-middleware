@@ -17,6 +17,7 @@ import com.openexchange.webdav.action.ifheader.IfHeaderParser;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class MockWebdavRequest implements WebdavRequest {
@@ -42,7 +43,7 @@ public class MockWebdavRequest implements WebdavRequest {
     }
 
     @Override
-    public WebdavResource getResource() throws OXException {
+    public WebdavResource getResource() throws WebdavProtocolException {
 		if(res != null) {
 			return res;
 		}
@@ -50,7 +51,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	}
 
 	@Override
-    public WebdavResource getDestination() throws OXException {
+    public WebdavResource getDestination() throws WebdavProtocolException {
 		if(null == getHeader("destination")) {
 			return null;
 		}
@@ -61,7 +62,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	}
 
 	@Override
-    public WebdavCollection getCollection() throws OXException {
+    public WebdavCollection getCollection() throws WebdavProtocolException {
 		if(res != null) {
 			return (WebdavCollection) res;
 		}
@@ -112,16 +113,12 @@ public class MockWebdavRequest implements WebdavRequest {
 	}
 
 	@Override
-    public IfHeader getIfHeader() throws OXException {
+    public IfHeader getIfHeader() throws IfHeaderParseException {
 		final String ifHeader = getHeader("If");
 		if(ifHeader == null) {
 			return null;
 		}
-		try {
-			return new IfHeaderParser().parse(getHeader("If"));
-		} catch (final IfHeaderParseException e) {
-			throw new OXException(e);
-		}
+		return new IfHeaderParser().parse(getHeader("If"));
 	}
 
 	@Override
@@ -134,7 +131,7 @@ public class MockWebdavRequest implements WebdavRequest {
 	}
 
 	@Override
-    public WebdavFactory getFactory() throws OXException {
+    public WebdavFactory getFactory() throws WebdavProtocolException {
 		return factory;
 	}
 

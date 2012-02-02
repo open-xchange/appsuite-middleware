@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -241,6 +242,8 @@ public class DispatcherServlet extends SessionServlet {
              */
             if (AJAXRequestResult.ResultType.ETAG.equals(result.getType())) {
                 httpResponse.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                final long expires = result.getExpires();
+                Tools.setETag(requestData.getETag(), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, httpResponse);
                 return;
             }
             /*

@@ -88,7 +88,7 @@ public class Bug12553Test extends AppointmentTest {
 			final Date[] deleteExceptions = new Date[] { recurrenceDatePosition };
 			appointmentObj.setObjectID(objectId);
 			appointmentObj.setDeleteExceptions(deleteExceptions);
-			appointmentObj.setChangeExceptions(null);
+			appointmentObj.setChangeExceptions((Date[]) null);
 			appointmentObj.setIgnoreConflicts(true);
 			updateAppointment(getWebConversation(), appointmentObj, objectId, appointmentFolderId, getHostName(),
 					getLogin(), getPassword(), context);

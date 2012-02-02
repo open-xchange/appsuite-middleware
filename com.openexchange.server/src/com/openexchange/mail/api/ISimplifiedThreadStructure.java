@@ -55,7 +55,6 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 
 
 /**
@@ -80,6 +79,6 @@ public interface ISimplifiedThreadStructure {
      * @return The thread-sorted messages or <code>null</code> if SORT is not supported by mail server
      * @throws OXException If messages cannot be returned
      */
-    public List<ThreadSortMailMessage> getThreadSortedMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException;
     
 }

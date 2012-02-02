@@ -49,10 +49,8 @@
 
 package com.openexchange;
 
-import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.java.AutoboxingTest;
 import com.openexchange.tools.id.IDManglerTest;
 import com.openexchange.tools.iterator.MergingSearchIteratorTest;
 
@@ -71,7 +69,6 @@ public class UnitTests {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(IDManglerTest.class);
         tests.addTestSuite(MergingSearchIteratorTest.class);
-        tests.addTest(new JUnit4TestAdapter(AutoboxingTest.class));
         return tests;
     }
 }
