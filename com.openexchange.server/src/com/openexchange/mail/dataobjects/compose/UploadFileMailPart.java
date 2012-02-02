@@ -64,10 +64,12 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MIMEType2ExtMap;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
+import com.openexchange.mail.utils.CharsetDetector;
 
 /**
  * {@link UploadFileMailPart} - A {@link MailPart} implementation that keeps a reference to a temporary uploaded file that shall be added as
@@ -99,6 +101,27 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         this.uploadFile = uploadFile.getTmpFile();
         final String preparedFileName = uploadFile.getPreparedFileName();
         setContentType(prepareContentType(uploadFile.getContentType(), preparedFileName));
+        {
+            final ContentType contentType = getContentType();
+            if (contentType.startsWith("text/") && "GB18030".equalsIgnoreCase(contentType.getCharsetParameter())) {
+                InputStream in = null;
+                try {
+                    in = new FileInputStream(this.uploadFile);
+                    contentType.setCharsetParameter(CharsetDetector.detectCharset(in));
+                    setContentType(contentType);
+                } catch (final IOException e) {
+                    // Ignore
+                } finally {
+                    if (null != in) {
+                        try {
+                            in.close();
+                        } catch (final IOException e) {
+                            // Ignore
+                        }
+                    }
+                }
+            }
+        }
         setFileName(preparedFileName);
         setSize(uploadFile.getSize());
         final ContentDisposition cd = new ContentDisposition();
@@ -122,7 +145,6 @@ public abstract class UploadFileMailPart extends MailPart implements ComposedMai
         }
         if ("multipart/form-data".equalsIgnoreCase(retval)) {
             return MIMEType2ExtMap.getContentType(preparedFileName);
-
         }
         return contentType;
     }
