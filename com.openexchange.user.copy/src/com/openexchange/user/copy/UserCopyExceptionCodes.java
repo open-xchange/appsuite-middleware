@@ -79,7 +79,7 @@ public enum UserCopyExceptionCodes implements OXExceptionCode {
     ID_PROBLEM(UserCopyExceptionMessages.ID_PROBLEM_MSG, Category.CATEGORY_ERROR, 8),
     /** Did not find contact for user %1$s in context %2$s. */
     USER_CONTACT_MISSING(UserCopyExceptionMessages.USER_CONTACT_MISSING_MSG, Category.CATEGORY_ERROR, 9),
-    /** Could not save users mail settings. */
+    /** Could not save user's mail settings. */
     SAVE_MAIL_SETTINGS_PROBLEM(UserCopyExceptionMessages.SAVE_MAIL_SETTINGS_PROBLEM_MSG, Category.CATEGORY_ERROR, 10),
      /** A user named %1$s already exists in destination context %2$s. */
     USER_ALREADY_EXISTS(UserCopyExceptionMessages.USER_ALREADY_EXISTS_MSG, Category.CATEGORY_USER_INPUT, 11),

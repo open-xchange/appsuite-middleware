@@ -171,12 +171,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             final String eTag = result.getHeader("ETag");
             if (null != eTag) {
                 final long expires = result.getExpires();
-                if (expires > 0) {
-                    final long millis = System.currentTimeMillis() + expires;
-                    Tools.setETag(eTag, new Date(millis), resp);
-                } else {
-                    Tools.setETag(eTag, null, resp);
-                }
+                Tools.setETag(eTag, expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
             }
             /*
              * Output binary content

@@ -62,6 +62,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.servlet.ImageServlet;
+import com.openexchange.java.Charsets;
 import com.openexchange.session.Session;
 
 /**
@@ -252,11 +253,9 @@ public final class ImageUtility {
         try {
             final AbstractChecksum checksum = new MD("MD5");
             checksum.setEncoding(encoding);
-            checksum.update(string.getBytes(UTF_8));
+            checksum.update(string.getBytes(Charsets.UTF_8));
             return checksum.getFormattedValue();
         } catch (final NoSuchAlgorithmException e) {
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
-        } catch (final UnsupportedEncodingException e) {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageUtility.class)).error(e.getMessage(), e);
         }
         return null;
