@@ -30,7 +30,6 @@ opt/open-xchange/etc/passwordchange.properties
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessioncache.ccf
 opt/open-xchange/etc/sessiond.properties
-opt/open-xchange/etc/smtp.properties
 opt/open-xchange/etc/sql.properties
 opt/open-xchange/etc/system.properties
 opt/open-xchange/etc/TidyConfiguration.properties
