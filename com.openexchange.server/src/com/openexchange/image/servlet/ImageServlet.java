@@ -301,48 +301,6 @@ public final class ImageServlet extends HttpServlet {
         }
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    private static User getUser(final int userId, final Context context) {
-        try {
-            return ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(userId, context);
-        } catch (final OXException e) {
-            LOG.debug("User '" + userId + "' not found.");
-            return null;
-        }
-    }
-
-    private static Context getContext(final int contextId) {
-        try {
-            return ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
-        } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        } catch (final OXException e) {
-            LOG.error("Can not load context.", e);
-            return null;
-        }
-    }
-
-    private static String getMailAddress(final HttpServletRequest request) {
-        final String userName = request.getParameter("username");
-        final String serverName = request.getParameter("server");
-        if (null == userName || null == serverName) {
-            return null;
-        }
-        return userName + '@' + serverName;
-    }
-
     private static void outputImageData(final ImageDataSource dataSource, final ImageLocation imageLocation, final Session session, final HttpServletResponse resp) throws IOException, OXException {
         final Data<InputStream> data = dataSource.getData(InputStream.class, dataSource.generateDataArgumentsFrom(imageLocation), session);
         final String ct;
@@ -445,4 +403,47 @@ public final class ImageServlet extends HttpServlet {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(e.getMessage(), e);
         }
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static User getUser(final int userId, final Context context) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(userId, context);
+        } catch (final OXException e) {
+            LOG.debug("User '" + userId + "' not found.");
+            return null;
+        }
+    }
+
+    private static Context getContext(final int contextId) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (final OXException e) {
+            LOG.error("Can not load context.", e);
+            return null;
+        }
+    }
+
+    private static String getMailAddress(final HttpServletRequest request) {
+        final String userName = request.getParameter("username");
+        final String serverName = request.getParameter("server");
+        if (null == userName || null == serverName) {
+            return null;
+        }
+        return userName + '@' + serverName;
+    }
+
 }
