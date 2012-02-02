@@ -291,6 +291,8 @@ public final class ImageServlet extends HttpServlet {
             final String eTag = req.getHeader("If-None-Match");
             if (null != eTag && dataSource.getETag(imageLocation, session).equals(eTag) ) {
                 resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                final long expires = dataSource.getExpires();
+                Tools.setETag(dataSource.getETag(imageLocation, session), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
                 return;
             }
             outputImageData(dataSource, imageLocation, session, resp);
@@ -369,12 +371,7 @@ public final class ImageServlet extends HttpServlet {
              * Set ETag
              */
             final long expires = dataSource.getExpires();
-            if (expires > 0) {
-                final long millis = System.currentTimeMillis() + (expires);
-                Tools.setETag(dataSource.getETag(imageLocation, session), new Date(millis), resp);
-            } else {
-                Tools.setETag(dataSource.getETag(imageLocation, session), resp);
-            }
+            Tools.setETag(dataSource.getETag(imageLocation, session), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
             /*
              * Select response's output stream
              */

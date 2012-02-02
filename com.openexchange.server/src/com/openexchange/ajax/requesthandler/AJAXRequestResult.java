@@ -198,11 +198,11 @@ public final class AJAXRequestResult {
     }
 
     /**
-     * Gets the expires time.
+     * Gets the expiry time.
      * <p>
      * Have a notion of a time-to-live value.
      *
-     * @return The expires time or <code>-1</code> for no expiry
+     * @return The expiry time or <code>-1</code> for no expiry
      */
     public long getExpires() {
         return expires;

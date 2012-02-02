@@ -134,6 +134,10 @@ public final class Tools {
         setETag(eTag, null, resp);
     }
 
+    private static final long MILLIS_WEEK = 604800000L;
+
+    private static final long MILLIS_YEAR = 52 * MILLIS_WEEK;
+
     /**
      * Sets specified ETag header (and implicitly removes/replaces any existing cache-controlling header: <i>Expires</i>,
      * <i>Cache-Control</i>, and <i>Pragma</i>)
@@ -146,7 +150,10 @@ public final class Tools {
         removeCachingHeader(resp);
         resp.setHeader("ETag", eTag);
         if (null == expires) {
-            resp.setHeader(EXPIRES_KEY, EXPIRES_DATE);
+            synchronized (HEADER_DATEFORMAT) {
+                resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
+                resp.setHeader(CACHE_CONTROL_KEY, "private, max-age=31521018"); // 1 year
+            }
         } else {
             synchronized (HEADER_DATEFORMAT) {
                 resp.setHeader(EXPIRES_KEY, HEADER_DATEFORMAT.format(expires));
