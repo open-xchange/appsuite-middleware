@@ -52,7 +52,7 @@ package com.openexchange.groupware.notify.imip;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.data.conversion.ical.ITipMethod;
+import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.Participant;

@@ -8,6 +8,8 @@ Homepage: http://www.open-xchange.com
 Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgcj-common, libgcj9-0, libgcj-bc, libgcj9-jar, java-gcj-compat-headless, gcj-4.3, java-gcj-compat, java-gcj-compat-dev
 
 Package: open-xchange-osgi
+Replaces: open-xchange-common (<< 7.0.0)
+Breaks: open-xchange-common (<< 7.0.0)
 Architecture: all
 Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime
 Description: OSGi bundles commonly used by all Open-Xchange packages

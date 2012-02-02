@@ -49,19 +49,19 @@
 
 package com.openexchange.webdav.action.ifheader;
 
-import com.openexchange.exception.OXException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
 
 /**
  * {@link StandardIfHeaderApplyTest}
@@ -70,7 +70,7 @@ import com.openexchange.webdav.protocol.Protocol.WEBDAV_METHOD;
  */
 public class StandardIfHeaderApplyTest extends TestCase {
 
-    public void testETagMustMatch() throws OXException {
+    public void testETagMustMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.ETag("1234567");
@@ -90,7 +90,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         return new StandardIfHeaderApply();
     }
 
-    public void testETagMustNotMatch() throws OXException {
+    public void testETagMustNotMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.ETag("1234567");
@@ -105,7 +105,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         assertTrue(apply.matches(entity, resource));
     }
 
-    public void testLockMustMatch() throws OXException {
+    public void testLockMustMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
@@ -120,7 +120,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         assertFalse(apply.matches(entity, resource));
     }
 
-    public void testLockMustNotMatch() throws OXException {
+    public void testLockMustNotMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
@@ -141,110 +141,110 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
 
             @Override
-            public String getETag() throws OXException {
+            public String getETag() throws WebdavProtocolException {
                 return eTag;
             }
 
             @Override
-            public WebdavResource copy(WebdavPath string) throws OXException {
+            public WebdavResource copy(WebdavPath string) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
+            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public void create() throws OXException {
+            public void create() throws WebdavProtocolException {
             }
 
             @Override
-            public void delete() throws OXException {
+            public void delete() throws WebdavProtocolException {
             }
 
             @Override
-            public boolean exists() throws OXException {
+            public boolean exists() throws WebdavProtocolException {
                 return false;
             }
 
             @Override
-            public List<WebdavProperty> getAllProps() throws OXException {
+            public List<WebdavProperty> getAllProps() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public InputStream getBody() throws OXException {
+            public InputStream getBody() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getContentType() throws OXException {
+            public String getContentType() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public Date getCreationDate() throws OXException {
+            public Date getCreationDate() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getDisplayName() throws OXException {
+            public String getDisplayName() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getLanguage() throws OXException {
+            public String getLanguage() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public Date getLastModified() throws OXException {
+            public Date getLastModified() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public Long getLength() throws OXException {
+            public Long getLength() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavLock getLock(String token) throws OXException {
+            public WebdavLock getLock(String token) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public List<WebdavLock> getLocks() throws OXException {
+            public List<WebdavLock> getLocks() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WEBDAV_METHOD[] getOptions() throws OXException {
+            public WEBDAV_METHOD[] getOptions() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavLock getOwnLock(String token) throws OXException {
+            public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public List<WebdavLock> getOwnLocks() throws OXException {
+            public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavProperty getProperty(String namespace, String name) throws OXException {
+            public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getResourceType() throws OXException {
+            public String getResourceType() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getSource() throws OXException {
+            public String getSource() throws WebdavProtocolException {
                 return null;
             }
 
@@ -264,62 +264,62 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void lock(WebdavLock lock) throws OXException {
+            public void lock(WebdavLock lock) throws WebdavProtocolException {
             }
 
             @Override
-            public WebdavResource move(WebdavPath newUri) throws OXException {
+            public WebdavResource move(WebdavPath newUri) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
+            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public void putBody(InputStream data) throws OXException {
+            public void putBody(InputStream data) throws WebdavProtocolException {
             }
 
             @Override
-            public void putBodyAndGuessLength(InputStream body) throws OXException {
+            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {
             }
 
             @Override
-            public void putProperty(WebdavProperty prop) throws OXException {
+            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
             }
 
             @Override
-            public WebdavResource reload() throws OXException {
+            public WebdavResource reload() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public void removeProperty(String namespace, String name) throws OXException {
+            public void removeProperty(String namespace, String name) throws WebdavProtocolException {
             }
 
             @Override
-            public void save() throws OXException {
+            public void save() throws WebdavProtocolException {
             }
 
             @Override
-            public void setContentType(String type) throws OXException {
+            public void setContentType(String type) throws WebdavProtocolException {
             }
 
             @Override
-            public void setDisplayName(String displayName) throws OXException {
+            public void setDisplayName(String displayName) throws WebdavProtocolException {
             }
 
             @Override
-            public void setLanguage(String language) throws OXException {
+            public void setLanguage(String language) throws WebdavProtocolException {
             }
 
             @Override
-            public void setLength(Long length) throws OXException {
+            public void setLength(Long length) throws WebdavProtocolException {
             }
 
             @Override
-            public void setSource(String source) throws OXException {
+            public void setSource(String source) throws WebdavProtocolException {
             }
 
             @Override
@@ -328,7 +328,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void unlock(String token) throws OXException {
+            public void unlock(String token) throws WebdavProtocolException {
             }
 
             @Override
@@ -344,7 +344,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
         return new WebdavResource() {
 
             @Override
-            public WebdavLock getLock(String token) throws OXException {
+            public WebdavLock getLock(String token) throws WebdavProtocolException {
                 if(!lock.equals(token)) {
                     return null;
                 }
@@ -354,105 +354,105 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public List<WebdavLock> getLocks() throws OXException {
+            public List<WebdavLock> getLocks() throws WebdavProtocolException {
                 return Arrays.asList(getLock(lock));
             }
 
 
             @Override
-            public String getETag() throws OXException {
+            public String getETag() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavResource copy(WebdavPath string) throws OXException {
+            public WebdavResource copy(WebdavPath string) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
+            public WebdavResource copy(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public void create() throws OXException {
+            public void create() throws WebdavProtocolException {
             }
 
             @Override
-            public void delete() throws OXException {
+            public void delete() throws WebdavProtocolException {
             }
 
             @Override
-            public boolean exists() throws OXException {
+            public boolean exists() throws WebdavProtocolException {
                 return false;
             }
 
             @Override
-            public List<WebdavProperty> getAllProps() throws OXException {
+            public List<WebdavProperty> getAllProps() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public InputStream getBody() throws OXException {
+            public InputStream getBody() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getContentType() throws OXException {
+            public String getContentType() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public Date getCreationDate() throws OXException {
+            public Date getCreationDate() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getDisplayName() throws OXException {
+            public String getDisplayName() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getLanguage() throws OXException {
+            public String getLanguage() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public Date getLastModified() throws OXException {
+            public Date getLastModified() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public Long getLength() throws OXException {
+            public Long getLength() throws WebdavProtocolException {
                 return null;
             }
             @Override
-            public WEBDAV_METHOD[] getOptions() throws OXException {
-                return null;
-            }
-
-            @Override
-            public WebdavLock getOwnLock(String token) throws OXException {
+            public WEBDAV_METHOD[] getOptions() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public List<WebdavLock> getOwnLocks() throws OXException {
+            public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavProperty getProperty(String namespace, String name) throws OXException {
+            public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getResourceType() throws OXException {
+            public WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public String getSource() throws OXException {
+            public String getResourceType() throws WebdavProtocolException {
+                return null;
+            }
+
+            @Override
+            public String getSource() throws WebdavProtocolException {
                 return null;
             }
 
@@ -472,62 +472,62 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void lock(WebdavLock lock) throws OXException {
+            public void lock(WebdavLock lock) throws WebdavProtocolException {
             }
 
             @Override
-            public WebdavResource move(WebdavPath newUri) throws OXException {
+            public WebdavResource move(WebdavPath newUri) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws OXException {
+            public WebdavResource move(WebdavPath string, boolean noroot, boolean overwrite) throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public void putBody(InputStream data) throws OXException {
+            public void putBody(InputStream data) throws WebdavProtocolException {
             }
 
             @Override
-            public void putBodyAndGuessLength(InputStream body) throws OXException {
+            public void putBodyAndGuessLength(InputStream body) throws WebdavProtocolException {
             }
 
             @Override
-            public void putProperty(WebdavProperty prop) throws OXException {
+            public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
             }
 
             @Override
-            public WebdavResource reload() throws OXException {
+            public WebdavResource reload() throws WebdavProtocolException {
                 return null;
             }
 
             @Override
-            public void removeProperty(String namespace, String name) throws OXException {
+            public void removeProperty(String namespace, String name) throws WebdavProtocolException {
             }
 
             @Override
-            public void save() throws OXException {
+            public void save() throws WebdavProtocolException {
             }
 
             @Override
-            public void setContentType(String type) throws OXException {
+            public void setContentType(String type) throws WebdavProtocolException {
             }
 
             @Override
-            public void setDisplayName(String displayName) throws OXException {
+            public void setDisplayName(String displayName) throws WebdavProtocolException {
             }
 
             @Override
-            public void setLanguage(String language) throws OXException {
+            public void setLanguage(String language) throws WebdavProtocolException {
             }
 
             @Override
-            public void setLength(Long length) throws OXException {
+            public void setLength(Long length) throws WebdavProtocolException {
             }
 
             @Override
-            public void setSource(String source) throws OXException {
+            public void setSource(String source) throws WebdavProtocolException {
             }
 
             @Override
@@ -536,7 +536,7 @@ public class StandardIfHeaderApplyTest extends TestCase {
             }
 
             @Override
-            public void unlock(String token) throws OXException {
+            public void unlock(String token) throws WebdavProtocolException {
             }
 
             @Override
