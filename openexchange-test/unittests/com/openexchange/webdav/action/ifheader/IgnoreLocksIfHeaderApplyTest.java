@@ -49,7 +49,7 @@
 
 package com.openexchange.webdav.action.ifheader;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 
@@ -61,7 +61,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class IgnoreLocksIfHeaderApplyTest extends StandardIfHeaderApplyTest {
     @Override
-    public void testLockMustMatch() throws OXException {
+    public void testLockMustMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");
@@ -77,7 +77,7 @@ public class IgnoreLocksIfHeaderApplyTest extends StandardIfHeaderApplyTest {
     }
 
     @Override
-    public void testLockMustNotMatch() throws OXException {
+    public void testLockMustNotMatch() throws WebdavProtocolException {
         IfHeaderApply apply = getApply();
 
         IfHeaderEntity entity = new IfHeaderEntity.LockToken("1234567");

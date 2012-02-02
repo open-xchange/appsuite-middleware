@@ -227,7 +227,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-	protected WebdavResource createResource() throws OXException {
+	protected WebdavResource createResource() throws WebdavProtocolException {
 		WebdavResource resource = FACTORY.resolveResource(testCollection+"/testResource"+Math.random());
 		assertFalse(resource.exists());
 		resource.create();
@@ -324,7 +324,7 @@ public class ResourceTest extends AbstractResourceTest{
 	// TESTS FOR PROPERTIES
 
 	@Override
-    public Object creationDate() throws OXException {
+    public Object creationDate() throws WebdavProtocolException {
 		final Date now = new Date();
 		WebdavResource res = createResource();
 		assertEquals(Utils.convert(res.getCreationDate()), res.getProperty("DAV:", "creationdate").getValue());
@@ -344,7 +344,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object displayName() throws OXException {
+    public Object displayName() throws WebdavProtocolException {
 		/*WebdavResource res = createResource();
 		String defaultDispName = res.getUrl().substring(res.getUrl().lastIndexOf("/")+1);
 		assertEquals(res.getDisplayName(), res.getProperty("DAV:", "displayname").getValue());
@@ -369,7 +369,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object contentLanguage() throws OXException {
+    public Object contentLanguage() throws WebdavProtocolException {
 		/*WebdavResource res = createResource();
 		String defaultLanguage = "en";
 		assertEquals(res.getLanguage(), res.getProperty("DAV:", "getcontentlanguage").getValue());
@@ -401,7 +401,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object contentLength() throws OXException {
+    public Object contentLength() throws WebdavProtocolException {
 		WebdavResource res = createResource();
 		final Long defaultLength = 0l;
 		assertEquals(""+res.getLength(), res.getProperty("DAV:", "getcontentlength").getValue());
@@ -441,7 +441,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object contentType() throws OXException {
+    public Object contentType() throws WebdavProtocolException {
 		WebdavResource res = createResource();
 
 		res.setContentType("text/plain");
@@ -462,7 +462,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object etag() throws OXException {
+    public Object etag() throws WebdavProtocolException {
 		WebdavResource res = createResource();
 		assertEquals(res.getETag(), res.getProperty("DAV:", "getetag").getValue());
 
@@ -493,7 +493,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object lastModified() throws OXException {
+    public Object lastModified() throws WebdavProtocolException {
 		Date now = new Date();
 		final WebdavResource res = createResource();
 		assertEquals(Utils.convert(res.getLastModified()), res.getProperty("DAV:", "getlastmodified").getValue());
@@ -511,7 +511,7 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object resourceType() throws OXException {
+    public Object resourceType() throws WebdavProtocolException {
 		final WebdavResource res = createResource();
 		assertNotNull(res.getProperty("DAV:", "resourcetype"));
 		assertNull(res.getProperty("DAV:", "resourcetype").getValue()); // Is set, but is empty
@@ -521,19 +521,19 @@ public class ResourceTest extends AbstractResourceTest{
 	}
 
 	@Override
-    public Object lockDiscovery() throws OXException {
+    public Object lockDiscovery() throws WebdavProtocolException {
 		// Tested in Lock Test
 		return null;
 	}
 
 	@Override
-    public Object supportedLock() throws OXException {
+    public Object supportedLock() throws WebdavProtocolException {
 		// Tested in Lock Test
 		return null;
 	}
 
 	@Override
-    public Object source() throws OXException {
+    public Object source() throws WebdavProtocolException {
 		/*WebdavResource res = createResource();
 		try {
 			res.setSource("http://localhost/theSecretSource");

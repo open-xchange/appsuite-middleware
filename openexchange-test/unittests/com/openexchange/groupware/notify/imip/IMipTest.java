@@ -51,7 +51,7 @@ package com.openexchange.groupware.notify.imip;
 
 import javax.mail.BodyPart;
 import javax.mail.internet.MimeMultipart;
-import com.openexchange.data.conversion.ical.ITipMethod;
+import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.contexts.Context;
