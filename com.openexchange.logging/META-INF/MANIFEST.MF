@@ -6,6 +6,8 @@ Bundle-Version: 7.0.0.0
 Bundle-Activator: com.openexchange.logging.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.apache.commons.logging,
+Import-Package: com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
  org.apache.log4j;resolution:=optional,
  org.osgi.framework

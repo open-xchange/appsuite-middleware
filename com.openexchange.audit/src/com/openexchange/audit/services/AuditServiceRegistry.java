@@ -49,7 +49,7 @@
 
 package com.openexchange.audit.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * @author Benjamin Otterbach

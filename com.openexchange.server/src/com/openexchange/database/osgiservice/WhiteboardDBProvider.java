@@ -56,7 +56,7 @@ import org.osgi.framework.ServiceReference;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.osgiservice.WhiteboardFactoryService;
+import com.openexchange.osgi.WhiteboardFactoryService;
 import com.openexchange.tools.global.OXCloseable;
 
 /**

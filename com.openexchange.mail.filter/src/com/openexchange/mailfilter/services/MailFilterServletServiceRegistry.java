@@ -49,7 +49,7 @@
 
 package com.openexchange.mailfilter.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MailFilterServletServiceRegistry} - A registry for services needed by Mail Filter bundle

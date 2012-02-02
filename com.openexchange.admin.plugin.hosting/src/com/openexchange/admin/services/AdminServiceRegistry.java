@@ -49,7 +49,7 @@
 
 package com.openexchange.admin.services;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
  * {@link AdminServiceRegistry} - A registry for services needed by admin.

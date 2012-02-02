@@ -50,21 +50,20 @@
 package com.openexchange.charset.osgi;
 
 import java.nio.charset.spi.CharsetProvider;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.charset.CollectionCharsetProvider;
 import com.openexchange.charset.ModifyCharsetExtendedProvider;
 import com.openexchange.charset.ModifyCharsetStandardProvider;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link CharsetActivator} - Activator for com.openexchange.charset bundle
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CharsetActivator implements BundleActivator, ServiceTrackerCustomizer<CharsetProvider, CharsetProvider> {
+public final class CharsetActivator extends HousekeepingActivator implements ServiceTrackerCustomizer<CharsetProvider, CharsetProvider> {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(CharsetActivator.class));
 
@@ -75,8 +74,6 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
     private CharsetProvider backupStandardCharsetProvider;
 
     private BundleContext context;
-
-    private ServiceTracker<CharsetProvider, CharsetProvider> serviceTracker;
 
     /**
      * Default constructor
@@ -114,7 +111,12 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.charset");
 
         try {
@@ -133,9 +135,8 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
             /*
              * Initialize a service tracker to track bundle chars providers
              */
-            this.context = context;
-            serviceTracker = new ServiceTracker<CharsetProvider, CharsetProvider>(context, CharsetProvider.class.getName(), this);
-            serviceTracker.open();
+            track(CharsetProvider.class, this);
+            openTrackers();
             if (LOG.isInfoEnabled()) {
                 LOG.info("Charset bundle successfully started");
             }
@@ -146,10 +147,10 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() {
         LOG.info("stopping bundle: com.openexchange.charset");
         try {
-            serviceTracker.close();
+            closeTrackers();
             /*
              * Restore original
              */
@@ -168,10 +169,10 @@ public final class CharsetActivator implements BundleActivator, ServiceTrackerCu
             }
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
+//            throw t instanceof Exception ? (Exception) t : new Exception(t);
         } finally {
             collectionCharsetProvider = null;
-            serviceTracker = null;
+            cleanUp();
         }
     }
 

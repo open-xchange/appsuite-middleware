@@ -50,7 +50,7 @@
 package com.openexchange.imap.services;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link IMAPServiceRegistry} - A registry for services needed by IMAP bundle

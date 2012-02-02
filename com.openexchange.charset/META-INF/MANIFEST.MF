@@ -6,7 +6,8 @@ Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-Activator: com.openexchange.charset.osgi.CharsetActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.apache.commons.logging,
- com.openexchange.log,
+Import-Package: com.openexchange.log,
+ com.openexchange.osgi,
+ org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker

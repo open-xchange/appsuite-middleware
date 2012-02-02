@@ -54,7 +54,7 @@ import com.openexchange.api2.ContactInterfaceFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.user.UserService;
 import com.openexchange.voipnow.json.actions.VoipNowActionFactory;
 import com.openexchange.voipnow.json.preferences.GUI;

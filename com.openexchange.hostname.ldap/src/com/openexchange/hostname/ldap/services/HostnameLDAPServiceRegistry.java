@@ -49,7 +49,7 @@
 
 package com.openexchange.hostname.ldap.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link HostnameLDAPServiceRegistry} - A registry for services needed by 1&1 push bundle

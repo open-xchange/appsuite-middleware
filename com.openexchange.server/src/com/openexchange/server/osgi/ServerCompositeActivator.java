@@ -50,7 +50,7 @@
 package com.openexchange.server.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
  * {@link ServerCompositeActivator} combines several activators in the server bundle that have been prepared to split up the server bundle into several

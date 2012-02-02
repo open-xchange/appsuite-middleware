@@ -49,15 +49,14 @@
 
 package com.openexchange.tx.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link TransactionActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class TransactionActivator implements BundleActivator {
+public class TransactionActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link TransactionActivator}.
@@ -67,12 +66,18 @@ public class TransactionActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         // Nope
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         // Nope
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

@@ -49,7 +49,7 @@
 
 package com.openexchange.calendar.printing;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * A registry for services needed by the calendar printing module.

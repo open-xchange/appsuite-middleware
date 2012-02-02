@@ -49,7 +49,7 @@
 
 package com.openexchange.spamhandler.cloudmark.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
 * {@link CloudmarkSpamHandlerServiceRegistry} - A registry for services required by Cloudmark Spamhandler bundle

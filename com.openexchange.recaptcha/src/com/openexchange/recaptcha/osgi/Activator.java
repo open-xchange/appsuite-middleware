@@ -5,11 +5,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.recaptcha.ReCaptchaService;
 import com.openexchange.recaptcha.ReCaptchaServlet;
 import com.openexchange.recaptcha.impl.ReCaptchaServiceImpl;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 
 public class Activator extends HousekeepingActivator {
 

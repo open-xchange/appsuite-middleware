@@ -55,8 +55,8 @@ import com.openexchange.monitoring.MonitorService;
 import com.openexchange.monitoring.internal.MonitorImpl;
 import com.openexchange.monitoring.internal.MonitoringInit;
 import com.openexchange.monitoring.services.MonitoringServiceRegistry;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 
 /**

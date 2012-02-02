@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.images.osgi;
 
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.images.impl.JavaImageScalingService;
 

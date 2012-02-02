@@ -51,9 +51,9 @@ package com.openexchange.secret.recovery.mail.osgi;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.session.ServerSession;
 
 /**

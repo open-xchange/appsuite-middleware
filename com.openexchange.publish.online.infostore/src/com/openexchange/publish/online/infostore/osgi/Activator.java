@@ -54,11 +54,11 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.online.infostore.InfostoreDocumentPublicationService;
 import com.openexchange.publish.online.infostore.InfostorePublicationServlet;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 

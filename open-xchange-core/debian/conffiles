@@ -9,7 +9,6 @@ opt/open-xchange/etc/excludedupdatetasks.properties
 opt/open-xchange/etc/file-logging.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/HTMLEntities.properties
-opt/open-xchange/etc/imap.properties
 opt/open-xchange/etc/importerExporter.xml
 opt/open-xchange/etc/import.properties
 opt/open-xchange/etc/infostore.properties
@@ -31,10 +30,8 @@ opt/open-xchange/etc/passwordchange.properties
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessioncache.ccf
 opt/open-xchange/etc/sessiond.properties
-opt/open-xchange/etc/smtp.properties
 opt/open-xchange/etc/sql.properties
 opt/open-xchange/etc/system.properties
-opt/open-xchange/etc/threadpool.properties
 opt/open-xchange/etc/TidyConfiguration.properties
 opt/open-xchange/etc/TidyMessages.properties
 opt/open-xchange/etc/transport.properties

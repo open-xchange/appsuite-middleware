@@ -143,7 +143,7 @@ public final class CachingMessagingAccountStorage implements MessagingAccountSto
 
     /**
      * Invalidates specified account.
-     * 
+     *
      * @param serviceId The service identifier
      * @param id The account identifier
      * @param user The user identifier

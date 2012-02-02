@@ -3,10 +3,10 @@ package com.openexchange.scripting.rhino.osgi;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceReference;
 
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.scripting.rhino.require.RequireSupport;
 import com.openexchange.scripting.rhino.require.ResolveEnhancement;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
 
 public class Activator extends HousekeepingActivator {
 

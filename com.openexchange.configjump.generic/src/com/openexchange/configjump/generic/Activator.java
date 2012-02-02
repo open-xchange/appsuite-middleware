@@ -49,40 +49,34 @@
 
 package com.openexchange.configjump.generic;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * Activator.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private Services services;
 
-    private ServiceTracker<ConfigurationService, ConfigurationService> tracker;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-    public void start(final BundleContext context) throws Exception {
+    @Override
+    protected void startBundle() throws Exception {
         services = new Services(context);
-        tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class
-            .getName(), new ConfigurationTracker(context, services));
-        tracker.open();
-	}
+        track(ConfigurationService.class, new ConfigurationTracker(context, services));
+        openTrackers();
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-    public void stop(final BundleContext context) throws Exception {
+    @Override
+    public void stopBundle() {
         services.unregisterService();
-        services = null;
-        tracker.close();
-        tracker = null;
-	}
+        closeTrackers();
+        cleanUp();
+    }
 }

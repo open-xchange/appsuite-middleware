@@ -49,7 +49,7 @@
 
 package com.openexchange.subscribe.osgi;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 
 /**

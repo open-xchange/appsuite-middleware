@@ -49,12 +49,8 @@
 
 package com.openexchange.messaging.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link MessagingActivator}
@@ -62,11 +58,9 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public final class MessagingActivator implements BundleActivator {
+public final class MessagingActivator extends HousekeepingActivator {
 
     private OSGIMessagingServiceRegistry registry;
-
-    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link MessagingActivator}.
@@ -76,7 +70,13 @@ public final class MessagingActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -90,8 +90,7 @@ public final class MessagingActivator implements BundleActivator {
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(1);
-            registrations.add(context.registerService(MessagingServiceRegistry.class.getName(), registry, null));
+            registerService(MessagingServiceRegistry.class, registry, null);
         } catch (final Exception e) {
             log.error(e.getMessage(), e);
             throw e;
@@ -99,18 +98,13 @@ public final class MessagingActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    protected void stopBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(MessagingActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.messaging");
             }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            unregisterServices();
             /*
              * Stop registry
              */

@@ -58,8 +58,8 @@ import com.openexchange.authentication.imap.impl.IMAPAuthentication;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 public class ActivatorNew extends DeferredActivator {

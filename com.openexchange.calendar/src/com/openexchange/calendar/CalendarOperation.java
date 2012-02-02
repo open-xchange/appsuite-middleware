@@ -73,6 +73,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
@@ -98,6 +99,263 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
 public class CalendarOperation implements SearchIterator<CalendarDataObject> {
+
+    private static interface FieldFiller {
+
+        public void fillField(CalendarDataObject cdao, int columnCount, ResultSet rs) throws SQLException;
+    }
+
+    private static final Map<Integer, FieldFiller> FILLERS = new HashMap<Integer, FieldFiller>() {
+
+        private static final long serialVersionUID = -647801170633669563L;
+
+        // instance initializer
+        {
+            put(I(Appointment.OBJECT_ID), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setObjectID(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.TITLE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String t = rs.getString(columnCount);
+                    cdao.setTitle(rs.wasNull() ? null : t);
+                }
+            });
+            put(I(Appointment.LOCATION), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String loc = rs.getString(columnCount);
+                    cdao.setLocation(rs.wasNull() ? null : loc);
+                }
+            });
+            put(I(Appointment.SHOWN_AS), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setShownAs(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.NOTE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String note = rs.getString(columnCount);
+                    cdao.setNote(rs.wasNull() ? null : note);
+                }
+            });
+            put(I(Appointment.START_DATE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final Date sd = rs.getTimestamp(columnCount);
+                    cdao.setStartDate(rs.wasNull() ? null : sd);
+                }
+            });
+            put(I(Appointment.END_DATE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final Date ed = rs.getTimestamp(columnCount);
+                    cdao.setEndDate(rs.wasNull() ? null : ed);
+                }
+            });
+            put(I(Appointment.CREATED_BY), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setCreatedBy(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.MODIFIED_BY), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setModifiedBy(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.CREATION_DATE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final Timestamp ts = rs.getTimestamp(columnCount);
+                    cdao.setCreationDate(rs.wasNull() ? null : ts);
+                }
+            });
+            put(I(Appointment.LAST_MODIFIED), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final Timestamp ts = new Timestamp(rs.getLong(columnCount));
+                    cdao.setLastModified(rs.wasNull() ? null : ts);
+                }
+            });
+            put(I(Appointment.FULL_TIME), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setFullTime(rs.getInt(columnCount) > 0);
+                }
+            });
+            put(I(Appointment.COLOR_LABEL), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setLabel(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.PRIVATE_FLAG), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setPrivateFlag(rs.getInt(columnCount) > 0);
+                }
+            });
+            put(I(Appointment.NUMBER_OF_ATTACHMENTS), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setNumberOfAttachments(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.RECURRENCE_ID), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final int recurrenceId = rs.getInt(columnCount);
+                    if (!rs.wasNull()) {
+                        cdao.setRecurrenceID(recurrenceId);
+                    }
+                }
+            });
+            put(I(Appointment.CATEGORIES), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String cat = rs.getString(columnCount);
+                    cdao.setCategories(rs.wasNull() ? null : cat);
+                }
+            });
+            put(I(Appointment.RECURRENCE_TYPE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String rt = rs.getString(columnCount);
+                    cdao.setRecurrence(rs.wasNull() ? null : rt);
+                }
+            });
+            put(I(Appointment.CHANGE_EXCEPTIONS), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String ce = rs.getString(columnCount);
+                    cdao.setExceptions(rs.wasNull() ? null : ce);
+                }
+            });
+            put(I(Appointment.DELETE_EXCEPTIONS), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String de = rs.getString(columnCount);
+                    cdao.setDelExceptions(rs.wasNull() ? null : de);
+                }
+            });
+            put(I(Appointment.RECURRENCE_CALCULATOR), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setRecurrenceCalculator(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.RECURRENCE_POSITION), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final int recurrencePosition = rs.getInt(columnCount);
+                    if (!rs.wasNull()) {
+                        cdao.setRecurrencePosition(recurrencePosition);
+                    }
+                }
+            });
+            put(I(Appointment.TIMEZONE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String tz = rs.getString(columnCount);
+                    cdao.setTimezone(rs.wasNull() ? null : tz);
+                }
+            });
+            put(I(Appointment.RECURRENCE_START), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final long recurring_start = rs.getLong(columnCount);
+                    cdao.setRecurringStart(recurring_start);
+                }
+            });
+            put(I(Appointment.ORGANIZER), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String organizer = rs.getString(columnCount);
+                    if (!rs.wasNull()) {
+                        cdao.setOrganizer(organizer);
+                    }
+                }
+            });
+            put(I(Appointment.UID), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String uid = rs.getString(columnCount);
+                    cdao.setUid(uid);
+                }
+            });
+            put(I(Appointment.SEQUENCE), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    cdao.setSequence(rs.getInt(columnCount));
+                }
+            });
+            put(I(Appointment.ORGANIZER_ID), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final int organizerId = rs.getInt(columnCount);
+                    if (!rs.wasNull()) {
+                        cdao.setOrganizerId(organizerId);
+                    }
+                }
+            });
+            put(I(Appointment.PRINCIPAL), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final String principal = rs.getString(columnCount);
+                    if (!rs.wasNull()) {
+                        cdao.setPrincipal(principal);
+                    }
+                }
+            });
+            put(I(Appointment.PRINCIPAL_ID), new FieldFiller() {
+
+                @Override
+                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
+                    final int principalId = rs.getInt(columnCount);
+                    if (!rs.wasNull()) {
+                        cdao.setPrincipalId(principalId);
+                    }
+                }
+            });
+
+        }
+    };
 
     public static final int READ = 0;
 
@@ -448,7 +706,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 // Constants.MILLI_DAY)));
                 cdao.setEndDate(calculateRealRecurringEndDate(cdao));
             } else {
-                cdao.setRecurrence(recColl.NO_DS);
+                cdao.setRecurrence(CalendarCollectionService.NO_DS);
             }
 
             cdao.setCreatedBy(uid);
@@ -1324,7 +1582,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
         if (cdao.containsPrivateFlag()) {
             if (cdao.getPrivateFlag()) {
-                if (cdao.getFolderType() != recColl.PRIVATE) {
+                if (cdao.getFolderType() != CalendarCollectionService.PRIVATE) {
                     throw OXCalendarExceptionCodes.PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER.create();
                 }
                 if (edao == null || (edao.containsPrivateFlag() && edao.getPrivateFlag())) {
@@ -1343,7 +1601,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
         } else if (edao != null && edao.containsPrivateFlag() && edao.getPrivateFlag()) {
             if (cdao.getSharedFolderOwner() != uid) {
-                if (cdao.getFolderType() != recColl.PRIVATE) {
+                if (cdao.getFolderType() != CalendarCollectionService.PRIVATE) {
                     throw OXCalendarExceptionCodes.MOVE_TO_SHARED_FOLDER_NOT_SUPPORTED.create();
                 }
             }
@@ -1365,7 +1623,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     final int checkUpdateRecurring(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (!edao.containsRecurrenceType() && !cdao.containsRecurrenceType()) {
-            return recColl.RECURRING_NO_ACTION;
+            return CalendarCollectionService.RECURRING_NO_ACTION;
         }
         if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() != edao.getObjectID()) {
             /*
@@ -1374,11 +1632,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (RecurrenceChecker.containsRecurrenceInformation(cdao)) {
                 throw OXCalendarExceptionCodes.CHANGE_EXCEPTION_TO_RECURRENCE.create();
             }
-            return recColl.RECURRING_NO_ACTION;
+            return CalendarCollectionService.RECURRING_NO_ACTION;
         }
         if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && (!cdao.containsRecurrenceType() || cdao.getRecurrenceType() == edao.getRecurrenceType())) {
             int ret = recColl.getRecurringAppoiontmentUpdateAction(cdao, edao);
-            if (ret == recColl.RECURRING_NO_ACTION) {
+            if (ret == CalendarCollectionService.RECURRING_NO_ACTION) {
                 // We have to check if something has been changed in the meantime!
                 if (!cdao.containsStartDate() || !cdao.containsEndDate()) {
                     final CalendarDataObject temp = edao.clone();
@@ -1403,7 +1661,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 if (cdao.getFolderMove()) {
                     throw OXCalendarExceptionCodes.RECURRING_EXCEPTION_MOVE_EXCEPTION.create();
                 }
-                if (recColl.RECURRING_EXCEPTION_DELETE_EXISTING == ret && (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao.getObjectID())) {
+                if (CalendarCollectionService.RECURRING_EXCEPTION_DELETE_EXISTING == ret && (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrenceID() == edao.getObjectID())) {
                     /*
                      * A formerly created change exception shall be deleted through an update on master recurring appointment
                      */
@@ -1419,7 +1677,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         } else if (edao.containsRecurrenceType() && edao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE && cdao.getRecurrenceType() != edao.getRecurrenceType()) {
             // Recurring Pattern changed! TODO: Remove all exceptions
             if ((cdao.containsRecurrencePosition() && cdao.getRecurrencePosition() > 0) || (cdao.containsRecurrenceDatePosition() && cdao.getRecurrenceDatePosition() != null)) {
-                return recColl.RECURRING_CREATE_EXCEPTION;
+                return CalendarCollectionService.RECURRING_CREATE_EXCEPTION;
             }
             cdao.setRecurrenceID(edao.getObjectID());
             if (!cdao.containsStartDate() && !cdao.containsEndDate()) {
@@ -1443,7 +1701,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             recColl.changeRecurrenceString(cdao);
             cdao.setExceptions(null);
             cdao.setDelExceptions(null);
-            return recColl.CHANGE_RECURRING_TYPE;
+            return CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else if (!edao.containsRecurrenceType() && cdao.getRecurrenceType() > CalendarDataObject.NO_RECURRENCE) {
             // TODO: Change from normal apointment to sequence
             if (edao.containsRecurrenceID() && edao.getRecurrenceID() > 0 && edao.getRecurrence() != null) {
@@ -1464,11 +1722,11 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         } else if (edao.containsRecurrenceType() && cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
             // Sequence reset, this means to delete all existing exceptions
             if (cdao.containsRecurrencePosition() || cdao.containsRecurrenceDatePosition()) {
-                return recColl.RECURRING_CREATE_EXCEPTION;
+                return CalendarCollectionService.RECURRING_CREATE_EXCEPTION;
             }
-            return recColl.RECURRING_EXCEPTION_DELETE;
+            return CalendarCollectionService.RECURRING_EXCEPTION_DELETE;
         }
-        return recColl.RECURRING_NO_ACTION;
+        return CalendarCollectionService.RECURRING_NO_ACTION;
     }
 
     private void calculateEndDateForNoType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
@@ -1479,7 +1737,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     private void calculateEndDateForNewType(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         Date occurrenceDate;
         if (cdao.getOccurrence() <= 0) {
-            occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAX_OCCURRENCESE);
+            occurrenceDate = recColl.getOccurenceDate(cdao, CalendarCollectionService.MAX_OCCURRENCESE);
         } else {
             occurrenceDate = recColl.getOccurenceDate(cdao);
         }
@@ -1553,7 +1811,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             // Calculate occurrence's time
             final Date occurrenceDate;
             if (cdao.getOccurrence() <= 0) {
-                occurrenceDate = recColl.getOccurenceDate(cdao, recColl.MAX_OCCURRENCESE);
+                occurrenceDate = recColl.getOccurenceDate(cdao, CalendarCollectionService.MAX_OCCURRENCESE);
             } else {
                 occurrenceDate = recColl.getOccurenceDate(cdao);
             }
@@ -1613,7 +1871,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             /*
              * Indicate change of recurring type
              */
-            retval = recColl.CHANGE_RECURRING_TYPE;
+            retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
             //checkAndRemoveRecurrenceFields(cdao);
@@ -1689,257 +1947,4 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
     }
 
-    private static interface FieldFiller {
-
-        public void fillField(CalendarDataObject cdao, int columnCount, ResultSet rs) throws SQLException;
-    }
-
-    private static final Map<Integer, FieldFiller> FILLERS = new HashMap<Integer, FieldFiller>() {
-
-        private static final long serialVersionUID = -647801170633669563L;
-
-        // instance initializer
-        {
-            put(I(Appointment.OBJECT_ID), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setObjectID(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.TITLE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String t = rs.getString(columnCount);
-                    cdao.setTitle(rs.wasNull() ? null : t);
-                }
-            });
-            put(I(Appointment.LOCATION), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String loc = rs.getString(columnCount);
-                    cdao.setLocation(rs.wasNull() ? null : loc);
-                }
-            });
-            put(I(Appointment.SHOWN_AS), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setShownAs(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.NOTE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String note = rs.getString(columnCount);
-                    cdao.setNote(rs.wasNull() ? null : note);
-                }
-            });
-            put(I(Appointment.START_DATE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final Date sd = rs.getTimestamp(columnCount);
-                    cdao.setStartDate(rs.wasNull() ? null : sd);
-                }
-            });
-            put(I(Appointment.END_DATE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final Date ed = rs.getTimestamp(columnCount);
-                    cdao.setEndDate(rs.wasNull() ? null : ed);
-                }
-            });
-            put(I(Appointment.CREATED_BY), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setCreatedBy(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.MODIFIED_BY), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setModifiedBy(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.CREATION_DATE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final Timestamp ts = rs.getTimestamp(columnCount);
-                    cdao.setCreationDate(rs.wasNull() ? null : ts);
-                }
-            });
-            put(I(Appointment.LAST_MODIFIED), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final Timestamp ts = new Timestamp(rs.getLong(columnCount));
-                    cdao.setLastModified(rs.wasNull() ? null : ts);
-                }
-            });
-            put(I(Appointment.FULL_TIME), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setFullTime(rs.getInt(columnCount) > 0);
-                }
-            });
-            put(I(Appointment.COLOR_LABEL), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setLabel(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.PRIVATE_FLAG), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setPrivateFlag(rs.getInt(columnCount) > 0);
-                }
-            });
-            put(I(Appointment.NUMBER_OF_ATTACHMENTS), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setNumberOfAttachments(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.RECURRENCE_ID), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final int recurrenceId = rs.getInt(columnCount);
-                    if (!rs.wasNull()) {
-                        cdao.setRecurrenceID(recurrenceId);
-                    }
-                }
-            });
-            put(I(Appointment.CATEGORIES), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String cat = rs.getString(columnCount);
-                    cdao.setCategories(rs.wasNull() ? null : cat);
-                }
-            });
-            put(I(Appointment.RECURRENCE_TYPE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String rt = rs.getString(columnCount);
-                    cdao.setRecurrence(rs.wasNull() ? null : rt);
-                }
-            });
-            put(I(Appointment.CHANGE_EXCEPTIONS), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String ce = rs.getString(columnCount);
-                    cdao.setExceptions(rs.wasNull() ? null : ce);
-                }
-            });
-            put(I(Appointment.DELETE_EXCEPTIONS), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String de = rs.getString(columnCount);
-                    cdao.setDelExceptions(rs.wasNull() ? null : de);
-                }
-            });
-            put(I(Appointment.RECURRENCE_CALCULATOR), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setRecurrenceCalculator(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.RECURRENCE_POSITION), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final int recurrencePosition = rs.getInt(columnCount);
-                    if (!rs.wasNull()) {
-                        cdao.setRecurrencePosition(recurrencePosition);
-                    }
-                }
-            });
-            put(I(Appointment.TIMEZONE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String tz = rs.getString(columnCount);
-                    cdao.setTimezone(rs.wasNull() ? null : tz);
-                }
-            });
-            put(I(Appointment.RECURRENCE_START), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final long recurring_start = rs.getLong(columnCount);
-                    cdao.setRecurringStart(recurring_start);
-                }
-            });
-            put(I(Appointment.ORGANIZER), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String organizer = rs.getString(columnCount);
-                    if (!rs.wasNull()) {
-                        cdao.setOrganizer(organizer);
-                    }
-                }
-            });
-            put(I(Appointment.UID), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    final String uid = rs.getString(columnCount);
-                    cdao.setUid(uid);
-                }
-            });
-            put(I(Appointment.SEQUENCE), new FieldFiller() {
-
-                @Override
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs) throws SQLException {
-                    cdao.setSequence(rs.getInt(columnCount));
-                }
-            });
-            put(I(Appointment.ORGANIZER_ID), new FieldFiller() {
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
-                        throws SQLException {
-                    final int organizerId = rs.getInt(columnCount);
-                    if (!rs.wasNull()) {
-                        cdao.setOrganizerId(organizerId);
-                    }
-                }
-            });
-            put(I(Appointment.PRINCIPAL), new FieldFiller() {
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
-                        throws SQLException {
-                    final String principal = rs.getString(columnCount);
-                    if (!rs.wasNull()) {
-                        cdao.setPrincipal(principal);
-                    }
-                }
-            });
-            put(I(Appointment.PRINCIPAL_ID), new FieldFiller() {
-                public void fillField(final CalendarDataObject cdao, final int columnCount, final ResultSet rs)
-                        throws SQLException {
-                    final int principalId = rs.getInt(columnCount);
-                    if (!rs.wasNull()) {
-                        cdao.setPrincipalId(principalId);
-                    }
-                }
-            });
-
-        }
-    };
 }

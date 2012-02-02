@@ -1,5 +1,7 @@
-#! /bin/bash
+#!/bin/bash
 # postinst script for open-xchange-core
+#
+# see: dh_installdeb(1)
 
 set -e
 
@@ -8,15 +10,14 @@ set -e
 #        * <old-postinst> `abort-upgrade' <new version>
 #        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
 #          <new-version>
+#        * <postinst> `abort-remove'
 #        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
 #          <failed-install-package> <version> `removing'
 #          <conflicting-package> <version>
 # for details, see http://www.debian.org/doc/debian-policy/ or
 # the debian-policy package
-#
 
 . /opt/open-xchange/lib/oxfunctions.sh
-
 
 postFix() {
   local version=${1%-*}
@@ -25,10 +26,8 @@ postFix() {
   # prevent bash from expanding, see bug 13316
   GLOBIGNORE='*'
 
-
   # run checkconfigconsistency once
   /opt/open-xchange/sbin/checkconfigconsistency
-
 }
 
 setConfigFilePermissions() {
@@ -37,17 +36,15 @@ setConfigFilePermissions() {
 
 case "$1" in
     configure)
-    setConfigFilePermissions
+        setConfigFilePermissions
         test -n "$2" && {
-                # we are in update mode, run postFix to apply fixes
-                postFix "$2"
-                exit 0
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+            exit 0
         }
-
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
-
     ;;
 
     *)

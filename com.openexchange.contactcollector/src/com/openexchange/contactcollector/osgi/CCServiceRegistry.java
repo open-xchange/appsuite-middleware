@@ -54,7 +54,7 @@ package com.openexchange.contactcollector.osgi;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CCServiceRegistry extends com.openexchange.server.osgiservice.ServiceRegistry {
+public final class CCServiceRegistry extends com.openexchange.osgi.ServiceRegistry {
 
     private static final CCServiceRegistry instance = new CCServiceRegistry();
 

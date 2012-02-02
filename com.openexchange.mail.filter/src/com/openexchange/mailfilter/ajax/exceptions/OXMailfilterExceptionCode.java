@@ -92,9 +92,9 @@ public enum OXMailfilterExceptionCode implements OXExceptionCode {
      */
     EMPTY_MANDATORY_FIELD("The field \"%1$s\" must have a value, but is not set", CATEGORY_USER_INPUT, 18),
     /**
-     * The configuration requests a masterpassword but none is given in the configuration file
+     * The configuration requests a master password but none is given in the configuration file
      */
-    NO_MASTERPASSWORD_SET("The configuration requests a masterpassword but none is given in the configuration file", CATEGORY_ERROR, 19),
+    NO_MASTERPASSWORD_SET("The configuration requests a master password but none is given in the configuration file", CATEGORY_ERROR, 19),
     /**
      * The passwordSource given in the config file is not a valid one
      */

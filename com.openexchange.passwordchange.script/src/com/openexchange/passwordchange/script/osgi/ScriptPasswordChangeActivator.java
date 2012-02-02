@@ -51,10 +51,10 @@ package com.openexchange.passwordchange.script.osgi;
 
 import static com.openexchange.passwordchange.script.services.SPWServiceRegistry.getServiceRegistry;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.script.impl.ScriptPasswordChange;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**

@@ -49,9 +49,7 @@
 
 package com.openexchange.timer.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 import com.openexchange.timer.internal.TimerImpl;
 
@@ -60,11 +58,9 @@ import com.openexchange.timer.internal.TimerImpl;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TimerActivator implements BundleActivator {
+public final class TimerActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory.getLog(TimerActivator.class);
-
-    private ServiceRegistration<TimerService> timerRegistration;
 
     private TimerImpl timer;
 
@@ -76,7 +72,7 @@ public final class TimerActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         if (true) {
             return;
         }
@@ -86,7 +82,7 @@ public final class TimerActivator implements BundleActivator {
             }
             timer = new TimerImpl();
             timer.start();
-            timerRegistration = context.registerService(TimerService.class, timer, null);
+            registerService(TimerService.class, timer, null);
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
@@ -94,7 +90,7 @@ public final class TimerActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         if (true) {
             return;
         }
@@ -102,14 +98,19 @@ public final class TimerActivator implements BundleActivator {
             if (LOG.isInfoEnabled()) {
                 LOG.info("stopping bundle: com.openexchange.timer");
             }
-            timerRegistration.unregister();
-            timerRegistration = null;
+            unregisterServices();
             timer.stop();
             timer = null;
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

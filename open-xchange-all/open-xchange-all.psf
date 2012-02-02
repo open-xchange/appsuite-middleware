@@ -6,5 +6,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-dav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-oauth"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange"/>
 </provider>
 </psf>

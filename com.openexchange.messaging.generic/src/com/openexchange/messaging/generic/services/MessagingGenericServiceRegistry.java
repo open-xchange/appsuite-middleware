@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.generic.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MessagingGenericServiceRegistry} - The service registry for <code>com.openexchange.messaging.generic</code> bundle.

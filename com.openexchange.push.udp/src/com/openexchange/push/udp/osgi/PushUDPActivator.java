@@ -58,10 +58,10 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.folder.FolderService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.udp.PushHandler;
 import com.openexchange.push.udp.PushInit;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.timer.TimerService;
 
 /**

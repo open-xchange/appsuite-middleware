@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.rdb.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link FileStorageRdbServiceRegistry} - The service registry for <code>com.openexchange.file.storage.generic</code> bundle.

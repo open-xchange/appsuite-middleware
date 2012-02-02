@@ -240,9 +240,9 @@ public class Messages implements LocalizableStrings {
 
     public static final String HAS_REMOVED_GROUP = "The group %1$s has been removed from the appointment";
 
-    public static final String ASK_ADD_RESOURCE = "Please reserve the resource %1$s for the appointment";
+    public static final String ASK_ADD_RESOURCE = "Reserve the resource %1$s for the appointment";
 
-    public static final String INTENTION_ADD_RESOURCE = "Please reserve the resource %1$s for the appointment.";
+    public static final String INTENTION_ADD_RESOURCE = "Reserve the resource %1$s for the appointment.";
 
     public static final String HAS_ADDED_RESOURCE = "The resource %1$s has been reserved for the appointment";
 

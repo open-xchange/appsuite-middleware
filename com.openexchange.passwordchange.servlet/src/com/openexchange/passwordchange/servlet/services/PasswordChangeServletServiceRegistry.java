@@ -49,7 +49,7 @@
 
 package com.openexchange.passwordchange.servlet.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link PasswordChangeServletServiceRegistry} - A registry for services needed by password change servlet bundle

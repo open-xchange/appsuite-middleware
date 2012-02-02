@@ -14,7 +14,7 @@ Import-Package: com.openexchange.exception,
  com.openexchange.mail.mime,
  com.openexchange.mail.service,
  com.openexchange.mail.utils,
- com.openexchange.server.osgiservice,
+ com.openexchange.osgi,
  com.openexchange.session,
  com.openexchange.tools.session,
  org.osgi.framework

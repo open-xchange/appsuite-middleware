@@ -54,7 +54,7 @@ package com.openexchange.contacts.ldap.osgi;
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public final class LDAPServiceRegistry extends com.openexchange.server.osgiservice.ServiceRegistry {
+public final class LDAPServiceRegistry extends com.openexchange.osgi.ServiceRegistry {
 
     private static final LDAPServiceRegistry instance = new LDAPServiceRegistry();
 

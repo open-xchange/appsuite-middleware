@@ -49,10 +49,8 @@
 
 package com.openexchange.subscribe.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.folders.HasSubscriptions;
 
@@ -63,21 +61,22 @@ import com.openexchange.subscribe.folders.HasSubscriptions;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public class FolderFieldActivator implements BundleActivator {
-
-    private ServiceRegistration<AdditionalFolderField> registerService;
+public class FolderFieldActivator extends HousekeepingActivator {
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        registerService = context.registerService(AdditionalFolderField.class, new HasSubscriptions(AbstractSubscribeService.STORAGE), null);
+    public void startBundle() throws Exception {
+        registerService(AdditionalFolderField.class, new HasSubscriptions(AbstractSubscribeService.STORAGE));
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        if (null != registerService) {
-            registerService.unregister();
-            registerService = null;
-        }
+    public void stopBundle() throws Exception {
+        unregisterServices();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

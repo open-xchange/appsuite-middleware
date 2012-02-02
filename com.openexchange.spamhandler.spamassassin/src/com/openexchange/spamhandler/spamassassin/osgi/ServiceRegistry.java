@@ -54,7 +54,7 @@ package com.openexchange.spamhandler.spamassassin.osgi;
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
-public final class ServiceRegistry extends com.openexchange.server.osgiservice.ServiceRegistry {
+public final class ServiceRegistry extends com.openexchange.osgi.ServiceRegistry {
 
     private static final ServiceRegistry instance = new ServiceRegistry();
 

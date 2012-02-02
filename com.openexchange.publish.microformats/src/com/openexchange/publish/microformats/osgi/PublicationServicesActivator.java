@@ -50,13 +50,9 @@
 
 package com.openexchange.publish.microformats.osgi;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
 import com.openexchange.publish.microformats.FormStrings;
@@ -67,16 +63,14 @@ import com.openexchange.publish.microformats.tools.ContactTemplateUtils;
 import com.openexchange.publish.microformats.tools.InfostoreTemplateUtils;
 import com.openexchange.templating.TemplateService;
 
-public class PublicationServicesActivator implements BundleActivator {
-
-    private final List<ServiceRegistration<?>> serviceRegistrations = new ArrayList<ServiceRegistration<?>>(2);
+public class PublicationServicesActivator extends HousekeepingActivator {
 
     private OXMFPublicationService contactPublisher;
 
     private OXMFPublicationService infostorePublisher;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         contactPublisher = new OXMFPublicationService();
         contactPublisher.setFolderType("contacts");
         contactPublisher.setRootURL("/publications/contacts");
@@ -90,7 +84,7 @@ public class PublicationServicesActivator implements BundleActivator {
         MicroformatServlet.registerType("contacts", contactPublisher,additionalVars);
         ContactPictureServlet.setContactPublisher(contactPublisher);
 
-        serviceRegistrations.add(context.registerService(PublicationService.class, contactPublisher, null));
+        registerService(PublicationService.class, contactPublisher, null);
 
         infostorePublisher = new OXMFPublicationService();
         infostorePublisher.setFolderType("infostore");
@@ -105,20 +99,24 @@ public class PublicationServicesActivator implements BundleActivator {
 
         MicroformatServlet.registerType("infostore", infostorePublisher, infoAdditionalVars);
 
-        serviceRegistrations.add(context.registerService(PublicationService.class, infostorePublisher, null));
+        registerService(PublicationService.class, infostorePublisher, null);
 
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        for (final ServiceRegistration<?> registration : serviceRegistrations) {
-            registration.unregister();
-        }
+    public void stopBundle() throws Exception {
+        unregisterServices();
     }
 
     public void setTemplateService(final TemplateService templateService) {
         infostorePublisher.setTemplateService(templateService);
         contactPublisher.setTemplateService(templateService);
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

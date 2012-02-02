@@ -51,10 +51,8 @@ package com.openexchange.url.mail.attachment.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.url.mail.attachment.URLMailAttachmentDataSource;
 
 /**
@@ -62,14 +60,12 @@ import com.openexchange.url.mail.attachment.URLMailAttachmentDataSource;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class URLMailAttachmentActivator implements BundleActivator {
+public final class URLMailAttachmentActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG =
         com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(URLMailAttachmentActivator.class));
 
     private final String name;
-
-    private ServiceRegistration<DataSource> registration;
 
     /**
      * Initializes a new {@link URLMailAttachmentActivator}.
@@ -80,7 +76,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         LOG.info("starting bundle: " + name);
         try {
             /*
@@ -88,7 +84,7 @@ public final class URLMailAttachmentActivator implements BundleActivator {
              */
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put("identifier", name);
-            registration = context.registerService(DataSource.class, new URLMailAttachmentDataSource(), props);
+            registerService(DataSource.class, new URLMailAttachmentDataSource(), props);
         } catch (final Exception e) {
             LOG.error("starting bundle failed: " + name, e);
             throw e;
@@ -96,17 +92,20 @@ public final class URLMailAttachmentActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         LOG.info("stopping bundle: " + name);
         try {
-            if (null != registration) {
-                registration.unregister();
-                registration = null;
-            }
+            unregisterServices();
         } catch (final Exception e) {
             LOG.error("stopping bundle failed: " + name, e);
             throw e;
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

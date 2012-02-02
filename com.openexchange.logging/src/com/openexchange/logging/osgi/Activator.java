@@ -49,39 +49,39 @@
 
 package com.openexchange.logging.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
-	@Override
-    public void start(BundleContext context) throws Exception {
-	    /*
-	     * Uncomment if a suitable solution is available that does not break other log4j settings, e.g. as used in USM module
-	     */
-	    /*-
-	     *
-	    new com.openexchange.logging.internal.JdkCorrector().correct();
-	    try {
-	        Class<?> clazz = Class.forName("org.apache.log4j.Logger");
-    	    if (null != clazz) {
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        /*
+         * Uncomment if a suitable solution is available that does not break other log4j settings, e.g. as used in USM module
+         */
+        /*-
+         *
+        new com.openexchange.logging.internal.JdkCorrector().correct();
+        try {
+            Class<?> clazz = Class.forName("org.apache.log4j.Logger");
+            if (null != clazz) {
                 com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector corrector =
                     (com.openexchange.logging.internal.LoggingCorrector.LoggingCorrector) Class.forName("com.openexchange.logging.internal.Log4JCorrector").newInstance();
-    	        corrector.correct();
-    	    }
-	    } catch (Throwable t) {
-	        // Log4J is not installed.
-	    }
-	    */
-	}
-
-	@Override
-    public void stop(BundleContext context) throws Exception {
-	    // Nothing to do.
-	}
+                corrector.correct();
+            }
+        } catch (Throwable t) {
+            // Log4J is not installed.
+        }
+        */
+    }
 }

@@ -50,30 +50,24 @@
 package com.openexchange.publish.osgi;
 
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.database.PublicationUserDeleteListener;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.helpers.FolderSecurityStrategy;
 import com.openexchange.publish.sql.PublicationSQLStorage;
 import com.openexchange.publish.tools.CompositePublicationTargetDiscoveryService;
-import com.openexchange.server.osgiservice.Whiteboard;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class DiscovererActivator implements BundleActivator {
-
-
-
-    private ServiceRegistration discoveryRegistration;
+public class DiscovererActivator extends HousekeepingActivator {
 
     private OSGiPublicationTargetCollector pubServiceCollector;
 
@@ -82,7 +76,7 @@ public class DiscovererActivator implements BundleActivator {
     private Whiteboard whiteboard;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         whiteboard = new Whiteboard(context);
 
         pubServiceCollector = new OSGiPublicationTargetCollector(context);
@@ -97,8 +91,7 @@ public class DiscovererActivator implements BundleActivator {
         final Hashtable<String, Object> discoveryDict = new Hashtable<String, Object>(1);
         discoveryDict.put(Constants.SERVICE_RANKING, Integer.valueOf(256));
 
-        discoveryRegistration =
-            context.registerService(PublicationTargetDiscoveryService.class.getName(), compositeDiscovererCollector, discoveryDict);
+        registerService(PublicationTargetDiscoveryService.class, compositeDiscovererCollector, discoveryDict);
 
         final DBProvider provider = whiteboard.getService(DBProvider.class);
         final GenericConfigurationStorageService confStorage = whiteboard.getService(GenericConfigurationStorageService.class);
@@ -110,19 +103,24 @@ public class DiscovererActivator implements BundleActivator {
         listener.setDiscoveryService(compositeDiscovererCollector);
         listener.setGenConfStorage(confStorage);
 
-        context.registerService(DeleteListener.class.getName(), listener, null);
+        registerService(DeleteListener.class, listener, null);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        discoveryRegistration.unregister();
-        discoveryRegistration = null;
+    public void stopBundle() throws Exception {
+        unregisterServices();
         pubServiceCollector.close();
         pubServiceCollector = null;
         discovererCollector.close();
         discovererCollector = null;
         whiteboard.close();
         whiteboard = null;
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

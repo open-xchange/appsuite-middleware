@@ -78,8 +78,8 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.tools.images.ImageScalingService;
 import com.openexchange.tools.service.SessionServletRegistration;
 

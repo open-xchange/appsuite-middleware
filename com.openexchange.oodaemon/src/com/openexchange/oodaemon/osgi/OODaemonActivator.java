@@ -50,22 +50,18 @@
 package com.openexchange.oodaemon.osgi;
 
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.anwrt.ooserver.daemon.Logger;
 import com.anwrt.ooserver.daemon.LoggerCommonsImpl;
 import com.openexchange.log.Log;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link OODaemonActivator}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OODaemonActivator implements BundleActivator {
-
-    private ServiceTracker<ThreadPoolService, ThreadPoolService> tracker;
+public class OODaemonActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link OODaemonActivator}.
@@ -75,13 +71,13 @@ public class OODaemonActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final org.apache.commons.logging.Log logger = Log.valueOf(LogFactory.getLog(OODaemonActivator.class));
         logger.info("Starting bundle: com.openexchange.oodaemon");
         try {
             Logger.newInstance(LoggerCommonsImpl.getInstance());
-            tracker = new ServiceTracker<ThreadPoolService, ThreadPoolService>(context, ThreadPoolService.class, new OODaemonTracker(context));
-            tracker.open();
+            track(ThreadPoolService.class, new OODaemonTracker(context));
+            openTrackers();
         } catch (final Exception e) {
             logger.info("Failed starting bundle: com.openexchange.oodaemon", e);
             throw e;
@@ -89,18 +85,22 @@ public class OODaemonActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         final org.apache.commons.logging.Log logger = Log.valueOf(LogFactory.getLog(OODaemonActivator.class));
         logger.info("Stopping bundle: com.openexchange.oodaemon");
         try {
-            if (null != tracker) {
-                tracker.close();
-                tracker = null;
-            }
+            closeTrackers();
+            cleanUp();
         } catch (final Exception e) {
             logger.info("Failed stopping bundle: com.openexchange.oodaemon", e);
             throw e;
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

@@ -50,25 +50,21 @@
 package com.openexchange.config.osgi;
 
 import java.util.Hashtable;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ConfigActivator} - Activator for <code>com.openexchange.config</code> bundle
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ConfigActivator implements BundleActivator {
+public final class ConfigActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ConfigActivator.class));
-
-    private ServiceRegistration<ConfigurationService> registration;
 
     /**
      * Default constructor
@@ -78,14 +74,20 @@ public final class ConfigActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         LOG.info("starting bundle: com.openexchange.configread");
         try {
             final ConfigurationService configService = new ConfigurationImpl();
-            registration = context.registerService(ConfigurationService.class, configService, null);
-            final Hashtable<String, Object> properties = new Hashtable<String,Object>();
+            registerService(ConfigurationService.class, configService, null);
+            final Hashtable<String, Object> properties = new Hashtable<String, Object>();
             properties.put("scope", "server");
-            context.registerService(ConfigProviderService.class.getName(), new ConfigProviderServiceImpl(configService), properties);
+            registerService(ConfigProviderService.class, new ConfigProviderServiceImpl(configService), properties);
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -93,17 +95,13 @@ public final class ConfigActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() {
         LOG.info("stopping bundle: com.openexchange.configread");
         try {
-            if (null != registration) {
-                registration.unregister();
-                registration = null;
-            }
+            unregisterServices();
             FileWatcher.dropTimer();
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
         }
     }
 

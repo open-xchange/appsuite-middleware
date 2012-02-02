@@ -49,9 +49,7 @@
 
 package com.openexchange.security.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.security.BundleAccessSecurityService;
 import com.openexchange.security.internal.BundleAccessSecurityServiceImpl;
 
@@ -61,12 +59,10 @@ import com.openexchange.security.internal.BundleAccessSecurityServiceImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class SecurityActivator implements BundleActivator {
+public final class SecurityActivator extends HousekeepingActivator {
 
 	private static final org.apache.commons.logging.Log LOG = org.apache.commons.logging.LogFactory
 			.getLog(SecurityActivator.class);
-
-	private ServiceRegistration<BundleAccessSecurityService> serviceRegistration;
 
 	/**
 	 * Initializes a new {@link SecurityActivator}
@@ -76,10 +72,9 @@ public final class SecurityActivator implements BundleActivator {
 	}
 
 	@Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
 		try {
-			serviceRegistration = context.registerService(BundleAccessSecurityService.class,
-					new BundleAccessSecurityServiceImpl(), null);
+			registerService(BundleAccessSecurityService.class, new BundleAccessSecurityServiceImpl(), null);
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
@@ -88,14 +83,19 @@ public final class SecurityActivator implements BundleActivator {
 	}
 
 	@Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
 		try {
-			serviceRegistration.unregister();
-			serviceRegistration = null;
+			unregisterServices();
 		} catch (final Exception e) {
 			LOG.error(e.getMessage(), e);
 			throw e;
 		}
 	}
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

@@ -1,5 +1,5 @@
 open-xchange-core (7.0.0-1) unstable; urgency=low
 
-  * Initial build.
+  * Initial release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Oct 2011 16:24:07 +0200

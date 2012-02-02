@@ -49,7 +49,7 @@
 
 package com.openexchange.sessiond.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link SessiondServiceRegistry} - The {@link ServiceRegistry} for sessiond bundle

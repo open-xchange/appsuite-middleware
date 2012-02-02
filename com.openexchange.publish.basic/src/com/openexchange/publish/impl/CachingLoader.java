@@ -55,9 +55,9 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.server.osgiservice.Whiteboard;
 
 
 /**

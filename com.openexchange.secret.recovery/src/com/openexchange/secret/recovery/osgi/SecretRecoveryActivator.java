@@ -54,12 +54,12 @@ import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.recovery.SecretInconsistencyDetector;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.impl.FastSecretInconsistencyDetector;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 

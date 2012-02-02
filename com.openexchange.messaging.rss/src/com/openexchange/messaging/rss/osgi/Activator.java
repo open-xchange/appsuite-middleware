@@ -49,16 +49,12 @@
 
 package com.openexchange.messaging.rss.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.html.HTMLService;
 import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.rss.RSSMessagingService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
 
 /**
@@ -66,39 +62,34 @@ import com.openexchange.proxy.ProxyRegistry;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
-    private List<ServiceTracker<?,?>> trackers;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-	@Override
-    public void start(final BundleContext context) throws Exception {
-	    try {
-	        trackers = new ArrayList<ServiceTracker<?,?>>(2);
-	        trackers.add(new ServiceTracker<HTMLService,HTMLService>(context, HTMLService.class, new HTMLRegistryCustomizer(context)));
-	        trackers.add(new ServiceTracker<ProxyRegistry,ProxyRegistry>(context, ProxyRegistry.class, new ProxyRegistryCustomizer(context)));
-	        for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
-
-	        context.registerService(MessagingService.class.getName(), new RSSMessagingService(), null);
-	    } catch (final Exception x) {
-	        LOG.error(x.getMessage(), x);
-	        throw x;
-	    }
-	}
-
-	@Override
-    public void stop(final BundleContext context) throws Exception {
-	    if (null != trackers) {
-	        for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.close();
-            }
-	        trackers = null;
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            track(HTMLService.class, new HTMLRegistryCustomizer(context));
+            track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
+            openTrackers();
+            registerService(MessagingService.class, new RSSMessagingService(), null);
+        } catch (final Exception x) {
+            LOG.error(x.getMessage(), x);
+            throw x;
         }
+    }
 
-	    // Services are deregistered automatically by the framework
-	}
+    @Override
+    protected void stopBundle() {
+        closeTrackers();
+        unregisterServices();
+        cleanUp();
+    }
 
 }

@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.mail.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MailMessagingServiceRegistry} - Container class for the service registry of <i>com.openexchange.messaging.mail</i> bundle.

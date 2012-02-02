@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.webdav.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link WebDAVFileStorageServiceRegistry} - Container class for the service registry of <i>com.openexchange.file.storage.webdav</i> bundle.

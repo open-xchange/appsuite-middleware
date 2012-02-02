@@ -49,7 +49,7 @@
 
 package com.openexchange.mobile.configuration.json.action.sms.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * @author Benjamin Otterbach

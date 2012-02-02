@@ -73,12 +73,12 @@ import com.openexchange.messaging.generic.groupware.MessagingGenericDeleteListen
 import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorage;
 import com.openexchange.messaging.generic.secret.MessagingSecretHandling;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.secret.recovery.EncryptedItemDetectorService;
 import com.openexchange.secret.recovery.SecretMigrator;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 
 /**
  * {@link MessagingGenericActivator}
@@ -86,7 +86,7 @@ import com.openexchange.server.osgiservice.ServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.16
  */
-public class MessagingGenericActivator extends DeferredActivator {
+public class MessagingGenericActivator extends HousekeepingActivator {
 
     private List<ServiceTracker<?,?>> trackers;
 

@@ -176,8 +176,6 @@ public class CalendarDowngradeUserTest extends TestCase {
                 calendars.deleteAppointmentObject(cdao, cdao.getParentFolderID(), new Date(Long.MAX_VALUE));
             } catch (final OXException e) {
                 // IGNORE
-            } catch (final SQLException e) {
-                // IGNORE
             }
         }
 

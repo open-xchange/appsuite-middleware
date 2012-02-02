@@ -58,8 +58,8 @@ import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
 import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
 import com.openexchange.oauth.json.service.ServiceRegistry;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
  * {@link OAuthJSONActivator} - Activator for JSON OAuth interface.

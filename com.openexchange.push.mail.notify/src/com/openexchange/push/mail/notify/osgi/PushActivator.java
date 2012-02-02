@@ -58,6 +58,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushDeleteListener;
 import com.openexchange.push.mail.notify.MailNotifyPushListenerRegistry;
@@ -65,8 +67,6 @@ import com.openexchange.push.mail.notify.MailNotifyPushMailAccountDeleteListener
 import com.openexchange.push.mail.notify.MailNotifyPushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushUdpSocketListener;
 import com.openexchange.push.mail.notify.services.PushServiceRegistry;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;

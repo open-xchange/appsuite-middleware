@@ -2,7 +2,7 @@ package com.openexchange.contact.aggregator.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.subscribe.SubscribeService;
 
 public class Activator extends HousekeepingActivator {

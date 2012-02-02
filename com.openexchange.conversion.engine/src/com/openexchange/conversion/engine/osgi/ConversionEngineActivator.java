@@ -54,7 +54,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.engine.internal.ConversionEngineRegistry;
 import com.openexchange.conversion.engine.internal.ConversionServiceImpl;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ConversionEngineActivator} - Activator for conversion engine

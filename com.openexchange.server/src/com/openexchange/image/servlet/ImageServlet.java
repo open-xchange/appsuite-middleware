@@ -291,6 +291,8 @@ public final class ImageServlet extends HttpServlet {
             final String eTag = req.getHeader("If-None-Match");
             if (null != eTag && dataSource.getETag(imageLocation, session).equals(eTag) ) {
                 resp.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+                final long expires = dataSource.getExpires();
+                Tools.setETag(dataSource.getETag(imageLocation, session), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
                 return;
             }
             outputImageData(dataSource, imageLocation, session, resp);
@@ -299,48 +301,6 @@ public final class ImageServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    private static User getUser(final int userId, final Context context) {
-        try {
-            return ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(userId, context);
-        } catch (final OXException e) {
-            LOG.debug("User '" + userId + "' not found.");
-            return null;
-        }
-    }
-
-    private static Context getContext(final int contextId) {
-        try {
-            return ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
-        } catch (final ServiceException e) {
-            LOG.error(e.getMessage(), e);
-            return null;
-        } catch (final OXException e) {
-            LOG.error("Can not load context.", e);
-            return null;
-        }
-    }
-
-    private static String getMailAddress(final HttpServletRequest request) {
-        final String userName = request.getParameter("username");
-        final String serverName = request.getParameter("server");
-        if (null == userName || null == serverName) {
-            return null;
-        }
-        return userName + '@' + serverName;
     }
 
     private static void outputImageData(final ImageDataSource dataSource, final ImageLocation imageLocation, final Session session, final HttpServletResponse resp) throws IOException, OXException {
@@ -411,12 +371,7 @@ public final class ImageServlet extends HttpServlet {
              * Set ETag
              */
             final long expires = dataSource.getExpires();
-            if (expires > 0) {
-                final long millis = System.currentTimeMillis() + (expires);
-                Tools.setETag(dataSource.getETag(imageLocation, session), new Date(millis), resp);
-            } else {
-                Tools.setETag(dataSource.getETag(imageLocation, session), resp);
-            }
+            Tools.setETag(dataSource.getETag(imageLocation, session), expires > 0 ? new Date(System.currentTimeMillis() + expires) : null, resp);
             /*
              * Select response's output stream
              */
@@ -445,4 +400,47 @@ public final class ImageServlet extends HttpServlet {
             com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class)).error(e.getMessage(), e);
         }
     }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    private static User getUser(final int userId, final Context context) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(UserService.class, true).getUser(userId, context);
+        } catch (final OXException e) {
+            LOG.debug("User '" + userId + "' not found.");
+            return null;
+        }
+    }
+
+    private static Context getContext(final int contextId) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(ContextService.class, true).getContext(contextId);
+        } catch (final ServiceException e) {
+            LOG.error(e.getMessage(), e);
+            return null;
+        } catch (final OXException e) {
+            LOG.error("Can not load context.", e);
+            return null;
+        }
+    }
+
+    private static String getMailAddress(final HttpServletRequest request) {
+        final String userName = request.getParameter("username");
+        final String serverName = request.getParameter("server");
+        if (null == userName || null == serverName) {
+            return null;
+        }
+        return userName + '@' + serverName;
+    }
+
 }

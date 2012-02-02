@@ -50,7 +50,7 @@
 package com.openexchange.publish.json.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
  * {@link Activator}

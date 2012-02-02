@@ -1,3 +1,12 @@
+* 2012-02-02 - jan.bauerdick@open-xchange.com
+
+ - Refactoring: Housekeeping Activator in separate bundle and used everywhere
+
+* 2012-02-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21242: Check syntactical correctness of composed SQL query
+ - Fix for bug 21405: Added support for new calendar fields
+
 * 2012-01-31 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 21374: Correctly mapping a contact's profession to vCard TITLE field

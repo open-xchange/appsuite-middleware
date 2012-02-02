@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.virtual;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link VirtualServiceRegistry} - The service registry for virtual folder storage.

@@ -57,6 +57,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.imap.notify.IMAPNotifierRegistryService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
 import com.openexchange.push.imapidle.ImapIdleMailAccountDeleteListener;
@@ -65,7 +66,6 @@ import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.ImapIdlePushListenerRegistry;
 import com.openexchange.push.imapidle.ImapIdlePushManagerService;
 import com.openexchange.push.imapidle.services.ImapIdleServiceRegistry;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 

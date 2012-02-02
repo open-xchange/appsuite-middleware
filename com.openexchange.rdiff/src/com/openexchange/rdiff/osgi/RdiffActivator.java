@@ -51,9 +51,7 @@ package com.openexchange.rdiff.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.rdiff.internal.RdiffServiceImpl;
 
@@ -62,9 +60,7 @@ import com.openexchange.rdiff.internal.RdiffServiceImpl;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdiffActivator implements BundleActivator {
-
-    private ServiceRegistration<RdiffService> serviceRegistration;
+public final class RdiffActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link RdiffActivator}.
@@ -74,11 +70,11 @@ public final class RdiffActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdiffActivator.class));
         log.info("Starting bundle: com.openexchange.rdiff");
         try {
-            serviceRegistration = context.registerService(RdiffService.class, new RdiffServiceImpl(), null);
+            registerService(RdiffService.class, new RdiffServiceImpl(), null);
         } catch (final Exception e) {
             log.error("Starting bundle failed: com.openexchange.rdiff", e);
             throw e;
@@ -86,18 +82,21 @@ public final class RdiffActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(RdiffActivator.class));
         log.info("Stopping bundle: com.openexchange.rdiff");
         try {
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
+            unregisterServices();
         } catch (final Exception e) {
             log.error("Stopping bundle failed: com.openexchange.rdiff", e);
             throw e;
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

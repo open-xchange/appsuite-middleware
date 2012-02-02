@@ -52,24 +52,23 @@ package com.openexchange.user.copy.osgi;
 import java.util.Collection;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.copy.CopyUserTaskService;
 
 /**
  * {@link CommandActivator}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class CommandActivator implements BundleActivator {
+public class CommandActivator extends HousekeepingActivator {
 
     public class UtilCommandProvider implements CommandProvider {
-        
+
         private final BundleContext context;
-        
+
 
         public UtilCommandProvider(final BundleContext context) {
             super();
@@ -94,8 +93,6 @@ public class CommandActivator implements BundleActivator {
             }
         }
     }
-    
-    private ServiceRegistration<CommandProvider> registration;
 
     /**
      * The constructor
@@ -108,19 +105,25 @@ public class CommandActivator implements BundleActivator {
      * (non-Javadoc)
      * @see org.eclipse.core.runtime.Plugins#start(org.osgi.framework.BundleContext)
      */
-    public void start(final BundleContext context) throws Exception {
-        registration = context.registerService(CommandProvider.class, new UtilCommandProvider(context), null);
+    @Override
+    public void startBundle() throws Exception {
+        registerService(CommandProvider.class, new UtilCommandProvider(context));
     }
 
     /*
      * (non-Javadoc)
      * @see org.eclipse.core.runtime.Plugin#stop(org.osgi.framework.BundleContext)
      */
-    public void stop(final BundleContext context) throws Exception {
-        if (registration != null) {
-            registration.unregister();
-        }
+    @Override
+    public void stopBundle() throws Exception {
+        unregisterServices();
 
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

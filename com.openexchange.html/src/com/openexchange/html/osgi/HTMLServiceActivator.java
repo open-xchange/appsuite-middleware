@@ -68,8 +68,8 @@ import com.openexchange.html.HTMLService;
 import com.openexchange.html.internal.HTMLServiceImpl;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.ProxyRegistry;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**

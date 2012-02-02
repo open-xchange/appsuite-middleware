@@ -58,7 +58,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.service.messaging.MessageHandler;
 import com.openexchange.service.messaging.MessagingService;
 import com.openexchange.service.messaging.MessagingServiceConstants;
@@ -77,7 +77,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MessagingServiceActivator extends DeferredActivator {
+public final class MessagingServiceActivator extends HousekeepingActivator {
 
     private List<ServiceRegistration<?>> registrations;
 

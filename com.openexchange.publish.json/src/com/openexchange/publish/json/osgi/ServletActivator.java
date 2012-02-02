@@ -54,13 +54,13 @@ import java.util.List;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.publish.json.PublicationMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationServlet;
 import com.openexchange.publish.json.PublicationTargetMultipleHandlerFactory;
 import com.openexchange.publish.json.PublicationTargetServlet;
 import com.openexchange.publish.json.types.EntityMap;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 import com.openexchange.tools.service.SessionServletRegistration;
 
 public class ServletActivator extends HousekeepingActivator {

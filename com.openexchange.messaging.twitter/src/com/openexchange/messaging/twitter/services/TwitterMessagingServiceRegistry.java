@@ -49,7 +49,7 @@
 
 package com.openexchange.messaging.twitter.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link TwitterMessagingServiceRegistry} - Container class for the service registry of <i>com.openexchange.messaging.twitter</i> bundle.

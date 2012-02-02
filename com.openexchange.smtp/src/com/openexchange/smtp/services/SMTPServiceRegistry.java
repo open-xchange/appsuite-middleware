@@ -49,7 +49,7 @@
 
 package com.openexchange.smtp.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link SMTPServiceRegistry} - A registry for services needed by SMTP bundle
