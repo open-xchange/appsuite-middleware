@@ -75,7 +75,6 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.caching.CacheKey;
@@ -201,7 +200,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static AppointmentSqlFactoryService factory;
     
-    public static void setApppointmentSqlFactory(AppointmentSqlFactoryService factory) {
+    public static void setApppointmentSqlFactory(final AppointmentSqlFactoryService factory) {
         CalendarMySQL.factory = factory;
     }
 
@@ -374,6 +373,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.ORGANIZER), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setString(pos, cdao.getOrganizer());
@@ -387,18 +387,21 @@ public class CalendarMySQL implements CalendarSqlImp {
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.ORGANIZER_ID), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getOrganizerId());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.PRINCIPAL), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setString(pos, cdao.getPrincipal());
             }
         });
         STATEMENT_FILLERS.put(Integer.valueOf(Appointment.PRINCIPAL_ID), new StatementFiller() {
+            @Override
             public void fillStatement(final PreparedStatement stmt, final int pos, final CalendarDataObject cdao)
                     throws OXException, SQLException {
                 stmt.setInt(pos, cdao.getPrincipalId());
@@ -1411,15 +1414,16 @@ public class CalendarMySQL implements CalendarSqlImp {
             sb.append(PDM_AND);
         }
 
-        if (searchobject.getFolder() > 0) {
+        final int folder = searchobject.getFolder();
+        if (folder > 0) {
             sb.append(" ((pd.fid = 0");
             sb.append(PDM_PFID_IS);
-            sb.append(searchobject.getFolder());
+            sb.append(folder);
             sb.append(PDM_MEMBER_UID_IS);
             sb.append(uid);
             sb.append(") OR (");
             sb.append("pd.fid = ");
-            sb.append(searchobject.getFolder());
+            sb.append(folder);
             sb.append(PDM_MEMBER_UID_IS);
             sb.append(uid);
             sb.append("))");
@@ -1436,13 +1440,21 @@ public class CalendarMySQL implements CalendarSqlImp {
 
                 boolean private_query = false;
                 boolean public_query = false;
+                boolean started = false;
+
                 if (!private_read_all.isEmpty()) {
-                    sb.append(" AND (pdm.pfid IN ");
+                    sb.append(" AND (");
+                    started = true;
+                    sb.append("pdm.pfid IN ");
                     sb.append(StringCollection.getSqlInString(private_read_all));
                     private_query = true;
                 }
 
                 if (!private_read_own.isEmpty()) {
+                    if (!started) {
+                        sb.append(" AND (");
+                        started = true;
+                    }
                     if (private_query) {
                         sb.append(" OR pd.created_from = ");
                     } else {
@@ -1455,6 +1467,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
 
                 if (!public_read_all.isEmpty()) {
+                    if (!started) {
+                        sb.append(" AND (");
+                        started = true;
+                    }
                     if (private_query) {
                         sb.append(" OR pd.fid IN ");
                         sb.append(StringCollection.getSqlInString(public_read_all));
@@ -1467,6 +1483,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
 
                 if (!public_read_own.isEmpty()) {
+                    if (!started) {
+                        sb.append(" AND (");
+                        started = true;
+                    }
                     if (private_query || public_query) {
                         sb.append(" OR pd.fid IN ");
                         sb.append(StringCollection.getSqlInString(public_read_own));
@@ -1481,7 +1501,9 @@ public class CalendarMySQL implements CalendarSqlImp {
                 }
 
                 if (private_query) {
-                    sb.append(')');
+                    if (started) { // Something was appended
+                        sb.append(')');
+                    }
                 }
             }
         }
@@ -2347,6 +2369,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         return loadObjectForUpdate(cdao, so, ctx, inFolder, con, true);
     }
 
+    @Override
     public final CalendarDataObject loadObjectForUpdate(final CalendarDataObject cdao, final Session so, final Context ctx, final int inFolder, final Connection con, final boolean checkPermissions) throws SQLException, OXException {
         final CalendarOperation co = new CalendarOperation();
         Connection readcon = null;
@@ -4353,12 +4376,13 @@ public class CalendarMySQL implements CalendarSqlImp {
          */
         return false;
     }
+    @Override
     public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
         deleteAppointment(uid, cdao, writecon, so, ctx, inFolder, clientLastModified, true);
     }
 
     @Override
-   public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, boolean checkPermissions) throws SQLException, OXException {
+   public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean checkPermissions) throws SQLException, OXException {
         final Connection readcon = DBPool.pickup(ctx);
         final CalendarDataObject edao;
         PreparedStatement prep = null;
