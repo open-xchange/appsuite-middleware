@@ -29,7 +29,6 @@
             <property name="packageName" value="${packageName}"/>
         	<property name="bsProject" value="${bsProject}"/>
         </ant>
-    	<sleep seconds="1"/>
         <ant antfile="build.xml" target="clean">
             <property name="packageName" value="${packageName}"/>
         </ant>
