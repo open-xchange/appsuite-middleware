@@ -49,25 +49,19 @@
 
 package com.openexchange.subscribe.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 
 /**
  * {@link TrackerActivator} - The activator for starting/stopping needed service trackers.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TrackerActivator implements BundleActivator {
-
-    private List<ServiceTracker<?, ?>> trackers;
+public final class TrackerActivator extends HousekeepingActivator {
 
     private WhiteboardSecretService secretService;
 
@@ -79,50 +73,26 @@ public final class TrackerActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        closeTrackers();
-        openTrackers(context);
-    }
-
-    @Override
-    public void stop(final BundleContext context) throws Exception {
-        closeTrackers();
-    }
-
-    private void openTrackers(final BundleContext context) {
-        trackers = new ArrayList<ServiceTracker<?, ?>>();
-        trackers.add(new ServiceTracker<ConfigurationService,ConfigurationService>(
-            context,
-            ConfigurationService.class,
-            new RegistryServiceTrackerCustomizer<ConfigurationService>(
-                    context,
-                    SubscriptionServiceRegistry.getInstance(),
-                    ConfigurationService.class)));
-           trackers.add(new ServiceTracker(
-                   context,
-                   ContactInterfaceDiscoveryService.class.getName(),
-                   new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(
-                       context,
-                       SubscriptionServiceRegistry.getInstance(),
-                       ContactInterfaceDiscoveryService.class)));
-            for (final ServiceTracker tracker : trackers) {
-                tracker.open();
-            }
-
+    public void startBundle() throws Exception {
+        track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, SubscriptionServiceRegistry.getInstance(), ConfigurationService.class));
+        track(ContactInterfaceDiscoveryService.class, new RegistryServiceTrackerCustomizer<ContactInterfaceDiscoveryService>(context, SubscriptionServiceRegistry.getInstance(), ContactInterfaceDiscoveryService.class));
+        openTrackers();
         SubscriptionServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();
     }
 
-    private void closeTrackers() {
-        if (null != trackers) {
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.close();
-            }
-            trackers = null;
-        }
+    @Override
+    public void stopBundle() throws Exception {
+        closeTrackers();
         if (secretService != null) {
             secretService.close();
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

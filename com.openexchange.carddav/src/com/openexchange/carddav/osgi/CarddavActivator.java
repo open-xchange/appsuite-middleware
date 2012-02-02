@@ -7,7 +7,7 @@ import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.directory.PathRegistration;

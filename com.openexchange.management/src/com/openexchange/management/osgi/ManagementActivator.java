@@ -57,8 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ManagementActivator} - Activator for management bundle

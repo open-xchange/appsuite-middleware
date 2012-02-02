@@ -63,7 +63,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -166,10 +165,14 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
+import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
 import com.openexchange.management.ManagementService;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
+import com.openexchange.osgi.BundleServiceTracker;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.WhiteboardFactoryService;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -182,9 +185,6 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.impl.Version;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.WhiteboardFactoryService;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.SessiondService;
@@ -208,7 +208,7 @@ import com.openexchange.xml.spring.SpringParser;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ServerActivator extends DeferredActivator {
+public final class ServerActivator extends HousekeepingActivator {
 
 	private static final class ServiceAdderTrackerCustomizer implements ServiceTrackerCustomizer<FileMetadataParserService,FileMetadataParserService> {
 
@@ -278,8 +278,6 @@ public final class ServerActivator extends DeferredActivator {
         return CONTEXT;
     }
 
-    private final List<ServiceRegistration<?>> registrationList;
-
     private final List<ServiceTracker<?,?>> serviceTrackerList;
 
     private final List<EventHandlerRegistration> eventHandlerList;
@@ -301,7 +299,6 @@ public final class ServerActivator extends DeferredActivator {
         super();
         this.started = new AtomicBoolean();
         this.starter = new Starter();
-        registrationList = new ArrayList<ServiceRegistration<?>>();
         serviceTrackerList = new ArrayList<ServiceTracker<?,?>>();
         eventHandlerList = new ArrayList<EventHandlerRegistration>();
         activators = new ArrayList<BundleActivator>(8);
@@ -394,62 +391,48 @@ public final class ServerActivator extends DeferredActivator {
         confTracker.open(); // We need this for {@link Starter#start()}
         serviceTrackerList.add(confTracker);
         // move this to the required services once the database component gets into its own bundle.
-        serviceTrackerList.add(new ServiceTracker<DatabaseService,DatabaseService>(context, DatabaseService.class, new DatabaseCustomizer(context)));
+        track(DatabaseService.class, new DatabaseCustomizer(context));
         // I18n service load
-        serviceTrackerList.add(new ServiceTracker<I18nService,I18nService>(context, I18nService.class, new I18nServiceListener(context)));
+        track(I18nService.class, new I18nServiceListener(context));
 
         // Mail account delete listener
-        serviceTrackerList.add(new ServiceTracker<MailAccountDeleteListener,MailAccountDeleteListener>(
-            context,
-            MailAccountDeleteListener.class,
-            new com.openexchange.mailaccount.internal.DeleteListenerServiceTracker(context)));
+        track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
 
         // Mail provider service tracker
-        serviceTrackerList.add(new ServiceTracker<MailProvider,MailProvider>(context, MailProvider.class, new MailProviderServiceTracker(context)));
+        track(MailProvider.class, new MailProviderServiceTracker(context));
 
         // Transport provider service tracker
-        serviceTrackerList.add(new ServiceTracker<TransportProvider,TransportProvider>(context, TransportProvider.class, new TransportProviderServiceTracker(context)));
+        track(TransportProvider.class, new TransportProviderServiceTracker(context));
 
         // Spam handler provider service tracker
-        serviceTrackerList.add(new ServiceTracker<SpamHandler,SpamHandler>(context, SpamHandler.class, new SpamHandlerServiceTracker(context)));
+        track(SpamHandler.class, new SpamHandlerServiceTracker(context));
 
         // AJAX request handler
-        serviceTrackerList.add(new ServiceTracker<AJAXRequestHandler,AJAXRequestHandler>(context, AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context)));
+        track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));
 
         // contacts
-        serviceTrackerList.add(new ServiceTracker<ContactInterfaceProvider,ContactInterfaceProvider>(context, ContactInterfaceProvider.class, new ContactServiceListener(context)));
+        track(ContactInterfaceProvider.class, new ContactServiceListener(context));
         // ICal Parser
-        serviceTrackerList.add(new ServiceTracker<ICalParser,ICalParser>(context, ICalParser.class, new RegistryCustomizer<ICalParser>(
-            context,
-            ICalParser.class){
+        track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class){
 
             @Override
             protected ICalParser customize(final ICalParser service) {
                 return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
             }
 
-        }));
+        });
 
         // ICal Emitter
-        serviceTrackerList.add(new ServiceTracker<ICalEmitter,ICalEmitter>(context, ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(
-            context,
-            ICalEmitter.class)));
+        track(ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class));
 
         // Data Retention Service
-        serviceTrackerList.add(new ServiceTracker<DataRetentionService,DataRetentionService>(
-            context,
-            DataRetentionService.class,
-            new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class)));
+        track(DataRetentionService.class, new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class));
 
         // Delete Listener Service Tracker
-        serviceTrackerList.add(new ServiceTracker<DeleteListener,DeleteListener>(context, DeleteListener.class, new DeleteListenerServiceTrackerCustomizer(
-            context)));
+        track(DeleteListener.class, new DeleteListenerServiceTrackerCustomizer(context));
 
         // Folder Delete Listener Service Tracker
-        serviceTrackerList.add(new ServiceTracker<FolderDeleteListenerService,FolderDeleteListenerService>(
-            context,
-            FolderDeleteListenerService.class,
-            new FolderDeleteListenerServiceTrackerCustomizer(context)));
+        track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
 
         /*
          * Register EventHandler
@@ -470,7 +453,7 @@ public final class ServerActivator extends DeferredActivator {
             starter.adminStart();
         } else {
             // Management is only needed for groupware.
-            serviceTrackerList.add(new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new ManagementServiceTracker(context)));
+            track(ManagementService.class, new ManagementServiceTracker(context));
             // TODO:
             /*-
              * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
@@ -478,62 +461,41 @@ public final class ServerActivator extends DeferredActivator {
              */
 
             // Search for AuthenticationService
-            serviceTrackerList.add(new ServiceTracker<AuthenticationService,AuthenticationService>(context, AuthenticationService.class, new AuthenticationCustomizer(context)));
+            track(AuthenticationService.class, new AuthenticationCustomizer(context));
             // Search for ConfigJumpService
-            serviceTrackerList.add(new ServiceTracker<ConfigJumpService,ConfigJumpService>(
-                context,
-                ConfigJumpService.class,
-                new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class)));
+            track(ConfigJumpService.class, new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class));
             // Search for extensions of the preferences tree interface
-            serviceTrackerList.add(new ServiceTracker<PreferencesItemService,PreferencesItemService>(context, PreferencesItemService.class, new PreferencesCustomizer(context)));
+            track(PreferencesItemService.class, new PreferencesCustomizer(context));
             // Search for UserPasswordChange service
-            serviceTrackerList.add(new ServiceTracker<PasswordChangeService,PasswordChangeService>(context, PasswordChangeService.class, new PasswordChangeCustomizer(context)));
+            track(PasswordChangeService.class, new PasswordChangeCustomizer(context));
             // Search for host name service
-            serviceTrackerList.add(new ServiceTracker<HostnameService,HostnameService>(context, HostnameService.class, new HostnameServiceCustomizer(context)));
+            track(HostnameService.class, new HostnameServiceCustomizer(context));
             // Conversion service
-            serviceTrackerList.add(new ServiceTracker<ConversionService,ConversionService>(
-                context,
-                ConversionService.class,
-                new RegistryCustomizer<ConversionService>(context, ConversionService.class)));
+            track(ConversionService.class, new RegistryCustomizer<ConversionService>(context, ConversionService.class));
             // Contact collector
-            serviceTrackerList.add(new ServiceTracker<ContactCollectorService,ContactCollectorService>(
-                context,
-                ContactCollectorService.class,
-                new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class)));
+            track(ContactCollectorService.class, new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class));
             // Search Service
-            serviceTrackerList.add(new ServiceTracker<SearchService,SearchService>(context, SearchService.class, new RegistryCustomizer<SearchService>(
-                context,
-                SearchService.class)));
+            track(SearchService.class, new RegistryCustomizer<SearchService>(context, SearchService.class));
             // Login handler
-            serviceTrackerList.add(new ServiceTracker<LoginHandlerService,LoginHandlerService>(context, LoginHandlerService.class, new LoginHandlerCustomizer(context)));
+            track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
             // Multiple handler factory services
-            serviceTrackerList.add(new ServiceTracker<MultipleHandlerFactoryService,MultipleHandlerFactoryService>(
-                context,
-                MultipleHandlerFactoryService.class,
-                new MultipleHandlerServiceTracker(context)));
+            track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
             // Attachment Plugins
             serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
             serviceTrackerList.add(new AttachmentListenerTracker(context));
 
            // PublicationTargetDiscoveryService
-            serviceTrackerList.add(new ServiceTracker<PublicationTargetDiscoveryService,PublicationTargetDiscoveryService>(
-                context,
-                PublicationTargetDiscoveryService.class,
-                new PublicationTargetDiscoveryServiceTrackerCustomizer(context)));
+            track(PublicationTargetDiscoveryService.class, new PublicationTargetDiscoveryServiceTrackerCustomizer(context));
 
             // Folder Fields
-
-            serviceTrackerList.add(new ServiceTracker<AdditionalFolderField,AdditionalFolderField>(context, AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields())));
+            track(AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields()));
 
             /*
              * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
              * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
              */
-            serviceTrackerList.add(new ServiceTracker<FileMetadataParserService,FileMetadataParserService>(
-                context,
-                FileMetadataParserService.class,
-                new ServiceAdderTrackerCustomizer(context)));
+            track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
 
             // Start up server the usual way
             starter.start();
@@ -542,96 +504,77 @@ public final class ServerActivator extends DeferredActivator {
         for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
             tracker.open();
         }
+        openTrackers();
         // Register server's services
-        registrationList.add(context.registerService(CharsetProvider.class.getName(), new CustomCharsetProvider(), null));
+        registerService(CharsetProvider.class, new CustomCharsetProvider());
         final GroupService groupService = new GroupServiceImpl();
-        registrationList.add(context.registerService(GroupService.class.getName(), groupService, null));
+        registerService(GroupService.class, groupService);
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
-        registrationList.add(context.registerService(
-            ResourceService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(ResourceService.class, true),
-            null));
-        registrationList.add(context.registerService(
-            UserService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(UserService.class, true),
-            null));
+        registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
+        registerService(UserService.class, ServerServiceRegistry.getInstance().getService(UserService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
-        registrationList.add(context.registerService(
-            UserConfigurationService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class),
-            null));
-        registrationList.add(context.registerService(ContextService.class.getName(), ServerServiceRegistry.getInstance().getService(
-            ContextService.class,
-            true), null));
+        registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
+        registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
         // Register mail stuff
         {
-            registrationList.add(context.registerService(MailService.class.getName(), new MailServiceImpl(), null));
+            registerService(MailService.class, new MailServiceImpl());
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, MailSessionEventHandler.getTopics());
-            registrationList.add(context.registerService(EventHandler.class.getName(), new MailSessionEventHandler(), serviceProperties));
-            registrationList.add(context.registerService(MailCounter.class.getName(), new MailCounterImpl(), null));
-            registrationList.add(context.registerService(MailIdleCounter.class.getName(), new MailIdleCounterImpl(), null));
+            registerService(EventHandler.class, new MailSessionEventHandler(), serviceProperties);
+            registerService(MailCounter.class, new MailCounterImpl());
+            registerService(MailIdleCounter.class, new MailIdleCounterImpl());
         }
         // TODO: Register search service here until its encapsulated in an own bundle
-        registrationList.add(context.registerService(SearchService.class.getName(), new SearchServiceImpl(), null));
+        registerService(SearchService.class, new SearchServiceImpl());
         // TODO: Register server's login handler here until its encapsulated in an own bundle
-        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new MailLoginHandler(), null));
-        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new TransportLoginHandler(), null));
-        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new LastLoginRecorder(), null));
+        registerService(LoginHandlerService.class, new MailLoginHandler());
+        registerService(LoginHandlerService.class, new TransportLoginHandler());
+        registerService(LoginHandlerService.class, new LastLoginRecorder());
 //        registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
-        registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateMailAccountTables(), null));
-        registrationList.add(context.registerService(CreateTableService.class.getName(), new CreateIDSequenceTable(), null));
+        registerService(CreateTableService.class, new CreateMailAccountTables());
+        registerService(CreateTableService.class, new CreateIDSequenceTable());
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
-        registrationList.add(context.registerService(
-            MailAccountStorageService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class),
-            null));
+        registerService(MailAccountStorageService.class, ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class));
         // TODO: Register server's Unified INBOX management here until its encapsulated in an own bundle
-        registrationList.add(context.registerService(
-            UnifiedINBOXManagement.class.getName(),
-            ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class),
-            null));
+        registerService(UnifiedINBOXManagement.class, ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class));
         // Register ID generator
-        registrationList.add(context.registerService(
-            IDGeneratorService.class.getName(),
-            ServerServiceRegistry.getInstance().getService(IDGeneratorService.class),
-            null));
+        registerService(IDGeneratorService.class, ServerServiceRegistry.getInstance().getService(IDGeneratorService.class));
         /*
          * Register data sources
          */
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
-            registrationList.add(context.registerService(DataSource.class.getName(), new VCardMailPartDataSource(), props));
+            registerService(DataSource.class, new VCardMailPartDataSource(), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
-            registrationList.add(context.registerService(DataSource.class.getName(), new ICalMailPartDataSource(), props));
+            registerService(DataSource.class, new ICalMailPartDataSource(), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
-            registrationList.add(context.registerService(DataSource.class.getName(), new ContactDataSource(), props));
+            registerService(DataSource.class, new ContactDataSource(), props);
         }
         {
             final InlineImageDataSource dataSource = new InlineImageDataSource();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+            registerService(DataSource.class, dataSource, props);
         }
         {
             final ContactImageDataSource dataSource = new ContactImageDataSource();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+            registerService(DataSource.class, dataSource, props);
         }
         {
             final ManagedFileImageDataSource dataSource = new ManagedFileImageDataSource();
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, dataSource.getRegistrationName());
-            registrationList.add(context.registerService(DataSource.class.getName(), dataSource, props));
+            registerService(DataSource.class, dataSource, props);
         }
         /*
          * Register data handlers
@@ -639,58 +582,58 @@ public final class ServerActivator extends DeferredActivator {
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.contact");
-            registrationList.add(context.registerService(DataHandler.class.getName(), new ContactInsertDataHandler(), props));
+            registerService(DataHandler.class, new ContactInsertDataHandler(), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.contact.json");
-            registrationList.add(context.registerService(DataHandler.class.getName(), new ContactJSONDataHandler(), props));
+            registerService(DataHandler.class, new ContactJSONDataHandler(), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.ical");
-            registrationList.add(context.registerService(DataHandler.class.getName(), new ICalInsertDataHandler(), props));
+            registerService(DataHandler.class, new ICalInsertDataHandler(), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.ical.json");
-            registrationList.add(context.registerService(DataHandler.class.getName(), new ICalJSONDataHandler(), props));
+            registerService(DataHandler.class, new ICalJSONDataHandler(), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
-            registrationList.add(context.registerService(DataHandler.class.getName(), new VCardAttachMailDataHandler(), props));
+            registerService(DataHandler.class, new VCardAttachMailDataHandler(), props);
         }
 
         // Register DBProvider
-        registrationList.add(context.registerService(DBProvider.class.getName(), new DBPoolProvider(), null));
-        registrationList.add(context.registerService(WhiteboardFactoryService.class.getName(), new WhiteboardDBProvider.Factory(), null));
+        registerService(DBProvider.class, new DBPoolProvider());
+        registerService(WhiteboardFactoryService.class, new WhiteboardDBProvider.Factory());
 
         // Register Infostore
-        registrationList.add(context.registerService(InfostoreFacade.class.getName(), Infostore.FACADE, null));
-        registrationList.add(context.registerService(InfostoreSearchEngine.class.getName(), Infostore.SEARCH_ENGINE, null));
+        registerService(InfostoreFacade.class, Infostore.FACADE);
+        registerService(InfostoreSearchEngine.class, Infostore.SEARCH_ENGINE);
 
         // Register AttachmentBase
-        registrationList.add(context.registerService(AttachmentBase.class.getName(), Attachment.ATTACHMENT_BASE, null));
+        registerService(AttachmentBase.class, Attachment.ATTACHMENT_BASE);
 
         // Register ContactSQL
-        registrationList.add(context.registerService(ContactInterfaceFactory.class.getName(), new RdbContactInterfaceFactory(), null));
+        registerService(ContactInterfaceFactory.class, new RdbContactInterfaceFactory());
 
         // Register event factory service
-        registrationList.add(context.registerService(EventFactoryService.class.getName(), new EventFactoryServiceImpl(), null));
+        registerService(EventFactoryService.class, new EventFactoryServiceImpl());
 
         // Register folder service
         final FolderService folderService = new FolderServiceImpl();
-        registrationList.add(context.registerService(FolderService.class.getName(), folderService, null));
+        registerService(FolderService.class, folderService);
         ServerServiceRegistry.getInstance().addService(FolderService.class, folderService);
 
         // Register contact interface discovery service
         final ContactInterfaceDiscoveryService cids = ContactInterfaceDiscoveryServiceImpl.getInstance();
-        registrationList.add(context.registerService(ContactInterfaceDiscoveryService.class.getName(), cids, null));
+        registerService(ContactInterfaceDiscoveryService.class, cids);
         ServerServiceRegistry.getInstance().addService(ContactInterfaceDiscoveryService.class, cids);
 
         // Register SessionHolder
-        registrationList.add(context.registerService(SessionHolder.class.getName(), ThreadLocalSessionHolder.getInstance(), null));
+        registerService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
         ServerServiceRegistry.getInstance().addService(SessionHolder.class, ThreadLocalSessionHolder.getInstance());
 
         // Fake bundle start
@@ -724,16 +667,14 @@ public final class ServerActivator extends DeferredActivator {
             /*
              * Unregister server's services
              */
-            for (final ServiceRegistration<?> registration : registrationList) {
-                registration.unregister();
-            }
-            registrationList.clear();
+            unregisterServices();
             /*
              * Close service trackers
              */
             for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
                 tracker.close();
             }
+            closeTrackers();
             serviceTrackerList.clear();
             ServerRequestHandlerRegistry.getInstance().clearRegistry();
             /*

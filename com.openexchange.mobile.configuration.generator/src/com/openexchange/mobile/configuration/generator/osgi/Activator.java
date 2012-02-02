@@ -10,13 +10,13 @@ import com.openexchange.mobile.configuration.generator.configuration.Configurati
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
 import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.service.ServletRegistration;
 
-public class Activator extends DeferredActivator {
+public class Activator extends HousekeepingActivator {
 
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Activator.class));
 
@@ -34,7 +34,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleAvailability(Class<?> clazz) {
+    protected void handleAvailability(final Class<?> clazz) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Re-available service: " + clazz.getName());
         }
@@ -44,7 +44,7 @@ public class Activator extends DeferredActivator {
     }
 
     @Override
-    protected void handleUnavailability(Class<?> clazz) {
+    protected void handleUnavailability(final Class<?> clazz) {
         if (LOG.isWarnEnabled()) {
             LOG.warn("Absent service: " + clazz.getName());
         }

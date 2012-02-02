@@ -49,7 +49,7 @@
 
 package com.openexchange.passcrypt;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link PasscryptServiceRegistry} - Container class for the service registry of <i>com.openexchange.passcrypt</i> bundle.

@@ -49,7 +49,7 @@
 
 package com.openexchange.sso.services;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
  * {@link SSOServiceRegistry} - A service registry for single sign-on bundle.

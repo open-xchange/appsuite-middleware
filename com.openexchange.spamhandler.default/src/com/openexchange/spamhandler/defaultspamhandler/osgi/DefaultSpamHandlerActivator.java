@@ -54,7 +54,7 @@ import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.defaultspamhandler.ConfigurationServiceSupplier;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;

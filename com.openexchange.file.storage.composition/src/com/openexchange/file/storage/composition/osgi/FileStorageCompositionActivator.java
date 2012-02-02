@@ -56,7 +56,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 
 

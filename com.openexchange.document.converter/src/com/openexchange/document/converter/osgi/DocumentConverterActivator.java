@@ -54,7 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.document.converter.DocumentConverterService;
 import com.openexchange.document.converter.internal.JODConverterDocumentConverterService;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link DocumentConverterActivator}

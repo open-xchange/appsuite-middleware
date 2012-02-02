@@ -71,7 +71,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.extensions.ServicePublisher;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.strings.StringParser;
 

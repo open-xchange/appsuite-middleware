@@ -49,46 +49,42 @@
 
 package com.openexchange.oauth.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.oauth.internal.groupware.CreateOAuthAccountTable;
 import com.openexchange.oauth.internal.groupware.OAuthDeleteListener;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * Registers the services necessary for the administration daemon.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class LowLevelServicesActivator implements BundleActivator {
-
-    private final Stack<ServiceRegistration<?>> registrations = new Stack<ServiceRegistration<?>>();
-    private ServiceTracker<DatabaseService,DatabaseService> tracker;
+public class LowLevelServicesActivator extends HousekeepingActivator {
 
     public LowLevelServicesActivator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        registrations.push(context.registerService(CreateTableService.class.getName(), new CreateOAuthAccountTable(), null));
-        registrations.push(context.registerService(DeleteListener.class.getName(), new OAuthDeleteListener(), null));
-        tracker = new ServiceTracker<DatabaseService,DatabaseService>(context, DatabaseService.class, new UpdateTaskRegisterer(context));
-        tracker.open();
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        if (null != tracker) {
-            tracker.close();
-        }
-        while (!registrations.isEmpty()) {
-            registrations.pop().unregister();
-        }
+    protected void startBundle() throws Exception {
+        registerService(CreateTableService.class, new CreateOAuthAccountTable(), null);
+        registerService(DeleteListener.class, new OAuthDeleteListener(), null);
+        track(DatabaseService.class, new UpdateTaskRegisterer(context));
+        openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() {
+        unregisterServices();
+        closeTrackers();
+        cleanUp();
     }
 }

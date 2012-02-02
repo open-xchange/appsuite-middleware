@@ -49,7 +49,7 @@
 
 package com.openexchange.spellcheck.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link SpellCheckServletServiceRegistry} - A registry for services needed by spell check servlet bundle

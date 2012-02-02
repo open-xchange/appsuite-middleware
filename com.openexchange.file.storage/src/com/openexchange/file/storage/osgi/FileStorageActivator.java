@@ -49,13 +49,9 @@
 
 package com.openexchange.file.storage.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link FileStorageActivator}
@@ -63,15 +59,13 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since Open-Xchange v6.18.2
  */
-public final class FileStorageActivator implements BundleActivator {
+public final class FileStorageActivator extends HousekeepingActivator {
 
     private OSGIFileStorageServiceRegistry registry;
 
     private OSGIFileStorageAccountManagerLookupService lookupService;
 
     private OSGIEventAdminLookup eventAdminLookup;
-
-    private List<ServiceRegistration<?>> registrations;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -81,7 +75,13 @@ public final class FileStorageActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -102,9 +102,8 @@ public final class FileStorageActivator implements BundleActivator {
             /*
              * Register services
              */
-            registrations = new ArrayList<ServiceRegistration<?>>(4);
-            registrations.add(context.registerService(FileStorageServiceRegistry.class, registry, null));
-            registrations.add(context.registerService(FileStorageAccountManagerLookupService.class, lookupService, null));
+            registerService(FileStorageServiceRegistry.class, registry);
+            registerService(FileStorageAccountManagerLookupService.class, lookupService);
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;
@@ -112,18 +111,13 @@ public final class FileStorageActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(FileStorageActivator.class));
         try {
             if (log.isInfoEnabled()) {
                 log.info("stopping bundle: com.openexchange.file.storage");
             }
-            if (null != registrations) {
-                while (!registrations.isEmpty()) {
-                    registrations.remove(0).unregister();
-                }
-                registrations = null;
-            }
+            unregisterServices();
             /*
              * Stop look-up service
              */

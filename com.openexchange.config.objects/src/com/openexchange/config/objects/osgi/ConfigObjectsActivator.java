@@ -53,7 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.objects.ConfigObjectRegistryFactory;
 import com.openexchange.config.objects.impl.CascadingConfigObjectRegistryFactory;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ConfigObjectsActivator}

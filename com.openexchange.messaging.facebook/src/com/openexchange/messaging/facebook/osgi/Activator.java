@@ -50,7 +50,7 @@
 package com.openexchange.messaging.facebook.osgi;
 
 import org.osgi.framework.BundleActivator;
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
 
 /**
  * Combining both activators.

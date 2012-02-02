@@ -49,7 +49,7 @@
 
 package com.openexchange.monitoring.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link MonitoringServiceRegistry} - A registry for services needed by IMAP bundle

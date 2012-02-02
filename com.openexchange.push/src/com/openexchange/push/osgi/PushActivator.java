@@ -49,24 +49,19 @@
 
 package com.openexchange.push.osgi;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.EventFactoryService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.internal.PushEventHandler;
 import com.openexchange.push.internal.PushManagerRegistry;
 import com.openexchange.push.internal.ServiceRegistry;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -75,11 +70,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushActivator implements BundleActivator {
-
-    private ServiceRegistration<EventHandler> eventHandlerRegistration;
-
-    private List<ServiceTracker<?, ?>> trackers;
+public final class PushActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link PushActivator}.
@@ -89,7 +80,7 @@ public final class PushActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final org.apache.commons.logging.Log log =
             com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushActivator.class))));
         try {
@@ -99,47 +90,24 @@ public final class PushActivator implements BundleActivator {
             /*
              * Initialize and open service tracker for push manager services
              */
-            trackers = new ArrayList<ServiceTracker<?, ?>>(8);
             PushManagerRegistry.init();
-            trackers.add(new ServiceTracker<PushManagerService, PushManagerService>(
-                context,
-                PushManagerService.class,
-                new PushManagerServiceTracker(context)));
-            trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(
-                context,
-                ConfigurationService.class,
-                new WhitelistServiceTracker(context)));
+            track(PushManagerService.class, new PushManagerServiceTracker(context));
+            track(ConfigurationService.class, new WhitelistServiceTracker(context));
             /*
              * Thread pool service tracker
              */
-            trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(
-                context,
-                ConfigurationService.class,
-                new RegistryServiceTrackerCustomizer<ConfigurationService>(
-                    context,
-                    ServiceRegistry.getInstance(),
-                    ConfigurationService.class)));
-            trackers.add(new ServiceTracker<EventFactoryService, EventFactoryService>(
-                context,
-                EventFactoryService.class,
-                new RegistryServiceTrackerCustomizer<EventFactoryService>(context, ServiceRegistry.getInstance(), EventFactoryService.class)));
-            trackers.add(new ServiceTracker<ThreadPoolService, ThreadPoolService>(
-                context,
-                ThreadPoolService.class,
-                new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, ServiceRegistry.getInstance(), ThreadPoolService.class)));
-            trackers.add(new ServiceTracker<EventAdmin, EventAdmin>(
-                context,
-                EventAdmin.class,
-                new RegistryServiceTrackerCustomizer<EventAdmin>(context, ServiceRegistry.getInstance(), EventAdmin.class)));
-            for (final ServiceTracker<?,?> tracker : trackers) {
-                tracker.open();
-            }
+            track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, ServiceRegistry.getInstance(), ConfigurationService.class));
+            track(EventFactoryService.class, new RegistryServiceTrackerCustomizer<EventFactoryService>(context, ServiceRegistry.getInstance(), EventFactoryService.class));
+            track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, ServiceRegistry.getInstance(), ThreadPoolService.class));
+            track(EventAdmin.class, new RegistryServiceTrackerCustomizer<EventAdmin>(context, ServiceRegistry.getInstance(), EventAdmin.class));
+
+            openTrackers();
             /*
              * Register event handler to detect removed sessions
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            eventHandlerRegistration = context.registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
+            registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
         } catch (final Exception e) {
             log.error("Failed start-up of bundle com.openexchange.push: " + e.getMessage(), e);
             throw e;
@@ -147,7 +115,7 @@ public final class PushActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         final org.apache.commons.logging.Log log =
             com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(PushActivator.class))));
         try {
@@ -157,24 +125,22 @@ public final class PushActivator implements BundleActivator {
             /*
              * Unregister event handler
              */
-            if (null != eventHandlerRegistration) {
-                eventHandlerRegistration.unregister();
-                eventHandlerRegistration = null;
-            }
+            unregisterServices();
             /*
              * Drop service tracker
              */
-            if (null != trackers) {
-                while (!trackers.isEmpty()) {
-                    trackers.remove(0).close();
-                }
-                trackers = null;
-            }
+            closeTrackers();
             PushManagerRegistry.shutdown();
         } catch (final Exception e) {
             log.error("Failed shut-down of bundle com.openexchange.push: " + e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

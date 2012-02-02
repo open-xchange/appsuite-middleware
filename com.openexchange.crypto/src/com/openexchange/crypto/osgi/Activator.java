@@ -50,27 +50,29 @@
 
 package com.openexchange.crypto.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.internal.CryptoServiceImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class Activator implements BundleActivator {
-
-    private ServiceRegistration<CryptoService> cryptoRegistration;
+public class Activator extends HousekeepingActivator {
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        cryptoRegistration = context.registerService(CryptoService.class, new CryptoServiceImpl(), null);
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        cryptoRegistration.unregister();
+    protected void startBundle() throws Exception {
+        registerService(CryptoService.class, new CryptoServiceImpl(), null);
+    }
+
+    @Override
+    public void stopBundle() {
+        unregisterServices();
     }
 
 }

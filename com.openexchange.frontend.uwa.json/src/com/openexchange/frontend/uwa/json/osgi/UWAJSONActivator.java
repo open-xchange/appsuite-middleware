@@ -58,7 +58,7 @@ import com.openexchange.frontend.uwa.json.servlet.UWAWidgetServlet;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.tools.service.SessionServletRegistration;
 

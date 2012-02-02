@@ -49,7 +49,7 @@
 
 package com.openexchange.folderstorage.filestorage;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link FileStorageFolderStorageServiceRegistry} - The service registry for messaging folder storage.

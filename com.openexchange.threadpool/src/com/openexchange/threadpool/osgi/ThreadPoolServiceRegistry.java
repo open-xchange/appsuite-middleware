@@ -50,7 +50,7 @@
 package com.openexchange.threadpool.osgi;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ThreadPoolServiceRegistry} - The service registry for thread pool bundle.

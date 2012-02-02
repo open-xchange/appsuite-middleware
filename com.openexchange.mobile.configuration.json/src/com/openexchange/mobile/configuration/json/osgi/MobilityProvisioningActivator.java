@@ -50,16 +50,13 @@
 package com.openexchange.mobile.configuration.json.osgi;
 
 import static com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.servlet.MobilityProvisioningServlet;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.SessionServletRegistration;
 
 /**
@@ -67,14 +64,12 @@ import com.openexchange.tools.service.SessionServletRegistration;
  * @author <a href="mailto:benjamin.otterbach@open-xchange.com">Benjamin Otterbach</a>
  *
  */
-public class MobilityProvisioningActivator extends DeferredActivator {
+public class MobilityProvisioningActivator extends HousekeepingActivator {
 
     private static transient final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(MobilityProvisioningActivator.class));
     private final static String SERVLET_PATH = "/ajax/mobilityprovisioning";
 
 	private SessionServletRegistration servletRegistration;
-
-	private List<ServiceTracker<?,?>> serviceTrackerList;
 
 	public MobilityProvisioningActivator() {
 		super();
@@ -122,13 +117,8 @@ public class MobilityProvisioningActivator extends DeferredActivator {
 			this.servletRegistration = new SessionServletRegistration(context, new MobilityProvisioningServlet(), SERVLET_PATH);
 			this.servletRegistration.open();
 
-			serviceTrackerList = new ArrayList<ServiceTracker<?,?>>(1);
-            serviceTrackerList.add(new ServiceTracker<ActionService,ActionService>(context, ActionService.class, new ActionServiceListener(context)));
-
-            // Open service trackers
-            for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
-                tracker.open();
-            }
+            track(ActionService.class, new ActionServiceListener(context));
+            openTrackers();
 		} catch (final Throwable t) {
 			LOG.error(t.getMessage(), t);
 			throw t instanceof Exception ? (Exception) t : new Exception(t);
@@ -147,11 +137,7 @@ public class MobilityProvisioningActivator extends DeferredActivator {
             /*
              * Close service trackers
              */
-            for (final ServiceTracker tracker : serviceTrackerList) {
-                tracker.close();
-            }
-            serviceTrackerList.clear();
-
+            closeTrackers();
             getInstance().clearRegistry();
             getInstance().clearActionServices();
 		} catch (final Throwable t) {

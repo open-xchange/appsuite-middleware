@@ -59,8 +59,8 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.virtual.VirtualFolderDeleteListener;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link VirtualFolderStorageActivator} - {@link BundleActivator Activator} for virtual folder storage.

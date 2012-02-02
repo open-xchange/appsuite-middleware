@@ -50,10 +50,10 @@
 package com.openexchange.passwordchange.database.osgi;
 
 import static com.openexchange.passwordchange.database.services.DPWServiceRegistry.getServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordchange.database.impl.DatabasePasswordChange;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**

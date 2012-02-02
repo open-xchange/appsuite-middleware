@@ -50,14 +50,14 @@
 package com.openexchange.dataretention.osgi;
 
 import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link DataRetentionActivator} - Simple {@link BundleActivator activator} which registers data retention bundle's exception class.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DataRetentionActivator implements BundleActivator {
+public final class DataRetentionActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link DataRetentionActivator}.
@@ -67,13 +67,15 @@ public final class DataRetentionActivator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        // Nope
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     @Override
-    public void stop(final BundleContext arg0) throws Exception {
-        // Nope
+    protected void startBundle() throws Exception {
+        // TODO Auto-generated method stub
+
     }
 
 }

@@ -53,32 +53,32 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
-import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Whiteboard;
 import com.openexchange.publish.helpers.AbstractPublicationService;
 import com.openexchange.publish.impl.EntityCleanUp;
 import com.openexchange.publish.impl.FolderCleanUpEventHandler;
 import com.openexchange.publish.impl.InfostoreCleanUpEventHandler;
-import com.openexchange.server.osgiservice.Whiteboard;
 
 /**
  * {@link CleanUpActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CleanUpActivator implements BundleActivator {
+public class CleanUpActivator extends HousekeepingActivator {
 
     private List<ServiceRegistration<?>> registrations;
 
     private Whiteboard whiteboard;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         whiteboard = new Whiteboard(context);
         final ContextService contexts = whiteboard.getService(ContextService.class);
 
@@ -107,13 +107,19 @@ public class CleanUpActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         for (final ServiceRegistration<?> registration : registrations) {
             registration.unregister();
         }
         registrations = null;
         whiteboard.close();
         whiteboard = null;
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

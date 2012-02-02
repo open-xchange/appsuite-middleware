@@ -1,35 +1,37 @@
 package com.openexchange.subscribe.facebook.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.context.ContextService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.facebook.FacebookService;
+import com.openexchange.osgi.HousekeepingActivator;
 
-public class Activator implements BundleActivator {
-
-    private ServiceTracker<Object, Object> tracker;
+public class Activator extends HousekeepingActivator {
 
     public Activator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + OAuthServiceMetaData.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + FacebookService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + ContextService.class.getName() + "))");
-        tracker = new ServiceTracker<Object,Object>(context, filter, new FacebookRegisterer(context));
-        tracker.open();
+        track(filter, new FacebookRegisterer(context));
+        openTrackers();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        tracker.close();
+    public void stopBundle() throws Exception {
+        closeTrackers();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

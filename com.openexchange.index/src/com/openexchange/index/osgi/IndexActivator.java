@@ -53,7 +53,7 @@ import org.apache.commons.logging.LogFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.internal.StaticConfigIndexService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link IndexActivator} - The activator of the index bundle.

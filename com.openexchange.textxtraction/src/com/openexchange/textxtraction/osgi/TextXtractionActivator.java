@@ -51,9 +51,7 @@ package com.openexchange.textxtraction.osgi;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.textxtraction.internal.TikaTextXtractService;
 
@@ -62,9 +60,7 @@ import com.openexchange.textxtraction.internal.TikaTextXtractService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TextXtractionActivator implements BundleActivator {
-
-    private ServiceRegistration<TextXtractService> registration;
+public class TextXtractionActivator extends HousekeepingActivator {
 
     /**
      * Initializes a new {@link TextXtractionActivator}.
@@ -74,12 +70,12 @@ public class TextXtractionActivator implements BundleActivator {
     }
 
 	@Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
 		final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(TextXtractionActivator.class));
 		final String name = "com.openexchange.textxtraction";
 		log.info("Starting bundle: " + name);
 		try {
-            registration = context.registerService(TextXtractService.class, new TikaTextXtractService(), null);
+		    registerService(TextXtractService.class, new TikaTextXtractService());
         } catch (final Exception e) {
             log.info("Starting bundle failed: " + name, e);
             throw e;
@@ -87,19 +83,22 @@ public class TextXtractionActivator implements BundleActivator {
 	}
 
 	@Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
 	    final Log log = com.openexchange.log.Log.valueOf(LogFactory.getLog(TextXtractionActivator.class));
 	    final String name = "com.openexchange.textxtraction";
 	    log.info("Stopping bundle: " + name);
 	    try {
-            if (null != registration) {
-                registration.unregister();
-                registration = null;
-            }
+            unregisterServices();
         } catch (final Exception e) {
             log.info("Stopping bundle failed: " + name, e);
             throw e;
         }
 	}
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

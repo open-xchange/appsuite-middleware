@@ -49,41 +49,38 @@
 
 package com.openexchange.easylogin.osgi;
 
-import java.util.Stack;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
-import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.Tools;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.Tools;
 
 /**
  * {@link Activator}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class Activator implements BundleActivator {
-
-    private final Stack<ServiceTracker<?,?>> trackers = new Stack<ServiceTracker<?,?>>();
+public class Activator extends HousekeepingActivator {
 
     public Activator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final Filter filter = Tools.generateServiceFilter(context, HttpService.class, ConfigurationService.class);
-        trackers.push(new ServiceTracker<Object, Object>(context, filter, new ServletRegisterer(context)));
-        for (final ServiceTracker<?,?> tracker : trackers) {
-            tracker.open();
-        }
+        track(filter, new ServletRegisterer(context));
+        openTrackers();
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        while (!trackers.isEmpty()) {
-            trackers.pop().close();
-        }
+    public void stopBundle() throws Exception {
+        closeTrackers();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

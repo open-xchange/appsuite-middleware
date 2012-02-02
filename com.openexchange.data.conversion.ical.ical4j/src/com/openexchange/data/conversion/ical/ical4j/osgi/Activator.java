@@ -49,11 +49,6 @@
 
 package com.openexchange.data.conversion.ical.ical4j.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JITipEmitter;
@@ -61,12 +56,12 @@ import com.openexchange.data.conversion.ical.ical4j.ICal4JITipParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
-import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
 
@@ -75,82 +70,38 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public class Activator implements BundleActivator {
+public class Activator extends HousekeepingActivator {
 
-    /**
-     * Tracker for the user service.
-     */
-    private ServiceTracker<UserService, UserService> userTracker;
-
-    /**
-     * Tracker for the resource service.
-     */
-    private ServiceTracker<ResourceService, ResourceService> resourceTracker;
-
-    private ServiceTracker<CalendarCollectionService, CalendarCollectionService> calendarTracker;
-
-    /**
-     * Service registration of the parser service.
-     */
-    private ServiceRegistration<ICalParser> parserRegistration;
-
-    /**
-     * Service registration of the emitter service.
-     */
-    private ServiceRegistration<ICalEmitter> emitterRegistration;
-
-    private ServiceRegistration<ITipParser> itipParserRegistration;
-
-    private ServiceRegistration<ITipEmitter> itipEmitterRegistration;
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void start(final BundleContext context) throws Exception {
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
         final OXUserResolver userResolver = new OXUserResolver();
-        userTracker =
-            new ServiceTracker<UserService, UserService>(context, UserService.class, new UserServiceTrackerCustomizer(
-                context,
-                userResolver));
-        userTracker.open();
+        track(UserService.class, new UserServiceTrackerCustomizer(context, userResolver));
         Participants.userResolver = userResolver;
         CreatedBy.userResolver = userResolver;
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
-        resourceTracker =
-            new ServiceTracker<ResourceService, ResourceService>(
-                context,
-                ResourceService.class,
-                new ResourceServiceTrackerCustomizer(context, resourceResolver));
-        resourceTracker.open();
+        track(ResourceService.class, new ResourceServiceTrackerCustomizer(context, resourceResolver));
         Participants.resourceResolver = resourceResolver;
 
-        calendarTracker =
-            new ServiceTracker<CalendarCollectionService, CalendarCollectionService>(
-                context,
-                CalendarCollectionService.class,
-                new CalendarServiceTracker(context));
-        calendarTracker.open();
-        parserRegistration = context.registerService(ICalParser.class, new ICal4JParser(), null);
-        emitterRegistration = context.registerService(ICalEmitter.class, new ICal4JEmitter(), null);
-        itipParserRegistration = context.registerService(ITipParser.class, new ICal4JITipParser(), null);
-        itipEmitterRegistration = context.registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
+        track(CalendarCollectionService.class, new CalendarServiceTracker(context));
+        openTrackers();
+
+        registerService(ICalParser.class, new ICal4JParser(), null);
+        registerService(ICal4JEmitter.class, new ICal4JEmitter(), null);
+        registerService(ITipParser.class, new ICal4JITipParser(), null);
+        registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        emitterRegistration.unregister();
-        parserRegistration.unregister();
-        itipParserRegistration.unregister();
-        itipEmitterRegistration.unregister();
-        calendarTracker.close();
-        resourceTracker.close();
-        CreatedBy.userResolver = UserResolver.EMPTY;
-        Participants.userResolver = UserResolver.EMPTY;
-        userTracker.close();
+    public void stopBundle() {
+        unregisterServices();
+        closeTrackers();
+        cleanUp();
     }
 }

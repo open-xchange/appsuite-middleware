@@ -58,8 +58,8 @@ import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
 import com.openexchange.groupware.update.tools.UpdateTaskMBeanInit;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.report.internal.ReportingInit;
-import com.openexchange.server.osgiservice.BundleServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 

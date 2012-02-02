@@ -10,7 +10,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,
- com.openexchange.server.osgiservice,
+ com.openexchange.osgi,
  org.apache.commons.logging,
  org.osgi.framework
 Bundle-Activator: com.openexchange.config.objects.osgi.ConfigObjectsActivator

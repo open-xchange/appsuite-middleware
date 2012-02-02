@@ -2,7 +2,7 @@ package com.openexchange.calendar.osgi;
 
 import org.osgi.framework.BundleActivator;
 
-import com.openexchange.server.osgiservice.CompositeBundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
 
 public class CalendarActivator extends CompositeBundleActivator {
 

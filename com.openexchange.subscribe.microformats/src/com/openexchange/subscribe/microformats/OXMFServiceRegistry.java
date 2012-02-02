@@ -49,7 +49,7 @@
 
 package com.openexchange.subscribe.microformats;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 
 /**

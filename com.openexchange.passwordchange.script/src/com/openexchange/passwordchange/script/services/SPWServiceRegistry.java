@@ -49,7 +49,7 @@
 
 package com.openexchange.passwordchange.script.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link SPWServiceRegistry} - A registry for services

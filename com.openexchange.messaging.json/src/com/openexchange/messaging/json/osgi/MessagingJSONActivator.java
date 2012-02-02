@@ -122,20 +122,20 @@ public class MessagingJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         try {
             parser = new MessagingMessageParser();
-    
+
             rememberTracker(new ContentParserTracker(context, parser));
             rememberTracker(new HeaderParserTracker(context, parser));
-    
+
             writer = new MessagingMessageWriter();
             rememberTracker(new ContentWriterTracker(context, writer));
             rememberTracker(new HeaderWriterTracker(context, writer));
             track(I18nService.class, new I18nServiceCustomizer(context));
-    
+
             openTrackers();
-    
+
             fileInputStreamRegistry = ManagedFileInputStreamRegistry.getInstance();
             fileInputStreamRegistry.start(context);
-    
+
             register();
         } catch (final Exception x) {
             LOG.error(x.getMessage(), x);

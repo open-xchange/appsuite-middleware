@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.mobile.configuration.json.action.ActionService;
 import com.openexchange.mobile.configuration.json.action.ActionTypes;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  *

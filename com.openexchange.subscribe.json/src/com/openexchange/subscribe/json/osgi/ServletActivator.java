@@ -51,11 +51,10 @@ package com.openexchange.subscribe.json.osgi;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
-import com.openexchange.server.osgiservice.DeferredActivator;
 import com.openexchange.subscribe.SubscriptionExecutionService;
 import com.openexchange.subscribe.json.SubscriptionMultipleFactory;
 import com.openexchange.subscribe.json.SubscriptionServlet;
@@ -67,7 +66,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class ServletActivator extends DeferredActivator {
+public class ServletActivator extends HousekeepingActivator {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServletActivator.class));
 
@@ -80,10 +79,6 @@ public class ServletActivator extends DeferredActivator {
     private static final Class<?>[] NEEDED_SERVICES = { HttpService.class, SubscriptionExecutionService.class };
 
     private WhiteboardSubscriptionSourceDiscoveryService discoverer;
-
-    private ServiceRegistration subscriptionsMultipleReg;
-
-    private ServiceRegistration subscriptionSourceMultipleReg;
 
     private WhiteboardSecretService secretService;
 
@@ -143,11 +138,8 @@ public class ServletActivator extends DeferredActivator {
         SubscriptionServlet.setFactory(subscriptionsFactory);
         SubscriptionSourcesServlet.setFactory(subscriptionSourcesFactory);
 
-        subscriptionsMultipleReg = context.registerService(MultipleHandlerFactoryService.class.getName(), subscriptionsFactory, null);
-        subscriptionSourceMultipleReg = context.registerService(
-            MultipleHandlerFactoryService.class.getName(),
-            subscriptionSourcesFactory,
-            null);
+        registerService(MultipleHandlerFactoryService.class, subscriptionsFactory);
+        registerService(MultipleHandlerFactoryService.class, subscriptionSourcesFactory);
 
     }
 
@@ -160,8 +152,7 @@ public class ServletActivator extends DeferredActivator {
 
     private void destroyMultipleHandler() {
         secretService.close();
-        subscriptionsMultipleReg.unregister();
-        subscriptionSourceMultipleReg.unregister();
+        unregisterServices();
         SubscriptionServlet.setFactory(null);
         SubscriptionSourcesServlet.setFactory(null);
     }

@@ -60,8 +60,8 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.webdav.session.WebDAVEventHandler;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 

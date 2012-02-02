@@ -49,7 +49,7 @@
 
 package com.openexchange.passwordchange.database.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link DPWServiceRegistry} - A registry for services

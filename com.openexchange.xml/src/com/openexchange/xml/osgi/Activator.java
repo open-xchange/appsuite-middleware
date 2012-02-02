@@ -49,9 +49,7 @@
 
 package com.openexchange.xml.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.jdom.impl.JDOMParserImpl;
 import com.openexchange.xml.spring.SpringParser;
@@ -60,23 +58,24 @@ import com.openexchange.xml.spring.impl.DefaultSpringParser;
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
-public class Activator implements BundleActivator {
-
-    private ServiceRegistration<JDOMParser> jdomRegistration;
-
-    private ServiceRegistration<SpringParser> springParserRegistration;
+public class Activator extends HousekeepingActivator {
 
     @Override
-    public void start(final BundleContext bundleContext) throws Exception {
-        this.jdomRegistration = bundleContext.registerService(JDOMParser.class, new JDOMParserImpl(), null);
-        this.springParserRegistration = bundleContext.registerService(SpringParser.class, new DefaultSpringParser(), null);
+    public void startBundle() throws Exception {
+        registerService(JDOMParser.class, new JDOMParserImpl(), null);
+        registerService(SpringParser.class, new DefaultSpringParser(), null);
         // new javax.xml.stream.internal.Activator().start(bundleContext);
     }
 
     @Override
-    public void stop(final BundleContext bundleContext) throws Exception {
+    public void stopBundle() throws Exception {
         // new javax.xml.stream.internal.Activator().stop(bundleContext);
-        jdomRegistration.unregister();
-        springParserRegistration.unregister();
+        unregisterServices();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

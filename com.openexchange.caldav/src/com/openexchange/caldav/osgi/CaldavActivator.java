@@ -62,7 +62,7 @@ import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;

@@ -49,15 +49,14 @@
 
 package com.openexchange.conversion.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * Activator for this bundle that registers a new Component.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-public final class ConversionActivator implements BundleActivator {
+public final class ConversionActivator extends HousekeepingActivator {
 
     /**
      * Default constructor.
@@ -66,19 +65,15 @@ public final class ConversionActivator implements BundleActivator {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void start(final BundleContext context) throws Exception {
-        // Nope
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        // Nope
+    protected void startBundle() throws Exception {
+        // TODO Auto-generated method stub
+
     }
 }

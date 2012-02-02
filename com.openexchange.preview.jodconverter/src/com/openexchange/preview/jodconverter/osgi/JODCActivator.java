@@ -3,9 +3,9 @@ package com.openexchange.preview.jodconverter.osgi;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.document.converter.DocumentConverterService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.preview.InternalPreviewService;
 import com.openexchange.preview.jodconverter.internal.JODCPreviewService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
 
 public class JODCActivator extends HousekeepingActivator {
 

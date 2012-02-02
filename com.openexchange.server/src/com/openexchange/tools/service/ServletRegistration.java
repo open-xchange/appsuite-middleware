@@ -62,7 +62,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.server.osgiservice.DeferredRegistryRegistration;
+import com.openexchange.osgi.DeferredRegistryRegistration;
 
 
 /**

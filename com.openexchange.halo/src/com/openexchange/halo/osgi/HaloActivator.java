@@ -8,8 +8,8 @@ import com.openexchange.halo.ContactHalo;
 import com.openexchange.halo.internal.ContactHaloImpl;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.contacts.ContactDataSource;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.user.UserService;
 

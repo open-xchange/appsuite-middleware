@@ -49,7 +49,7 @@
 
 package com.openexchange.push.imapidle.services;
 
-import com.openexchange.server.osgiservice.AbstractServiceRegistry;
+import com.openexchange.osgi.AbstractServiceRegistry;
 
 /**
  * {@link ImapIdleServiceRegistry} - A registry for services needed by IMAP IDLE bundle

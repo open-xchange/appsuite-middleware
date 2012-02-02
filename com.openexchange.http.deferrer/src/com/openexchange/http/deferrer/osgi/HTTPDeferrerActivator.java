@@ -53,7 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
 import com.openexchange.http.deferrer.servlet.DeferrerServlet;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
 
 

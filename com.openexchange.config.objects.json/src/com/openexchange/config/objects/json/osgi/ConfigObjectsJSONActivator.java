@@ -55,7 +55,7 @@ import com.openexchange.config.objects.json.ConfigObjectActionFactory;
 import com.openexchange.config.objects.json.ConfigObjectServlet;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.SessionServletRegistration;
 
 

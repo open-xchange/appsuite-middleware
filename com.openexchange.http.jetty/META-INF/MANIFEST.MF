@@ -5,12 +5,12 @@ Bundle-SymbolicName: com.openexchange.http.jetty
 Bundle-Version: 6.19.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.server.osgiservice,
+Import-Package: com.openexchange.log,
+ com.openexchange.osgi,
  com.openexchange.systemname,
  javax.servlet,
  javax.servlet.http,
  org.apache.commons.logging,
- com.openexchange.log,
  org.osgi.framework,
  org.osgi.service.http
 Bundle-ClassPath: lib/jetty-server-7.2.2.v20101205.jar,

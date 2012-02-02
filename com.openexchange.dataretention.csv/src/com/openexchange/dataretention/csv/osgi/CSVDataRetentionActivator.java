@@ -55,7 +55,7 @@ import com.openexchange.dataretention.csv.CSVDataRetentionConfig;
 import com.openexchange.dataretention.csv.CSVDataRetentionService;
 import com.openexchange.dataretention.csv.CSVWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link CSVDataRetentionActivator}

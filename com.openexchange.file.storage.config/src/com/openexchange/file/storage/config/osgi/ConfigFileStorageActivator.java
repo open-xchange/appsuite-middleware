@@ -55,8 +55,8 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.config.ConfigFileStorageAccountParser;
 import com.openexchange.file.storage.config.services.ConfigFileStorageServiceRegistry;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ConfigFileStorageActivator}

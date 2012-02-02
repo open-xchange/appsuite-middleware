@@ -53,19 +53,18 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.proxy.servlet.Constants;
 import com.openexchange.proxy.servlet.ProxyEventHandler;
 import com.openexchange.proxy.servlet.ProxyRegistryImpl;
 import com.openexchange.proxy.servlet.ProxyServlet;
 import com.openexchange.proxy.servlet.services.ServiceRegistry;
-import com.openexchange.server.osgiservice.RegistryServiceTrackerCustomizer;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
@@ -76,14 +75,14 @@ import com.openexchange.tools.service.SessionServletRegistration;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ProxyServletActivator implements BundleActivator {
+public class ProxyServletActivator extends HousekeepingActivator {
 
     private List<ServiceTracker<?,?>> trackers;
 
     private List<ServiceRegistration<?>> registrations;
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public void startBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -115,7 +114,7 @@ public class ProxyServletActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
+    public void stopBundle() throws Exception {
         final org.apache.commons.logging.Log log = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ProxyServletActivator.class));
         try {
             if (log.isInfoEnabled()) {
@@ -137,6 +136,12 @@ public class ProxyServletActivator implements BundleActivator {
             log.error("Failed shut-down of bundle com.openexchange.proxy.servlet: " + e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

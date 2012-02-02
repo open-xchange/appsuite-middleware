@@ -50,7 +50,6 @@
 package com.openexchange.groupware.dataRetrieval.osgi;
 
 import java.util.Map;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.groupware.dataRetrieval.actions.RetrievalActions;
@@ -60,7 +59,7 @@ import com.openexchange.groupware.dataRetrieval.servlets.Paths;
 import com.openexchange.groupware.dataRetrieval.servlets.RetrievalServlet;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.RandomTokenContainer;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.tools.service.ServletRegistration;
@@ -71,7 +70,7 @@ import com.openexchange.tools.service.SessionServletRegistration;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DataRetrievalActivator extends DeferredActivator {
+public class DataRetrievalActivator extends HousekeepingActivator {
 
     private static final String NAMESPACE = "com.openexchange.groupware.dataRetrieval.tokens";
 
@@ -80,8 +79,6 @@ public class DataRetrievalActivator extends DeferredActivator {
     private ServletRegistration servletRegistration1;
 
     private ServletRegistration servletRegistration2;
-
-    private ServiceRegistration<MultipleHandlerFactoryService> registration1;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -121,7 +118,7 @@ public class DataRetrievalActivator extends DeferredActivator {
         servletRegistration1 = new SessionServletRegistration(context, new RetrievalServlet(), "/ajax/" + Paths.MODULE);
         servletRegistration2 = new ServletRegistration(context, new FileDeliveryServlet(), Paths.FILE_DELIVERY_PATH);
 
-        registration1 = context.registerService(MultipleHandlerFactoryService.class, actionService, null);
+        registerService(MultipleHandlerFactoryService.class, actionService, null);
 
     }
 
@@ -134,9 +131,7 @@ public class DataRetrievalActivator extends DeferredActivator {
             servletRegistration2.remove();
         }
 
-        if (registration1 != null) {
-            registration1.unregister();
-        }
+        unregisterServices();
 
         if (dataProviderRegistry != null) {
             dataProviderRegistry.close();

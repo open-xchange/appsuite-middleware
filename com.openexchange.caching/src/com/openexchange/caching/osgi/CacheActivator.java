@@ -65,8 +65,8 @@ import com.openexchange.caching.internal.JCSCacheServiceInit;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.server.osgiservice.DeferredActivator;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.DeferredActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link CacheActivator} - The {@link DeferredActivator} implementation for cache bundle.

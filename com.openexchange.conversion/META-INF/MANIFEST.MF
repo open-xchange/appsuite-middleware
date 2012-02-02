@@ -8,9 +8,10 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
  com.openexchange.session,
  org.apache.commons.logging,
- com.openexchange.log,
  org.osgi.framework
 Export-Package: com.openexchange.conversion
 Bundle-Activator: com.openexchange.conversion.osgi.ConversionActivator

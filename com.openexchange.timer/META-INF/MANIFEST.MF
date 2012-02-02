@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.timer
 Bundle-Version: 6.13.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.apache.commons.logging,
+Import-Package: com.openexchange.osgi,
+ com.openexchange.server,
+ org.apache.commons.logging,
  org.apache.commons.logging.impl,
  org.osgi.framework
 Bundle-Activator: com.openexchange.timer.osgi.TimerActivator

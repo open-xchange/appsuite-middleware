@@ -49,7 +49,7 @@
 
 package com.openexchange.recaptcha.osgi;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link ReCaptchaServiceRegistry}
