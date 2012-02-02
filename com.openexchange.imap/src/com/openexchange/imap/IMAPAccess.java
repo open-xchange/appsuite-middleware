@@ -536,7 +536,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return true;
         } catch (final OXException e) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug(new StringBuilder("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString());
+                LOG.debug(new StringBuilder("Ping to IMAP server \"").append(config.getServer()).append("\" failed").toString(), e);
             }
             return false;
         }
