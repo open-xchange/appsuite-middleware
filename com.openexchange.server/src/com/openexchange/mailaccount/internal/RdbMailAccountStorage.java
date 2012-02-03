@@ -1555,17 +1555,20 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     @Override
     public int insertMailAccount(final MailAccountDescription mailAccount, final int user, final Context ctx, final Session session, final Connection con) throws OXException {
         final int cid = ctx.getContextId();
-        // Check for duplicate
+        final boolean isUnifiedMail = mailAccount.getMailProtocol().startsWith(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX, 0);
         final String primaryAddress = mailAccount.getPrimaryAddress();
-        if (-1 != getByPrimaryAddress(primaryAddress, user, cid, con)) {
-            throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(user), I(cid));
-        }
-        checkDuplicateMailAccount(mailAccount, null, user, cid, con);
-        checkDuplicateTransportAccount(mailAccount, null, user, cid, con);
-        // Check name
         final String name = mailAccount.getName();
-        if (!isValid(name)) {
-            throw MailAccountExceptionCodes.INVALID_NAME.create(name);
+        if (!isUnifiedMail) {
+            // Check for duplicate
+            if (-1 != getByPrimaryAddress(primaryAddress, user, cid, con)) {
+                throw MailAccountExceptionCodes.CONFLICT_ADDR.create(primaryAddress, I(user), I(cid));
+            }
+            checkDuplicateMailAccount(mailAccount, null, user, cid, con);
+            checkDuplicateTransportAccount(mailAccount, null, user, cid, con);
+            // Check name
+            if (!isValid(name)) {
+                throw MailAccountExceptionCodes.INVALID_NAME.create(name);
+            }
         }
         dropPOP3StorageFolders(user, cid);
         // Get ID

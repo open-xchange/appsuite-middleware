@@ -55,7 +55,7 @@ import org.apache.cxf.Bus;
 import org.apache.cxf.BusFactory;
 import org.apache.cxf.transport.servlet.CXFNonSpringServlet;
 import org.osgi.service.http.HttpService;
-import com.openexchange.server.osgiservice.DeferredActivator;
+import com.openexchange.osgi.DeferredActivator;
 
 /**
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>

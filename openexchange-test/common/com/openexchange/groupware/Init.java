@@ -147,7 +147,6 @@ import com.openexchange.push.udp.registry.PushServiceRegistry;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.internal.ResourceServiceImpl;
 import com.openexchange.server.Initialization;
-import com.openexchange.server.osgiservice.ServiceRegistry;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.SessiondInit;
@@ -619,7 +618,7 @@ public final class Init {
          */
         MailProperties.getInstance().loadProperties();
 
-        final ServiceRegistry imapServiceRegistry = IMAPServiceRegistry.getServiceRegistry();
+        final com.openexchange.osgi.ServiceRegistry imapServiceRegistry = IMAPServiceRegistry.getServiceRegistry();
         if (null == MailProviderRegistry.getMailProvider("imap_imaps")) {
             imapServiceRegistry.addService(ConfigurationService.class, services.get(ConfigurationService.class));
             imapServiceRegistry.addService(CacheService.class, services.get(CacheService.class));

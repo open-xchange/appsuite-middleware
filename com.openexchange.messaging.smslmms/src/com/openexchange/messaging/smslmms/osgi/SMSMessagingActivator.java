@@ -63,8 +63,8 @@ import com.openexchange.messaging.smslmms.api.DefaultSMSMessage;
 import com.openexchange.messaging.smslmms.api.SMSService;
 import com.openexchange.messaging.smslmms.internal.SMSFolderSupportPreferencesItem;
 import com.openexchange.messaging.smslmms.internal.SMSPreferencesItem;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
-import com.openexchange.server.osgiservice.SimpleRegistryListener;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.sessiond.SessiondService;
 
 

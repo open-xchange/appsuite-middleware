@@ -366,24 +366,33 @@ public final class MIMEMessageConverter {
                     mimeMessage =
                         new MimeMessage(MIMEDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
                 } else {
-                    FileOutputStream fos = null;
-                    try {
-                        final File newTempFile = fileManagement.newTempFile();
-                        fos = new FileOutputStream(newTempFile);
-                        mail.writeTo(fos);
-                        fos.flush();
-                        fos.close();
-                        fos = null;
-                        mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), newTempFile);
-                    } catch (final IOException e) {
-                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                    } finally {
-                        if (null != fos) {
-                            try {
-                                fos.close();
-                            } catch (final IOException e) {
-                                // Ignore
+                    final File file = checkForFile(mail);
+                    if (null == file) {
+                        FileOutputStream fos = null;
+                        try {
+                            final File newTempFile = fileManagement.newTempFile();
+                            fos = new FileOutputStream(newTempFile);
+                            mail.writeTo(fos);
+                            fos.flush();
+                            fos.close();
+                            fos = null;
+                            mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), newTempFile);
+                        } catch (final IOException e) {
+                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                        } finally {
+                            if (null != fos) {
+                                try {
+                                    fos.close();
+                                } catch (final IOException e) {
+                                    // Ignore
+                                }
                             }
+                        }
+                    } else {
+                        try {
+                            mimeMessage = new ManagedMimeMessage(MIMEDefaultSession.getDefaultSession(), file);
+                        } catch (final IOException e) {
+                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         }
                     }
                 }
@@ -412,6 +421,16 @@ public final class MIMEMessageConverter {
         } catch (final MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static File checkForFile(final MailMessage mail) {
+        if (mail instanceof MIMEMailMessage) {
+            final MimeMessage mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
+            if (mimeMessage instanceof ManagedMimeMessage) {
+                return ((ManagedMimeMessage) mimeMessage).getFile();
+            }
+        }
+        return null;
     }
 
     /**

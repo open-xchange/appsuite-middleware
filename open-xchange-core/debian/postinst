@@ -1,5 +1,7 @@
 #!/bin/bash
 # postinst script for open-xchange-core
+#
+# see: dh_installdeb(1)
 
 set -e
 
@@ -34,11 +36,11 @@ setConfigFilePermissions() {
 
 case "$1" in
     configure)
-    setConfigFilePermissions
+        setConfigFilePermissions
         test -n "$2" && {
-                # we are in update mode, run postFix to apply fixes
-                postFix "$2"
-                exit 0
+            # we are in update mode, run postFix to apply fixes
+            postFix "$2"
+            exit 0
         }
     ;;
 

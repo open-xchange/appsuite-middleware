@@ -49,7 +49,7 @@
 
 package com.openexchange.file.storage.cifs.services;
 
-import com.openexchange.server.osgiservice.ServiceRegistry;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
  * {@link CIFSServiceRegistry} - Container class for the service registry of <i>com.openexchange.file.storage.cifs</i> bundle.

@@ -167,7 +167,7 @@ public final class Tools {
      * <i>Cache-Control</i>, and <i>Pragma</i>)
      *
      * @param eTag The ETag value
-     * @param expires The optional expires date, pass <code>null</code> to not set any expiry
+     * @param expires The optional expires date, pass <code>null</code> to set default expiry (+ 1 year)
      * @param resp The HTTP servlet response to apply to
      */
     public static void setETag(final String eTag, final Date expires, final HttpServletResponse resp) {
