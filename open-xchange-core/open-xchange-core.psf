@@ -21,6 +21,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.monitoring"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.proxy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish"/>
