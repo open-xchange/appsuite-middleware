@@ -110,6 +110,7 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -311,8 +312,8 @@ public class MIMEMessageFiller {
                     LOG.debug("Session provides localhost as client IP address: " + localIp);
                 }
                 // Prefer request's remote address if local IP seems to denote local host
-                final Map<String, Object> logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+                final Props logProperties = LogProperties.optLogProperties();
+                final String clientIp = null == logProperties ? null : logProperties.<String> get("com.openexchange.ajp13.requestIp");
                 mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
             } else {
                 mimeMessage.setHeader("X-Originating-IP", localIp);

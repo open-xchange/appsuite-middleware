@@ -139,7 +139,7 @@ public final class MailParserWriterTest extends AbstractMailTest {
             final SessionObject session = getSession();
             final MailAccess<?, ?> mailConnection = MailAccess.getInstance(session);
             mailConnection.connect(/* mailConfig */);
-            final ServerSession ss = new ServerSessionAdapter(session);
+            final ServerSession ss = ServerSessionAdapter.valueOf(session);
             try {
                 final MailFolder root = mailConnection.getFolderStorage().getRootFolder();
                 writeFolder(root, mailConnection, ss);

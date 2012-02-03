@@ -116,7 +116,7 @@ public class AttachmentRequest extends CommonRequest {
     private final Session session;
 
     public AttachmentRequest(final Session session, final Context ctx, final JSONWriter w) {
-        this(new ServerSessionAdapter(session, ctx), w);
+        this(ServerSessionAdapter.valueOf(session, ctx), w);
     }
 
     public AttachmentRequest(final ServerSession session, final JSONWriter w) {

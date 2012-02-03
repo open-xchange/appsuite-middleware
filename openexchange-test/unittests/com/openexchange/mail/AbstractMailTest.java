@@ -165,7 +165,7 @@ public abstract class AbstractMailTest extends TestCase {
      */
     protected int getMessageCount(final int accountId, final String fullName) throws OXException {
         final MailFolderStorage folderStorage = new MailFolderStorage();
-        final StorageParametersImpl storageParameters = new StorageParametersImpl(new ServerSessionAdapter(getSession()));
+        final StorageParametersImpl storageParameters = new StorageParametersImpl(ServerSessionAdapter.valueOf(getSession()));
         final boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
             final Folder folder = folderStorage.getFolder(MailFolderStorage.REAL_TREE_ID, MailFolderUtility.prepareFullname(accountId, fullName), storageParameters);

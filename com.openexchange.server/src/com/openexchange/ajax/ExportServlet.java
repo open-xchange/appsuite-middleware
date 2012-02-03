@@ -99,7 +99,7 @@ public class ExportServlet extends ImportExport {
                 return;
             }
 
-            final ServerSession session = new ServerSessionAdapter(getSessionObject(req));
+            final ServerSession session = ServerSessionAdapter.valueOf(getSessionObject(req));
             final SizedInputStream inputStream = importerExporter.exportData(session, format, folder, fieldsToBeExported, req.getParameterMap());
 
             final OutputStream outputStream = resp.getOutputStream();

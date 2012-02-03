@@ -806,7 +806,7 @@ public final class MailFolderStorage implements FolderStorage {
         if (s instanceof ServerSession) {
             return (ServerSession) s;
         }
-        return new ServerSessionAdapter(s);
+        return ServerSessionAdapter.valueOf(s);
     }
 
     private static MailFolder getMailFolder(final String treeId, final int accountId, final String fullname, final boolean createIfAbsent, final Session session, final MailAccess<?, ?> mailAccess) throws OXException {

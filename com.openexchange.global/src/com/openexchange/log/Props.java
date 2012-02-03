@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,76 @@
  *
  */
 
-package com.openexchange.groupware.infostore.webdav;
+package com.openexchange.log;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.session.SessionHolder;
+import java.util.Map;
 
 /**
- * {@link TouchInfoitemsWithExpiredLocksListener}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link Props} - The log properties associated with a certain {@link Thread thread}.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TouchInfoitemsWithExpiredLocksListener implements LockExpiryListener {
+public final class Props {
 
-    private SessionHolder sessionHolder;
+    private final Map<String, Object> map;
 
-    private InfostoreFacade infostoreFacade;
-
-    public TouchInfoitemsWithExpiredLocksListener(SessionHolder sessionHolder, InfostoreFacade infostoreFacade) {
+    /**
+     * Initializes a new {@link Props}.
+     * 
+     * @param map The backing map
+     */
+    protected Props(final Map<String, Object> map) {
         super();
-        this.sessionHolder = sessionHolder;
-        this.infostoreFacade = infostoreFacade;
+        this.map = map;
     }
 
-    public TouchInfoitemsWithExpiredLocksListener() {
-        super();
-
+    /**
+     * Gets the backing map
+     * 
+     * @return The backing map
+     */
+    public Map<String, Object> getMap() {
+        return map;
     }
 
-    @Override
-    public void lockExpired(Lock lock) throws OXException {
-        ServerSession serverSession;
-        serverSession = ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(), sessionHolder.getContext());
-        infostoreFacade.touch(lock.getEntity(), serverSession);
+    /**
+     * Checks for presence of associated property.
+     * 
+     * @param name The property name
+     * @return <code>true</code> if present; otherwise <code>false</code>
+     */
+    public boolean contains(final String name) {
+        return map.containsKey(name);
     }
 
-
-    public SessionHolder getSessionHolder() {
-        return sessionHolder;
+    /**
+     * Gets the property associated with given name.
+     * 
+     * @param name The property name
+     * @return The property value or <code>null</code> if absent
+     */
+    @SuppressWarnings("unchecked")
+    public <V> V get(final String name) {
+        return (V) map.get(name);
     }
 
-
-    public void setSessionHolder(SessionHolder sessionHolder) {
-        this.sessionHolder = sessionHolder;
+    /**
+     * Puts specified mapping. Any existing mapping is overwritten.
+     * 
+     * @param name The property name
+     * @param value The property value
+     */
+    public <V> void put(final String key, final V value) {
+        map.put(key, value);
     }
 
-
-    public InfostoreFacade getInfostoreFacade() {
-        return infostoreFacade;
+    /**
+     * Removes the property associated with given name.
+     * 
+     * @param name The property name
+     */
+    public void remove(final String name) {
+        map.remove(name);
     }
 
-
-    public void setInfostoreFacade(InfostoreFacade infostoreFacade) {
-        this.infostoreFacade = infostoreFacade;
-    }
 }

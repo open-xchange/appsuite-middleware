@@ -457,7 +457,7 @@ public final class CacheFolderStorage implements FolderStorage {
             return new PathPerformer(storageParameters.getUser(), storageParameters.getContext(), null, registry);
         }
         try {
-            return new PathPerformer(new ServerSessionAdapter(session), null, registry);
+            return new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry);
         } catch (final OXException e) {
             throw new OXException(e);
         }
@@ -489,7 +489,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 perf.setCheck4Duplicates(false);
                 folderId = perf.doCreate(folder);
             } else {
-                final CreatePerformer createPerformer = new CreatePerformer(new ServerSessionAdapter(session), registry);
+                final CreatePerformer createPerformer = new CreatePerformer(ServerSessionAdapter.valueOf(session), registry);
                 createPerformer.setCheck4Duplicates(false);
                 folderId = createPerformer.doCreate(folder);
             }
@@ -600,7 +600,7 @@ public final class CacheFolderStorage implements FolderStorage {
             if (singleOnly) {
                 removeSingleFromCache(id, treeId, session.getUserId(), session, true);
             } else {
-                removeFromCache(id, treeId, session, new PathPerformer(new ServerSessionAdapter(session), null, registry));
+                removeFromCache(id, treeId, session, new PathPerformer(ServerSessionAdapter.valueOf(session), null, registry));
             }
         } finally {
             lock.unlock();
@@ -774,7 +774,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 new ClearPerformer(storageParameters.getUser(), storageParameters.getContext(), registry).doClear(treeId, folderId);
             } else {
                 try {
-                    new ClearPerformer(new ServerSessionAdapter(session), registry).doClear(treeId, folderId);
+                    new ClearPerformer(ServerSessionAdapter.valueOf(session), registry).doClear(treeId, folderId);
                 } catch (final OXException e) {
                     throw new OXException(e);
                 }
@@ -904,7 +904,7 @@ public final class CacheFolderStorage implements FolderStorage {
                     storageParameters.getTimeStamp());
             } else {
                 try {
-                    new DeletePerformer(new ServerSessionAdapter(session), registry).doDelete(
+                    new DeletePerformer(ServerSessionAdapter.valueOf(session), registry).doDelete(
                         treeId,
                         folderId,
                         storageParameters.getTimeStamp());
@@ -1445,7 +1445,7 @@ public final class CacheFolderStorage implements FolderStorage {
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             } else {
-                final UpdatePerformer updatePerformer = new UpdatePerformer(new ServerSessionAdapter(session), registry);
+                final UpdatePerformer updatePerformer = new UpdatePerformer(ServerSessionAdapter.valueOf(session), registry);
                 updatePerformer.setCheck4Duplicates(false);
                 updatePerformer.doUpdate(folder, storageParameters.getTimeStamp());
             }
@@ -1582,7 +1582,7 @@ public final class CacheFolderStorage implements FolderStorage {
             } else {
                 try {
                     folders =
-                        new UpdatesPerformer(new ServerSessionAdapter(session), storageParameters.getDecorator(), registry).doUpdates(
+                        new UpdatesPerformer(ServerSessionAdapter.valueOf(session), storageParameters.getDecorator(), registry).doUpdates(
                             treeId,
                             timeStamp,
                             ignoreDelete,

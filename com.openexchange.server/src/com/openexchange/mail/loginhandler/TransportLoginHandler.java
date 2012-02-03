@@ -256,6 +256,6 @@ public final class TransportLoginHandler implements LoginHandlerService {
         if (session instanceof ServerSession) {
             return (ServerSession) session;
         }
-        return new ServerSessionAdapter(session, context);
+        return ServerSessionAdapter.valueOf(session, context);
     }
 }

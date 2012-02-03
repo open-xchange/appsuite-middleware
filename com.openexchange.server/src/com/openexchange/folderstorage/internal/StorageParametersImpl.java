@@ -146,7 +146,7 @@ public final class StorageParametersImpl implements StorageParameters {
             contextId = context.getContextId();
         } else {
             try {
-                session = s instanceof ServerSession ? (ServerSession) s : new ServerSessionAdapter(s);
+                session = s instanceof ServerSession ? (ServerSession) s : ServerSessionAdapter.valueOf(s);
                 user = this.session.getUser();
                 userId = user.getId();
                 context = this.session.getContext();

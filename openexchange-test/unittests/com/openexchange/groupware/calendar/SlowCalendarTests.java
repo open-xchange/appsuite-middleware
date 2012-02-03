@@ -148,7 +148,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             final String COLS_STRING = cols.toString();
 
             // ALL
-            final AppointmentRequest req = new AppointmentRequest(new ServerSessionAdapter(session));
+            final AppointmentRequest req = new AppointmentRequest(ServerSessionAdapter.valueOf(session));
             JSONObject requestData = json(
                 AJAXServlet.PARAMETER_COLUMNS,
                 COLS_STRING,

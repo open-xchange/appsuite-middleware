@@ -1109,7 +1109,7 @@ public class FolderTest extends TestCase {
 
     public void testGetSubfolders() {
         try {
-            final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(new ServerSessionAdapter(session));
+            final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(session));
             SearchIterator<?> it = null;
             try {
                 it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, null);
@@ -1145,7 +1145,7 @@ public class FolderTest extends TestCase {
             uc.setCalendar(false);
             saveUserConfiguration(uc);
             try {
-                final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(new ServerSessionAdapter(session));
+                final FolderSQLInterface folderSQLInterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(session));
                 final SearchIterator<?> it = folderSQLInterface.getSubfolders(FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
                         null);
                 try {

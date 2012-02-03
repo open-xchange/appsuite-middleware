@@ -467,7 +467,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
 
         final ServerSession serverSession;
         try {
-            serverSession = new ServerSessionAdapter(session);
+            serverSession = ServerSessionAdapter.valueOf(session);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
             return;

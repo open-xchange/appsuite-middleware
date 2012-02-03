@@ -221,7 +221,7 @@ public final class FolderMap {
 
     private void reloadFolder(final String folderId, final String treeId, final boolean loadSubfolders) {
         try {
-            final ServerSession session = ServerSessionAdapter.valueOf((Session) LogProperties.getLogProperties().get("com.openexchange.session.session"));
+            final ServerSession session = ServerSessionAdapter.valueOf(LogProperties.getLogProperties().<Session> get("com.openexchange.session.session"));
             if (null == session) {
                 return;
             }
@@ -233,7 +233,7 @@ public final class FolderMap {
 
     private void loadSubolders(final Folder folder, final String treeId) {
         try {
-            final ServerSession session = ServerSessionAdapter.valueOf((Session) LogProperties.getLogProperties().get("com.openexchange.session.session"));
+            final ServerSession session = ServerSessionAdapter.valueOf(LogProperties.getLogProperties().<Session> get("com.openexchange.session.session"));
             if (null == session) {
                 return;
             }

@@ -442,7 +442,7 @@ public final class Response {
         if (session instanceof ServerSession) {
             return (ServerSession) session;
         }
-        return new ServerSessionAdapter(session);
+        return ServerSessionAdapter.valueOf(session);
     }
 
 }

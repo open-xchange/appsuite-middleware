@@ -264,7 +264,7 @@ public class AuditEventHandler implements EventHandler {
         String retval = "";
 
         try {
-            final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(new ServerSessionAdapter(sessionObj));
+            final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(sessionObj));
             final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getPathToRoot(folderId)).asQueue();
             final int size = q.size();
             final Iterator<FolderObject> iter = q.iterator();

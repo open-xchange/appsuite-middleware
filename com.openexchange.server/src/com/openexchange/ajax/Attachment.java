@@ -145,7 +145,7 @@ public class Attachment extends PermissionServlet {
 
         final ServerSession session;
         try {
-            session = new ServerSessionAdapter(getSessionObject(req));
+            session = ServerSessionAdapter.valueOf(getSessionObject(req));
         } catch (final OXException e) {
             handle(res, e, action);
             return;
@@ -231,7 +231,7 @@ public class Attachment extends PermissionServlet {
 
         final ServerSession session;
         try {
-            session = new ServerSessionAdapter(getSessionObject(req));
+            session = ServerSessionAdapter.valueOf(getSessionObject(req));
         } catch (final OXException e) {
             handle(res, e, action);
             return;
@@ -270,7 +270,7 @@ public class Attachment extends PermissionServlet {
 
         final ServerSession session;
         try {
-            session = new ServerSessionAdapter(getSessionObject(req));
+            session = ServerSessionAdapter.valueOf(getSessionObject(req));
         } catch (final OXException e) {
             handle(res, e, action);
             return;

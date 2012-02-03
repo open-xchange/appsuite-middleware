@@ -62,7 +62,6 @@ import java.net.URLDecoder;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -94,6 +93,7 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.UploadServletException;
@@ -676,7 +676,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                 /*
                  * Gather logging info
                  */
-                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final Props properties = LogProperties.getLogProperties();
                 properties.put("com.openexchange.ajp13.threadName", thread.getName());
                 properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(socket.getPort()));
                 properties.put("com.openexchange.ajp13.remoteAddress", socket.getInetAddress().getHostAddress());
@@ -1404,7 +1404,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
          */
         setServletInstance(request.getRequestURI());
         {
-            final Map<String, Object> properties = LogProperties.getLogProperties();
+            final Props properties = LogProperties.getLogProperties();
             if (LogProperties.isEnabled()) {
                 properties.put("com.openexchange.ajp13.requestURI", request.getRequestURI());
                 properties.put("com.openexchange.ajp13.servletPath", request.getServletPath());

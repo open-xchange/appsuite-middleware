@@ -54,7 +54,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -69,6 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
@@ -154,7 +154,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (LogProperties.isEnabled()) {
-                final Map<String, Object> logProperties = LogProperties.getLogProperties();
+                final Props logProperties = LogProperties.getLogProperties();
                 for (final String name : ALL_LOG_PROPERTIES) {
                     logProperties.remove(name);
                 }

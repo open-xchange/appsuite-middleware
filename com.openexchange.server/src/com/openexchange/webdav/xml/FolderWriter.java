@@ -108,7 +108,7 @@ public class FolderWriter extends FolderChildWriter {
     }
 
     public void startWriter(final int objectId, final OutputStream os) throws Exception {
-        final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(new ServerSessionAdapter(sessionObj));
+        final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(sessionObj));
 
         final Element eProp = new Element("prop", "D", "DAV:");
         final XMLOutputter xo = new XMLOutputter();
@@ -128,7 +128,7 @@ public class FolderWriter extends FolderChildWriter {
     }
 
     public void startWriter(final boolean modified, final boolean deleted, final boolean bList, final Date lastsync, final OutputStream os) throws Exception {
-        final ServerSessionAdapter serverSession = new ServerSessionAdapter(sessionObj);
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(sessionObj);
         final FolderSQLInterface sqlinterface = new RdbFolderSQLInterface(serverSession);
         final XMLOutputter xo = new XMLOutputter();
         final Date dLastSync = lastsync == null ? new Date(0) : lastsync;

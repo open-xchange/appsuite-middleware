@@ -304,7 +304,7 @@ public class Memorizer implements Runnable {
         boolean enabledRight = false;
         try {
             enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
-            enabledRight = new ServerSessionAdapter(session).getUserConfiguration().isCollectEmailAddresses();
+            enabledRight = ServerSessionAdapter.valueOf(session).getUserConfiguration().isCollectEmailAddresses();
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
         }

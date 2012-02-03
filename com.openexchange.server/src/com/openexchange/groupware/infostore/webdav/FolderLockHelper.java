@@ -124,7 +124,7 @@ public class FolderLockHelper extends LockHelper {
 	}
 
     private ServerSession getSession() throws OXException {
-        return new ServerSessionAdapter(sessionHolder.getSessionObject());
+        return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
     }
 
 
