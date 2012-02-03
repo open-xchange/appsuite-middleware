@@ -1441,6 +1441,10 @@ public class MIMEMessageFiller {
         return sb.toString();
     }
 
+    private static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_AMP = Pattern.compile(Pattern.quote("&amp;"));
+
     /**
      * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
@@ -1487,7 +1491,16 @@ public class MIMEMessageFiller {
                         continue;
                     }
                 } else {
-                    final ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(m.group());
+                    final ImageLocation imageLocation;
+                    {
+                        final String match = m.group();
+                        final Matcher srcMatcher = PATTERN_SRC.matcher(match);
+                        if (srcMatcher.find()) {
+                            imageLocation = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                        } else {
+                            imageLocation = ImageUtility.parseImageLocationFrom(match);
+                        }
+                    }
                     if (null == imageLocation) {
                         if (LOG.isWarnEnabled()) {
                             tmp.setLength(0);
