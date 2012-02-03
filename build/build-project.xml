@@ -414,6 +414,6 @@
     	<antcall target="postClean"/>
     </target>
 
-	<target name="postClean" description="Empty target that can be overwritten by some bundles."/>
+	<target name="postClean" description="This target should remove all files in a bundle created by the overriding build script."/>
 
 </project>
