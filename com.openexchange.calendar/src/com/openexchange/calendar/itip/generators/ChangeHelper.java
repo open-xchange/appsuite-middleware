@@ -54,6 +54,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.itip.generators.changes.ChangeDescriber;
+import com.openexchange.calendar.itip.generators.changes.generators.Attachments;
 import com.openexchange.calendar.itip.generators.changes.generators.Details;
 import com.openexchange.calendar.itip.generators.changes.generators.Participants;
 import com.openexchange.calendar.itip.generators.changes.generators.Rescheduling;
@@ -88,7 +89,7 @@ public class ChangeHelper {
 
 	private TimeZone timezone;
 
-    public ChangeHelper(Context ctx, NotificationParticipant participant, Appointment original, Appointment update, AppointmentDiff diff, Locale locale, TimeZone tz, TypeWrapper wrapper, ServiceLookup services, Style style) {
+    public ChangeHelper(Context ctx, NotificationParticipant participant, Appointment original, Appointment update, AppointmentDiff diff, Locale locale, TimeZone tz, TypeWrapper wrapper, AttachmentMemory attachmentMemory, ServiceLookup services, Style style) {
         super();
         this.original = original;
         this.update = update;
@@ -104,9 +105,9 @@ public class ChangeHelper {
         }
         Participants participants =  new Participants(services.getService(UserService.class), services.getService(GroupService.class), services.getService(ResourceService.class), style, interested);
         Details details = new Details(style);
-
+        Attachments attachments = new Attachments(attachmentMemory);
     	
-    	describer = new ChangeDescriber(rescheduling, details, participants);
+    	describer = new ChangeDescriber(rescheduling, details, participants, attachments);
         
     }
     

@@ -86,6 +86,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -742,11 +743,11 @@ public final class SMTPTransport extends MailTransport {
     }
 
     private static String getHostName() {
-        final Map<String, Object> logProperties = LogProperties.optLogProperties();
+        final Props logProperties = LogProperties.optLogProperties();
         if (null == logProperties) {
             return getStaticHostName();
         }
-        final String serverName = (String) logProperties.get("com.openexchange.ajp13.serverName");
+        final String serverName = logProperties.get("com.openexchange.ajp13.serverName");
         if (null == serverName) {
             return getStaticHostName();
         }

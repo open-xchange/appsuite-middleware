@@ -179,7 +179,7 @@ public final class folders extends XmlServlet<FolderSQLInterface> {
     @Override
     protected void performActions(final OutputStream os, final Session session,
             final PendingInvocations<FolderSQLInterface> pendingInvocations) throws IOException, OXException {
-        final FolderSQLInterface foldersql = new RdbFolderSQLInterface(new ServerSessionAdapter(session));
+        final FolderSQLInterface foldersql = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(session));
         while (!pendingInvocations.isEmpty()) {
             final QueuedFolder qfld = (QueuedFolder) pendingInvocations.poll();
             if (null != qfld) {

@@ -69,6 +69,9 @@ import com.openexchange.calendar.itip.generators.changes.generators.Style;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -82,12 +85,16 @@ import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
+import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HTMLService;
 import com.openexchange.html.tools.HTMLUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.user.UserService;
 import static com.openexchange.calendar.itip.ITipUtils.*;
 import static com.openexchange.java.Autoboxing.I;
@@ -119,10 +126,16 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private Context ctx;
     
+    private AttachmentMemory attachmentMemory;
+    
     private ServiceLookup services;
 
     private List<NotificationParticipant> participants;
 
+    private User user;
+    
+    private UserConfiguration userConfig;
+    
     public static final int[] DEFAULT_SKIP = new int[]{
         Appointment.OBJECT_ID,
         Appointment.CREATED_BY,
@@ -146,10 +159,16 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     
 
-    public NotificationMailGenerator(ServiceLookup services, NotificationParticipantResolver resolver, ITipIntegrationUtility util, Appointment original, Appointment appointment, User user, User onBehalfOf, Context ctx, Session session) throws OXException {
+    public NotificationMailGenerator(ServiceLookup services, AttachmentMemory attachmentMemory, NotificationParticipantResolver resolver, ITipIntegrationUtility util, Appointment original, Appointment appointment, User user, User onBehalfOf, Context ctx, Session session) throws OXException {
         this.util = util;
         this.ctx = ctx;
         this.services = services;
+        this.attachmentMemory = attachmentMemory;
+        
+        this.user = user;
+        if (UserConfigurationStorage.getInstance() != null) {
+            this.userConfig = UserConfigurationStorage.getInstance().getUserConfiguration(user.getId(), ctx);
+        }
         
         this.recipients = resolver.resolveAllRecipients(original, appointment, user, onBehalfOf, ctx);
         this.participants = resolver.getAllParticipants(this.recipients, appointment, user, ctx);
@@ -195,7 +214,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
         }
         
-        if (diff != null && diff.getDifferingFieldNames().isEmpty()) {
+        if (diff != null && diff.getDifferingFieldNames().isEmpty() && !attachmentMemory.hasAttachmentChanged(appointment.getObjectID(), session.getContextId())) {
             state = new DoNothingState();
         }
     }
@@ -294,6 +313,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         mail.setSender(organizer);
         mail.setStateType(type);
         initMail(mail);
+        initAttachments(mail);
 
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
@@ -318,6 +338,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         mail.setSender(organizer);
         mail.setStateType(State.Type.NEW);
         initMail(mail);
+        initAttachments(mail);
 
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
@@ -333,6 +354,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         mail.setSender(actor);
         mail.setStateType(State.Type.MODIFIED);
         initMail(mail);
+        initAttachments(mail);
         
         ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.COUNTER);
@@ -452,6 +474,29 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         mail.setParticipants(participants);
         mail.setResources(resources);
 
+    }
+    
+    private void initAttachments(NotificationMail mail) throws OXException {
+    	if (services == null) {
+    		return;
+    	}
+    	AttachmentBase attachments = services.getService(AttachmentBase.class);
+    	SearchIterator<AttachmentMetadata> results = null;
+    	try {
+    		TimedResult<AttachmentMetadata> attachmentsResult = attachments.getAttachments(mail.getAppointment().getParentFolderID(), mail.getAppointment().getObjectID(), Types.APPOINTMENT, ctx, user, userConfig);
+    		results = attachmentsResult.results();
+    		while(results.hasNext()) {
+    			mail.addAttachment(results.next());
+    		}
+    	} finally {
+    		if (results != null) {
+        		results.close();
+    		}
+    	}
+    	
+    	if (attachmentMemory.hasAttachmentChanged(appointment.getObjectID(), ctx.getContextId())) {
+    		mail.setAttachmentUpdate(true);
+    	}
     }
 
     // Templating and mail text
@@ -604,7 +649,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         env.put("formatters", dateHelperFor(mail.getRecipient()));
         env.put("labels",getLabelHelper(mail, wrapper, participant));
 		if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, services, style).getChanges());
+            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services, style).getChanges());
         } else {
             env.put("changes", new ArrayList<String>());
         }
@@ -617,7 +662,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         wrapper = new HTMLWrapper();
         env.put("labels", getLabelHelper(mail, wrapper, participant));
         if (originalForRendering != null) {
-            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, services, style).getChanges());
+            env.put("changes", new ChangeHelper(ctx, mail.getRecipient(), originalForRendering, appointmentForRendering, mail.getDiff(), participant.getLocale(), participant.getTimeZone(), wrapper, attachmentMemory, services, style).getChanges());
         }
         writer = new StringWriter();
         htmlTemplate.process(env, writer);

@@ -52,7 +52,6 @@ package com.openexchange.ajp13.najp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -75,6 +74,7 @@ import com.openexchange.ajp13.watcher.AJPv13TaskWatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.Log;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
@@ -372,7 +372,7 @@ public final class AJPv13Task implements Task<Object>, com.openexchange.ajp13.wa
                 /*
                  * Gather logging info
                  */
-                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final Props properties = LogProperties.getLogProperties();
                 properties.put("com.openexchange.ajp13.threadName", t.getName());
                 properties.put("com.openexchange.ajp13.remotePort", Integer.valueOf(client.getPort()));
                 properties.put("com.openexchange.ajp13.remoteAddress", client.getInetAddress().getHostAddress());

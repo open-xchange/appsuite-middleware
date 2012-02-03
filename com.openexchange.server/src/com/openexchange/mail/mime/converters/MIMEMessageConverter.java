@@ -425,11 +425,9 @@ public final class MIMEMessageConverter {
 
     private static File checkForFile(final MailMessage mail) {
         if (mail instanceof MIMEMailMessage) {
-            final MIMEMailMessage mimeMailMessage = (MIMEMailMessage) mail;
-            final MimeMessage mimeMessage = mimeMailMessage.getMimeMessage();
+            final MimeMessage mimeMessage = ((MIMEMailMessage) mail).getMimeMessage();
             if (mimeMessage instanceof ManagedMimeMessage) {
-                final ManagedMimeMessage managedMimeMessage = (ManagedMimeMessage) mimeMessage;
-                return managedMimeMessage.getFile();
+                return ((ManagedMimeMessage) mimeMessage).getFile();
             }
         }
         return null;

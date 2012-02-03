@@ -52,7 +52,6 @@ package com.openexchange.log;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -110,7 +109,7 @@ public final class LogProperties {
     /**
      * The {@link ThreadLocal} variable.
      */
-    private static final ConcurrentMap<Thread, Map<String, Object>> THREAD_LOCAL = new ConcurrentHashMap<Thread, Map<String,Object>>();
+    private static final ConcurrentMap<Thread, Props> THREAD_LOCAL = new ConcurrentHashMap<Thread, Props>();
 
     /**
      * Gets the thread-local log properties.
@@ -118,7 +117,7 @@ public final class LogProperties {
      * @return The log properties or <code>null</code>
      * @see #isEnabled()
      */
-    public static Map<String, Object> optLogProperties() {
+    public static Props optLogProperties() {
         return THREAD_LOCAL.get(Thread.currentThread());
     }
 
@@ -135,17 +134,17 @@ public final class LogProperties {
      * @return The log properties
      * @see #isEnabled()
      */
-    public static Map<String, Object> getLogProperties() {
+    public static Props getLogProperties() {
         final Thread thread = Thread.currentThread();
-        Map<String, Object> map = THREAD_LOCAL.get(thread);
-        if (null == map) {
-            final Map<String, Object> newmap = new HashMap<String, Object>();
-            map = THREAD_LOCAL.putIfAbsent(thread, newmap);
-            if (null == map) {
-                map = newmap;
+        Props props = THREAD_LOCAL.get(thread);
+        if (null == props) {
+            final Props newprops = new Props(new HashMap<String, Object>(16));
+            props = THREAD_LOCAL.putIfAbsent(thread, newprops);
+            if (null == props) {
+                props = newprops;
             }
         }
-        return map;
+        return props;
     }
 
     /**
@@ -155,11 +154,11 @@ public final class LogProperties {
      */
     public static void cloneLogProperties(final Thread other) {
         final Thread thread = Thread.currentThread();
-        final Map<String, Object> map = THREAD_LOCAL.get(thread);
-        if (null == map) {
+        final Props props = THREAD_LOCAL.get(thread);
+        if (null == props) {
             return;
         }
-        THREAD_LOCAL.put(other, new HashMap<String, Object>(map));
+        THREAD_LOCAL.put(other, new Props(new HashMap<String, Object>(props.getMap())));
     }
 
     /**
@@ -171,8 +170,8 @@ public final class LogProperties {
     @SuppressWarnings("unchecked")
     public static <V> V getLogProperty(final String name) {
         final Thread thread = Thread.currentThread();
-        final Map<String, Object> map = THREAD_LOCAL.get(thread);
-        return (V) (null == map ? null : map.get(name));
+        final Props props = THREAD_LOCAL.get(thread);
+        return null == props ? null : props.<V> get(name);
     }
 
     /**

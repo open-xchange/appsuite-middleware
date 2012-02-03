@@ -110,6 +110,7 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -311,8 +312,8 @@ public class MIMEMessageFiller {
                     LOG.debug("Session provides localhost as client IP address: " + localIp);
                 }
                 // Prefer request's remote address if local IP seems to denote local host
-                final Map<String, Object> logProperties = LogProperties.optLogProperties();
-                final String clientIp = null == logProperties ? null : (String) logProperties.get("com.openexchange.ajp13.requestIp");
+                final Props logProperties = LogProperties.optLogProperties();
+                final String clientIp = null == logProperties ? null : logProperties.<String> get("com.openexchange.ajp13.requestIp");
                 mimeMessage.setHeader("X-Originating-IP", clientIp == null ? localIp : clientIp);
             } else {
                 mimeMessage.setHeader("X-Originating-IP", localIp);
@@ -1440,6 +1441,10 @@ public class MIMEMessageFiller {
         return sb.toString();
     }
 
+    private static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
+
+    private static final Pattern PATTERN_AMP = Pattern.compile(Pattern.quote("&amp;"));
+
     /**
      * Processes referenced local images, inserts them as inlined html images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
@@ -1486,7 +1491,16 @@ public class MIMEMessageFiller {
                         continue;
                     }
                 } else {
-                    final ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(m.group());
+                    final ImageLocation imageLocation;
+                    {
+                        final String match = m.group();
+                        final Matcher srcMatcher = PATTERN_SRC.matcher(match);
+                        if (srcMatcher.find()) {
+                            imageLocation = ImageUtility.parseImageLocationFrom(PATTERN_AMP.matcher(srcMatcher.group(1)).replaceAll("&"));
+                        } else {
+                            imageLocation = ImageUtility.parseImageLocationFrom(match);
+                        }
+                    }
                     if (null == imageLocation) {
                         if (LOG.isWarnEnabled()) {
                             tmp.setLength(0);

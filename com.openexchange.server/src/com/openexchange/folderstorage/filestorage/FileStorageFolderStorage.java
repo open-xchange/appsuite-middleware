@@ -550,7 +550,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
             if (s instanceof ServerSession) {
                 session = (ServerSession) s;
             } else {
-                session = new ServerSessionAdapter(s);
+                session = ServerSessionAdapter.valueOf(s);
             }
         }
 

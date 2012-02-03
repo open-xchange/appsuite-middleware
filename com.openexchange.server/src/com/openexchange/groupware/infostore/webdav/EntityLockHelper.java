@@ -132,7 +132,7 @@ public class EntityLockHelper extends LockHelper {
 
     private ServerSession getSession() throws OXException {
         try {
-            return new ServerSessionAdapter(sessionHolder.getSessionObject());
+            return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject());
         } catch (final OXException e) {
             throw e;
         }

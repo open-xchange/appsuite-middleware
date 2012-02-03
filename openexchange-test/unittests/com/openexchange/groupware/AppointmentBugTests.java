@@ -415,12 +415,12 @@ public class AppointmentBugTests extends TestCase {
         fo.setObjectID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
-        new RdbFolderSQLInterface(new ServerSessionAdapter(so)).clearFolder(fo, new Date());
+        new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(so)).clearFolder(fo, new Date());
         fo = new FolderObject();
         fo.setObjectID(fid2);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
-        new RdbFolderSQLInterface(new ServerSessionAdapter(so2)).clearFolder(fo, new Date());
+        new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(so2)).clearFolder(fo, new Date());
 
 
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -1938,7 +1938,7 @@ public class AppointmentBugTests extends TestCase {
         fo.setObjectID(fid);
         fo.setModule(FolderObject.CALENDAR);
         fo.setType(FolderObject.PRIVATE);
-        new RdbFolderSQLInterface(new ServerSessionAdapter(so)).clearFolder(fo, new Date());
+        new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(so)).clearFolder(fo, new Date());
 
         final CalendarSql csql = new CalendarSql(so);
 

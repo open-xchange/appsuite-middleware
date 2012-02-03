@@ -58,7 +58,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import javax.activation.DataHandler;
@@ -86,6 +85,7 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.log.ForceLog;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -276,7 +276,7 @@ public final class MailMessageParser {
         final boolean logPropsEnabled = LogProperties.isEnabled();
         try {
             if (logPropsEnabled) {
-                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final Props properties = LogProperties.getLogProperties();
                 final int accountId = mail.getAccountId();
                 if (accountId >= 0) {
                     properties.put("com.openexchange.mail.accountId", ForceLog.valueOf(Integer.valueOf(accountId)));
@@ -308,7 +308,7 @@ public final class MailMessageParser {
                 null == folder ? "" : folder);
         } finally {
             if (logPropsEnabled) {
-                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final Props properties = LogProperties.getLogProperties();
                 properties.put("com.openexchange.mail.accountId", null);
                 properties.put("com.openexchange.mail.mailId", null);
                 properties.put("com.openexchange.mail.folder", null);

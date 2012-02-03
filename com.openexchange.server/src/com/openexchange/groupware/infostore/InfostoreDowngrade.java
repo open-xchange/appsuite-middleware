@@ -73,7 +73,7 @@ public class InfostoreDowngrade extends DowngradeListener {
         }
         final DBProvider provider = new StaticDBPoolProvider(event.getWriteCon());
 
-        final ServerSession session = new ServerSessionAdapter(event.getSession(), event.getContext());
+        final ServerSession session = ServerSessionAdapter.valueOf(event.getSession(), event.getContext());
 
         final InfostoreFacade infostore = new InfostoreFacadeImpl(provider);
         infostore.setTransactional(true);

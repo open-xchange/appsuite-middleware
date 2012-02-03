@@ -432,7 +432,7 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
         db.setTransactional(true);
         try {
             db.startTransaction();
-            db.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(event.getSession(), event.getContext()));
+            db.removeDocument(folderID, System.currentTimeMillis(), ServerSessionAdapter.valueOf(event.getSession(), event.getContext()));
             db.commit();
         } catch (final OXException x) {
             try {

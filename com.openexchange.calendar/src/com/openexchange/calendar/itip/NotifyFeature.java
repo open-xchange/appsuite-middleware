@@ -51,6 +51,7 @@ package com.openexchange.calendar.itip;
 
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarFeature;
+import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.server.ServiceLookup;
@@ -68,12 +69,14 @@ public class NotifyFeature implements CalendarFeature {
     private ITipMailGeneratorFactory generators;
     private MailSenderService sender;
     private ServiceLookup services;
+	private AttachmentMemory attachmentMemory;
 
-    public NotifyFeature(ITipMailGeneratorFactory generators, MailSenderService sender, ServiceLookup services) {
+    public NotifyFeature(ITipMailGeneratorFactory generators, MailSenderService sender, AttachmentMemory attachmentMemory, ServiceLookup services) {
         super();
         this.generators = generators;
         this.sender = sender;
         this.services = services;
+        this.attachmentMemory = attachmentMemory;
     }
 
     public String getId() {
@@ -81,7 +84,7 @@ public class NotifyFeature implements CalendarFeature {
     }
 
     public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) {
-        return new NotifyingCalendar(generators, sender, delegate, services, session);
+        return new NotifyingCalendar(generators, sender, delegate, attachmentMemory, services, session);
     }
     
     

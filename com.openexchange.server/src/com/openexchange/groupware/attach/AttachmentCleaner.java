@@ -129,7 +129,7 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
     private final void deleteAttachments(final int parentFolderID, final int objectID, final int type, final Session session) {
         SearchIterator iter = null;
         try {
-            final ServerSession sessionObj = new ServerSessionAdapter(session);
+            final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
             ATTACHMENT_BASE.startTransaction();
             final TimedResult rs =
                 ATTACHMENT_BASE.getAttachments(
