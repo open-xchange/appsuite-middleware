@@ -94,6 +94,16 @@ public class HeaderCollection implements Serializable {
 
     private static final int DEFAULT_CAPACITY = 4096;
 
+    private static final HeaderName RETURN_PATH = MessageHeaders.RETURN_PATH;
+
+    private static final HeaderName RECEIVED = MessageHeaders.RECEIVED;
+
+    private static final HeaderName CONTENT_TYPE = MessageHeaders.CONTENT_TYPE;
+
+    /*-
+     * ------------------------ Member stuff ---------------------------------
+     */
+
     private final HashMap<HeaderName, List<String>> map;
 
     private int count;
@@ -395,7 +405,7 @@ public class HeaderCollection implements Serializable {
         } else if (clear) {
             values.clear();
         }
-        if (MessageHeaders.RECEIVED.equals(headerName) || MessageHeaders.RETURN_PATH.equals(headerName)) {
+        if (RECEIVED.equals(headerName) || RETURN_PATH.equals(headerName) || CONTENT_TYPE.equals(headerName)) {
             /*
              * Append
              */
