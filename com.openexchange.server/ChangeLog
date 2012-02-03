@@ -1,3 +1,8 @@
+* 2012-02-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21452: Allow creation of Unified Mail account
+ - Fix for bug 21102: Fixed I/O error on IMAP append operation
+
 * 2012-02-02 - jan.bauerdick@open-xchange.com
 
  - Refactoring: Housekeeping Activator in separate bundle and used everywhere

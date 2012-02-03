@@ -52,7 +52,10 @@ package com.openexchange.mail.mime;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Flags;
@@ -174,6 +177,48 @@ public final class ManagedMimeMessage extends MimeMessage {
         closeables.add(fis);
         this.managedFile = null;
         this.file = file;
+    }
+
+    @Override
+    public void writeTo(final OutputStream os) throws IOException, MessagingException {
+        flush2stream(os);
+    }
+
+    @Override
+    public void writeTo(final OutputStream os, final String[] ignoreList) throws IOException, MessagingException {
+        flush2stream(os);
+    }
+
+    /**
+     * Gets the associated file
+     * 
+     * @return The file
+     */
+    public File getFile() {
+        return null == file ? managedFile.getFile() : file;
+    }
+
+    private void flush2stream(final OutputStream os) throws FileNotFoundException, IOException {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(getFile());
+            // now copy the data to the output stream
+            final int buflen = 8192;
+            final byte[] buf = new byte[buflen];
+            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
+                os.write(buf, 0, read);
+            }
+            is.close();
+        } finally {
+            if (null != is) {
+                try {
+                    is.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        }
+        os.flush();
     }
 
     @Override
