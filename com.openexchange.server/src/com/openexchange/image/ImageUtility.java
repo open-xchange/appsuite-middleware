@@ -63,6 +63,8 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.image.servlet.ImageServlet;
 import com.openexchange.java.Charsets;
+import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.session.Session;
 
 /**
@@ -104,12 +106,12 @@ public final class ImageUtility {
         String imageId = null;
         String registrationName = null;
         for (String nvp : nvps) {
-            nvp = nvp.trim().toLowerCase(Locale.US);
+            nvp = nvp.trim();
             if (nvp.length() > 0) {
                 // Look-up character '='
                 final int pos = nvp.indexOf('=');
                 if (pos >= 0) {
-                    final String name = nvp.substring(0, pos);
+                    final String name = nvp.substring(0, pos).toLowerCase(Locale.US);
                     if ("accountId".equals(name)) {
                         accountId = decodeQueryStringValue(nvp.substring(pos + 1));
                     } else if (AJAXServlet.PARAMETER_FOLDERID.equals(name)) {
@@ -163,7 +165,8 @@ public final class ImageUtility {
                  * Compose relative URL
                  */
                 prefix = "";
-                route = null;
+                final Props properties = LogProperties.optLogProperties();
+                route = null == properties ? null : properties.<String> get("com.openexchange.ajp13.httpSession");
             } else {
                 /*
                  * Compose absolute URL if a relative one is not preferred

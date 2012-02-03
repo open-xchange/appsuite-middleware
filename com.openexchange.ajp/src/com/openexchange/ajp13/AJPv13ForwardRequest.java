@@ -697,6 +697,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
                         jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     } else {
@@ -731,6 +732,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
                         jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
                         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, true);
                     }
@@ -780,6 +782,7 @@ public final class AJPv13ForwardRequest extends AJPv13Request {
             }
         }
         final Cookie jsessionIDCookie = new Cookie(AJPv13RequestHandler.JSESSIONID_COOKIE, jsessionIdVal);
+        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
         jsessionIDCookie.setSecure(forceHttps || servletRequest.isSecure());
         ajpRequestHandler.setHttpSessionCookie(jsessionIDCookie, join);
         /*

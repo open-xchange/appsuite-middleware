@@ -1653,6 +1653,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
                         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
@@ -1688,6 +1689,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
                             continue NextCookie;
                         }
                         jsessionIDCookie = current;
+                        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
                         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
                         httpSessionCookie = jsessionIDCookie;
                         httpSessionJoined = true;
@@ -1709,7 +1711,9 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
         if ((jvmRoute != null) && (jvmRoute.length() > 0)) {
             jsessionIDVal.append('.').append(jvmRoute);
         }
-        final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionIDVal.toString());
+        final String id = jsessionIDVal.toString();
+        final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, id);
+        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", id);
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = false;
@@ -1741,6 +1745,7 @@ public final class AjpProcessor implements com.openexchange.ajp13.watcher.Task {
             join = false;
         }
         final Cookie jsessionIDCookie = new Cookie(JSESSIONID_COOKIE, jsessionIdVal);
+        LogProperties.putLogProperty("com.openexchange.ajp13.httpSession", jsessionIdVal);
         jsessionIDCookie.setSecure(forceHttps || request.isSecure());
         httpSessionCookie = jsessionIDCookie;
         httpSessionJoined = join;

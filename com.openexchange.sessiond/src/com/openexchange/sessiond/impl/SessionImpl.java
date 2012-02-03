@@ -159,6 +159,9 @@ public final class SessionImpl implements Session {
         }
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
+        if (!parameters.containsKey(PARAM_ALTERNATIVE_ID)) {
+            parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());
+        }
     }
 
     /**
