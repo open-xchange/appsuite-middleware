@@ -103,6 +103,7 @@ public class Sentence {
             case PARTICIPANT: wrapped.add(wrapper.participant(argument)); break;
             case STATUS: wrapped.add(wrapper.state(argument, (ConfirmStatus) extraInfo[0])); break;
             case EMPHASIZED: wrapped.add(wrapper.emphasiszed(argument)); break;
+            case REFERENCE: wrapped.add(wrapper.reference(argument)); break;
             }
         }
 

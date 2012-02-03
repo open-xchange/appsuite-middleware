@@ -64,4 +64,5 @@ public interface TypeWrapper {
     public String state(Object argument, ConfirmStatus confirmStatus);
     public String none(Object argument);
 	public String emphasiszed(Object argument);
+	public String reference(Object argument);
 }

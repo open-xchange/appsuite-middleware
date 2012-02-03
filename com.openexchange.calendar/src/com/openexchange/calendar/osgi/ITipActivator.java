@@ -64,6 +64,7 @@ import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.calendar.itip.ITipFeature;
 import com.openexchange.calendar.itip.NotifyFeature;
 import com.openexchange.calendar.itip.analyzers.DefaultITipAnalyzerService;
+import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.calendar.itip.performers.DefaultITipDingeMacherFactoryService;
@@ -74,6 +75,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HTMLService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
@@ -94,7 +97,7 @@ public class ITipActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HTMLService.class };
+        return new Class<?>[] { ContextService.class, ResourceService.class, UserService.class, GroupService.class, TemplateService.class, TimerService.class, ITipEmitter.class, ConfigurationService.class, HTMLService.class, AttachmentBase.class };
     }
 
 
@@ -105,16 +108,24 @@ public class ITipActivator extends HousekeepingActivator {
         final ResourceService resources = getService(ResourceService.class);
         final GroupService groups = getService(GroupService.class);
         final ConfigurationService config = getService(ConfigurationService.class);
+        final ITipEmitter emitter = getService(ITipEmitter.class);
+        final HTMLService htmlService = getService(HTMLService.class);
+        final AttachmentBase attachments = getService(AttachmentBase.class);
+        final UserConfigurationStorage userConfigs = UserConfigurationStorage.getInstance();
+        final TimerService timers = getService(TimerService.class);
+		
+        int interval = config.getIntProperty("com.openexchange.calendar.notify.interval", 120000);
+        final AttachmentMemory attachmentMemory = new AttachmentMemory(interval * 3, timers);
 
-        
-        MailSenderService sender = new DefaultMailSenderService(getService(ITipEmitter.class), getService(HTMLService.class));
+        MailSenderService sender = new DefaultMailSenderService(emitter, htmlService, attachments, contexts, users, userConfigs, attachmentMemory);
 
         final AppointmentSqlFactory sqlFactory = new AppointmentSqlFactory();
         final CalendarITipIntegrationUtility util = new CalendarITipIntegrationUtility(sqlFactory, new CalendarCollection(), contexts);
         final DefaultNotificationParticipantResolver resolver = new DefaultNotificationParticipantResolver(groups, users, resources, config, util );
-        final NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this);
+        final NotificationMailGeneratorFactory mails = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
 
-        AppointmentNotificationPool pool = new AppointmentNotificationPool(getService(TimerService.class), mails, sender, config.getIntProperty("com.openexchange.calendar.notify.interval", 120000));
+        
+		AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, mails, sender, interval);
         sender = new PoolingMailSenderService(pool, sender);
         
         
@@ -125,7 +136,7 @@ public class ITipActivator extends HousekeepingActivator {
 
         registerService(MailSenderService.class, sender);
         
-        features.add(new NotifyFeature(mails, sender, this));
+        features.add(new NotifyFeature(mails, sender, attachmentMemory, this));
         features.add(new ITipFeature(this));
         setFeatureIfPossible();
     }

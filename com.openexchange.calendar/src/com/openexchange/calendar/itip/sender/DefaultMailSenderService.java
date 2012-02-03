@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.itip.sender;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -56,24 +57,33 @@ import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.Part;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.NotificationConfiguration;
 import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.datasources.MessageDataSource;
+import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.mail.MailObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.State;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.html.HTMLService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -82,6 +92,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MIMEMessageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * {@link DefaultMailSenderService}
@@ -96,9 +107,21 @@ public class DefaultMailSenderService implements MailSenderService {
 
     private final HTMLService htmlService;
 
-    public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HTMLService htmlService) {
+	private AttachmentBase attachments;
+
+	private ContextService contexts;
+
+	private UserService users;
+
+	private UserConfigurationStorage userConfigurations;
+
+    public DefaultMailSenderService(final ITipEmitter iTipEmitter, final HTMLService htmlService, AttachmentBase attachments, ContextService contexts, UserService users, UserConfigurationStorage userConfigs, AttachmentMemory attachmentMemory) {
         this.iTipEmitter = iTipEmitter;
         this.htmlService = htmlService;
+        this.attachments = attachments;
+        this.contexts = contexts;
+        this.users = users;
+        this.userConfigurations = userConfigs;
     }
 
     public void sendMail(NotificationMail mail, Session session) {
@@ -141,23 +164,116 @@ public class DefaultMailSenderService implements MailSenderService {
             recipientConfig.setSendITIP(mail.getMessage() != null);
         }
         
+        boolean addAttachments = !mail.getAttachments().isEmpty() && mail.getRecipient().isExternal();
+        
         if (!recipientConfig.sendITIP() && !recipientConfig.includeHTML()) { // text only
-            message.setContentType("text/plain; charset=" + charset);
-            addTextBody(mail, message);
+        	if (!addAttachments) {
+            	message.setContentType("text/plain; charset=" + charset);
+                addTextBody(mail, message);
+        	} else {
+        		message.setContentType("multipart/mixed");
+        		MimeMultipart multipart = new MimeMultipart("mixed");
+        		multipart.addBodyPart(generateTextPart(mail, charset));
+        		addAttachments(mail, multipart, session);
+        		message.setText(multipart);
+        	}
         } else if (!recipientConfig.sendITIP()) { // text + html
-            message.setContentType("multipart/alternative");
-            Multipart textAndHtml = generateTextAndHtmlMultipart(mail, charset);
-            message.setText(textAndHtml);
+            if (!addAttachments) {
+            	message.setContentType("multipart/alternative");
+                Multipart textAndHtml = generateTextAndHtmlMultipart(mail, charset);
+                message.setText(textAndHtml);
+            } else {
+        		message.setContentType("multipart/mixed");
+        		MimeMultipart multipart = new MimeMultipart("mixed");
+        		multipart.addBodyPart(toPart(generateTextAndHtmlMultipart(mail, charset)));
+        		addAttachments(mail, multipart, session);
+        		message.setText(multipart);
+            }
         } else if (!recipientConfig.includeHTML()) { // text + iCal
-            message.setContentType("multipart/alternative");
-            Multipart textAndIcal = generateTextAndIcalMultipart(mail, charset, session);
-            message.setText(textAndIcal);
+            if (!addAttachments) {
+            	message.setContentType("multipart/alternative");
+                Multipart textAndIcal = generateTextAndIcalMultipart(mail, charset, session);
+                message.setText(textAndIcal);
+            } else {
+        		message.setContentType("multipart/mixed");
+        		MimeMultipart multipart = new MimeMultipart("mixed");
+        		multipart.addBodyPart(toPart(generateTextAndIcalMultipart(mail, charset, session)));
+        		addAttachments(mail, multipart, session);
+        		message.setText(multipart);
+            }
         } else { // (text + html) + iCal
-            message.setContentType("multipart/mixed");
+        	message.setContentType("multipart/mixed");
             Multipart textAndIcalAndHtml = generateTextAndHtmlAndIcalAndIcalAttachment(mail, charset, session, false);
+            addAttachments(mail, textAndIcalAndHtml, session);
             message.setText(textAndIcalAndHtml);
         }
     }
+    
+    private BodyPart toPart(Multipart multipart) throws MessagingException {
+    	MimeBodyPart part = new MimeBodyPart();
+    	part.setContent(multipart);
+    	return part;
+	}
+
+	private void addAttachments(NotificationMail mail,
+			Multipart multipart, Session session)  throws OXException {
+		try {
+			Context context = contexts.getContext(session.getContextId());
+			User user = users.getUser(session.getUserId(), context);
+			UserConfiguration config = userConfigurations.getUserConfiguration(session.getUserId(), context);
+			
+			Appointment effective = (mail.getAppointment() != null) ? mail.getAppointment() : mail.getOriginal();
+			int folderId = effective.getParentFolderID();
+			int attachedId = effective.getObjectID();
+			
+			for (AttachmentMetadata metadata : mail.getAttachments()) {
+				/*
+				 * Create appropriate MIME body part
+				 */
+				final MimeBodyPart bodyPart = new MimeBodyPart();
+				final ContentType ct;
+				{
+					String mimeType = metadata.getFileMIMEType();
+					if (null == mimeType) {
+						mimeType = "application/octet-stream";
+					}
+					ct = new ContentType(mimeType);
+				}
+				/*
+				 * Set content through a DataHandler
+				 */
+				bodyPart.setDataHandler(new DataHandler(new MessageDataSource(
+						attachments.getAttachedFile(folderId, attachedId,
+								Types.APPOINTMENT, metadata.getId(), context, user,
+								config), ct)));
+				final String fileName = metadata.getFilename();
+				if (fileName != null && !ct.containsNameParameter()) {
+					ct.setNameParameter(fileName);
+				}
+				bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE,
+						MIMEMessageUtility.foldContentType(ct.toString()));
+				bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+				if (fileName != null) {
+					final ContentDisposition cd = new ContentDisposition(
+							Part.ATTACHMENT);
+					cd.setFilenameParameter(fileName);
+					bodyPart.setHeader(
+							MessageHeaders.HDR_CONTENT_DISPOSITION,
+							MIMEMessageUtility.foldContentDisposition(cd.toString()));
+				}
+				bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC,
+						"base64");
+				/*
+				 * Append body part
+				 */
+				multipart.addBodyPart(bodyPart);
+			}
+		} catch (IOException x) {
+			LOG.error(x.getMessage(), x);
+		} catch (MessagingException x) {
+			LOG.error(x.getMessage(), x);
+		}
+	}
 
     private Multipart generateTextAndHtmlAndIcalAndIcalAttachment(NotificationMail mail, String charset, Session session, boolean iCalAsAttachment) throws MessagingException, OXException, UnsupportedEncodingException {
         BodyPart textAndHtml = new MimeBodyPart();

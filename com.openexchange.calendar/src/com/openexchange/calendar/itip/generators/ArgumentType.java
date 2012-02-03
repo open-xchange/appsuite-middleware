@@ -56,5 +56,5 @@ package com.openexchange.calendar.itip.generators;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public enum ArgumentType {
-    PARTICIPANT, ORIGINAL, UPDATED, STATUS, NONE, EMPHASIZED
+    PARTICIPANT, ORIGINAL, UPDATED, STATUS, NONE, EMPHASIZED, REFERENCE
 }
