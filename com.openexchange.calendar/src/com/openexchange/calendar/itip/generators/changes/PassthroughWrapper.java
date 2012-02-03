@@ -86,5 +86,9 @@ public class PassthroughWrapper implements TypeWrapper {
 	public String emphasiszed(Object argument) {
 		return none(argument);
 	}
+	
+	public String reference(Object argument) {
+		return none(argument);
+	}
 
 }

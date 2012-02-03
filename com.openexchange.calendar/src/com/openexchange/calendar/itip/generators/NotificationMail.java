@@ -49,6 +49,7 @@
 
 package com.openexchange.calendar.itip.generators;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -60,6 +61,7 @@ import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
+import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Change;
 import com.openexchange.groupware.container.Difference;
@@ -94,9 +96,12 @@ public class NotificationMail {
     private List<NotificationParticipant> resources;
 
     private NotificationParticipant actor;
+    
+    private List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
 
 	private Type stateType;
-    
+	
+	private boolean attachmentUpdate;
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -261,9 +266,20 @@ public class NotificationMail {
     public void setSubject(String subject) {
         this.subject = subject;
     }
+    
+    public void setAttachmentUpdate(boolean attachmentUpdate) {
+		this.attachmentUpdate = attachmentUpdate;
+	}
+    
+    public boolean isAttachmentUpdate() {
+		return attachmentUpdate;
+	}
 
     public boolean shouldBeSent() {
-    	if (recipient.getConfiguration().forceCancelMails() && isCancelMail() && !endsInPast(appointment)) {
+    	if (endsInPast(appointment)) {
+    		return false;
+    	}
+    	if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
     		return true;
     	}
     	if (appointment != null && appointment.containsNotification() && !appointment.getNotification()) {
@@ -276,11 +292,11 @@ public class NotificationMail {
     	                        && isNotWorthUpdateNotification(original, appointment)) {
     	    return false;
     	}
-    	if (appointment != null && stateType.equals(Type.DELETED) && endsInPast(appointment)) {
+    	if (appointment != null && stateType.equals(Type.DELETED)) {
     	    return false;
     	}
     	if (appointment != null && (stateType.equals(Type.ACCEPTED) || stateType.equals(Type.DECLINED) 
-    	                        || stateType.equals(Type.TENTATIVELY_ACCEPTED)) && endsInPast(appointment)) {
+    	                        || stateType.equals(Type.TENTATIVELY_ACCEPTED))) {
     	    return false;
     	}
     	if (! anInterestingFieldChanged()) {
@@ -357,6 +373,9 @@ public class NotificationMail {
     	if (getDiff() == null) {
     		return true;
     	}
+    	if (isAttachmentUpdate()) {
+    		return true;
+    	}
     	Set<String> changedFields = new HashSet<String>(getDiff().getDifferingFieldNames());
     	
     	changedFields.removeAll(FIELDS_TO_IGNORE);
@@ -379,7 +398,7 @@ public class NotificationMail {
             return false;
         }
         
-        // Hm, okay, so no let's see if any participants were added or removed. That also means this mail is not only about state changes.
+        // Hm, okay, so now let's see if any participants were added or removed. That also means this mail is not only about state changes.
         for(String field: new String[]{AppointmentFields.PARTICIPANTS, AppointmentFields.USERS, AppointmentFields.CONFIRMATIONS}) {
             FieldUpdate update = getDiff().getUpdateFor(field);
             if (update == null) {
@@ -435,7 +454,13 @@ public class NotificationMail {
 		this.stateType = stateType;
 	}
     
+    public void addAttachment(AttachmentMetadata attachment) {
+    	attachments.add(attachment);
+    }
     
+    public List<AttachmentMetadata> getAttachments() {
+		return attachments;
+	}
     
     
 }

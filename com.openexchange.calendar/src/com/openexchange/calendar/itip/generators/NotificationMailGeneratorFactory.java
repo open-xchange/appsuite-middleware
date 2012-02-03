@@ -70,14 +70,17 @@ public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactor
     private NotificationParticipantResolver resolver;
     private ITipIntegrationUtility util;
     
+    private AttachmentMemory attachmentMemory;
     private ServiceLookup services;
     
     
-    public NotificationMailGeneratorFactory(NotificationParticipantResolver resolver, ITipIntegrationUtility util, ServiceLookup services) {
+    
+    public NotificationMailGeneratorFactory(NotificationParticipantResolver resolver, ITipIntegrationUtility util, ServiceLookup services, AttachmentMemory attachmentMemory) {
         super();
         this.resolver = resolver;
         this.util = util;
         this.services = services;
+        this.attachmentMemory = attachmentMemory;
     }
 
 
@@ -87,7 +90,7 @@ public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactor
         User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
         User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);
         
-        NotificationMailGenerator generator = new NotificationMailGenerator(services, resolver, util, original, appointment, user, onBehalfOf, ctx, session);
+        NotificationMailGenerator generator = new NotificationMailGenerator(services, attachmentMemory, resolver, util, original, appointment, user, onBehalfOf, ctx, session);
         
         return generator;
     }
