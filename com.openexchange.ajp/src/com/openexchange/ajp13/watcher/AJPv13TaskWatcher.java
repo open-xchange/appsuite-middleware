@@ -148,6 +148,8 @@ public class AJPv13TaskWatcher {
 
     private static class TimerTaskRunnable implements Runnable {
 
+        private static final long MAX_PROC_TIME = 300000;
+
         private final Collection<com.openexchange.ajp13.watcher.Task> tasks;
 
         private final org.apache.commons.logging.Log log;
@@ -181,8 +183,11 @@ public class AJPv13TaskWatcher {
                      */
                     final Collection<com.openexchange.threadpool.Task<Object>> tasks =
                         new ArrayList<com.openexchange.threadpool.Task<Object>>();
+                    final long now = System.currentTimeMillis();
+                    final long maxLogTime = now - AJPv13Config.getAJPWatcherMaxRunningTime();
+                    final long max = now - MAX_PROC_TIME;
                     for (final com.openexchange.ajp13.watcher.Task ajPv13Task : this.tasks) {
-                        tasks.add(new TaskRunCallable(ajPv13Task, countWaiting, countProcessing, countExceeded, true, log));
+                        tasks.add(new TaskRunCallable(maxLogTime, max, ajPv13Task, countWaiting, countProcessing, countExceeded, true, log));
                     }
                     /*
                      * Invoke all and wait for being executed
@@ -222,8 +227,10 @@ public class AJPv13TaskWatcher {
                      */
                     final Collection<com.openexchange.threadpool.Task<Object>> tasks =
                         new ArrayList<com.openexchange.threadpool.Task<Object>>();
+                    final long now = System.currentTimeMillis();
+                    final long max = now - MAX_PROC_TIME;
                     for (final com.openexchange.ajp13.watcher.Task ajPv13Task : this.tasks) {
-                        tasks.add(new TaskRunCallable(ajPv13Task, logExceededTasks, log));
+                        tasks.add(new SimpleTaskRunCallable(max, ajPv13Task));
                     }
                     /*
                      * Invoke all and wait for being executed
@@ -242,7 +249,9 @@ public class AJPv13TaskWatcher {
 
         private final boolean logExceededTasks;
 
-        private final boolean hasPermission;
+        private final long maxLogTime;
+
+        private final long max;
 
         private final AtomicInteger waiting;
 
@@ -255,25 +264,6 @@ public class AJPv13TaskWatcher {
         private final boolean info;
 
         /**
-         * Initializes a new {@link TaskRunCallable} to only perform keep-alive on given AJP task.
-         *
-         * @param task The AJP task
-         * @param logExceededTasks Whether to log exceeded tasks
-         * @param log The logger
-         */
-        public TaskRunCallable(final com.openexchange.ajp13.watcher.Task task, final boolean logExceededTasks, final org.apache.commons.logging.Log log) {
-            super();
-            this.logExceededTasks = logExceededTasks;
-            this.task = task;
-            hasPermission = false;
-            exceeded = null;
-            processing = null;
-            waiting = null;
-            this.log = log;
-            info = log.isInfoEnabled();
-        }
-
-        /**
          * Initializes a new {@link TaskRunCallable} fully tracking given AJP task.
          *
          * @param task The AJP task
@@ -283,11 +273,12 @@ public class AJPv13TaskWatcher {
          * @param logExceededTasks Whether to log exceeded tasks
          * @param log The logger
          */
-        public TaskRunCallable(final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final boolean logExceededTasks, final org.apache.commons.logging.Log log) {
+        public TaskRunCallable(final long maxLogTime, final long max, final com.openexchange.ajp13.watcher.Task task, final AtomicInteger waiting, final AtomicInteger processing, final AtomicInteger exceeded, final boolean logExceededTasks, final org.apache.commons.logging.Log log) {
             super();
+            this.maxLogTime = maxLogTime;
+            this.max = max;
             this.logExceededTasks = logExceededTasks;
             this.task = task;
-            hasPermission = true;
             this.exceeded = exceeded;
             this.processing = processing;
             this.waiting = waiting;
@@ -297,44 +288,26 @@ public class AJPv13TaskWatcher {
 
         @Override
         public Object call() {
-            if (hasPermission) {
-                if (task.isWaitingOnAJPSocket()) {
-                    waiting.incrementAndGet();
-                }
-                if (task.isProcessing()) {
+            if (task.isWaitingOnAJPSocket()) {
+                waiting.incrementAndGet();
+            }
+            if (task.isProcessing()) {
+                /*
+                 * Task is currently processing
+                 */
+                processing.incrementAndGet();
+                if (task.getProcessingStartTime() < maxLogTime) {
                     /*
-                     * Task is currently processing
+                     * Task exceeded max. running time
                      */
-                    processing.incrementAndGet();
-                    final long currentProcTime = (System.currentTimeMillis() - task.getProcessingStartTime());
-                    if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
-                        /*
-                         * Task exceeded max. running time
-                         */
-                        exceeded.incrementAndGet();
-                        handleExceededTask(currentProcTime);
-                    }
-                }
-            } else {
-                if (task.isProcessing()) {
-                    /*
-                     * Task is currently processing
-                     */
-                    final long currentProcTime = (System.currentTimeMillis() - task.getProcessingStartTime());
-                    if (currentProcTime > AJPv13Config.getAJPWatcherMaxRunningTime()) {
-                        /*
-                         * Task exceeded max. running time
-                         */
-                        handleExceededTask(currentProcTime);
-                    }
+                    exceeded.incrementAndGet();
+                    handleExceededTask();
                 }
             }
             return null;
         }
 
-        private static final long MAX_PROC_TIME = 300000;
-
-        private void handleExceededTask(final long currentProcTime) {
+        private void handleExceededTask() {
             if (task.isLongRunning()) {
                 return;
             }
@@ -344,11 +317,13 @@ public class AJPv13TaskWatcher {
             if (logExceededTasks && info) {
                 final Throwable t = new Throwable();
                 t.setStackTrace(task.getStackTrace());
-                log.info(new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append(
-                    "\" exceeds max. running time of ").append(AJPv13Config.getAJPWatcherMaxRunningTime()).append(
-                    "msec -> Processing time: ").append(currentProcTime).append("msec").toString(), t);
+                log.info(
+                    new StringBuilder(128).append("AJP Listener \"").append(task.getThreadName()).append("\" exceeds max. running time of ").append(
+                        AJPv13Config.getAJPWatcherMaxRunningTime()).append("msec -> Processing time: ").append(
+                        System.currentTimeMillis() - task.getProcessingStartTime()).append("msec").toString(),
+                    t);
             }
-            if (currentProcTime > MAX_PROC_TIME) {
+            if (task.getProcessingStartTime() < max) {
                 task.cancel();
             }
         }
@@ -369,5 +344,47 @@ public class AJPv13TaskWatcher {
         }
 
     } // End of TaskRunCallable class
+
+    private static final class SimpleTaskRunCallable implements com.openexchange.threadpool.Task<Object> {
+
+        private final com.openexchange.ajp13.watcher.Task task;
+
+        private final long max;
+
+        public SimpleTaskRunCallable(final long max, final com.openexchange.ajp13.watcher.Task task) {
+            super();
+            this.max = max;
+            this.task = task;
+        }
+
+        @Override
+        public Object call() {
+            if (task.isProcessing()) {
+                /*
+                 * Task is currently processing
+                 */
+                if (task.getProcessingStartTime() < max) {
+                    task.cancel();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public void afterExecute(final Throwable t) {
+            // NOP
+        }
+
+        @Override
+        public void beforeExecute(final Thread t) {
+            // NOP
+        }
+
+        @Override
+        public void setThreadName(final ThreadRenamer threadRenamer) {
+            // NOP
+        }
+
+    } // End of SimpleTaskRunCallable class
 
 }
