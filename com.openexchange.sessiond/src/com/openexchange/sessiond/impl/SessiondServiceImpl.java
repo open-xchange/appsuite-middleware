@@ -109,6 +109,11 @@ public class SessiondServiceImpl implements SessiondService {
     }
 
     @Override
+    public void removeContextSessions(final int contextId) {
+        SessionHandler.removeContextSessions(contextId, true);
+    }
+
+    @Override
     public int getUserSessions(final int userId, final int contextId) {
         return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
     }

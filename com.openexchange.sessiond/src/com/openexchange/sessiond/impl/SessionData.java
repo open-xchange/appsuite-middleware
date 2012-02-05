@@ -51,12 +51,10 @@ package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -97,7 +95,7 @@ final class SessionData {
 
     // The LongTermUserGuardian contains an entry for a given UserKey if the longTermList contains a session for the user
     // This is used to guard against potentially slow serial searches of the long term sessions
-    private final Set<UserKey> longTermUserGuardian = new HashSet<UserKey>();
+    private final UserRefCounter longTermUserGuardian = new UserRefCounter();
 
     private final Lock wlongTermLock;
     private final Lock rlongTermLock;
@@ -197,7 +195,7 @@ final class SessionData {
                                     try {
                                         final SessionMap first = longTermList.getFirst();
                                         first.putBySessionId(session.getSessionID(), sessionControl);
-                                        longTermUserGuardian.add(new UserKey(session.getUserId(), session.getContextId()));
+                                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
                                     } finally {
                                         wlongTermLock.unlock();
                                     }
@@ -233,8 +231,9 @@ final class SessionData {
                 try {
                     final SessionMap first = longTermList.getFirst();
                     for (final SessionControl control : retval) {
-                        first.putBySessionId(control.getSession().getSessionID(), control);
-                        longTermUserGuardian.add(new UserKey(control.getSession().getUserId(), control.getSession().getContextId()));
+                        final SessionImpl session = control.getSession();
+                        first.putBySessionId(session.getSessionID(), control);
+                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
                     }
                 } finally {
                     wlongTermLock.unlock();
@@ -253,7 +252,8 @@ final class SessionData {
             final List<SessionControl> retval = new ArrayList<SessionControl>();
             retval.addAll(longTermList.removeLast().values());
             for (final SessionControl sessionControl : retval) {
-                longTermUserGuardian.remove(new UserKey(sessionControl.getSession().getUserId(), sessionControl.getSession().getContextId()));
+                final SessionImpl session = sessionControl.getSession();
+                longTermUserGuardian.remove(session.getUserId(), session.getContextId());
             }
             return retval;
         } finally {
@@ -289,7 +289,11 @@ final class SessionData {
     }
 
     private final boolean hasLongTermSession(final int userId, final int contextId) {
-        return this.longTermUserGuardian.contains(new UserKey(userId, contextId));
+        return this.longTermUserGuardian.contains(userId, contextId);
+    }
+
+    private final boolean hasLongTermSession(final int contextId) {
+        return this.longTermUserGuardian.contains(contextId);
     }
 
     SessionControl[] removeUserSessions(final int userId, final int contextId) {
@@ -317,8 +321,8 @@ final class SessionData {
                     final SessionControl control = iter.next();
                     final Session session = control.getSession();
                     if ((session.getContextId() == contextId) && (session.getUserId() == userId)) {
-                        //iter.remove();
                         longTerm.removeBySessionId(session.getSessionID());
+                        longTermUserGuardian.remove(userId, contextId);
                         retval.add(control);
                     }
                 }
@@ -327,6 +331,43 @@ final class SessionData {
             wlongTermLock.unlock();
         }
         return retval.toArray(new SessionControl[retval.size()]);
+    }
+
+    List<SessionControl> removeContextSessions(final int contextId) {
+        // Removing sessions is a write operation.
+        final List<SessionControl> list = new ArrayList<SessionControl>();
+        wlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                list.addAll(Arrays.asList(container.removeSessionsByContext(contextId)));
+            }
+            for (final SessionControl control : list) {
+                unscheduleTask2MoveSession2FirstContainer(control.getSession().getSessionID());
+            }
+        } finally {
+            wlock.unlock();
+        }
+        wlongTermLock.lock();
+        try {
+            if (!hasLongTermSession(contextId)) {
+                return list;
+            }
+            for (final SessionMap longTerm : longTermList) {
+                final Iterator<SessionControl> iter = longTerm.values().iterator();
+                while (iter.hasNext()) {
+                    final SessionControl control = iter.next();
+                    final Session session = control.getSession();
+                    if (session.getContextId() == contextId) {
+                        longTerm.removeBySessionId(session.getSessionID());
+                        longTermUserGuardian.remove(session.getUserId(), contextId);
+                        list.add(control);
+                    }
+                }
+            }
+        } finally {
+            wlongTermLock.unlock();
+        }
+        return list;
     }
 
     public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
@@ -718,7 +759,8 @@ final class SessionData {
                     continue;
                 }
                 sessionList.getFirst().putSessionControl(control);
-                longTermUserGuardian.remove(new UserKey(control.getSession().getUserId(), control.getSession().getContextId()));
+                final SessionImpl session = control.getSession();
+                longTermUserGuardian.remove(session.getUserId(), session.getContextId());
                 LOG.trace("Moved from long term container " + i + " to first one.");
                 movedSession = true;
             }

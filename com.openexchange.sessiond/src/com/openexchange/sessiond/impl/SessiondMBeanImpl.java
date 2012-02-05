@@ -75,4 +75,9 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
         return SessionHandler.removeUserSessions(userId, contextId, true).length;
     }
 
+    @Override
+    public void clearContextSessions(final int contextId) {
+        SessionHandler.removeContextSessions(contextId, true);
+    }
+
 }

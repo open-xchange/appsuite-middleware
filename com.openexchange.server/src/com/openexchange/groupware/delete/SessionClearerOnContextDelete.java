@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,48 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.groupware.delete;
+
+import java.sql.Connection;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.sessiond.SessiondService;
+
 
 /**
- * {@link SessiondMBean} - The MBean for sessiond
+ * {@link SessionClearerOnContextDelete} - Clears foreign caches on context delete.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface SessiondMBean {
-
-    public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
+public final class SessionClearerOnContextDelete extends ContextDelete {
 
     /**
-     * Clears all sessions belonging to the user identified by given user ID in specified context
-     *
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     * Initializes a new {@link SessionClearerOnContextDelete}.
      */
-    public int clearUserSessions(int userId, int contextId);
+    public SessionClearerOnContextDelete() {
+        super();
+    }
 
-    /**
-     * Clears all sessions belonging to specified context
-     * 
-     * @param contextId The context ID
-     */
-    public void clearContextSessions(int contextId);
+    @Override
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+        if (!isContextDelete(event)) {
+            return;
+        }
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionClearerOnContextDelete.class));
+        /*
+         * Get cache service
+         */
+        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null == service) {
+            logger.warn(SessiondService.class.getSimpleName() + " is absent.");
+            return;
+        }
+        /*
+         * Clear context sessions
+         */
+        service.removeContextSessions(event.getContext().getContextId());
+    }
 
 }
