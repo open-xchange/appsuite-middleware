@@ -153,7 +153,7 @@ public final class SessionCache {
                 try {
                     element = cache.get(key);
                     if (null != element) {
-                        cache.remove(key);
+                        cache.localRemove(key);
                     }
                 } finally {
                     readLock.lock();

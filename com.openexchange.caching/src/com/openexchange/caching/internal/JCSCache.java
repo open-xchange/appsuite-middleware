@@ -50,9 +50,14 @@
 package com.openexchange.caching.internal;
 
 import java.io.Serializable;
+import java.lang.reflect.Field;
 import org.apache.jcs.JCS;
+import org.apache.jcs.access.CacheAccess;
 import org.apache.jcs.access.exception.ObjectExistsException;
 import org.apache.jcs.engine.behavior.ICacheElement;
+import org.apache.jcs.engine.control.CompositeCache;
+import org.apache.jcs.engine.control.group.GroupAttrName;
+import org.apache.jcs.engine.control.group.GroupId;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheElement;
 import com.openexchange.caching.CacheExceptionCode;
@@ -67,12 +72,14 @@ import com.openexchange.exception.OXException;
 
 /**
  * {@link JCSCache} - A cache implementation that uses the <a href="http://jakarta.apache.org/jcs/">JCS</a> caching system.
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JCSCache implements Cache {
 
     private final JCS cache;
+
+    private final CompositeCache cacheControl;
 
     /**
      * Initializes a new {@link JCSCache}
@@ -80,6 +87,16 @@ public final class JCSCache implements Cache {
     public JCSCache(final JCS cache) {
         super();
         this.cache = cache;
+        // Init CompositeCache reference
+        CompositeCache tmp;
+        try {
+            final Field cacheControlField = CacheAccess.class.getDeclaredField("cacheControl");
+            cacheControlField.setAccessible(true);
+            tmp = (CompositeCache) cacheControlField.get(cache);
+        } catch (final Exception e) {
+            tmp = null;
+        }
+        cacheControl = tmp;
     }
 
     @Override
@@ -186,8 +203,27 @@ public final class JCSCache implements Cache {
     }
 
     @Override
+    public void localRemove(final Serializable key) throws OXException {
+        try {
+            cacheControl.localRemove(key);
+        } catch (final Exception e) {
+            throw CacheExceptionCode.FAILED_REMOVE.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public void removeFromGroup(final Serializable key, final String group) {
         cache.remove(key, group);
+    }
+
+    @Override
+    public void localRemoveFromGroup(final Serializable key, final String group) {
+        final GroupAttrName groupAttrName = getGroupAttrName(group, key);
+        this.cacheControl.localRemove(groupAttrName);
+    }
+
+    private GroupAttrName getGroupAttrName(final String group, final Object name) {
+        return new GroupAttrName(new GroupId(this.cacheControl.getCacheName(), group), name);
     }
 
     @Override
