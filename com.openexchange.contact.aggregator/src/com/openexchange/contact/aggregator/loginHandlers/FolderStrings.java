@@ -47,29 +47,18 @@
  *
  */
 
-package com.openexchange.config.cascade;
+package com.openexchange.contact.aggregator.loginHandlers;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link ConfigView}
+ * {@link FolderStrings}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ConfigView {
+public class FolderStrings implements LocalizableStrings {
 
-    <T> void set(String scope, String property, T value) throws OXException;
-
-    <T> T get(String property, Class<T> coerceTo) throws OXException;
-
-    <T> T opt(String property, Class<T> coerceTo, T defaultValue) throws OXException;
-
-    <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws OXException;
-
-    <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws OXException;
-
-    Map<String, ComposedConfigProperty<String>> all() throws OXException;
+    public static final String DEFAULT_AGGREGATION_CONTACT_FOLDER_NAME = "All my contacts";
 
 }

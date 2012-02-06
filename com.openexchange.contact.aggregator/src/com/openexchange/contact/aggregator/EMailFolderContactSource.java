@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.aggregator.osgi;
+package com.openexchange.contact.aggregator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +57,6 @@ import java.util.Set;
 import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -68,17 +67,17 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link EMailFolderContactSource}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class EMailFolderContactSource implements ContactSource {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(EMailFolderContactSource.class));
-
+    private static final Log LOG = LogFactory.getLog(EMailFolderContactSource.class);
+    
     private final MailFolderDiscoverer discoverer;
     private int limit = 3000;
-
+    
 
     public EMailFolderContactSource(final MailFolderDiscoverer discoverer, final int limit) {
         this.discoverer = discoverer;
@@ -165,8 +164,6 @@ public class EMailFolderContactSource implements ContactSource {
                 }
 
             }
-        } catch (final OXException e) {
-            throw e;
         } finally {
             if (mailInterface != null) {
                 mailInterface.close(true);
@@ -187,5 +184,10 @@ public class EMailFolderContactSource implements ContactSource {
     public Type getType() {
         return Type.CONTRIBUTOR;
     }
+    
+    public Speed getSpeed() {
+        return Speed.SLOW;
+    }
+
 
 }

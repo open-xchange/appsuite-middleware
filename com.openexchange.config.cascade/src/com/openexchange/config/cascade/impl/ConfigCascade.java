@@ -145,6 +145,12 @@ public class ConfigCascade implements ConfigViewFactory {
         }
 
         @Override
+        public <T> T opt(final String property, final java.lang.Class<T> coerceTo, final T defaultValue) throws OXException {
+            final ComposedConfigProperty<T> p = property(property, coerceTo);
+            return p.isDefined() ? p.get() : defaultValue;
+        }
+
+        @Override
         public <T> ConfigProperty<T> property(final String scope, final String property, final Class<T> coerceTo) throws OXException {
             return new CoercingConfigProperty<T>(coerceTo, providers.get(scope).get(property, context, user), stringParser);
         }

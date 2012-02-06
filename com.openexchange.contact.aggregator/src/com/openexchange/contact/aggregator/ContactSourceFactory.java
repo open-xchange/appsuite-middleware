@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.aggregator.osgi;
+package com.openexchange.contact.aggregator;
 
 import java.util.List;
 import com.openexchange.tools.session.ServerSession;
@@ -60,4 +60,5 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface ContactSourceFactory {
     List<ContactSource> getSources(ServerSession session) throws Exception;
+    public ContactSource.Speed getSpeed();
 }
