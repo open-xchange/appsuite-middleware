@@ -47,64 +47,48 @@
  *
  */
 
-package com.openexchange.groupware.delete;
+package com.openexchange.caching;
 
-import java.sql.Connection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
-import com.openexchange.caching.InvalidatedMarker;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.sessiond.SessiondService;
-
+import java.io.Serializable;
 
 /**
- * {@link SessionClearerOnContextDelete} - Clears foreign caches on context delete.
- *
+ * {@link InvalidatedMarker} - A simple marker for an invalidated entity.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessionClearerOnContextDelete extends ContextDelete {
+public final class InvalidatedMarker<T> implements Serializable {
+
+    private static final long serialVersionUID = 7202966861003492335L;
 
     /**
-     * Initializes a new {@link SessionClearerOnContextDelete}.
+     * Creates a new invalidated marker.
+     * 
+     * @param identifier The identifier
+     * @return A new invalidated marker
      */
-    public SessionClearerOnContextDelete() {
-        super();
+    public static <T> InvalidatedMarker<T> newInstance(final T identifier) {
+        return new InvalidatedMarker<T>(identifier);
     }
 
-    @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
-        if (!isContextDelete(event)) {
-            return;
-        }
-        final int contextId = event.getContext().getContextId();
-        /*
-         * Get cache service
-         */
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                final Cache sessionCache = cacheService.getCache("SessionCache");
-                sessionCache.put(Integer.valueOf(contextId), InvalidatedMarker.newInstance(Integer.valueOf(contextId)));
-            } catch (final OXException e) {
-                // Ignore
-            }
-        }
-        /*
-         * Get SessionD service
-         */
-        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null == service) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionClearerOnContextDelete.class));
-            logger.warn(SessiondService.class.getSimpleName() + " is absent.");
-        } else {
-            /*
-             * Clear context sessions
-             */
-            service.removeContextSessions(contextId);
-        }
+    private final T identifier;
+
+    /**
+     * Initializes a new {@link InvalidatedMarker}.
+     * 
+     * @param identifier The identifier
+     */
+    private InvalidatedMarker(final T identifier) {
+        super();
+        this.identifier = identifier;
+    }
+
+    /**
+     * Gets the identifier
+     * 
+     * @return The identifier
+     */
+    public T getIdentifier() {
+        return identifier;
     }
 
 }

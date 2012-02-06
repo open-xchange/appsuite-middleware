@@ -1,3 +1,7 @@
+* 2012-02-05 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21467: Checking for possibly invalidated context
+
 * 2012-02-03 - thorben.betten@open-xchange.com
 
  - Fix for bug 21452: Allow creation of Unified Mail account
