@@ -1,3 +1,8 @@
+* 2012-02-06 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21456: Exclude trash-calendar from synchronization via CalDAV interface
+ - Fix for bug 21473: Specify all columns in request that might be used later 
+
 * 2012-02-06 - thorben.betten@open-xchange.com
 
  - Fix for bug 21469: Fixed possible NPE
