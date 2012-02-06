@@ -99,6 +99,7 @@ import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
@@ -829,7 +830,7 @@ public class Login extends AJAXServlet {
             ResponseWriter.write(response, resp.getWriter());
         } finally {
             if (LogProperties.isEnabled()) {
-                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final Props properties = LogProperties.getLogProperties();
                 properties.remove("com.openexchange.session.sessionId");
                 properties.remove("com.openexchange.session.userId");
                 properties.remove("com.openexchange.session.contextId");
@@ -943,7 +944,7 @@ public class Login extends AJAXServlet {
             } else {
                 final Session session = result.getSession();
                 // Store associated session
-                SessionServlet.rememberSession(req, new ServerSessionAdapter(session, result.getContext(), result.getUser()));
+                SessionServlet.rememberSession(req, ServerSessionAdapter.valueOf(session, result.getContext(), result.getUser()));
                 writeSecretCookie(resp, session, session.getHash(), req.isSecure());
 
                 // Login response is unfortunately not conform to default responses.

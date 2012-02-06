@@ -159,7 +159,7 @@ public class Subscription extends TargetFolderDefinition {
             return session;
         }
         try {
-            return new ServerSessionAdapter(new TargetFolderSession(this));
+            return ServerSessionAdapter.valueOf(new TargetFolderSession(this));
         } catch (OXException e) {
             return null;
         }

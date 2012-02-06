@@ -69,7 +69,7 @@ public class UploadSource extends Task {
     private String url;
     private String user;
     private String pass;
-    private String project;
+    private String bsProject;
     private String packageName;
     private Path files;
 
@@ -90,7 +90,7 @@ public class UploadSource extends Task {
     }
 
     public void setProject(final String project) {
-        this.project = project;
+        this.bsProject = project;
     }
 
     public void setPackageName(final String packageName) {
@@ -104,14 +104,14 @@ public class UploadSource extends Task {
 
     @Override
     public void execute() throws BuildException {
-        BuildServiceClient client = new BuildServiceClient(user, pass, url);
-        String[] list = files.list();
-        final File[] fFiles = new File[files.list().length];
+        final BuildServiceClient client = new BuildServiceClient(user, pass, url);
+        final String[] list = files.list();
+        final File[] fFiles = new File[list.length];
         for (int i = 0; i < list.length; i++) {
             fFiles[i] = new File(list[i]);
         }
         try {
-            client.uploadSourcePackage(project, packageName, fFiles);
+            client.uploadSourcePackage(bsProject, packageName, fFiles);
         } catch (HttpException e) {
             throw new BuildException(e.getMessage(), e);
         } catch (XPathExpressionException e) {

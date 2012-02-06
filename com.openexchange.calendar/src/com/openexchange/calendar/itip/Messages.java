@@ -58,12 +58,14 @@ import com.openexchange.i18n.LocalizableStrings;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class Messages implements LocalizableStrings {
-    // Explanations
     public static final String REQUESTED_A_REFRESHER = "An attendee would like to be brought up to date about this appointment.";
     
-    // Actions
     
-    // Errors
+    /**
+     * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
+     */
+    public static final String HAS_ATTACHMENTS = "This appointment has attachments, please see the appointment at %1$s to retrieve them.";
+    
     public static final String ADD_TO_UNKNOWN = "The organizer would like to create an exception for an recurring appointment that is unknown. Either ignore this update, or ask the organizer to again send you the recurrence.";
     public static final String ADD_WOULD_OVERWRITE_EXISTING_EXCEPTION = "The organizer would like to change the occurrence of a recurrence on a day that already contains such a change. The server can only store one change for a series per day.";
     public static final String CANCEL_UNKNOWN_APPOINTMENT = "The organizer would like to cancel an appointment that could not be found.";
@@ -75,7 +77,11 @@ public class Messages implements LocalizableStrings {
     public static final String REFRESH_FOR_UNKNOWN = "An attendee wants to be brought up to date about an appointment that does not seem to exist. It was probably deleted at some point. It is best to just ignore this message.";
     public static final String ALREADY_UPDATED = "This message contains appointment updates that were already accepted by another user. You do not need to do anything with this message.";
     public static final String INTERNAL_MAIL = "This message comes from an internal user. You do not need to do anything with this message.";
-
+    
+    public static final String ATTACHMENTS_CHANGED = "The attachments to the appointment have changed";
+    
+    public static final String FIELDS_CHANGED = "One or more other fields have been updated";
+    
     public static final String RESERVERD = "Reserved";
 
     public static final String TEMPORARY = "Temporary";

@@ -56,6 +56,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.InvalidatedMarker;
 import com.openexchange.caching.objects.CachedSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -128,6 +129,41 @@ public final class SessionCache {
                     singleton = null;
                 }
             }
+        }
+    }
+
+    /**
+     * Checks if cache contains invalidate marker for given context.
+     *
+     * @param contextId The context identifier
+     * @return <code>true</code> if present in cache; otherwise <code>false</code>
+     * @throws OXException If a caching error occurs
+     */
+    public boolean containsInvalidateMarker(final int contextId) throws OXException {
+        final Cache cache = getCache();
+        final Lock readLock = readWriteLock.readLock();
+        readLock.lock();
+        try {
+            final Integer key = Integer.valueOf(contextId);
+            Object element = cache.get(key);
+            if ((null != element) && (element instanceof InvalidatedMarker) && (contextId == ((InvalidatedMarker) element).getIdentifier())) {
+                final Lock writeLock = readWriteLock.writeLock();
+                readLock.unlock();
+                writeLock.lock();
+                try {
+                    element = cache.get(key);
+                    if (null != element) {
+                        cache.remove(key);
+                    }
+                } finally {
+                    readLock.lock();
+                    writeLock.unlock();
+                }
+                return true;
+            }
+            return false;
+        } finally {
+            readLock.unlock();
         }
     }
 

@@ -1,0 +1,5 @@
+open-xchange-imap (7.0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Feb 2012 17:03:11 +0100

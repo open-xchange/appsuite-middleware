@@ -180,6 +180,7 @@ public final class DeleteRegistry {
             new AttachmentContextDelete(),
             new AttachmentDelDelete(),
             new CacheClearerOnContextDelete(),
+            new SessionClearerOnContextDelete(),
             /*
              * Insert folder delete listener
              */

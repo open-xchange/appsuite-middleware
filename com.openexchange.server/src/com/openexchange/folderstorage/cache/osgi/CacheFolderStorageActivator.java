@@ -303,9 +303,14 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
     protected static String sanitizeFolderId(final String id) {
         String fid = id;
         if (fid.startsWith(DEFAULT)) {
-            final Matcher matcher = PAT_FIX.matcher(fid);
-            if (matcher.matches()) {
-                fid = DEFAULT + matcher.group(1);
+            try {
+                final Matcher matcher = PAT_FIX.matcher(fid);
+                if (matcher.matches()) {
+                    fid = DEFAULT + matcher.group(1);
+                }
+            } catch (final Exception e) {
+                LOG.warn("Couldn't sanitize folder identifier: " + id + ". Returning unchanged.", e);
+                return id;
             }
         }
         return fid;

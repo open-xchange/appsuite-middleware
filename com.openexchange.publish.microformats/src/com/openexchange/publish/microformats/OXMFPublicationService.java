@@ -74,6 +74,7 @@ import com.openexchange.publish.interfaces.UserSpecificPublicationTarget;
 import com.openexchange.publish.tools.PublicationSession;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -177,7 +178,7 @@ public class OXMFPublicationService extends AbstractPublicationService {
             if (templateName == null || "".equals(templateName)) {
                 return templateService.loadTemplate(defaultTemplateName);
             }
-            final ServerSessionAdapter serverSession = new ServerSessionAdapter(new PublicationSession(publication));
+            final ServerSession serverSession = ServerSessionAdapter.valueOf(new PublicationSession(publication));
             return templateService.loadTemplate(templateName, defaultTemplateName, serverSession);
         } catch (final OXException e) {
             throw e;

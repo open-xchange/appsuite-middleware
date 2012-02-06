@@ -314,7 +314,7 @@ public class ParticipantNotifyTest extends TestCase {
         sessObj.setUsername("2000");
         sessObj.setContextId(ctx.getContextId());
 
-        session = new ServerSessionAdapter(sessObj,ctx);
+        session = ServerSessionAdapter.valueOf(sessObj,ctx);
 
 
         // inject test instance as message sender

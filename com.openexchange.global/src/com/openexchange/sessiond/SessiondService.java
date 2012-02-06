@@ -113,6 +113,13 @@ public interface SessiondService {
     public int removeUserSessions(final int userId, final Context ctx);
 
     /**
+     * Removes all sessions belonging to given context.
+     *
+     * @param contextId The context identifier
+     */
+    public void removeContextSessions(final int contextId);
+
+    /**
      * Gets the number of active sessions belonging to given user in specified context.
      *
      * @param userId The user identifier

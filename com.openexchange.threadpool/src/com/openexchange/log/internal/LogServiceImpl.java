@@ -60,6 +60,7 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogService;
 import com.openexchange.log.Loggable;
 import com.openexchange.log.Loggable.Level;
+import com.openexchange.log.Props;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.AbortBehavior;
 
@@ -132,7 +133,8 @@ public final class LogServiceImpl implements LogService {
     public Loggable loggableFor(final Level level, final Log log, final String message, final Throwable throwable) {
         final LoggableImpl loggable = new LoggableImpl(level, log, message, throwable, new Throwable());
         if (LogProperties.isEnabled()) {
-            loggable.putProperties(LogProperties.optLogProperties());
+            final Props props = LogProperties.optLogProperties();
+            loggable.putProperties(null == props ? null : props.getMap());
         }
         return loggable;
     }
@@ -141,7 +143,8 @@ public final class LogServiceImpl implements LogService {
     public Loggable loggableFor(final Level level, final Log log, final String message) {
         final LoggableImpl loggable = new LoggableImpl(level, log, message, null, new Throwable());
         if (LogProperties.isEnabled()) {
-            loggable.putProperties(LogProperties.optLogProperties());
+            final Props props = LogProperties.optLogProperties();
+            loggable.putProperties(null == props ? null : props.getMap());
         }
         return loggable;
     }

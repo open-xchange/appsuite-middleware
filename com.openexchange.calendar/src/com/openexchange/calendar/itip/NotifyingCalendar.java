@@ -53,8 +53,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.calendar.itip.generators.AttachmentMemory;
 import com.openexchange.calendar.itip.generators.ITipMailGenerator;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.generators.NotificationMail;
@@ -74,6 +80,7 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 
 /**
@@ -83,28 +90,91 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class NotifyingCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
 
-    private final AppointmentSQLInterface delegate;
+	private static final Log LOG = LogFactory.getLog(NotifyingCalendar.class);
 
+	private final AppointmentSQLInterface delegate;
 
     private final MailSenderService sender;
 
     private final ITipMailGeneratorFactory generators;
 
-
     private final CalendarCollection calendarCollection;
 
+	private AttachmentMemory attachmentMemory;
+	
+	private static class AppointmentAddress {
+		private int id;
+		private int cid;
+		public AppointmentAddress(int id, int cid) {
+			super();
+			this.id = id;
+			this.cid = cid;
+		}
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + cid;
+			result = prime * result + id;
+			return result;
+		}
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AppointmentAddress other = (AppointmentAddress) obj;
+			if (cid != other.cid)
+				return false;
+			if (id != other.id)
+				return false;
+			return true;
+		}
+		
+	}
+	
+	private static ConcurrentHashMap<AppointmentAddress, AppointmentAddress> createNewLimbo = new ConcurrentHashMap<AppointmentAddress, AppointmentAddress>();
 
 
-    public NotifyingCalendar(final ITipMailGeneratorFactory generators, final MailSenderService sender, final AppointmentSQLInterface delegate, final ServiceLookup services, final Session session) {
+    public NotifyingCalendar(final ITipMailGeneratorFactory generators, final MailSenderService sender, final AppointmentSQLInterface delegate, AttachmentMemory attachmentMemory, final ServiceLookup services, final Session session) {
         super(session, services);
         this.delegate = delegate;
         this.generators = generators;
         this.sender = sender;
+        this.attachmentMemory = attachmentMemory;
+        
         calendarCollection = new CalendarCollection();
     }
 
     public long attachmentAction(final int objectId, final int uid, final int folderId, final Session session, final Context c, final int numberOfAttachments) throws OXException {
-        return delegate.attachmentAction(objectId, uid, folderId, session, c, numberOfAttachments);
+    	attachmentMemory.rememberAttachmentChange(uid, c.getContextId());
+    	
+    	long retval = delegate.attachmentAction(objectId, uid, folderId, session, c, numberOfAttachments);
+    	// Trigger Update Mail unless attachment is in create new limbo
+    	if (!createNewLimbo.containsKey(new AppointmentAddress(uid, c.getContextId()))) {
+    		try {
+        		final CalendarDataObject reloaded = getObjectById(uid);
+                final ITipMailGenerator generator = generators.create(reloaded, reloaded, session, onBehalfOf(folderId));
+                final List<NotificationParticipant> recipients = generator.getRecipients();
+                for (final NotificationParticipant notificationParticipant : recipients) {
+                    NotificationMail mail;
+                    mail = generator.generateUpdateMailFor(notificationParticipant);
+                    if (mail != null) {
+                    	if (mail.getStateType() == null) {
+                    		mail.setStateType(State.Type.MODIFIED);
+                    	}
+                        sender.sendMail(mail, session);
+                    }
+                }
+    		} catch (SQLException e) {
+    			throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+    		}
+    	}
+    	return retval;
+    	
     }
 
     public boolean checkIfFolderContainsForeignObjects(final int user_id, final int inFolder, final Connection readCon) throws OXException, SQLException {

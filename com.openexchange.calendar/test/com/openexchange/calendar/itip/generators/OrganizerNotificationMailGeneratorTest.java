@@ -94,7 +94,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         util.setExceptions(Arrays.asList(exc));
         
         
-        NotificationMailGenerator generator = new NotificationMailGenerator(null, resolver, util, null, appointment, user, user, null, session);
+        NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, null, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateCreateMailFor("external1@otherdomain.ox");
         assertNotNull(notificationMail);
         assertEquals("external1@otherdomain.ox", notificationMail.getRecipient().getEmail());
@@ -124,7 +124,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         exc.setObjectID(13);
         util.setExceptions(Arrays.asList(exc));
     
-        NotificationMailGenerator generator = new NotificationMailGenerator(null, resolver, util, original, appointment, user, user, null, session);
+        NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateUpdateMailFor("external1@otherdomain.ox");
 
         assertNotNull(notificationMail);
@@ -153,7 +153,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         Appointment master = createTestAppointment();
 
     
-        NotificationMailGenerator generator = new NotificationMailGenerator(null, resolver, util, master, appointment, user, user, null, session);
+        NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, master, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateCreateExceptionMailFor("external1@otherdomain.ox");
 
         assertNotNull(notificationMail);
@@ -183,7 +183,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         exc.setObjectID(13);
         util.setExceptions(Arrays.asList(exc));
     
-        NotificationMailGenerator generator = new NotificationMailGenerator(null, resolver, util, original, appointment, user, user, null, session);
+        NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateUpdateMailFor("external1@otherdomain.ox");
 
         ITipMessage message = notificationMail.getMessage();
@@ -211,7 +211,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         exc.setObjectID(13);
         util.setExceptions(Arrays.asList(exc));
     
-        NotificationMailGenerator generator = new NotificationMailGenerator(null, resolver, util, original, appointment, user, user, null, session);
+        NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, original, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateUpdateMailFor("internal1@domain.ox");
 
         ITipMessage message = notificationMail.getMessage();
@@ -234,7 +234,7 @@ public class OrganizerNotificationMailGeneratorTest extends AbstractMailGenerato
         Appointment appointment = createTestAppointment();
         
         
-        NotificationMailGenerator generator = new NotificationMailGenerator(null, resolver, util, null, appointment, user, user, null, session);
+        NotificationMailGenerator generator = new NotificationMailGenerator(null, null, resolver, util, null, appointment, user, user, null, session);
         NotificationMail notificationMail = generator.generateDeleteMailFor("external1@otherdomain.ox");
         assertNotNull(notificationMail);
         assertEquals("external1@otherdomain.ox", notificationMail.getRecipient().getEmail());

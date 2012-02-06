@@ -366,7 +366,7 @@ public class PermissionTest extends TestCase implements SessionHolder {
             document.setFileName(fileName);
             document.setFolderId(testFolder.getObjectID());
             final InputStream data = new ByteArrayInputStream(new byte[] {1});
-            infostore.saveDocument(document,data,System.currentTimeMillis(), new ServerSessionAdapter(session, getContext()));
+            infostore.saveDocument(document,data,System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, getContext()));
             return document;
         } catch (final Exception x) {
             infostore.rollback();

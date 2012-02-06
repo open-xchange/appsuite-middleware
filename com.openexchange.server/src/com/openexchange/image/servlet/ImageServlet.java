@@ -62,6 +62,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.ServiceException;
 import com.openexchange.ajax.Login;
 import com.openexchange.ajax.SessionServlet;
@@ -91,8 +93,7 @@ import com.openexchange.user.UserService;
  */
 public final class ImageServlet extends HttpServlet {
 
-    private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ImageServlet.class));
+    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ImageServlet.class));
 
     private static final int BUFLEN = 0xFFFF;
 

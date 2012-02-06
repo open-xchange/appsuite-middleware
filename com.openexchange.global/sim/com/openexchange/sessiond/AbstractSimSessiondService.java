@@ -61,12 +61,12 @@ import com.openexchange.session.Session;
 public class AbstractSimSessiondService implements SessiondService {
 
     @Override
-    public String addSession(AddSessionParameter parameterObject) {
+    public String addSession(final AddSessionParameter parameterObject) {
         return null;
     }
 
     @Override
-    public void changeSessionPassword(String sessionId, String newPassword) {
+    public void changeSessionPassword(final String sessionId, final String newPassword) {
         // TODO Auto-generated method stub
     }
 
@@ -81,7 +81,7 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
-    public Session getSessionByAlternativeId(String altId) {
+    public Session getSessionByAlternativeId(final String altId) {
         return null;
     }
 
@@ -121,12 +121,21 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
-    public Session getAnyActiveSessionForUser(int userId, int contextId) {
+    public Session getAnyActiveSessionForUser(final int userId, final int contextId) {
         return null;
     }
 
     @Override
-    public Session findFirstMatchingSessionForUser(int userId, int contextId, SessionMatcher matcher) {
+    public Session findFirstMatchingSessionForUser(final int userId, final int contextId, final SessionMatcher matcher) {
         return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.sessiond.SessiondService#removeContextSessions(int)
+     */
+    @Override
+    public void removeContextSessions(final int contextId) {
+        // TODO Auto-generated method stub
+        
     }
 }

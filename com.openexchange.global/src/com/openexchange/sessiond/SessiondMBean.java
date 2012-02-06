@@ -67,4 +67,11 @@ public interface SessiondMBean {
      */
     public int clearUserSessions(int userId, int contextId);
 
+    /**
+     * Clears all sessions belonging to specified context
+     * 
+     * @param contextId The context ID
+     */
+    public void clearContextSessions(int contextId);
+
 }

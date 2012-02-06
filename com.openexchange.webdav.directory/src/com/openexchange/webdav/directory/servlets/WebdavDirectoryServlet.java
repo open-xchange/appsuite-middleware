@@ -149,7 +149,7 @@ public class WebdavDirectoryServlet extends OXServlet {
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
         ServerSession session;
         try {
-            session = new ServerSessionAdapter(getSession(req));
+            session = ServerSessionAdapter.valueOf(getSession(req));
         } catch (final OXException exc) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;

@@ -49,12 +49,13 @@
 
 package com.openexchange.sessiond.impl;
 
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
@@ -74,12 +75,12 @@ final class SessionContainer {
 
     private final Lock sessionIdMapLock = new ReentrantLock();
 
-    private final ConcurrentMap<UserKey, Map<String, Object>> userSessions;
+    private final ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<Map<String, Object>>> userSessions;
 
     SessionContainer() {
         super();
         sessionMap = new SessionMap();
-        userSessions = new ConcurrentHashMap<UserKey, Map<String, Object>>();
+        userSessions = new ConcurrentTIntObjectHashMap<ConcurrentTIntObjectHashMap<Map<String, Object>>>(32);
     }
 
     /**
@@ -119,7 +120,8 @@ final class SessionContainer {
      * @return <code>true</code> if this container contains an entry for specified user; otherwise <code>false</code>
      */
     boolean containsUser(final int userId, final int contextId) {
-        return userSessions.containsKey(new UserKey(userId, contextId));
+        final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        return null != map && map.contains(userId);
     }
 
     /**
@@ -130,7 +132,11 @@ final class SessionContainer {
      * @return The number of sessions bound to specified user in specified context
      */
     int numOfUserSessions(final int userId, final int contextId) {
-        final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
+        final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        if (null == map) {
+            return 0;
+        }
+        final Map<String, Object> sessionIds = map.get(userId);
         return null == sessionIds ? 0 : sessionIds.size();
     }
 
@@ -162,7 +168,11 @@ final class SessionContainer {
      * @return The sessions bound to specified user ID and context ID
      */
     SessionControl[] getSessionsByUser(final int userId, final int contextId) {
-        final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
+        final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        if (null == map) {
+            return new SessionControl[0];
+        }
+        final Map<String, Object> sessionIds = map.get(userId);
         if (null == sessionIds) {
             return new SessionControl[0];
         }
@@ -174,7 +184,11 @@ final class SessionContainer {
     }
 
     public SessionControl getAnySessionByUser(final int userId, final int contextId) {
-        final Map<String, Object> sessionIds = userSessions.get(new UserKey(userId, contextId));
+        final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        if (null == map) {
+            return null;
+        }
+        final Map<String, Object> sessionIds = map.get(userId);
         if (sessionIds == null) {
         	return null;
         }
@@ -217,11 +231,20 @@ final class SessionContainer {
             sessionIdMapLock.unlock();
         }
         // Add session ID to user-sessions-map
-        final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-        Map<String, Object> sessionIds = userSessions.get(key);
+        final int contextId = session.getContextId();
+        ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        if (null == map) {
+            final ConcurrentTIntObjectHashMap<Map<String, Object>> newMap = new ConcurrentTIntObjectHashMap<Map<String,Object>>(32);
+            map = userSessions.putIfAbsent(contextId, newMap);
+            if (null == map) {
+                map = newMap;
+            }
+        }
+        final int userId = session.getUserId();
+        Map<String, Object> sessionIds = map.get(userId);
         if (sessionIds == null) {
             final Map<String, Object> newSet = new ConcurrentHashMap<String, Object>();
-            sessionIds = userSessions.putIfAbsent(key, newSet);
+            sessionIds = map.putIfAbsent(userId, newSet);
             if (null == sessionIds) {
                 sessionIds = newSet;
             }
@@ -245,11 +268,21 @@ final class SessionContainer {
             final String login2 = sessionControl.getSession().getLogin();
             throw SessionExceptionCodes.SESSIONID_COLLISION.create(login1, login2);
         }
-        final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-        Map<String, Object> sessionIds = userSessions.get(key);
+        // Add session ID to user-sessions-map
+        final int contextId = session.getContextId();
+        ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        if (null == map) {
+            final ConcurrentTIntObjectHashMap<Map<String, Object>> newMap = new ConcurrentTIntObjectHashMap<Map<String,Object>>(32);
+            map = userSessions.putIfAbsent(contextId, newMap);
+            if (null == map) {
+                map = newMap;
+            }
+        }
+        final int userId = session.getUserId();
+        Map<String, Object> sessionIds = map.get(userId);
         if (sessionIds == null) {
             final Map<String, Object> newSet = new ConcurrentHashMap<String, Object>();
-            sessionIds = userSessions.putIfAbsent(key, newSet);
+            sessionIds = map.putIfAbsent(userId, newSet);
             if (null == sessionIds) {
                 sessionIds = newSet;
             }
@@ -267,11 +300,44 @@ final class SessionContainer {
         final SessionControl sessionControl = sessionMap.removeBySessionId(sessionId);
         if (sessionControl != null) {
             final Session session = sessionControl.getSession();
-            final UserKey key = new UserKey(session.getUserId(), session.getContextId());
-            final Map<String, Object> sessionIds = userSessions.get(key);
+            final int contextId = session.getContextId();
+            ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+            if (null == map) {
+                return sessionControl;
+            }
+            if (map.isEmpty()) {
+                final Lock l = userSessions.getReadWriteLock().writeLock();
+                l.lock();
+                try {
+                    map = userSessions.get(contextId);
+                    if (null == map) {
+                        return sessionControl;
+                    }
+                    if (map.isEmpty()) {
+                        userSessions.remove(contextId);
+                        return sessionControl;
+                    }
+                } finally {
+                    l.unlock();
+                }
+            }
+            final int userId = session.getUserId();
+            Map<String, Object> sessionIds = map.get(userId);
+            if (sessionIds == null) {
+                return sessionControl;
+            }
             sessionIds.remove(sessionId);
             if (sessionIds.isEmpty()) {
-                userSessions.remove(key);
+                final Lock l = map.getReadWriteLock().writeLock();
+                l.lock();
+                try {
+                    sessionIds = map.get(userId);
+                    if (null != sessionIds && sessionIds.isEmpty()) {
+                        map.remove(userId);
+                    }
+                } finally {
+                    l.unlock();
+                }
             }
         }
         return sessionControl;
@@ -285,9 +351,31 @@ final class SessionContainer {
      * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
      */
     SessionControl[] removeSessionsByUser(final int userId, final int contextId) {
-        final UserKey key = new UserKey(userId, contextId);
-        final Map<String, Object> sessionIds = userSessions.remove(key);
+        ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.get(contextId);
+        if (null == map) {
+            return new SessionControl[0];
+        }
+        if (map.isEmpty()) {
+            final Lock l = userSessions.getReadWriteLock().writeLock();
+            l.lock();
+            try {
+                map = userSessions.get(contextId);
+                if (null == map) {
+                    return new SessionControl[0];
+                }
+                if (map.isEmpty()) {
+                    userSessions.remove(contextId);
+                    return new SessionControl[0];
+                }
+            } finally {
+                l.unlock();
+            }
+        }
+        final Map<String, Object> sessionIds = map.remove(userId);
         if (sessionIds == null) {
+            return new SessionControl[0];
+        }
+        if (sessionIds.isEmpty()) {
             return new SessionControl[0];
         }
         final List<SessionControl> l = new ArrayList<SessionControl>(sessionIds.size());
@@ -297,6 +385,38 @@ final class SessionContainer {
                 l.add(sc);
             }
         }
+        return l.toArray(new SessionControl[l.size()]);
+    }
+
+    /**
+     * Removes the sessions bound to specified context ID.
+     *
+     * @param contextId The context ID
+     * @return The {@link SessionControl session controls} previously associated with specified user ID and context ID.
+     */
+    SessionControl[] removeSessionsByContext(final int contextId) {
+        final ConcurrentTIntObjectHashMap<Map<String, Object>> map = userSessions.remove(contextId);
+        if (null == map) {
+            return new SessionControl[0];
+        }
+        if (map.isEmpty()) {
+            return new SessionControl[0];
+        }
+        final List<SessionControl> l = new ArrayList<SessionControl>(128);
+        final SessionMap sessionMap = this.sessionMap;
+        map.forEachValue(new TObjectProcedure<Map<String, Object>>() {
+
+            @Override
+            public boolean execute(final Map<String, Object> sessionIds) {
+                for (final String sessionId : sessionIds.keySet()) {
+                    final SessionControl sc = sessionMap.removeBySessionId(sessionId);
+                    if (sc != null) {
+                        l.add(sc);
+                    }
+                }
+                return true;
+            }
+        });
         return l.toArray(new SessionControl[l.size()]);
     }
 

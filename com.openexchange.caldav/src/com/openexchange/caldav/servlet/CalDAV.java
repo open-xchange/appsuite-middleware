@@ -168,7 +168,7 @@ public class CalDAV extends OXServlet {
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final Action action) throws ServletException, IOException {
         ServerSession session;
         try {
-            session = new ServerSessionAdapter(getSession(req));
+            session = ServerSessionAdapter.valueOf(getSession(req));
             if (!checkPermission(session)) {
                 resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 return;

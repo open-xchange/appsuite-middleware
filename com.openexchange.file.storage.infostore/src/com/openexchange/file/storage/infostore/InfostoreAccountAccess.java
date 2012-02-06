@@ -74,7 +74,7 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
 
     public InfostoreAccountAccess(final Session session, final InfostoreFileStorageService service) throws OXException {
         try {
-            this.session = new ServerSessionAdapter(session);
+            this.session = ServerSessionAdapter.valueOf(session);
             this.service = service;
         } catch (final OXException e) {
             throw new OXException(e);

@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.tools.session;
 
 import com.openexchange.exception.OXException;
@@ -63,17 +62,18 @@ import com.openexchange.session.Session;
 
 /**
  * {@link ServerSessionAdapter}
- *
+ * 
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ServerSessionAdapter implements ServerSession {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServerSessionAdapter.class));
+    private static final org.apache.commons.logging.Log LOG =
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ServerSessionAdapter.class));
 
     /**
      * Gets the server session for specified session.
-     *
+     * 
      * @param session The session
      * @return The appropriate server session
      * @throws OXException If context cannot be resolved
@@ -83,6 +83,51 @@ public class ServerSessionAdapter implements ServerSession {
             return (ServerSession) session;
         }
         return null == session ? null : new ServerSessionAdapter(session);
+    }
+
+    /**
+     * Gets the server session for specified session.
+     * 
+     * @param session The session
+     * @param context The associated context
+     * @return The appropriate server session
+     */
+    public static ServerSession valueOf(final Session session, final Context context) {
+        if (ServerSession.class.isInstance(session)) {
+            return (ServerSession) session;
+        }
+        return null == session ? null : new ServerSessionAdapter(session, context);
+    }
+
+    /**
+     * Gets the server session for specified session.
+     * 
+     * @param session The session
+     * @param context The associated context
+     * @param user The user
+     * @return The appropriate server session
+     */
+    public static ServerSession valueOf(final Session session, final Context context, final User user) {
+        if (ServerSession.class.isInstance(session)) {
+            return (ServerSession) session;
+        }
+        return null == session ? null : new ServerSessionAdapter(session, context, user);
+    }
+
+    /**
+     * Gets the server session for specified session.
+     * 
+     * @param session The session
+     * @param context The associated context
+     * @param user The user
+     * @param userConfiguration The user configuration
+     * @return The appropriate server session
+     */
+    public static ServerSession valueOf(final Session session, final Context context, final User user, final UserConfiguration userConfiguration) {
+        if (ServerSession.class.isInstance(session)) {
+            return (ServerSession) session;
+        }
+        return null == session ? null : new ServerSessionAdapter(session, context, user, userConfiguration);
     }
 
     private Session session;
@@ -99,7 +144,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     *
+     * 
      * @param session The delegate session
      * @throws OXException If context look-up fails
      */
@@ -115,7 +160,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     *
+     * 
      * @param session The delegate session
      * @param ctx The session's context object
      */
@@ -131,7 +176,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     *
+     * 
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object
@@ -149,7 +194,7 @@ public class ServerSessionAdapter implements ServerSession {
 
     /**
      * Initializes a new {@link ServerSessionAdapter}.
-     *
+     * 
      * @param session The delegate session
      * @param ctx The session's context object
      * @param user The session's user object

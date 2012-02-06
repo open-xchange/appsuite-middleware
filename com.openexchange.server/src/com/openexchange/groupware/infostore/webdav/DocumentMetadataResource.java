@@ -940,7 +940,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
     }
 
     private ServerSession getSession() {
-        return new ServerSessionAdapter(sessionHolder.getSessionObject(), sessionHolder.getContext());
+        return ServerSessionAdapter.valueOf(sessionHolder.getSessionObject(), sessionHolder.getContext());
 
     }
 }

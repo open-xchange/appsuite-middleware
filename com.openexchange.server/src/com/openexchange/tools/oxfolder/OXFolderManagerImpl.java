@@ -1681,7 +1681,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         try {
             infostoreFacade.startTransaction();
             try {
-                infostoreFacade.removeDocument(folderID, System.currentTimeMillis(), new ServerSessionAdapter(session, ctx));
+                infostoreFacade.removeDocument(folderID, System.currentTimeMillis(), ServerSessionAdapter.valueOf(session, ctx));
                 infostoreFacade.commit();
             } catch (final OXException x) {
                 infostoreFacade.rollback();

@@ -21,7 +21,7 @@ public class ServerSessionFactory {
      * @return A server session.
      */
     public static ServerSession createServerSession(final int userid, final Context ctx, final String sessionid) {
-        return new ServerSessionAdapter(SessionObjectWrapper.createSessionObject(userid, ctx, "blupp"), ctx);
+        return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(userid, ctx, "blupp"), ctx);
     }
 
     /**
@@ -34,6 +34,6 @@ public class ServerSessionFactory {
      * @throws OXException If context look-up fails
      */
     public static ServerSession createServerSession(final int userid, final int contextid, final String sessionid) throws OXException {
-        return new ServerSessionAdapter(SessionObjectWrapper.createSessionObject(userid, contextid, sessionid));
+        return ServerSessionAdapter.valueOf(SessionObjectWrapper.createSessionObject(userid, contextid, sessionid));
     }
 }

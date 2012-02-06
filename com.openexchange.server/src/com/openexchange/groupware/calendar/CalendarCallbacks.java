@@ -121,7 +121,7 @@ public class CalendarCallbacks implements CalendarListener {
         if(ServerSession.class.isAssignableFrom(session.getClass())) {
             return (ServerSession) session;
         }
-        return new ServerSessionAdapter(session);
+        return ServerSessionAdapter.valueOf(session);
     }
 
     @Override

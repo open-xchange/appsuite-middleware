@@ -877,7 +877,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         if (s instanceof ServerSession) {
             return (ServerSession) s;
         }
-        return new ServerSessionAdapter(s);
+        return ServerSessionAdapter.valueOf(s);
     }
 
     private static final class Pair {

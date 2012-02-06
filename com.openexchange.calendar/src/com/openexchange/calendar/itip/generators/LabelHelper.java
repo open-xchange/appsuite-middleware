@@ -274,6 +274,14 @@ public class LabelHelper {
     	return template.replaceAll("\\[hostname\\]", hostname).replaceAll("\\[uiwebpath\\]", webpath).replaceAll("\\[module\\]", module).replaceAll("\\[object\\]", objectId+"").replaceAll("\\[folder\\]", folder+"");
     }
     
+    public String getAttachmentNote() {
+    	if (mail.getAttachments().isEmpty() || mail.getRecipient().isExternal()) {
+    		return "";
+    	}
+    	String directLink = getDirectLink();
+    	return new Sentence(Messages.HAS_ATTACHMENTS).add(directLink, ArgumentType.REFERENCE).getMessage(wrapper, locale);
+    }
+    
 
     
     

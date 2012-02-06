@@ -154,7 +154,7 @@ public final class Tools {
              */
             return account;
         }
-        final ServerSession serverSession = session instanceof ServerSession ? (ServerSession) session : new ServerSessionAdapter(session);
+        final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final MailAccountDescription mad = new MailAccountDescription();
         mad.setId(accountId);
         final Set<Attribute> attributes = EnumSet.noneOf(Attribute.class);

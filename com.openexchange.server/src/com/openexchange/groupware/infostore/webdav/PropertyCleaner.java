@@ -81,7 +81,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
 	@Override
     public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
-            final ServerSession sessionObj = new ServerSessionAdapter(session);
+            final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
             folderProperties.startTransaction();
 			folderProperties.removeAll(folderObj.getObjectID(), sessionObj.getContext());
 			folderProperties.commit();
@@ -111,7 +111,7 @@ public class PropertyCleaner implements FolderEventInterface, InfostoreEventInte
     public void infoitemDeleted(final DocumentMetadata metadata,
 			final Session session) {
 		try {
-            final ServerSession sessionObject = new ServerSessionAdapter(session);
+            final ServerSession sessionObject = ServerSessionAdapter.valueOf(session);
             infoProperties.startTransaction();
 			infoProperties.removeAll(metadata.getId(), sessionObject.getContext());
 			infoProperties.commit();

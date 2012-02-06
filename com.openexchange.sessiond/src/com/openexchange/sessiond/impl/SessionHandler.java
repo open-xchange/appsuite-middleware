@@ -168,6 +168,28 @@ public final class SessionHandler {
     }
 
     /**
+     * Removes all sessions associated with given context.
+     *
+     * @param contextId The context ID
+     * @param propagate <code>true</code> for remote removal; otherwise <code>false</code>
+     */
+    public static void removeContextSessions(final int contextId, final boolean propagate) {
+        final List<SessionControl> list = sessionData.removeContextSessions(contextId);
+        if (propagate) {
+            for (final SessionControl sessionControl : list) {
+                try {
+                    SessionCache.getInstance().putCachedSessionForRemoteRemoval(sessionControl.getSession().createCachedSession());
+                } catch (final OXException e) {
+                    LOG.error("Remote removal failed for session " + sessionControl.getSession().getSecret(), e);
+                }
+            }
+        }
+        if (INFO) {
+            LOG.info(new StringBuilder(64).append(propagate ? "Remote" : "Local").append(" removal of sessions: Context=").append(contextId).toString());
+        }
+    }
+
+    /**
      * Gets all sessions associated with given user in specified context
      *
      * @param userId The user ID

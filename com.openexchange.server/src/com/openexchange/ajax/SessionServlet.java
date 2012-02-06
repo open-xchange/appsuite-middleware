@@ -56,7 +56,6 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -89,6 +88,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.Props;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -286,7 +286,7 @@ public abstract class SessionServlet extends AJAXServlet {
         } finally {
             ThreadLocalSessionHolder.getInstance().setSession(null);
             if (LogProperties.isEnabled()) {
-                final Map<String, Object> properties = LogProperties.getLogProperties();
+                final Props properties = LogProperties.getLogProperties();
                 properties.remove("com.openexchange.session.sessionId");
                 properties.remove("com.openexchange.session.userId");
                 properties.remove("com.openexchange.session.contextId");
@@ -367,7 +367,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 LOG.error("Cookies could not be removed.", e2);
             } finally {
                 if (LogProperties.isEnabled()) {
-                    final Map<String, Object> properties = LogProperties.getLogProperties();
+                    final Props properties = LogProperties.getLogProperties();
                     properties.remove("com.openexchange.session.sessionId");
                     properties.remove("com.openexchange.session.userId");
                     properties.remove("com.openexchange.session.contextId");
@@ -505,7 +505,7 @@ public abstract class SessionServlet extends AJAXServlet {
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
         if (LogProperties.isEnabled()) {
-            final Map<String, Object> properties = LogProperties.getLogProperties();
+            final Props properties = LogProperties.getLogProperties();
             properties.put("com.openexchange.session.sessionId", sessionId);
             properties.put("com.openexchange.session.userId", Integer.valueOf(session.getUserId()));
             properties.put("com.openexchange.session.contextId", Integer.valueOf(session.getContextId()));
@@ -532,7 +532,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
-            return new ServerSessionAdapter(session, context, user);
+            return ServerSessionAdapter.valueOf(session, context, user);
         } catch (final OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 /*

@@ -103,6 +103,15 @@ public class HTMLWrapper extends PassthroughWrapper {
         }
         return "<span class='"+string+"'>"+argument.toString()+"</span>";
     }
+    
+    @Override
+    public String reference(Object argument) {
+        if (argument == null) {
+            return "";
+        }
+        String string = argument.toString();
+    	return "<a href=\""+string+"\">"+string+"</a>";
+    }
 
 
 }

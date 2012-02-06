@@ -165,7 +165,7 @@ public class InfostorePublicationServlet extends HttpServlet {
             if(mustSelfDestruct(publication)) {
                 destroy(publication);
                 if(mustDestroyDocument(publication) && ! hasMorePublications(publication.getContext(), document)) {
-                    final ServerSessionAdapter session = new ServerSessionAdapter(new PublicationSession(publication), publication.getContext());
+                    final ServerSession session = ServerSessionAdapter.valueOf(new PublicationSession(publication), publication.getContext());
                     destroy(session, document);
                 }
             }
@@ -203,7 +203,7 @@ public class InfostorePublicationServlet extends HttpServlet {
 
 
     private void configureHeaders(final DocumentMetadata document, final HttpServletRequest req, final HttpServletResponse resp) throws UnsupportedEncodingException {
-        String fileName = document.getFileName();
+        final String fileName = document.getFileName();
         if(fileName != null) {
             resp.setHeader("Content-Disposition", "attachment; filename=\""
                 + Helper.encodeFilename(fileName, "UTF-8", isIE(req)) + "\"");

@@ -347,7 +347,7 @@ public final class FolderWriter extends DataWriter {
         this.userConfig = UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx);
         this.ctx = ctx;
         this.fields = fields;
-        this.session = new ServerSessionAdapter(session, ctx, user, userConfig);
+        this.session = ServerSessionAdapter.valueOf(session, ctx, user, userConfig);
     }
 
     private static TimeZone getTimeZoneBySession(final Session session, final Context ctx) {
