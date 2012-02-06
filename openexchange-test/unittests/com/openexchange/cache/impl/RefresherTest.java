@@ -218,6 +218,16 @@ public class RefresherTest extends TestCase {
                 public void setDefaultElementAttributes(final ElementAttributes attr) {
                     throw new UnsupportedOperationException();
                 }
+                @Override
+                public void localRemove(final Serializable key) throws OXException {
+                    // TODO Auto-generated method stub
+                    
+                }
+                @Override
+                public void localRemoveFromGroup(final Serializable key, final String group) {
+                    // TODO Auto-generated method stub
+                    
+                }
             };
             @Override
             public void freeCache(final String name) {

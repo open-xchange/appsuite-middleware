@@ -56,7 +56,7 @@ import java.io.Serializable;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class InvalidatedMarker<T> implements Serializable {
+public final class InvalidatedMarker<T extends Serializable> implements Serializable {
 
     private static final long serialVersionUID = 7202966861003492335L;
 
@@ -66,7 +66,7 @@ public final class InvalidatedMarker<T> implements Serializable {
      * @param identifier The identifier
      * @return A new invalidated marker
      */
-    public static <T> InvalidatedMarker<T> newInstance(final T identifier) {
+    public static <T extends Serializable> InvalidatedMarker<T> newInstance(final T identifier) {
         return new InvalidatedMarker<T>(identifier);
     }
 
