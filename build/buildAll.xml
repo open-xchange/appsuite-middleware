@@ -9,11 +9,6 @@
     <property name="mainDir" value=".."/>
     <property name="checkoutDir" value="${mainDir}"/>
 
-	<property name="bsProject"  value="open-xchange-7-test"/>
-	<property name="bsApiUrl"   value="http://buildapi.netline.de"/>
-	<property name="bsUser"     value="oxbuilduser"/>
-	<property name="bsPassword" value="openxchange"/>
-
     <import file="antExtensions.xml"/>
 
     <target name="prepare" depends="antExtensions" description="Reads the ProjectSet PSF file and generates the repository properties for each project listed there.">
@@ -26,19 +21,9 @@
     </target>
 
     <target name="buildPackage" description="Calls the build.xml with the packageName.">
-        <ant antfile="build.xml" target="clean">
-            <property name="packageName" value="${packageName}"/>
-        </ant>
-        <ant antfile="build.xml" target="${allBuildType}">
-            <property name="packageName" value="${packageName}"/>
-        	<property name="bsProject"  value="${bsProject}"/>
-        	<property name="bsApiUrl"   value="${bsApiUrl}"/>
-        	<property name="bsUser"     value="${bsUser}"/>
-        	<property name="bsPassword" value="${bsPass}"/>
-        </ant>
-        <ant antfile="build.xml" target="clean">
-            <property name="packageName" value="${packageName}"/>
-        </ant>
+        <ant antfile="build.xml" target="clean"/>
+        <ant antfile="build.xml" target="${allBuildType}"/>
+        <ant antfile="build.xml" target="clean"/>
     </target>
 
     <target name="setBuild" description="Sets the build type to build and install all bundles.">
@@ -53,8 +38,8 @@
         <foreach list="${packageList}" target="buildPackage" param="packageName" inheritall="true"/>
     </target>
 
-	<target name="upload" depends="setUpload,prepare" description="Reads project set and uploads all packages to build service.">
-		<foreach list="${packageList}" target="buildPackage" param="packageName" inheritall="true"/>
-	</target>
+    <target name="upload" depends="setUpload,prepare" description="Reads project set and uploads all packages to build service.">
+        <foreach list="${packageList}" target="buildPackage" param="packageName" inheritall="true"/>
+    </target>
 
 </project>
