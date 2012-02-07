@@ -84,6 +84,8 @@ public interface ITipIntegrationUtility {
 
     Appointment reloadAppointment(Appointment appointment, Session session) throws OXException;
     
+    Appointment loadAppointment(Appointment appointment, Session session) throws OXException;
+
     int getFolderIdForUser(int appId, int userId, int contextId) throws OXException;
 
 }

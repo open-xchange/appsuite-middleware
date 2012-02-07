@@ -91,14 +91,16 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
         this.mailGenerators = mailGenerators;
     }
     
-    protected Appointment determineOriginalAppointment(ITipChange change, Map<String, CalendarDataObject> processed, Session session) {
-        // TODO: Use Black Magic to obtain an appointment
+    protected Appointment determineOriginalAppointment(ITipChange change, Map<String, CalendarDataObject> processed, Session session) throws OXException {
         Appointment currentAppointment = change.getCurrentAppointment();
         if (currentAppointment == null) {
             if (change.isException()) {
                 currentAppointment = change.getMasterAppointment();
                 if (currentAppointment == null) {
                     currentAppointment = processed.get(change.getNewAppointment().getUid());
+                    if (currentAppointment == null) {
+                    	currentAppointment = util.loadAppointment(change.getNewAppointment(), session);
+                    }
                 }
             }
         }
