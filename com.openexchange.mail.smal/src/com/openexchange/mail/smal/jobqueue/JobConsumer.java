@@ -116,13 +116,18 @@ final class JobConsumer extends AbstractTask<Object> {
         public String getIdentifier() {
             return "poison";
         }
+
+        @Override
+        public boolean forcedRun() {
+            return false;
+        }
     };
 
     private static final int NUM_OF_MAX_CONCURRENT_WORKERS = Runtime.getRuntime().availableProcessors() << 1;
 
     private final BlockingQueue<Job> queue;
 
-    private final ConcurrentMap<String, Job> identifiers;
+    protected final ConcurrentMap<String, Job> identifiers;
 
     private final AtomicBoolean keepgoing;
 
@@ -288,8 +293,8 @@ final class JobConsumer extends AbstractTask<Object> {
          * Check if canceled in the meantime
          */
         if (job.isCanceled()) {
-            identifiers.remove(job.getIdentifier());
-            decrementJobCount();
+            job.afterExecute(null);
+            jobCleanUp(job);
             if (debug) {
                 LOG.debug("Aborted execution of canceled job: " + job.getIdentifier());
             }
@@ -306,47 +311,47 @@ final class JobConsumer extends AbstractTask<Object> {
             }
             return;
         }
-        try {
-            if (consumerMayPerformTasks) {
-                if (semaphore.tryAcquire()) {
-                    // Further concurrent worker allowed
-                    final Future<Object> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.getInstance());
-                    job.future = future;
-                } else {
-                    // Execute with "Job-Consumer" thread
-                    final JobWrapper jobWrapper = wrapperFor(job, false, debug);
-                    boolean ran = false;
-                    jobWrapper.beforeExecute(Thread.currentThread());
-                    try {
-                        jobWrapper.call();
-                        ran = true;
-                        jobWrapper.afterExecute(null);
-                    } catch (final Throwable t) {
-                        if (!ran) {
-                            afterExecute(t);
-                        }
-                        // Else the exception occurred within afterExecute itself in which case we don't want to call it again.
-                        LOG.warn("Exception occurred within afterExecute().", t);
-                    } finally {
-                        Thread.interrupted();
-                    }
-                }
-            } else {
-                if (debug) {
-                    LOG.debug("Awaiting free worker thread to execute job: " + job.getIdentifier());
-                }
-                semaphore.acquire();
-                // Free worker
-                final Future<Object> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.getInstance());
+        /*
+         * Perform that job
+         */
+        if (consumerMayPerformTasks) {
+            if (semaphore.tryAcquire()) {
+                // Further concurrent worker allowed
+                final Future<Void> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.<Void> getInstance());
                 job.future = future;
+            } else {
+                // Execute with "Job-Consumer" thread
+                final JobWrapper jobWrapper = wrapperFor(job, false, debug);
+                boolean ran = false;
+                jobWrapper.beforeExecute(Thread.currentThread());
+                try {
+                    jobWrapper.call();
+                    ran = true;
+                    jobWrapper.afterExecute(null);
+                } catch (final Throwable t) {
+                    if (!ran) {
+                        afterExecute(t);
+                    }
+                    // Else the exception occurred within afterExecute itself in which case we don't want to call it again.
+                    LOG.warn("Exception occurred within afterExecute().", t);
+                } finally {
+                    Thread.interrupted();
+                }
             }
-        } finally {
-            /*
-             * Last, but not least, remove from known identifiers if done
-             */
-            identifiers.remove(job.getIdentifier());
-            decrementJobCount();
+        } else {
+            if (debug) {
+                LOG.debug("Awaiting free worker thread to execute job: " + job.getIdentifier());
+            }
+            semaphore.acquire();
+            // Free worker
+            final Future<Void> future = threadPool.submit(wrapperFor(job, true, debug), CallerRunsBehavior.<Void> getInstance());
+            job.future = future;
         }
+    }
+
+    protected void jobCleanUp(final Job job) {
+        identifiers.remove(job.getIdentifier());
+        decrementJobCount();
     }
 
     private void decrementJobCount() {
@@ -363,7 +368,7 @@ final class JobConsumer extends AbstractTask<Object> {
         return new JobWrapper(job, releasePermit, debug);
     }
 
-    private final class JobWrapper implements Task<Object> {
+    private final class JobWrapper implements Task<Void> {
 
         private final Job job;
 
@@ -391,6 +396,7 @@ final class JobConsumer extends AbstractTask<Object> {
 
         @Override
         public void afterExecute(final Throwable t) {
+            jobCleanUp(job);
             if (releasePermit) {
                 semaphore.release();
             }
@@ -399,7 +405,7 @@ final class JobConsumer extends AbstractTask<Object> {
         }
 
         @Override
-        public Object call() throws Exception {
+        public Void call() throws Exception {
             if (!debug) {
                 return job.call();
             }

@@ -65,7 +65,7 @@ import com.openexchange.threadpool.ThreadRenamer;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class Job implements Task<Object>, Comparable<Job>, Serializable {
+public abstract class Job implements Task<Void>, Comparable<Job>, Serializable {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(Job.class));
 
@@ -81,7 +81,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
     /**
      * The associated future object.
      */
-    protected volatile Future<Object> future;
+    protected volatile Future<Void> future;
 
     /**
      * The execution failure (<code>null</code> for no error during execution).
@@ -143,6 +143,13 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
     public abstract void perform();
 
     /**
+     * Checks whether this job enters a forced run.
+     * 
+     * @return <code>true</code> for forced run; otherwise <code>false</code>
+     */
+    public abstract boolean forcedRun();
+
+    /**
      * Replaces this job with values/operations from passed job.
      *
      * @param anotherJob The other job to copy from
@@ -156,7 +163,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
      *
      * @return The associated future or <code>null</code> if not in progress
      */
-    public final Future<Object> getAssociatedFuture() {
+    public final Future<Void> getAssociatedFuture() {
         return future;
     }
 
@@ -249,7 +256,7 @@ public abstract class Job implements Task<Object>, Comparable<Job>, Serializable
     }
 
     @Override
-    public final Object call() throws Exception {
+    public final Void call() throws Exception {
         // final List<Job> currentJobs = JobQueue.getInstance().currentJobs();
         // for (final Job currentJob : currentJobs) {
         // if (this != currentJob && equals(currentJob)) {

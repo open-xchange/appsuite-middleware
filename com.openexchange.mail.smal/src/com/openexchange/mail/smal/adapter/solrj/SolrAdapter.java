@@ -500,6 +500,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         final CommonsHttpSolrServerManagement cache = solrServerManagement = new CommonsHttpSolrServerManagement(100, 300000);
         final SolrTextFillerQueue q = textFillerQueue = new SolrTextFillerQueue(cache);
         q.start();
+        q.proceed();
     }
 
     @Override

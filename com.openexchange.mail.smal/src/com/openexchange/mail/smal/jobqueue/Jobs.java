@@ -192,6 +192,11 @@ public final class Jobs {
                 executionFailure = e;
             }
         }
+
+        @Override
+        public boolean forcedRun() {
+            return true;
+        }
     }
 
     private static final class RunnableJob extends Job {
@@ -229,6 +234,11 @@ public final class Jobs {
                 final Throwable cause = e.getCause();
                 executionFailure = null == cause ? e : cause;
             }
+        }
+
+        @Override
+        public boolean forcedRun() {
+            return true;
         }
 
     }
