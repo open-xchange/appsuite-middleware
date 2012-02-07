@@ -50,10 +50,15 @@
 package com.openexchange.textxtraction.internal;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 import org.apache.tika.io.TikaInputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -87,14 +92,31 @@ public final class TikaTextXtractService implements TextXtractService {
     @Override
     public String extractFromResource(final String arg, final String optMimeType) throws OXException {
         try {
-            final URL url;
-            {
-                final File file = new File(arg);
-                if (file.isFile()) {
-                    url = file.toURI().toURL();
-                } else {
-                    url = new URL(arg);
+            final File file = new File(arg);
+            if (null != optMimeType) {
+                if (optMimeType.toLowerCase(Locale.ENGLISH).startsWith("text/htm")) {
+                    InputStream input = null;
+                    try {
+                        if (file.isFile()) {
+                            input = new FileInputStream(file);
+                        } else {
+                            input = TikaInputStream.get(new URL(arg));
+                        }
+                        final Source source = new Source(input);
+                        return new Renderer(new Segment(source, 0, source.getEnd())).setMaxLineLength(9999).setIncludeHyperlinkURLs(false).toString();
+                    } finally {
+                        Streams.close(input);
+                    }
                 }
+            }
+            /*
+             * Non-HTML content
+             */
+            final URL url;
+            if (file.isFile()) {
+                url = file.toURI().toURL();
+            } else {
+                url = new URL(arg);
             }
             final TikaDocumentHandler documentHandler = isEmpty(optMimeType) ? newDefaultHandler() : newHandler(optMimeType);
             final InputStream input = TikaInputStream.get(url, documentHandler.getMetadata());
