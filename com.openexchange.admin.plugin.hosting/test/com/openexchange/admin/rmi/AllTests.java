@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.rmi;
 
-import com.openexchange.admin.DBWeightTest;
-import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -66,7 +64,6 @@ public class AllTests {
         suite.addTest(Bug16865Test.suite());
         suite.addTest(Bug19379Test.suite());
         suite.addTest(UtilTest.suite());
-        suite.addTest(new JUnit4TestAdapter(DBWeightTest.class));
         return suite;
     }
 }
