@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,49 @@
  *
  */
 
-package com.openexchange.admin;
+package com.openexchange.admin.storage.mysqlStorage;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.Vector;
-import junit.framework.TestCase;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.Comparator;
 
 /**
+ * {@link DBWeightComparator}
  *
- * @author cutmasta
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class AbstractAdminTest extends TestCase{
-    
-    protected  static String TEST_DOMAIN = "example.org";
-    protected  static String change_suffix = "_changed";
-    
-    protected static void parseResponse(Vector resp) throws Exception{
-        if(resp.size()==0){
-            throw new Exception("Invalid Response:");
-        }else{
-            if(!(resp.get(0)!=null && resp.get(0).toString().equals("OK"))){                
-                if(resp.size()>1){                
-                    throw new Exception ("Error: "+resp.get(1));
-                }else{
-                    throw new Exception("Error without message");
-                }
-            }
-        }
+public class DBWeightComparator implements Comparator<DatabaseHandle> {
+
+    private final int totalUnits;
+    private final int totalWeight;
+
+    public DBWeightComparator(final int totalUnits, final int totalWeight) {
+        super();
+        this.totalUnits = totalUnits;
+        this.totalWeight = totalWeight;
     }
-    
-    protected static String checkHost(String host) throws Exception{
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
+
+    public int compare(DatabaseHandle db1, DatabaseHandle db2) {
+        int missingUnits1 = getMissingUnits(db1);
+        if (isFull(db1)) {
+            missingUnits1 = Integer.MIN_VALUE;
         }
-        if(!host.endsWith("/")){
-            host = host+"/";
+        int missingUnits2 = getMissingUnits(db2);
+        if (isFull(db2)) {
+            missingUnits2 = Integer.MIN_VALUE;
         }
-        return host;
+        return I(missingUnits1).compareTo(I(missingUnits2));
     }
-    
-    protected static void log(Object obj){
-        System.out.println(""+obj);
+
+    private int getMissingUnits(final DatabaseHandle db) {
+        return getAverageUnits(db) - db.getCount();
     }
-    
-    protected static void compareStringArray(String[] a,String[]b){
-        if(a==null){
-            assertNotNull("expected null array",b);
-        }else{
-            assertNotNull("array is null",b);
-        }
-        assertEquals("expected same size",a.length,b.length);
-        SortedSet<String> aa = new TreeSet<String>();
-        SortedSet<String> bb = new TreeSet<String>();
-        for(int cc = 0;cc<a.length;cc++){
-            aa.add(a[cc]);
-            bb.add(b[cc]);
-        }
-//        boolean test = aa.(bb);
-        assertEquals(aa,bb);
+
+    private int getAverageUnits(final DatabaseHandle db) {
+        return totalUnits * i(db.getClusterWeight()) / totalWeight;
     }
-   
+
+    private boolean isFull(final DatabaseHandle db) {
+        return db.getCount() >= i(db.getMaxUnits());
+    }
 }

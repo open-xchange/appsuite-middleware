@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,80 +47,26 @@
  *
  */
 
-package com.openexchange.obs.ant.tasks;
+package com.openexchange.admin;
 
-import java.io.File;
-import java.io.IOException;
-import javax.xml.xpath.XPathExpressionException;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
-import org.apache.tools.ant.types.Path;
-import com.openexchange.obs.api.BuildServiceClient;
-import com.openexchange.obs.api.BuildServiceException;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
- * Uploads source files to openSUSE build service.
+ * {@link UnitTests}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class UploadSource extends Task {
+public final class UnitTests {
 
-    private String url;
-    private String user;
-    private String pass;
-    private String bsProject;
-    private String packageName;
-    private Path files;
-
-    public UploadSource() {
+    public UnitTests() {
         super();
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
-    }
-
-    public void setPass(String pass) {
-        this.pass = pass;
-    }
-
-    public void setProject(final String project) {
-        this.bsProject = project;
-    }
-
-    public void setPackageName(final String packageName) {
-        this.packageName = packageName;
-    }
-
-    public final Path createFiles() {
-        files = new Path(getProject());
-        return files;
-    }
-
-    @Override
-    public void execute() throws BuildException {
-        final BuildServiceClient client;
-        final String[] list = files.list();
-        final File[] fFiles = new File[list.length];
-        for (int i = 0; i < list.length; i++) {
-            fFiles[i] = new File(list[i]);
-        }
-        try {
-        	client = new BuildServiceClient(user, pass, url);
-            client.uploadSourcePackage(bsProject, packageName, fFiles);
-        } catch (HttpException e) {
-            throw new BuildException(e.getMessage(), e);
-        } catch (XPathExpressionException e) {
-            throw new BuildException(e.getMessage(), e);
-        } catch (IOException e) {
-            throw new BuildException(e.getMessage(), e);
-        } catch (BuildServiceException e) {
-            throw new BuildException(e.getMessage(), e);
-        }
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTest(new JUnit4TestAdapter(DBWeightTest.class));
+        return tests;
     }
 }

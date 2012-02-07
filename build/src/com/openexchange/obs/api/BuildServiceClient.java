@@ -53,12 +53,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -155,16 +159,23 @@ public class BuildServiceClient {
 
     /**
      * requires the account name, password and url of the openSUSE buildservice host
+     * @throws MalformedURLException 
      */
-    public BuildServiceClient(final String bsuser, final String bspass, final String bsurl) {
+    public BuildServiceClient(final String bsuser, final String bspass, final String bsurl) throws MalformedURLException {
         super();
         this.bsuser = bsuser;
         this.bspass = bspass;
         this.bsurl = bsurl;
         this.bsarch = "i586";
         this.xpath = XPathFactory.newInstance().newXPath();
+        URL tmpurl = new URL(bsurl);
         this.httpclient = new HttpClient();
-        this.httpclient.getState().setCredentials(new AuthScope(null, 80, null), new UsernamePasswordCredentials(bsuser, bspass));
+        this.httpclient.getState().setCredentials(new AuthScope(tmpurl.getHost(), tmpurl.getPort(), ""), new UsernamePasswordCredentials(bsuser, bspass));
+        //        List<String> authPrefs = new ArrayList<String>(3); 
+        //        authPrefs.add(AuthPolicy.BASIC);
+        //        authPrefs.add(AuthPolicy.NTLM);
+        //        authPrefs.add(AuthPolicy.DIGEST);
+        //        this.httpclient.getParams().setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, authPrefs);
     }
 
     /**
@@ -173,7 +184,7 @@ public class BuildServiceClient {
      * @param method
      */
     private void setHttpMethodParams(HttpMethod method) {
-        method.getHostAuthState().setAuthScheme(new BasicScheme());
+    	method.getHostAuthState().setAuthScheme(new BasicScheme());
         method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(3, false));
     }
 
@@ -544,8 +555,9 @@ public class BuildServiceClient {
      * @param args
      * @throws BuildServiceException
      * @throws XPathExpressionException
+     * @throws MalformedURLException 
      */
-    public static void main(String[] args) throws XPathExpressionException, BuildServiceException {
+    public static void main(String[] args) throws XPathExpressionException, BuildServiceException, MalformedURLException {
         BuildServiceClient bsc = new BuildServiceClient("oxbuilduser", "openxchange", "http://buildapi.netline.de");
 
 //        final String project = "open-xchange-6.20-public-ptf-2011-10-06";

@@ -127,4 +127,12 @@ public class MockITipIntegrationUtility implements ITipIntegrationUtility {
 		return 0;
 	}
 
+
+	@Override
+	public Appointment loadAppointment(Appointment appointment, Session session)
+			throws OXException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

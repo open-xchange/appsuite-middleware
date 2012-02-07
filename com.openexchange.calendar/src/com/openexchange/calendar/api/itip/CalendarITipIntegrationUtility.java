@@ -200,6 +200,19 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
         }
     }
+    
+	public Appointment loadAppointment(Appointment appointment, Session session) throws OXException {
+	       try {
+	        	if (appointment.getObjectID() <= 0) {
+	                AppointmentSQLInterface appointments = factory.createAppointmentSql(session);
+	            	appointment.setObjectID(appointments.resolveUid(appointment.getUid()));
+	        	}
+	            return factory.createAppointmentSql(session).getObjectById(appointment.getObjectID());
+	        } catch (SQLException e) {
+	        	throw OXCalendarExceptionCodes.SQL_ERROR.create(e);
+	        }
+	    }
+
 
     public void createAppointment(CalendarDataObject appointment, Session session) throws OXException {
         Context ctx = contexts.getContext(session.getContextId());
@@ -221,8 +234,12 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             		appointment.setParentFolderID(folder);
             	} else {
             		folder = getPrincipalsFolderId(appointments.getObjectById(appointment.getObjectID()), session);
-            		appointment.setParentFolderID(folder);
-            		checkPermissions = true;
+            		if (folder != 0) {
+            			appointment.setParentFolderID(folder);
+                		checkPermissions = true;
+            		} else {
+            			appointment.setParentFolderID(getPrivateCalendarFolderId(session));
+            		}
             	}
         	} catch (OXException x) {
         		// IGNORE
@@ -289,6 +306,9 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         final OXFolderAccess acc = new OXFolderAccess(ctx);
         return acc.getDefaultFolder(session.getUserId(), FolderObject.CALENDAR).getObjectID();
     }
+
+
+	
 
 
 }

@@ -67,8 +67,10 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -126,6 +128,7 @@ import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersService;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class provides the implementation for the storage into a MySQL database
@@ -1854,103 +1857,90 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     /**
-     * determine the next database to use depending on database weight factor
+     * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.
+     * Additionally check each master for availability.
      * 
-     * @param configdb_con
+     * @param con
      * @return Database handle containing information about database
      * @throws SQLException
      * @throws OXContextException
      */
-    private Database getNextDBHandleByWeight(final Connection configdb_con) throws SQLException, OXContextException {
-        PreparedStatement pstm = null;
-        try {
-            pstm = configdb_con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,weight,max_units FROM db_pool, db_cluster WHERE db_cluster.write_db_pool_id = db_pool_id");
-            ResultSet rs = pstm.executeQuery();
-
-            int totalDatabases = 0;
-            final ArrayList<DatabaseHandle> list = new ArrayList<DatabaseHandle>();
-            double maxdist = 0;
-
-            while (rs.next()) {
-                final DatabaseHandle datahandle = new DatabaseHandle();
-                datahandle.setUrl(rs.getString("url"));
-                datahandle.setId(rs.getInt("db_pool_id"));
-                datahandle.setDriver(rs.getString("driver"));
-                datahandle.setLogin(rs.getString("login"));
-                datahandle.setPassword(rs.getString("password"));
-                datahandle.setClusterWeight(rs.getInt("weight"));
-                datahandle.setMaxUnits(rs.getInt("max_units"));
-
-                final int db_count = countUnits(datahandle, configdb_con);
-                datahandle.setCount(db_count);
-
-                totalDatabases += db_count;
-                final String name = rs.getString("name");
-                datahandle.setName(name);
-
-                list.add(datahandle);
-
-                // log.debug("SERVERDATA(" + rs.getString("name") + ")= " +
-                // sdata);
-            }
-            rs.close();
-            pstm.close();
-
-            // with increasing numbers of db_count, the currweight value will get
-            // bigger as double can hold. So here we calculate the amount of digits a number has and
-            // later divide it with that 10^thisvalue
-            double div = Math.pow(10, (int) Math.log10(totalDatabases));
-            div = div == 0 ? 1 : div;
-
-            DatabaseHandle selectedDatabase = null;
-            // Here we have to do a second loop because we know the amount of
-            // totalDatabase
-            // after the first loop
-            for (final DatabaseHandle handle : list) {
-                final int unit_max = handle.getMaxUnits();
-                final int weight = handle.getClusterWeight();
-                final int db_count = handle.getCount();
-                final String name = handle.getName();
-
-                if (unit_max == -1 || (unit_max != 0 && db_count < unit_max)) {
-                    double currweight = totalDatabases / div * db_count;
-                    final double x = currweight / weight;
-                    currweight -= (int) x * weight;
-                    final double currdist = weight - currweight;
-                    LOG.debug(name + ":\tX=" + x + "\tcurrweight=" + currweight + "\tcurrdist=" + currdist + "\tmaxdist=" + maxdist);
-                    if (currdist > maxdist) {
-                        selectedDatabase = handle;
-                        maxdist = weight - currweight;
-                    }
-                }
-            }
-
-            if (selectedDatabase == null) {
-                throw new OXContextException(
-                    "The new context could not be created. The maximum number of contexts in every database " + "cluster has been reached. Use register-, create- or change database to resolve the problem.");
-            }
-
-            pstm = configdb_con.prepareStatement("SELECT read_db_pool_id FROM db_cluster WHERE write_db_pool_id = ?");
-            pstm.setInt(1, selectedDatabase.getId());
-            rs = pstm.executeQuery();
-            if (!rs.next()) {
-                throw new OXContextException("Unable to read table db_cluster");
-            }
-            // Never used so commented
-            final int slave_id = rs.getInt("read_db_pool_id");
-            rs.close();
-            pstm.close();
-
-            final Database retval = selectedDatabase;
-            if (slave_id > 0) {
-                retval.setRead_id(slave_id);
-            }
-
-            return retval;
-        } finally {
-            closePreparedStatement(pstm);
+    private Database getNextDBHandleByWeight(final Connection con) throws SQLException, OXContextException {
+        List<DatabaseHandle> list = loadDatabases(con);
+        int totalUnits = 0;
+        int totalWeight = 0;
+        for (final DatabaseHandle db : list) {
+            totalUnits += db.getCount();
+            totalWeight += i(db.getClusterWeight());
         }
+        list = removeFull(list);
+        if (list.isEmpty()) {
+            throw new OXContextException(
+                "The new context could not be created. The maximum number of contexts in every database cluster has been reached. Use register-, create- or change database to resolve the problem.");
+        }
+        Collections.sort(list, Collections.reverseOrder(new DBWeightComparator(totalUnits, totalWeight)));
+        final Iterator<DatabaseHandle> iter = list.iterator();
+        DatabaseHandle retval = null;
+        while (iter.hasNext() && null == retval) {
+            final DatabaseHandle db = iter.next();
+            final int dbPoolId = i(db.getId());
+            try {
+                final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
+                cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
+                retval = db;
+            } catch (final PoolException e) {
+                LOG.error(e.getMessage(), e);
+            }
+        }
+        if (null == retval) {
+            throw new OXContextException("The new context could not be created. All not full databases can not be connected to.");
+        }
+        return retval;
+    }
 
+    private List<DatabaseHandle> removeFull(List<DatabaseHandle> list) {
+        final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>();
+        for (final DatabaseHandle db : list) {
+            final int maxUnit = i(db.getMaxUnits());
+            if (maxUnit == -1 || (maxUnit != 0 && db.getCount() < maxUnit)) {
+                retval.add(db);
+            }
+        }
+        return retval;
+    }
+
+    private List<DatabaseHandle> loadDatabases(final Connection con) throws SQLException, OXContextException {
+        final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>();
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id");
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                final DatabaseHandle db = new DatabaseHandle();
+                int pos = 1;
+                db.setId(I(rs.getInt(pos++)));
+                db.setUrl(rs.getString(pos++));
+                db.setDriver(rs.getString(pos++));
+                db.setLogin(rs.getString(pos++));
+                db.setPassword(rs.getString(pos++));
+                db.setName(rs.getString(pos++));
+                final int slaveId = rs.getInt(pos++);
+                if (slaveId > 0) {
+                    db.setRead_id(I(slaveId));
+                }
+                db.setClusterWeight(I(rs.getInt(pos++)));
+                db.setMaxUnits(I(rs.getInt(pos++)));
+                retval.add(db);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        for (final DatabaseHandle db : retval) {
+            final int db_count = countUnits(db, con);
+            db.setCount(db_count);
+        }
+        return retval;
     }
 
     /**

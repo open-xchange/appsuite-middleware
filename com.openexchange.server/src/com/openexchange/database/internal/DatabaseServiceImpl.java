@@ -187,7 +187,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
         }
         try {
-            if (!con.getCatalog().equals(schema)) {
+            if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
             }
         } catch (final SQLException e) {
@@ -210,7 +210,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
             throw DBPoolingExceptionCodes.NO_CONNECTION.create(e, I(poolId));
         }
         try {
-            if (!con.getCatalog().equals(schema)) {
+            if (null != schema && !con.getCatalog().equals(schema)) {
                 con.setCatalog(schema);
             }
         } catch (final SQLException e) {

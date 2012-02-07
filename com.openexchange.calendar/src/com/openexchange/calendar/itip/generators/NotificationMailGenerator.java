@@ -488,6 +488,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     		while(results.hasNext()) {
     			mail.addAttachment(results.next());
     		}
+    	} catch (OXException x) {
+    		// Ignore. This is best effort only.
     	} finally {
     		if (results != null) {
         		results.close();
