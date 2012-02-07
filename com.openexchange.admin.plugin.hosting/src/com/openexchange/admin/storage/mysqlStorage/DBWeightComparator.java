@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,27 +49,47 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import com.openexchange.admin.rmi.dataobjects.Database;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
+import java.util.Comparator;
 
 /**
- * Internally used object for getnextdbhandlebyweight method instead of
+ * {@link DBWeightComparator}
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class DatabaseHandle extends Database {
+public class DBWeightComparator implements Comparator<DatabaseHandle> {
 
-    private static final long serialVersionUID = -4816706296673058930L;
+    private final int totalUnits;
+    private final int totalWeight;
 
-    private int count;
-
-    public DatabaseHandle() {
+    public DBWeightComparator(final int totalUnits, final int totalWeight) {
         super();
-        this.count = -1;
+        this.totalUnits = totalUnits;
+        this.totalWeight = totalWeight;
     }
 
-    public int getCount() {
-        return this.count;
+    public int compare(DatabaseHandle db1, DatabaseHandle db2) {
+        int missingUnits1 = getMissingUnits(db1);
+        if (isFull(db1)) {
+            missingUnits1 = Integer.MIN_VALUE;
+        }
+        int missingUnits2 = getMissingUnits(db2);
+        if (isFull(db2)) {
+            missingUnits2 = Integer.MIN_VALUE;
+        }
+        return I(missingUnits1).compareTo(I(missingUnits2));
     }
 
-    public void setCount(int count) {
-        this.count = count;
+    private int getMissingUnits(final DatabaseHandle db) {
+        return getAverageUnits(db) - db.getCount();
+    }
+
+    private int getAverageUnits(final DatabaseHandle db) {
+        return totalUnits * i(db.getClusterWeight()) / totalWeight;
+    }
+
+    private boolean isFull(final DatabaseHandle db) {
+        return db.getCount() >= i(db.getMaxUnits());
     }
 }
