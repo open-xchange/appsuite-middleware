@@ -50,6 +50,7 @@
 package com.openexchange.caching;
 
 import java.io.Serializable;
+import org.apache.jcs.access.exception.CacheException;
 import com.openexchange.exception.OXException;
 
 /**
@@ -188,12 +189,28 @@ public interface Cache {
     public void remove(Serializable key) throws OXException;
 
     /**
+     * Removes the object from the cache which is bound to specified key without propagating that operation neither laterally nor remotely.
+     * 
+     * @param key The key
+     * @throws CacheException If remove operation on cache fails
+     */
+    public void localRemove(Serializable key) throws OXException;
+
+    /**
      * Removes the object located in specified group and bound to given key.
      *
      * @param key The key
      * @param group The group name.
      */
     public void removeFromGroup(Serializable key, String group);
+
+    /**
+     * Removes the object located in specified group and bound to given key without propagating that operation neither laterally nor remotely.
+     *
+     * @param key The key
+     * @param group The group name.
+     */
+    public void localRemoveFromGroup(Serializable key, String group);
 
     /**
      * This method does not reset the attributes for items already in the cache. It could potentially do this for items in memory, and maybe

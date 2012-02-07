@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.aggregator.osgi;
+package com.openexchange.contact.aggregator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,27 +65,40 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ContactFolderContactSource implements ContactSource {
 
-    private final FolderObject folder;
-    private final ContactSQLInterface contacts;
-    private final Type type;
+    private int id;
+    private ContactSQLInterface contacts;
+    private Type type;
 
     public ContactFolderContactSource(FolderObject folder, ContactSQLInterface contacts, Type type) {
-        this.folder = folder;
+        this.id = folder.getObjectID();
+        this.contacts = contacts;
+        this.type = type;
+    }
+
+    public ContactFolderContactSource(int folderId, ContactSQLInterface contacts, Type type) {
+        this.id = folderId;
         this.contacts = contacts;
         this.type = type;
     }
 
     public List<Contact> getContacts(ServerSession session) throws Exception {
-        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(folder.getObjectID(), 0, 0, 0, null, null, Contact.CONTENT_COLUMNS);
+        SearchIterator<Contact> contactsInFolder = contacts.getContactsInFolder(id, 0, 0, 0, null, null, Contact.CONTENT_COLUMNS);
         List<Contact> c = new ArrayList<Contact>();
         while(contactsInFolder.hasNext()) {
-            c.add(contactsInFolder.next());
+            Contact contact = contactsInFolder.next();
+            if (!contact.getMarkAsDistribtuionlist()) {
+                c.add(contact);
+            }
         }
         return c;
     }
 
     public Type getType() {
         return type;
+    }
+    
+    public Speed getSpeed() {
+        return Speed.FAST;
     }
 
 }

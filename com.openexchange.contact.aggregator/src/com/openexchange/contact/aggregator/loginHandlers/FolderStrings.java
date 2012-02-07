@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,18 @@
  *
  */
 
-package com.openexchange.caching;
+package com.openexchange.contact.aggregator.loginHandlers;
 
-import java.io.Serializable;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link InvalidatedMarker} - A simple marker for an invalidated entity.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link FolderStrings}
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public final class InvalidatedMarker<T extends Serializable> implements Serializable {
+public class FolderStrings implements LocalizableStrings {
 
-    private static final long serialVersionUID = 7202966861003492335L;
-
-    /**
-     * Creates a new invalidated marker.
-     * 
-     * @param identifier The identifier
-     * @return A new invalidated marker
-     */
-    public static <T extends Serializable> InvalidatedMarker<T> newInstance(final T identifier) {
-        return new InvalidatedMarker<T>(identifier);
-    }
-
-    private final T identifier;
-
-    /**
-     * Initializes a new {@link InvalidatedMarker}.
-     * 
-     * @param identifier The identifier
-     */
-    private InvalidatedMarker(final T identifier) {
-        super();
-        this.identifier = identifier;
-    }
-
-    /**
-     * Gets the identifier
-     * 
-     * @return The identifier
-     */
-    public T getIdentifier() {
-        return identifier;
-    }
+    public static final String DEFAULT_AGGREGATION_CONTACT_FOLDER_NAME = "All my contacts";
 
 }

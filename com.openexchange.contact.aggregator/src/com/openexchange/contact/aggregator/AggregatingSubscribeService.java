@@ -47,19 +47,24 @@
  *
  */
 
-package com.openexchange.contact.aggregator.osgi;
+package com.openexchange.contact.aggregator;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -69,12 +74,12 @@ import com.openexchange.subscribe.SubscriptionSource;
  */
 public class AggregatingSubscribeService extends AbstractSubscribeService {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(AggregatingSubscribeService.class));
-
+    private static final Log LOG = LogFactory.getLog(AggregatingSubscribeService.class);
+    
     private ContactAggregator aggregator = new ContactAggregator();
-
+    
     private final SubscriptionSource source;
-
+    
     public AggregatingSubscribeService(final ContactAggregator aggregator) {
         super();
         this.aggregator = aggregator;
@@ -82,25 +87,38 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
         source.setId("com.openexchange.contact.aggregator");
         source.setDisplayName("OX Contact Aggregator");
         source.setFolderModule(FolderObject.CONTACT);
-
+        
         final DynamicFormDescription form = new DynamicFormDescription();
-
-        form.add(FormElement.input("displayName", "Display Name", true, "OX Contact Aggregator"));
-
+        
+        form.add(FormElement.input("displayName", "Display Name", true, "Contact Aggregator"));
+        
         source.setFormDescription(form);
         source.setSubscribeService(this);
     }
 
     public Collection<?> getContent(final Subscription subscription) throws OXException {
         try {
-            return aggregator.aggregate(subscription.getSession());
-        } catch (final OXException x) {
-            LOG.error(x.getMessage(), x);
-            throw x;
+            return aggregator.aggregate(subscription.getSession(), fastOnly(subscription), loadContacts(subscription.getFolderIdAsInt(), subscription.getSession()));
         } catch (final Throwable t) {
             LOG.error(t.getMessage(), t);
             throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(t);
         }
+    }
+
+    private List<Contact> loadContacts(final int folderIdAsInt, final ServerSession session) {
+        
+        try {
+            return new ContactFolderContactSource(folderIdAsInt,new RdbContactSQLImpl(session),null).getContacts(session);
+        } catch (final OXException e) {
+            return Collections.emptyList();
+        } catch (final Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    private boolean fastOnly(final Subscription subscription) {
+        final Object object = subscription.getConfiguration().get("fast");
+        return object != null && (Boolean) object;
     }
 
     public SubscriptionSource getSubscriptionSource() {
@@ -110,7 +128,7 @@ public class AggregatingSubscribeService extends AbstractSubscribeService {
     public boolean handles(final int folderModule) {
         return folderModule == FolderObject.CONTACT;
     }
-
+    
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
         super.modifyOutgoing(subscription);

@@ -146,14 +146,14 @@ public final class SessionCache {
         try {
             final Integer key = Integer.valueOf(contextId);
             Object element = cache.get(key);
-            if ((null != element) && (element instanceof InvalidatedMarker) && (contextId == ((InvalidatedMarker) element).getIdentifier())) {
+            if ((null != element) && (element instanceof InvalidatedMarker) && (contextId == ((InvalidatedMarker<Integer>) element).getIdentifier().intValue())) {
                 final Lock writeLock = readWriteLock.writeLock();
                 readLock.unlock();
                 writeLock.lock();
                 try {
                     element = cache.get(key);
                     if (null != element) {
-                        cache.remove(key);
+                        cache.localRemove(key);
                     }
                 } finally {
                     readLock.lock();

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.contact.aggregator.osgi;
+package com.openexchange.contact.aggregator;
 
 import java.util.List;
 import com.openexchange.groupware.container.Contact;
@@ -55,13 +55,33 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ContactSource}
+ * {@link StaticContactSource}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ContactSource {
-    public enum Type {CONFIRMED, CONTRIBUTOR};
+public class StaticContactSource implements ContactSource {
 
-    public List<Contact> getContacts(ServerSession session) throws Exception;
-    public Type getType();
+    private List<Contact> contacts;
+    private Speed speed;
+    private Type type;
+
+    public StaticContactSource(List<Contact> contacts, Speed speed, Type type) {
+        super();
+        this.contacts = contacts;
+        this.speed = speed;
+        this.type = type;
+    }
+
+    public List<Contact> getContacts(ServerSession session) throws Exception {
+        return contacts;
+    }
+
+    public Speed getSpeed() {
+        return speed;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
 }

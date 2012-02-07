@@ -159,7 +159,7 @@ public abstract class PasswordChangeService {
             throw UserExceptionCode.INVALID_MIN_LENGTH.create(Integer.valueOf(property));
         }
         property = service.getIntProperty("com.openexchange.passwordchange.maxLength", 0);
-        if (property > 0 && len < property) {
+        if (property > 0 && len > property) {
             throw UserExceptionCode.INVALID_MAX_LENGTH.create(Integer.valueOf(property));
         }
         /*

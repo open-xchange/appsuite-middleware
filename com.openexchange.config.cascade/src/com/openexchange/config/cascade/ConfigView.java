@@ -64,6 +64,8 @@ public interface ConfigView {
 
     <T> T get(String property, Class<T> coerceTo) throws OXException;
 
+    <T> T opt(String property, Class<T> coerceTo, T defaultValue) throws OXException;
+
     <T> ConfigProperty<T> property(String scope, String property, Class<T> coerceTo) throws OXException;
 
     <T> ComposedConfigProperty<T> property(String property, Class<T> coerceTo) throws OXException;
