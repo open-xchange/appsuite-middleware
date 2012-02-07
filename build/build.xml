@@ -10,7 +10,11 @@
     <property name="prefix" value="/opt/open-xchange"/><!-- Installation path on destination system -->
     <property name="tmpDir" value="tmp"/><!-- Directory for temporary file storage -->
     <property name="distDir" value=""/><!-- Use some tmpDir -->
-	<property name="bsProject" value="open-xchange-7-test"/><!-- project name in buildservice -->
+	
+	<property name="bsProject"  value="open-xchange-7-test"/><!-- project name in buildservice -->
+	<property name="bsApiUrl"   value="http://buildapi.netline.de"/>
+	<property name="bsUser"     value="oxbuilduser"/>
+	<property name="bsPassword" value="openxchange"/>
 
     <property name="branch" value="master"/>
 
@@ -193,7 +197,7 @@
 
     <target name="upload" depends="debianSource" description="Uploads a package to the build system.">
         <!-- TODO project must be defined somewhere -->
-        <uploadSource url="http://buildapi.netline.de" user="oxbuilduser" pass="openxchange" project="${bsProject}" packageName="${packageName}">
+        <uploadSource url="${bsApiUrl}" user="${bsUser}" pass="${bsPassword}" project="${bsProject}" packageName="${packageName}">
             <files>
                 <fileset dir="${tmpDir}">
                     <exclude name="${packageName}-${version}/**"/>

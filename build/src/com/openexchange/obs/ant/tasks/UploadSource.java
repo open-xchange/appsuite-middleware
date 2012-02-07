@@ -104,13 +104,14 @@ public class UploadSource extends Task {
 
     @Override
     public void execute() throws BuildException {
-        final BuildServiceClient client = new BuildServiceClient(user, pass, url);
+        final BuildServiceClient client;
         final String[] list = files.list();
         final File[] fFiles = new File[list.length];
         for (int i = 0; i < list.length; i++) {
             fFiles[i] = new File(list[i]);
         }
         try {
+        	client = new BuildServiceClient(user, pass, url);
             client.uploadSourcePackage(bsProject, packageName, fFiles);
         } catch (HttpException e) {
             throw new BuildException(e.getMessage(), e);

@@ -193,8 +193,8 @@ public class DownloadPackages extends Task {
             }
         }
         
-        BuildServiceClient bsc = new BuildServiceClient(bsuser, bspass, bsurl);
             try {
+            	BuildServiceClient bsc = new BuildServiceClient(bsuser, bspass, bsurl);
                 Iterator<String> it = bsc.getProjectBinaryPackageNames(bsprjname, bsreponame, bspackage).iterator();
                 while( it.hasNext() ) {
                     final String pkg = it.next();

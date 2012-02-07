@@ -8,7 +8,11 @@
     <!-- Constants -->
     <property name="mainDir" value=".."/>
     <property name="checkoutDir" value="${mainDir}"/>
-	<property name="bsProject" value="open-xchange-7-test"/>
+
+	<property name="bsProject"  value="open-xchange-7-test"/>
+	<property name="bsApiUrl"   value="http://buildapi.netline.de"/>
+	<property name="bsUser"     value="oxbuilduser"/>
+	<property name="bsPassword" value="openxchange"/>
 
     <import file="antExtensions.xml"/>
 
@@ -27,7 +31,10 @@
         </ant>
         <ant antfile="build.xml" target="${allBuildType}">
             <property name="packageName" value="${packageName}"/>
-        	<property name="bsProject" value="${bsProject}"/>
+        	<property name="bsProject"  value="${bsProject}"/>
+        	<property name="bsApiUrl"   value="${bsApiUrl}"/>
+        	<property name="bsUser"     value="${bsUser}"/>
+        	<property name="bsPassword" value="${bsPass}"/>
         </ant>
         <ant antfile="build.xml" target="clean">
             <property name="packageName" value="${packageName}"/>
