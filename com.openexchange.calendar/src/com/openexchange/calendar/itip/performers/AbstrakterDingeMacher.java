@@ -141,7 +141,7 @@ public abstract class AbstrakterDingeMacher implements ITipDingeMacher {
             recipients = generator.getRecipients();
         	for (NotificationParticipant p : recipients) {
                 NotificationMail mail = generator.generateUpdateMailFor(p);
-                if (mail != null) {
+                if (mail != null ) {
                     sender.sendMail(mail, session);
                 }
             }
