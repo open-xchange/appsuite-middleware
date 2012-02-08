@@ -593,11 +593,11 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 contents = messageStorage.getPrimaryContents(fillers.get(0).getFullName(), mailIds);
             }
             SMALMailAccess.closeUnwrappedInstance(access);
+            access = null;
             if (DEBUG) {
                 final long dur = System.currentTimeMillis() - st;
                 LOG.debug("Held mail connection for " + dur + "msec");
             }
-            access = null;
             // final TextFinder textFinder = new TextFinder();
             final Thread thread = Thread.currentThread();
             for (int i = 0; i < fs; i++) {
