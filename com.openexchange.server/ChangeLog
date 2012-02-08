@@ -1,3 +1,7 @@
+* 2012-02-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 21499: Store user timezone in appointments imported from CalDAV interface
+
 * 2012-02-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 21339: Deny creation of OAuth account with empty/missing display name
