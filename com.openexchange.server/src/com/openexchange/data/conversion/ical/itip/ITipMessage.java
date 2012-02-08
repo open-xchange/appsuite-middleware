@@ -49,7 +49,9 @@
 
 package com.openexchange.data.conversion.ical.itip;
 
-import com.openexchange.groupware.container.Appointment;
+import java.util.HashSet;
+import java.util.Set;
+
 
 /**
  * {@link ITipMessage}
@@ -62,6 +64,7 @@ public class ITipMessage extends AppointmentWithExceptions {
 
     private String comment;
     
+    private Set<Object> features = new HashSet<Object>();
 
     public ITipMethod getMethod() {
         return method;
@@ -88,5 +91,13 @@ public class ITipMessage extends AppointmentWithExceptions {
     public void setComment(String comment) {
         this.comment = comment;
     }
+
+	public void addFeature(Object feature) {
+		features.add(feature);
+	}
+	
+	public boolean hasFeature(Object feature) {
+		return features.contains(feature);
+	}
 
 }

@@ -86,6 +86,11 @@ public abstract class AbstractMailSyncJob extends Job {
         this.contextId = contextId;
     }
 
+    @Override
+    public boolean forcedRun() {
+        return true;
+    }
+
     /**
      * Checks if a sync should be performed for specified full name with default span of 1 hour.
      *

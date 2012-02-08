@@ -299,7 +299,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Set display name & identifier
              */
             final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            account.setDisplayName(null == displayName ? service.getDisplayName() : displayName);
+            if (isEmpty(displayName)) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            }
+            account.setDisplayName(displayName);
             account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
             /*
              * Token & secret
@@ -349,7 +352,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Set display name & identifier
              */
             final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            account.setDisplayName(null == displayName ? service.getDisplayName() : displayName);
+            if (isEmpty(displayName)) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            }
+            account.setDisplayName(displayName);
             account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
             /*
              * Obtain & apply the access token

@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.langdetect.LanguageDetectionExceptionCodes;
 import com.openexchange.langdetect.LanguageDetectionService;
 import com.openexchange.langdetect.internal.Lc4jLanguageDetectionService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -68,8 +69,7 @@ public class LangDetectActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
+        return EMPTY_CLASSES;
     }
 
     @Override
@@ -90,14 +90,30 @@ public class LangDetectActivator extends HousekeepingActivator {
                          * Load language codes
                          */
                         try {
-                            languageDetectionService.loadLanguageCodes(service.getProperty("com.openexchange.langdetect.languageCodesFile"));
+                            final String propName = "com.openexchange.langdetect.languageCodesFile";
+                            final String languageCodesFile = service.getProperty(propName);
+                            if (null == languageCodesFile) {
+                                throw LanguageDetectionExceptionCodes.UNEXPECTED_ERROR.create("Missing property: " + propName);
+                            }
+                            languageDetectionService.loadLanguageCodes(languageCodesFile);
                         } catch (final OXException e) {
                             logger.error(e.getMessage(), e);
+                            return null;
                         }
                         /*
                          * Set language model directory
                          */
-                        languageDetectionService.setLanguageModelsDir(service.getProperty("com.openexchange.langdetect.languageModelsDir"));
+                        try {
+                            final String propName = "com.openexchange.langdetect.languageModelsDir";
+                            final String languageModelsDir = service.getProperty(propName);
+                            if (null == languageModelsDir) {
+                                throw LanguageDetectionExceptionCodes.UNEXPECTED_ERROR.create("Missing property: " + propName);
+                            }
+                            languageDetectionService.setLanguageModelsDir(languageModelsDir);
+                        } catch (final OXException e) {
+                            logger.error(e.getMessage(), e);
+                            return null;
+                        }
                         registerService(LanguageDetectionService.class, languageDetectionService, null);
                         return service;
                     }

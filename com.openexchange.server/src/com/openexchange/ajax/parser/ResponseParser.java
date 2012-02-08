@@ -128,7 +128,7 @@ public final class ResponseParser {
                 for (int i = 0; i < length; i++) {
                     categories.add(Categories.getKnownCategoryByName(jsonArray.getString(i)));
                 }
-                Collections.sort(categories);
+                OXException.sortCategories(categories);
             } else {
             	if (jsonCategories != null) {
                     categories = Collections.singletonList(Categories.getKnownCategoryByName(jsonCategories.toString()));
