@@ -106,6 +106,11 @@ abstract class AbstractJobCompletionService implements JobCompletionService {
             queue.add(job);
         }
 
+        @Override
+        public boolean forcedRun() {
+            return job.forcedRun();
+        }
+
     }
 
     protected final BlockingQueue<Job> queue;

@@ -164,6 +164,10 @@ public final class JobQueue {
         if (null == job || !checkCount()) {
             return false;
         }
+        if (job.forcedRun()) {
+            return queue.offer(job);
+        }
+        // Check for possible duplicates already located in queue
         final String identifier = job.getIdentifier();
         final Job prev = identifiers.putIfAbsent(identifier, job);
         if (null == prev) {
