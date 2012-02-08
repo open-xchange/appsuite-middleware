@@ -1,11 +1,15 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange JSlob Config Bundle
-Bundle-SymbolicName: com.openexchange.jslob.config
+Bundle-Name: Open-Xchange JSlob Database Storage Bundle
+Bundle-SymbolicName: com.openexchange.jslob.storage.db
 Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.delete,
+ com.openexchange.groupware.update,
  com.openexchange.i18n,
  com.openexchange.jslob,
  com.openexchange.jslob.registry,
@@ -15,8 +19,10 @@ Import-Package: com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools.sql,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker
-Bundle-Activator: com.openexchange.jslob.config.osgi.ConfigJSlobActivator
+Bundle-Activator: com.openexchange.jslob.storage.db.osgi.DBJSlobStorageActivcator
