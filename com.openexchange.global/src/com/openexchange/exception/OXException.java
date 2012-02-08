@@ -661,14 +661,51 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The (sorted) categories
      */
     public List<Category> getCategories() {
-        if (this.categories.isEmpty()) {
+        if (categories.isEmpty()) {
             /*
              * No category specified. Fall back to default one.
              */
             return Collections.<Category> singletonList(CATEGORY_ERROR);
         }
-        Collections.sort(this.categories);
-        return Collections.unmodifiableList(this.categories);
+        if (1 == categories.size()) {
+            return Collections.unmodifiableList(categories);
+        }
+        // Sort before return
+        final List<ComparableCategory> comparables = toComparables(categories);
+        Collections.sort(comparables);
+        return Collections.unmodifiableList(fillSortedCategories(comparables));
+    }
+
+    private static List<ComparableCategory> toComparables(final List<Category> categories) {
+        final List<ComparableCategory> ret = new ArrayList<ComparableCategory>(categories.size());
+        for (final Category category : categories) {
+            ret.add(new ComparableCategory(category));
+        }
+        return ret;
+    }
+
+    private List<Category> fillSortedCategories(final List<ComparableCategory> sortedCategories) {
+        categories.clear();
+        for (final ComparableCategory comparableCategory : sortedCategories) {
+            categories.add(comparableCategory.category);
+        }
+        return categories;
+    }
+
+    private static final class ComparableCategory implements Comparable<ComparableCategory> {
+
+        protected final Category category;
+
+        protected ComparableCategory(final Category category) {
+            super();
+            this.category = category;
+        }
+
+        @Override
+        public int compareTo(final ComparableCategory other) {
+            return category.compareTo(other.category);
+        }
+
     }
 
     /**
