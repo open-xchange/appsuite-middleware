@@ -59,6 +59,7 @@ import com.openexchange.calendar.itip.ITipAnalyzerService;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
+import com.openexchange.data.conversion.ical.itip.ITipSpecialHandling;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -97,7 +98,10 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
         List<ITipAnalysis> result = new ArrayList<ITipAnalysis>(messages.size());
         for (ITipMessage message : messages) {
             ITipMethod method = message.getMethod();
-            if (method == ITipMethod.COUNTER && mailHeader.containsKey("X-Mailer") && mailHeader.get("X-Mailer").toLowerCase().contains("outlook")) {
+            if (mailHeader.containsKey("X-Mailer") && mailHeader.get("X-Mailer").toLowerCase().contains("outlook")) {
+            	message.addFeature(ITipSpecialHandling.MICROSOFT);
+            }
+            if (method == ITipMethod.COUNTER && message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
                 method = ITipMethod.REPLY;
             }
             
@@ -111,7 +115,7 @@ public class DefaultITipAnalyzerService implements ITipAnalyzerService {
             if (analyzer == null) {
                 // TODO: Error
             } else {
-                result.add(analyzer.analyze(message, mailHeader, format, session));
+            	result.add(analyzer.analyze(message, mailHeader, format, session));
             }
         }
         
