@@ -52,6 +52,8 @@ package com.openexchange.calendar.printing;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.calendar.printing.days.CalendarTools;
@@ -105,15 +107,15 @@ public class CPAppointment {
     }
 
     public String getTitle() {
-        return title;
+        return StringEscapeUtils.escapeHtml( title );
     }
 
     public String getDescription() {
-        return description;
+        return StringEscapeUtils.escapeHtml( description );
     }
 
     public String getLocation() {
-        return location;
+        return StringEscapeUtils.escapeHtml( location );
     }
 
     public Date getStartDate() {
