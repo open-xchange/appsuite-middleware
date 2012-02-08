@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,43 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobExceptionMessages}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
+public final class JSlobExceptionMessages implements LocalizableStrings {
 
-    private ITipMethod method;
+    // An unexpected error occurred: %1$s
+    public static final String UNEXPECTED_ERROR = "An unexpected error occurred: %1$s";
 
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
+    // A JSON error occurred: %1$s
+    public static final String JSON_ERROR = "A JSON error occurred: %1$s";
 
-    public ITipMethod getMethod() {
-        return method;
-    }
+    // No JSlob storage found for identifier: %1$s
+    public static final String NOT_FOUND = "No JSlob storage found for identifier: %1$s";
 
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+    // No JSlob found for service %1$s.
+    public static final String NOT_FOUND_EXT = "No JSlob found for service %1$s.";
 
-    /**
-     * Gets the comment
-     * 
-     * @return The comment
-     */
-    public String getComment() {
-        return comment;
-    }
+    // Conflicting deletion of JSlob for service %1$s.
+    public static final String CONFLICT = "Conflicting deletion of JSlob for service %1$s.";
+
+    // Path doesn't exist: %1$s
+    public static final String PATH_NOT_FOUND = "Path doesn't exist: %1$s";
+
+    // Invalid path: %1$s.
+    public static final String INVALID_PATH = "Invalid path: %1$s.";
 
     /**
-     * Sets the comment
-     * 
-     * @param comment The comment to set
+     * Initializes a new {@link JSlobExceptionMessages}.
      */
-    public void setComment(String comment) {
-        this.comment = comment;
+    private JSlobExceptionMessages() {
+        super();
     }
-
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
 
 }

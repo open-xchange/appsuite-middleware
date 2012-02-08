@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,35 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob.config.osgi;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.config.ConfigJSlobService;
+import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ITipMessage}
+ * {@link ConfigJSlobActivator}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
-
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+public final class ConfigJSlobActivator extends HousekeepingActivator {
 
     /**
-     * Gets the comment
-     * 
-     * @return The comment
+     * Initializes a new {@link ConfigJSlobActivator}.
      */
-    public String getComment() {
-        return comment;
+    public ConfigJSlobActivator() {
+        super();
     }
 
-    /**
-     * Sets the comment
-     * 
-     * @param comment The comment to set
-     */
-    public void setComment(String comment) {
-        this.comment = comment;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { JSlobStorageRegistry.class };
     }
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(JSlobService.class, new ConfigJSlobService(this));
+    }
 
 }

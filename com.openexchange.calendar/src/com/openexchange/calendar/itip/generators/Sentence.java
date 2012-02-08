@@ -90,12 +90,14 @@ public class Sentence {
         
         for(int i = 0, size = arguments.size(); i < size; i++) {
             Object argument = arguments.get(i);
-            if (argument instanceof String) {
-				String str = (String) argument;
-				argument = sh.getString(str);
-			}
             ArgumentType type = types.get(i);
             Object[] extraInfo = extra.get(i);
+            if (argument instanceof String) {
+				String str = (String) argument;
+				if (type == ArgumentType.STATUS && str != null && str.trim().length() != 0) {
+					argument = sh.getString(str);
+				}
+			}
             switch (type) {
             case NONE: wrapped.add(wrapper.none(argument)); break;
             case ORIGINAL: wrapped.add(wrapper.original(argument)); break;

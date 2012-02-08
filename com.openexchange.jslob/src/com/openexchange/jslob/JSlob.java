@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,54 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import org.json.JSONObject;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlob} - A JSlob holding a JSON object.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
+public class JSlob {
 
-    private ITipMethod method;
+    private JSONObject jsonObject;
 
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
+    /**
+     * Initializes a new empty {@link JSlob}.
+     */
+    public JSlob() {
+        super();
     }
 
     /**
-     * Gets the comment
+     * Initializes a new {@link JSlob}.
      * 
-     * @return The comment
+     * @param jsonObject The JSON object initially applied to this JSlob
      */
-    public String getComment() {
-        return comment;
+    public JSlob(final JSONObject jsonObject) {
+        super();
+        this.jsonObject = jsonObject;
     }
 
     /**
-     * Sets the comment
+     * Gets the JSON object stored in this JSlob.
      * 
-     * @param comment The comment to set
+     * @return The JSON object
      */
-    public void setComment(String comment) {
-        this.comment = comment;
+    public JSONObject getJsonObject() {
+        return jsonObject;
     }
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    /**
+     * Sets the JSON object stored in this JSlob.
+     * 
+     * @param jsonObject The JSON object
+     * @return This JSlob with new JSON object applied
+     */
+    public JSlob setJsonObject(final JSONObject jsonObject) {
+        this.jsonObject = jsonObject;
+        return this;
+    }
 
 }

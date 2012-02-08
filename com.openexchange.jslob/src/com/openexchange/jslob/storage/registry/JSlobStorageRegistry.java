@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,50 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob.storage.registry;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.storage.JSlobStorage;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobStorageRegistry} - The registry for JSlob storages.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
-
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+public interface JSlobStorageRegistry {
 
     /**
-     * Gets the comment
+     * Gets the JSlob storage associated with given service identifier.
      * 
-     * @return The comment
+     * @param storageId The storage identifier
+     * @return The JSlob storage associated with given service identifier or <code>null</code>
+     * @throws OXException If returning the storage fails
      */
-    public String getComment() {
-        return comment;
-    }
+    JSlobStorage getJSlobStorage(String storageId) throws OXException;
 
     /**
-     * Sets the comment
+     * Gets a collection containing all registered JSlob storage
      * 
-     * @param comment The comment to set
+     * @return A collection containing all registered JSlob storage
+     * @throws OXException If returning the collection fails
      */
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+    Collection<JSlobStorage> getJSlobStorages() throws OXException;
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    /**
+     * Puts given JSlob storage into this registry.
+     * 
+     * @param jslobStorage The JSlob storage to put
+     * @return <code>true</code> on success; otherwise <code>false</code> if another storage is already bound to the same identifier
+     */
+    boolean putJSlobStorage(JSlobStorage jslobStorage);
+
+    /**
+     * Removes the JSlob storage associated with given service identifier.
+     * 
+     * @param storageId The storage identifier
+     * @throws OXException If removing the storage fails
+     */
+    void removeJSlobStorage(String storageId) throws OXException;
 
 }

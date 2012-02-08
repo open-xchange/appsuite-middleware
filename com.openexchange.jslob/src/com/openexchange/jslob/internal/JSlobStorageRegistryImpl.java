@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,65 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob.internal;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.storage.JSlobStorage;
+import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobStorageRegistryImpl}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
+public final class JSlobStorageRegistryImpl implements JSlobStorageRegistry {
 
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+    private static final JSlobStorageRegistryImpl INSTANCE = new JSlobStorageRegistryImpl();
 
     /**
-     * Gets the comment
+     * Gets the instance.
      * 
-     * @return The comment
+     * @return The instance
      */
-    public String getComment() {
-        return comment;
+    public static JSlobStorageRegistryImpl getInstance() {
+        return INSTANCE;
     }
+
+    private final ConcurrentMap<String, JSlobStorage> registry;
 
     /**
-     * Sets the comment
-     * 
-     * @param comment The comment to set
+     * Initializes a new {@link JSlobStorageRegistryImpl}.
      */
-    public void setComment(String comment) {
-        this.comment = comment;
+    private JSlobStorageRegistryImpl() {
+        super();
+        registry = new ConcurrentHashMap<String, JSlobStorage>(2);
     }
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    @Override
+    public JSlobStorage getJSlobStorage(final String storageId) throws OXException {
+        return registry.get(storageId);
+    }
+
+    @Override
+    public Collection<JSlobStorage> getJSlobStorages() throws OXException {
+        final List<JSlobStorage> list = new ArrayList<JSlobStorage>(8);
+        list.addAll(registry.values());
+        return list;
+    }
+
+    @Override
+    public boolean putJSlobStorage(final JSlobStorage jslobStorage) {
+        return (null == registry.putIfAbsent(jslobStorage.getIdentifier(), jslobStorage));
+    }
+
+    @Override
+    public void removeJSlobStorage(final String storageId) throws OXException {
+        registry.remove(storageId);
+    }
 
 }

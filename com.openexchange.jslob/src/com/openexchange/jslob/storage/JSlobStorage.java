@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,76 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob.storage;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobStorage} - The JSlob storage.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
-
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+public interface JSlobStorage {
 
     /**
-     * Gets the comment
+     * Gets the identifier of this JSlob storage.
      * 
-     * @return The comment
+     * @return The identifier of this JSlob storage.
      */
-    public String getComment() {
-        return comment;
-    }
+    String getIdentifier();
 
     /**
-     * Sets the comment
+     * Stores an element with the given identifier.
      * 
-     * @param comment The comment to set
+     * @param id Identifier.
+     * @param t Element.
+     * @throws OXException If storing fails
      */
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+    void store(JSlobId id, JSlob t) throws OXException;
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    /**
+     * Reads the element associated with the given identifier.
+     * 
+     * @param id The identifier
+     * @return The element.
+     * @throws OXException If loading fails or no element is associated with specified identifier
+     */
+    JSlob load(JSlobId id) throws OXException;
+
+    /**
+     * Reads the element associated with the given identifier.
+     * 
+     * @param id The identifier.
+     * @return The element or <code>null</code>
+     * @throws OXException If loading fails
+     */
+    JSlob opt(JSlobId id) throws OXException;
+
+    /**
+     * Deletes the element associated with the given identifier.
+     * 
+     * @param id Identifier.
+     * @return The deleted Element.
+     * @throws OXException If removal fails
+     */
+    JSlob remove(JSlobId id) throws OXException;
+
+    /**
+     * Marks the entry associated with given identifier as locked.
+     * 
+     * @param jslobId The JSlob identifier
+     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
+     * @throws OXException If setting the lock fails
+     */
+    boolean lock(JSlobId jslobId) throws OXException;
+
+    /**
+     * Marks the entry associated with given identifier as unlocked.
+     * 
+     * @param jslobId The JSlob identifier
+     * @throws OXException If setting the unlock fails
+     */
+    void unlock(JSlobId jslobId) throws OXException;
 
 }

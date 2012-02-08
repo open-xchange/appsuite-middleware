@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,59 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob.registry;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlobService;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobServiceRegistry} - A registry for JSlob services.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
-
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+public interface JSlobServiceRegistry {
 
     /**
-     * Gets the comment
+     * Gets the JSlob service associated with given service identifier.
      * 
-     * @return The comment
+     * @param serviceId The service identifier or an alias
+     * @return The JSlob service associated with given service identifier
+     * @throws OXException If returning the service fails or not found
      */
-    public String getComment() {
-        return comment;
-    }
+    JSlobService getJSlobService(String serviceId) throws OXException;
 
     /**
-     * Sets the comment
+     * Gets the JSlob service associated with given service identifier.
      * 
-     * @param comment The comment to set
+     * @param serviceId The service identifier or an alias
+     * @return The JSlob service associated with given service identifier or <code>null</code>
+     * @throws OXException If returning the service fails
      */
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+    JSlobService optJSlobService(String serviceId) throws OXException;
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    /**
+     * Gets a collection containing all registered JSlob services
+     * 
+     * @return A collection containing all registered JSlob services
+     * @throws OXException If returning the collection fails
+     */
+    Collection<JSlobService> getJSlobServices() throws OXException;
+
+    /**
+     * Puts given JSlob service into this registry.
+     * 
+     * @param jslobService The JSlob service to put
+     * @return <code>true</code> on success; otherwise <code>false</code> if another service is already bound to the same identifier
+     */
+    boolean putJSlobService(JSlobService jslobService);
+
+    /**
+     * Removes the JSlob service associated with given service identifier.
+     * 
+     * @param jslobService The JSlob service to remove
+     * @throws OXException If removing the service fails
+     */
+    void removeJSlobService(JSlobService jslobService) throws OXException;
 
 }

@@ -80,6 +80,7 @@ import com.openexchange.calendar.itip.ParticipantChange;
 import com.openexchange.context.ContextService;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
+import com.openexchange.data.conversion.ical.itip.ITipSpecialHandling;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -138,7 +139,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 
 		if (update != null) {
 			ParticipantChange participantChange = applyParticipantChange(
-					update, original, message.getMethod());
+					update, original, message.getMethod(), message);
 			if (participantChange != null) {
 				participantChange.setComment(message.getComment());
 
@@ -162,7 +163,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			change.setMaster(original);
 			if (matchingException != null) {
 				ParticipantChange participantChange = applyParticipantChange(
-						exception, matchingException, message.getMethod());
+						exception, matchingException, message.getMethod(), message);
 				participantChange.setComment(message.getComment());
 
 				change = new ITipChange();
@@ -275,7 +276,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 	}
 
 	private ParticipantChange applyParticipantChange(Appointment update,
-			Appointment original, ITipMethod method) {
+			Appointment original, ITipMethod method, ITipMessage message) {
 		
 		discardAllButFirst(update);
 		
@@ -287,8 +288,11 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 			AppointmentDiff diff = AppointmentDiff.compare(original, update,
 					Appointment.PARTICIPANTS, Appointment.USERS,
 					Appointment.CONFIRMATIONS);
+			Set<Integer> skipFields = skipFieldsInCounter(message);
+			
+			
 			for(int field : Appointment.ALL_COLUMNS) {
-				if (field == Appointment.NUMBER_OF_LINKS || field == Appointment.TITLE) {
+				if (skipFields.contains(field)) {
 					continue; // Skip
 				}
 				if (field != Appointment.PARTICIPANTS && field != Appointment.USERS && field != Appointment.CONFIRMATIONS && !diff.anyFieldChangedOf(field)) {
@@ -518,6 +522,15 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		}
 
 		return pChange;
+	}
+
+	private Set<Integer> skipFieldsInCounter(ITipMessage message) {
+		Set<Integer> skipList = new HashSet<Integer>();
+		skipList.add(Appointment.NUMBER_OF_LINKS); 
+		if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
+			skipList.add(Appointment.TITLE);
+		}
+		return null;
 	}
 
 	private void discardAllButFirst(Appointment update) {

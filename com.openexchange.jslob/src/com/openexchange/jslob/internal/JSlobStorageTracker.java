@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,58 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob.internal;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.storage.JSlobStorage;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobStorageTracker}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
+public final class JSlobStorageTracker implements ServiceTrackerCustomizer<JSlobStorage, JSlobStorage> {
 
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+    private final BundleContext context;
 
     /**
-     * Gets the comment
-     * 
-     * @return The comment
+     * Initializes a new {@link JSlobStorageTracker}.
      */
-    public String getComment() {
-        return comment;
+    public JSlobStorageTracker(final BundleContext context) {
+        super();
+        this.context = context;
     }
 
-    /**
-     * Sets the comment
-     * 
-     * @param comment The comment to set
-     */
-    public void setComment(String comment) {
-        this.comment = comment;
+    @Override
+    public JSlobStorage addingService(final ServiceReference<JSlobStorage> reference) {
+        final JSlobStorage service = context.getService(reference);
+        if (JSlobStorageRegistryImpl.getInstance().putJSlobStorage(service)) {
+            return service;
+        }
+        /*
+         * Nothing to track
+         */
+        context.ungetService(reference);
+        return null;
     }
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    @Override
+    public void modifiedService(final ServiceReference<JSlobStorage> reference, final JSlobStorage service) {
+        // Nothing to do
+    }
+
+    @Override
+    public void removedService(final ServiceReference<JSlobStorage> reference, final JSlobStorage service) {
+        try {
+            JSlobStorageRegistryImpl.getInstance().removeJSlobStorage(service.getIdentifier());
+        } catch (final OXException e) {
+            org.apache.commons.logging.LogFactory.getLog(JSlobStorageTracker.class).error(e.getMessage(), e);
+        } finally {
+            context.ungetService(reference);
+        }
+    }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,65 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
-
-import java.util.HashSet;
-import java.util.Set;
-
+package com.openexchange.jslob;
 
 /**
- * {@link ITipMessage}
+ * {@link JSONPathElement} - A JSON path element.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
+public final class JSONPathElement {
 
-    private ITipMethod method;
+    private final String name;
 
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
+    private final int index;
 
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
+    /**
+     * Initializes a new {@link JSONPathElement}.
+     * 
+     * @param name The field name
+     */
+    public JSONPathElement(final String name) {
+        this(name, -1);
     }
 
     /**
-     * Gets the comment
+     * Initializes a new {@link JSONPathElement}.
      * 
-     * @return The comment
+     * @param name The field name
+     * @param index The index in the JSON array denoted by field name
      */
-    public String getComment() {
-        return comment;
+    public JSONPathElement(final String name, final int index) {
+        super();
+        this.name = name;
+        this.index = index;
     }
 
     /**
-     * Sets the comment
+     * Checks if this JSON field denotes a certain index in a JSON array.
      * 
-     * @param comment The comment to set
+     * @return <code>true</code> if this JSON field has an index; otherwise <code>false</code>
      */
-    public void setComment(String comment) {
-        this.comment = comment;
+    public boolean hasIndex() {
+        return index >= 0;
     }
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    /**
+     * Gets the name
+     * 
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the index
+     * 
+     * @return The index
+     */
+    public int getIndex() {
+        return index;
+    }
 
 }

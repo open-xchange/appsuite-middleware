@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,65 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobService} - The JSlob service.
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
-
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+public interface JSlobService {
 
     /**
-     * Gets the comment
+     * Gets the service identifier.
      * 
-     * @return The comment
+     * @return The service identifier
      */
-    public String getComment() {
-        return comment;
-    }
+    String getIdentifier();
 
     /**
-     * Sets the comment
+     * Gets the aliases for this service.
      * 
-     * @param comment The comment to set
+     * @return The aliases for this service.
      */
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+    List<String> getAliases();
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    /**
+     * Gets the JSlob associated with given user in given context.
+     * 
+     * @param id The identifier of the JSlob
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The JSlob
+     * @throws OXException If JSlob cannot be returned
+     */
+    JSlob get(String id, int userId, int contextId) throws OXException;
+
+    /**
+     * Sets the JSlob associated with given user in given context.
+     * <p>
+     * If passed JSlob is <code>null</code>, a delete is performed.
+     * 
+     * @param id The path of the JSlob
+     * @param jsonJSlob The JSlob or <code>null</code> for deletion
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If JSlob cannot be set
+     */
+    void set(String id, JSlob jsonJSlob, int userId, int contextId) throws OXException;
+
+    /**
+     * Updates the JSlob associated with given user in given context.
+     * 
+     * @param id The path of the JSlob
+     * @param jsonUpdate The JSON update providing the data to update
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If update fails
+     */
+    void update(String id, JSONUpdate update, int userId, int contextId) throws OXException;
 
 }

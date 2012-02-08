@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,57 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.jslob.osgi;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.internal.JSlobServiceRegistryImpl;
+import com.openexchange.jslob.internal.JSlobServiceTracker;
+import com.openexchange.jslob.internal.JSlobStorageRegistryImpl;
+import com.openexchange.jslob.internal.JSlobStorageTracker;
+import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import com.openexchange.jslob.storage.JSlobStorage;
+import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ITipMessage}
+ * {@link JSlobActivator}
  * 
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ITipMessage extends AppointmentWithExceptions {
-
-    private ITipMethod method;
-
-    private String comment;
-    
-    private Set<Object> features = new HashSet<Object>();
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
-    }
+public class JSlobActivator extends HousekeepingActivator {
 
     /**
-     * Gets the comment
-     * 
-     * @return The comment
+     * Initializes a new {@link JSlobActivator}.
      */
-    public String getComment() {
-        return comment;
+    public JSlobActivator() {
+        super();
     }
 
-    /**
-     * Sets the comment
-     * 
-     * @param comment The comment to set
-     */
-    public void setComment(String comment) {
-        this.comment = comment;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-	
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
+    @Override
+    protected void startBundle() throws Exception {
+        final org.apache.commons.logging.Log logger = org.apache.commons.logging.LogFactory.getLog(JSlobActivator.class);
+        logger.info("Starting bundle: com.openexchange.jslob");
+        try {
+            /*
+             * Initialize and open trackers
+             */
+            track(JSlobService.class, new JSlobServiceTracker(context));
+            track(JSlobStorage.class, new JSlobStorageTracker(context));
+            openTrackers();
+            /*
+             * Register services
+             */
+            registerService(JSlobServiceRegistry.class, JSlobServiceRegistryImpl.getInstance());
+            registerService(JSlobStorageRegistry.class, JSlobStorageRegistryImpl.getInstance());
+        } catch (final Exception e) {
+            logger.error("Starting bundle \"com.openexchange.jslob\" failed: " + e.getMessage(), e);
+            throw e;
+        }
+    }
 
 }
