@@ -208,6 +208,7 @@ public final class ManagedMimeMessage extends MimeMessage {
             for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
                 os.write(buf, 0, read);
             }
+            os.flush();
             is.close();
         } finally {
             if (null != is) {
