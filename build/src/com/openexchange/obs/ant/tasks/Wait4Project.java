@@ -192,9 +192,10 @@ public class Wait4Project extends Task {
 
         // endless loop until build finished
 
-        final BuildServiceClient bsc = new BuildServiceClient(bsuser, bspass, bsurl);
+        final BuildServiceClient bsc; 
         try {
-            PackageStatus[] statuses;
+        	bsc = new BuildServiceClient(bsuser, bspass, bsurl);
+        	PackageStatus[] statuses;
             do {
                 Thread.sleep(bssleepdelay);
                 statuses = bsc.checkProjectStatus(bsprjname, bsreponame);

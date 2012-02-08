@@ -10,7 +10,11 @@
     <property name="prefix" value="/opt/open-xchange"/><!-- Installation path on destination system -->
     <property name="tmpDir" value="tmp"/><!-- Directory for temporary file storage -->
     <property name="distDir" value=""/><!-- Use some tmpDir -->
-	<property name="bsProject" value="open-xchange-7-test"/><!-- project name in buildservice -->
+
+    <property name="bsProject" value="open-xchange-7-test"/><!-- project name in buildservice -->
+    <property name="bsApiUrl" value="http://buildapi.netline.de"/>
+    <property name="bsUser" value="oxbuilduser"/>
+    <property name="bsPassword" value="openxchange"/>
 
     <property name="branch" value="master"/>
 
@@ -66,19 +70,19 @@
                     </else>
                 </if>
                 <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
-            	<if>
-            		<available file="${destDir}/${bundlesDir}" type="dir"/>
-            		<then>
-            			<path id="buildClasspath">
-            				<path refid="classpath"/>
-            				<fileset dir="${destDir}/${bundlesDir}" includes="*.jar"/>
-		                    <dirset dir="${destDir}/${bundlesDir}" includes="*"/>
-            			</path>
-            		</then>
-        			<else>
-        				<path id="buildClasspath" refid="classpath"/>
-            		</else>
-            	</if>
+                <if>
+                    <available file="${destDir}/${bundlesDir}" type="dir"/>
+                    <then>
+                        <path id="buildClasspath">
+                            <path refid="classpath"/>
+                            <fileset dir="${destDir}/${bundlesDir}" includes="*.jar"/>
+                            <dirset dir="${destDir}/${bundlesDir}" includes="*"/>
+                        </path>
+                    </then>
+                    <else>
+                        <path id="buildClasspath" refid="classpath"/>
+                    </else>
+                </if>
                 <!-- TODO include the dist build as a normal buildType in build-project.xml -->
                 <if>
                     <equals arg1="dist" arg2="${buildType}"/>
@@ -193,7 +197,7 @@
 
     <target name="upload" depends="debianSource" description="Uploads a package to the build system.">
         <!-- TODO project must be defined somewhere -->
-        <uploadSource url="http://buildapi.netline.de" user="oxbuilduser" pass="openxchange" project="${bsProject}" packageName="${packageName}">
+        <uploadSource url="${bsApiUrl}" user="${bsUser}" pass="${bsPassword}" project="${bsProject}" packageName="${packageName}">
             <files>
                 <fileset dir="${tmpDir}">
                     <exclude name="${packageName}-${version}/**"/>
