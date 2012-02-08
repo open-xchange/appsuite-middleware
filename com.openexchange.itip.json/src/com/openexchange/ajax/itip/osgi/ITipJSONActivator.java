@@ -58,7 +58,7 @@ import com.openexchange.conversion.ConversionService;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
-import com.openexchange.server.osgiservice.HousekeepingActivator;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.service.ServletRegistration;
 
 
