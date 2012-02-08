@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -89,6 +89,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -126,6 +127,12 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 public class GroupwareCaldavFactory extends AbstractWebdavFactory implements BulkLoader {
 
     private static final Log LOG = LogFactory.getLog(GroupwareCaldavFactory.class);
+
+    /**
+     * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
+     * (copied from com.openexchange.folderstorage.outlook)
+     */
+    private static final String OUTLOOK_TREE_ID = "1"; 
 
     private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
 
@@ -245,6 +252,10 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
     public Context getContext() {
         return sessionHolder.getContext();
+    }
+
+    public User getUser() {
+        return sessionHolder.getUser();
     }
 
     public String getLoginName() {
@@ -469,6 +480,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
         private final Set<String> patchGuard = new HashSet<String>();
 
+        private String defaultFolderTrash = null; 
+
         public void cacheFolderSlim(final int folderId) {
             if (folderCache.containsKey(folderId)) {
                 return;
@@ -530,14 +543,59 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 					this.factory.getTreeID(), CalendarContentType.getInstance(), type, false, this.factory.getSession(), null);
             final UserizedFolder[] response = visibleFoldersResponse.getResponse();
             for (final UserizedFolder folder : response) {
-                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission()) {
+                if (Permission.READ_OWN_OBJECTS < folder.getOwnPermission().getReadPermission() && false == this.isTrashFolder(folder)) {
                 	folders.add(folder);
                 }
             }
             return folders;
 	    }
 	    
-        public void cacheAppointment(final int folder, final int appointment) throws WebdavProtocolException {
+	    /**
+	     * Gets the id of the default trash folder
+	     * @return
+	     */
+        private String getDefaultFolderTrash() {
+        	if (null == this.defaultFolderTrash) {
+    			FolderService folderService = this.factory.getFolderService();
+    			try {
+					this.defaultFolderTrash = folderService.getDefaultFolder(this.factory.getUser(), OUTLOOK_TREE_ID, 
+							TrashContentType.getInstance(), this.factory.getSession(), null).getID();
+				} catch (OXException e) {
+					LOG.warn("unable to determine default trash folder", e);
+				}
+        	}
+        	return this.defaultFolderTrash;
+        }
+        
+	    /**
+	     * Checks whether the supplied folder is a trash folder, i.e. one of 
+	     * it's parent folders is the default trash folder.
+	     * 
+	     * @param folder
+	     * @return
+	     * @throws WebdavProtocolException
+	     * @throws FolderException 
+	     */
+	    private boolean isTrashFolder(final UserizedFolder folder) throws OXException {
+	    	String trashFolderId = this.getDefaultFolderTrash();
+	    	if (null != trashFolderId) {
+				FolderService folderService = this.factory.getFolderService();
+				FolderResponse<UserizedFolder[]> pathResponse = folderService.getPath(
+						OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
+	            UserizedFolder[] response = pathResponse.getResponse();
+	            for (UserizedFolder parentFolder : response) {
+	            	if (trashFolderId.equals(parentFolder.getID())) {
+	            		LOG.debug("Detected folder below trash: " + folder);
+	            		return true;
+	            	}
+	            }
+	    	} else {
+	    		LOG.warn("No config value for trash folder id found");
+	    	}
+	    	return false;
+	    }
+
+	    public void cacheAppointment(final int folder, final int appointment) throws WebdavProtocolException {
             cacheFolderSlim(folder);
             getComplete(appointment, folder);
         }
@@ -822,7 +880,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 
     }
     
-    private final int[] SYNC_STATUS_FIELDS = {Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED};
+    private final int[] SYNC_STATUS_FIELDS = { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED, Appointment.CREATION_DATE };
 
     public Syncstatus<WebdavResource> getSyncStatusSince(WebdavCollection webdavCollection, String token) throws WebdavProtocolException {
         if (token.length() == 0) {

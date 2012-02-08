@@ -146,6 +146,6 @@ public interface SolrConstants {
 
     public static final int MAX_NUM_CONCURRENT_FILLER_TASKS = Runtime.getRuntime().availableProcessors() << 1;
 
-    public static final int MAX_FILLER_CHUNK = 50;
+    public static final int MAX_FILLER_CHUNK = 200;
 
 }

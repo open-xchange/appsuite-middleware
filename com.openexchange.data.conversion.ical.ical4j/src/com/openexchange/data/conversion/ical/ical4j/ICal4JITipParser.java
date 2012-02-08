@@ -60,7 +60,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+
+import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Comment;
 import net.fortuna.ical4j.model.property.Method;
@@ -73,6 +76,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
+import com.openexchange.data.conversion.ical.itip.ITipSpecialHandling;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -103,7 +107,9 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
             reader = new BufferedReader(new InputStreamReader(ical, "UTF-8"));
 
             net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-
+            
+            boolean microsoft = looksLikeMicrosoft(calendar);
+            
             Method method = (Method) calendar.getProperty(Method.METHOD);
             ITipMethod methodValue = (method == null) ? ITipMethod.NO_METHOD : ITipMethod.get(method.getValue());
             
@@ -117,6 +123,9 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
                     ITipMessage message = messagesPerUID.get(appointment.getUid());
                     if (message == null) {
                         message = new ITipMessage();
+                        if (microsoft) {
+                        	message.addFeature(ITipSpecialHandling.MICROSOFT);
+                        }
                         message.setMethod(methodValue);
                         messagesPerUID.put(appointment.getUid(), message);
                         messages.add(message);
@@ -146,5 +155,10 @@ public class ICal4JITipParser extends ICal4JParser implements ITipParser {
 
         return messages;
     }
+
+	private boolean looksLikeMicrosoft(Calendar calendar) {
+		Property property = calendar.getProperty("PRODID");
+		return property.getValue().toLowerCase().contains("microsoft");
+	}
 
 }

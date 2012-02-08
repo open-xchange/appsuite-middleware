@@ -141,8 +141,8 @@ public class Participants implements ChangeDescriptionGenerator{
             put(Style.FAIT_ACCOMPLI, Messages.DECLINED);
         }});
         put(ChangeType.TENTATIVE, new EnumMap<Style, String>(Style.class){{
-            put(Style.ASK, Messages.TENTATIVELY_ACCEPT);
-            put(Style.INTENTION, Messages.TENTATIVELY_ACCEPT);
+            put(Style.ASK, Messages.TENTATIVELY_ACCEPTED);
+            put(Style.INTENTION, Messages.TENTATIVELY_ACCEPTED);
             put(Style.FAIT_ACCOMPLI, Messages.TENTATIVELY_ACCEPTED);
         }});
 

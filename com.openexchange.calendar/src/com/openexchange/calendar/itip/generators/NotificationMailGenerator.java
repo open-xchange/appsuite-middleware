@@ -488,6 +488,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     		while(results.hasNext()) {
     			mail.addAttachment(results.next());
     		}
+    	} catch (OXException x) {
+    		// Ignore. This is best effort only.
     	} finally {
     		if (results != null) {
         		results.close();
@@ -588,7 +590,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     }
 
     protected NotificationMail stateChanged(NotificationMail mail, ConfirmStatus status) throws OXException {
-        switch (status) {
+    	switch (status) {
         case ACCEPT:
             mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.ACCEPTED).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
             mail.setTemplateName("notify.appointment.accept");
@@ -852,6 +854,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         public NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException {
             if (onlyMyStateChanged()) {
+            	if (confirmStatus == null) {
+        			return null;
+        		}
                 // This needs to be a reply
                 if (participant.hasRole(ITipRole.ORGANIZER)) {
                     return stateChanged(reply(participant, confirmStatus), confirmStatus);

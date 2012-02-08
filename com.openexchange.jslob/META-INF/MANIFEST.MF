@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange JSlob Bundle
+Bundle-SymbolicName: com.openexchange.jslob
+Bundle-Version: 7.0.0.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.session,
+ org.apache.commons.logging,
+ org.json,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.jslob.osgi.JSlobActivator
+Export-Package: com.openexchange.jslob,
+ com.openexchange.jslob.registry,
+ com.openexchange.jslob.storage,
+ com.openexchange.jslob.storage.registry

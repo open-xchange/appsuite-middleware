@@ -1,0 +1,15 @@
+#! /bin/bash
+
+BSAPIURL=http://buildapi.netline.de
+BSUSER=oxbuilduser
+BSPASS=openxchange
+BSPROJECT=open-xchange-7-test
+PACKAGELIST=open-xchange-all
+
+ANT_OPTS=-Xmx512m ant -lib lib -f buildAll.xml \
+	-DbsProject=$BSPROJECT \
+	-DbsApiUrl=$BSAPIURL \
+	-DbsUser=$BSUSER \
+	-DbsPassword=$BSPASS \
+	-DprojectSet=$PACKAGELIST \
+	upload

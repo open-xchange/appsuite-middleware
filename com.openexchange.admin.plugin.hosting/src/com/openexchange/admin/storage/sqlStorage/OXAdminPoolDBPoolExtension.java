@@ -56,57 +56,56 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 
 public class OXAdminPoolDBPoolExtension extends OXAdminPoolDBPool implements OXAdminPoolInterfaceExtension {
-    
+
     public OXAdminPoolDBPoolExtension(final PropertyHandler prop) {
         super(prop);
     }
 
     public int getDBPoolIdForContextId(final int context_id) throws PoolException {
-        try{
-            return Database.resolvePool(context_id,true);
-        }catch(final OXException db){
-            throw new PoolException(""+db.getMessage());
+        try {
+            return Database.resolvePool(context_id, true);
+        } catch (final OXException e) {
+            throw new PoolException("" + e.getMessage(), e);
         }
     }
 
-    public Connection getWRITEConnectionForPoolId(final int db_pool_id,final String schema_name) throws PoolException {
-        try{
+    public Connection getWRITEConnectionForPoolId(final int db_pool_id, final String schema_name) throws PoolException {
+        try {
             return Database.get(db_pool_id,schema_name);
-        }catch(final OXException db){
-            throw new PoolException(""+db.getMessage());
+        } catch (final OXException e) {
+            throw new PoolException("" + e.getMessage(), e);
         }
     }
 
-    public void pushWRITEConnectionForPoolId(final int db_pool_id,final Connection conny) throws PoolException {        
-        Database.back(db_pool_id,conny);
+    public void pushWRITEConnectionForPoolId(final int db_pool_id, final Connection con) {
+        Database.back(db_pool_id, con);
     }
 
-    public Connection getWRITENoTimeoutConnectionForPoolId(final int db_pool_id,final String schema_name) throws PoolException {
-        try{
-            return Database.getNoTimeout(db_pool_id,schema_name);
-        }catch(final OXException db){
-            throw new PoolException(""+db.getMessage());
+    public Connection getWRITENoTimeoutConnectionForPoolId(final int db_pool_id, final String schema_name) throws PoolException {
+        try {
+            return Database.getNoTimeout(db_pool_id, schema_name);
+        } catch (final OXException e) {
+            throw new PoolException("" + e.getMessage(), e);
         }
     }
 
-    public void pushWRITENoTimeoutConnectionForPoolId(final int db_pool_id,final Connection conny) throws PoolException {        
-        Database.backNoTimeoout(db_pool_id,conny);
+    public void pushWRITENoTimeoutConnectionForPoolId(final int db_pool_id, final Connection con) {
+        Database.backNoTimeoout(db_pool_id, con);
     }
 
     public void resetPoolMappingForContext(final int context_id) throws PoolException {
-        try{
+        try {
             Database.reset(context_id);
-        }catch(final OXException db){
-            throw new PoolException(""+db.getMessage());
+        } catch (final OXException e) {
+            throw new PoolException("" + e.getMessage(), e);
         }
     }
-    
-   public String getSchemeForContextId(final int context_id) throws PoolException{
-       try{
+
+   public String getSchemeForContextId(final int context_id) throws PoolException {
+       try {
             return Database.getSchema(context_id);
-        }catch(final OXException db){
-            throw new PoolException(""+db.getMessage());
+        } catch (final OXException e) {
+            throw new PoolException("" + e.getMessage(), e);
         }
    }
-    
 }

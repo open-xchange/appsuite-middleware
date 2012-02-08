@@ -54,7 +54,7 @@ import com.openexchange.admin.rmi.dataobjects.Database;
 /**
  * Internally used object for getnextdbhandlebyweight method instead of
  */
-class DatabaseHandle extends Database {
+public class DatabaseHandle extends Database {
 
     private static final long serialVersionUID = -4816706296673058930L;
 

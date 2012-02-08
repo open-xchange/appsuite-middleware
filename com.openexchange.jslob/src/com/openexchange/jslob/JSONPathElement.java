@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,65 @@
  *
  */
 
-package com.openexchange.admin;
-
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.Vector;
-import junit.framework.TestCase;
+package com.openexchange.jslob;
 
 /**
- *
- * @author cutmasta
+ * {@link JSONPathElement} - A JSON path element.
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractAdminTest extends TestCase{
-    
-    protected  static String TEST_DOMAIN = "example.org";
-    protected  static String change_suffix = "_changed";
-    
-    protected static void parseResponse(Vector resp) throws Exception{
-        if(resp.size()==0){
-            throw new Exception("Invalid Response:");
-        }else{
-            if(!(resp.get(0)!=null && resp.get(0).toString().equals("OK"))){                
-                if(resp.size()>1){                
-                    throw new Exception ("Error: "+resp.get(1));
-                }else{
-                    throw new Exception("Error without message");
-                }
-            }
-        }
+public final class JSONPathElement {
+
+    private final String name;
+
+    private final int index;
+
+    /**
+     * Initializes a new {@link JSONPathElement}.
+     * 
+     * @param name The field name
+     */
+    public JSONPathElement(final String name) {
+        this(name, -1);
     }
-    
-    protected static String checkHost(String host) throws Exception{
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
-        }
-        if(!host.endsWith("/")){
-            host = host+"/";
-        }
-        return host;
+
+    /**
+     * Initializes a new {@link JSONPathElement}.
+     * 
+     * @param name The field name
+     * @param index The index in the JSON array denoted by field name
+     */
+    public JSONPathElement(final String name, final int index) {
+        super();
+        this.name = name;
+        this.index = index;
     }
-    
-    protected static void log(Object obj){
-        System.out.println(""+obj);
+
+    /**
+     * Checks if this JSON field denotes a certain index in a JSON array.
+     * 
+     * @return <code>true</code> if this JSON field has an index; otherwise <code>false</code>
+     */
+    public boolean hasIndex() {
+        return index >= 0;
     }
-    
-    protected static void compareStringArray(String[] a,String[]b){
-        if(a==null){
-            assertNotNull("expected null array",b);
-        }else{
-            assertNotNull("array is null",b);
-        }
-        assertEquals("expected same size",a.length,b.length);
-        SortedSet<String> aa = new TreeSet<String>();
-        SortedSet<String> bb = new TreeSet<String>();
-        for(int cc = 0;cc<a.length;cc++){
-            aa.add(a[cc]);
-            bb.add(b[cc]);
-        }
-//        boolean test = aa.(bb);
-        assertEquals(aa,bb);
+
+    /**
+     * Gets the name
+     * 
+     * @return The name
+     */
+    public String getName() {
+        return name;
     }
-   
+
+    /**
+     * Gets the index
+     * 
+     * @return The index
+     */
+    public int getIndex() {
+        return index;
+    }
+
 }
