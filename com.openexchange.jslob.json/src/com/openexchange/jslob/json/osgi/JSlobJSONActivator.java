@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,76 +47,30 @@
  *
  */
 
-package com.openexchange.jslob;
+package com.openexchange.jslob.json.osgi;
 
-import java.util.Collection;
-import java.util.List;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.jslob.json.JSlobActionFactory;
+import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
+import com.openexchange.jslob.registry.JSlobServiceRegistry;
 
 /**
- * {@link JSlobService} - The JSlob service.
- * 
+ * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSlobService {
+public class JSlobJSONActivator extends AJAXModuleActivator {
 
-    /**
-     * Gets the service identifier.
-     * 
-     * @return The service identifier
-     */
-    String getIdentifier();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { JSlobServiceRegistry.class };
+    }
 
-    /**
-     * Gets the aliases for this service.
-     * 
-     * @return The aliases for this service.
-     */
-    List<String> getAliases();
-
-    /**
-     * Gets the JSlob associated with given user in given context.
-     * 
-     * @param id The identifier of the JSlob
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The JSlob
-     * @throws OXException If JSlob cannot be returned
-     */
-    JSlob get(String id, int userId, int contextId) throws OXException;
-
-    /**
-     * Gets the JSlobs associated with given user in given context.
-     * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The JSlobs
-     * @throws OXException If JSlobs cannot be returned
-     */
-    Collection<JSlob> get(int userId, int contextId) throws OXException;
-
-    /**
-     * Sets the JSlob associated with given user in given context.
-     * <p>
-     * If passed JSlob is <code>null</code>, a delete is performed.
-     * 
-     * @param id The path of the JSlob
-     * @param jsonJSlob The JSlob or <code>null</code> for deletion
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @throws OXException If JSlob cannot be set
-     */
-    void set(String id, JSlob jsonJSlob, int userId, int contextId) throws OXException;
-
-    /**
-     * Updates the JSlob associated with given user in given context.
-     * 
-     * @param id The path of the JSlob
-     * @param jsonUpdate The JSON update providing the data to update
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @throws OXException If update fails
-     */
-    void update(String id, JSONUpdate update, int userId, int contextId) throws OXException;
+    @Override
+    protected void startBundle() throws Exception {
+        registerModule(new JSlobActionFactory(this), "jslob");
+        registerService(ResultConverter.class, new JSlobJSONResultConverter());
+    }
 
 }

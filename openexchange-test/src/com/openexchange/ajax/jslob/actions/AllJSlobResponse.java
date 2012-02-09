@@ -47,86 +47,46 @@
  *
  */
 
-package com.openexchange.jslob.storage;
+package com.openexchange.ajax.jslob.actions;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.jslob.JSlob;
 
 /**
- * {@link JSlobStorage} - The JSlob storage.
- * 
+ * {@link AllJSlobResponse}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSlobStorage {
+public final class AllJSlobResponse extends AbstractAJAXResponse {
 
     /**
-     * Gets the identifier of this JSlob storage.
-     * 
-     * @return The identifier of this JSlob storage.
+     * Initializes a new {@link AllJSlobResponse}.
+     *
+     * @param response
      */
-    String getIdentifier();
+    public AllJSlobResponse(final Response response) {
+        super(response);
+    }
 
     /**
-     * Stores an element with the given identifier.
-     * 
-     * @param id Identifier.
-     * @param t Element.
-     * @throws OXException If storing fails
+     * Gets the JSlobs.
+     *
+     * @return The JSlobs
+     * @throws JSONException If parsing JSON fails
      */
-    void store(JSlobId id, JSlob t) throws OXException;
-
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier
-     * @return The element.
-     * @throws OXException If loading fails or no element is associated with specified identifier
-     */
-    JSlob load(JSlobId id) throws OXException;
-
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The element or <code>null</code>
-     * @throws OXException If loading fails
-     */
-    JSlob opt(JSlobId id) throws OXException;
-
-    /**
-     * Reads the elements associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The elements
-     * @throws OXException If loading fails
-     */
-    Collection<JSlob> list(JSlobId id) throws OXException;
-
-    /**
-     * Deletes the element associated with the given identifier.
-     * 
-     * @param id Identifier.
-     * @return The deleted Element.
-     * @throws OXException If removal fails
-     */
-    JSlob remove(JSlobId id) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as locked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
-     * @throws OXException If setting the lock fails
-     */
-    boolean lock(JSlobId jslobId) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as unlocked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @throws OXException If setting the unlock fails
-     */
-    void unlock(JSlobId jslobId) throws OXException;
+    public List<JSlob> getJSlobs() throws JSONException {
+        final JSONArray jslobs = (JSONArray) getData();
+        final int len = jslobs.length();
+        final List<JSlob> list = new ArrayList<JSlob>(len);
+        for (int i = 0; i < len; i++) {
+            list.add(new JSlob(jslobs.getJSONObject(i)));
+        }
+        return list;
+    }
 
 }

@@ -53,6 +53,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -252,7 +256,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 }
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }  finally {
+            } finally {
                 if (!committed) {
                     Databases.rollback(con);
                 }
@@ -291,8 +295,6 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
-    private static final String SQL_SELECT = "SELECT data FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
-
     @Override
     public JSlob load(final JSlobId id) throws OXException {
         rlock.lock();
@@ -303,7 +305,10 @@ public final class DBJSlobStorage implements JSlobStorage {
             try {
                 final JSlob jslob = load(id, contextId, con);
                 if (null == jslob) {
-                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(contextId));
+                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
+                        id.getServiceId(),
+                        Integer.valueOf(id.getUser()),
+                        Integer.valueOf(contextId));
                 }
                 return jslob;
             } finally {
@@ -338,7 +343,7 @@ public final class DBJSlobStorage implements JSlobStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT);
+            stmt = con.prepareStatement("SELECT data FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id.getUser());
             stmt.setString(3, id.getServiceId());
@@ -357,7 +362,51 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
-    private static final String SQL_DELETE = "DELETE FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
+    @Override
+    public Collection<JSlob> list(final JSlobId id) throws OXException {
+        rlock.lock();
+        try {
+            final DatabaseService databaseService = getDatabaseService();
+            final int contextId = id.getContext();
+            final Connection con = databaseService.getReadOnly(contextId);
+            try {
+                return loadAll(id, contextId, con);
+            } finally {
+                databaseService.backReadOnly(contextId, con);
+            }
+        } finally {
+            rlock.unlock();
+        }
+    }
+
+    private Collection<JSlob> loadAll(final JSlobId id, final int contextId, final Connection con) throws OXException {
+        if (false && checkLocked(id, false, con)) {
+            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id.getComponents());
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT data FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt.setLong(1, contextId);
+            stmt.setLong(2, id.getUser());
+            stmt.setString(3, id.getServiceId());
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return Collections.emptyList();
+            }
+            final List<JSlob> list = new LinkedList<JSlob>();
+            do {
+                list.add(new JSlob(new JSONObject(rs.getString(1))));
+            } while (rs.next());
+            return list;
+        } catch (final SQLException e) {
+            throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (final JSONException e) {
+            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
 
     @Override
     public JSlob remove(final JSlobId id) throws OXException {
@@ -377,20 +426,26 @@ public final class DBJSlobStorage implements JSlobStorage {
                  */
                 final JSlob toDelete = load(id, contextId, con);
                 if (null == toDelete) {
-                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(contextId));
+                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
+                        id.getServiceId(),
+                        Integer.valueOf(id.getUser()),
+                        Integer.valueOf(contextId));
                 }
                 /*
                  * Now delete
                  */
                 con.setAutoCommit(false);
-                stmt = con.prepareStatement(SQL_DELETE);
+                stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, id.getUser());
                 stmt.setString(3, id.getServiceId());
                 stmt.setString(4, id.getId());
                 final int rows = stmt.executeUpdate();
                 if (rows < 1) {
-                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(contextId));
+                    throw JSlobExceptionCodes.NOT_FOUND_EXT.create(
+                        id.getServiceId(),
+                        Integer.valueOf(id.getUser()),
+                        Integer.valueOf(contextId));
                 } else if (rows > 1) {
                     throw JSlobExceptionCodes.CONFLICT.create(id.getServiceId(), Integer.valueOf(id.getUser()), Integer.valueOf(contextId));
                 }

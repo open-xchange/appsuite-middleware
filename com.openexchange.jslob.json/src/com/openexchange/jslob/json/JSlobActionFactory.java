@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,76 +47,47 @@
  *
  */
 
-package com.openexchange.jslob;
+package com.openexchange.jslob.json;
 
-import java.util.Collection;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.jslob.json.action.JSlobAction;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link JSlobService} - The JSlob service.
- * 
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link JSlobActionFactory}
+ *
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface JSlobService {
+public class JSlobActionFactory implements AJAXActionServiceFactory {
+
+    private final Map<String, JSlobAction> actions;
 
     /**
-     * Gets the service identifier.
+     * Initializes a new {@link JSlobActionFactory}.
      * 
-     * @return The service identifier
+     * @param services The service look-up
      */
-    String getIdentifier();
+    public JSlobActionFactory(final ServiceLookup services) {
+        super();
+        actions = new ConcurrentHashMap<String, JSlobAction>(4);
+        addJSlobAction(new com.openexchange.jslob.json.action.AllAction(services));
+        addJSlobAction(new com.openexchange.jslob.json.action.GetAction(services));
+        addJSlobAction(new com.openexchange.jslob.json.action.SetAction(services));
+        addJSlobAction(new com.openexchange.jslob.json.action.UpdateAction(services));
+    }
 
-    /**
-     * Gets the aliases for this service.
-     * 
-     * @return The aliases for this service.
-     */
-    List<String> getAliases();
+    private void addJSlobAction(final JSlobAction jslobAction) {
+        actions.put(jslobAction.getAction(), jslobAction);
+    }
 
-    /**
-     * Gets the JSlob associated with given user in given context.
-     * 
-     * @param id The identifier of the JSlob
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The JSlob
-     * @throws OXException If JSlob cannot be returned
-     */
-    JSlob get(String id, int userId, int contextId) throws OXException;
-
-    /**
-     * Gets the JSlobs associated with given user in given context.
-     * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return The JSlobs
-     * @throws OXException If JSlobs cannot be returned
-     */
-    Collection<JSlob> get(int userId, int contextId) throws OXException;
-
-    /**
-     * Sets the JSlob associated with given user in given context.
-     * <p>
-     * If passed JSlob is <code>null</code>, a delete is performed.
-     * 
-     * @param id The path of the JSlob
-     * @param jsonJSlob The JSlob or <code>null</code> for deletion
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @throws OXException If JSlob cannot be set
-     */
-    void set(String id, JSlob jsonJSlob, int userId, int contextId) throws OXException;
-
-    /**
-     * Updates the JSlob associated with given user in given context.
-     * 
-     * @param id The path of the JSlob
-     * @param jsonUpdate The JSON update providing the data to update
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @throws OXException If update fails
-     */
-    void update(String id, JSONUpdate update, int userId, int contextId) throws OXException;
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
 
 }

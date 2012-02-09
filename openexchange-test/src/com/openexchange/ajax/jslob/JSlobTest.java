@@ -47,86 +47,53 @@
  *
  */
 
-package com.openexchange.jslob.storage;
+package com.openexchange.ajax.jslob;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
+import java.util.List;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.jslob.actions.AllJSlobRequest;
+import com.openexchange.ajax.jslob.actions.AllJSlobResponse;
 import com.openexchange.jslob.JSlob;
 
 /**
- * {@link JSlobStorage} - The JSlob storage.
+ * {@link JSlobTest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSlobStorage {
+public final class JSlobTest extends AbstractAJAXSession {
 
     /**
-     * Gets the identifier of this JSlob storage.
-     * 
-     * @return The identifier of this JSlob storage.
+     * Initializes a new {@link JSlobTest}.
      */
-    String getIdentifier();
+    public JSlobTest() {
+        super(JSlobTest.class.getSimpleName());
+    }
 
-    /**
-     * Stores an element with the given identifier.
-     * 
-     * @param id Identifier.
-     * @param t Element.
-     * @throws OXException If storing fails
-     */
-    void store(JSlobId id, JSlob t) throws OXException;
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier
-     * @return The element.
-     * @throws OXException If loading fails or no element is associated with specified identifier
-     */
-    JSlob load(JSlobId id) throws OXException;
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The element or <code>null</code>
-     * @throws OXException If loading fails
-     */
-    JSlob opt(JSlobId id) throws OXException;
+    public void testSimpleAllRequest() {
+        try {
+            final AllJSlobRequest request = new AllJSlobRequest();
+            final AllJSlobResponse response = client.execute(request);
 
-    /**
-     * Reads the elements associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The elements
-     * @throws OXException If loading fails
-     */
-    Collection<JSlob> list(JSlobId id) throws OXException;
-
-    /**
-     * Deletes the element associated with the given identifier.
-     * 
-     * @param id Identifier.
-     * @return The deleted Element.
-     * @throws OXException If removal fails
-     */
-    JSlob remove(JSlobId id) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as locked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
-     * @throws OXException If setting the lock fails
-     */
-    boolean lock(JSlobId jslobId) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as unlocked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @throws OXException If setting the unlock fails
-     */
-    void unlock(JSlobId jslobId) throws OXException;
+            final List<JSlob> list = response.getJSlobs();
+            if (!list.isEmpty()) {
+                for (final JSlob jSlob : list) {
+                    assertNotNull(jSlob.getJsonObject());
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 
 }

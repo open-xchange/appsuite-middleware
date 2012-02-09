@@ -47,86 +47,58 @@
  *
  */
 
-package com.openexchange.jslob.storage;
+package com.openexchange.ajax.jslob.actions;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlob;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link JSlobStorage} - The JSlob storage.
- * 
+ * {@link AllJSlobRequest}
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSlobStorage {
+public final class AllJSlobRequest extends AbstractJSlobRequest<AllJSlobResponse> {
 
     /**
-     * Gets the identifier of this JSlob storage.
-     * 
-     * @return The identifier of this JSlob storage.
+     * Initializes a new {@link AllJSlobRequest}.
      */
-    String getIdentifier();
+    public AllJSlobRequest() {
+        super();
+        setFailOnError(true);
+    }
 
-    /**
-     * Stores an element with the given identifier.
-     * 
-     * @param id Identifier.
-     * @param t Element.
-     * @throws OXException If storing fails
-     */
-    void store(JSlobId id, JSlob t) throws OXException;
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
+    }
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier
-     * @return The element.
-     * @throws OXException If loading fails or no element is associated with specified identifier
-     */
-    JSlob load(JSlobId id) throws OXException;
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(1);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        return params.toArray(new Parameter[params.size()]);
+    }
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The element or <code>null</code>
-     * @throws OXException If loading fails
-     */
-    JSlob opt(JSlobId id) throws OXException;
+    @Override
+    public AbstractAJAXParser<? extends AllJSlobResponse> getParser() {
+        return new AbstractAJAXParser<AllJSlobResponse>(isFailOnError()) {
 
-    /**
-     * Reads the elements associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The elements
-     * @throws OXException If loading fails
-     */
-    Collection<JSlob> list(JSlobId id) throws OXException;
+            @Override
+            protected AllJSlobResponse createResponse(final Response response) {
+                return new AllJSlobResponse(response);
+            }
+        };
+    }
 
-    /**
-     * Deletes the element associated with the given identifier.
-     * 
-     * @param id Identifier.
-     * @return The deleted Element.
-     * @throws OXException If removal fails
-     */
-    JSlob remove(JSlobId id) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as locked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
-     * @throws OXException If setting the lock fails
-     */
-    boolean lock(JSlobId jslobId) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as unlocked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @throws OXException If setting the unlock fails
-     */
-    void unlock(JSlobId jslobId) throws OXException;
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
 
 }

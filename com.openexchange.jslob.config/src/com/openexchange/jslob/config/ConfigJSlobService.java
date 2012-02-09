@@ -50,6 +50,7 @@
 package com.openexchange.jslob.config;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -130,18 +131,23 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     @Override
-    public JSlob get(final String id, final int user, final int context) throws OXException {
+    public Collection<JSlob> get(final int userId, final int contextId) throws OXException {
+        return getStorage().list(new JSlobId(ID, null, userId, contextId));
+    }
+
+    @Override
+    public JSlob get(final String id, final int userId, final int contextId) throws OXException {
         /*
          * Get from storage
          */
-        JSlob jsonJSlob = getStorage().opt(new JSlobId(ID, id, user, context));
+        JSlob jsonJSlob = getStorage().opt(new JSlobId(ID, id, userId, contextId));
         if (null == jsonJSlob) {
             jsonJSlob = new JSlob(new JSONObject());
         }
         /*
          * Fill with config cascade settings
          */
-        final ConfigView view = getConfigViewFactory().getView(user, context);
+        final ConfigView view = getConfigViewFactory().getView(userId, contextId);
         for (final AttributedProperty attributedProperty : preferenceItems.values()) {
             add2JSlob(attributedProperty, jsonJSlob, view);
         }

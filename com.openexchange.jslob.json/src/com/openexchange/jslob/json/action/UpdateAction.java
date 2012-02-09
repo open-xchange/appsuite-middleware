@@ -47,86 +47,54 @@
  *
  */
 
-package com.openexchange.jslob.storage;
+package com.openexchange.jslob.json.action;
 
-import java.util.Collection;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSONUpdate;
+import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.json.JSlobRequest;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link JSlobStorage} - The JSlob storage.
+ * {@link UpdateAction}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSlobStorage {
+public final class UpdateAction extends JSlobAction {
 
     /**
-     * Gets the identifier of this JSlob storage.
+     * Initializes a new {@link UpdateAction}.
      * 
-     * @return The identifier of this JSlob storage.
+     * @param services The service look-up
      */
-    String getIdentifier();
+    public UpdateAction(final ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Stores an element with the given identifier.
-     * 
-     * @param id Identifier.
-     * @param t Element.
-     * @throws OXException If storing fails
-     */
-    void store(JSlobId id, JSlob t) throws OXException;
+    @Override
+    protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException, JSONException {
+        String serviceId = jslobRequest.getParameter("serviceId", String.class);
+        if (null == serviceId) {
+            serviceId = "io.ox.wd.jslob.config";
+        }
+        final JSlobService jslobService = getJSlobService(serviceId);
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier
-     * @return The element.
-     * @throws OXException If loading fails or no element is associated with specified identifier
-     */
-    JSlob load(JSlobId id) throws OXException;
+        final String id = jslobRequest.checkParameter("id");
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The element or <code>null</code>
-     * @throws OXException If loading fails
-     */
-    JSlob opt(JSlobId id) throws OXException;
+        final JSONObject jsonData = (JSONObject) jslobRequest.getRequestData().getData();
+        final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
 
-    /**
-     * Reads the elements associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The elements
-     * @throws OXException If loading fails
-     */
-    Collection<JSlob> list(JSlobId id) throws OXException;
+        jslobService.update(id, jsonUpdate, jslobRequest.getUserId(), jslobRequest.getContextId());
 
-    /**
-     * Deletes the element associated with the given identifier.
-     * 
-     * @param id Identifier.
-     * @return The deleted Element.
-     * @throws OXException If removal fails
-     */
-    JSlob remove(JSlobId id) throws OXException;
+        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+    }
 
-    /**
-     * Marks the entry associated with given identifier as locked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
-     * @throws OXException If setting the lock fails
-     */
-    boolean lock(JSlobId jslobId) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as unlocked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @throws OXException If setting the unlock fails
-     */
-    void unlock(JSlobId jslobId) throws OXException;
+    @Override
+    public String getAction() {
+        return "update";
+    }
 
 }
