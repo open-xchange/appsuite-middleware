@@ -1,3 +1,7 @@
+* 2012-02-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21517: Enhanced whitelist by CSS property
+
 * 2012-02-09 - jan.bauerdick@open-xchange.com
 
  - Add method to DeferredActivator for outstanding services
