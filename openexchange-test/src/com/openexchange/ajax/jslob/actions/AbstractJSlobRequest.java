@@ -47,30 +47,44 @@
  *
  */
 
-package com.openexchange.jslob.json.osgi;
+package com.openexchange.ajax.jslob.actions;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.jslob.json.JSlobActionFactory;
-import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
-import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 /**
- * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
  */
-public class JSlobJSONActivator extends AJAXModuleActivator {
+public abstract class AbstractJSlobRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobServiceRegistry.class };
+    private boolean failOnError;
+
+    /**
+     * URL of the JSlob AJAX interface.
+     */
+    public static final String JSLOB_URL = "/ajax/jslob";
+
+    protected AbstractJSlobRequest() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new JSlobActionFactory(this), "jslob");
-        registerService(ResultConverter.class, new JSlobJSONResultConverter());
+    public String getServletPath() {
+        return JSLOB_URL;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
+    public void setFailOnError(final boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
+    public boolean isFailOnError() {
+        return failOnError;
     }
 
 }

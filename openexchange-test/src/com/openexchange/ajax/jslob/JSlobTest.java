@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,53 @@
  *
  */
 
-package com.openexchange.jslob.json.osgi;
+package com.openexchange.ajax.jslob;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.jslob.json.JSlobActionFactory;
-import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
-import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import java.util.List;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.jslob.actions.AllJSlobRequest;
+import com.openexchange.ajax.jslob.actions.AllJSlobResponse;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
- *
+ * {@link JSlobTest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSlobJSONActivator extends AJAXModuleActivator {
+public final class JSlobTest extends AbstractAJAXSession {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobServiceRegistry.class };
+    /**
+     * Initializes a new {@link JSlobTest}.
+     */
+    public JSlobTest() {
+        super(JSlobTest.class.getSimpleName());
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new JSlobActionFactory(this), "jslob");
-        registerService(ResultConverter.class, new JSlobJSONResultConverter());
+    protected void setUp() throws Exception {
+        super.setUp();
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    public void testSimpleAllRequest() {
+        try {
+            final AllJSlobRequest request = new AllJSlobRequest();
+            final AllJSlobResponse response = client.execute(request);
+
+            final List<JSlob> list = response.getJSlobs();
+            if (!list.isEmpty()) {
+                for (final JSlob jSlob : list) {
+                    assertNotNull(jSlob.getJsonObject());
+                }
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
     }
 
 }

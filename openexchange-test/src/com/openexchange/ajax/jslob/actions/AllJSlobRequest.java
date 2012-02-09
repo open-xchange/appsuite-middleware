@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,58 @@
  *
  */
 
-package com.openexchange.jslob.json.osgi;
+package com.openexchange.ajax.jslob.actions;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.jslob.json.JSlobActionFactory;
-import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
-import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+
 
 /**
- * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
+ * {@link AllJSlobRequest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSlobJSONActivator extends AJAXModuleActivator {
+public final class AllJSlobRequest extends AbstractJSlobRequest<AllJSlobResponse> {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobServiceRegistry.class };
+    /**
+     * Initializes a new {@link AllJSlobRequest}.
+     */
+    public AllJSlobRequest() {
+        super();
+        setFailOnError(true);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerModule(new JSlobActionFactory(this), "jslob");
-        registerService(ResultConverter.class, new JSlobJSONResultConverter());
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(1);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends AllJSlobResponse> getParser() {
+        return new AbstractAJAXParser<AllJSlobResponse>(isFailOnError()) {
+
+            @Override
+            protected AllJSlobResponse createResponse(final Response response) {
+                return new AllJSlobResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

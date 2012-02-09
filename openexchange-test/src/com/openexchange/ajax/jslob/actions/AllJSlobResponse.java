@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,46 @@
  *
  */
 
-package com.openexchange.jslob.json.osgi;
+package com.openexchange.ajax.jslob.actions;
 
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.jslob.json.JSlobActionFactory;
-import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
-import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
+ * {@link AllJSlobResponse}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSlobJSONActivator extends AJAXModuleActivator {
+public final class AllJSlobResponse extends AbstractAJAXResponse {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobServiceRegistry.class };
+    /**
+     * Initializes a new {@link AllJSlobResponse}.
+     *
+     * @param response
+     */
+    public AllJSlobResponse(final Response response) {
+        super(response);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(new JSlobActionFactory(this), "jslob");
-        registerService(ResultConverter.class, new JSlobJSONResultConverter());
+    /**
+     * Gets the JSlobs.
+     *
+     * @return The JSlobs
+     * @throws JSONException If parsing JSON fails
+     */
+    public List<JSlob> getJSlobs() throws JSONException {
+        final JSONArray jslobs = (JSONArray) getData();
+        final int len = jslobs.length();
+        final List<JSlob> list = new ArrayList<JSlob>(len);
+        for (int i = 0; i < len; i++) {
+            list.add(new JSlob(jslobs.getJSONObject(i)));
+        }
+        return list;
     }
 
 }
