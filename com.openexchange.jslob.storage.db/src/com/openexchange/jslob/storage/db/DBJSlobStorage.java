@@ -120,13 +120,14 @@ public final class DBJSlobStorage implements JSlobStorage {
         try {
             final DatabaseService databaseService = getDatabaseService();
             final Connection con = databaseService.getWritable(contextId);
-            boolean committed = false;
+            boolean committed = true;
             PreparedStatement stmt = null;
             try {
                 /*
                  * Now delete
                  */
                 con.setAutoCommit(false); // BEGIN
+                committed = false;
                 stmt = con.prepareStatement(SQL_DELETE_ALL_USER);
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, userId);
@@ -161,11 +162,12 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
-            boolean committed = false;
+            boolean committed = true;
             PreparedStatement stmt = null;
             final ResultSet result = null;
             try {
                 con.setAutoCommit(false); // BEGIN
+                committed = false;
                 final boolean locked = checkLocked(id, true, con);
                 if (locked) {
                     /*
@@ -222,11 +224,12 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
-            boolean committed = false;
+            boolean committed = true;
             PreparedStatement stmt = null;
             final ResultSet result = null;
             try {
                 con.setAutoCommit(false); // BEGIN
+                committed = false;
                 final boolean locked = checkLocked(id, true, con);
                 if (!locked) {
                     /*
@@ -482,13 +485,14 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
-            boolean committed = false;
+            boolean committed = true;
             PreparedStatement stmt = null;
             try {
                 /*
                  * Load
                  */
                 con.setAutoCommit(false);
+                committed = false;
                 final JSlob present = load(id, contextId, con);
                 if (null == present) {
                     /*

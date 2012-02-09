@@ -89,7 +89,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private static final String METADATA_PREFIX = "meta".intern();
 
-    private static final String ID = "io.ox.wd.jslob.config";
+    private static final String ID = "com.openexchange.jslob.config";
 
     /*-
      * ------------------------- Member stuff -----------------------------
