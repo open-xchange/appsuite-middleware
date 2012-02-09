@@ -53,6 +53,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.jslob.json.JSlobActionFactory;
 import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
+import com.openexchange.jslob.registry.JSlobServiceRegistry;
 
 /**
  * {@link JSlobJSONActivator} - Activator for the JSlob JSON interface.
@@ -63,7 +64,7 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { JSlobServiceRegistry.class };
     }
 
     @Override

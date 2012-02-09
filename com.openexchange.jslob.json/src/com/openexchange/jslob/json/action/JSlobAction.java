@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -101,7 +102,11 @@ public abstract class JSlobAction implements AJAXActionService {
      * @throws OXException If JSlob service cannot be returned
      */
     protected JSlobService getJSlobService(final String jslobServiceId) throws OXException {
-        return services.getService(JSlobServiceRegistry.class).getJSlobService(jslobServiceId);
+        final JSlobServiceRegistry registry = services.getService(JSlobServiceRegistry.class);
+        if (null == registry) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(JSlobServiceRegistry.class.getName());
+        }
+        return registry.getJSlobService(jslobServiceId);
     }
 
     /**
