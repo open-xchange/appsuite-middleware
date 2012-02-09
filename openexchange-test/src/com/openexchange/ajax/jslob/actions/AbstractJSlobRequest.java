@@ -61,7 +61,7 @@ public abstract class AbstractJSlobRequest<T extends AbstractAJAXResponse> imple
     /**
      * The default service identifier.
      */
-    protected static final String DEFAULT_SERVICE_ID = "io.ox.wd.jslob.config";
+    protected static final String DEFAULT_SERVICE_ID = "com.openexchange.jslob.config";
 
     private boolean failOnError;
 

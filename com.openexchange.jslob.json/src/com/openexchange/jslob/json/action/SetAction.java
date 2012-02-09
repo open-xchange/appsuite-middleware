@@ -77,7 +77,7 @@ public final class SetAction extends JSlobAction {
     protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException {
         String serviceId = jslobRequest.getParameter("serviceId", String.class);
         if (null == serviceId) {
-            serviceId = "io.ox.wd.jslob.config";
+            serviceId = DEFAULT_SERVICE_ID;
         }
         final JSlobService jslobService = getJSlobService(serviceId);
 

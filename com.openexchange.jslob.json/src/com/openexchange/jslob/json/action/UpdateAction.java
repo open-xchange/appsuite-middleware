@@ -78,7 +78,7 @@ public final class UpdateAction extends JSlobAction {
     protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException, JSONException {
         String serviceId = jslobRequest.getParameter("serviceId", String.class);
         if (null == serviceId) {
-            serviceId = "io.ox.wd.jslob.config";
+            serviceId = DEFAULT_SERVICE_ID;
         }
         final JSlobService jslobService = getJSlobService(serviceId);
 
