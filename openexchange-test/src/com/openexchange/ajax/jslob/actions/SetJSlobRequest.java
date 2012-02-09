@@ -47,73 +47,97 @@
  *
  */
 
-package com.openexchange.jslob;
+package com.openexchange.ajax.jslob.actions;
 
-import org.json.JSONObject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link JSlob} - A JSlob holding a JSON object.
+ * {@link SetJSlobRequest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JSlob {
+public final class SetJSlobRequest extends AbstractJSlobRequest<SetJSlobResponse> {
 
-    private static final class EmptyJSlob extends JSlob {
+    private String serviceId;
 
-        protected EmptyJSlob() {
-            super(null);
-        }
+    private String id;
 
-        @Override
-        public JSlob setJsonObject(final JSONObject jsonObject) {
-            throw new UnsupportedOperationException("EmptyJSlob.setJsonObject()");
-        }
-    }
+    private JSlob jslob;
 
     /**
-     * The unmodifiable, empty {@link JSlob} instance.
-     * <p>
-     * Invoking {@link #setJsonObject(JSONObject)} will throw an {@link UnsupportedOperationException}.
+     * Initializes a new {@link SetJSlobRequest}.
      */
-    public static final JSlob EMPTY_JSLOB = new EmptyJSlob();
-
-    private JSONObject jsonObject;
-
-    /**
-     * Initializes a new empty {@link JSlob}.
-     */
-    public JSlob() {
+    public SetJSlobRequest() {
         super();
+        setFailOnError(true);
+        serviceId = DEFAULT_SERVICE_ID;
     }
 
     /**
-     * Initializes a new {@link JSlob}.
+     * Sets the JSlob
      * 
-     * @param jsonObject The JSON object initially applied to this JSlob
+     * @param jslob The JSlob to set
      */
-    public JSlob(final JSONObject jsonObject) {
-        super();
-        this.jsonObject = jsonObject;
-    }
-
-    /**
-     * Gets the JSON object stored in this JSlob.
-     * 
-     * @return The JSON object
-     */
-    public JSONObject getJsonObject() {
-        return jsonObject;
-    }
-
-    /**
-     * Sets the JSON object stored in this JSlob.
-     * 
-     * @param jsonObject The JSON object
-     * @return This JSlob with new JSON object applied
-     */
-    public JSlob setJsonObject(final JSONObject jsonObject) {
-        this.jsonObject = jsonObject;
+    public SetJSlobRequest setJslob(final JSlob jslob) {
+        this.jslob = jslob;
         return this;
+    }
+
+    /**
+     * Sets the service id
+     * 
+     * @param serviceId The service id to set
+     */
+    public SetJSlobRequest setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
+        return this;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public SetJSlobRequest setId(final String id) {
+        this.id = id;
+        return this;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
+        params.add(new Parameter("serviceId", serviceId));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends SetJSlobResponse> getParser() {
+        return new AbstractAJAXParser<SetJSlobResponse>(isFailOnError()) {
+
+            @Override
+            protected SetJSlobResponse createResponse(final Response response) {
+                return new SetJSlobResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null == jslob ? "" : jslob.getJsonObject();
     }
 
 }

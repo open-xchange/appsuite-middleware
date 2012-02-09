@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,47 +49,82 @@
 
 package com.openexchange.ajax.jslob.actions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
+ * {@link GetJSlobRequest}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractJSlobRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public final class GetJSlobRequest extends AbstractJSlobRequest<GetJSlobResponse> {
+
+    private String serviceId;
+
+    private String id;
 
     /**
-     * The default service identifier.
+     * Initializes a new {@link GetJSlobRequest}.
      */
-    protected static final String DEFAULT_SERVICE_ID = "io.ox.wd.jslob.config";
-
-    private boolean failOnError;
-
-    /**
-     * URL of the JSlob AJAX interface.
-     */
-    public static final String JSLOB_URL = "/ajax/jslob";
-
-    protected AbstractJSlobRequest() {
+    public GetJSlobRequest() {
         super();
+        setFailOnError(true);
+        serviceId = DEFAULT_SERVICE_ID;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public GetJSlobRequest setId(final String id) {
+        this.id = id;
+        return this;
+    }
+
+    /**
+     * Sets the serviceId
+     * 
+     * @param serviceId The serviceId to set
+     */
+    public GetJSlobRequest setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
+        return this;
     }
 
     @Override
-    public String getServletPath() {
-        return JSLOB_URL;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
     }
 
     @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(1);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        params.add(new Parameter("serviceId", serviceId));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
+        return params.toArray(new Parameter[params.size()]);
     }
 
-    public void setFailOnError(final boolean failOnError) {
-        this.failOnError = failOnError;
+    @Override
+    public AbstractAJAXParser<? extends GetJSlobResponse> getParser() {
+        return new AbstractAJAXParser<GetJSlobResponse>(isFailOnError()) {
+
+            @Override
+            protected GetJSlobResponse createResponse(final Response response) {
+                return new GetJSlobResponse(response);
+            }
+        };
     }
 
-    public boolean isFailOnError() {
-        return failOnError;
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

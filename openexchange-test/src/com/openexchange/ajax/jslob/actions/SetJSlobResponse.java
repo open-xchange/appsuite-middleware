@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,47 +49,23 @@
 
 package com.openexchange.ajax.jslob.actions;
 
-import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
 
 /**
- * @author <a href="mailto:markus.wagner@open-xchange.com">Markus Wagner</a>
+ * {@link SetJSlobResponse}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractJSlobRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public final class SetJSlobResponse extends AbstractAJAXResponse {
 
     /**
-     * The default service identifier.
+     * Initializes a new {@link SetJSlobResponse}.
+     *
+     * @param response
      */
-    protected static final String DEFAULT_SERVICE_ID = "io.ox.wd.jslob.config";
-
-    private boolean failOnError;
-
-    /**
-     * URL of the JSlob AJAX interface.
-     */
-    public static final String JSLOB_URL = "/ajax/jslob";
-
-    protected AbstractJSlobRequest() {
-        super();
-    }
-
-    @Override
-    public String getServletPath() {
-        return JSLOB_URL;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public void setFailOnError(final boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    public boolean isFailOnError() {
-        return failOnError;
+    public SetJSlobResponse(final Response response) {
+        super(response);
     }
 
 }
