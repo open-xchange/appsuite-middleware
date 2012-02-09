@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,86 +47,77 @@
  *
  */
 
-package com.openexchange.jslob.storage;
+package com.openexchange.jslob.json.action;
 
-import java.util.Collection;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.jslob.JSlob;
+import com.openexchange.jslob.JSlobService;
+import com.openexchange.jslob.json.JSlobRequest;
+import com.openexchange.jslob.registry.JSlobServiceRegistry;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JSlobStorage} - The JSlob storage.
+ * {@link JSlobAction} - Abstract JSlob action.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSlobStorage {
+public abstract class JSlobAction implements AJAXActionService {
 
     /**
-     * Gets the identifier of this JSlob storage.
-     * 
-     * @return The identifier of this JSlob storage.
+     * The service look-up
      */
-    String getIdentifier();
+    protected final ServiceLookup services;
 
     /**
-     * Stores an element with the given identifier.
+     * Initializes a new {@link JSlobAction}.
      * 
-     * @param id Identifier.
-     * @param t Element.
-     * @throws OXException If storing fails
+     * @param services The service look-up
      */
-    void store(JSlobId id, JSlob t) throws OXException;
+    protected JSlobAction(final ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    @Override
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        try {
+            final JSlobRequest jslobRequest = new JSlobRequest(requestData, session);
+            return perform(jslobRequest);
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
 
     /**
-     * Reads the element associated with the given identifier.
+     * Gets the JSlob service associated with specified JSlob service identifier.
      * 
-     * @param id The identifier
-     * @return The element.
-     * @throws OXException If loading fails or no element is associated with specified identifier
+     * @param jslobServiceId The JSlob service identifier
+     * @return The JSlob service
+     * @throws OXException If JSlob service cannot be returned
      */
-    JSlob load(JSlobId id) throws OXException;
+    protected JSlobService getJSlobService(final String jslobServiceId) throws OXException {
+        return services.getService(JSlobServiceRegistry.class).getJSlobService(jslobServiceId);
+    }
 
     /**
-     * Reads the element associated with the given identifier.
+     * Performs given JSlob request.
      * 
-     * @param id The identifier.
-     * @return The element or <code>null</code>
-     * @throws OXException If loading fails
+     * @param jslobRequest The JSlob request
+     * @return The AJAX result
+     * @throws OXException If performing request fails
      */
-    JSlob opt(JSlobId id) throws OXException;
+    protected abstract AJAXRequestResult perform(JSlobRequest jslobRequest) throws OXException, JSONException;
 
     /**
-     * Reads the elements associated with the given identifier.
+     * Gets the action identifier for this JSlob action.
      * 
-     * @param id The identifier.
-     * @return The elements
-     * @throws OXException If loading fails
+     * @return The action identifier; e.g. <code>"get"</code>
      */
-    Collection<JSlob> list(JSlobId id) throws OXException;
-
-    /**
-     * Deletes the element associated with the given identifier.
-     * 
-     * @param id Identifier.
-     * @return The deleted Element.
-     * @throws OXException If removal fails
-     */
-    JSlob remove(JSlobId id) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as locked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
-     * @throws OXException If setting the lock fails
-     */
-    boolean lock(JSlobId jslobId) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as unlocked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @throws OXException If setting the unlock fails
-     */
-    void unlock(JSlobId jslobId) throws OXException;
+    public abstract String getAction();
 
 }

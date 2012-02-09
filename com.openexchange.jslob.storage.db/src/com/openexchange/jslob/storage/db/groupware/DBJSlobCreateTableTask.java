@@ -110,6 +110,7 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
                 }
             }
             writeCon.commit(); // COMMIT
+            rollback = false;
         } catch (final OXException e) {
             if (rollback) {
                 DBUtils.rollback(writeCon);

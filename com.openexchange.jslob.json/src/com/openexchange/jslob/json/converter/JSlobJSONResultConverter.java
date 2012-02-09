@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,86 +47,69 @@
  *
  */
 
-package com.openexchange.jslob.storage;
+package com.openexchange.jslob.json.converter;
 
 import java.util.Collection;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link JSlobStorage} - The JSlob storage.
+ * {@link JSlobJSONResultConverter} - The result converter for JSlob module.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface JSlobStorage {
+public class JSlobJSONResultConverter implements ResultConverter {
 
     /**
-     * Gets the identifier of this JSlob storage.
-     * 
-     * @return The identifier of this JSlob storage.
+     * Initializes a new {@link JSONResultConverter}.
      */
-    String getIdentifier();
+    public JSlobJSONResultConverter() {
+        super();
+    }
 
-    /**
-     * Stores an element with the given identifier.
-     * 
-     * @param id Identifier.
-     * @param t Element.
-     * @throws OXException If storing fails
-     */
-    void store(JSlobId id, JSlob t) throws OXException;
+    @Override
+    public String getInputFormat() {
+        return "jslob";
+    }
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier
-     * @return The element.
-     * @throws OXException If loading fails or no element is associated with specified identifier
-     */
-    JSlob load(JSlobId id) throws OXException;
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
 
-    /**
-     * Reads the element associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The element or <code>null</code>
-     * @throws OXException If loading fails
-     */
-    JSlob opt(JSlobId id) throws OXException;
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-    /**
-     * Reads the elements associated with the given identifier.
-     * 
-     * @param id The identifier.
-     * @return The elements
-     * @throws OXException If loading fails
-     */
-    Collection<JSlob> list(JSlobId id) throws OXException;
+    @Override
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final Object resultObject = result.getResultObject();
+        if (resultObject instanceof JSlob) {
+            final JSlob jslob = (JSlob) resultObject;
+            result.setResultObject(jslob.getJsonObject(), "json");
+            return;
+        }
+        /*
+         * Collection of JSlobs
+         */
+        @SuppressWarnings("unchecked") final Collection<JSlob> jslobs = (Collection<JSlob>) resultObject;
+        final JSONArray jArray = new JSONArray();
+        for (final JSlob jslob : jslobs) {
+            jArray.put(convertJSlob(jslob));
+        }
+        result.setResultObject(jArray, "json");
+    }
 
-    /**
-     * Deletes the element associated with the given identifier.
-     * 
-     * @param id Identifier.
-     * @return The deleted Element.
-     * @throws OXException If removal fails
-     */
-    JSlob remove(JSlobId id) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as locked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @return <code>true</code> if this call successfully set the lock; otherwise <code>false</code> if already locked
-     * @throws OXException If setting the lock fails
-     */
-    boolean lock(JSlobId jslobId) throws OXException;
-
-    /**
-     * Marks the entry associated with given identifier as unlocked.
-     * 
-     * @param jslobId The JSlob identifier
-     * @throws OXException If setting the unlock fails
-     */
-    void unlock(JSlobId jslobId) throws OXException;
+    private JSONObject convertJSlob(final JSlob jslob) {
+        return jslob.getJsonObject();
+    }
 
 }
