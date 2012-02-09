@@ -118,8 +118,9 @@ public final class ConfigJSlobService implements JSlobService {
         for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
             // Check for existence of "preferencePath"
             final ComposedConfigProperty<String> property = entry.getValue();
-            final String preferencePath = property.get(PREFERENCE_PATH);
+            String preferencePath = property.get(PREFERENCE_PATH);
             if (null != preferencePath) {
+                preferencePath = preferencePath + "/value"; // Avoid overriding value when appending meta & other property information
                 try {
                     preferenceItems.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
                 } catch (final Exception e) {
@@ -172,10 +173,15 @@ public final class ConfigJSlobService implements JSlobService {
         if (null == jsonJSlob) {
             getStorage().remove(new JSlobId(ID, id, user, context));
         } else {
+            final JSONObject jObject = jsonJSlob.getJsonObject();
+            if (null == jObject) {
+                getStorage().remove(new JSlobId(ID, id, user, context));
+                return;
+            }
+            // Set (or replace) JSlob
             final ConfigView view = getConfigViewFactory().getView(user, context);
-            final JSONObject current = jsonJSlob.getJsonObject();
             for (final AttributedProperty attributedProperty : preferenceItems.values()) {
-                final Object value = getPathFrom(attributedProperty.path, current);
+                final Object value = getPathFrom(attributedProperty.path, jObject);
                 if (null != value) {
                     try {
                         final String oldValue = view.get(attributedProperty.propertyName, String.class);
@@ -368,7 +374,8 @@ public final class ConfigJSlobService implements JSlobService {
             Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
             addValueByPath(path, value, jsonJSlob);
             // Add the metadata as well
-            final StringBuilder sb = new StringBuilder(attributedProperty.preferencePath);
+            final String preferencePath = attributedProperty.preferencePath;
+            final StringBuilder sb = new StringBuilder(preferencePath.substring(0, preferencePath.lastIndexOf('/')));
             final int resetLength = sb.length();
             final ComposedConfigProperty<String> preferenceItem = attributedProperty.property;
             final List<String> metadataNames = preferenceItem.getMetadataNames();

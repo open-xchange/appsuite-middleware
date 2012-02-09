@@ -49,10 +49,11 @@
 
 package com.openexchange.ajax.itip;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import com.openexchange.ajax.itip.actions.DingeMacherAction;
 import com.openexchange.ajax.itip.actions.AnalyzeAction;
+import com.openexchange.ajax.itip.actions.DingeMacherAction;
 import com.openexchange.ajax.itip.actions.ShowMailAction;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -69,20 +70,26 @@ public class ITipActionFactory implements AJAXActionServiceFactory {
 
     public static ITipActionFactory INSTANCE = null;
     
-    private Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
 
-    public ITipActionFactory(ServiceLookup services) {
+    public ITipActionFactory(final ServiceLookup services) {
         super();
         actions.put("analyze",  new AnalyzeAction(services));
         actions.put("showMail", new ShowMailAction(services));
-        DingeMacherAction dingeMacherAction = new DingeMacherAction(services);
-        for (String actionName : dingeMacherAction.getActionNames()) {
+        final DingeMacherAction dingeMacherAction = new DingeMacherAction(services);
+        for (final String actionName : dingeMacherAction.getActionNames()) {
             actions.put(actionName, dingeMacherAction);
         }
     }
 
-    public AJAXActionService createActionService(String action) throws OXException {
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

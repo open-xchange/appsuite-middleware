@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,39 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.services;
+package com.openexchange.ajax.jslob.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link ServicesActionFactory}
+ * {@link GetJSlobResponse}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServicesActionFactory implements AJAXActionServiceFactory {
+public final class GetJSlobResponse extends AbstractAJAXResponse {
 
-    public static volatile ServicesActionFactory INSTANCE; // Initialized in Activator
-
-    private final Map<String, AJAXActionService> actions;
-
-    public ServicesActionFactory(final MessagingServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>(2);
-        actions.put("all", new AllAction(registry));
-        actions.put("get", new GetAction(registry));
+    /**
+     * Initializes a new {@link GetJSlobResponse}.
+     *
+     * @param response
+     */
+    public GetJSlobResponse(final Response response) {
+        super(response);
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    /**
+     * Gets the JSlob.
+     *
+     * @return The JSlob
+     * @throws JSONException If parsing JSON fails
+     */
+    public JSlob getJSlob() throws JSONException {
+        final JSONObject jData = (JSONObject) getData();
+        return new JSlob(jData);
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
-    }
 }

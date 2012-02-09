@@ -50,10 +50,16 @@
 package com.openexchange.ajax.jslob;
 
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.jslob.actions.AllJSlobRequest;
 import com.openexchange.ajax.jslob.actions.AllJSlobResponse;
+import com.openexchange.ajax.jslob.actions.GetJSlobRequest;
+import com.openexchange.ajax.jslob.actions.GetJSlobResponse;
+import com.openexchange.ajax.jslob.actions.SetJSlobRequest;
 import com.openexchange.jslob.JSlob;
+import com.openexchange.test.json.JSONAssertion;
 
 /**
  * {@link JSlobTest}
@@ -93,6 +99,43 @@ public final class JSlobTest extends AbstractAJAXSession {
         } catch (final Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
+        }
+    }
+
+    public void testSetRequest() {
+        final String id = "test.id";
+        try {
+            final JSONObject jsonObject = new JSONObject();
+            jsonObject.put("string", "A sample string.");
+            jsonObject.put("array", new JSONArray("[12,34,56,78,90]"));
+            jsonObject.put("object", new JSONObject("{value: " + 1234 + "}"));
+
+            final SetJSlobRequest setRequest = new SetJSlobRequest().setId(id).setJslob(new JSlob(jsonObject));
+            client.execute(setRequest);
+
+            final GetJSlobRequest getRequest = new GetJSlobRequest().setId(id);
+            final GetJSlobResponse getResponse = client.execute(getRequest);
+            
+            final JSlob jslob = getResponse.getJSlob();
+            assertNotNull("JSlob is null.", jslob);
+            
+            final JSONObject jsonObject2 = jslob.getJsonObject();
+            assertNotNull("JSON data is null.", jsonObject2);
+            
+            assertTrue("Retrieved JSON data is not equal to provided one.", jsonObject2.hasAndNotNull("string") && JSONAssertion.equals(jsonObject.get("string"), jsonObject2.get("string")));
+            assertTrue("Retrieved JSON data is not equal to provided one.", jsonObject2.hasAndNotNull("array") && JSONAssertion.equals(jsonObject.get("array"), jsonObject2.get("array")));
+            assertTrue("Retrieved JSON data is not equal to provided one.", jsonObject2.hasAndNotNull("object") && JSONAssertion.equals(jsonObject.get("object"), jsonObject2.get("object")));
+        } catch (final Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        } finally {
+            try {
+                final SetJSlobRequest request = new SetJSlobRequest().setId(id).setJslob(null);
+                client.execute(request);
+            } catch (final Exception e) {
+                System.err.println("Couldn't delete test JSlob");
+                e.printStackTrace();
+            }
         }
     }
 

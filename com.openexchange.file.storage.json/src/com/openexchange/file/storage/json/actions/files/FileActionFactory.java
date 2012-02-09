@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,6 +100,11 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("documentsig", new DocumentSigAction());
         actions.put("documentpatch", new DocumentPatchAction());
         this.actions = Collections.unmodifiableMap(actions);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

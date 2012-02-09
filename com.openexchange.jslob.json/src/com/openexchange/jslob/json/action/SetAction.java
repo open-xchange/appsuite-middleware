@@ -82,7 +82,8 @@ public final class SetAction extends JSlobAction {
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-        final JSlob jslob = new JSlob((JSONObject) jslobRequest.getRequestData().getData());
+        final Object data = jslobRequest.getRequestData().getData();
+        final JSlob jslob = null == data ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
         jslobService.set(id, jslob, jslobRequest.getUserId(), jslobRequest.getContextId());
 
         return AJAXRequestResult.EMPTY_REQUEST_RESULT;

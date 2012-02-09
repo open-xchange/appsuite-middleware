@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,84 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.services;
+package com.openexchange.ajax.jslob.actions;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link ServicesActionFactory}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * {@link GetJSlobRequest}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServicesActionFactory implements AJAXActionServiceFactory {
+public final class GetJSlobRequest extends AbstractJSlobRequest<GetJSlobResponse> {
 
-    public static volatile ServicesActionFactory INSTANCE; // Initialized in Activator
+    private String serviceId;
 
-    private final Map<String, AJAXActionService> actions;
+    private String id;
 
-    public ServicesActionFactory(final MessagingServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>(2);
-        actions.put("all", new AllAction(registry));
-        actions.put("get", new GetAction(registry));
+    /**
+     * Initializes a new {@link GetJSlobRequest}.
+     */
+    public GetJSlobRequest() {
+        super();
+        setFailOnError(true);
+        serviceId = DEFAULT_SERVICE_ID;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public GetJSlobRequest setId(final String id) {
+        this.id = id;
+        return this;
+    }
+
+    /**
+     * Sets the serviceId
+     * 
+     * @param serviceId The serviceId to set
+     */
+    public GetJSlobRequest setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
+        return this;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.GET;
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(1);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
+        params.add(new Parameter("serviceId", serviceId));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
+        return params.toArray(new Parameter[params.size()]);
     }
+
+    @Override
+    public AbstractAJAXParser<? extends GetJSlobResponse> getParser() {
+        return new AbstractAJAXParser<GetJSlobResponse>(isFailOnError()) {
+
+            @Override
+            protected GetJSlobResponse createResponse(final Response response) {
+                return new GetJSlobResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
 }

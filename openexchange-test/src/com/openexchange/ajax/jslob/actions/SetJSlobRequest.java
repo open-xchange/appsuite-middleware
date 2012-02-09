@@ -47,46 +47,97 @@
  *
  */
 
-package com.openexchange.filemanagement.json;
+package com.openexchange.ajax.jslob.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link ManagedFileActionFactory}
- *
+ * {@link SetJSlobRequest}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ManagedFileActionFactory implements AJAXActionServiceFactory {
+public final class SetJSlobRequest extends AbstractJSlobRequest<SetJSlobResponse> {
 
-    private final Map<String, AJAXActionService> actions;
+    private String serviceId;
+
+    private String id;
+
+    private JSlob jslob;
 
     /**
-     * Initializes a new {@link ManagedFileActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link SetJSlobRequest}.
      */
-    public ManagedFileActionFactory(final ServiceLookup services) {
+    public SetJSlobRequest() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(4);
-        actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction(services));
-        actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction(services));
-        actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction(services));
+        setFailOnError(true);
+        serviceId = DEFAULT_SERVICE_ID;
+    }
+
+    /**
+     * Sets the JSlob
+     * 
+     * @param jslob The JSlob to set
+     */
+    public SetJSlobRequest setJslob(final JSlob jslob) {
+        this.jslob = jslob;
+        return this;
+    }
+
+    /**
+     * Sets the service id
+     * 
+     * @param serviceId The service id to set
+     */
+    public SetJSlobRequest setServiceId(final String serviceId) {
+        this.serviceId = serviceId;
+        return this;
+    }
+
+    /**
+     * Sets the id
+     * 
+     * @param id The id to set
+     */
+    public SetJSlobRequest setId(final String id) {
+        this.id = id;
+        return this;
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        final List<Parameter> params = new ArrayList<Parameter>(2);
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
+        params.add(new Parameter("serviceId", serviceId));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
+        return params.toArray(new Parameter[params.size()]);
+    }
+
+    @Override
+    public AbstractAJAXParser<? extends SetJSlobResponse> getParser() {
+        return new AbstractAJAXParser<SetJSlobResponse>(isFailOnError()) {
+
+            @Override
+            protected SetJSlobResponse createResponse(final Response response) {
+                return new SetJSlobResponse(response);
+            }
+        };
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null == jslob ? "" : jslob.getJsonObject();
     }
 
 }

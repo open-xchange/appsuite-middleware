@@ -49,6 +49,7 @@
 
 package com.openexchange.group.servlet.request;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -79,6 +80,11 @@ public final class GroupManageActionFactory implements AJAXActionServiceFactory 
         actions.put("new", new com.openexchange.group.servlet.request.actions.NewAction(services));
         actions.put("update", new com.openexchange.group.servlet.request.actions.UpdateAction(services));
         actions.put("delete", new com.openexchange.group.servlet.request.actions.DeleteAction(services));
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

@@ -47,39 +47,32 @@
  *
  */
 
-package com.openexchange.messaging.json.actions.services;
+package com.openexchange.ajax.jslob;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 /**
- * {@link ServicesActionFactory}
+ * {@link JSlobAJAXSuite}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServicesActionFactory implements AJAXActionServiceFactory {
+public class JSlobAJAXSuite extends TestSuite {
 
-    public static volatile ServicesActionFactory INSTANCE; // Initialized in Activator
-
-    private final Map<String, AJAXActionService> actions;
-
-    public ServicesActionFactory(final MessagingServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>(2);
-        actions.put("all", new AllAction(registry));
-        actions.put("get", new GetAction(registry));
+    /**
+     * Initializes a new {@link JSlobAJAXSuite}.
+     * @param theClass
+     */
+    public JSlobAJAXSuite() {
+        super();
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(JSlobTest.class);
+        return tests;
+
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) {
-        return actions.get(action);
-    }
 }

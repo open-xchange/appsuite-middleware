@@ -58,6 +58,11 @@ import com.openexchange.ajax.framework.Header;
  */
 public abstract class AbstractJSlobRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
+    /**
+     * The default service identifier.
+     */
+    protected static final String DEFAULT_SERVICE_ID = "io.ox.wd.jslob.config";
+
     private boolean failOnError;
 
     /**
