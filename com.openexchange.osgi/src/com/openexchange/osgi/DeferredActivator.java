@@ -49,8 +49,11 @@
 
 package com.openexchange.osgi;
 
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -75,9 +78,11 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
+public abstract class DeferredActivator implements BundleActivator, ServiceLookup, DeferredActivatorMBean {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class));
+
+    private static List<DeferredActivator> activators = new ArrayList<DeferredActivator>();
 
     /**
      * The empty class array.
@@ -368,11 +373,35 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     public final void start(final BundleContext context) throws Exception {
         try {
             this.context = context;
+            synchronized (activators) {
+                activators.add(this);
+            }
             init();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public final List<String> getMissingServices() {
+        final List<String> result = new ArrayList<String>();
+        for (final ServiceTracker tracker : serviceTrackers) {
+            final ServiceReference[] references = tracker.getServiceReferences();
+            for (final ServiceReference reference : references) {
+                if (context.getService(reference) == null) {
+                    final String missing = reference.getClass().getCanonicalName();
+                    result.add(missing);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public final boolean isActive() {
+        return getMissingServices().isEmpty();
     }
 
     /**
@@ -390,6 +419,9 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     @Override
     public final void stop(final BundleContext context) throws Exception {
         try {
+            synchronized (activators) {
+                activators.remove(this);
+            }
             stopBundle();
             started.set(false);
         } catch (final Exception e) {
@@ -436,13 +468,13 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
         return clazz.cast(service);
     }
-    
-    public final <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
-    	ServiceReference<? extends S> serviceReference = context.getServiceReference(clazz);
-    	
-    	return context.getService(serviceReference);
-    }
 
+    @Override
+    public final <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceReference<? extends S> serviceReference = context.getServiceReference(clazz);
+
+        return context.getService(serviceReference);
+    }
 
     /**
      * Adds specified service (if absent).
@@ -505,5 +537,9 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             }
         }
         return true;
+    }
+
+    public static List<DeferredActivator> getActivators() {
+        return activators;
     }
 }

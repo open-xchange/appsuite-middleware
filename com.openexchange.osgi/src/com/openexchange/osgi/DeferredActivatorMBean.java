@@ -47,31 +47,22 @@
  *
  */
 
-package com.openexchange.management;
+package com.openexchange.osgi;
 
-import com.openexchange.server.ServiceHolder;
+import java.util.List;
+
 
 /**
- * {@link ManagementServiceHolder}
+ * {@link DeferredActivatorMBean} - MBean for DeferredActivator
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class ManagementServiceHolder extends ServiceHolder<ManagementService> {
+public interface DeferredActivatorMBean {
 
-    /**
-     * Gets the management service instance.
-     *
-     * @return The management service instance.
-     */
-    public static ManagementServiceHolder newInstance() {
-        return new ManagementServiceHolder();
-    }
+    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
 
-    /**
-     * Default constructor
-     */
-    private ManagementServiceHolder() {
-        super();
-    }
+    public List<String> getMissingServices();
+
+    public boolean isActive();
 
 }

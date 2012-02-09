@@ -125,6 +125,14 @@ public final class JSONPathElement {
         return index >= 0;
     }
 
+    @Override
+    public String toString() {
+        if (index >= 0) {
+            new StringBuilder(name).append('[').append(index).append(']').toString();
+        }
+        return name;
+    }
+
     /**
      * Gets the name
      * 
