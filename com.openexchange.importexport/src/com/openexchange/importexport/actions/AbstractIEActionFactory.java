@@ -46,8 +46,10 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.importexport.actions;
 
+import java.util.Collection;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -56,22 +58,26 @@ import com.openexchange.importexport.formats.Format;
 
 public abstract class AbstractIEActionFactory implements AJAXActionServiceFactory {
 
-	protected abstract Map<Format, AJAXActionService> getActions();
+    protected abstract Map<Format, AJAXActionService> getActions();
 
-	@Override
-    public AJAXActionService createActionService(String action) throws OXException {
-		Format format = Format.getFormatByConstantName(action);
-		if(format == null) {
-	        return null;
-	    }
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        final Format format = Format.getFormatByConstantName(action);
+        if (format == null) {
+            return null;
+        }
 
-	    AJAXActionService handler = getActions().get(format);
-	    if(handler == null) {
-	        return null;
-	    }
+        final AJAXActionService handler = getActions().get(format);
+        if (handler == null) {
+            return null;
+        }
 
-	    return handler;
-	}
+        return handler;
+    }
 
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(getActions().values());
+    }
 
 }

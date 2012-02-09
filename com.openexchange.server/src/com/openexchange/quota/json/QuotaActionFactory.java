@@ -49,6 +49,7 @@
 
 package com.openexchange.quota.json;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -58,7 +59,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link QuotaActionFactory}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class QuotaActionFactory implements AJAXActionServiceFactory {
@@ -67,7 +68,7 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link QuotaActionFactory}.
-     *
+     * 
      * @param services The service look-up
      */
     public QuotaActionFactory(final ServiceLookup services) {
@@ -84,4 +85,8 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
         return actions.get(action);
     }
 
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
+    }
 }
