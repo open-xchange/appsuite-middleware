@@ -415,7 +415,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
-            boolean committed = false;
+            boolean committed = true;
             if (false && checkLocked(id, false, con)) {
                 throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id.getComponents());
             }
@@ -435,6 +435,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                  * Now delete
                  */
                 con.setAutoCommit(false);
+                committed = false;
                 stmt = con.prepareStatement("DELETE FROM jsonStorage WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, id.getUser());
