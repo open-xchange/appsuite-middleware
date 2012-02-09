@@ -255,7 +255,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                     /*
                      * Could not be locked
                      */
-                    throw DBJSlobStorageExceptionCode.UNLOCK_FAILED.create(id.getComponents());
+                    throw DBJSlobStorageExceptionCode.UNLOCK_FAILED.create(id);
                 }
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -288,7 +288,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             stmt.setString(4, id.getId());
             result = stmt.executeQuery();
             if (!result.next()) {
-                throw DBJSlobStorageExceptionCode.NO_ENTRY.create(id.getComponents());
+                throw DBJSlobStorageExceptionCode.NO_ENTRY.create(id);
             }
             return (result.getInt(1) > 0);
         } catch (final SQLException e) {
@@ -341,7 +341,7 @@ public final class DBJSlobStorage implements JSlobStorage {
 
     private JSlob load(final JSlobId id, final int contextId, final Connection con) throws OXException {
         if (false && checkLocked(id, false, con)) {
-            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id.getComponents());
+            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -384,7 +384,7 @@ public final class DBJSlobStorage implements JSlobStorage {
 
     private Collection<JSlob> loadAll(final JSlobId id, final int contextId, final Connection con) throws OXException {
         if (false && checkLocked(id, false, con)) {
-            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id.getComponents());
+            throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -420,7 +420,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             final Connection con = databaseService.getWritable(contextId);
             boolean committed = true;
             if (false && checkLocked(id, false, con)) {
-                throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id.getComponents());
+                throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
             }
             PreparedStatement stmt = null;
             try {
@@ -510,7 +510,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                      * Update
                      */
                     if (false && checkLocked(id, false, con)) {
-                        throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id.getComponents());
+                        throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id);
                     }
                     stmt = con.prepareStatement(SQL_UPDATE);
                     stmt.setString(1, jslob.getJsonObject().toString());
