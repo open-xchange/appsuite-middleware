@@ -51,10 +51,15 @@ package com.openexchange.jslob.config;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.json.JSONValue;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSONUpdate;
@@ -73,6 +78,12 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class ConfigJSlobService implements JSlobService {
 
+    private static final List<String> ALIASES = Arrays.asList("config");
+
+    public static final String PREFERENCE_PATH = "preferencePath".intern();
+
+    public static final String METADATA_PREFIX = "meta".intern();
+
     private static final String ID = "io.ox.wd.jslob.config";
 
     private final ServiceLookup services;
@@ -90,9 +101,24 @@ public final class ConfigJSlobService implements JSlobService {
         /*
          * Get from storage
          */
-        final JSlob jsonJSlob = getStorage().opt(new JSlobId(ID, id, user, context));
+        JSlob jsonJSlob = getStorage().opt(new JSlobId(ID, id, user, context));
         if (null == jsonJSlob) {
-            return new JSlob(new JSONObject());
+            jsonJSlob = new JSlob(new JSONObject());
+        }
+        /*
+         * Fill with config cascade settings
+         */
+        final ConfigViewFactory viewFactory = getConfigViewFactory();
+        final ConfigView view = viewFactory.getView();
+        final Map<String, ComposedConfigProperty<String>> all = view.all();
+        for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+            final String propertyName = entry.getKey();
+            final ComposedConfigProperty<String> property = entry.getValue();
+            // Check for existence of "preferencePath"
+            final String preferencePath = property.get(PREFERENCE_PATH);
+            if (null != preferencePath) {
+                add2JSlob(propertyName, preferencePath, property, jsonJSlob, viewFactory.getView(user, context));
+            }
         }
         return jsonJSlob;
     }
@@ -104,7 +130,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("config");
+        return ALIASES;
     }
 
     @Override
@@ -251,6 +277,121 @@ public final class ConfigJSlobService implements JSlobService {
             throw JSlobExceptionCodes.NOT_FOUND.create(storageId);
         }
         return storage;
+    }
+
+    private ConfigViewFactory getConfigViewFactory() {
+        return services.getService(ConfigViewFactory.class);
+    }
+
+    private static void add2JSlob(final String propertyName, final String preferencePath, final ComposedConfigProperty<String> preferenceItem, final JSlob jsonJSlob, final ConfigView view) throws OXException {
+        if (null == preferencePath) {
+            return;
+        }
+        try {
+            // Add property's value
+            List<JSONPathElement> path = JSONPathElement.parsePath(preferencePath);
+            Object value = asJSObject(view.get(propertyName, String.class));
+            addValueByPath(path, value, jsonJSlob);
+            // Add the metadata as well
+            final StringBuilder sb = new StringBuilder(preferencePath);
+            final int resetLength = sb.length();
+            final List<String> metadataNames = preferenceItem.getMetadataNames();
+            if (null != metadataNames && !metadataNames.isEmpty()) {
+                for (final String metadataName : metadataNames) {
+                    // Parse metadata path
+                    sb.setLength(resetLength);
+                    sb.append('/').append(metadataName).append('/').append(METADATA_PREFIX);
+                    path = JSONPathElement.parsePath(sb.toString());
+                    // Metadata value
+                    final ComposedConfigProperty<String> prop = view.property(propertyName, String.class);
+                    value = asJSObject(prop.get(metadataName));
+                    // Add to JSlob
+                    addValueByPath(path, value, jsonJSlob);
+                }
+            }
+            // Lastly, let's add configurability.
+            sb.setLength(resetLength);
+            sb.append('/').append("configurable").append('/').append(METADATA_PREFIX);
+            path = JSONPathElement.parsePath(sb.toString());
+            final String finalScope = preferenceItem.get("final");
+            final String isProtected = preferenceItem.get("protected");
+            final boolean writable =
+                (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get("protected", boolean.class).booleanValue());
+            value = Boolean.valueOf(writable);
+            addValueByPath(path, value, jsonJSlob);
+        } catch (final JSONException e) {
+            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void addValueByPath(final List<JSONPathElement> path, final Object value, final JSlob jsonJSlob) throws JSONException {
+        final int msize = path.size() - 1;
+        JSONObject current = jsonJSlob.getJsonObject();
+        for (int i = 0; i < msize; i++) {
+            final JSONPathElement jsonPathElem = path.get(i);
+            final int index = jsonPathElem.getIndex();
+            final String name = jsonPathElem.getName();
+            if (index >= 0) {
+                /*
+                 * Denotes an index within a JSON array
+                 */
+                if (isInstance(name, JSONArray.class, current)) {
+                    final JSONArray jsonArray = current.getJSONArray(name);
+                    if (index >= jsonArray.length()) {
+                        current = putNewJSONObject(jsonArray);
+                    } else {
+                        if (isInstance(index, JSONObject.class, jsonArray)) {
+                            current = jsonArray.getJSONObject(index);
+                        } else {
+                            current = putNewJSONObject(index, jsonArray);
+                        }
+                    }
+                } else {
+                    final JSONArray newArray = new JSONArray();
+                    current.put(name, newArray);
+                    current = putNewJSONObject(newArray);
+                }
+            } else {
+                /*
+                 * Denotes an element within a JSON object
+                 */
+                if (isInstance(name, JSONObject.class, current)) {
+                    current = current.getJSONObject(name);
+                } else {
+                    final JSONObject newObject = new JSONObject();
+                    current.put(name, newObject);
+                    current = newObject;
+                }
+            }
+        }
+        /*
+         * Handle last path element
+         */
+        final JSONPathElement lastPathElem = path.get(msize);
+        final int index = lastPathElem.getIndex();
+        final String name = lastPathElem.getName();
+        if (index >= 0) {
+            if (isInstance(name, JSONArray.class, current)) {
+                current.getJSONArray(name).put(index, value);
+            } else {
+                final JSONArray newArray = new JSONArray();
+                current.put(name, newArray);
+                newArray.put(value);
+            }
+        } else {
+            current.put(name, value);
+        }
+    }
+
+    private static Object asJSObject(final String propertyValue) {
+        if (null == propertyValue) {
+            return null;
+        }
+        try {
+            return new JSONTokener(propertyValue).nextValue();
+        } catch (final Exception e) {
+            return propertyValue;
+        }
     }
 
 }

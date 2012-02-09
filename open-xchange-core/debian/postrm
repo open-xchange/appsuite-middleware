@@ -43,7 +43,7 @@ case "$1" in
     ;;
 esac
 
-GWCONFFILES="mail-push.properties messaging.properties secret.properties secrets templating.properties threadpool.properties"
+GWCONFFILES="mail-push.properties messaging.properties secret.properties secrets threadpool.properties"
 
 for FILE in ${GWCONFFILES}; do
     dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/${FILE} /opt/open-xchange/etc/${FILE} 6.99.9 -- "$@"

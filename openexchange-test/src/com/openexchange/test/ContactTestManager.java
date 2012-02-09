@@ -733,8 +733,8 @@ final class ContactMapping extends TestCase {
             put(ContactFields.ADDRESS_OTHER, Contact.ADDRESS_OTHER);
 
             put(ContactFields.UID, Contact.UID);
+
         } catch (final Exception e) {
-            e.printStackTrace();
             fail(e.getMessage());
         }
     }

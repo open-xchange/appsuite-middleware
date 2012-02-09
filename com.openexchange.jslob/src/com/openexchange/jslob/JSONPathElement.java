@@ -49,12 +49,47 @@
 
 package com.openexchange.jslob;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import com.openexchange.exception.OXException;
+
 /**
  * {@link JSONPathElement} - A JSON path element.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JSONPathElement {
+
+    private static final Pattern SPLIT = Pattern.compile("/"); // Pattern.compile("\\.");
+
+    /**
+     * Parses specified path to a list of path elements.
+     * 
+     * @param path The path to parse; e.g. <code>"ui/my/setting"</code>
+     * @return The parsed path 
+     * @throws OXException If parsing path fails
+     */
+    public static List<JSONPathElement> parsePath(final String path) throws OXException {
+        try {
+            final String[] fields = SPLIT.split(path, 0);
+            final List<JSONPathElement> list = new ArrayList<JSONPathElement>(fields.length);
+            for (int i = 0; i < fields.length; i++) {
+                final String field = fields[i];
+                final int pos = field.indexOf('[');
+                if (pos >= 0) {
+                    final int index = getUnsignedInteger(field.substring(pos + 1, field.indexOf(']', pos + 1)));
+                    final String name = field.substring(0, pos);
+                    list.add(new JSONPathElement(0 == name.length() ? null : name, index));
+                } else {
+                    list.add(new JSONPathElement(field));
+                }
+            }
+            return list;
+        } catch (final IndexOutOfBoundsException e) {
+            throw JSlobExceptionCodes.INVALID_PATH.create(path);
+        }
+    }
 
     private final String name;
 
@@ -106,6 +141,69 @@ public final class JSONPathElement {
      */
     public int getIndex() {
         return index;
+    }
+
+    /*-
+     * ---------------------- HELPER --------------------------
+     */
+
+    /**
+     * The radix for base <code>10</code>.
+     */
+    private static final int RADIX = 10;
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     * 
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    private static final int getUnsignedInteger(final String s) {
+        if (s == null) {
+            return -1;
+        }
+
+        final int max = s.length();
+
+        if (max <= 0) {
+            return -1;
+        }
+        if (s.charAt(0) == '-') {
+            return -1;
+        }
+
+        int result = 0;
+        int i = 0;
+
+        final int limit = -Integer.MAX_VALUE;
+        final int multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            /*
+             * Accumulating negatively avoids surprises near MAX_VALUE
+             */
+            digit = Character.digit(s.charAt(i++), RADIX);
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < multmin) {
+                return -1;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
     }
 
 }

@@ -116,19 +116,27 @@ public final class DBJSlobStorage implements JSlobStorage {
         try {
             final DatabaseService databaseService = getDatabaseService();
             final Connection con = databaseService.getWritable(contextId);
+            boolean committed = false;
             PreparedStatement stmt = null;
             try {
                 /*
                  * Now delete
                  */
+                con.setAutoCommit(false); // BEGIN
                 stmt = con.prepareStatement(SQL_DELETE_ALL_USER);
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, userId);
                 stmt.executeUpdate();
+                con.commit(); // COMMIT
+                committed = true;
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
+                if (!committed) {
+                    Databases.rollback(con);
+                }
                 Databases.closeSQLStuff(stmt);
+                Databases.autocommit(con);
                 databaseService.backWritable(contextId, con);
             }
         } finally {
@@ -137,7 +145,7 @@ public final class DBJSlobStorage implements JSlobStorage {
     }
 
     private static final String SQL_UPDATE_LOCK =
-        "UPDATE jsonStorage SET locked = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?";
+        "UPDATE jsonStorage SET locked = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ? AND locked = ?";
 
     @Override
     public boolean lock(final JSlobId id) throws OXException {
@@ -149,6 +157,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
+            boolean committed = false;
             PreparedStatement stmt = null;
             final ResultSet result = null;
             try {
@@ -170,28 +179,26 @@ public final class DBJSlobStorage implements JSlobStorage {
                 stmt.setLong(3, id.getUser());
                 stmt.setString(4, id.getServiceId());
                 stmt.setString(5, id.getId());
-                if (stmt.executeUpdate() == 0) {
+                stmt.setInt(6, 0);
+                final int res = stmt.executeUpdate();
+                con.commit(); // COMMIT
+                committed = true;
+                if (res == 0) {
                     /*
                      * Could not be locked
                      */
-                    throw DBJSlobStorageExceptionCode.LOCK_FAILED.create(id.getComponents());
+                    return false;
                 }
-                /*-
-                 * Everything went fine. Marked as locked.
-                 * Finally commit
+                /*
+                 * Marked as locked.
                  */
-                con.commit(); // COMMIT
                 return true;
-            } catch (final OXException e) {
-                Databases.rollback(con);
-                throw e;
             } catch (final SQLException e) {
-                Databases.rollback(con);
-                throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final Exception e) {
-                Databases.rollback(con);
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
+                if (!committed) {
+                    Databases.rollback(con);
+                }
                 Databases.closeSQLStuff(result, stmt);
                 Databases.autocommit(con);
                 databaseService.backWritable(contextId, con);
@@ -211,6 +218,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
+            boolean committed = false;
             PreparedStatement stmt = null;
             final ResultSet result = null;
             try {
@@ -232,27 +240,22 @@ public final class DBJSlobStorage implements JSlobStorage {
                 stmt.setLong(3, id.getUser());
                 stmt.setString(4, id.getServiceId());
                 stmt.setString(5, id.getId());
-                if (stmt.executeUpdate() == 0) {
+                stmt.setInt(6, 1);
+                final int res = stmt.executeUpdate();
+                con.commit(); // COMMIT
+                committed = true;
+                if (res == 0) {
                     /*
                      * Could not be locked
                      */
                     throw DBJSlobStorageExceptionCode.UNLOCK_FAILED.create(id.getComponents());
                 }
-                /*-
-                 * Everything went fine. Marked as unlocked.
-                 * Finally commit
-                 */
-                con.commit(); // COMMIT
-            } catch (final OXException e) {
-                Databases.rollback(con);
-                throw e;
             } catch (final SQLException e) {
-                Databases.rollback(con);
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final Exception e) {
-                Databases.rollback(con);
-                throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
+            }  finally {
+                if (!committed) {
+                    Databases.rollback(con);
+                }
                 Databases.closeSQLStuff(result, stmt);
                 Databases.autocommit(con);
                 databaseService.backWritable(contextId, con);
@@ -363,6 +366,7 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
+            boolean committed = false;
             if (false && checkLocked(id, false, con)) {
                 throw DBJSlobStorageExceptionCode.ALREADY_LOCKED.create(id.getComponents());
             }
@@ -378,6 +382,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 /*
                  * Now delete
                  */
+                con.setAutoCommit(false);
                 stmt = con.prepareStatement(SQL_DELETE);
                 stmt.setLong(1, contextId);
                 stmt.setLong(2, id.getUser());
@@ -392,11 +397,17 @@ public final class DBJSlobStorage implements JSlobStorage {
                 /*
                  * Return
                  */
+                con.commit();
+                committed = true;
                 return toDelete;
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
+                if (!committed) {
+                    Databases.rollback(con);
+                }
                 Databases.closeSQLStuff(stmt);
+                Databases.autocommit(con);
                 databaseService.backWritable(contextId, con);
             }
         } finally {
@@ -415,11 +426,13 @@ public final class DBJSlobStorage implements JSlobStorage {
             final DatabaseService databaseService = getDatabaseService();
             final int contextId = id.getContext();
             final Connection con = databaseService.getWritable(contextId);
+            boolean committed = false;
             PreparedStatement stmt = null;
             try {
                 /*
                  * Load
                  */
+                con.setAutoCommit(false);
                 final JSlob present = load(id, contextId, con);
                 if (null == present) {
                     /*
@@ -447,10 +460,16 @@ public final class DBJSlobStorage implements JSlobStorage {
                     stmt.setString(5, id.getId());
                     stmt.executeUpdate();
                 }
+                con.commit();
+                committed = true;
             } catch (final SQLException e) {
                 throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
+                if (!committed) {
+                    Databases.rollback(con);
+                }
                 Databases.closeSQLStuff(stmt);
+                Databases.autocommit(con);
                 databaseService.backWritable(contextId, con);
             }
         } finally {
