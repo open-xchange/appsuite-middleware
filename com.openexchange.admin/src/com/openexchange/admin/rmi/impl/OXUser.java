@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi.impl;
 
+import static com.openexchange.java.Autoboxing.i;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -184,6 +185,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 final NoSuchUserException noSuchUserException = new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
                 log.error(noSuchUserException.getMessage(), noSuchUserException);
                 throw noSuchUserException;
+            }
+            if (tool.existsDisplayName(ctx, usrdata, i(usrdata.getId()))) {
+                throw new InvalidDataException("The displayname is already used");
             }
             final User[] dbuser = oxu.getData(ctx, new User[] { usrdata });
 

@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.mysqlStorage;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
@@ -249,35 +250,35 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean existsDisplayName(Context ctx, User user) throws StorageException {
-        final int contextId = ctx.getId().intValue();
+    public boolean existsDisplayName(final Context ctx, final User user, final int userId) throws StorageException {
+        final int ctxId = i(ctx.getId());
         final Connection con;
         try {
-            con = cache.getConnectionForContext(contextId);
-        } catch (PoolException e) {
+            con = cache.getConnectionForContext(ctxId);
+        } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
         }
         PreparedStatement stmt = null;
-        ResultSet result = null;
+        ResultSet rs = null;
         boolean foundOther = false;
         try {
-            stmt = con.prepareStatement("SELECT field01 FROM prg_contacts WHERE cid=? AND field01=? AND fid=?");
-            stmt.setInt(1, contextId);
+            stmt = con.prepareStatement("SELECT field01,userid FROM prg_contacts WHERE cid=? AND field01=? AND fid=?");
+            stmt.setInt(1, ctxId);
             stmt.setString(2, user.getDisplay_name());
             stmt.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            result = stmt.executeQuery();
-            while (!foundOther && result.next()) {
-                foundOther = user.getDisplay_name().equals(result.getString(1));
+            rs = stmt.executeQuery();
+            while (!foundOther && rs.next()) {
+                foundOther = user.getDisplay_name().equals(rs.getString(1)) && (userId == 0 || userId != rs.getInt(2)); 
             }
-        } catch (SQLException e) {
+        } catch (final SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForContext(contextId, con);
-            } catch (PoolException e) {
+                cache.pushConnectionForContext(ctxId, con);
+            } catch (final PoolException e) {
                 log.error("Error pushing context connection to pool.", e);
             }
         }
@@ -2164,7 +2165,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             throw new InvalidDataException("Mandatory fields not set: " + usr.getUnsetMembers());
         }
         if (!usr.isContextadmin()) {
-            if (existsDisplayName(ctx, usr)) {
+            if (existsDisplayName(ctx, usr, 0)) {
                 throw new InvalidDataException("The displayname is already used");
             }
         }
