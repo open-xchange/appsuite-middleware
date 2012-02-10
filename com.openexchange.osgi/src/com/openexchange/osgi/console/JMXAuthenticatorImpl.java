@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2010 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,51 +49,43 @@
 
 package com.openexchange.osgi.console;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import javax.management.remote.JMXAuthenticator;
+import javax.management.remote.JMXPrincipal;
+import javax.security.auth.Subject;
 
-/**
- * {@link ServiceStateImpl}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- */
-public final class ServiceStateImpl implements ServiceState {
+public final class JMXAuthenticatorImpl implements JMXAuthenticator {
 
-    private final List<String> missing;
+    private final String login;
+    private final String password;
 
-    private final List<String> present;
-
-    private final String name;
-
-    public ServiceStateImpl(final String name, final List<String> missing, final List<String> present) {
+    public JMXAuthenticatorImpl(final String login, final String password) {
         super();
-        this.missing = missing;
-        this.present = present;
-        this.name = name;
+        this.login = login;
+        this.password = password;
     }
 
     @Override
-    public List<String> getMissingServices() {
-        return missing;
-    }
+    public Subject authenticate(final Object credentials) {
+        if (!(credentials instanceof String[])) {
+            if (credentials == null) {
+                throw new SecurityException("Credentials required");
+            }
+            throw new SecurityException("Credentials should be String[]");
+        }
+        final String[] creds = (String[]) credentials;
+        if (creds.length != 2) {
+            throw new SecurityException("Credentials should have 2 elements");
+        }
+        /*
+         * Perform authentication
+         */
+        final String username = creds[0];
+        final String testPassword = creds[1];
+        if (login.equals(username) && password.equals(testPassword)) {
+            return new Subject(true, Collections.singleton(new JMXPrincipal(username)), Collections.EMPTY_SET, Collections.EMPTY_SET);
+        }
+        throw new SecurityException("Invalid credentials");
 
-    @Override
-    public List<String> getPresentServices() {
-        return present;
     }
-
-    /**
-     * Creates a copy of this {@link ServiceStateImpl}.
-     *
-     * @return A copy of this {@link ServiceStateImpl}.
-     */
-    public ServiceStateImpl copy() {
-        return new ServiceStateImpl(name, new ArrayList<String>(missing), new ArrayList<String>(present));
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
 }

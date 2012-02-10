@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.sessiond.impl.clt;
+package com.openexchange.osgi.mbean;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import javax.management.InstanceNotFoundException;
@@ -70,44 +71,28 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.management.console.JMXAuthenticatorImpl;
-import com.openexchange.sessiond.SessiondMBean;
+import com.openexchange.osgi.console.JMXAuthenticatorImpl;
+
 
 /**
- * {@link CloseSessionsCLT} - Command-Line access to reset version via update task toolkit.
+ * {@link DeferredActivatorCLT}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class CloseSessionsCLT {
-
-    private static final Options toolkitOptions;
-
-    static {
-        toolkitOptions = new Options();
-        toolkitOptions.addOption("h", "help", false, "Prints a help text");
-
-        toolkitOptions.addOption("c", "context", true, "A valid context identifier");
-
-        toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
-        toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
-        toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
-    }
-
-    private static void printHelp() {
-        final HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp("forceupdatetask", toolkitOptions);
-    }
+public class DeferredActivatorCLT {
 
     /**
-     * Initializes a new {@link CloseSessionsCLT}.
+     * Initializes a new {@link DeferredActivatorCLT}.
      */
-    private CloseSessionsCLT() {
+    public DeferredActivatorCLT() {
         super();
+        // TODO Auto-generated constructor stub
+
     }
 
     public static void main(final String[] args) {
         final CommandLineParser parser = new PosixParser();
-        int contextId = -1;
+        String bundleName = null;
         try {
             final CommandLine cmd = parser.parse(toolkitOptions, args);
             if (cmd.hasOption('h')) {
@@ -134,17 +119,10 @@ public final class CloseSessionsCLT {
                 }
             }
 
-            if (cmd.hasOption('c')) {
-                final String optionValue = cmd.getOptionValue('c');
-                try {
-                    contextId = Integer.parseInt(optionValue.trim());
-                } catch (final NumberFormatException e) {
-                    System.err.println("Context identifier parameter is not a number: " + optionValue);
-                    printHelp();
-                    System.exit(0);
-                }
+            if (cmd.hasOption('n')) {
+                bundleName = cmd.getOptionValue('n');
             } else {
-                System.err.println("Missing context identifier.");
+                System.err.println("Missing bundle identifier.");
                 printHelp();
                 System.exit(0);
             }
@@ -172,9 +150,23 @@ public final class CloseSessionsCLT {
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
 
-                final String[] signature = new String[] { int.class.getName() };
-                final Object[] params = new Object[] { Integer.valueOf(contextId) };
-                mbsc.invoke(getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN), "clearContextSessions", params, signature);
+                final String[] signature = new String[] { String.class.getName() };
+                final Object[] params = new Object[] { bundleName };
+                final Object result = mbsc.invoke(getObjectName(DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN), "getMissingServices", params, signature);
+                if (result instanceof ArrayList<?>) {
+                    final ArrayList<?> missing = (ArrayList<?>) result;
+                    if (missing.isEmpty()) {
+                        System.out.println("No services missing for bundle " + bundleName);
+                    } else {
+                        System.out.println("Services missing for bundle " + bundleName + ":");
+                        final StringBuilder sb = new StringBuilder();
+                        for (final Object o : missing) {
+                            sb.append(o.toString()).append(",");
+                        }
+                        sb.deleteCharAt(sb.length() - 1);
+                        System.out.println(sb.toString());
+                    }
+                }
             } finally {
                 jmxConnector.close();
             }
@@ -199,7 +191,7 @@ public final class CloseSessionsCLT {
                 if ((t instanceof OXException)) {
                     final OXException oxe = (OXException) t;
                     if ("CTX".equals(oxe.getPrefix())) {
-                        message = "Cannot find context " + contextId;
+                        message = "Cannot find bundle " + bundleName;
                     } else {
                         message = t.getMessage();
                     }
@@ -227,6 +219,24 @@ public final class CloseSessionsCLT {
     private static ObjectName getObjectName(final String className, final String domain) throws MalformedObjectNameException {
         final int pos = className.lastIndexOf('.');
         return new ObjectName(domain, "name", pos == -1 ? className : className.substring(pos + 1));
+    }
+
+    private static final Options toolkitOptions;
+
+    static {
+        toolkitOptions = new Options();
+        toolkitOptions.addOption("h", "help", false, "Prints a help text");
+
+        toolkitOptions.addOption("n", "name", true, "The bundle's symbolic name");
+
+        toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
+        toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
+        toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
+    }
+
+    private static void printHelp() {
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.printHelp("servicestate", toolkitOptions);
     }
 
 }

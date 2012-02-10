@@ -1,4 +1,8 @@
-* 2012-02-09 - jan.bauerdick@open-xchange.com
+* 2012-02-10 - jan.bauerdick@open-xchange.com
+
+ - DeferredActivator CLT 
+
+- 2012-02-09 - jan.bauerdick@open-xchange.com
 
  - Add method to DeferredActivator for outstanding services
  - JMX interface
