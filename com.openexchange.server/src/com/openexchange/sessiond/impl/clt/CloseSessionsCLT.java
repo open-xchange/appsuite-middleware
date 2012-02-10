@@ -70,7 +70,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.management.console.JMXAuthenticatorImpl;
 import com.openexchange.sessiond.SessiondMBean;
 
@@ -199,7 +198,7 @@ public final class CloseSessionsCLT {
             } else {
                 if ((t instanceof OXException)) {
                     final OXException oxe = (OXException) t;
-                    if (ContactExceptionCodes.PREFIX.equals(oxe.getPrefix())) {
+                    if ("CTX".equals(oxe.getPrefix())) {
                         message = "Cannot find context " + contextId;
                     } else {
                         message = t.getMessage();

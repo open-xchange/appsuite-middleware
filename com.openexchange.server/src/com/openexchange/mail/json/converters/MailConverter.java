@@ -51,8 +51,10 @@ package com.openexchange.mail.json.converters;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -335,6 +337,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         result.setResultObject(jsonWriter.getObject(), "json");
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
     private void convertSingle4Get(final MailMessage mail, final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session) throws OXException {
         String tmp = requestData.getParameter(Mail.PARAMETER_EDIT_DRAFT);
         final boolean editDraft = ("1".equals(tmp) || Boolean.parseBoolean(tmp));
@@ -350,6 +354,24 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             ttlMillis = (tmp == null ? -1 : Integer.parseInt(tmp.trim()));
         } catch (final NumberFormatException e) {
             ttlMillis = -1;
+        }
+        tmp = requestData.getParameter("ignorable");
+        final List<String> ignorableContentTypes;
+        if (isEmpty(tmp)) {
+            ignorableContentTypes = Collections.<String> emptyList();
+        } else {
+            final String[] strings = SPLIT.split(tmp, 0);
+            final int length = strings.length;
+            ignorableContentTypes = new ArrayList<String>(length);
+            for (int i = 0; i < length; i++) {
+                final String cts = strings[i];
+                if ("ics".equalsIgnoreCase(cts)) {
+                    ignorableContentTypes.add("text/calendar");
+                    ignorableContentTypes.add("application/ics");
+                } else {
+                    ignorableContentTypes.add(cts);
+                }
+            }
         }
         tmp = null;
         final UserSettingMail usmNoSave = (UserSettingMail) session.getUserSettingMail().clone();
@@ -375,7 +397,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final MailServletInterface mailInterface = getMailInterface(requestData, session);
         final List<OXException> warnings = new ArrayList<OXException>(2);
         result.setResultObject(
-            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis),
+            MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, ignorableContentTypes),
             "json");
         if (doUnseen) {
             /*-
@@ -442,6 +464,18 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             request.getState().putProperty(PROPERTY_MAIL_IFACE, mailInterface);
         }
         return mailInterface;
+    }
+
+    private static boolean isEmpty(final String string) {
+        if (null == string) {
+            return true;
+        }
+        final int len = string.length();
+        boolean isWhitespace = true;
+        for (int i = 0; isWhitespace && i < len; i++) {
+            isWhitespace = Character.isWhitespace(string.charAt(i));
+        }
+        return isWhitespace;
     }
 
 }
