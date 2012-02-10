@@ -49,67 +49,59 @@
 
 package com.openexchange.osgi;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.eclipse.osgi.framework.console.CommandInterpreter;
 import org.eclipse.osgi.framework.console.CommandProvider;
-import com.openexchange.management.ManagementService;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
+ * {@link CLI}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class OsgiActivator extends HousekeepingActivator {
+public class CLI implements CommandProvider {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * Initializes a new {@link CLI}.
      */
-    public OsgiActivator() {
+    public CLI(final BundleContext context) {
         super();
+        this.context = context;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    /*
+     * (non-Javadoc)
+     * @see org.eclipse.osgi.framework.console.CommandProvider#getHelp()
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
+    public String getHelp() {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
+    public Object _getMissingServices(final CommandInterpreter interpreter) {
         try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("starting bundle: com.openexchange.osgi");
+            final int bundleId = Integer.parseInt(interpreter.nextArgument());
+            final Bundle b = context.getBundle(bundleId);
+            if (b == null || b.getState() != Bundle.ACTIVE) {
+                interpreter.println("Bundle " + bundleId + " is not active.");
+            } else {
+                for (final DeferredActivator d : OsgiActivator.getActivators()) {
+                    final Bundle activatorBundle = d.context.getBundle();
+                    if (activatorBundle.getBundleId() == bundleId) {
+                        interpreter.println("Missing services: " + (d.isActive() ? "none" : d.getMissingServices()));
+                        interpreter.println("Bundle " + activatorBundle.getSymbolicName() + " " + (d.isActive() ? "active." : "inactive."));
+                        break;
+                    }
+                }
             }
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-            registerService(CommandProvider.class, new CLI(context));
+        } catch (final NumberFormatException e) {
+            interpreter.println("Usage: getMissingServices <bundleId>");
         } catch (final Exception e) {
-            LOG.error("OsgiActivator: start: ", e);
-            throw e;
+            interpreter.println(e.getMessage());
+            interpreter.println("Usage: getMissingServices <bundleId>");
         }
+        return null;
     }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("stopping bundle: com.openexchange.osgi");
-            }
-            unregisterServices();
-            closeTrackers();
-        } catch (final Exception e) {
-            LOG.error("OsgiActivator: stop: ", e);
-            throw e;
-        }
-    }
-
 }
