@@ -101,7 +101,7 @@ final class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementS
     private void registerSessiondMBean(final ManagementService management) {
         if (objectName == null) {
             try {
-                objectName = getObjectName(SessiondMBeanImpl.class.getName(), SessiondMBean.SESSIOND_DOMAIN);
+                objectName = getObjectName("SessionD Toolkit", SessiondMBean.SESSIOND_DOMAIN);
                 management.registerMBean(objectName, new SessiondMBeanImpl());
             } catch (final MalformedObjectNameException e) {
                 LOG.error(e.getMessage(), e);
