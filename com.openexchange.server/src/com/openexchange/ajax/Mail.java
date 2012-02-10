@@ -1200,6 +1200,8 @@ public class Mail extends PermissionServlet implements UploadListener {
             } catch (final NumberFormatException e) {
                 ttlMillis = -1;
             }
+            tmp = paramContainer.getStringParam("ignorable");
+            final List<String> ignorableContentTypes = isEmpty(tmp) ? Collections.<String> emptyList() : Arrays.asList(SPLIT.split(tmp, 0));
             tmp = null;
             errorAsCallback = saveToDisk;
             /*
@@ -1374,7 +1376,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
                     }
                     data =
-                        MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis);
+                        MessageWriter.writeMailMessage(mailInterface.getAccountID(), mail, displayMode, session, usmNoSave, warnings, token, ttlMillis, ignorableContentTypes);
                     if (doUnseen) {
                         /*
                          * Leave mail as unseen
