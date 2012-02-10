@@ -255,7 +255,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES_ADMIN =
         {
-            ConfigurationService.class, CacheService.class, EventAdmin.class, SessiondService.class, TimerService.class, ThreadPoolService.class,
+            ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, ThreadPoolService.class,
             CalendarAdministrationService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class
         };
 

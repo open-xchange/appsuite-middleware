@@ -50,8 +50,6 @@
 package com.openexchange.groupware.delete;
 
 import java.sql.Connection;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.InvalidatedMarker;
@@ -96,10 +94,7 @@ public final class SessionClearerOnContextDelete extends ContextDelete {
          * Get SessionD service
          */
         final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null == service) {
-            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(SessionClearerOnContextDelete.class));
-            logger.warn(SessiondService.class.getSimpleName() + " is absent.");
-        } else {
+        if (null != service) {
             /*
              * Clear context sessions
              */
