@@ -53,7 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.concole.osgi.ConsoleActivator;
+import com.openexchange.osgi.console.osgi.ConsoleActivator;
 
 /**
  * {@link OsgiActivator} - Activator for OSGi-Bundle

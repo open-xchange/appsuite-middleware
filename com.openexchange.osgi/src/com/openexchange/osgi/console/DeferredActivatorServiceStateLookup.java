@@ -47,64 +47,53 @@
  *
  */
 
-package com.openexchange.osgi.concole.osgi;
+package com.openexchange.osgi.console;
 
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.osgi.concole.ServiceStateCommandProvider;
-import com.openexchange.osgi.concole.ServiceStateLookup;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link ConsoleActivator}
- *
+ * {@link DeferredActivatorServiceStateLookup}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ConsoleActivator implements BundleActivator {
+public class DeferredActivatorServiceStateLookup implements ServiceStateLookup {
 
-    private ServiceTracker<ServiceStateLookup, ServiceStateLookup> tracker;
+    private final Map<String, ServiceStateImpl> states;
 
-    protected ServiceRegistration<CommandProvider> registration;
+    /**
+     * Initializes a new {@link DeferredActivatorServiceStateLookup}.
+     */
+    public DeferredActivatorServiceStateLookup() {
+        super();
+        states = new ConcurrentHashMap<String, ServiceStateImpl>(128);
+    }
 
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        tracker =
-            new ServiceTracker<ServiceStateLookup, ServiceStateLookup>(
-                context,
-                ServiceStateLookup.class,
-                new ServiceTrackerCustomizer<ServiceStateLookup, ServiceStateLookup>() {
-
-                    @Override
-                    public ServiceStateLookup addingService(final ServiceReference<ServiceStateLookup> reference) {
-                        final ServiceStateLookup lookup = context.getService(reference);
-                        registration = context.registerService(CommandProvider.class, new ServiceStateCommandProvider(lookup), null);
-                        return lookup;
-                    }
-
-                    @Override
-                    public void modifiedService(final ServiceReference<ServiceStateLookup> reference, final ServiceStateLookup service) {
-                        // Ignore
-                    }
-
-                    @Override
-                    public void removedService(final ServiceReference<ServiceStateLookup> reference, final ServiceStateLookup service) {
-                        context.ungetService(reference);
-                        registration.unregister();
-                    }
-                });
-        tracker.open();
+    /**
+     * Applies the given service state information.
+     * 
+     * @param name The bundle's symbolic name
+     * @param missing The list of symbolic names of missing services
+     * @param present The list of symbolic names of available services
+     */
+    public void setState(final String name, final List<String> missing, final List<String> present) {
+        states.put(name, new ServiceStateImpl(name, missing, present));
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        if (null != tracker) {
-            tracker.close();
-            tracker = null;
+    public ServiceState determineState(final String name) {
+        final ServiceStateImpl serviceState = states.get(name);
+        if (null == serviceState) {
+            return null;
         }
+        return serviceState.copy();
+    }
+
+    @Override
+    public List<String> getNames() {
+        return new ArrayList<String>(states.keySet());
     }
 
 }

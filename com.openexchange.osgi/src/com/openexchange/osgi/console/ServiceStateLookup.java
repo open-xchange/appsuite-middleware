@@ -47,53 +47,29 @@
  *
  */
 
-package com.openexchange.osgi.concole;
+package com.openexchange.osgi.console;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link DeferredActivatorServiceStateLookup}
+ * A {@link ServiceStateLookup} provides access to {@link ServiceState} Objects.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DeferredActivatorServiceStateLookup implements ServiceStateLookup {
-
-    private final Map<String, ServiceStateImpl> states;
+public interface ServiceStateLookup {
 
     /**
-     * Initializes a new {@link DeferredActivatorServiceStateLookup}.
-     */
-    public DeferredActivatorServiceStateLookup() {
-        super();
-        states = new ConcurrentHashMap<String, ServiceStateImpl>(128);
-    }
-
-    /**
-     * Applies the given service state information.
+     * Retrieves a snapshot of the current service state.
      * 
-     * @param name The bundle's symbolic name
-     * @param missing The list of symbolic names of missing services
-     * @param present The list of symbolic names of available services
+     * @param name The name of the bundle to query the service state for.
+     * @return The current service state, or <code>null</code> if the bundle is not known.
      */
-    public void setState(final String name, final List<String> missing, final List<String> present) {
-        states.put(name, new ServiceStateImpl(name, missing, present));
-    }
+    public ServiceState determineState(String name);
 
-    @Override
-    public ServiceState determineState(final String name) {
-        final ServiceStateImpl serviceState = states.get(name);
-        if (null == serviceState) {
-            return null;
-        }
-        return serviceState.copy();
-    }
-
-    @Override
-    public List<String> getNames() {
-        return new ArrayList<String>(states.keySet());
-    }
-
+    /**
+     * Retrieves the names this lookup knows about
+     * 
+     * @return
+     */
+    public List<String> getNames();
 }

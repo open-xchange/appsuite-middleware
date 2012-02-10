@@ -51,8 +51,8 @@ package com.openexchange.osgi.mbean;
 
 import java.util.List;
 import com.openexchange.osgi.DeferredActivator;
-import com.openexchange.osgi.concole.ServiceState;
-import com.openexchange.osgi.concole.ServiceStateLookup;
+import com.openexchange.osgi.console.ServiceState;
+import com.openexchange.osgi.console.ServiceStateLookup;
 
 /**
  * {@link DeferredActivatorMBeanImpl}

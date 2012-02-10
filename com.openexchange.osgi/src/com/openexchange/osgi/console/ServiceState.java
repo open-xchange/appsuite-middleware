@@ -47,53 +47,35 @@
  *
  */
 
-package com.openexchange.osgi.concole;
+package com.openexchange.osgi.console;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link ServiceStateImpl}
+ * A {@link ServiceState} object details which service constraints have been satisfied and which are not satisfied.
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ServiceStateImpl implements ServiceState {
-
-    private final List<String> missing;
-
-    private final List<String> present;
-
-    private final String name;
-
-    public ServiceStateImpl(final String name, final List<String> missing, final List<String> present) {
-        super();
-        this.missing = missing;
-        this.present = present;
-        this.name = name;
-    }
-
-    @Override
-    public List<String> getMissingServices() {
-        return missing;
-    }
-
-    @Override
-    public List<String> getPresentServices() {
-        return present;
-    }
+public interface ServiceState {
 
     /**
-     * Creates a copy of this {@link ServiceStateImpl}.
+     * Retrieves a list of service class names that have not been satisfied.
      * 
-     * @return A copy of this {@link ServiceStateImpl}.
+     * @return A list of service class names that have not been satisfied.
      */
-    public ServiceStateImpl copy() {
-        return new ServiceStateImpl(name, new ArrayList<String>(missing), new ArrayList<String>(present));
-    }
+    public List<String> getMissingServices();
 
-    @Override
-    public String getName() {
-        return name;
-    }
+    /**
+     * Retrieves a list of service class names that have been satisfied.
+     * 
+     * @return A list of service class names that have been satisfied.
+     */
+    public List<String> getPresentServices();
 
+    /**
+     * Retrieves the name of the bundle this state describes.
+     * 
+     * @return The name of the bundle this state describes.
+     */
+    public String getName();
 }

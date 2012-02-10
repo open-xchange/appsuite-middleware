@@ -65,8 +65,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.osgi.concole.DeferredActivatorServiceStateLookup;
-import com.openexchange.osgi.concole.ServiceStateLookup;
+import com.openexchange.osgi.console.DeferredActivatorServiceStateLookup;
+import com.openexchange.osgi.console.ServiceStateLookup;
 import com.openexchange.server.ServiceLookup;
 
 /**

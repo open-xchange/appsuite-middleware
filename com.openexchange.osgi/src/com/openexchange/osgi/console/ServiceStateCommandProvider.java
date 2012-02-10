@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.osgi.concole;
+package com.openexchange.osgi.console;
 
 import java.util.List;
 import org.eclipse.osgi.framework.console.CommandInterpreter;
