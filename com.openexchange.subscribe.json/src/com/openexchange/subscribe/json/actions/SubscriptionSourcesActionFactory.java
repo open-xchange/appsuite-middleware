@@ -49,24 +49,24 @@
 
 package com.openexchange.subscribe.json.actions;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  *
  */
-public class SubscriptionSourcesActionFactory implements
-		AJAXActionServiceFactory {
+public class SubscriptionSourcesActionFactory implements AJAXActionServiceFactory {
 
 	private final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>();
 
-	public SubscriptionSourcesActionFactory(ServiceLookup services){
+	public SubscriptionSourcesActionFactory(final ServiceLookup services){
 		//someone decided to describe this one way and implement it another ... This works for both
 		actions.put("listSources", new ListSourcesAction(services));
 		actions.put("all", new ListSourcesAction(services));
@@ -75,14 +75,18 @@ public class SubscriptionSourcesActionFactory implements
 	}
 
 	@Override
-    public AJAXActionService createActionService(String action)
+    public AJAXActionService createActionService(final String action)
 			throws OXException {
 		if (actions.containsKey(action)){
 			return actions.get(action);
-		} else {
-			// TODO: fill this exception
-			throw new OXException();
 		}
+        // TODO: fill this exception
+        throw new OXException();
 	}
+
+	@Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
+    }
 
 }

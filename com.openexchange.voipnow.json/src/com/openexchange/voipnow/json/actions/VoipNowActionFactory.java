@@ -49,6 +49,7 @@
 
 package com.openexchange.voipnow.json.actions;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,6 +94,11 @@ public final class VoipNowActionFactory implements AJAXActionServiceFactory {
     private VoipNowActionFactory() {
         super();
         actions = initActions();
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

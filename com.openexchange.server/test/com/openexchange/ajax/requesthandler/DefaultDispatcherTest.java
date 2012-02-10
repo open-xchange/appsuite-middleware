@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import junit.framework.TestCase;
@@ -434,6 +435,11 @@ public class DefaultDispatcherTest extends TestCase {
         public AJAXActionService createActionService(final String action) throws OXException {
             this.action = action;
             return actionService;
+        }
+
+        @Override
+        public Collection<? extends AJAXActionService> getSupportedServices() {
+            return java.util.Collections.singleton(actionService);
         }
 
         public String getAction() {

@@ -79,6 +79,7 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -141,6 +142,8 @@ public class CaldavResource extends AbstractResource {
 
     private static final Log LOG = LogFactory.getLog(CaldavResource.class);
 
+    private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    
     private final GroupwareCaldavFactory factory;
 
     private Appointment appointment;
@@ -824,15 +827,15 @@ public class CaldavResource extends AbstractResource {
 
     private List<CalendarDataObject> parse(final String iCal) throws ConversionError {
     	/*
-    	 * apply patches 
+    	 * apply patches
     	 */
     	final String patchedICal = Patches.Incoming.applyAll(iCal);    	
     	/*
     	 * parse appointments
     	 */
-        final TimeZone timeZone = TimeZone.getTimeZone(this.factory.getUser().getTimeZone());
-        return factory.getIcalParser().parseAppointments(patchedICal, timeZone, factory.getContext(), 
-        		new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+        final ICalParser parser = factory.getIcalParser();
+        return parser.parseAppointments(
+        		patchedICal, UTC, factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
     }
     
 }

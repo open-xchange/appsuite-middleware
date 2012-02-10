@@ -50,11 +50,21 @@
 package com.openexchange.jslob.config;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.json.JSONValue;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSONUpdate;
@@ -73,26 +83,74 @@ import com.openexchange.server.ServiceLookup;
  */
 public final class ConfigJSlobService implements JSlobService {
 
-    private static final String ID = "io.ox.wd.jslob.config";
+    private static final List<String> ALIASES = Arrays.asList("config");
+
+    private static final String PREFERENCE_PATH = "preferencePath".intern();
+
+    private static final String METADATA_PREFIX = "meta".intern();
+
+    private static final String ID = "com.openexchange.jslob.config";
+
+    /*-
+     * ------------------------- Member stuff -----------------------------
+     */
 
     private final ServiceLookup services;
 
+    private final Map<String, AttributedProperty> preferenceItems;
+
     /**
      * Initializes a new {@link ConfigJSlobService}.
+     * 
+     * @throws OXException If initialization fails
      */
-    public ConfigJSlobService(final ServiceLookup services) {
+    public ConfigJSlobService(final ServiceLookup services) throws OXException {
         super();
         this.services = services;
+        preferenceItems = initPreferenceItems();
+    }
+
+    private Map<String, AttributedProperty> initPreferenceItems() throws OXException {
+        final ConfigView view = getConfigViewFactory().getView();
+        final Map<String, ComposedConfigProperty<String>> all = view.all();
+        final Map<String, AttributedProperty> preferenceItems = new HashMap<String, AttributedProperty>(all.size() >> 1);
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ConfigJSlobService.class));
+        for (final Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
+            // Check for existence of "preferencePath"
+            final ComposedConfigProperty<String> property = entry.getValue();
+            String preferencePath = property.get(PREFERENCE_PATH);
+            if (null != preferencePath) {
+                preferencePath = preferencePath + "/value"; // Avoid overriding value when appending meta & other property information
+                try {
+                    preferenceItems.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
+                } catch (final Exception e) {
+                    logger.warn("Couldn't initialize preference path: " + preferencePath, e);
+                }
+            }
+        }
+        return Collections.unmodifiableMap(preferenceItems);
     }
 
     @Override
-    public JSlob get(final String id, final int user, final int context) throws OXException {
+    public Collection<JSlob> get(final int userId, final int contextId) throws OXException {
+        return getStorage().list(new JSlobId(ID, null, userId, contextId));
+    }
+
+    @Override
+    public JSlob get(final String id, final int userId, final int contextId) throws OXException {
         /*
          * Get from storage
          */
-        final JSlob jsonJSlob = getStorage().opt(new JSlobId(ID, id, user, context));
+        JSlob jsonJSlob = getStorage().opt(new JSlobId(ID, id, userId, contextId));
         if (null == jsonJSlob) {
-            return new JSlob(new JSONObject());
+            jsonJSlob = new JSlob(new JSONObject());
+        }
+        /*
+         * Fill with config cascade settings
+         */
+        final ConfigView view = getConfigViewFactory().getView(userId, contextId);
+        for (final AttributedProperty attributedProperty : preferenceItems.values()) {
+            add2JSlob(attributedProperty, jsonJSlob, view);
         }
         return jsonJSlob;
     }
@@ -104,7 +162,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     @Override
     public List<String> getAliases() {
-        return Arrays.asList("config");
+        return ALIASES;
     }
 
     @Override
@@ -115,6 +173,28 @@ public final class ConfigJSlobService implements JSlobService {
         if (null == jsonJSlob) {
             getStorage().remove(new JSlobId(ID, id, user, context));
         } else {
+            final JSONObject jObject = jsonJSlob.getJsonObject();
+            if (null == jObject) {
+                getStorage().remove(new JSlobId(ID, id, user, context));
+                return;
+            }
+            // Set (or replace) JSlob
+            final ConfigView view = getConfigViewFactory().getView(user, context);
+            for (final AttributedProperty attributedProperty : preferenceItems.values()) {
+                final Object value = getPathFrom(attributedProperty.path, jObject);
+                if (null != value) {
+                    try {
+                        final String oldValue = view.get(attributedProperty.propertyName, String.class);
+                        // Clients have a habit of dumping the config back at us, so we only save differing values.
+                        if (!value.equals(oldValue)) {
+                            view.set("user", attributedProperty.propertyName, value);
+                        }
+                    } catch (final OXException e) {
+                        throw new OXException(e);
+                    }
+                }
+            }
+            // Finally store JSlob
             getStorage().store(new JSlobId(ID, id, user, context), jsonJSlob);
         }
     }
@@ -146,13 +226,40 @@ public final class ConfigJSlobService implements JSlobService {
                 /*
                  * Update whole object
                  */
-                storage.store(jslobId, jsonJSlob.setJsonObject((JSONObject) jsonUpdate.getValue()));
+                set(id, jsonJSlob.setJsonObject((JSONObject) jsonUpdate.getValue()), user, context);
                 return;
+            }
+            /*
+             * Update in config cascade
+             */
+            final int size = path.size();
+            {
+                final StringBuilder pathBuilder = new StringBuilder(16);
+                pathBuilder.append(path.get(0).toString());
+                for (int i = 1; i < size; i++) {
+                    pathBuilder.append('/').append(path.get(i).toString());
+                }
+                final AttributedProperty attributedProperty = preferenceItems.get(pathBuilder.toString());
+                if (null != attributedProperty) {
+                    final Object value = jsonUpdate.getValue();
+                    if (null != value) {
+                        try {
+                            final ConfigView view = getConfigViewFactory().getView(user, context);
+                            final String oldValue = view.get(attributedProperty.propertyName, String.class);
+                            // Clients have a habit of dumping the config back at us, so we only save differing values.
+                            if (!value.equals(oldValue)) {
+                                view.set("user", attributedProperty.propertyName, value);
+                            }
+                        } catch (final OXException e) {
+                            throw new OXException(e);
+                        }
+                    }
+                }
             }
             /*
              * Iterate path except last element
              */
-            final int msize = path.size() - 1;
+            final int msize = size - 1;
             JSONObject current = storageObject;
             for (int i = 0; i < msize; i++) {
                 final JSONPathElement jsonPathElem = path.get(i);
@@ -252,5 +359,217 @@ public final class ConfigJSlobService implements JSlobService {
         }
         return storage;
     }
+
+    private ConfigViewFactory getConfigViewFactory() {
+        return services.getService(ConfigViewFactory.class);
+    }
+
+    private static void add2JSlob(final AttributedProperty attributedProperty, final JSlob jsonJSlob, final ConfigView view) throws OXException {
+        if (null == attributedProperty) {
+            return;
+        }
+        try {
+            // Add property's value
+            List<JSONPathElement> path = attributedProperty.path;
+            Object value = asJSObject(view.get(attributedProperty.propertyName, String.class));
+            addValueByPath(path, value, jsonJSlob);
+            // Add the metadata as well
+            final String preferencePath = attributedProperty.preferencePath;
+            final StringBuilder sb = new StringBuilder(preferencePath.substring(0, preferencePath.lastIndexOf('/')));
+            final int resetLength = sb.length();
+            final ComposedConfigProperty<String> preferenceItem = attributedProperty.property;
+            final List<String> metadataNames = preferenceItem.getMetadataNames();
+            if (null != metadataNames && !metadataNames.isEmpty()) {
+                for (final String metadataName : metadataNames) {
+                    // Parse metadata path
+                    sb.setLength(resetLength);
+                    sb.append('/').append(metadataName).append('/').append(METADATA_PREFIX);
+                    path = JSONPathElement.parsePath(sb.toString());
+                    // Metadata value
+                    final ComposedConfigProperty<String> prop = view.property(attributedProperty.propertyName, String.class);
+                    value = asJSObject(prop.get(metadataName));
+                    // Add to JSlob
+                    addValueByPath(path, value, jsonJSlob);
+                }
+            }
+            // Lastly, let's add configurability.
+            sb.setLength(resetLength);
+            sb.append('/').append("configurable").append('/').append(METADATA_PREFIX);
+            path = JSONPathElement.parsePath(sb.toString());
+            final String finalScope = preferenceItem.get("final");
+            final String isProtected = preferenceItem.get("protected");
+            final boolean writable =
+                (finalScope == null || finalScope.equals("user")) && (isProtected == null || !preferenceItem.get("protected", boolean.class).booleanValue());
+            value = Boolean.valueOf(writable);
+            addValueByPath(path, value, jsonJSlob);
+        } catch (final JSONException e) {
+            throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void addValueByPath(final List<JSONPathElement> path, final Object value, final JSlob jsonJSlob) throws JSONException {
+        final int msize = path.size() - 1;
+        JSONObject current = jsonJSlob.getJsonObject();
+        for (int i = 0; i < msize; i++) {
+            final JSONPathElement jsonPathElem = path.get(i);
+            final int index = jsonPathElem.getIndex();
+            final String name = jsonPathElem.getName();
+            if (index >= 0) {
+                /*
+                 * Denotes an index within a JSON array
+                 */
+                if (isInstance(name, JSONArray.class, current)) {
+                    final JSONArray jsonArray = current.getJSONArray(name);
+                    if (index >= jsonArray.length()) {
+                        current = putNewJSONObject(jsonArray);
+                    } else {
+                        if (isInstance(index, JSONObject.class, jsonArray)) {
+                            current = jsonArray.getJSONObject(index);
+                        } else {
+                            current = putNewJSONObject(index, jsonArray);
+                        }
+                    }
+                } else {
+                    final JSONArray newArray = new JSONArray();
+                    current.put(name, newArray);
+                    current = putNewJSONObject(newArray);
+                }
+            } else {
+                /*
+                 * Denotes an element within a JSON object
+                 */
+                if (isInstance(name, JSONObject.class, current)) {
+                    current = current.getJSONObject(name);
+                } else {
+                    final JSONObject newObject = new JSONObject();
+                    current.put(name, newObject);
+                    current = newObject;
+                }
+            }
+        }
+        /*
+         * Handle last path element
+         */
+        final JSONPathElement lastPathElem = path.get(msize);
+        final int index = lastPathElem.getIndex();
+        final String name = lastPathElem.getName();
+        if (index >= 0) {
+            if (isInstance(name, JSONArray.class, current)) {
+                current.getJSONArray(name).put(index, value);
+            } else {
+                final JSONArray newArray = new JSONArray();
+                current.put(name, newArray);
+                newArray.put(value);
+            }
+        } else {
+            current.put(name, value);
+        }
+    }
+
+    private static Object getPathFrom(final List<JSONPathElement> jPath, final JSONObject jObject) {
+        JSONObject jCurrent = jObject;
+        final int msize = jPath.size() - 1;
+        for (int i = 0; i < msize; i++) {
+            final JSONPathElement jPathElement = jPath.get(i);
+            final int index = jPathElement.getIndex();
+            final String name = jPathElement.getName();
+            if (index >= 0) {
+                /*
+                 * Denotes an index within a JSON array
+                 */
+                if (isInstance(name, JSONArray.class, jCurrent)) {
+                    try {
+                        final JSONArray jsonArray = jCurrent.getJSONArray(name);
+                        jCurrent = jsonArray.getJSONObject(index);
+                    } catch (final JSONException e) {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            } else {
+                /*
+                 * Denotes an element within a JSON object
+                 */
+                if (isInstance(name, JSONObject.class, jCurrent)) {
+                    try {
+                        jCurrent = jCurrent.getJSONObject(name);
+                    } catch (final JSONException e) {
+                        return null;
+                    }
+                } else {
+                    return null;
+                }
+            }
+        }
+        try {
+            final JSONPathElement leaf = jPath.get(msize);
+            final int index = leaf.getIndex();
+            final String name = leaf.getName();
+            final Object retval;
+            if (index >= 0) {
+                retval = jCurrent.getJSONArray(name).get(index);
+            } else {
+                retval = jCurrent.get(name);
+            }
+            if (retval instanceof JSONValue) {
+                // Not a leaf
+                return null;
+            }
+            return retval;
+        } catch (final JSONException e) {
+            return null;
+        }
+    }
+
+    private static Object asJSObject(final String propertyValue) {
+        if (null == propertyValue) {
+            return null;
+        }
+        try {
+            return new JSONTokener(propertyValue).nextValue();
+        } catch (final Exception e) {
+            return propertyValue;
+        }
+    }
+
+    /**
+     * <ul>
+     * <li><b><code>preferencePath</code></b>:<br>&nbsp;&nbsp;The preference path</li>
+     * <li><b><code>propertyName</code></b>:<br>&nbsp;&nbsp;The property name of the preference item property.</li>
+     * <li><b><code>property</code></b>:<br>&nbsp;&nbsp;The property representing a preference item.</li>
+     * <li><b><code>path</code></b>:<br>&nbsp;&nbsp;The parsed preference path.</li>
+     * </ul>
+     */
+    private static final class AttributedProperty {
+
+        /**
+         * The property name of the preference item property.
+         */
+        protected final String propertyName;
+
+        /**
+         * The preference path
+         */
+        protected final String preferencePath;
+
+        /**
+         * The property representing a preference item.
+         */
+        protected final ComposedConfigProperty<String> property;
+
+        /**
+         * The parsed preference path.
+         */
+        protected final List<JSONPathElement> path;
+
+        protected AttributedProperty(final String preferencePath, final String propertyName, final ComposedConfigProperty<String> property) throws OXException {
+            super();
+            this.propertyName = propertyName;
+            this.property = property;
+            this.preferencePath = preferencePath;
+            path = JSONPathElement.parsePath(preferencePath);
+        }
+    } // End of class AttributedProperty
 
 }

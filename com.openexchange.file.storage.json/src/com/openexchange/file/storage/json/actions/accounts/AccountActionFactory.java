@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.accounts;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -65,7 +66,7 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
 
     public static AccountActionFactory INSTANCE; // Initialize in Activator
 
-    private Map<String, AJAXActionService> actions = null;
+    private final Map<String, AJAXActionService> actions;
 
     public AccountActionFactory(final FileStorageServiceRegistry registry) {
         actions = new HashMap<String, AJAXActionService>();
@@ -82,4 +83,10 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
+    }
+
 }

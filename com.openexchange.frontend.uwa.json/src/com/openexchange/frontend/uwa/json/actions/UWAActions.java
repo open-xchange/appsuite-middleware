@@ -49,12 +49,13 @@
 
 package com.openexchange.frontend.uwa.json.actions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.frontend.uwa.UWAWidgetServiceFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -64,9 +65,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class UWAActions implements AJAXActionServiceFactory {
 
-    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
+    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>(6);
 
-    public UWAActions(UWAWidgetServiceFactory factory) {
+    public UWAActions(final UWAWidgetServiceFactory factory) {
         super();
         actions.put("new", new CreateAction(factory));
         actions.put("get", new GetAction(factory));
@@ -76,11 +77,16 @@ public class UWAActions implements AJAXActionServiceFactory {
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
+    public AJAXActionService createActionService(final String action) throws OXException {
         if (!actions.containsKey(action)) {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return actions.get(action);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

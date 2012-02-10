@@ -49,6 +49,7 @@
 
 package com.openexchange.tasks.json;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -75,28 +76,33 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
  */
 public class TaskActionFactory implements AJAXActionServiceFactory {
 
-    private static final Map<String, TaskAction> ACTIONS = new ConcurrentHashMap<String, TaskAction>(10);
+    private static final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
 
     /**
      * Initializes a new {@link TaskActionFactory}.
      */
     public TaskActionFactory(final ServiceLookup serviceLookup) {
         super();
-        ACTIONS.put("all", new AllAction(serviceLookup));
-        ACTIONS.put("confirm", new ConfirmAction(serviceLookup));
-        ACTIONS.put("copy", new CopyAction(serviceLookup));
-        ACTIONS.put("delete", new DeleteAction(serviceLookup));
-        ACTIONS.put("get", new GetAction(serviceLookup));
-        ACTIONS.put("list", new ListAction(serviceLookup));
-        ACTIONS.put("new", new NewAction(serviceLookup));
-        ACTIONS.put("search", new SearchAction(serviceLookup));
-        ACTIONS.put("update", new UpdateAction(serviceLookup));
-        ACTIONS.put("updates", new UpdatesAction(serviceLookup));
+        actions.put("all", new AllAction(serviceLookup));
+        actions.put("confirm", new ConfirmAction(serviceLookup));
+        actions.put("copy", new CopyAction(serviceLookup));
+        actions.put("delete", new DeleteAction(serviceLookup));
+        actions.put("get", new GetAction(serviceLookup));
+        actions.put("list", new ListAction(serviceLookup));
+        actions.put("new", new NewAction(serviceLookup));
+        actions.put("search", new SearchAction(serviceLookup));
+        actions.put("update", new UpdateAction(serviceLookup));
+        actions.put("updates", new UpdatesAction(serviceLookup));
     }
 
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
-        return ACTIONS.get(action);
+        return actions.get(action);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

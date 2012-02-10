@@ -49,6 +49,7 @@
 
 package com.openexchange.jslob;
 
+import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
 
@@ -83,6 +84,16 @@ public interface JSlobService {
      * @throws OXException If JSlob cannot be returned
      */
     JSlob get(String id, int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the JSlobs associated with given user in given context.
+     * 
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The JSlobs
+     * @throws OXException If JSlobs cannot be returned
+     */
+    Collection<JSlob> get(int userId, int contextId) throws OXException;
 
     /**
      * Sets the JSlob associated with given user in given context.

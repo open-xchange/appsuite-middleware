@@ -5,7 +5,13 @@ Bundle-SymbolicName: com.openexchange.jslob.config
 Bundle-Version: 7.0.0.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.settings,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.jslob,
  com.openexchange.jslob.registry,
@@ -19,3 +25,4 @@ Import-Package: com.openexchange.exception,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker
+Bundle-Activator: com.openexchange.jslob.config.osgi.ConfigJSlobActivator

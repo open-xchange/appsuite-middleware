@@ -49,6 +49,7 @@
 
 package com.openexchange.favfolder.json;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -78,6 +79,11 @@ public class FavFolderActionFactory implements AJAXActionServiceFactory {
         actions.put("subscribe", new com.openexchange.favfolder.json.actions.SubscribeAction(services));
         actions.put("unsubscribe", new com.openexchange.favfolder.json.actions.UnsubscribeAction(services));
         actions.put("reorder", new com.openexchange.favfolder.json.actions.ReorderAction(services));
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

@@ -1,6 +1,7 @@
-* 2012-02-08 - tobias.friedrich@open-xchange.com
+* 2012-02-09 - jan.bauerdick@open-xchange.com
 
- - Fix for bug 21499: Store user timezone in appointments imported from CalDAV interface
+ - Add method to DeferredActivator for outstanding services
+ - JMX interface
 
 * 2012-02-08 - thorben.betten@open-xchange.com
 

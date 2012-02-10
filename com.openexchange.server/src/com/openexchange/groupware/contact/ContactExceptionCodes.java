@@ -151,6 +151,8 @@ public enum ContactExceptionCodes implements OXExceptionCode {
 
     ;
 
+    public static final String PREFIX = "CON".intern();
+
     private String message;
     private Category category;
     private int number;
@@ -173,7 +175,7 @@ public enum ContactExceptionCodes implements OXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "CON";
+        return PREFIX;
     }
 
     @Override
