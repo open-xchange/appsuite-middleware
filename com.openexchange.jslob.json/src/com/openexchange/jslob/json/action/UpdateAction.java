@@ -54,6 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSONUpdate;
+import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.json.JSlobRequest;
 import com.openexchange.server.ServiceLookup;
@@ -78,7 +79,7 @@ public final class UpdateAction extends JSlobAction {
     protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException, JSONException {
         String serviceId = jslobRequest.getParameter("serviceId", String.class);
         if (null == serviceId) {
-            serviceId = "io.ox.wd.jslob.config";
+            serviceId = DEFAULT_SERVICE_ID;
         }
         final JSlobService jslobService = getJSlobService(serviceId);
 
@@ -86,10 +87,17 @@ public final class UpdateAction extends JSlobAction {
 
         final JSONObject jsonData = (JSONObject) jslobRequest.getRequestData().getData();
         final JSONUpdate jsonUpdate = new JSONUpdate(jsonData.getString("path"), jsonData.get("value"));
-
-        jslobService.update(id, jsonUpdate, jslobRequest.getUserId(), jslobRequest.getContextId());
-
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        /*
+         * Update...
+         */
+        final int userId = jslobRequest.getUserId();
+        final int contextId = jslobRequest.getContextId();
+        jslobService.update(id, jsonUpdate, userId, contextId);
+        /*
+         * ... and write back
+         */
+        final JSlob jslob = jslobService.get(id, userId, contextId);
+        return new AJAXRequestResult(jslob, "jslob");
     }
 
     @Override

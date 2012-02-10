@@ -47,69 +47,37 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.mbean;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import com.openexchange.management.ManagementService;
+import java.util.List;
+import com.openexchange.osgi.DeferredActivator;
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
- *
+ * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class OsgiActivator extends HousekeepingActivator {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
-
+public interface DeferredActivatorMBean {
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * The MBean domain.
      */
-    public OsgiActivator() {
-        super();
-    }
+    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    /**
+     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
+     * 
+     * @name The bundle name
+     * @return A list of canonical class names of missing services
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
-    }
+    List<String> getMissingServices(String name);
 
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+    /**
+     * Checks if activator for specified bundle is active; meaning all needed services are available.
+     * 
+     * @name The bundle name
+     * @return <code>true</code> if active; otherwise <code>false</code>
      */
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("starting bundle: com.openexchange.osgi");
-            }
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-            registerService(CommandProvider.class, new CLI(context));
-        } catch (final Exception e) {
-            LOG.error("OsgiActivator: start: ", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("stopping bundle: com.openexchange.osgi");
-            }
-            unregisterServices();
-            closeTrackers();
-        } catch (final Exception e) {
-            LOG.error("OsgiActivator: stop: ", e);
-            throw e;
-        }
-    }
+    boolean isActive(String name);
 
 }

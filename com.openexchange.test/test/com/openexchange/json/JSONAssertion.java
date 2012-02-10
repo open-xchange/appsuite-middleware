@@ -52,12 +52,16 @@ package com.openexchange.json;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 
 /**
  * {@link JSONAssertion}
@@ -67,11 +71,104 @@ import org.json.JSONObject;
  */
 public class JSONAssertion implements JSONCondition {
 
-    public static final void assertValidates(JSONAssertion assertion, Object o) {
+    public static final void assertValidates(final JSONAssertion assertion, final Object o) {
         assertNotNull("Object was null", o);
         if(!assertion.validate(o)) {
             fail(assertion.getComplaint());
         }
+    }
+
+    /**
+     * Checks for equality of specified JSON values.
+     * 
+     * @param jsonValue1 The first JSON value
+     * @param jsonValue2 The second JSON value
+     * @return <code>true</code> if equal; otherwise <code>false</code>
+     */
+    public static boolean equals(final JSONValue jsonValue1, final JSONValue jsonValue2) {
+        if (jsonValue1 == jsonValue2) {
+            return true;
+        }
+        if (null == jsonValue1) {
+            if (null != jsonValue2) {
+                return false;
+            }
+            return true; // Both null
+        }
+        if (null == jsonValue2) {
+            return false;
+        }
+        if (jsonValue1.isArray()) {
+            if (!jsonValue2.isArray()) {
+                return false;
+            }
+            return getListFrom((JSONArray) jsonValue1).equals(getListFrom((JSONArray) jsonValue2));
+        }
+        if (jsonValue1.isObject()) {
+            if (!jsonValue2.isObject()) {
+                return false;
+            }
+            return getMapFrom((JSONObject) jsonValue1).equals(getMapFrom((JSONObject) jsonValue2));
+        }
+        return false;
+    }
+
+    /**
+     * Checks for equality of specified JSON datas.
+     * 
+     * @param jsonData1 The first JSON data
+     * @param jsonData2 The second JSON data
+     * @return <code>true</code> if equal; otherwise <code>false</code>
+     */
+    public static boolean equals(final Object jsonData1, final Object jsonData2) {
+        if (jsonData1 == jsonData2) {
+            return true;
+        }
+        if (null == jsonData1) {
+            if (null != jsonData2) {
+                return false;
+            }
+            return true; // Both null
+        }
+        if (null == jsonData2) {
+            return false;
+        }
+        if (!jsonData1.getClass().equals(jsonData2.getClass())) {
+            return false;
+        }
+        return getFrom(jsonData2).equals(getFrom(jsonData2));
+    }
+
+    private static List<Object> getListFrom(final JSONArray jsonArray) {
+        final int length = jsonArray.length();
+        final List<Object> list = new ArrayList<Object>(length);
+        for (int i = 0; i < length; i++) {
+            try {
+                list.add(getFrom(jsonArray.get(i)));
+            } catch (final JSONException e) {
+                // Ignore
+            }
+        }
+        return list;
+    }
+
+    private static Map<String, Object> getMapFrom(final JSONObject jsonObject) {
+        final int length = jsonObject.length();
+        final Map<String, Object> map = new HashMap<String, Object>(length);
+        for (final Entry<String, Object> entry : jsonObject.entrySet()) {
+            map.put(entry.getKey(), getFrom(entry.getValue()));
+        }
+        return map;
+    }
+
+    private static Object getFrom(final Object object) {
+        if (object instanceof JSONArray) {
+            return getListFrom((JSONArray) object);
+        }
+        if (object instanceof JSONObject) {
+            return getMapFrom((JSONObject) object);
+        }
+        return object;
     }
 
     private Stack<JSONAssertion> stack = new Stack<JSONAssertion>();
@@ -84,10 +181,11 @@ public class JSONAssertion implements JSONCondition {
     private int lastIndex;
 
     public JSONAssertion() {
-
+        super();
     }
 
-    private JSONAssertion (Stack<JSONAssertion> stack) {
+    private JSONAssertion (final Stack<JSONAssertion> stack) {
+        super();
         this.stack = stack;
     }
 
@@ -100,7 +198,7 @@ public class JSONAssertion implements JSONCondition {
         return this;
     }
 
-    public JSONAssertion hasKey(String key) {
+    public JSONAssertion hasKey(final String key) {
         if(!topmost()) {
             stack.peek().hasKey(key);
         } else {
@@ -110,7 +208,7 @@ public class JSONAssertion implements JSONCondition {
         return this;
     }
 
-    public JSONAssertion withValue(Object value) {
+    public JSONAssertion withValue(final Object value) {
 
         if(!topmost()) {
             stack.peek().withValue(value);
@@ -125,7 +223,7 @@ public class JSONAssertion implements JSONCondition {
             stack.peek().withValueObject();
             return this;
         }
-        JSONAssertion stackElement = new JSONAssertion(stack);
+        final JSONAssertion stackElement = new JSONAssertion(stack);
         conditions.add(new ValueObject(key, stackElement));
         stack.push(stackElement);
         stackElement.isObject();
@@ -137,14 +235,14 @@ public class JSONAssertion implements JSONCondition {
             stack.peek().withValueArray();
             return this;
         }
-        JSONAssertion stackElement = new JSONAssertion(stack);
+        final JSONAssertion stackElement = new JSONAssertion(stack);
         conditions.add(new ValueArray(key, stackElement));
         stack.push(stackElement);
         stackElement.isArray();
         return this;
     }
 
-    public JSONAssertion atIndex(int i) {
+    public JSONAssertion atIndex(final int i) {
         if(!topmost()) {
             stack.peek().atIndex(i);
             return this;
@@ -171,7 +269,7 @@ public class JSONAssertion implements JSONCondition {
         return this;
     }
 
-    public JSONAssertion withValues(Object...values) {
+    public JSONAssertion withValues(final Object...values) {
         if(!topmost()) {
             stack.peek().withValues(values);
             return this;
@@ -208,8 +306,8 @@ public class JSONAssertion implements JSONCondition {
     }
 
     @Override
-    public boolean validate(Object o) {
-        for(JSONCondition condition : conditions) {
+    public boolean validate(final Object o) {
+        for(final JSONCondition condition : conditions) {
             if(!condition.validate(o)) {
                 complaint = condition.getComplaint();
                 return false;
@@ -228,13 +326,13 @@ public class JSONAssertion implements JSONCondition {
         private String complaint;
         private final Class type;
 
-        public IsOfType(Class type) {
+        public IsOfType(final Class type) {
             this.type = type;
         }
 
         @Override
-        public boolean validate(Object o) {
-            boolean isCorrectType = type.isInstance(o);
+        public boolean validate(final Object o) {
+            final boolean isCorrectType = type.isInstance(o);
             if(!isCorrectType) {
                 complaint = "Expected "+type.getName()+" was: "+o.getClass().getName();
             }
@@ -251,12 +349,12 @@ public class JSONAssertion implements JSONCondition {
         private String complaint;
         private JSONObject object;
 
-        public HasKey(String key) {
+        public HasKey(final String key) {
             this.key = key;
         }
 
         @Override
-        public boolean validate(Object o) {
+        public boolean validate(final Object o) {
             if(!JSONObject.class.isInstance(o)) {
                 this.complaint = o.getClass().getName()+" can not have key "+key;
                 return false;
@@ -278,12 +376,12 @@ public class JSONAssertion implements JSONCondition {
     private static final class HasIndex implements JSONCondition {
         private final int index;
 
-        public HasIndex(int index) {
+        public HasIndex(final int index) {
             this.index = index;
         }
 
         @Override
-        public boolean validate(Object o) {
+        public boolean validate(final Object o) {
             return ((JSONArray)o).length() > index;
         }
 
@@ -299,26 +397,26 @@ public class JSONAssertion implements JSONCondition {
         private final Object value;
         private String complaint;
 
-        public KeyValuePair(String key, Object value) {
+        public KeyValuePair(final String key, final Object value) {
             this.key = key;
             this.value = value;
         }
 
         @Override
-        public boolean validate(Object o) {
+        public boolean validate(final Object o) {
             try {
-                Object object = ((JSONObject)o).get(key);
+                final Object object = ((JSONObject)o).get(key);
                 if(!equals(object, value)){
                     complaint = "Expected value "+value+" of class ("+value.getClass().getName()+") for key "+key+" but got "+object+" of class ("+object.getClass().getName()+")";
                     return false;
                 }
                 return true;
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 return false;
             }
         }
 
-        private boolean equals(Object o1, Object o2) {
+        private boolean equals(final Object o1, final Object o2) {
             if(Number.class.isInstance(o1) && Number.class.isInstance(o2)) {
                 if(isLongCompatible(o1) && isLongCompatible(o2)) {
                     return ((Number)o1).longValue() - ((Number)o2).longValue() == 0;
@@ -327,8 +425,8 @@ public class JSONAssertion implements JSONCondition {
             return o1.equals(o2);
         }
 
-        private boolean isLongCompatible(Object o1) {
-            for(Class c : new Class[]{Long.class, Integer.class}) {
+        private boolean isLongCompatible(final Object o1) {
+            for(final Class c : new Class[]{Long.class, Integer.class}) {
                 if(c.isInstance(o1)) {
                     return true;
                 }
@@ -347,7 +445,7 @@ public class JSONAssertion implements JSONCondition {
         private final String key;
         private final JSONAssertion assertion;
 
-        public ValueObject(String key, JSONAssertion assertion) {
+        public ValueObject(final String key, final JSONAssertion assertion) {
             this.key = key;
             this.assertion = assertion;
         }
@@ -358,11 +456,11 @@ public class JSONAssertion implements JSONCondition {
         }
 
         @Override
-        public boolean validate(Object o) {
+        public boolean validate(final Object o) {
             try {
-                Object subObject = ((JSONObject)o).get(key);
+                final Object subObject = ((JSONObject)o).get(key);
                 return assertion.validate(subObject);
-            } catch (JSONException x) {
+            } catch (final JSONException x) {
                 return false;
             }
         }
@@ -374,7 +472,7 @@ public class JSONAssertion implements JSONCondition {
         private final String key;
         private final JSONAssertion assertion;
 
-        public ValueArray(String key, JSONAssertion assertion) {
+        public ValueArray(final String key, final JSONAssertion assertion) {
             this.key = key;
             this.assertion = assertion;
         }
@@ -385,11 +483,11 @@ public class JSONAssertion implements JSONCondition {
         }
 
         @Override
-        public boolean validate(Object o) {
+        public boolean validate(final Object o) {
             try {
-                Object subObject = ((JSONObject)o).get(key);
+                final Object subObject = ((JSONObject)o).get(key);
                 return assertion.validate(subObject);
-            } catch (JSONException x) {
+            } catch (final JSONException x) {
                 return false;
             }
         }
@@ -402,24 +500,24 @@ public class JSONAssertion implements JSONCondition {
 
         public boolean ignoreOrder = false;
 
-        public WithValues(Object[] values) {
+        public WithValues(final Object[] values) {
             this.values = values;
         }
 
         @Override
-        public boolean validate(Object o) {
-            JSONArray arr = (JSONArray) o;
+        public boolean validate(final Object o) {
+            final JSONArray arr = (JSONArray) o;
             if(arr.length() != values.length) {
                 complaint = "Lengths differ: expected "+values.length+" was: "+arr.length();
                 return false;
             }
             if(!ignoreOrder) {
                 for(int i = 0; i < values.length; i++) {
-                    Object expected = values[i];
+                    final Object expected = values[i];
                     Object actual;
                     try {
                         actual = arr.get(i);
-                    } catch (JSONException e) {
+                    } catch (final JSONException e) {
                         complaint = e.toString();
                         return false;
                     }
@@ -429,7 +527,7 @@ public class JSONAssertion implements JSONCondition {
                     }
                 }
             } else {
-                List<Object> expectedList = new ArrayList<Object>();
+                final List<Object> expectedList = new ArrayList<Object>();
                 for(int i = 0; i < values.length; i++) {
                     expectedList.add(values[i]);
                 }
@@ -438,7 +536,7 @@ public class JSONAssertion implements JSONCondition {
                     Object v;
                     try {
                         v = arr.get(i);
-                    } catch (JSONException e) {
+                    } catch (final JSONException e) {
                         complaint = e.toString();
                         return false;
                     }

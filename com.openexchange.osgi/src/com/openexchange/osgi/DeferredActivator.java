@@ -65,6 +65,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.osgi.console.DeferredActivatorServiceStateLookup;
+import com.openexchange.osgi.console.ServiceStateLookup;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -78,11 +80,20 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class DeferredActivator implements BundleActivator, ServiceLookup, DeferredActivatorMBean {
+public abstract class DeferredActivator implements BundleActivator, ServiceLookup {
 
     private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(DeferredActivator.class));
 
-    private static List<DeferredActivator> activators = new ArrayList<DeferredActivator>();
+    private static final DeferredActivatorServiceStateLookup STATE_LOOKUP = new DeferredActivatorServiceStateLookup();
+
+    /**
+     * Gets the {@link ServiceStateLookup} for deferred activators.
+     * 
+     * @return The {@link ServiceStateLookup} for deferred activators.
+     */
+    public static ServiceStateLookup getLookup() {
+        return STATE_LOOKUP;
+    }
 
     /**
      * The empty class array.
@@ -117,6 +128,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  * Signal availability
                  */
                 signalAvailability(index, clazz);
+                updateServiceState();
                 return clazz.cast(addedService);
             }
             context.ungetService(reference);
@@ -141,6 +153,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                          * ... and remove from services
                          */
                         stcServices.remove(clazz);
+                        updateServiceState();
                     }
                 } finally {
                     if (null != context) {
@@ -169,7 +182,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The execution context of the bundle.
      */
-    protected BundleContext context;
+    protected volatile BundleContext context;
 
     /**
      * The initialized service trackers for needed services.
@@ -221,6 +234,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @throws Exception If no needed services are specified and immediately starting bundle fails
      */
     private final void init() throws Exception {
+        updateServiceState();
         final Class<?>[] classes = getNeededServices();
         if (null == classes) {
             services = new ConcurrentHashMap<Class<?>, Object>(1);
@@ -268,6 +282,31 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             services = null;
         }
         context = null;
+    }
+
+    /**
+     * Updates this bundles service state entry
+     */
+    final void updateServiceState() {
+        if (null == context) {
+            return;
+        }
+        final Class<?>[] classes = getNeededServices();
+        if (null == classes) {
+            STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), new ArrayList<String>(0), new ArrayList<String>());
+            return;
+        }
+        final List<String> missing = new ArrayList<String>(classes.length);
+        final List<String> present = new ArrayList<String>(classes.length);
+
+        for (final Class<?> clazz : classes) {
+            if (services != null && services.containsKey(clazz)) {
+                present.add(clazz.getName());
+            } else {
+                missing.add(clazz.getName());
+            }
+        }
+        STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), missing, present);
     }
 
     /**
@@ -373,35 +412,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     public final void start(final BundleContext context) throws Exception {
         try {
             this.context = context;
-            synchronized (activators) {
-                activators.add(this);
-            }
             init();
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
             throw e;
         }
-    }
-
-    @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public final List<String> getMissingServices() {
-        final List<String> result = new ArrayList<String>();
-        for (final ServiceTracker tracker : serviceTrackers) {
-            final ServiceReference[] references = tracker.getServiceReferences();
-            for (final ServiceReference reference : references) {
-                if (context.getService(reference) == null) {
-                    final String missing = reference.getClass().getCanonicalName();
-                    result.add(missing);
-                }
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public final boolean isActive() {
-        return getMissingServices().isEmpty();
     }
 
     /**
@@ -419,9 +434,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     @Override
     public final void stop(final BundleContext context) throws Exception {
         try {
-            synchronized (activators) {
-                activators.remove(this);
-            }
             stopBundle();
             started.set(false);
         } catch (final Exception e) {
@@ -539,7 +551,4 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         return true;
     }
 
-    public static List<DeferredActivator> getActivators() {
-        return activators;
-    }
 }

@@ -1,5 +1,6 @@
 package com.openexchange.scripting.rhino.apibridge;
 
+import java.util.Collection;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mozilla.javascript.Context;
@@ -8,7 +9,6 @@ import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 import org.mozilla.javascript.Undefined;
 import org.mozilla.javascript.Wrapper;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -21,27 +21,31 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 
 	private final Scriptable scriptable;
 
-	public ScriptableActionFactory(Scriptable scriptable) {
+	public ScriptableActionFactory(final Scriptable scriptable) {
 		this.scriptable = scriptable;
 	}
 
 	@Override
-	public AJAXActionService createActionService(String action)
+	public AJAXActionService createActionService(final String action)
 			throws OXException {
-		Object object = scriptable.get(action, scriptable);
+		final Object object = scriptable.get(action, scriptable);
 		if (object == null || object == Undefined.instance) {
 			return null;
 		}
 		if (object instanceof Function) {
 			return new FunctionAction(scriptable, (Function) object);
 		}
-		AJAXRequestResult retval = adapt(object);
+		final AJAXRequestResult retval = adapt(object);
 		if (retval != null) {
 			return new StaticAction(retval);
 		}
 		return null;
 	}
 
+	@Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.emptyList();
+    }
 
 	public static AJAXRequestResult adapt(Object object) throws OXException {
 		if (object == Undefined.instance) {
@@ -58,18 +62,18 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 		}
 		// Next try JSON Serialization
 		try {
-			Context cx = Context.enter();
-			Scriptable privateScope = cx.newObject(SharedScope.SHARED_SCOPE);
+			final Context cx = Context.enter();
+			final Scriptable privateScope = cx.newObject(SharedScope.SHARED_SCOPE);
 			privateScope.setParentScope(null);
 			privateScope.setPrototype(SharedScope.SHARED_SCOPE);
 			ScriptableObject.putProperty(privateScope, "obj", object);
-			String json = (String) cx.evaluateString(privateScope, "JSON.stringify(obj);", "<serialize>", 1, null);
-			Object jsonResult = new JSONObject("{a : "+json+"}").get("a");
+			final String json = (String) cx.evaluateString(privateScope, "JSON.stringify(obj);", "<serialize>", 1, null);
+			final Object jsonResult = new JSONObject("{a : "+json+"}").get("a");
 			return new AJAXRequestResult(jsonResult, "json");
 
-		} catch (JSONException e) {
+		} catch (final JSONException e) {
 			throw new OXException();
-		} catch (ClassCastException e) {
+		} catch (final ClassCastException e) {
 			return new AJAXRequestResult(object.toString(), "string");
 		} finally {
 			Context.exit();
@@ -82,13 +86,13 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 
 		private final AJAXRequestResult retval;
 
-		public StaticAction(AJAXRequestResult retval) {
+		public StaticAction(final AJAXRequestResult retval) {
 			this.retval = retval;
 		}
 
 		@Override
-		public AJAXRequestResult perform(AJAXRequestData requestData,
-				ServerSession session) throws OXException {
+		public AJAXRequestResult perform(final AJAXRequestData requestData,
+				final ServerSession session) throws OXException {
 			return retval;
 		}
 	}
@@ -98,17 +102,17 @@ public class ScriptableActionFactory implements AJAXActionServiceFactory {
 		private final Function function;
 		private final Scriptable scriptable;
 
-		public FunctionAction(Scriptable scriptable, Function function) {
+		public FunctionAction(final Scriptable scriptable, final Function function) {
 			this.scriptable = scriptable;
 			this.function = function;
 		}
 
 		@Override
-		public AJAXRequestResult perform(AJAXRequestData requestData,
-				ServerSession session) throws OXException {
+		public AJAXRequestResult perform(final AJAXRequestData requestData,
+				final ServerSession session) throws OXException {
 			try {
-				Context cx = Context.enter();
-				Object result = function.call(cx, function.getParentScope(), scriptable, new Object[]{requestData, session});
+				final Context cx = Context.enter();
+				final Object result = function.call(cx, function.getParentScope(), scriptable, new Object[]{requestData, session});
 				return adapt(result);
 			} finally {
 				Context.exit();

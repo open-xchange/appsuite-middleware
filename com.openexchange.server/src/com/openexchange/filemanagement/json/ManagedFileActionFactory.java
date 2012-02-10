@@ -49,6 +49,7 @@
 
 package com.openexchange.filemanagement.json;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -72,10 +73,15 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
      */
     public ManagedFileActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(4);
         actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction(services));
         actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction(services));
         actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction(services));
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

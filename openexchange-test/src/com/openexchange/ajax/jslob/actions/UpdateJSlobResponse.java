@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,38 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.ajax.jslob.actions;
 
-import org.eclipse.osgi.framework.console.CommandInterpreter;
-import org.eclipse.osgi.framework.console.CommandProvider;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.jslob.JSlob;
 
 /**
- * {@link CLI}
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link UpdateJSlobResponse}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CLI implements CommandProvider {
-
-    private final BundleContext context;
+public final class UpdateJSlobResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link CLI}.
+     * Initializes a new {@link UpdateJSlobResponse}.
+     * 
+     * @param response
      */
-    public CLI(final BundleContext context) {
-        super();
-        this.context = context;
+    public UpdateJSlobResponse(final Response response) {
+        super(response);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.eclipse.osgi.framework.console.CommandProvider#getHelp()
+    /**
+     * Gets the JSlob.
+     * 
+     * @return The JSlob
+     * @throws JSONException If parsing JSON fails
      */
-    @Override
-    public String getHelp() {
-        return null;
-    }
-
-    public Object _getMissingServices(final CommandInterpreter interpreter) {
-        try {
-            final int bundleId = Integer.parseInt(interpreter.nextArgument());
-            final Bundle b = context.getBundle(bundleId);
-            if (b == null || b.getState() != Bundle.ACTIVE) {
-                interpreter.println("Bundle " + bundleId + " is not active.");
-            } else {
-                for (final DeferredActivator d : OsgiActivator.getActivators()) {
-                    final Bundle activatorBundle = d.context.getBundle();
-                    if (activatorBundle.getBundleId() == bundleId) {
-                        interpreter.println("Missing services: " + (d.isActive() ? "none" : d.getMissingServices()));
-                        interpreter.println("Bundle " + activatorBundle.getSymbolicName() + " " + (d.isActive() ? "active." : "inactive."));
-                        break;
-                    }
-                }
-            }
-        } catch (final NumberFormatException e) {
-            interpreter.println("Usage: getMissingServices <bundleId>");
-        } catch (final Exception e) {
-            interpreter.println(e.getMessage());
-            interpreter.println("Usage: getMissingServices <bundleId>");
-        }
-        return null;
+    public JSlob getJSlob() throws JSONException {
+        final JSONObject jData = (JSONObject) getData();
+        return new JSlob(jData);
     }
 }

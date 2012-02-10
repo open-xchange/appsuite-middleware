@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
 
 /**
@@ -66,5 +67,12 @@ public interface AJAXActionServiceFactory {
      * @throws OXException If an action service can not be created for the given name.
      */
     AJAXActionService createActionService(String action) throws OXException;
+
+    /**
+     * Gets the supported action services.
+     * 
+     * @return The supported action services
+     */
+    Collection<? extends AJAXActionService> getSupportedServices();
 
 }

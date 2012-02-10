@@ -1,8 +1,9 @@
+
 package com.openexchange.polling.json.actions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -10,18 +11,21 @@ import com.openexchange.server.ServiceLookup;
 
 public class PollActionFactory implements AJAXActionServiceFactory {
 
-	private final Map<String, PollAction> ACTIONS = new HashMap<String, PollAction>();
+    private final Map<String, PollAction> actions = new HashMap<String, PollAction>(2);
 
-	public PollActionFactory(ServiceLookup services) {
-		ACTIONS.put("new", new CreateAction(services));
-		ACTIONS.put("get", new GetAction(services));
-	}
+    public PollActionFactory(final ServiceLookup services) {
+        actions.put("new", new CreateAction(services));
+        actions.put("get", new GetAction(services));
+    }
 
-	@Override
-    public AJAXActionService createActionService(String action)
-			throws OXException {
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
 
-		return ACTIONS.get(action);
-	}
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
+    }
 
 }
