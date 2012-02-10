@@ -87,7 +87,6 @@ public final class CloseSessionsCLT {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
 
-        final StringBuilder sb = new StringBuilder(128);
         toolkitOptions.addOption("c", "context", true, "A valid context identifier");
 
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
