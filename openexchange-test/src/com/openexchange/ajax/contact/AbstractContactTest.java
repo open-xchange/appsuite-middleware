@@ -650,7 +650,6 @@ public class AbstractContactTest extends AbstractAJAXSession {
         }
     }
 
-
     public Contact[] listModifiedAppointment(final int inFolder, final Date modified) throws Exception {
         final int[] cols = new int[]{ Appointment.OBJECT_ID };
         final UpdatesRequest request = new UpdatesRequest(inFolder, cols, 0, null, modified);
