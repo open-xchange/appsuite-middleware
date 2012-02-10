@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,73 +47,44 @@
  *
  */
 
-package com.openexchange.user.json.actions;
+package com.openexchange.documentation.json.actions;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.documentation.annotations.RequestMethod;
+import com.openexchange.documentation.json.DocumentationAJAXRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
-import com.openexchange.user.json.services.ServiceRegistry;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link GetAttributeAction} - Maps the action to an <tt>update</tt> action.
+ * {@link ModuleAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.GET, name = "getAttribute", description = "Get user attribute (available with v6.20).", parameters = { 
+@Action(method = RequestMethod.GET, name = "module", description = "Get a module's description.", parameters = { 
 		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "id", description = "ID of the user."),
-		@Parameter(name = "name", description = "The attribute name."),
-}, responseDescription = "Response without timestamp: A JSON object providing name and value of the requested attribute.")
-public final class GetAttributeAction extends AbstractUserAction {
+		@Parameter(name = "name", description = "The name of the module.") 
+}, responseDescription = "An object containing the requested module's description.")
+public final class ModuleAction extends DocumentationAction {
 
     /**
-     * The <tt>getAttribute</tt> action string.
+     * Initializes a new {@link ModuleAction}.
+     *
+     * @param services The service look-up
      */
-    public static final String ACTION = "getAttribute";
-
-    /**
-     * Initializes a new {@link GetAttributeAction}.
-     */
-    public GetAttributeAction() {
-        super();
+    public ModuleAction(final ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        try {
-            /*
-             * Parse parameters
-             */
-            final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
-            final String name = checkStringParameter("name", request);
-            /*
-             * Get user service
-             */
-            final UserService userService = ServiceRegistry.getInstance().getService(UserService.class, true);
-            /*
-             * Perform update
-             */
-            final String value = userService.getUserAttribute(name, id, session.getContext());
-            /*
-             * Return
-             */
-            final JSONObject json = new JSONObject();
-            json.put("name", name);
-            json.put("value", value);
-            return new AJAXRequestResult(json);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
-        }
+    protected AJAXRequestResult perform(final DocumentationAJAXRequest request) throws OXException, JSONException {
+        final DocumentationRegistry registry = super.getRegistry();
+        return new AJAXRequestResult(super.write(registry.getModule(request.checkParameter("name"))));
     }
 
 }
