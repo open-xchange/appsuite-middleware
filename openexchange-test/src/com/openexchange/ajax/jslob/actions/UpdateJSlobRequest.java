@@ -53,40 +53,44 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.jslob.JSlob;
 
 /**
- * {@link SetJSlobRequest}
+ * {@link UpdateJSlobRequest}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SetJSlobRequest extends AbstractJSlobRequest<SetJSlobResponse> {
+public final class UpdateJSlobRequest extends AbstractJSlobRequest<UpdateJSlobResponse> {
 
     private String serviceId;
 
     private String id;
 
-    private JSlob jslob;
+    private String path;
+
+    private Object value;
 
     /**
-     * Initializes a new {@link SetJSlobRequest}.
+     * Initializes a new {@link UpdateJSlobRequest}.
      */
-    public SetJSlobRequest() {
+    public UpdateJSlobRequest() {
         super();
         setFailOnError(true);
         serviceId = DEFAULT_SERVICE_ID;
     }
 
     /**
-     * Sets the JSlob
+     * Sets the path & value to update
      * 
-     * @param jslob The JSlob to set
+     * @param path The path
+     * @param value The value
      */
-    public SetJSlobRequest setJslob(final JSlob jslob) {
-        this.jslob = jslob;
+    public UpdateJSlobRequest setPathAndValue(final String path, final Object value) {
+        this.path = path;
+        this.value = value;
         return this;
     }
 
@@ -95,7 +99,7 @@ public final class SetJSlobRequest extends AbstractJSlobRequest<SetJSlobResponse
      * 
      * @param serviceId The service id to set
      */
-    public SetJSlobRequest setServiceId(final String serviceId) {
+    public UpdateJSlobRequest setServiceId(final String serviceId) {
         this.serviceId = serviceId;
         return this;
     }
@@ -105,7 +109,7 @@ public final class SetJSlobRequest extends AbstractJSlobRequest<SetJSlobResponse
      * 
      * @param id The id to set
      */
-    public SetJSlobRequest setId(final String id) {
+    public UpdateJSlobRequest setId(final String id) {
         this.id = id;
         return this;
     }
@@ -118,26 +122,26 @@ public final class SetJSlobRequest extends AbstractJSlobRequest<SetJSlobResponse
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
         final List<Parameter> params = new ArrayList<Parameter>(3);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "update"));
         params.add(new Parameter("serviceId", serviceId));
         params.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
         return params.toArray(new Parameter[params.size()]);
     }
 
     @Override
-    public AbstractAJAXParser<? extends SetJSlobResponse> getParser() {
-        return new AbstractAJAXParser<SetJSlobResponse>(isFailOnError()) {
+    public AbstractAJAXParser<? extends UpdateJSlobResponse> getParser() {
+        return new AbstractAJAXParser<UpdateJSlobResponse>(isFailOnError()) {
 
             @Override
-            protected SetJSlobResponse createResponse(final Response response) {
-                return new SetJSlobResponse(response);
+            protected UpdateJSlobResponse createResponse(final Response response) {
+                return new UpdateJSlobResponse(response);
             }
         };
     }
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        return null == jslob ? "" : jslob.getJsonObject();
+        return null == path ? "" : new JSONObject().put("path", path).put("value", null == value ? JSONObject.NULL : value);
     }
 
 }

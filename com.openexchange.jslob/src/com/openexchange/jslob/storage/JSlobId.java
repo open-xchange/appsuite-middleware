@@ -49,9 +49,6 @@
 
 package com.openexchange.jslob.storage;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * {@link JSlobId} - The JSlob identifier.
@@ -67,8 +64,6 @@ public final class JSlobId {
     private final String serviceId;
 
     private final String id;
-
-    private final List<Object> args;
 
     private final int hashCode;
 
@@ -86,37 +81,14 @@ public final class JSlobId {
         this.serviceId = serviceId;
         this.user = user;
         this.context = context;
-
-        final List<Object> objs = new ArrayList<Object>(4);
-        objs.add(serviceId);
-        objs.add(id);
-        objs.add(Integer.valueOf(user));
-        objs.add(Integer.valueOf(context));
-        this.args = Collections.unmodifiableList(objs);
+        // Hash code
         final int prime = 31;
         int result = 1;
-        result = prime * result + objs.hashCode();
+        result = prime * result + context;
+        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        result = prime * result + user;
         hashCode = result;
-    }
-
-    /**
-     * Gets the identifiers.
-     * 
-     * @return The identifiers
-     */
-    public List<Object> getIdentifiers() {
-        return args;
-    }
-
-    public List<String> getComponents() {
-        if (null == args) {
-            return Collections.<String> emptyList();
-        }
-        final List<String> ret = new ArrayList<String>(args.size());
-        for (final Object arg : args) {
-            ret.add(arg.toString());
-        }
-        return ret;
     }
 
     @Override
@@ -133,11 +105,24 @@ public final class JSlobId {
             return false;
         }
         final JSlobId other = (JSlobId) obj;
-        if (null == args) {
-            if (null != other.args) {
+        if (context != other.context) {
+            return false;
+        }
+        if (id == null) {
+            if (other.id != null) {
                 return false;
             }
-        } else if (!args.equals(other.args)) {
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        if (serviceId == null) {
+            if (other.serviceId != null) {
+                return false;
+            }
+        } else if (!serviceId.equals(other.serviceId)) {
+            return false;
+        }
+        if (user != other.user) {
             return false;
         }
         return true;
@@ -177,6 +162,20 @@ public final class JSlobId {
      */
     public String getId() {
         return id;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("JSlobId {user=").append(user).append(", context=").append(context).append(", ");
+        if (serviceId != null) {
+            builder.append("serviceId=").append(serviceId).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        builder.append("hashCode=").append(hashCode).append("}");
+        return builder.toString();
     }
 
 }

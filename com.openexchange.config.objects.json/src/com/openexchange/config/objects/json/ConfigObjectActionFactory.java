@@ -93,7 +93,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
                     final Object object = view.get(path);
 
                     if (object == null) {
-                        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+                        return new AJAXRequestResult();
                     }
 
                     final Object json = JSONCoercion.coerceToJSON(object);

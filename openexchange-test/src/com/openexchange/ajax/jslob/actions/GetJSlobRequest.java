@@ -104,7 +104,7 @@ public final class GetJSlobRequest extends AbstractJSlobRequest<GetJSlobResponse
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(1);
+        final List<Parameter> params = new ArrayList<Parameter>(3);
         params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET));
         params.add(new Parameter("serviceId", serviceId));
         params.add(new Parameter(AJAXServlet.PARAMETER_ID, id));

@@ -86,7 +86,7 @@ public final class SetAction extends JSlobAction {
         final JSlob jslob = null == data ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
         jslobService.set(id, jslob, jslobRequest.getUserId(), jslobRequest.getContextId());
 
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult();
     }
 
     @Override
