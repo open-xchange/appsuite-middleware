@@ -51,18 +51,30 @@ package com.openexchange.osgi;
 
 import java.util.List;
 
-
 /**
- * {@link DeferredActivatorMBean} - MBean for DeferredActivator
- *
+ * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
+ * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public interface DeferredActivatorMBean {
 
+    /**
+     * The MBean domain.
+     */
     public static final String OSGI_DOMAIN = "com.openexchange.osgi";
 
-    public List<String> getMissingServices();
+    /**
+     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available.
+     * 
+     * @return A list of canonical class names of missing services
+     */
+    List<String> getMissingServices();
 
-    public boolean isActive();
+    /**
+     * Checks if associated activator is active; meaning all needed services are available.
+     * 
+     * @return <code>true</code> if active; otherwise <code>false</code>
+     */
+    boolean isActive();
 
 }
