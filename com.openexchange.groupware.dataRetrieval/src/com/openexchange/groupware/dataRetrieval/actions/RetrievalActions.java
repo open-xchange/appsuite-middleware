@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.dataRetrieval.actions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -83,7 +84,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
     protected RandomTokenContainer<Map<String, Object>> paramMap;
 
-    public RetrievalActions(final DataProviderRegistry registry, RandomTokenContainer<Map<String, Object>> paramMap) {
+    public RetrievalActions(final DataProviderRegistry registry, final RandomTokenContainer<Map<String, Object>> paramMap) {
         this.registry = registry;
         this.paramMap = paramMap;
     }
@@ -94,6 +95,11 @@ public class RetrievalActions implements AJAXActionServiceFactory {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return REGISTER_ACTION;
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.singletonList(REGISTER_ACTION);
     }
 
     private final AJAXActionService REGISTER_ACTION = new AJAXActionService() {
@@ -118,7 +124,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
                 final FileMetadata metadata = provider.retrieveMetadata(state, parameters, session);
                 parameters.put(Constants.SESSION_KEY, session);
                 parameters.put(Constants.CREATED, System.currentTimeMillis());
-                String token = paramMap.rememberForSession(session, parameters);
+                final String token = paramMap.rememberForSession(session, parameters);
 
                 return new AJAXRequestResult(toJSON(metadata, getURI(token, requestData)));
             } finally {
@@ -128,12 +134,12 @@ public class RetrievalActions implements AJAXActionServiceFactory {
             }
         }
 
-        private String getURI(String token, AJAXRequestData request) {
-            Configuration configuration = Services.getConfiguration();
+        private String getURI(final String token, final AJAXRequestData request) {
+            final Configuration configuration = Services.getConfiguration();
             return request.constructURL(configuration.getForcedProtocol() , Paths.FILE_DELIVERY_PATH, true, "token=" + token).toString();
         }
 
-        private JSONObject toJSON(final FileMetadata metadata, String uri) throws OXException {
+        private JSONObject toJSON(final FileMetadata metadata, final String uri) throws OXException {
             try {
                 final JSONObject json = new JSONObject();
                 if (metadata.getFilename() != null) {
@@ -150,7 +156,7 @@ public class RetrievalActions implements AJAXActionServiceFactory {
 
                 json.put("url", uri);
                 return json;
-            } catch (JSONException e) {
+            } catch (final JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
             }
         }

@@ -77,15 +77,16 @@ public final class SetAction extends JSlobAction {
     protected AJAXRequestResult perform(final JSlobRequest jslobRequest) throws OXException {
         String serviceId = jslobRequest.getParameter("serviceId", String.class);
         if (null == serviceId) {
-            serviceId = "io.ox.wd.jslob.config";
+            serviceId = DEFAULT_SERVICE_ID;
         }
         final JSlobService jslobService = getJSlobService(serviceId);
 
         final String id = jslobRequest.checkParameter("id");
-        final JSlob jslob = new JSlob((JSONObject) jslobRequest.getRequestData().getData());
+        final Object data = jslobRequest.getRequestData().getData();
+        final JSlob jslob = null == data ? JSlob.EMPTY_JSLOB : new JSlob((JSONObject) data);
         jslobService.set(id, jslob, jslobRequest.getUserId(), jslobRequest.getContextId());
 
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult();
     }
 
     @Override

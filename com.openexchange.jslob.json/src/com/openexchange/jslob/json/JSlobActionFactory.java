@@ -49,6 +49,7 @@
 
 package com.openexchange.jslob.json;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -61,7 +62,7 @@ import com.openexchange.server.ServiceLookup;
 /**
  * {@link JSlobActionFactory}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class JSlobActionFactory implements AJAXActionServiceFactory {
 
@@ -88,6 +89,11 @@ public class JSlobActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

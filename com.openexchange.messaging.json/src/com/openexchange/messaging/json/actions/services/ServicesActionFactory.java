@@ -49,6 +49,7 @@
 
 package com.openexchange.messaging.json.actions.services;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -67,9 +68,14 @@ public class ServicesActionFactory implements AJAXActionServiceFactory {
     private final Map<String, AJAXActionService> actions;
 
     public ServicesActionFactory(final MessagingServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>();
+        actions = new HashMap<String, AJAXActionService>(2);
         actions.put("all", new AllAction(registry));
         actions.put("get", new GetAction(registry));
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

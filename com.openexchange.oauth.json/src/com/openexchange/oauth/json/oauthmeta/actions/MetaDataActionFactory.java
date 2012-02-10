@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.json.oauthmeta.actions;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,10 +88,15 @@ public final class MetaDataActionFactory implements AJAXActionServiceFactory {
     }
 
     private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
+        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(2);
         tmp.put("all", new AllAction());
         tmp.put("get", new GetAction());
         return Collections.unmodifiableMap(tmp);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

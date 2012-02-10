@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.reminder.json;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -59,7 +60,7 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ReminderActionFactory}
- *
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class ReminderActionFactory implements AJAXActionServiceFactory {
@@ -68,7 +69,7 @@ public class ReminderActionFactory implements AJAXActionServiceFactory {
 
     /**
      * Initializes a new {@link ReminderActionFactory}.
-     *
+     * 
      * @param services The service look-up
      */
     public ReminderActionFactory(final ServiceLookup services) {
@@ -83,6 +84,11 @@ public class ReminderActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

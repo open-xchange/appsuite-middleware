@@ -49,6 +49,7 @@
 
 package com.openexchange.appstore.json;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -72,24 +73,29 @@ import com.openexchange.server.ServiceLookup;
  */
 public class AppStoreActionFactory implements AJAXActionServiceFactory {
 
-    private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>();
+    private final Map<String, AJAXActionService> actions = new HashMap<String, AJAXActionService>();
 
-    public AppStoreActionFactory(ServiceLookup services) {
+    public AppStoreActionFactory(final ServiceLookup services) {
         super();
-        ACTIONS.put(CrawlAction.ACTION, new CrawlAction(services));
-        ACTIONS.put(GetAction.ACTION, new GetAction(services));
-        ACTIONS.put(InstallAction.ACTION, new InstallAction(services));
-        ACTIONS.put(InstalledAction.ACTION, new InstalledAction(services));
-        ACTIONS.put(ManifestAction.ACTION, new ManifestAction(services));
-        ACTIONS.put(ReleaseAction.ACTION, new ReleaseAction(services));
-        ACTIONS.put(RevokeAction.ACTION, new RevokeAction(services));
-        ACTIONS.put(StatusAction.ACTION, new StatusAction(services));
-        ACTIONS.put(UninstallAction.ACTION, new UninstallAction(services));
+        actions.put(CrawlAction.ACTION, new CrawlAction(services));
+        actions.put(GetAction.ACTION, new GetAction(services));
+        actions.put(InstallAction.ACTION, new InstallAction(services));
+        actions.put(InstalledAction.ACTION, new InstalledAction(services));
+        actions.put(ManifestAction.ACTION, new ManifestAction(services));
+        actions.put(ReleaseAction.ACTION, new ReleaseAction(services));
+        actions.put(RevokeAction.ACTION, new RevokeAction(services));
+        actions.put(StatusAction.ACTION, new StatusAction(services));
+        actions.put(UninstallAction.ACTION, new UninstallAction(services));
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

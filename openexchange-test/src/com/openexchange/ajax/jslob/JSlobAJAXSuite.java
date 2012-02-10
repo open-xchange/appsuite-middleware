@@ -47,22 +47,32 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.ajax.jslob;
 
-import java.util.List;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
- * {@link DeferredActivatorMBean} - MBean for DeferredActivator
+ * {@link JSlobAJAXSuite}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DeferredActivatorMBean {
+public class JSlobAJAXSuite extends TestSuite {
 
-    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
+    /**
+     * Initializes a new {@link JSlobAJAXSuite}.
+     * @param theClass
+     */
+    public JSlobAJAXSuite() {
+        super();
+    }
 
-    public List<String> getMissingServices();
+    public static Test suite() {
+        final TestSuite tests = new TestSuite();
+        tests.addTestSuite(JSlobTest.class);
+        return tests;
 
-    public boolean isActive();
+    }
 
 }

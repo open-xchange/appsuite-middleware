@@ -70,6 +70,11 @@ import com.openexchange.tools.session.ServerSession;
 public abstract class JSlobAction implements AJAXActionService {
 
     /**
+     * The default service identifier.
+     */
+    protected static final String DEFAULT_SERVICE_ID = "com.openexchange.jslob.config";
+
+    /**
      * The service look-up
      */
     protected final ServiceLookup services;

@@ -58,6 +58,25 @@ import org.json.JSONObject;
  */
 public class JSlob {
 
+    private static final class EmptyJSlob extends JSlob {
+
+        protected EmptyJSlob() {
+            super(null);
+        }
+
+        @Override
+        public JSlob setJsonObject(final JSONObject jsonObject) {
+            throw new UnsupportedOperationException("EmptyJSlob.setJsonObject()");
+        }
+    }
+
+    /**
+     * The unmodifiable, empty {@link JSlob} instance.
+     * <p>
+     * Invoking {@link #setJsonObject(JSONObject)} will throw an {@link UnsupportedOperationException}.
+     */
+    public static final JSlob EMPTY_JSLOB = new EmptyJSlob();
+
     private JSONObject jsonObject;
 
     /**

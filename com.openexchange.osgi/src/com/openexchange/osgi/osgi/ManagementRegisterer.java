@@ -47,10 +47,8 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
@@ -60,6 +58,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.mbean.DeferredActivatorMBean;
+import com.openexchange.osgi.mbean.DeferredActivatorMBeanImpl;
 
 
 
@@ -68,12 +68,11 @@ import com.openexchange.management.ManagementService;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
-
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+class ManagementRegisterer implements ServiceTrackerCustomizer<ManagementService, ManagementService> {
 
     private final BundleContext context;
-    private List<ObjectName> objectNames = new ArrayList<ObjectName>();
+
+    private ObjectName objectName;
 
     ManagementRegisterer(final BundleContext context) {
         super();
@@ -100,31 +99,30 @@ public class ManagementRegisterer implements ServiceTrackerCustomizer<Management
     }
 
     private void registerOsgiMBean(final ManagementService management) {
-        for (final DeferredActivator activator : DeferredActivator.getActivators()) {
+        if (objectName == null) {
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
             try {
-                final ObjectName objectName = getObjectName(DeferredActivator.class.getName() + ":" + activator.toString(), DeferredActivatorMBean.OSGI_DOMAIN);
-                synchronized (objectNames) {
-                    objectNames.add(objectName);
-                }
-                management.registerMBean(objectName, activator);
+                objectName = getObjectName(DeferredActivatorMBeanImpl.class.getName(), DeferredActivatorMBean.OSGI_DOMAIN);
+                management.registerMBean(objectName, new DeferredActivatorMBeanImpl());
             } catch (final MalformedObjectNameException e) {
-                LOG.error(e.getMessage(), e);
+                logger.error(e.getMessage(), e);
             } catch (final OXException e) {
-                LOG.error(e.getMessage(), e);
+                logger.error(e.getMessage(), e);
+            } catch (final Exception e) {
+                logger.error(e.getMessage(), e);
             }
         }
     }
 
     private void unregisterOsgiMBean(final ManagementService management) {
-        synchronized (objectNames) {
-            for (final ObjectName objectName : objectNames) {
-                try {
+        if (objectName != null) {
+            final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(ManagementRegisterer.class));
+            try {
                 management.unregisterMBean(objectName);
-                } catch (final OXException e) {
-                    LOG.error(e.getMessage(), e);
-                } finally {
-                    objectNames = null;
-                }
+            } catch (final OXException e) {
+                logger.error(e.getMessage(), e);
+            } finally {
+                objectName = null;
             }
         }
     }

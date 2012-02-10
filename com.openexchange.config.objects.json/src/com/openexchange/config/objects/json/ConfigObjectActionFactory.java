@@ -49,6 +49,7 @@
 
 package com.openexchange.config.objects.json;
 
+import java.util.Collection;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -74,16 +75,11 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
 
     ConfigObjectRegistryFactory registryFactory = null;
 
+    private final AJAXActionService actionService;
+
     public ConfigObjectActionFactory(final ConfigObjectRegistryFactory registryFactory) {
         this.registryFactory = registryFactory;
-    }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        if (!GET.equals(action)) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
-        }
-        return new AJAXActionService() {
+        actionService = new AJAXActionService() {
 
             @Override
             public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
@@ -97,7 +93,7 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
                     final Object object = view.get(path);
 
                     if (object == null) {
-                        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+                        return new AJAXRequestResult();
                     }
 
                     final Object json = JSONCoercion.coerceToJSON(object);
@@ -114,6 +110,19 @@ public class ConfigObjectActionFactory implements AJAXActionServiceFactory {
             }
 
         };
+    }
+
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        if (!GET.equals(action)) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+        }
+        return actionService;
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.singletonList(actionService);
     }
 
 }
