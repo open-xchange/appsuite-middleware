@@ -1201,7 +1201,23 @@ public class Mail extends PermissionServlet implements UploadListener {
                 ttlMillis = -1;
             }
             tmp = paramContainer.getStringParam("ignorable");
-            final List<String> ignorableContentTypes = isEmpty(tmp) ? Collections.<String> emptyList() : Arrays.asList(SPLIT.split(tmp, 0));
+            final List<String> ignorableContentTypes;
+            if (isEmpty(tmp)) {
+                ignorableContentTypes = Collections.<String> emptyList();
+            } else {
+                final String[] strings = SPLIT.split(tmp, 0);
+                final int length = strings.length;
+                ignorableContentTypes = new ArrayList<String>(length);
+                for (int i = 0; i < length; i++) {
+                    final String cts = strings[i];
+                    if ("ics".equalsIgnoreCase(cts)) {
+                        ignorableContentTypes.add("text/calendar");
+                        ignorableContentTypes.add("application/ics");
+                    } else {
+                        ignorableContentTypes.add(cts);
+                    }
+                }
+            }
             tmp = null;
             errorAsCallback = saveToDisk;
             /*
