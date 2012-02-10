@@ -50,6 +50,7 @@
 package com.openexchange.user.json.actions;
 
 import static com.openexchange.user.json.Utility.checkForRequiredField;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -58,15 +59,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.documentation.annotations.RequestMethod;
+import com.openexchange.documentation.annotations.Type;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
 import com.openexchange.groupware.contact.ContactSearchMultiplexer;
@@ -89,6 +96,13 @@ import com.openexchange.user.json.writer.UserWriter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "search", description = "Search users.", parameters = { 
+		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+		@Parameter(name = "columns", description = "The requested fields."),
+		@Parameter(name = "sort", optional = true, type = Type.NUMBER, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected users with global address book) the parameter \"order\" ist NOT necessary and will be ignored."),
+		@Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
+}, requestBody = "An Object as described in Search users. Alternative request body: An Object as described in Search users alternative.", 
+responseDescription = "An array with user data. Each array element describes one user and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class SearchAction extends AbstractUserAction {
 
     private static final Contact[] EMPTY_CONTACTS = new Contact[0];

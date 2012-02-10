@@ -100,8 +100,10 @@ public final class ContactImageDataSource implements ImageDataSource {
     public String generateUrl(final ImageLocation imageLocation, final Session session) throws OXException {
         final StringBuilder sb = new StringBuilder(64);
         ImageUtility.startImageUrl(imageLocation, session, this, true, sb);
-        final Contact contact = getContact(imageLocation, session);
-        sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
+        final Contact contact = optContact(imageLocation, session);
+        if (null != contact) {
+            sb.append('&').append("timestamp=").append(contact.getLastModified().getTime());
+        }
         return sb.toString();
     }
 
@@ -125,14 +127,16 @@ public final class ContactImageDataSource implements ImageDataSource {
 
     @Override
     public String getETag(final ImageLocation imageLocation, final Session session) throws OXException {
-        final Contact contact = getContact(imageLocation, session);
         final char delim = '#';
         final StringBuilder builder = new StringBuilder(128);
         builder.append(delim).append(imageLocation.getFolder());
         // builder.append(delim).append(imageLocation.getId());
         // builder.append(delim).append(session.getUserId());
         // builder.append(delim).append(session.getContextId());
-        builder.append(delim).append(contact.getLastModified().getTime());
+        final Contact contact = optContact(imageLocation, session);
+        if (null != contact) {
+            builder.append(delim).append(contact.getLastModified().getTime());
+        }
         builder.append(delim);
         return ImageUtility.getMD5(builder.toString(), "hex");
     }
@@ -172,7 +176,7 @@ public final class ContactImageDataSource implements ImageDataSource {
         /*
          * Get contact
          */
-        final Contact contact = getContact(objectId, folder, session);
+        final Contact contact = optContact(objectId, folder, session);
         /*
          * Return contact image
          */
@@ -193,14 +197,17 @@ public final class ContactImageDataSource implements ImageDataSource {
         return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
     }
 
-    private static Contact getContact(final ImageLocation imageLocation, final Session session) throws OXException {
-        return getContact(ImageUtility.getUnsignedInteger(imageLocation.getId()), ImageUtility.getUnsignedInteger(imageLocation.getFolder()), session);
+    private static Contact optContact(final ImageLocation imageLocation, final Session session) throws OXException {
+        return optContact(ImageUtility.getUnsignedInteger(imageLocation.getId()), ImageUtility.getUnsignedInteger(imageLocation.getFolder()), session);
     }
 
-    private static Contact getContact(final int objectId, final int folder, final Session session) throws OXException {
+    private static Contact optContact(final int objectId, final int folder, final Session session) throws OXException {
         try {
-            final ContactInterface contactInterface =
-                ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class).newContactInterface(folder, session);
+            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(ContactInterfaceDiscoveryService.class);
+            if (null == discoveryService) {
+                return null;
+            }
+            final ContactInterface contactInterface = discoveryService.newContactInterface(folder, session);
             return contactInterface.getObjectById(objectId, folder);
         } catch (final OXException e) {
             throw new OXException(e);

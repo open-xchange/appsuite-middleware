@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: HTTP/JSON interface for self-documenting API
+Bundle-SymbolicName: com.openexchange.documentation.json
+Bundle-Version: 7.0.0
+Bundle-Activator: com.openexchange.documentation.json.osgi.DocumentationJSONActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.documentation,
+ com.openexchange.documentation.annotations,
+ com.openexchange.documentation.descriptions,
+ com.openexchange.exception,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ org.json,
+ org.osgi.framework
