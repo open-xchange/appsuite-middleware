@@ -203,10 +203,6 @@ public class NotificationMail {
 			return principal;
 		}
 		
-		if (organizer != null) {
-			return organizer;
-		}
-
 		if (sharedCalendarOwner != null) {
 			return sharedCalendarOwner;
 		}
@@ -237,10 +233,7 @@ public class NotificationMail {
 			return false;
 		}
 		
-		if (actor.hasRole(ITipRole.ORGANIZER)) {
-			return recipient.hasRole(ITipRole.PRINCIPAL) || recipient.equals(sharedCalendarOwner);
-		}
-		return recipient.equals(principal) || recipient.equals(organizer) || recipient.equals(sharedCalendarOwner);
+		return recipient.equals(principal) ||recipient.equals(sharedCalendarOwner);
 	}
 
 	public void setParticipants(List<NotificationParticipant> recipients) {
