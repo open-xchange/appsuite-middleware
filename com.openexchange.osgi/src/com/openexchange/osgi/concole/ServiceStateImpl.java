@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,22 +47,53 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.concole;
 
+import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * {@link DeferredActivatorMBean} - MBean for DeferredActivator
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link ServiceStateImpl}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DeferredActivatorMBean {
+public final class ServiceStateImpl implements ServiceState {
 
-    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
+    private final List<String> missing;
 
-    public List<String> getMissingServices();
+    private final List<String> present;
 
-    public boolean isActive();
+    private final String name;
+
+    public ServiceStateImpl(final String name, final List<String> missing, final List<String> present) {
+        super();
+        this.missing = missing;
+        this.present = present;
+        this.name = name;
+    }
+
+    @Override
+    public List<String> getMissingServices() {
+        return missing;
+    }
+
+    @Override
+    public List<String> getPresentServices() {
+        return present;
+    }
+
+    /**
+     * Creates a copy of this {@link ServiceStateImpl}.
+     * 
+     * @return A copy of this {@link ServiceStateImpl}.
+     */
+    public ServiceStateImpl copy() {
+        return new ServiceStateImpl(name, new ArrayList<String>(missing), new ArrayList<String>(present));
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
 
 }
