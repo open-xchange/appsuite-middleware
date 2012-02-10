@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,33 +50,35 @@
 package com.openexchange.osgi;
 
 import java.util.List;
+import com.openexchange.osgi.concole.ServiceState;
+import com.openexchange.osgi.concole.ServiceStateLookup;
 
 /**
- * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
+ * {@link DeferredActivatorMBeanImpl}
  * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DeferredActivatorMBean {
+public final class DeferredActivatorMBeanImpl implements DeferredActivatorMBean {
 
     /**
-     * The MBean domain.
+     * Initializes a new {@link DeferredActivatorMBeanImpl}.
      */
-    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
+    public DeferredActivatorMBeanImpl() {
+        super();
+    }
 
-    /**
-     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
-     * 
-     * @name The bundle name
-     * @return A list of canonical class names of missing services
-     */
-    List<String> getMissingServices(String name);
+    @Override
+    public List<String> getMissingServices(final String name) {
+        final ServiceStateLookup serviceStateLookup = DeferredActivator.getLookup();
+        final ServiceState serviceState = serviceStateLookup.determineState(name);
+        return serviceState.getMissingServices();
+    }
 
-    /**
-     * Checks if activator for specified bundle is active; meaning all needed services are available.
-     * 
-     * @name The bundle name
-     * @return <code>true</code> if active; otherwise <code>false</code>
-     */
-    boolean isActive(String name);
+    @Override
+    public boolean isActive(final String name) {
+        final ServiceStateLookup serviceStateLookup = DeferredActivator.getLookup();
+        final ServiceState serviceState = serviceStateLookup.determineState(name);
+        return serviceState.getMissingServices().isEmpty();
+    }
 
 }

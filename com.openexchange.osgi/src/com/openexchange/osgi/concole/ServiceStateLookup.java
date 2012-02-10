@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,29 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.concole;
 
 import java.util.List;
 
 /**
- * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
+ * A {@link ServiceStateLookup} provides access to {@link ServiceState} Objects.
  * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DeferredActivatorMBean {
+public interface ServiceStateLookup {
 
     /**
-     * The MBean domain.
-     */
-    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
-
-    /**
-     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
+     * Retrieves a snapshot of the current service state.
      * 
-     * @name The bundle name
-     * @return A list of canonical class names of missing services
+     * @param name The name of the bundle to query the service state for.
+     * @return The current service state, or <code>null</code> if the bundle is not known.
      */
-    List<String> getMissingServices(String name);
+    public ServiceState determineState(String name);
 
     /**
-     * Checks if activator for specified bundle is active; meaning all needed services are available.
+     * Retrieves the names this lookup knows about
      * 
-     * @name The bundle name
-     * @return <code>true</code> if active; otherwise <code>false</code>
+     * @return
      */
-    boolean isActive(String name);
-
+    public List<String> getNames();
 }

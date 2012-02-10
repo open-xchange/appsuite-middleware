@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,53 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.concole;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import com.openexchange.management.ManagementService;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * {@link OsgiActivator} - Activator for OSGi-Bundle
- *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * {@link ServiceStateImpl}
+ * 
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OsgiActivator extends HousekeepingActivator {
+public final class ServiceStateImpl implements ServiceState {
 
-    private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
+    private final List<String> missing;
 
+    private final List<String> present;
+
+    private final String name;
+
+    public ServiceStateImpl(final String name, final List<String> missing, final List<String> present) {
+        super();
+        this.missing = missing;
+        this.present = present;
+        this.name = name;
+    }
+
+    @Override
+    public List<String> getMissingServices() {
+        return missing;
+    }
+
+    @Override
+    public List<String> getPresentServices() {
+        return present;
+    }
 
     /**
-     * Initializes a new {@link OsgiActivator}.
+     * Creates a copy of this {@link ServiceStateImpl}.
+     * 
+     * @return A copy of this {@link ServiceStateImpl}.
      */
-    public OsgiActivator() {
-        super();
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("starting bundle: com.openexchange.osgi");
-            }
-            track(ManagementService.class, new ManagementRegisterer(context));
-            openTrackers();
-        } catch (final Exception e) {
-            LOG.error("OsgiActivator: start: ", e);
-            throw e;
-        }
+    public ServiceStateImpl copy() {
+        return new ServiceStateImpl(name, new ArrayList<String>(missing), new ArrayList<String>(present));
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        try {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("stopping bundle: com.openexchange.osgi");
-            }
-//            closeTrackers();
-        } catch (final Exception e) {
-            LOG.error("OsgiActivator: stop: ", e);
-            throw e;
-        }
+    public String getName() {
+        return name;
     }
 
 }

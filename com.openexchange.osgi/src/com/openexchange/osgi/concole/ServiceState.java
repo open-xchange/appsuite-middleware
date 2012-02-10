@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,35 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.concole;
 
 import java.util.List;
 
 /**
- * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
+ * A {@link ServiceState} object details which service constraints have been satisfied and which are not satisfied.
  * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DeferredActivatorMBean {
+public interface ServiceState {
 
     /**
-     * The MBean domain.
-     */
-    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
-
-    /**
-     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
+     * Retrieves a list of service class names that have not been satisfied.
      * 
-     * @name The bundle name
-     * @return A list of canonical class names of missing services
+     * @return A list of service class names that have not been satisfied.
      */
-    List<String> getMissingServices(String name);
+    public List<String> getMissingServices();
 
     /**
-     * Checks if activator for specified bundle is active; meaning all needed services are available.
+     * Retrieves a list of service class names that have been satisfied.
      * 
-     * @name The bundle name
-     * @return <code>true</code> if active; otherwise <code>false</code>
+     * @return A list of service class names that have been satisfied.
      */
-    boolean isActive(String name);
+    public List<String> getPresentServices();
 
+    /**
+     * Retrieves the name of the bundle this state describes.
+     * 
+     * @return The name of the bundle this state describes.
+     */
+    public String getName();
 }

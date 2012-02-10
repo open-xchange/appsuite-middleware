@@ -47,36 +47,64 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.osgi;
 
-import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.concole.osgi.ConsoleActivator;
 
 /**
- * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
+ * {@link OsgiActivator} - Activator for OSGi-Bundle
  * 
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public interface DeferredActivatorMBean {
+public class OsgiActivator extends HousekeepingActivator {
+
+    private ConsoleActivator consoleActivator;
 
     /**
-     * The MBean domain.
+     * Initializes a new {@link OsgiActivator}.
      */
-    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
+    public OsgiActivator() {
+        super();
+    }
 
-    /**
-     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
-     * 
-     * @name The bundle name
-     * @return A list of canonical class names of missing services
-     */
-    List<String> getMissingServices(String name);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
 
-    /**
-     * Checks if activator for specified bundle is active; meaning all needed services are available.
-     * 
-     * @name The bundle name
-     * @return <code>true</code> if active; otherwise <code>false</code>
-     */
-    boolean isActive(String name);
+    @Override
+    protected void startBundle() throws Exception {
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
+        logger.info("starting bundle: com.openexchange.osgi");
+        try {
+            track(ManagementService.class, new ManagementRegisterer(context));
+            openTrackers();
+            consoleActivator = new ConsoleActivator();
+            consoleActivator.start(context);
+        } catch (final Exception e) {
+            logger.error("OsgiActivator: start: ", e);
+            throw e;
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        final Log logger = com.openexchange.log.Log.valueOf(LogFactory.getLog(OsgiActivator.class));
+        logger.info("stopping bundle: com.openexchange.osgi");
+        try {
+            if (null != consoleActivator) {
+                consoleActivator.stop(context);
+                consoleActivator = null;
+            }
+            cleanUp();
+        } catch (final Exception e) {
+            logger.error("OsgiActivator: stop: ", e);
+            throw e;
+        }
+    }
 
 }

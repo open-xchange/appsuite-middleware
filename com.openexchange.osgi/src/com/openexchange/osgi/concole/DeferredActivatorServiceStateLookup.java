@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,36 +47,53 @@
  *
  */
 
-package com.openexchange.osgi;
+package com.openexchange.osgi.concole;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * {@link DeferredActivatorMBean} - MBean for {@link DeferredActivator}.
+ * {@link DeferredActivatorServiceStateLookup}
  * 
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface DeferredActivatorMBean {
+public class DeferredActivatorServiceStateLookup implements ServiceStateLookup {
+
+    private final Map<String, ServiceStateImpl> states;
 
     /**
-     * The MBean domain.
+     * Initializes a new {@link DeferredActivatorServiceStateLookup}.
      */
-    public static final String OSGI_DOMAIN = "com.openexchange.osgi";
+    public DeferredActivatorServiceStateLookup() {
+        super();
+        states = new ConcurrentHashMap<String, ServiceStateImpl>(128);
+    }
 
     /**
-     * Gets a list of canonical class names of services needed for start-up, but currently not (yet) available for specified bundle.
+     * Applies the given service state information.
      * 
-     * @name The bundle name
-     * @return A list of canonical class names of missing services
+     * @param name The bundle's symbolic name
+     * @param missing The list of symbolic names of missing services
+     * @param present The list of symbolic names of available services
      */
-    List<String> getMissingServices(String name);
+    public void setState(final String name, final List<String> missing, final List<String> present) {
+        states.put(name, new ServiceStateImpl(name, missing, present));
+    }
 
-    /**
-     * Checks if activator for specified bundle is active; meaning all needed services are available.
-     * 
-     * @name The bundle name
-     * @return <code>true</code> if active; otherwise <code>false</code>
-     */
-    boolean isActive(String name);
+    @Override
+    public ServiceState determineState(final String name) {
+        final ServiceStateImpl serviceState = states.get(name);
+        if (null == serviceState) {
+            return null;
+        }
+        return serviceState.copy();
+    }
+
+    @Override
+    public List<String> getNames() {
+        return new ArrayList<String>(states.keySet());
+    }
 
 }
