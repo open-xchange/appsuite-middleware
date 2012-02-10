@@ -67,15 +67,15 @@ public class DeleteAction extends AbstractUWAAction {
      * Initializes a new {@link DeleteAction}.
      * @param factory
      */
-    public DeleteAction(UWAWidgetServiceFactory factory) {
+    public DeleteAction(final UWAWidgetServiceFactory factory) {
         super(factory);
     }
 
     @Override
-    protected AJAXRequestResult perform(UWAWidgetRequest req, UWAWidgetService widgets) throws JSONException, OXException {
+    protected AJAXRequestResult perform(final UWAWidgetRequest req, final UWAWidgetService widgets) throws JSONException, OXException {
         req.require("id");
         widgets.delete(req.getParameter("id"));
-        return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+        return new AJAXRequestResult();
     }
 
 }

@@ -9,6 +9,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade.context"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade.user"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.configread"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.contacts.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.control"/>
@@ -22,6 +24,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.global"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.html"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management.api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.osgi"/>

@@ -47,31 +47,69 @@
  *
  */
 
-package com.openexchange.management;
+package com.openexchange.jslob.json.converter;
 
-import com.openexchange.server.ServiceHolder;
+import java.util.Collection;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlob;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ManagementServiceHolder}
- *
+ * {@link JSlobJSONResultConverter} - The result converter for JSlob module.
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ManagementServiceHolder extends ServiceHolder<ManagementService> {
+public class JSlobJSONResultConverter implements ResultConverter {
 
     /**
-     * Gets the management service instance.
-     *
-     * @return The management service instance.
+     * Initializes a new {@link JSONResultConverter}.
      */
-    public static ManagementServiceHolder newInstance() {
-        return new ManagementServiceHolder();
+    public JSlobJSONResultConverter() {
+        super();
     }
 
-    /**
-     * Default constructor
-     */
-    private ManagementServiceHolder() {
-        super();
+    @Override
+    public String getInputFormat() {
+        return "jslob";
+    }
+
+    @Override
+    public String getOutputFormat() {
+        return "json";
+    }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @Override
+    public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
+        final Object resultObject = result.getResultObject();
+        if (resultObject instanceof JSlob) {
+            final JSlob jslob = (JSlob) resultObject;
+            result.setResultObject(jslob.getJsonObject(), "json");
+            return;
+        }
+        /*
+         * Collection of JSlobs
+         */
+        @SuppressWarnings("unchecked") final Collection<JSlob> jslobs = (Collection<JSlob>) resultObject;
+        final JSONArray jArray = new JSONArray();
+        for (final JSlob jslob : jslobs) {
+            jArray.put(convertJSlob(jslob));
+        }
+        result.setResultObject(jArray, "json");
+    }
+
+    private JSONObject convertJSlob(final JSlob jslob) {
+        return jslob.getJsonObject();
     }
 
 }

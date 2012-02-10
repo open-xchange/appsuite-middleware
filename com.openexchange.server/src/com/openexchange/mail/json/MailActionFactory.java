@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.json;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -122,6 +123,11 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("clear", new ClearAction(services));
         actions.put("new", new NewAction(services));
         actions.put("edit", new EditAction(services));
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

@@ -49,6 +49,7 @@
 
 package com.openexchange.user.json.actions;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,13 +108,18 @@ public final class UserActionFactory implements AJAXActionServiceFactory {
         return retval;
     }
 
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
+    }
+
     /**
      * Initializes the unmodifiable map to stored actions.
      *
      * @return The unmodifiable map with actions stored
      */
     private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
+        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(12);
         tmp.put(GetAction.ACTION, new GetAction());
         tmp.put(ListAction.ACTION, new ListAction());
         tmp.put(AllAction.ACTION, new AllAction());

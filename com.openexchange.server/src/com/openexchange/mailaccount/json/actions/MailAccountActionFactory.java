@@ -49,6 +49,7 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -89,6 +90,11 @@ public final class MailAccountActionFactory implements AJAXActionServiceFactory 
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return retval;
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     private Map<String, AJAXActionService> initActions() {

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.autoconfig.json.actions;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -63,22 +64,24 @@ import com.openexchange.server.ServiceLookup;
  */
 public class AutoconfigActionFactory implements AJAXActionServiceFactory {
 
-    private final Map<String, AutoconfigAction> ACTIONS = new HashMap<String, AutoconfigAction>();
+    private final Map<String, AutoconfigAction> actions = new HashMap<String, AutoconfigAction>(1);
 
     /**
      * Initializes a new {@link AutoconfigActionFactory}.
      */
-    public AutoconfigActionFactory(ServiceLookup services) {
-        ACTIONS.put("get", new GetAction(services));
+    public AutoconfigActionFactory(final ServiceLookup services) {
+        super();
+        actions.put("get", new GetAction(services));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.ajax.requesthandler.AJAXActionServiceFactory#createActionService(java.lang.String)
-     */
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        return ACTIONS.get(action);
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
+
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }
