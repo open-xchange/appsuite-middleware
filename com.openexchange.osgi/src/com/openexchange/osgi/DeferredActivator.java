@@ -384,15 +384,13 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     }
 
     @Override
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     public final List<String> getMissingServices() {
         final List<String> result = new ArrayList<String>();
-        for (final ServiceTracker tracker : serviceTrackers) {
-            final ServiceReference[] references = tracker.getServiceReferences();
-            for (final ServiceReference reference : references) {
+        for (final ServiceTracker<?, ?> tracker : serviceTrackers) {
+            final ServiceReference<?>[] references = tracker.getServiceReferences();
+            for (final ServiceReference<?> reference : references) {
                 if (context.getService(reference) == null) {
-                    final String missing = reference.getClass().getCanonicalName();
-                    result.add(missing);
+                    result.add(reference.getClass().getCanonicalName());
                 }
             }
         }

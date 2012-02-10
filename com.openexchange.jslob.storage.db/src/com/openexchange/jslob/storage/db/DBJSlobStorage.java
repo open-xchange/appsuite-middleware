@@ -149,9 +149,6 @@ public final class DBJSlobStorage implements JSlobStorage {
         }
     }
 
-    private static final String SQL_UPDATE_LOCK =
-        "UPDATE jsonStorage SET locked = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ? AND locked = ?";
-
     @Override
     public boolean lock(final JSlobId id) throws OXException {
         wlock.lock();
@@ -179,7 +176,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 /*
                  * Lock
                  */
-                stmt = con.prepareStatement(SQL_UPDATE_LOCK);
+                stmt = con.prepareStatement("UPDATE jsonStorage SET locked = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ? AND locked = ?");
                 stmt.setInt(1, 1);
                 stmt.setLong(2, contextId);
                 stmt.setLong(3, id.getUser());
@@ -241,7 +238,7 @@ public final class DBJSlobStorage implements JSlobStorage {
                 /*
                  * Unlock
                  */
-                stmt = con.prepareStatement(SQL_UPDATE_LOCK);
+                stmt = con.prepareStatement("UPDATE jsonStorage SET locked = ? WHERE cid = ? AND user = ? AND serviceId = ? AND id = ? AND locked = ?");
                 stmt.setInt(1, 0);
                 stmt.setLong(2, contextId);
                 stmt.setLong(3, id.getUser());

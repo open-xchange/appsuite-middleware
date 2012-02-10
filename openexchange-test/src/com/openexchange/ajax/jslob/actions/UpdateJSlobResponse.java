@@ -49,95 +49,36 @@
 
 package com.openexchange.ajax.jslob.actions;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.jslob.JSlob;
 
 /**
- * {@link SetJSlobRequest}
+ * {@link UpdateJSlobResponse}
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SetJSlobRequest extends AbstractJSlobRequest<SetJSlobResponse> {
-
-    private String serviceId;
-
-    private String id;
-
-    private JSlob jslob;
+public final class UpdateJSlobResponse extends AbstractAJAXResponse {
 
     /**
-     * Initializes a new {@link SetJSlobRequest}.
-     */
-    public SetJSlobRequest() {
-        super();
-        setFailOnError(true);
-        serviceId = DEFAULT_SERVICE_ID;
-    }
-
-    /**
-     * Sets the JSlob
+     * Initializes a new {@link UpdateJSlobResponse}.
      * 
-     * @param jslob The JSlob to set
+     * @param response
      */
-    public SetJSlobRequest setJslob(final JSlob jslob) {
-        this.jslob = jslob;
-        return this;
+    public UpdateJSlobResponse(final Response response) {
+        super(response);
     }
 
     /**
-     * Sets the service id
+     * Gets the JSlob.
      * 
-     * @param serviceId The service id to set
+     * @return The JSlob
+     * @throws JSONException If parsing JSON fails
      */
-    public SetJSlobRequest setServiceId(final String serviceId) {
-        this.serviceId = serviceId;
-        return this;
+    public JSlob getJSlob() throws JSONException {
+        final JSONObject jData = (JSONObject) getData();
+        return new JSlob(jData);
     }
-
-    /**
-     * Sets the id
-     * 
-     * @param id The id to set
-     */
-    public SetJSlobRequest setId(final String id) {
-        this.id = id;
-        return this;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return com.openexchange.ajax.framework.AJAXRequest.Method.PUT;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        final List<Parameter> params = new ArrayList<Parameter>(3);
-        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "set"));
-        params.add(new Parameter("serviceId", serviceId));
-        params.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
-        return params.toArray(new Parameter[params.size()]);
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends SetJSlobResponse> getParser() {
-        return new AbstractAJAXParser<SetJSlobResponse>(isFailOnError()) {
-
-            @Override
-            protected SetJSlobResponse createResponse(final Response response) {
-                return new SetJSlobResponse(response);
-            }
-        };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null == jslob ? "" : jslob.getJsonObject();
-    }
-
 }
