@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,90 +47,55 @@
  *
  */
 
-package com.openexchange.user.json.actions;
+package com.openexchange.documentation.json;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
+import com.openexchange.documentation.json.actions.ContainerAction;
+import com.openexchange.documentation.json.actions.ContainersAction;
+import com.openexchange.documentation.json.actions.ModuleAction;
+import com.openexchange.documentation.json.actions.ModulesAction;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link UserActionFactory} - Factory for user component.
+ * {@link DocumentationActionFactory}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Module(name = "user", description = "Provides access to user information.")
-public final class UserActionFactory implements AJAXActionServiceFactory {
+@Module(name = "documentation", description = "Provides access to the documentation subsystem.")
+public class DocumentationActionFactory implements AJAXActionServiceFactory {
 
-    /**
-     * The singleton instance.
-     */
-    private static final UserActionFactory SINGLETON = new UserActionFactory();
-
-    /**
-     * Gets the {@link UserActionFactory factory} instance.
-     *
-     * @return The {@link UserActionFactory factory} instance.
-     */
-    public static final UserActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    /*-
-     * Member section
-     */
-
-    /**
-     * The map to store actions.
-     */
     private final Map<String, AJAXActionService> actions;
 
     /**
-     * Initializes a new {@link UserActionFactory}.
+     * Initializes a new {@link DocumentationActionFactory}.
+     *
+     * @param services The service look-up
      */
-    private UserActionFactory() {
+    public DocumentationActionFactory(final ServiceLookup services) {
         super();
-        actions = initActions();
+        actions = new ConcurrentHashMap<String, AJAXActionService>();
+        actions.put("modules", new ModulesAction(services));
+        actions.put("module", new ModuleAction(services));
+        actions.put("containers", new ContainersAction(services));
+        actions.put("container", new ContainerAction(services));
     }
 
     @Override
     public AJAXActionService createActionService(final String action) throws OXException {
-        if (null == action) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
-        }
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
-        }
-        return retval;
+        return actions.get(action);
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
-    /**
-     * Initializes the unmodifiable map to stored actions.
-     *
-     * @return The unmodifiable map with actions stored
-     */
-    private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>(12);
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(AllAction.ACTION, new AllAction());
-        tmp.put(SearchAction.ACTION, new SearchAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(GetAttributeAction.ACTION, new GetAttributeAction());
-        tmp.put(SetAttributeAction.ACTION, new SetAttributeAction());
-        return Collections.unmodifiableMap(tmp);
-    }
+	@Override
+	public Collection<? extends AJAXActionService> getSupportedServices() {
+        return Collections.unmodifiableCollection(actions.values());
+	}
 
 }
