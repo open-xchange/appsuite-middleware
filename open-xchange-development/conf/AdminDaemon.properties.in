@@ -4,7 +4,7 @@ BIND_ADDRESS=0
 
 # Properties files for the different calls and actions
 SQL_PROP=$PWD/@oxconfdir@/Sql.properties
-USER_PROP=$PWD/@oxconfdir@/User.properties
+USER_PROP=$PWD/@oxconfdir@/AdminUser.properties
 GROUP_PROP=$PWD/@oxconfdir@/Group.properties
 RESOURCE_PROP=$PWD/@oxconfdir@/Resource.properties
 RMI_PROP=$PWD/@oxconfdir@/RMI.properties
