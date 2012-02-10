@@ -59,7 +59,6 @@ import javax.servlet.ServletException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -243,21 +242,9 @@ public final class ServerActivator extends HousekeepingActivator {
     private static final Log LOG = com.openexchange.log.Log.valueOf(LogFactory.getLog(ServerActivator.class));
 
     /**
-     * Bundle ID of admin.<br>
-     * TODO: Maybe this should be read by config.ini
-     */
-    private static final String BUNDLE_ID_ADMIN = "com.openexchange.admin";
-
-    /**
      * Constant for string: "identifier"
      */
     private static final String STR_IDENTIFIER = "identifier";
-
-    private static final Class<?>[] NEEDED_SERVICES_ADMIN =
-        {
-            ConfigurationService.class, CacheService.class, EventAdmin.class, TimerService.class, ThreadPoolService.class,
-            CalendarAdministrationService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class
-        };
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER =
         {
@@ -289,8 +276,6 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private final AtomicBoolean started;
 
-    private Boolean adminBundleInstalled;
-
     private WhiteboardSecretService secretService;
 
     /**
@@ -310,10 +295,7 @@ public final class ServerActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        if (null == adminBundleInstalled) {
-            this.adminBundleInstalled = Boolean.valueOf(isAdminBundleInstalled(context));
-        }
-        return this.adminBundleInstalled.booleanValue() ? NEEDED_SERVICES_ADMIN : NEEDED_SERVICES_SERVER;
+        return NEEDED_SERVICES_SERVER;
     }
 
     @Override
@@ -445,62 +427,55 @@ public final class ServerActivator extends HousekeepingActivator {
         for (final EventHandlerRegistration ehr : eventHandlerList) {
             ehr.registerService(context);
         }
+        
+        track(ManagementService.class, new ManagementServiceTracker(context));
+        // TODO:
+        /*-
+         * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
+         *     new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
+         */
+
+        // Search for AuthenticationService
+        track(AuthenticationService.class, new AuthenticationCustomizer(context));
+        // Search for ConfigJumpService
+        track(
+            ConfigJumpService.class,
+            new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class));
+        // Search for extensions of the preferences tree interface
+        track(PreferencesItemService.class, new PreferencesCustomizer(context));
+        // Search for UserPasswordChange service
+        track(PasswordChangeService.class, new PasswordChangeCustomizer(context));
+        // Search for host name service
+        track(HostnameService.class, new HostnameServiceCustomizer(context));
+        // Conversion service
+        track(ConversionService.class, new RegistryCustomizer<ConversionService>(context, ConversionService.class));
+        // Contact collector
+        track(ContactCollectorService.class, new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class));
+        // Search Service
+        track(SearchService.class, new RegistryCustomizer<SearchService>(context, SearchService.class));
+        // Login handler
+        track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
+        // Multiple handler factory services
+        track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
+
+        // Attachment Plugins
+        serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
+        serviceTrackerList.add(new AttachmentListenerTracker(context));
+
+        // PublicationTargetDiscoveryService
+        track(PublicationTargetDiscoveryService.class, new PublicationTargetDiscoveryServiceTrackerCustomizer(context));
+
+        // Folder Fields
+        track(AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields()));
 
         /*
-         * Start server dependent on whether admin bundle is available or not
+         * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
+         * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
          */
-        if (adminBundleInstalled.booleanValue()) {
-            // Start up server to only fit admin needs.
-            starter.adminStart();
-        } else {
-            // Management is only needed for groupware.
-            track(ManagementService.class, new ManagementServiceTracker(context));
-            // TODO:
-            /*-
-             * serviceTrackerList.add(new ServiceTracker(context, MonitorService.class.getName(),
-             *     new BundleServiceTracker&lt;MonitorService&gt;(context, MonitorService.getInstance(), MonitorService.class)));
-             */
+        track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
 
-            // Search for AuthenticationService
-            track(AuthenticationService.class, new AuthenticationCustomizer(context));
-            // Search for ConfigJumpService
-            track(ConfigJumpService.class, new BundleServiceTracker<ConfigJumpService>(context, ConfigJump.getHolder(), ConfigJumpService.class));
-            // Search for extensions of the preferences tree interface
-            track(PreferencesItemService.class, new PreferencesCustomizer(context));
-            // Search for UserPasswordChange service
-            track(PasswordChangeService.class, new PasswordChangeCustomizer(context));
-            // Search for host name service
-            track(HostnameService.class, new HostnameServiceCustomizer(context));
-            // Conversion service
-            track(ConversionService.class, new RegistryCustomizer<ConversionService>(context, ConversionService.class));
-            // Contact collector
-            track(ContactCollectorService.class, new RegistryCustomizer<ContactCollectorService>(context, ContactCollectorService.class));
-            // Search Service
-            track(SearchService.class, new RegistryCustomizer<SearchService>(context, SearchService.class));
-            // Login handler
-            track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
-            // Multiple handler factory services
-            track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
-
-            // Attachment Plugins
-            serviceTrackerList.add(new AttachmentAuthorizationTracker(context));
-            serviceTrackerList.add(new AttachmentListenerTracker(context));
-
-           // PublicationTargetDiscoveryService
-            track(PublicationTargetDiscoveryService.class, new PublicationTargetDiscoveryServiceTrackerCustomizer(context));
-
-            // Folder Fields
-            track(AdditionalFolderField.class, new FolderFieldCollector(context, Folder.getAdditionalFields()));
-
-            /*
-             * The FileMetadataParserService needs to be tracked by a separate service tracker instead of just adding the service to
-             * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
-             */
-            track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
-
-            // Start up server the usual way
-            starter.start();
-        }
+        // Start up server the usual way
+        starter.start();
         // Open service trackers
         for (final ServiceTracker<?,?> tracker : serviceTrackerList) {
             tracker.open();
@@ -652,9 +627,7 @@ public final class ServerActivator extends HousekeepingActivator {
         /*
          * Register servlets
          */
-        if (!adminBundleInstalled.booleanValue()) {
-            registerServlets(getService(HttpService.class));
-        }
+        registerServlets(getService(HttpService.class));
     }
 
     @Override
@@ -700,25 +673,8 @@ public final class ServerActivator extends HousekeepingActivator {
             }
         } finally {
             started.set(false);
-            adminBundleInstalled = null;
             CONTEXT = null;
         }
-    }
-
-    /**
-     * Determines if admin bundle is installed by iterating context's bundles whose status is set to {@link Bundle#INSTALLED} or
-     * {@link Bundle#ACTIVE} and whose symbolic name equals {@value #BUNDLE_ID_ADMIN}.
-     *
-     * @param context The bundle context
-     * @return <code>true</code> if admin bundle is installed; otherwise <code>false</code>
-     */
-    private static boolean isAdminBundleInstalled(final BundleContext context) {
-        for (final Bundle bundle : context.getBundles()) {
-            if (BUNDLE_ID_ADMIN.equals(bundle.getSymbolicName())) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {
