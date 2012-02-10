@@ -242,7 +242,10 @@ public final class MailMessageParser {
     public MailMessageParser addIgnorableContentTypes(final Collection<String> contentTypes) {
         for (final String contentType : contentTypes) {
             try {
-                ignorableContentTypes.add(new ContentType(contentType));
+                final ContentType type = new ContentType(contentType);
+                if (!type.startsWith("multipart/") && !type.startsWith("message/")) {
+                    ignorableContentTypes.add(type);
+                }
             } catch (final OXException e) {
                 LOG.warn("Couldn't parse ignorable Content-Type: " + contentType, e);
             }
@@ -272,7 +275,9 @@ public final class MailMessageParser {
      * @return This parser with ignorable Content-Type added
      */
     public MailMessageParser addIgnorableContentType(final ContentType contentType) {
-        ignorableContentTypes.add(contentType);
+        if (!contentType.startsWith("multipart/") && !contentType.startsWith("message/")) {
+            ignorableContentTypes.add(contentType);
+        }
         return this;
     }
 
@@ -281,7 +286,7 @@ public final class MailMessageParser {
             return false;
         }
         for (final ContentType ict : ignorableContentTypes) {
-            if (ict.getPrimaryType().equals(ct.getBaseType()) && ict.getSubType().equals(ct.getSubType())) {
+            if (ict.getPrimaryType().equals(ct.getPrimaryType()) && ict.getSubType().equals(ct.getSubType())) {
                 return true;
             }
         }

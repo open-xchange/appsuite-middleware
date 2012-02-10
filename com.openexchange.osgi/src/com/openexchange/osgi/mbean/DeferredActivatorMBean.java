@@ -80,4 +80,11 @@ public interface DeferredActivatorMBean {
      */
     boolean isActive(String name);
 
+    /**
+     * Lists all available bundles.
+     * 
+     * @return All available bundles
+     */
+    List<String> listAvailableBundles();
+
 }
