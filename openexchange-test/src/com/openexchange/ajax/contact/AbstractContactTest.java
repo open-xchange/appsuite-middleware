@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.contact;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
@@ -90,6 +94,7 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.LinkEntryObject;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.java.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.test.OXTestToolkit;
 
 
@@ -232,7 +237,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
      * Initializes a new {@link AbstractContactTest}.
      * @param name
      */
-    protected AbstractContactTest(String name) {
+    protected AbstractContactTest(final String name) {
         super(name);
     }
 
@@ -539,20 +544,20 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     public int insertContact(final Contact contactObj) throws Exception {
-        InsertRequest request = new InsertRequest(contactObj);
-        InsertResponse response = client.execute(request);
+        final InsertRequest request = new InsertRequest(contactObj);
+        final InsertResponse response = client.execute(request);
         response.fillObject(contactObj);
 
         return contactObj.getObjectID();
     }
 
     public void updateContact(final Contact contactObj, final int inFolder) throws Exception {
-        UpdateRequest request = new UpdateRequest(inFolder, contactObj, true);
+        final UpdateRequest request = new UpdateRequest(inFolder, contactObj, true);
         client.execute(request);
     }
 
     public void deleteContact(final int id, final int inFolder) throws Exception {
-        DeleteRequest request = new DeleteRequest(inFolder, id, new Date());
+        final DeleteRequest request = new DeleteRequest(inFolder, id, new Date());
         client.execute(request);
     }
 
@@ -561,7 +566,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     public Contact[] allContact(final int inFolder, final int[] cols, final int leftHandLimit, final int rightHandLimit) throws Exception {
-        AllRequest request = new AllRequest(inFolder, cols);
+        final AllRequest request = new AllRequest(inFolder, cols);
         if (leftHandLimit > -1) {
             request.setLeftHandLimit(leftHandLimit);
         }
@@ -569,7 +574,7 @@ public class AbstractContactTest extends AbstractAJAXSession {
             request.setRightHandLimit(rightHandLimit);
         }
 
-        CommonAllResponse response = client.execute(request);
+        final CommonAllResponse response = client.execute(request);
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
@@ -578,8 +583,8 @@ public class AbstractContactTest extends AbstractAJAXSession {
     }
 
     public Contact[] searchContact(final String searchpattern, final int inFolder, final int[] cols, final boolean startletter) throws OXException, Exception {
-        SearchRequest request = new SearchRequest(searchpattern, startletter, inFolder, cols, -1, null, true);
-        SearchResponse response = client.execute(request);
+        final SearchRequest request = new SearchRequest(searchpattern, startletter, inFolder, cols, -1, null, true);
+        final SearchResponse response = client.execute(request);
 
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
@@ -588,51 +593,75 @@ public class AbstractContactTest extends AbstractAJAXSession {
         return searchContactAdvanced(cso, 0, cols);
     }
 
-    public Contact[] searchContactAdvanced(ContactSearchObject cso, int orderBy, int[] cols) throws OXException, Exception {
-        SearchRequest request = new SearchRequest(cso, cols, orderBy, null, true);
-        SearchResponse response = client.execute(request);
+    public Contact[] searchContactAdvanced(final ContactSearchObject cso, final int orderBy, final int[] cols) throws OXException, Exception {
+        final SearchRequest request = new SearchRequest(cso, cols, orderBy, null, true);
+        final SearchResponse response = client.execute(request);
 
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
     public Contact[] listContact(final int[][] objectIdAndFolderId, final int[] cols) throws Exception {
-        ListIDs identifier = new ListIDs();
+        final ListIDs identifier = new ListIDs();
         for (int i = 0; i < objectIdAndFolderId.length; i++) {
 
             identifier.add(new ListIDInt(objectIdAndFolderId[i][1], objectIdAndFolderId[i][0]));
         }
-        ListRequest request = new ListRequest(identifier, cols);
-        CommonListResponse response = client.execute(request);
+        final ListRequest request = new ListRequest(identifier, cols);
+        final CommonListResponse response = client.execute(request);
 
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
     public Contact loadUser(final int userId) throws OXException, IOException, JSONException {
-        GetContactForUserRequest request = new GetContactForUserRequest(userId, true, tz);
-        GetResponse response = client.execute(request);
+        final GetContactForUserRequest request = new GetContactForUserRequest(userId, true, tz);
+        final GetResponse response = client.execute(request);
 
         return response.getContact();
     }
 
     public Contact loadContact(final int objectId, final int inFolder) throws Exception {
-        GetRequest request = new GetRequest(inFolder, objectId, tz);
-        GetResponse response = client.execute(request);
+        final GetRequest request = new GetRequest(inFolder, objectId, tz);
+        final GetResponse response = client.execute(request);
 
         return response.getContact();
     }
 
     public byte[] loadImage(final String uid) throws Exception {
-        ImageRequest request = new ImageRequest(uid);
-        ImageResponse response = client.execute(request);
+        final ImageRequest request = new ImageRequest(uid);
+        final ImageResponse response = client.execute(request);
 
         return response.getImage();
+    }
+
+    public byte[] loadImageByURL(final String imageUrl) throws Exception {
+        final URL url = new URL(imageUrl);
+        InputStream inputStream = null;
+        try {
+            final URLConnection urlConnection = url.openConnection();
+            inputStream = urlConnection.getInputStream();
+            final int len = 8192;
+            final byte[] buf = new byte[len];
+            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
+            for (int read; (read = inputStream.read(buf, 0, len)) > 0;) {
+                out.write(buf, 0, read);
+            }
+            return out.toByteArray();
+        } finally {
+            if (null != inputStream) {
+                try {
+                    inputStream.close();
+                } catch (final Exception e) {
+                    // Ignore
+                }
+            }
+        }
     }
 
 
     public Contact[] listModifiedAppointment(final int inFolder, final Date modified) throws Exception {
         final int[] cols = new int[]{ Appointment.OBJECT_ID };
-        UpdatesRequest request = new UpdatesRequest(inFolder, cols, 0, null, modified);
-        ContactUpdatesResponse response = client.execute(request);
+        final UpdatesRequest request = new UpdatesRequest(inFolder, cols, 0, null, modified);
+        final ContactUpdatesResponse response = client.execute(request);
 
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
