@@ -52,12 +52,12 @@ package com.openexchange.ajax.contact;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.TimeZone;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,13 +77,12 @@ import com.openexchange.ajax.contact.action.UpdatesRequest;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.fields.DistributionListFields;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.CommonListResponse;
 import com.openexchange.ajax.framework.ListIDInt;
 import com.openexchange.ajax.framework.ListIDs;
-import com.openexchange.ajax.image.ImageRequest;
-import com.openexchange.ajax.image.ImageResponse;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -626,19 +625,13 @@ public class AbstractContactTest extends AbstractAJAXSession {
         return response.getContact();
     }
 
-    public byte[] loadImage(final String uid) throws Exception {
-        final ImageRequest request = new ImageRequest(uid);
-        final ImageResponse response = client.execute(request);
-
-        return response.getImage();
-    }
-
-    public byte[] loadImageByURL(final String imageUrl) throws Exception {
-        final URL url = new URL(imageUrl);
+    public byte[] loadImageByURL(final String protocol, final String hostname, final String imageUrl) throws Exception {
         InputStream inputStream = null;
         try {
-            final URLConnection urlConnection = url.openConnection();
-            inputStream = urlConnection.getInputStream();
+            final AJAXSession ajaxSession = getSession();
+            final HttpGet httpRequest = new HttpGet((null == protocol ? "http" : protocol) + "://" + (hostname == null ? "localhost" : hostname) + imageUrl);
+            final HttpResponse httpResponse = ajaxSession.getHttpClient().execute(httpRequest);
+            inputStream = httpResponse.getEntity().getContent();
             final int len = 8192;
             final byte[] buf = new byte[len];
             final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(len << 2);
