@@ -50,6 +50,8 @@
 package com.openexchange.osgi.mbean;
 
 import java.util.List;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
 import com.openexchange.osgi.DeferredActivator;
 import com.openexchange.osgi.console.ServiceState;
 import com.openexchange.osgi.console.ServiceStateLookup;
@@ -59,13 +61,16 @@ import com.openexchange.osgi.console.ServiceStateLookup;
  * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DeferredActivatorMBeanImpl implements DeferredActivatorMBean {
+public final class DeferredActivatorMBeanImpl extends StandardMBean implements DeferredActivatorMBean {
 
     /**
      * Initializes a new {@link DeferredActivatorMBeanImpl}.
+     * 
+     * @throws NotCompliantMBeanException  If the mbeanInterface does not follow JMX design patterns for Management Interfaces, or if this
+     *             does not implement the specified interface. 
      */
-    public DeferredActivatorMBeanImpl() {
-        super();
+    public DeferredActivatorMBeanImpl() throws NotCompliantMBeanException {
+        super(DeferredActivatorMBean.class);
     }
 
     @Override
