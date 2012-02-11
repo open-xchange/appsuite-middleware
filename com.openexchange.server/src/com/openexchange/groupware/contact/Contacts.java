@@ -1697,60 +1697,54 @@ public final class Contacts {
 
     public static void updateDistributionListEntriesByIds(final int id, final DistributionListEntryObject[] dleos, final int cid, final Connection writecon) throws OXException {
         if (dleos.length > 0) {
-
-            DistributionListEntryObject dleo = null;
-
             PreparedStatement ps = null;
             try {
                 final ContactSql cs = new ContactMySql(null);
                 ps = writecon.prepareStatement(cs.iFupdateDistributionListEntriesByIds());
                 for (int i = 0; i < dleos.length; i++) {
-                    dleo = dleos[i];
-
-                    ps.setInt(1, id);
-                    ps.setInt(9, id);
-
-                    if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
-                        ps.setInt(2, dleo.getEntryID());
-                        ps.setInt(3, dleo.getEmailfield());
-                        ps.setInt(10, dleo.getEntryID());
-                        ps.setInt(11, dleo.getEmailfield());
-                        ps.setInt(4, dleo.getFolderID());
-                    } else {
-                        ps.setNull(2, java.sql.Types.INTEGER);
-                        ps.setNull(3, java.sql.Types.INTEGER);
-                        ps.setNull(10, java.sql.Types.INTEGER);
-                        ps.setNull(11, java.sql.Types.INTEGER);
-                        ps.setNull(4, java.sql.Types.INTEGER);
+                    final DistributionListEntryObject dleo = dleos[i];
+                    if (null != dleo) {
+                        ps.setInt(1, id);
+                        ps.setInt(9, id);
+                        if (dleo.containsEntryID() && (dleo.getEntryID() > 0)) {
+                            ps.setInt(2, dleo.getEntryID());
+                            ps.setInt(3, dleo.getEmailfield());
+                            ps.setInt(10, dleo.getEntryID());
+                            ps.setInt(11, dleo.getEmailfield());
+                            ps.setInt(4, dleo.getFolderID());
+                        } else {
+                            ps.setNull(2, java.sql.Types.INTEGER);
+                            ps.setNull(3, java.sql.Types.INTEGER);
+                            ps.setNull(10, java.sql.Types.INTEGER);
+                            ps.setNull(11, java.sql.Types.INTEGER);
+                            ps.setNull(4, java.sql.Types.INTEGER);
+                        }
+                        if (dleo.containsDisplayname()) {
+                            ps.setString(5, dleo.getDisplayname());
+                        } else if (dleo.containsLastname() && dleo.containsFistname()) {
+                            ps.setString(5, dleo.getLastname() + ", " + dleo.getFirstname());
+                        } else if (dleo.containsLastname() && !dleo.containsFistname()) {
+                            ps.setString(5, dleo.getLastname());
+                        } else {
+                            ps.setString(5, "unknown");
+                        }
+                        if (dleo.containsLastname()) {
+                            ps.setString(6, dleo.getLastname());
+                        } else {
+                            ps.setNull(6, java.sql.Types.VARCHAR);
+                        }
+                        if (dleo.containsFistname()) {
+                            ps.setString(7, dleo.getFirstname());
+                        } else {
+                            ps.setNull(7, java.sql.Types.VARCHAR);
+                        }
+                        ps.setString(8, dleo.getEmailaddress());
+                        ps.setInt(12, cid);
+                        if (DEBUG) {
+                            LOG.debug(new StringBuilder("UPDATE DLIST ").append(getStatementString(ps)));
+                        }
+                        ps.execute();
                     }
-                    if (dleo.containsDisplayname()) {
-                        ps.setString(5, dleo.getDisplayname());
-                    } else if (dleo.containsLastname() && dleo.containsFistname()) {
-                        ps.setString(5, dleo.getLastname() + ", " + dleo.getFirstname());
-                    } else if (dleo.containsLastname() && !dleo.containsFistname()) {
-                        ps.setString(5, dleo.getLastname());
-                    } else {
-                        ps.setString(5, "unknown");
-                    }
-                    if (dleo.containsLastname()) {
-                        ps.setString(6, dleo.getLastname());
-                    } else {
-                        ps.setNull(6, java.sql.Types.VARCHAR);
-                    }
-                    if (dleo.containsFistname()) {
-                        ps.setString(7, dleo.getFirstname());
-                    } else {
-                        ps.setNull(7, java.sql.Types.VARCHAR);
-                    }
-                    ps.setString(8, dleo.getEmailaddress());
-                    ps.setInt(12, cid);
-
-                    if (DEBUG) {
-                        LOG.debug(new StringBuilder("UPDATE DLIST ").append(getStatementString(ps)));
-                    }
-
-                    ps.execute();
-
                 }
             } catch (final SQLException e) {
                 throw ContactExceptionCodes.SQL_PROBLEM.create(e);
