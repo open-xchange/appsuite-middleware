@@ -1,6 +1,7 @@
 * 2012-02-11 - thorben.betten@open-xchange.com
 
- - Fix for bug 21525: FIxed possible NPE
+ - Fix for bug 21525: Fixed possible NPE
+ - Fix for bug 21483: Interpret ASCII as ISO-8859-1 characters
 
 * 2012-02-10 - jan.bauerdick@open-xchange.com
 
