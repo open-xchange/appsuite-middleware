@@ -239,4 +239,27 @@ public final class ImageLocation {
         properties.putIfAbsent(PROPERTY_REGISTRATION_NAME, registrationName);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder(64);
+        builder.append("ImageLocation [");
+        if (accountId != null) {
+            builder.append("accountId=").append(accountId).append(", ");
+        }
+        if (folder != null) {
+            builder.append("folder=").append(folder).append(", ");
+        }
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (imageId != null) {
+            builder.append("imageId=").append(imageId).append(", ");
+        }
+        if (properties != null && !properties.isEmpty()) {
+            builder.append("properties=").append(properties);
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
 }
