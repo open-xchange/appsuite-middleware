@@ -109,6 +109,16 @@ public final class ModifyCharsetStandardProvider {
                 new StringBuilder("Charset \"WINDOWS-1252\" is not support by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
                     System.getProperty("java.vm.version")).append("\".").toString());
         }
+        try {
+            charsetProvider = new ASCIIReplacementCharsetProvider(null == charsetProvider ? backupCharsetProvider : charsetProvider);
+        } catch (final UnsupportedCharsetException e) {
+            /*
+             * Leave unchanged since fall-back charset "WINDOWS-1252" is not support by JVM
+             */
+            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(ModifyCharsetStandardProvider.class)).warn(
+                new StringBuilder("Charset \"WINDOWS-1252\" is not support by JVM \"").append(System.getProperty("java.vm.vendor")).append(" v").append(
+                    System.getProperty("java.vm.version")).append("\".").toString());
+        }
         if (null == charsetProvider) {
             return null;
         }
