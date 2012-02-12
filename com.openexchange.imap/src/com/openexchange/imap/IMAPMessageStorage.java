@@ -2284,7 +2284,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             ".\nmsgref account ID: ").append(msgref.getAccountId()).toString(),
                         new Throwable());
                 }
-                deleteMessagesLong(msgref.getFolder(), new long[] { Long.parseLong(msgref.getMailID()) }, true);
+                deleteMessagesLong(msgref.getFolder(), new long[] { parseUnsignedLong(msgref.getMailID()) }, true);
                 composedMail.setMsgref(null);
             }
             /*
