@@ -561,6 +561,8 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         return retval;
     }
 
+    private static final int RADIX = 10;
+
     /**
      * Converts specified UID numbers to an array of <code>String</code>.
      *
@@ -577,15 +579,13 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             if (-1 == l) {
                 retval[i] = null;
             } else {
-                retval[i] = String.valueOf(longs[i]);
+                retval[i] = Long.toString(longs[i], RADIX);
             }
         }
         return retval;
     }
 
     private static final long DEFAULT = -1L;
-
-    private static final int RADIX = 10;
 
     /**
      * Parses the string argument as a signed decimal <code>long</code>. The characters in the string must all be decimal digits.
