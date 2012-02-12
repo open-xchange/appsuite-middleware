@@ -1,3 +1,7 @@
+* 2012-02-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21507: Checking for possible TNEF content by file name, too
+
 * 2012-02-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 21525: Fixed possible NPE
