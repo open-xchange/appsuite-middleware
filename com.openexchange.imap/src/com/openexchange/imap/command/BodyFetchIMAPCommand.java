@@ -128,7 +128,7 @@ public final class BodyFetchIMAPCommand extends AbstractIMAPCommand<byte[]> {
         }
         this.sequenceId = sequenceId;
         this.uid = true;
-        args = new String[] { String.valueOf(uid) };
+        args = new String[] { Long.toString(uid) };
     }
 
     @Override

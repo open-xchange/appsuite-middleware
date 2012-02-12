@@ -771,7 +771,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         final FacebookPage fbPage = FacebookFQLPageParser.parsePageDOMElement(iterator.next());
                         final long pageId = fbPage.getPageId();
                         safetyCheck.remove(pageId);
-                        final String pageIdStr = String.valueOf(pageId);
+                        final String pageIdStr = Long.toString(pageId);
                         for (final FacebookMessagingMessage message : m.get(pageId)) {
                             message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbPage.getName(), pageIdStr));
                             message.setPicture(fbPage.getPicSmall());
@@ -797,7 +797,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                         final FacebookGroup fbGroup = FacebookFQLGroupParser.parseGroupDOMElement(iterator.next());
                         final long groupId = fbGroup.getGid();
                         safetyCheck.remove(groupId);
-                        final String groupIdStr = String.valueOf(groupId);
+                        final String groupIdStr = Long.toString(groupId);
                         for (final FacebookMessagingMessage message : m.get(groupId)) {
                             message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbGroup.getName(), groupIdStr));
                             message.setPicture(fbGroup.getPicSmall());
@@ -852,7 +852,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                             for (int i = 0; i < resSize; i++) {
                                 final FacebookGroup fbGroup = FacebookFQLGroupParser.parseGroupDOMElement(iterator.next());
                                 final long facebookGroupId = fbGroup.getGid();
-                                final String groupIdStr = String.valueOf(facebookGroupId);
+                                final String groupIdStr = Long.toString(facebookGroupId);
                                 for (final FacebookMessagingMessage message : m.get(facebookGroupId)) {
                                     message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbGroup.getName(), groupIdStr));
                                     message.setPicture(fbGroup.getPicSmall());
@@ -862,7 +862,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                             for (int i = 0; i < resSize; i++) {
                                 final FacebookUser fbUser = FacebookFQLUserParser.parseUserDOMElement(iterator.next());
                                 final long facebookUserId = fbUser.getUid();
-                                final String userIdStr = String.valueOf(facebookUserId);
+                                final String userIdStr = Long.toString(facebookUserId);
                                 for (final FacebookMessagingMessage message : m.get(facebookUserId)) {
                                     message.setHeader(MimeAddressMessagingHeader.valueOfPlain(FROM, fbUser.getName(), userIdStr));
                                     message.setPicture(fbUser.getPicSmall());
