@@ -314,7 +314,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void setContentLength(final int contentLength) {
-        headers.put(CONTENT_LENGTH, Collections.singletonList(String.valueOf(contentLength)));
+        headers.put(CONTENT_LENGTH, Collections.singletonList(Integer.toString(contentLength)));
     }
 
     public int getContentLength() {
@@ -634,7 +634,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void addIntHeader(final String name, final int i) {
-        addHeader(name, String.valueOf(i));
+        addHeader(name, Integer.toString(i));
     }
 
     @Override
@@ -772,7 +772,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
 
     @Override
     public void setIntHeader(final String name, final int i) {
-        setHeader(name, String.valueOf(i));
+        setHeader(name, Integer.toString(i));
     }
 
     @Override
@@ -843,7 +843,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         }
         String errorMsgStr = ERROR_PAGE_TEMPL;
         errorMsgStr =
-            errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
+            errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
                 "#STATUS_DESC#",
                 desc);
         synchronized (HEADER_DATE_FORMAT) {
@@ -877,7 +877,7 @@ public final class HttpServletResponseImpl implements HttpServletResponse {
         }
         String errorMsgStr = ERROR_PAGE_TEMPL;
         errorMsgStr =
-            errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
+            errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
                 "#STATUS_DESC#",
                 desc);
         synchronized (HEADER_DATE_FORMAT) {

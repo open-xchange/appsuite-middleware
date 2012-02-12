@@ -122,7 +122,7 @@ public class TestEvents extends SmackTestCase
 		final Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
 
         // Send event
-        final String itemId = String.valueOf(System.currentTimeMillis());
+        final String itemId = Long.toString(System.currentTimeMillis());
         creatorNode.send(new Item(itemId));
 
         for(int i=0; i<2; i++)
@@ -151,7 +151,7 @@ public class TestEvents extends SmackTestCase
 		final Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
 
         // Send event
-        final String itemId = String.valueOf(System.currentTimeMillis());
+        final String itemId = Long.toString(System.currentTimeMillis());
         creatorNode.publish(new Item(itemId));
 
    		final ItemEventCoordinator<Item> coord = queue.take();
@@ -177,7 +177,7 @@ public class TestEvents extends SmackTestCase
 		final Subscription sub1 = subNode.subscribe(getConnection(1).getUser());
 
         // Send event
-        final String itemId = String.valueOf(System.currentTimeMillis());
+        final String itemId = Long.toString(System.currentTimeMillis());
         final String payloadString = "<book xmlns=\"pubsub:test:book\"><author>Sir Arthur Conan Doyle</author></book>";
         creatorNode.send(new PayloadItem<SimplePayload>(itemId, new SimplePayload("book", "pubsub:test:book", payloadString)));
 
@@ -258,7 +258,7 @@ public class TestEvents extends SmackTestCase
 		final Subscription sub2 = subNode.subscribe(getConnection(1).getUser());
 
 		// Send event
-        final String itemId = String.valueOf(System.currentTimeMillis());
+        final String itemId = Long.toString(System.currentTimeMillis());
         creatorNode.send(new Item(itemId));
 
         for(int i=0; i<3; i++)
@@ -303,7 +303,7 @@ public class TestEvents extends SmackTestCase
 		assertEquals(Subscription.State.subscribed, sub2.getState());
 
         // Send event
-        final String itemId = String.valueOf(System.currentTimeMillis());
+        final String itemId = Long.toString(System.currentTimeMillis());
 
         final Collection<PayloadItem<SimplePayload>> items = new ArrayList<PayloadItem<SimplePayload>>(3);
         final String ids[] = {"First-" + itemId, "Second-" + itemId, "Third-" + itemId};
@@ -425,7 +425,7 @@ public class TestEvents extends SmackTestCase
 		subNode.subscribe(getConnection(1).getUser());
 
 		// Send event
-        final String itemId = String.valueOf(System.currentTimeMillis());
+        final String itemId = Long.toString(System.currentTimeMillis());
 
         final Collection<Item> items = new ArrayList<Item>(3);
         final String id1 = "First-" + itemId;

@@ -521,7 +521,7 @@ public final class DBChat implements Chat {
         super();
         userNameCache = new ConcurrentTIntObjectHashMap<String>(128);
         this.chatId = chatId;
-        sChatId = String.valueOf(chatId);
+        sChatId = Integer.toString(chatId);
         this.contextId = contextId;
         messageListeners = new CopyOnWriteArrayList<MessageListener>();
         secureMessaging = false;
@@ -610,7 +610,7 @@ public final class DBChat implements Chat {
                 final MessageImpl message = new MessageImpl();
                 pos = 1;
                 final int userId = rs.getInt(pos++);
-                message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
+                message.setFrom(new ChatUserImpl(Integer.toString(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
                 message.setText(prepareSelect(rs.getString(pos++)));
                 final long createdAt = rs.getLong(pos);
@@ -769,7 +769,7 @@ public final class DBChat implements Chat {
             rs = stmt.executeQuery();
             final List<String> ret = new LinkedList<String>();
             while (rs.next()) {
-                ret.add(String.valueOf(rs.getInt(1)));
+                ret.add(Integer.toString(rs.getInt(1)));
             }
             return ret;
         } catch (final SQLException e) {
@@ -1250,7 +1250,7 @@ public final class DBChat implements Chat {
                 }
                 final MessageImpl message = new MessageImpl();
                 pos = 1;
-                message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
+                message.setFrom(new ChatUserImpl(Integer.toString(userId), getUserName(userId, context)));
                 message.setPacketId(messageId);
                 message.setText(prepareSelect(rs.getString(pos++)));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
@@ -1379,7 +1379,7 @@ public final class DBChat implements Chat {
                 final MessageImpl message = new MessageImpl();
                 pos = 1;
                 final int userId = rs.getInt(pos++);
-                message.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, context)));
+                message.setFrom(new ChatUserImpl(Integer.toString(userId), getUserName(userId, context)));
                 message.setPacketId(toUUID(rs.getBytes(pos++)).toString());
                 message.setText(prepareSelect(rs.getString(pos++)));
                 message.setTimeStamp(new Date(rs.getLong(pos)));
@@ -1527,7 +1527,7 @@ public final class DBChat implements Chat {
 
     private Message createJoinMessage(final String userJoined) {
         final MessageImpl m = new MessageImpl();
-        final ChatUser user = new ChatUserImpl(String.valueOf(0));
+        final ChatUser user = new ChatUserImpl(Integer.toString(0));
         m.setFrom(user);
         m.setText(String.format(ChatStrings.CHAT_JOIN, userJoined));
         return m;
@@ -1535,7 +1535,7 @@ public final class DBChat implements Chat {
 
     private Message createLeftMessage(final String userLeft) {
         final MessageImpl m = new MessageImpl();
-        final ChatUser user = new ChatUserImpl(String.valueOf(0));
+        final ChatUser user = new ChatUserImpl(Integer.toString(0));
         m.setFrom(user);
         m.setText(String.format(ChatStrings.CHAT_LEFT, userLeft));
         return m;

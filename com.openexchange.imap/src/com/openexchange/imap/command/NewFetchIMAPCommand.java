@@ -1014,14 +1014,14 @@ public final class NewFetchIMAPCommand extends AbstractIMAPCommand<MailMessage[]
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.apache.commons.logging.Log logger) {
             final long id = ((UID) item).uid;
-            msg.setMailId(String.valueOf(id));
+            msg.setMailId(Long.toString(id));
             msg.setUid(id);
         }
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.apache.commons.logging.Log logger) throws MessagingException {
             final long id = ((IMAPFolder) message.getFolder()).getUID(message);
-            msg.setMailId(String.valueOf(id));
+            msg.setMailId(Long.toString(id));
             msg.setUid(id);
         }
     };

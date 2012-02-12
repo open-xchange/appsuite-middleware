@@ -79,7 +79,7 @@ public class ContactFolderContactSourceFactory implements ContactSourceFactory {
     
     private ConfigViewFactory configs;
     
-    public ContactFolderContactSourceFactory(ConfigViewFactory configs) {
+    public ContactFolderContactSourceFactory(final ConfigViewFactory configs) {
         this.configs = configs;
     }
 
@@ -87,13 +87,13 @@ public class ContactFolderContactSourceFactory implements ContactSourceFactory {
         super();
     }
 
-    public List<ContactSource> getSources(ServerSession session) throws Exception {
+    public List<ContactSource> getSources(final ServerSession session) throws Exception {
         final User user = session.getUser();
         final UserConfiguration userConfig = session.getUserConfiguration();
         
-        ConfigView view = configs.getView(session.getUserId(), session.getContextId());
+        final ConfigView view = configs.getView(session.getUserId(), session.getContextId());
         
-        Set<String> excluded = new HashSet<String>(Arrays.asList(view.opt("com.openexchange.contact.aggregator.folderBlacklist", String.class, "").split("\\s*,\\s*")));
+        final Set<String> excluded = new HashSet<String>(Arrays.asList(view.opt("com.openexchange.contact.aggregator.folderBlacklist", String.class, "").split("\\s*,\\s*")));
 
         final Queue<FolderObject> queue = ((FolderObjectIterator) OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
             session.getUserId(),
@@ -102,16 +102,16 @@ public class ContactFolderContactSourceFactory implements ContactSourceFactory {
             FolderObject.CONTACT,
             session.getContext())).asQueue();
         
-        List<ContactSource> sources = new ArrayList<ContactSource>(queue.size());
+        final List<ContactSource> sources = new ArrayList<ContactSource>(queue.size());
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance();
 
         final Integer ccollectorFolderId = serverUserSetting.getContactCollectionFolder(session.getContextId(), session.getUserId());
         
-        for (FolderObject folder : queue) {
-            if (excluded.contains(String.valueOf(folder.getObjectID()))) {
+        for (final FolderObject folder : queue) {
+            if (excluded.contains(Integer.toString(folder.getObjectID()))) {
                 continue;
             }
-            EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userConfig);
+            final EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userConfig);
             
             if ((permission.canReadAllObjects() || permission.canReadOwnObjects())) {
                 if (ccollectorFolderId == null || folder.getObjectID() != ccollectorFolderId) {
@@ -119,7 +119,7 @@ public class ContactFolderContactSourceFactory implements ContactSourceFactory {
                     if (folder.getType() == FolderObject.PRIVATE) {
                         type = Type.IMPORTANT;
                     }
-                    ContactFolderContactSource source = new ContactFolderContactSource(folder, new RdbContactSQLImpl(session), type);
+                    final ContactFolderContactSource source = new ContactFolderContactSource(folder, new RdbContactSQLImpl(session), type);
                     if (folder.isDefaultFolder()) {
                         sources.add(0, source);
                     } else {

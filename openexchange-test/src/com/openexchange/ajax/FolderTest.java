@@ -305,7 +305,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
+        urlParam.setParameter(FolderFields.FOLDER_ID, Integer.toString(parentFolderId));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
@@ -362,7 +362,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
+        urlParam.setParameter(FolderFields.FOLDER_ID, Integer.toString(parentFolderId));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
@@ -390,7 +390,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
+        urlParam.setParameter(AJAXServlet.PARAMETER_ID, Integer.toString(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -441,7 +441,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
+        urlParam.setParameter(AJAXServlet.PARAMETER_ID, Integer.toString(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -688,7 +688,7 @@ public class FolderTest extends AbstractAJAXTest {
             throw new TestException("System infostore folder not found!");
         }
         FolderObject userStore = null;
-        l = getSubfolders(conversation, protocol, hostname, sessionId, String.valueOf(infostore.getObjectID()));
+        l = getSubfolders(conversation, protocol, hostname, sessionId, Integer.toString(infostore.getObjectID()));
         for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
             final FolderObject f = iter.next();
             if (f.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
@@ -699,7 +699,7 @@ public class FolderTest extends AbstractAJAXTest {
         if (null == userStore) {
             throw new TestException("System user store folder not found!");
         }
-        l = getSubfolders(conversation, protocol, hostname, sessionId, String.valueOf(userStore.getObjectID()));
+        l = getSubfolders(conversation, protocol, hostname, sessionId, Integer.toString(userStore.getObjectID()));
         for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
             final FolderObject f = iter.next();
             if (f.containsDefaultFolder() && f.isDefaultFolder() && f.getCreator() == loginId) {

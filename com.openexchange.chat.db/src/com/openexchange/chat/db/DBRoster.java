@@ -182,7 +182,7 @@ public final class DBRoster implements Roster {
         for (int i = 0; i < users.length; i++) {
             final User u = users[i];
             final ChatUserImpl chatUser = new ChatUserImpl();
-            final String id = String.valueOf(u.getId());
+            final String id = Integer.toString(u.getId());
             chatUser.setId(id);
             chatUser.setName(u.getDisplayName());
             tmp.put(id, chatUser);

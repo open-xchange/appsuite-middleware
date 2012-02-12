@@ -149,7 +149,7 @@ public class ServletRequestWrapper implements ServletRequest {
         attributes = new HashMap<String, Object>(32);
         parameters = new HashKeyMap<String[]>(max > 0 ? max : 64).setGenerator(hashKeyGenerator);
         headers = new HashMap<String, String[]>(16);
-        setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
+        setHeaderInternal(CONTENT_LENGTH, Integer.toString(-1), false);
     }
 
     /**
@@ -159,7 +159,7 @@ public class ServletRequestWrapper implements ServletRequest {
      * @throws AJPv13Exception If setting <code>Content-Length</code> header fails
      */
     public void setContentLength(final int contentLength) throws AJPv13Exception {
-        setHeaderInternal(CONTENT_LENGTH, String.valueOf(contentLength), false);
+        setHeaderInternal(CONTENT_LENGTH, Integer.toString(contentLength), false);
     }
 
     /**
