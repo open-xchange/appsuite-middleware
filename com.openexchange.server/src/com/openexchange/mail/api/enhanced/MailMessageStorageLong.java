@@ -169,7 +169,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         try {
-            return getAttachmentLong(folder, Long.parseLong(mailId), sequenceId);
+            return getAttachmentLong(folder, parseUnsignedLong(mailId), sequenceId);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -203,7 +203,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         try {
-            return getImageAttachmentLong(folder, Long.parseLong(mailId), contentId);
+            return getImageAttachmentLong(folder, parseUnsignedLong(mailId), contentId);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -264,7 +264,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         try {
-            return getMessageLong(folder, Long.parseLong(mailId), markSeen);
+            return getMessageLong(folder, parseUnsignedLong(mailId), markSeen);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -587,7 +587,17 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     private static final int RADIX = 10;
 
-    private static long parseUnsignedLong(final String s) {
+    /**
+     * Parses the string argument as a signed decimal <code>long</code>. The characters in the string must all be decimal digits.
+     * <p>
+     * Note that neither the character <code>L</code> (<code>'&#92;u004C'</code>) nor <code>l</code> (<code>'&#92;u006C'</code>) is
+     * permitted to appear at the end of the string as a type indicator, as would be permitted in Java programming language source code.
+     * 
+     * @param s A <code>String</code> containing the <code>long</code> representation to be parsed
+     * @return The <code>long</code> represented by the argument in decimal or <code>-1</code> if the string does not contain a parsable
+     *         <code>long</code>.
+     */
+    protected static long parseUnsignedLong(final String s) {
         if (s == null) {
             return DEFAULT;
         }
