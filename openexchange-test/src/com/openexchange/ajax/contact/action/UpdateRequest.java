@@ -78,11 +78,11 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         this(contactObj, true);
     }
 
-    public UpdateRequest(final Contact contactObj, boolean failOnError) {
+    public UpdateRequest(final Contact contactObj, final boolean failOnError) {
         this(contactObj.getParentFolderID(), contactObj, failOnError);
     }
 
-    public UpdateRequest(int inFolder, Contact entry, boolean failOnError) {
+    public UpdateRequest(final int inFolder, final Contact entry, final boolean failOnError) {
         super();
         this.contactObj = entry;
         this.failOnError = failOnError;
@@ -122,9 +122,9 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
         if (withImage) {
             return new Parameter[] {
                 new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-                new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),
-                new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj.getObjectID())),
-                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj.getLastModified().getTime())),
+                new Parameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(this.originFolder)),
+                new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactObj.getObjectID())),
+                new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactObj.getLastModified().getTime())),
                 new FieldParameter("json", fieldContent),
                 new FileParameter("file", "open-xchange_image.jpg", new ByteArrayInputStream(contactObj.getImage1()), "image/jpg")
             };
@@ -132,9 +132,9 @@ public class UpdateRequest extends AbstractContactRequest<UpdateResponse> {
 
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE),
-            new Parameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(this.originFolder)),
-            new Parameter(AJAXServlet.PARAMETER_ID, String.valueOf(contactObj.getObjectID())),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(contactObj.getLastModified().getTime()))
+            new Parameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(this.originFolder)),
+            new Parameter(AJAXServlet.PARAMETER_ID, Integer.toString(contactObj.getObjectID())),
+            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(contactObj.getLastModified().getTime()))
         };
     }
 

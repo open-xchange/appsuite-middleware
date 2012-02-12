@@ -310,7 +310,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      */
     public void setContentLength(final long contentLength) {
         try {
-            setHeaderInternal(CONTENT_LENGTH, String.valueOf(contentLength), false);
+            setHeaderInternal(CONTENT_LENGTH, Long.toString(contentLength), false);
         } catch (final AJPv13Exception e) {
             // Cannot occur
         }
