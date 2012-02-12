@@ -163,7 +163,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
                  * Update last-accessed time stamp
                  */
                 final long stamp = System.currentTimeMillis();
-                pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, String.valueOf(stamp));
+                pop3StorageProperties.addProperty(POP3StoragePropertyNames.PROPERTY_LAST_ACCESSED, Long.toString(stamp));
                 if (DEBUG) {
                     final long dur = stamp - st;
                     final Session session = pop3Access.getSession();

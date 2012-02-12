@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactInterface;
 import com.openexchange.groupware.contact.ContactInterfaceDiscoveryService;
@@ -27,40 +26,40 @@ import com.openexchange.tools.session.ServerSession;
 public class FacebookFriendsImporter extends AbstractImporter {
 
 	@Override
-	protected String getNameForFieldInTruncationError(int id,
-			OXException dataTruncation) {
+	protected String getNameForFieldInTruncationError(final int id,
+			final OXException dataTruncation) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-    public boolean canImport(ServerSession sessObj, Format format,
-			List<String> folders, Map<String, String[]> optionalParams)
+    public boolean canImport(final ServerSession sessObj, final Format format,
+			final List<String> folders, final Map<String, String[]> optionalParams)
 			throws OXException {
 		return Format.FacebookFriends == format;
 	}
 
 	@Override
-    public List<ImportResult> importData(ServerSession sessObj, Format format,
-			InputStream is, List<String> folders,
-			Map<String, String[]> optionalParams) throws OXException {
+    public List<ImportResult> importData(final ServerSession sessObj, final Format format,
+			final InputStream is, final List<String> folders,
+			final Map<String, String[]> optionalParams) throws OXException {
 
-		int fid = checkAndGetFolder(folders, sessObj);
-		Scanner scanner = new Scanner(is, "UTF-8");
-		StringBuilder html = new StringBuilder();
+		final int fid = checkAndGetFolder(folders, sessObj);
+		final Scanner scanner = new Scanner(is, "UTF-8");
+		final StringBuilder html = new StringBuilder();
 		while(scanner.hasNextLine()){
 			html.append(scanner.nextLine());
 		}
-		Pattern p= Pattern.compile("<div\\s+class\\s?=\\s?[\"']friend[\"']\\s?>\\s?<span\\s+class\\s?=\\s?[\"']profile[\"']\\s?>(.+?)</span\\s?>\\s?</div\\s?>");
-		Matcher m = p.matcher(html);
+		final Pattern p= Pattern.compile("<div\\s+class\\s?=\\s?[\"']friend[\"']\\s?>\\s?<span\\s+class\\s?=\\s?[\"']profile[\"']\\s?>(.+?)</span\\s?>\\s?</div\\s?>");
+		final Matcher m = p.matcher(html);
 
         final List<ImportResult> list = new ArrayList<ImportResult>();
 
-		List<Contact> contacts = new LinkedList<Contact>();
+		final List<Contact> contacts = new LinkedList<Contact>();
 
 		while(m.find()){
-			String displayName = m.group(1);
-			Contact c = new Contact();
+			final String displayName = m.group(1);
+			final Contact c = new Contact();
 			c.setDisplayName(displayName);
 			c.setParentFolderID(fid);
 			contacts.add(c);
@@ -70,20 +69,20 @@ public class FacebookFriendsImporter extends AbstractImporter {
 		try {
 			contactInterface = ServerServiceRegistry.getInstance().getService(
 			        ContactInterfaceDiscoveryService.class).newContactInterface(fid, sessObj);
-		} catch (OXException e1) {
+		} catch (final OXException e1) {
 			throw ImportExportExceptionCodes.CONTACT_INTERFACE_MISSING.create();
 		}
 
 
-		for(Contact c: contacts) {
+		for(final Contact c: contacts) {
 			ImportResult res = null;
 			try {
 				contactInterface.insertContactObject(c);
 				res = new ImportResult(
-						String.valueOf(fid),
-						String.valueOf(c.getObjectID()),
+				        Integer.toString(fid),
+				        Integer.toString(c.getObjectID()),
 						new Date());
-			} catch (OXException e) {
+			} catch (final OXException e) {
 				res = new ImportResult();
 				res.setException(ImportExportExceptionCodes.COULD_NOT_WRITE.create());
 				res.setDate(new Date());
@@ -94,11 +93,11 @@ public class FacebookFriendsImporter extends AbstractImporter {
 		return list;
 	}
 
-	private int checkAndGetFolder(List<String> folders, ServerSession session) throws OXException {
+	private int checkAndGetFolder(final List<String> folders, final ServerSession session) throws OXException {
 
         final OXFolderAccess folderAccess = new OXFolderAccess(session.getContext());
 
-        for (String fid : folders) {
+        for (final String fid : folders) {
 
             final int folderId = Integer.parseInt(fid);
             FolderObject fo;

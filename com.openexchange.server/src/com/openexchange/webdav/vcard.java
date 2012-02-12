@@ -240,7 +240,7 @@ public final class vcard extends PermissionServlet {
                     final VersitObject vo = oxc.convertContact(contactObject, "3.0");
                     def.write(w, vo);
 
-                    entries.add(String.valueOf(contactObject.getObjectID()));
+                    entries.add(Integer.toString(contactObject.getObjectID()));
                 }
             } finally {
                 w.flush();
@@ -588,7 +588,7 @@ public final class vcard extends PermissionServlet {
             rs = ps.executeQuery();
 
             while (rs.next()) {
-                entries_db.put(rs.getString(2), String.valueOf(rs.getInt(3)));
+                entries_db.put(rs.getString(2), Integer.toString(rs.getInt(3)));
             }
 
             rs.close();

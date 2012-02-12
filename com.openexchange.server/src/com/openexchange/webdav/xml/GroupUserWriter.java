@@ -296,7 +296,7 @@ public class GroupUserWriter extends ContactWriter {
         final int groupId[] = u.getGroups();
         for (int a = 0; a < groupId.length; a++) {
             final Element eMember = new Element("member", XmlServlet.NS);
-            eMember.addContent(String.valueOf(groupId[a]));
+            eMember.addContent(Integer.toString(groupId[a]));
             eMemberInGroups.addContent(eMember);
         }
 

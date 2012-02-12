@@ -162,7 +162,7 @@ public final class AppointmentRepairRecurrenceDatePosition implements UpdateTask
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(sql);
-            stmt.setString(1, String.valueOf(recurrenceDatePosition));
+            stmt.setString(1, Long.toString(recurrenceDatePosition));
             stmt.setInt(2, cid);
             stmt.setInt(3, id);
             final int changed = stmt.executeUpdate();

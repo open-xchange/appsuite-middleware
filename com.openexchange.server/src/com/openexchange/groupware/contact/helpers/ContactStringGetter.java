@@ -94,7 +94,7 @@ public class ContactStringGetter implements ContactSwitcher {
 	    if (date == null) {
 	        return "";
 	    }
-	    return String.valueOf(date.getTime());
+	    return Long.toString(date.getTime());
 	}
 
 	/* DELEGATE */
@@ -653,58 +653,62 @@ public class ContactStringGetter implements ContactSwitcher {
 	}
 
     @Override
-    public Object numberofimages(Object... objects) throws OXException {
+    public Object numberofimages(final Object... objects) throws OXException {
         return stringify(delegate.numberofimages(objects));
     }
 
     @Override
-    public Object lastmodifiedofnewestattachment(Object... objects) throws OXException {
+    public Object lastmodifiedofnewestattachment(final Object... objects) throws OXException {
         return stringifyTimestamp((Date)delegate.lastmodifiedofnewestattachment(objects));
     }
 
     @Override
-    public Object usecount(Object... objects) throws OXException {
+    public Object usecount(final Object... objects) throws OXException {
         return stringify(delegate.usecount(objects));
     }
 
     @Override
-    public Object markasdistributionlist(Object[] objects) throws OXException {
+    public Object markasdistributionlist(final Object[] objects) throws OXException {
         return stringify(delegate.markasdistributionlist(objects));
     }
 
     @Override
-    public Object yomifirstname(Object[] objects) throws OXException {
+    public Object yomifirstname(final Object[] objects) throws OXException {
         return stringify(delegate.yomifirstname(objects));
     }
 
     @Override
-    public Object yomilastname(Object[] objects) throws OXException {
+    public Object yomilastname(final Object[] objects) throws OXException {
         return stringify(delegate.yomilastname(objects));
     }
 
     @Override
-    public Object yomicompanyname(Object[] objects) throws OXException {
+    public Object yomicompanyname(final Object[] objects) throws OXException {
         return stringify(delegate.yomicompanyname(objects));
     }
 
     @Override
-    public Object image1contenttype(Object[] objects) throws OXException {
+    public Object image1contenttype(final Object[] objects) throws OXException {
         return stringify(delegate.image1contenttype(objects));
     }
     
-    public Object homeaddress(Object[] objects) throws OXException {
+    @Override
+    public Object homeaddress(final Object[] objects) throws OXException {
         return stringify(delegate.homeaddress(objects));
     }
 
-    public Object businessaddress(Object[] objects) throws OXException {
+    @Override
+    public Object businessaddress(final Object[] objects) throws OXException {
         return stringify(delegate.businessaddress(objects));
     }
 
-    public Object otheraddress(Object[] objects) throws OXException {
+    @Override
+    public Object otheraddress(final Object[] objects) throws OXException {
         return stringify(delegate.otheraddress(objects));
     }
 
-    public Object uid(Object[] objects) throws OXException {
+    @Override
+    public Object uid(final Object[] objects) throws OXException {
         return stringify(delegate.uid(objects));
     }
 

@@ -51,7 +51,6 @@ package com.openexchange.carddav;
 
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -61,12 +60,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.ContactSQLInterface;
 import com.openexchange.api2.RdbContactSQLImpl;
 import com.openexchange.carddav.reports.Syncstatus;
@@ -294,7 +290,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 					nextSyncToken = Tools.getLatestModified(nextSyncToken, folderLastModified);
 				}				
 			}
-			multistatus.setToken(String.valueOf(nextSyncToken.getTime()));
+			multistatus.setToken(Long.toString(nextSyncToken.getTime()));
 			// TODO: Deleted Folders
 			return multistatus;
 		} catch (final OXException e) {

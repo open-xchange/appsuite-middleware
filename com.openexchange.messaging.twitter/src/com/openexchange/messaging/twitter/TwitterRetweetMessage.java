@@ -151,7 +151,7 @@ public final class TwitterRetweetMessage implements MessagingMessage {
             }
             {
                 final String name = TwitterConstants.HEADER_STATUS_ID;
-                m.put(name, getSimpleHeader(name, String.valueOf(status.getId())));
+                m.put(name, getSimpleHeader(name, Long.toString(status.getId())));
             }
             headers = Collections.unmodifiableMap(m);
         }

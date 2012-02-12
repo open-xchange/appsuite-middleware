@@ -514,7 +514,7 @@ public class InfostoreRequest extends CommonRequest {
 
             dm = infostore.getDocumentMetadata(id, version, ctx, user, userConfiguration);
             if (dm == null) {
-                sendErrorAsJS("Cannot find document: %s ", String.valueOf(id));
+                sendErrorAsJS("Cannot find document: %s ", Integer.toString(id));
             }
         } catch (final Throwable t) {
             handle(t);

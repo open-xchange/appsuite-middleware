@@ -98,7 +98,7 @@ public class GenericImpl implements ConfigJumpService {
         final Set<String> infos = new HashSet<String>();
         infos.addAll(Arrays.asList(loginInfos));
         if (infos.size() > 1) {
-            infos.remove(String.valueOf(contextId));
+            infos.remove(Integer.toString(contextId));
         }
         return infos.toArray(new String[infos.size()])[0];
     }

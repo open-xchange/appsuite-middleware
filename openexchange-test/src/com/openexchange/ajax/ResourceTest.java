@@ -129,7 +129,7 @@ public class ResourceTest extends AbstractAJAXTest {
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET);
-        parameter.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(groupId));
+        parameter.setParameter(AJAXServlet.PARAMETER_ID, Integer.toString(groupId));
 
         final WebRequest req = new GetMethodWebRequest(host + RESOURCE_URL + parameter.getURLParameters());
         final WebResponse resp = webCon.getResponse(req);
@@ -149,16 +149,16 @@ public class ResourceTest extends AbstractAJAXTest {
         return extractResource(jsonObj);
     }
 
-    private static List<Resource> extractResources(JSONArray array) throws JSONException {
-        LinkedList<Resource> resources = new LinkedList<Resource>();
+    private static List<Resource> extractResources(final JSONArray array) throws JSONException {
+        final LinkedList<Resource> resources = new LinkedList<Resource>();
         for (int i = 0, length = array.length(); i < length; i++) {
             resources.add(extractResource(array.getJSONObject(i)));
         }
         return resources;
     }
 
-    private static Resource extractResource(JSONObject jObj) throws JSONException {
-        Resource res = new com.openexchange.resource.Resource();
+    private static Resource extractResource(final JSONObject jObj) throws JSONException {
+        final Resource res = new com.openexchange.resource.Resource();
         res.setIdentifier(jObj.getInt(ResourceFields.ID));
         if (jObj.has(ResourceFields.DISPLAY_NAME)) {
             res.setDisplayName(jObj.getString(ResourceFields.DISPLAY_NAME));

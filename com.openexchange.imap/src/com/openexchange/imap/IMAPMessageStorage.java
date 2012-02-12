@@ -658,7 +658,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             for (int k = 0; k < uids.length; k++) {
                 final long uid = uids[k];
                 if (uid != -1) {
-                    retval[k] = new IDMailMessage(fullName, String.valueOf(uid));
+                    retval[k] = new IDMailMessage(fullName, Long.toString(uid));
                     count++;
                 }
             }
@@ -692,7 +692,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             try {
                 mail = MIMEMessageConverter.convertMessage(msg, false);
                 mail.setFolder(fullName);
-                mail.setMailId(String.valueOf(msgUID));
+                mail.setMailId(Long.toString(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
             } catch (final OXException e) {
                 if (MIMEMailExceptionCode.MESSAGE_REMOVED.getNumber() == e.getCode() && e.isPrefix("MSG")) {
@@ -2370,7 +2370,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         final int len = uids.length;
                         final List<MailMessage> list = new ArrayList<MailMessage>(len);
                         for (int i = 0; i < len; i++) {
-                            final IDMailMessage mail = new IDMailMessage(String.valueOf(uids[i]), fullName);
+                            final IDMailMessage mail = new IDMailMessage(Long.toString(uids[i]), fullName);
                             list.add(mail);
                         }
                         retval = list.toArray(new MailMessage[list.size()]);

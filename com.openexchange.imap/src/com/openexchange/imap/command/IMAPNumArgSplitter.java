@@ -139,7 +139,7 @@ public final class IMAPNumArgSplitter {
 
             @Override
             public String getNext(final int index) {
-                return String.valueOf(arr[index]);
+                return Long.toString(arr[index]);
             }
         }, arr.length);
     }

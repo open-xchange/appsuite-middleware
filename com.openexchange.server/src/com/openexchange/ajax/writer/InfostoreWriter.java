@@ -296,7 +296,7 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
 		}
 
 		private void writeId(final long id) {
-			writeString(String.valueOf(id));
+			writeString(Long.toString(id));
 		}
 
 		private void writeString(final String string) {

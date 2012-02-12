@@ -50,18 +50,14 @@
 package com.openexchange.groupware.infostore.webdav;
 
 import static com.openexchange.java.Autoboxing.I;
-
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.EnumComponent;
@@ -391,7 +387,7 @@ public class DocumentMetadataResource extends AbstractResource implements OXWebd
                     displayName = user.getMail();
                 }
                 if(displayName == null) {
-                    displayName = String.valueOf(userId);
+                    displayName = Integer.toString(userId);
                 }
                 lock.setOwner(displayName);
 

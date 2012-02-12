@@ -68,7 +68,7 @@ public class IntSQLInjector implements SQLInjector {
 
 	@Override
 	public String toString() {
-		return String.valueOf(value);
+		return Integer.toString(value);
 	}
 
 }
