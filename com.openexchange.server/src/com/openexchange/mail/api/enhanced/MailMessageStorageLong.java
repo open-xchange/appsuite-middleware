@@ -603,10 +603,10 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         }
         final int max = s.length();
         if (max <= 0) {
-            return -1;
+            return DEFAULT;
         }
         if (s.charAt(0) == '-') {
-            return -1;
+            return DEFAULT;
         }
 
         long result = 0;
