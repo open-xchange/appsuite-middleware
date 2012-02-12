@@ -408,13 +408,13 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * A convenience method that saves given draft mail to default drafts folder and supports deletion of old draft's version (draft-edit
      * operation).
      *
-     * @param draftFullname name The full name of default drafts folder
+     * @param draftFullName name The full name of default drafts folder
      * @param draftMail The draft mail as a composed mail
      * @return The stored draft mail
      * @throws OXException If saving specified draft message fails
      */
     @Override
-    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
+    public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
             final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
@@ -422,7 +422,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             /*
              * Append message to draft folder
              */
-            uid = appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
+            uid = appendMessages(draftFullName, new MailMessage[] { filledMail })[0];
         } finally {
             draftMail.cleanUp();
         }
@@ -430,14 +430,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
          * Check for draft-edit operation: Delete old version
          */
         final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null && draftFullname.equals(msgref.getFolder())) {
+        if (msgref != null && draftFullName.equals(msgref.getFolder())) {
             deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             draftMail.setMsgref(null);
         }
         /*
          * Return draft mail
          */
-        return getMessage(draftFullname, uid, true);
+        return getMessage(draftFullName, uid, true);
     }
 
     /**
