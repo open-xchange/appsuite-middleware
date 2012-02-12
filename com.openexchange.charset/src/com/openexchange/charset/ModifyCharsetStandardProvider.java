@@ -68,7 +68,7 @@ public final class ModifyCharsetStandardProvider {
     }
 
     /**
-     * Modifies field <code>java.nio.charset.Charset.extendedProvider</code>
+     * Modifies field <code>java.nio.charset.Charset.standardProvider</code>
      *
      * @throws NoSuchFieldException If field "standardProvider" does not exist
      * @throws IllegalAccessException If field "standardProvider" is not accessible
