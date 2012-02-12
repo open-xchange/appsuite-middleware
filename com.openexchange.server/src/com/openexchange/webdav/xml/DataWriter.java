@@ -140,7 +140,7 @@ public class DataWriter {
     public static Element addElement(final String name, final Date value, final Element parent) {
         if (value != null) {
             final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-            e.addContent(String.valueOf(value.getTime()));
+            e.addContent(Long.toString(value.getTime()));
             parent.addContent(e);
             return e;
         }
@@ -163,7 +163,7 @@ public class DataWriter {
 
     public static Element addElement(final String name, final long value, final Element parent) throws Exception {
         final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-        e.addContent(String.valueOf(value));
+        e.addContent(Long.toString(value));
         parent.addContent(e);
         return e;
     }

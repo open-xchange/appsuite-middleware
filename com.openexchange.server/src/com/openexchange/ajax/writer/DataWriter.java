@@ -174,7 +174,7 @@ public class DataWriter {
      */
     public static void writeParameter(final String name, final long value, final JSONObject json) throws JSONException {
         // Large values of long must be written as string. See bug 11311.
-        writeParameter(name, String.valueOf(value), json);
+        writeParameter(name, Long.toString(value), json);
     }
 
     /**
@@ -194,7 +194,7 @@ public class DataWriter {
         if (null == value) {
             writeNull(name, json, condition);
         } else {
-            writeParameter(name, String.valueOf(value), json, condition);
+            writeParameter(name, Long.toString(value.longValue()), json, condition);
         }
     }
 

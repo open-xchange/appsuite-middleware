@@ -539,7 +539,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         final Date lastModified = dataobject.getLastModified();
         if (lastModified != null) {
             final Element eLastModified = new Element(DataFields.LAST_MODIFIED, NS);
-            eLastModified.addContent(String.valueOf(lastModified.getTime()));
+            eLastModified.addContent(Long.toString(lastModified.getTime()));
             e_prop.addContent(eLastModified);
         }
 

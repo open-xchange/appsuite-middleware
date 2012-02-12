@@ -482,7 +482,7 @@ public final class AJPv13RequestHandlerImpl implements AJPv13RequestHandler {
             sb.append("State: ").append(state.equals(State.IDLE) ? "IDLE" : "ASSIGNED").append(delim);
             sb.append("Servlet: ").append(servlet == null ? "null" : servlet.getClass().getName()).append(delim);
             sb.append("Current Request: ").append(ajpRequest.getClass().getName()).append(delim);
-            sb.append("Content Length: ").append(bContentLength ? String.valueOf(contentLength) : "Not available").append(delim);
+            sb.append("Content Length: ").append(bContentLength ? Long.toString(contentLength) : "Not available").append(delim);
             sb.append("Servlet triggered: ").append(serviceMethodCalled).append(delim);
             sb.append("Headers sent: ").append(headersSent).append(delim);
             sb.append("End Response sent: ").append(endResponseSent).append(delim);

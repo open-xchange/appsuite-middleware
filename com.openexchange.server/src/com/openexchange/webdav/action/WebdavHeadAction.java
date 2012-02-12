@@ -54,7 +54,8 @@ import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavHeadAction extends AbstractAction {
 
-	public void perform(final WebdavRequest req, final WebdavResponse res)
+	@Override
+    public void perform(final WebdavRequest req, final WebdavResponse res)
 			throws WebdavProtocolException {
 		head(res,req.getResource(),-1);
 	}
@@ -65,7 +66,7 @@ public class WebdavHeadAction extends AbstractAction {
 		}
 		res.setHeader("Content-Type", resource.getContentType());
 		if(!resource.isCollection()) {
-			res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : String.valueOf(overrideLength));
+			res.setHeader("Content-Length", (overrideLength == -1) ? resource.getLength().toString() : Long.toString(overrideLength));
 		}
 		res.setHeader("ETag", resource.getETag());
 		res.setHeader("Accept-Ranges", "bytes");

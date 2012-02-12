@@ -203,7 +203,7 @@ public final class attachments extends OXServlet {
             e_prop.addContent(e_object_id);
 
             final Element e_lastmodified = new Element(LAST_MODIFIED, PREFIX, NAMESPACE);
-            e_lastmodified.addContent(String.valueOf(lastModified.getTime()));
+            e_lastmodified.addContent(Long.toString(lastModified.getTime()));
 
             e_prop.addContent(e_lastmodified);
 
