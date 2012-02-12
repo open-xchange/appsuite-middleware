@@ -1006,7 +1006,7 @@ public final class MailMessageParser {
     }
 
     private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
-        if (is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
+        if (false && is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
             try {
                 final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
                 if (!MessageUtility.isAscii(bytes)) {
