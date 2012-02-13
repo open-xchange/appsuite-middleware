@@ -144,7 +144,7 @@ public final class AllFetch {
 
             @Override
             public void handleItem(final Item item, final MailMessage m, final Log logger) {
-                m.setMailId(String.valueOf(((UID) item).uid));
+                m.setMailId(Long.toString(((UID) item).uid));
             }
         }),
         /**

@@ -218,7 +218,7 @@ public final class IMAPCommandsCollection {
                  * Encode the mbox as per RFC2060
                  */
                 final String mboxName = prepareStringArgument(new StringBuilder("probe").append(
-                    String.valueOf(System.currentTimeMillis())).toString());
+                    Long.toString(System.currentTimeMillis())).toString());
                 /*
                  * Perform command: CREATE
                  */
@@ -257,9 +257,9 @@ public final class IMAPCommandsCollection {
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
                 final String fullName;
                 if (null == fullnamePrefix || fullnamePrefix.length() == 0) {
-                    fullName = String.valueOf(System.currentTimeMillis());
+                    fullName = Long.toString(System.currentTimeMillis());
                 } else {
-                    fullName = new StringBuilder(64).append(fullnamePrefix).append(String.valueOf(System.currentTimeMillis())).toString();
+                    fullName = new StringBuilder(64).append(fullnamePrefix).append(Long.toString(System.currentTimeMillis())).toString();
                 }
                 try {
                     Boolean retval = Boolean.TRUE;
@@ -324,7 +324,7 @@ public final class IMAPCommandsCollection {
     }
 
     protected static char getSeparator(final IMAPProtocol p) throws ProtocolException {
-        final String dummyFullname = String.valueOf(System.currentTimeMillis());
+        final String dummyFullname = Long.toString(System.currentTimeMillis());
         final ListInfo[] li;
         if (p.isREV1()) {
             li = p.list(dummyFullname, "");
@@ -353,7 +353,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Encode the mbox as per RFC2060
                  */
-                final String now = String.valueOf(System.currentTimeMillis());
+                final String now = Long.toString(System.currentTimeMillis());
                 final StringBuilder sb = new StringBuilder(now.length() + prefix.length() + 16);
                 final String mboxName = prepareStringArgument(sb.append(prefix).append(now).toString());
                 /*

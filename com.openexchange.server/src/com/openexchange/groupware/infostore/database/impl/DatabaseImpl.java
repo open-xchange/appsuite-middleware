@@ -256,7 +256,7 @@ public class DatabaseImpl extends DBService {
         if (version == InfostoreFacade.CURRENT_VERSION) {
             versionString = "infostore.version";
         } else {
-            versionString = String.valueOf(version);
+            versionString = Integer.toString(version);
         }
         try {
             final int[] columns = switchMetadata2DBColumns(Metadata.VALUES_ARRAY, false);
@@ -628,7 +628,7 @@ public class DatabaseImpl extends DBService {
             stmt.setString(11, document.getCategories());
             stmt.setString(12, document.getFileName());
             stmt.setString(13, identifier);
-            stmt.setString(14, String.valueOf(document.getFileSize()));
+            stmt.setString(14, Long.toString(document.getFileSize()));
             stmt.setString(15, document.getFileMIMEType());
             stmt.setString(16, document.getFileMD5Sum());
             retval[2] = stmt.executeUpdate();

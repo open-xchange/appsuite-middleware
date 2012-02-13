@@ -217,7 +217,7 @@ public class MailAccountPOP3Storage implements POP3Storage {
 
     private static String stripSpecials(final String src) {
         if (null == src || src.length() == 0) {
-            return String.valueOf(System.currentTimeMillis());
+            return Long.toString(System.currentTimeMillis());
         }
         final char[] chars = src.toCharArray();
         final StringBuilder sb = new StringBuilder(chars.length);

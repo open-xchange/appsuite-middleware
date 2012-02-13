@@ -275,23 +275,23 @@ public class FolderWriter extends FolderChildWriter {
     protected static void addElementUser(final Element e_permissions, final int entity, final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws Exception {
         final Element e = new Element("user", namespace);
         addAttributes(e, fp, orp, owp, odp, adminFlag);
-        e.addContent(String.valueOf(entity));
+        e.addContent(Integer.toString(entity));
         e_permissions.addContent(e);
     }
 
     protected static void addElementGroup(final Element e_permissions, final int entity, final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws Exception {
         final Element e = new Element("group", namespace);
         addAttributes(e, fp, orp, owp, odp, adminFlag);
-        e.addContent(String.valueOf(entity));
+        e.addContent(Integer.toString(entity));
         e_permissions.addContent(e);
     }
 
     protected static void addAttributes(final Element e, final int fp, final int orp, final int owp, final int odp, final boolean adminFlag) throws Exception {
-        e.setAttribute("folderpermission", String.valueOf(fp), namespace);
-        e.setAttribute("objectreadpermission", String.valueOf(orp), namespace);
-        e.setAttribute("objectwritepermission", String.valueOf(owp), namespace);
-        e.setAttribute("objectdeletepermission", String.valueOf(odp), namespace);
-        e.setAttribute("admin_flag", String.valueOf(adminFlag), namespace);
+        e.setAttribute("folderpermission", Integer.toString(fp), namespace);
+        e.setAttribute("objectreadpermission", Integer.toString(orp), namespace);
+        e.setAttribute("objectwritepermission", Integer.toString(owp), namespace);
+        e.setAttribute("objectdeletepermission", Integer.toString(odp), namespace);
+        e.setAttribute("admin_flag", Boolean.toString(adminFlag), namespace);
     }
 
     /*-

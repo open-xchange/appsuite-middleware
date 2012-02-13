@@ -105,7 +105,7 @@ public final class ICalMailPartDataSource extends MailPartDataSource {
             } else {
                 properties.put(DataProperties.PROPERTY_CHARSET, charset);
             }
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(mailPart.getSize()));
+            properties.put(DataProperties.PROPERTY_SIZE, Long.toString(mailPart.getSize()));
             properties.put(DataProperties.PROPERTY_NAME, mailPart.getFileName());
             try {
                 return new SimpleData<D>((D) mailPart.getInputStream(), properties);

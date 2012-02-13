@@ -1860,7 +1860,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 FolderObject fo = new FolderObject(updateFolderId);
                 new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
                 fo = foldersqlinterface.saveFolderObject(fo, timestamp);
-                retval = String.valueOf(fo.getObjectID());
+                retval = Integer.toString(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (folderIdentifier.startsWith(FolderObject.SHARED_PREFIX)) {
                 throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(getUserName(session),
@@ -1993,7 +1993,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 fo.setParentFolderID(parentFolderId);
                 new FolderParser(session.getUserConfiguration()).parse(fo, jsonObj);
                 fo = foldersqlinterface.saveFolderObject(fo, null);
-                retval = String.valueOf(fo.getObjectID());
+                retval = Integer.toString(fo.getObjectID());
                 lastModifiedDate = fo.getLastModified();
             } else if (parentFolder.startsWith(FolderObject.SHARED_PREFIX)) {
                 throw OXFolderExceptionCode.NO_CREATE_SUBFOLDER_PERMISSION.create(getUserName(session),

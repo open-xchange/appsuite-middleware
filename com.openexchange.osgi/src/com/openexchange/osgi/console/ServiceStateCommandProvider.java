@@ -89,7 +89,7 @@ public final class ServiceStateCommandProvider implements CommandProvider {
         builder.append("=====[").append(name).append("]=====");
         intp.println(builder);
         if (state == null) {
-            intp.println("Noting known. Sorry.");
+            intp.println("Nothing known. Sorry.");
             return;
         }
         final List<String> missing = state.getMissingServices();

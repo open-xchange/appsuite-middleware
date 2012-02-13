@@ -92,13 +92,13 @@ public class DataWriter {
     protected void writeResponseElement(final Element e_prop, final int object_id, final int status, final String description, final XMLOutputter xo, final OutputStream os) throws Exception {
         final Element e_response = new Element("response", dav);
         e_response.addNamespaceDeclaration(Namespace.getNamespace(XmlServlet.PREFIX, XmlServlet.NAMESPACE));
-        e_response.addContent(new Element("href", dav).addContent(String.valueOf(object_id)));
+        e_response.addContent(new Element("href", dav).addContent(Integer.toString(object_id)));
 
         final Element e_propstat = new Element("propstat", dav);
         e_response.addContent(e_propstat);
 
         e_propstat.addContent(e_prop);
-        e_propstat.addContent(new Element("status", dav).addContent(String.valueOf(status)));
+        e_propstat.addContent(new Element("status", dav).addContent(Integer.toString(status)));
         e_propstat.addContent(new Element("responsedescription", dav).addContent(correctCharacterData(description)));
 
         xo.output(e_response, os);
@@ -140,7 +140,7 @@ public class DataWriter {
     public static Element addElement(final String name, final Date value, final Element parent) {
         if (value != null) {
             final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-            e.addContent(String.valueOf(value.getTime()));
+            e.addContent(Long.toString(value.getTime()));
             parent.addContent(e);
             return e;
         }
@@ -149,21 +149,21 @@ public class DataWriter {
 
     public static Element addElement(final String name, final int value, final Element parent) {
         final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-        e.addContent(String.valueOf(value));
+        e.addContent(Integer.toString(value));
         parent.addContent(e);
         return e;
     }
 
     public static Element addElement(final String name, final float value, final Element parent) throws Exception {
         final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-        e.addContent(String.valueOf(value));
+        e.addContent(Float.toString(value));
         parent.addContent(e);
         return e;
     }
 
     public static Element addElement(final String name, final long value, final Element parent) throws Exception {
         final Element e = new Element(name, XmlServlet.PREFIX, XmlServlet.NAMESPACE);
-        e.addContent(String.valueOf(value));
+        e.addContent(Long.toString(value));
         parent.addContent(e);
         return e;
     }

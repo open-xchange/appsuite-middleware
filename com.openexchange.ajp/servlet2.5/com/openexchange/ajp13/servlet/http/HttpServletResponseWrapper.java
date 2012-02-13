@@ -289,7 +289,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     @Override
     public void addIntHeader(final String name, final int i) {
-        addHeader(name, String.valueOf(i));
+        addHeader(name, Integer.toString(i));
     }
 
     @Override
@@ -416,7 +416,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
 
     @Override
     public void setIntHeader(final String name, final int i) {
-        setHeader(name, String.valueOf(i));
+        setHeader(name, Integer.toString(i));
     }
 
     @Override
@@ -486,7 +486,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             desc = String.format(desc, request.getServletPath());
         }
         String errorMsgStr = ERROR_PAGE_TEMPL;
-        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
             "#STATUS_DESC#",
             desc);
         synchronized (HEADER_DATE_FORMAT) {
@@ -518,7 +518,7 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper implement
             desc = String.format(desc, request.getServletPath());
         }
         String errorMsgStr = ERROR_PAGE_TEMPL;
-        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", String.valueOf(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
+        errorMsgStr = errorMsgStr.replaceAll("#STATUS_CODE#", Integer.toString(this.status)).replaceAll("#STATUS_MSG#", this.statusMsg).replaceFirst(
             "#STATUS_DESC#",
             desc);
         synchronized (HEADER_DATE_FORMAT) {

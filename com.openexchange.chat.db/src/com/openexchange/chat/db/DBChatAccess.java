@@ -176,7 +176,7 @@ public final class DBChatAccess implements ChatAccess {
         this.userId = userId;
         context = DBChatServiceLookup.getService(ContextService.class).getContext(contextId);
         final ChatUserImpl user = new ChatUserImpl();
-        user.setId(String.valueOf(userId));
+        user.setId(Integer.toString(userId));
         user.setName(getUserName(userId));
         this.user = user;
         this.contextId = contextId;
@@ -306,7 +306,7 @@ public final class DBChatAccess implements ChatAccess {
             final List<String> ids = new LinkedList<String>();
             // TODO: ids.add("default"); // The default chat where all users are participating
             while (rs.next()) {
-                ids.add(String.valueOf(rs.getInt(1)));
+                ids.add(Integer.toString(rs.getInt(1)));
             }
             return ids;
         } catch (final SQLException e) {
@@ -553,7 +553,7 @@ public final class DBChatAccess implements ChatAccess {
     public Chat openChat(final String chatId, final MessageListener listener, final ChatUser... members) throws OXException {
         String chid = chatId;
         if (null == chid) {
-            chid = String.valueOf(getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId, MIN_CHAT_ID));
+            chid = Integer.toString(getService(IDGeneratorService.class).getId(PACKAGE_NAME, contextId, MIN_CHAT_ID));
         }
         final DatabaseService databaseService = getDatabaseService();
         final Connection con = databaseService.getWritable(contextId);

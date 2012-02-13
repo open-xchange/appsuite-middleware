@@ -51,9 +51,13 @@ package com.openexchange.user.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.documentation.annotations.RequestMethod;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -65,6 +69,11 @@ import com.openexchange.user.json.services.ServiceRegistry;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "getAttribute", description = "Get user attribute (available with v6.20).", parameters = { 
+		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+		@Parameter(name = "id", description = "ID of the user."),
+		@Parameter(name = "name", description = "The attribute name."),
+}, responseDescription = "Response without timestamp: A JSON object providing name and value of the requested attribute.")
 public final class GetAttributeAction extends AbstractUserAction {
 
     /**

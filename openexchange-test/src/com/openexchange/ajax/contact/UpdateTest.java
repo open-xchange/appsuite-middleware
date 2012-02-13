@@ -95,12 +95,12 @@ public class UpdateTest extends AbstractContactTest {
 
         final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
         final GetResponse response = client.execute(request);
-        final String uid = response.getImageUid();
-        if (uid == null) {
-            fail("Contact contains no image url.");
+        final String imageUrl = response.getImageUrl();
+        if (imageUrl == null) {
+            fail("Contact contains no image URL.");
         }
 
-        final byte[] b = loadImage(uid);
+        final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
 
         OXTestToolkit.assertEqualsAndNotNull("image", contactObj.getImage1(), b);
     }
@@ -116,12 +116,12 @@ public class UpdateTest extends AbstractContactTest {
 
         final GetRequest request = new GetRequest(contactFolderId, objectId, tz);
         final GetResponse response = client.execute(request);
-        final String uid = response.getImageUid();
-        if (uid == null) {
-            fail("Contact contains no image url.");
+        final String imageUrl = response.getImageUrl();
+        if (imageUrl == null) {
+            fail("Contact contains no image URL.");
         }
 
-        final byte[] b = loadImage(uid);
+        final byte[] b = loadImageByURL(client.getProtocol(), client.getHostname(), imageUrl);
 
         OXTestToolkit.assertEqualsAndNotNull("image", contactObj.getImage1(), b);
     }

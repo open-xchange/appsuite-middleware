@@ -80,7 +80,7 @@ public class UserStory1085Test extends AppointmentTest {
 
     private Date start, end;
 
-    public UserStory1085Test(String name) {
+    public UserStory1085Test(final String name) {
         super(name);
     }
 
@@ -97,7 +97,7 @@ public class UserStory1085Test extends AppointmentTest {
 
         folder = Create.folder(
             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
-            "UserStory1085Test - " + String.valueOf(System.currentTimeMillis()),
+            "UserStory1085Test - " + Long.toString(System.currentTimeMillis()),
             FolderObject.CALENDAR,
             FolderObject.PRIVATE,
             ocl(userIdB, false, true,
@@ -111,7 +111,7 @@ public class UserStory1085Test extends AppointmentTest {
                 OCLPermission.ADMIN_PERMISSION,
                 OCLPermission.ADMIN_PERMISSION));
 
-        CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
+        final CommonInsertResponse response = clientB.execute(new com.openexchange.ajax.folder.actions.InsertRequest(EnumAPI.OX_OLD, folder));
         response.fillObject(folder);
 
         appointmenShare = new Appointment();
@@ -157,21 +157,21 @@ public class UserStory1085Test extends AppointmentTest {
     }
 
     public void testUserStory1085() throws Exception {
-        Appointment[] appointmentsB = getFreeBusy(getWebConversation(), userIdB, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
-        Appointment[] appointmentsC = getFreeBusy(getWebConversation(), userIdC, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
+        final Appointment[] appointmentsB = getFreeBusy(getWebConversation(), userIdB, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
+        final Appointment[] appointmentsC = getFreeBusy(getWebConversation(), userIdC, Participant.USER, start, end, clientB.getValues().getTimeZone(), getHostName(), getSessionId());
 
         boolean foundShare = false;
         boolean foundPrivate = false;
         boolean foundNormal = false;
 
-        for (Appointment app : appointmentsB) {
+        for (final Appointment app : appointmentsB) {
             if (app.getObjectID() == appointmenShare.getObjectID()) {
                 foundShare = true;
                 validateShare(app);
             }
         }
 
-        for (Appointment app : appointmentsC) {
+        for (final Appointment app : appointmentsC) {
             if (app.getObjectID() == appointmentNormal.getObjectID()) {
                 foundNormal = true;
                 validateNormal(app);
@@ -186,17 +186,17 @@ public class UserStory1085Test extends AppointmentTest {
         assertTrue("Missing appointment", foundNormal);
     }
 
-    private void validatePrivate(Appointment app) {
+    private void validatePrivate(final Appointment app) {
         assertFalse("No title for private flagged appointment expected but found: " + app.getTitle(), appointmentPrivate.getTitle().equals(app.getTitle()));
         assertFalse("No folderId expected", app.containsParentFolderID());
     }
 
-    private void validateNormal(Appointment app) {
+    private void validateNormal(final Appointment app) {
         assertFalse("No title for appointment in not shared folder expected but found: " + app.getTitle(), appointmentNormal.getTitle().equals(app.getTitle()));
         assertFalse("No folderId expected", app.containsParentFolderID());
     }
 
-    private void validateShare(Appointment app) {
+    private void validateShare(final Appointment app) {
         assertEquals("Missing or wrong folderId in Appointment", folder.getObjectID(), app.getParentFolderID());
     }
 

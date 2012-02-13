@@ -143,8 +143,8 @@ public class ContactWriter extends CommonWriter {
                 try {
                     final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
                     final ImageLocation imageLocation =
-                        new ImageLocation.Builder().folder(String.valueOf(contact.getParentFolderID())).id(
-                            String.valueOf(contact.getObjectID())).build();
+                        new ImageLocation.Builder().folder(Integer.toString(contact.getParentFolderID())).id(
+                            Integer.toString(contact.getObjectID())).build();
                     final String imageURL = imgSource.generateUrl(imageLocation, session);
                     writeParameter(ContactFields.IMAGE1_URL, imageURL, json);
                 } catch (final OXException e) {
@@ -695,8 +695,8 @@ public class ContactWriter extends CommonWriter {
                         try {
                             final ContactImageDataSource imgSource = ContactImageDataSource.getInstance();
                             final ImageLocation imageLocation =
-                                new ImageLocation.Builder().folder(String.valueOf(contactObject.getParentFolderID())).id(
-                                    String.valueOf(contactObject.getObjectID())).build();
+                                new ImageLocation.Builder().folder(Integer.toString(contactObject.getParentFolderID())).id(
+                                    Integer.toString(contactObject.getObjectID())).build();
                             final String imageURL = imgSource.generateUrl(imageLocation, session);
                             writeValue(imageURL, jsonArray);
                         } catch (final OXException e) {

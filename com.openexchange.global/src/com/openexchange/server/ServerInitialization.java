@@ -86,12 +86,12 @@ final class ServerInitialization implements Initialization {
         /*
          * The number of seconds to cache the successful lookup
          */
-        java.security.Security.setProperty("networkaddress.cache.ttl", String.valueOf(3600));
-        System.setProperty("sun.net.inetaddr.ttl", String.valueOf(3600));
+        java.security.Security.setProperty("networkaddress.cache.ttl", Integer.toString(3600));
+        System.setProperty("sun.net.inetaddr.ttl", Integer.toString(3600));
         /*
          * The number of seconds to cache the failure for un-successful lookups
          */
-        java.security.Security.setProperty("networkaddress.cache.negative.ttl", String.valueOf(10));
+        java.security.Security.setProperty("networkaddress.cache.negative.ttl", Integer.toString(10));
     }
 
     @Override

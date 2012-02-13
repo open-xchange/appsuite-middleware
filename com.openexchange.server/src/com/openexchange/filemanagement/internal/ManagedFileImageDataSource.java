@@ -93,7 +93,7 @@ public final class ManagedFileImageDataSource implements ImageDataSource {
             final DataProperties properties = new DataProperties();
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, managedFile.getContentType());
             properties.put(DataProperties.PROPERTY_CHARSET, "UTF-8");
-            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(managedFile.getSize()));
+            properties.put(DataProperties.PROPERTY_SIZE, Long.toString(managedFile.getSize()));
             properties.put(DataProperties.PROPERTY_NAME, managedFile.getFileName());
             return new SimpleData<D>((D) new FileInputStream(managedFile.getFile()), properties);
         } catch (final FileNotFoundException e) {

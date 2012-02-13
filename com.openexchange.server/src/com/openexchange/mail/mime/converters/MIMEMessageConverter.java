@@ -948,7 +948,7 @@ public final class MIMEMessageConverter {
 
             @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                mailMessage.setMailId(String.valueOf(((ExtendedMimeMessage) msg).getUid()));
+                mailMessage.setMailId(Long.toString(((ExtendedMimeMessage) msg).getUid()));
             }
         });
         FILLER_MAP_EXT.put(MailField.FOLDER_ID, new MailMessageFieldFiller() {
@@ -1494,7 +1494,7 @@ public final class MIMEMessageConverter {
                         @Override
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
                             if (folder instanceof UIDFolder) {
-                                mailMessage.setMailId(String.valueOf(((UIDFolder) folder).getUID(msg)));
+                                mailMessage.setMailId(Long.toString(((UIDFolder) folder).getUID(msg)));
                             } else if (folder instanceof FullnameFolder) {
                                 mailMessage.setMailId(((FullnameFolder) folder).getUID(msg));
                             } else if (folder instanceof POP3Folder) {
@@ -1604,7 +1604,7 @@ public final class MIMEMessageConverter {
                     }
                     try {
                         if (f instanceof UIDFolder) {
-                            mail.setMailId(String.valueOf(((UIDFolder) f).getUID(msg)));
+                            mail.setMailId(Long.toString(((UIDFolder) f).getUID(msg)));
                         } else if (f instanceof FullnameFolder) {
                             mail.setMailId(((FullnameFolder) f).getUID(msg));
                         } else if (f instanceof POP3Folder) {

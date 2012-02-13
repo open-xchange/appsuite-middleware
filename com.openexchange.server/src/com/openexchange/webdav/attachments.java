@@ -190,7 +190,7 @@ public final class attachments extends OXServlet {
 
             final Element e_href = new Element("href", "D", DAV);
 
-            e_href.addContent(String.valueOf(objectId));
+            e_href.addContent(Integer.toString(objectId));
 
             e_response.addContent(e_href);
 
@@ -198,12 +198,12 @@ public final class attachments extends OXServlet {
             final Element e_propstat = new Element("propstat", "D", DAV);
 
             final Element e_object_id = new Element(DataFields.OBJECT_ID, PREFIX, NAMESPACE);
-            e_object_id.addContent(String.valueOf(objectId));
+            e_object_id.addContent(Integer.toString(objectId));
 
             e_prop.addContent(e_object_id);
 
             final Element e_lastmodified = new Element(LAST_MODIFIED, PREFIX, NAMESPACE);
-            e_lastmodified.addContent(String.valueOf(lastModified.getTime()));
+            e_lastmodified.addContent(Long.toString(lastModified.getTime()));
 
             e_prop.addContent(e_lastmodified);
 
@@ -216,7 +216,7 @@ public final class attachments extends OXServlet {
             e_propstat.addContent(e_prop);
 
             final Element e_status = new Element("status", "D", DAV);
-            e_status.addContent(String.valueOf(HttpServletResponse.SC_OK));
+            e_status.addContent(Integer.toString(HttpServletResponse.SC_OK));
 
             e_propstat.addContent(e_status);
 

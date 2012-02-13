@@ -608,8 +608,8 @@ public class ContactTest extends AbstractAJAXTest {
         final URLParameter parameter = new URLParameter();
         parameter.setParameter(AJAXServlet.PARAMETER_SESSION, session);
         parameter.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
-        parameter.setParameter(DataFields.ID, String.valueOf(objectId));
-        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, String.valueOf(inFolder));
+        parameter.setParameter(DataFields.ID, Integer.toString(objectId));
+        parameter.setParameter(AJAXServlet.PARAMETER_INFOLDER, Integer.toString(inFolder));
         parameter.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date(System.currentTimeMillis()+1000000));
 
         WebRequest req = null;
@@ -748,11 +748,11 @@ public class ContactTest extends AbstractAJAXTest {
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
-    public static Contact[] searchContactAdvanced(final WebConversation webCon, final ContactSearchObject cso,final int folder, final int[] cols, String host, final String session) throws OXException, Exception {
+    public static Contact[] searchContactAdvanced(final WebConversation webCon, final ContactSearchObject cso,final int folder, final int[] cols, final String host, final String session) throws OXException, Exception {
         return searchContactAdvanced(webCon, cso, folder, 0, cols, host, session);
     }
 
-    public static Contact[] searchContactAdvanced(WebConversation webCon, ContactSearchObject cso, int folder, int orderBy, int[] cols, String host, String session) throws OXException, Exception {
+    public static Contact[] searchContactAdvanced(final WebConversation webCon, final ContactSearchObject cso, final int folder, final int orderBy, final int[] cols, String host, final String session) throws OXException, Exception {
         host = appendPrefix(host);
 
         final URLParameter parameter = new URLParameter();
@@ -832,21 +832,21 @@ public class ContactTest extends AbstractAJAXTest {
         return jsonArray2ContactArray((JSONArray)response.getData(), cols);
     }
 
-    public static Contact loadUser(final WebConversation webCon, final int userId, String host, final String session) throws OXException, IOException, SAXException, JSONException {
+    public static Contact loadUser(final WebConversation webCon, final int userId, final String host, final String session) throws OXException, IOException, SAXException, JSONException {
         return UserTools.getUserContact(webCon, host, session, userId);
     }
 
-    public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, String protocol, String host, final String session) throws Exception {
-        AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
+    public static Contact loadContact(final WebConversation webCon, final int objectId, final int inFolder, final String protocol, final String host, final String session) throws Exception {
+        final AJAXClient client = new AJAXClient(new AJAXSession(webCon, host, session));
         if (protocol.endsWith("://")) {
             client.setProtocol(protocol.substring(0, protocol.length() - 3));
         } else {
             client.setProtocol(protocol);
         }
         client.setHostname(host);
-        TimeZone timeZone = client.getValues().getTimeZone();
-        GetRequest request = new GetRequest(inFolder, objectId, timeZone);
-        GetResponse response = client.execute(request);
+        final TimeZone timeZone = client.getValues().getTimeZone();
+        final GetRequest request = new GetRequest(inFolder, objectId, timeZone);
+        final GetResponse response = client.execute(request);
         return response.getContact();
     }
 

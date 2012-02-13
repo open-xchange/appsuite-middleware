@@ -54,7 +54,7 @@ import java.util.List;
 
 /**
  * {@link ServiceStateImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class ServiceStateImpl implements ServiceState {
@@ -84,7 +84,7 @@ public final class ServiceStateImpl implements ServiceState {
 
     /**
      * Creates a copy of this {@link ServiceStateImpl}.
-     * 
+     *
      * @return A copy of this {@link ServiceStateImpl}.
      */
     public ServiceStateImpl copy() {

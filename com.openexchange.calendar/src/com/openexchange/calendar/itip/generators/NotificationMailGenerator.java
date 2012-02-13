@@ -49,15 +49,15 @@
 
 package com.openexchange.calendar.itip.generators;
 
+import static com.openexchange.calendar.itip.ITipUtils.endOfTheDay;
+import static com.openexchange.calendar.itip.ITipUtils.startOfTheDay;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -72,7 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
@@ -88,16 +87,11 @@ import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.html.HTMLService;
-import com.openexchange.html.tools.HTMLUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.user.UserService;
-import static com.openexchange.calendar.itip.ITipUtils.*;
-import static com.openexchange.java.Autoboxing.I;
 
 /**
  * {@link NotificationMailGenerator}
@@ -110,29 +104,29 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     private NotificationParticipant actor;
 
-    private List<NotificationParticipant> recipients;
+    private final List<NotificationParticipant> recipients;
 
-    private Appointment appointment;
+    private final Appointment appointment;
 
-    private Appointment original;
+    private final Appointment original;
 
-    private ITipIntegrationUtility util;
+    private final ITipIntegrationUtility util;
 
-    private Session session;
+    private final Session session;
 
     private AppointmentDiff diff;
 
     private MailGeneratorState state;
 
-    private Context ctx;
+    private final Context ctx;
     
-    private AttachmentMemory attachmentMemory;
+    private final AttachmentMemory attachmentMemory;
     
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
-    private List<NotificationParticipant> participants;
+    private final List<NotificationParticipant> participants;
 
-    private User user;
+    private final User user;
     
     private UserConfiguration userConfig;
     
@@ -151,7 +145,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         Appointment.SHOWN_AS
     };
 
-    private List<NotificationParticipant> resources;
+    private final List<NotificationParticipant> resources;
 
 	private NotificationParticipant principal;
 
@@ -159,7 +153,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     
 
-    public NotificationMailGenerator(ServiceLookup services, AttachmentMemory attachmentMemory, NotificationParticipantResolver resolver, ITipIntegrationUtility util, Appointment original, Appointment appointment, User user, User onBehalfOf, Context ctx, Session session) throws OXException {
+    public NotificationMailGenerator(final ServiceLookup services, final AttachmentMemory attachmentMemory, final NotificationParticipantResolver resolver, final ITipIntegrationUtility util, final Appointment original, final Appointment appointment, final User user, final User onBehalfOf, final Context ctx, final Session session) throws OXException {
         this.util = util;
         this.ctx = ctx;
         this.services = services;
@@ -174,7 +168,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         this.participants = resolver.getAllParticipants(this.recipients, appointment, user, ctx);
         this.resources = resolver.getResources(appointment, ctx);
         
-        for (NotificationParticipant participant : recipients) {
+        for (final NotificationParticipant participant : recipients) {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
                 this.organizer = participant;
             }
@@ -219,17 +213,20 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         }
     }
     
+    @Override
     public void noActor() {
     	this.actor = this.actor.clone();
     	this.actor.setVirtual(true);
     }
     
+    @Override
     public boolean userIsTheOrganizer() {
         return actor.hasRole(ITipRole.ORGANIZER);
     };
 
 
-    public NotificationMail generateCreateMailFor(NotificationParticipant participant) throws OXException {
+    @Override
+    public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
         if (participant.equals(actor) && !this.actor.isVirtual()) {
             return null;
         }
@@ -237,7 +234,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return state.generateCreateMailFor(participant);
     }
 
-    public NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException {
+    @Override
+    public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
         if (participant.equals(actor) && !this.actor.isVirtual()) {
             return null;
         }
@@ -245,7 +243,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return state.generateUpdateMailFor(participant);
     }
 
-    public NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws OXException {
+    @Override
+    public NotificationMail generateCreateExceptionMailFor(final NotificationParticipant participant) throws OXException {
         if (participant.equals(actor) && !this.actor.isVirtual()) {
             return null;
         }
@@ -253,21 +252,24 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return state.generateCreateExceptionMailFor(participant);
     }
 
-    public NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws OXException {
+    @Override
+    public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
         if (participant.equals(actor) && !this.actor.isVirtual()) {
             return null;
         }
         return state.generateDeleteMailFor(participant);
     }
     
-    public NotificationMail generateRefreshMailFor(NotificationParticipant participant) throws OXException {
+    @Override
+    public NotificationMail generateRefreshMailFor(final NotificationParticipant participant) throws OXException {
         if (participant.equals(actor) && !this.actor.isVirtual()) {
             return null;
         }
         return state.generateRefreshMailFor(participant); 
     }
 
-    public NotificationMail generateDeclineCounterMailFor(NotificationParticipant participant) throws OXException {
+    @Override
+    public NotificationMail generateDeclineCounterMailFor(final NotificationParticipant participant) throws OXException {
         if (participant.equals(actor) && !this.actor.isVirtual()) {
             return null;
         }
@@ -275,13 +277,13 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     }
 
 
-    protected NotificationMail cancel(NotificationParticipant recipient) {
-        NotificationMail mail = new NotificationMail();
+    protected NotificationMail cancel(final NotificationParticipant recipient) {
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(organizer);
         initMail(mail);
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.CANCEL);
         message.setAppointment(appointment);
 
@@ -290,14 +292,14 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
     
-    private LabelHelper getLabelHelper(NotificationMail mail, TypeWrapper wrapper, NotificationParticipant participant) {
+    private LabelHelper getLabelHelper(final NotificationMail mail, final TypeWrapper wrapper, final NotificationParticipant participant) {
     	return new LabelHelper(dateHelperFor(participant), participant.getTimeZone(), mail, participant.getLocale() , ctx,wrapper, services);
     }
 
     // IMIP Messages
 
-    protected NotificationMail noITIP(NotificationParticipant recipient, State.Type type) throws OXException {
-        NotificationMail mail = new NotificationMail();
+    protected NotificationMail noITIP(final NotificationParticipant recipient, final State.Type type) throws OXException {
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
         mail.setStateType(type);
@@ -306,23 +308,23 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    protected NotificationMail request(NotificationParticipant recipient, Appointment override,  State.Type type) throws OXException {
-        Appointment appointmentToReport = (override != null) ? override : this.appointment;
-        NotificationMail mail = new NotificationMail();
+    protected NotificationMail request(final NotificationParticipant recipient, final Appointment override,  final State.Type type) throws OXException {
+        final Appointment appointmentToReport = (override != null) ? override : this.appointment;
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(organizer);
         mail.setStateType(type);
         initMail(mail);
         initAttachments(mail);
 
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
         message.setAppointment(appointmentToReport);
         
         if (appointmentToReport.isMaster()) {
-            List<Appointment> exceptions = util.getExceptions(appointmentToReport, session);
+            final List<Appointment> exceptions = util.getExceptions(appointmentToReport, session);
             if (exceptions != null) {
-                for (Appointment exception : exceptions) {
+                for (final Appointment exception : exceptions) {
                     message.addException(exception);
                 }
             }
@@ -332,15 +334,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
     
-    protected NotificationMail add(NotificationParticipant recipient) throws OXException {
-        NotificationMail mail = new NotificationMail();
+    protected NotificationMail add(final NotificationParticipant recipient) throws OXException {
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(organizer);
         mail.setStateType(State.Type.NEW);
         initMail(mail);
         initAttachments(mail);
 
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REQUEST);
         message.addException(appointment);
         mail.setMessage(message);
@@ -348,15 +350,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    protected NotificationMail counter(NotificationParticipant recipient) throws OXException {
-        NotificationMail mail = new NotificationMail();
+    protected NotificationMail counter(final NotificationParticipant recipient) throws OXException {
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
         mail.setStateType(State.Type.MODIFIED);
         initMail(mail);
         initAttachments(mail);
         
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.COUNTER);
         if (appointment.isException()) {
             message.addException(appointment);
@@ -369,18 +371,18 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    protected NotificationMail reply(NotificationParticipant recipient, ConfirmStatus confirmStatus) throws OXException {
-        NotificationMail mail = new NotificationMail();
+    protected NotificationMail reply(final NotificationParticipant recipient, final ConfirmStatus confirmStatus) throws OXException {
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
         mail.setStateType(getStateTypeForStatus(confirmStatus));
         initMail(mail);
 
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REPLY);
 
-        Appointment reply = new Appointment();
-        for (int field : Appointment.ALL_COLUMNS) {
+        final Appointment reply = new Appointment();
+        for (final int field : Appointment.ALL_COLUMNS) {
             if (field == Appointment.USERS || field == Appointment.PARTICIPANTS || field == Appointment.CONFIRMATIONS) {
                 continue;
             }
@@ -388,7 +390,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 reply.set(field, appointment.get(field));
             }
         }
-        UserParticipant userParticipant = new UserParticipant(actor.getIdentifier());
+        final UserParticipant userParticipant = new UserParticipant(actor.getIdentifier());
         userParticipant.setConfirm(confirmStatus.getId());
         reply.setParticipants(Arrays.asList((Participant) userParticipant));
         reply.setUsers(Arrays.asList(userParticipant));
@@ -403,7 +405,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
     
-    private State.Type getStateTypeForStatus(ConfirmStatus confirmStatus) {
+    private State.Type getStateTypeForStatus(final ConfirmStatus confirmStatus) {
     	if (confirmStatus == null) {
     		return State.Type.MODIFIED;
     	}
@@ -416,18 +418,18 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     	return State.Type.MODIFIED;
 	}
 
-	protected NotificationMail refresh(NotificationParticipant recipient) throws OXException {
-        NotificationMail mail = new NotificationMail();
+	protected NotificationMail refresh(final NotificationParticipant recipient) throws OXException {
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
         mail.setStateType(State.Type.REFRESH);
         initMail(mail);
 
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.REFRESH);
 
-        Appointment address = appointment.clone();
-        for (int field : new int[] { Appointment.USERS, Appointment.CONFIRMATIONS, Appointment.PARTICIPANTS, Appointment.NOTE, Appointment.LOCATION }) {
+        final Appointment address = appointment.clone();
+        for (final int field : new int[] { Appointment.USERS, Appointment.CONFIRMATIONS, Appointment.PARTICIPANTS, Appointment.NOTE, Appointment.LOCATION }) {
             address.remove(field);
         }
 
@@ -442,15 +444,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
     
-    protected NotificationMail declinecounter(NotificationParticipant recipient) throws OXException {
-        NotificationMail mail = new NotificationMail();
+    protected NotificationMail declinecounter(final NotificationParticipant recipient) throws OXException {
+        final NotificationMail mail = new NotificationMail();
         mail.setRecipient(recipient);
         mail.setSender(actor);
         mail.setStateType(State.Type.DECLINE_COUNTER);
 
         initMail(mail);
 
-        ITipMessage message = new ITipMessage();
+        final ITipMessage message = new ITipMessage();
         message.setMethod(ITipMethod.DECLINECOUNTER);
 
         if (appointment.containsRecurrenceDatePosition() || appointment.containsRecurrenceDatePosition()) {
@@ -464,7 +466,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    private void initMail(NotificationMail mail) {
+    private void initMail(final NotificationMail mail) {
         mail.setOrganizer(organizer);
         mail.setActor(actor);
         mail.setPrincipal(principal);
@@ -476,19 +478,19 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     }
     
-    private void initAttachments(NotificationMail mail) throws OXException {
+    private void initAttachments(final NotificationMail mail) throws OXException {
     	if (services == null) {
     		return;
     	}
-    	AttachmentBase attachments = services.getService(AttachmentBase.class);
+    	final AttachmentBase attachments = services.getService(AttachmentBase.class);
     	SearchIterator<AttachmentMetadata> results = null;
     	try {
-    		TimedResult<AttachmentMetadata> attachmentsResult = attachments.getAttachments(mail.getAppointment().getParentFolderID(), mail.getAppointment().getObjectID(), Types.APPOINTMENT, ctx, user, userConfig);
+    		final TimedResult<AttachmentMetadata> attachmentsResult = attachments.getAttachments(mail.getAppointment().getParentFolderID(), mail.getAppointment().getObjectID(), Types.APPOINTMENT, ctx, user, userConfig);
     		results = attachmentsResult.results();
     		while(results.hasNext()) {
     			mail.addAttachment(results.next());
     		}
-    	} catch (OXException x) {
+    	} catch (final OXException x) {
     		// Ignore. This is best effort only.
     	} finally {
     		if (results != null) {
@@ -503,28 +505,28 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     // Templating and mail text
 
-    protected NotificationMail create(NotificationMail mail) throws OXException {
+    protected NotificationMail create(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.create");
         mail.setSubject(new Sentence(Messages.SUBJECT_NEW_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
 
-    protected NotificationMail update(NotificationMail mail) throws OXException {
+    protected NotificationMail update(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.update");
         mail.setSubject(new Sentence(Messages.SUBJECT_CHANGED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
 
-    protected NotificationMail delete(NotificationMail mail) throws OXException {
+    protected NotificationMail delete(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.delete");
         mail.setSubject(new Sentence(Messages.SUBJECT_CANCELLED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
         render(mail);
         return mail;
     }
     
-    protected NotificationMail createException(NotificationMail mail) throws OXException {
+    protected NotificationMail createException(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.createexception");
         recalculateOccurrence(mail);
         mail.setSubject(new Sentence(Messages.SUBJECT_CHANGED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
@@ -532,7 +534,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
     
-    protected NotificationMail askForUpdate(NotificationMail mail) throws OXException {
+    protected NotificationMail askForUpdate(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.refresh");
         recalculateOccurrence(mail);
         mail.setSubject(new Sentence(Messages.SUBJECT_REFRESH).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
@@ -540,7 +542,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    protected NotificationMail declinecounter(NotificationMail mail) throws OXException {
+    protected NotificationMail declinecounter(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.declinecounter");
         recalculateOccurrence(mail);
         mail.setSubject(new Sentence(Messages.SUBJECT_DECLINECOUNTER).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
@@ -548,10 +550,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    private void recalculateOccurrence(NotificationMail mail) {
-        CalendarCollection calCol = new CalendarCollection();
-        Appointment originalOcurrence = mail.getOriginal();
-        Appointment newAppointment = mail.getAppointment();
+    private void recalculateOccurrence(final NotificationMail mail) {
+        final CalendarCollection calCol = new CalendarCollection();
+        final Appointment originalOcurrence = mail.getOriginal();
+        final Appointment newAppointment = mail.getAppointment();
         if (newAppointment.getRecurrenceDatePosition() == null) {
             return;
         }
@@ -559,13 +561,13 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             if (!originalOcurrence.containsTimezone()) {
                 originalOcurrence.setTimezone("UTC");
             }
-            RecurringResultsInterface recurring = calCol.calculateRecurring(originalOcurrence, startOfTheDay(newAppointment.getRecurrenceDatePosition()), endOfTheDay(newAppointment.getRecurrenceDatePosition()), 0);
+            final RecurringResultsInterface recurring = calCol.calculateRecurring(originalOcurrence, startOfTheDay(newAppointment.getRecurrenceDatePosition()), endOfTheDay(newAppointment.getRecurrenceDatePosition()), 0);
             if (recurring != null && recurring.size() > 0) {
-                RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
+                final RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
                 originalOcurrence.setStartDate(new Date(recurringResult.getStart()));
                 originalOcurrence.setEndDate(new Date(recurringResult.getEnd()));
             }
-        } catch (OXException e) {
+        } catch (final OXException e) {
             // IGNORE
         }
         
@@ -574,7 +576,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
 
 
-    protected NotificationMail counter(NotificationMail mail, ITipRole role) throws OXException {
+    protected NotificationMail counter(final NotificationMail mail, final ITipRole role) throws OXException {
         switch (role) {
         case ATTENDEE:
             mail.setSubject(new Sentence(Messages.SUBJECT_COUNTER_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
@@ -589,7 +591,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    protected NotificationMail stateChanged(NotificationMail mail, ConfirmStatus status) throws OXException {
+    protected NotificationMail stateChanged(final NotificationMail mail, final ConfirmStatus status) throws OXException {
         switch (status) {
         case ACCEPT:
             mail.setSubject(new Sentence(Messages.SUBJECT_STATE_CHANGED).add(actor.getDisplayName()).add(Messages.ACCEPTED).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
@@ -612,25 +614,25 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return mail;
     }
 
-    private void render(NotificationMail mail) throws OXException {
+    private void render(final NotificationMail mail) throws OXException {
         if (services == null) {
             return;
         }
-        Appointment originalForRendering = mail.getOriginal();
-		Appointment appointmentForRendering = mail.getAppointment();
+        final Appointment originalForRendering = mail.getOriginal();
+		final Appointment appointmentForRendering = mail.getAppointment();
 		
 		
 
 		fastForwardToConcreteOriginalOccurrence(originalForRendering, appointmentForRendering);
 		
-		NotificationParticipant participant = mail.getRecipient();
+		final NotificationParticipant participant = mail.getRecipient();
         
-        TemplateService templates = services.getService(TemplateService.class);
+        final TemplateService templates = services.getService(TemplateService.class);
         if (templates == null) {
             return;
         }
-        OXTemplate textTemplate = templates.loadTemplate(mail.getTemplateName()+".txt.tmpl", mail.getTemplateName()+".txt.tmpl", session, false);
-        OXTemplate htmlTemplate = templates.loadTemplate(mail.getTemplateName()+".html.tmpl", mail.getTemplateName()+".html.tmpl", session, false);
+        final OXTemplate textTemplate = templates.loadTemplate(mail.getTemplateName()+".txt.tmpl", mail.getTemplateName()+".txt.tmpl", session, false);
+        final OXTemplate htmlTemplate = templates.loadTemplate(mail.getTemplateName()+".html.tmpl", mail.getTemplateName()+".html.tmpl", session, false);
         
         Style style = null;
         if (mail.getRecipient().hasRole(ITipRole.ORGANIZER)) {
@@ -643,7 +645,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             style = Style.INTENTION;
         }
         
-        Map<String,Object> env = new HashMap<String, Object>();
+        final Map<String,Object> env = new HashMap<String, Object>();
         PassthroughWrapper wrapper = new PassthroughWrapper();
         
         env.put("mail", mail);
@@ -672,32 +674,33 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     }
 
     private void fastForwardToConcreteOriginalOccurrence(
-			Appointment originalForRendering,
-			Appointment appointmentForRendering) {
+			final Appointment originalForRendering,
+			final Appointment appointmentForRendering) {
     	if (originalForRendering != null && appointmentForRendering != null && originalForRendering.isMaster() && appointmentForRendering.isException()) {
-        	CalendarCollection calCol = new CalendarCollection();
+        	final CalendarCollection calCol = new CalendarCollection();
             try {
                 if (!originalForRendering.containsTimezone()) {
                 	originalForRendering.setTimezone("UTC");
                 }
-                RecurringResultsInterface recurring = calCol.calculateRecurring(originalForRendering, startOfTheDay(appointmentForRendering.getRecurrenceDatePosition()), endOfTheDay(appointmentForRendering.getRecurrenceDatePosition()), 0);
+                final RecurringResultsInterface recurring = calCol.calculateRecurring(originalForRendering, startOfTheDay(appointmentForRendering.getRecurrenceDatePosition()), endOfTheDay(appointmentForRendering.getRecurrenceDatePosition()), 0);
                 if (recurring.size() > 0) {
-                    RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
+                    final RecurringResultInterface recurringResult = recurring.getRecurringResult(0);
                     originalForRendering.setStartDate(new Date(recurringResult.getStart()));
                     originalForRendering.setEndDate(new Date(recurringResult.getEnd()));
                 }
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 // IGNORE
             }
     	}
 	}
 
-	private DateHelper dateHelperFor(NotificationParticipant participant) {
+	private DateHelper dateHelperFor(final NotificationParticipant participant) {
 		return new DateHelper(appointment, participant.getLocale(), participant.getTimeZone());
 	}
 
-	public NotificationMail generateCreateMailFor(String email) throws OXException {
-        for (NotificationParticipant p : recipients) {
+	@Override
+    public NotificationMail generateCreateMailFor(final String email) throws OXException {
+        for (final NotificationParticipant p : recipients) {
             if (p.getEmail().equalsIgnoreCase(email)) {
                 return generateCreateMailFor(p);
             }
@@ -705,8 +708,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return null;
     }
 
-    public NotificationMail generateUpdateMailFor(String email) throws OXException {
-        for (NotificationParticipant p : recipients) {
+    @Override
+    public NotificationMail generateUpdateMailFor(final String email) throws OXException {
+        for (final NotificationParticipant p : recipients) {
             if (p.getEmail().equalsIgnoreCase(email)) {
                 return generateUpdateMailFor(p);
             }
@@ -714,8 +718,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return null;
     }
 
-    public NotificationMail generateDeleteMailFor(String email) throws OXException {
-        for (NotificationParticipant p : recipients) {
+    @Override
+    public NotificationMail generateDeleteMailFor(final String email) throws OXException {
+        for (final NotificationParticipant p : recipients) {
             if (p.getEmail().equalsIgnoreCase(email)) {
                 return generateDeleteMailFor(p);
             }
@@ -723,8 +728,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return null;
     }
 
-    public NotificationMail generateCreateExceptionMailFor(String email) throws OXException {
-        for (NotificationParticipant p : recipients) {
+    @Override
+    public NotificationMail generateCreateExceptionMailFor(final String email) throws OXException {
+        for (final NotificationParticipant p : recipients) {
             if (p.getEmail().equalsIgnoreCase(email)) {
                 return generateCreateExceptionMailFor(p);
             }
@@ -732,8 +738,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return null;
     }
     
-    public NotificationMail generateRefreshMailFor(String email) throws OXException {
-        for (NotificationParticipant p : recipients) {
+    @Override
+    public NotificationMail generateRefreshMailFor(final String email) throws OXException {
+        for (final NotificationParticipant p : recipients) {
             if (p.getEmail().equalsIgnoreCase(email)) {
                 return generateRefreshMailFor(p);
             }
@@ -741,8 +748,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return null;
     }
 
-	public NotificationMail generateDeclineCounterMailFor(String email) throws OXException {
-        for (NotificationParticipant p : recipients) {
+	@Override
+    public NotificationMail generateDeclineCounterMailFor(final String email) throws OXException {
+        for (final NotificationParticipant p : recipients) {
             if (p.getEmail().equalsIgnoreCase(email)) {
                 return generateDeclineCounterMailFor(p);
             }
@@ -750,6 +758,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         return null;
 	}
 
+    @Override
     public List<NotificationParticipant> getRecipients() {
         return recipients;
     }
@@ -771,11 +780,13 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     protected class OrganizerState implements MailGeneratorState {
 
-        public NotificationMail generateCreateMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
             return create(request(participant, null, State.Type.NEW));
         }
 
-        public NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
             if (hasBeenRemoved(participant)) {
                 return delete(cancel(participant));
             }
@@ -785,15 +796,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return update(request(participant, null, State.Type.MODIFIED	));
         }
 
-        protected boolean hasBeenRemoved(NotificationParticipant participant) {
+        protected boolean hasBeenRemoved(final NotificationParticipant participant) {
             if (diff == null) {
                 return false;
             }
             if (diff.anyFieldChangedOf("participants")) {
-                FieldUpdate update = diff.getUpdateFor("participants");
-                Difference difference = (Difference) update.getExtraInfo();
-                List<Object> removed = difference.getRemoved();
-                for (Object object : removed) {
+                final FieldUpdate update = diff.getUpdateFor("participants");
+                final Difference difference = (Difference) update.getExtraInfo();
+                final List<Object> removed = difference.getRemoved();
+                for (final Object object : removed) {
                     if (participant.matches((Participant) object)) {
                         return true;
                     }
@@ -802,15 +813,15 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return false;
         }
 
-        protected boolean hasBeenAdded(NotificationParticipant participant) {
+        protected boolean hasBeenAdded(final NotificationParticipant participant) {
             if (diff == null) {
                 return false;
             }
             if (diff.anyFieldChangedOf("participants")) {
-                FieldUpdate update = diff.getUpdateFor("participants");
-                Difference difference = (Difference) update.getExtraInfo();
-                List<Object> added = difference.getAdded();
-                for (Object object : added) {
+                final FieldUpdate update = diff.getUpdateFor("participants");
+                final Difference difference = (Difference) update.getExtraInfo();
+                final List<Object> added = difference.getAdded();
+                for (final Object object : added) {
                     if (participant.matches((Participant) object)) {
                         return true;
                     }
@@ -819,21 +830,25 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return false;
         }
 
-        public NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
             return delete(cancel(participant));
         }
 
-        public NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateCreateExceptionMailFor(final NotificationParticipant participant) throws OXException {
             return createException(add(participant));
         }
 
-		public NotificationMail generateDeclineCounterMailFor(
-				NotificationParticipant participant) throws OXException {
+		@Override
+        public NotificationMail generateDeclineCounterMailFor(
+				final NotificationParticipant participant) throws OXException {
 			return declinecounter(declinecounter(participant));
 		}
 
-		public NotificationMail generateRefreshMailFor(
-				NotificationParticipant participant) throws OXException {
+		@Override
+        public NotificationMail generateRefreshMailFor(
+				final NotificationParticipant participant) throws OXException {
 			return null;
 		}
     }
@@ -844,15 +859,18 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         protected ConfirmStatus confirmStatus;
 
-        public NotificationMail generateCreateMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
             return null;
         }
 
-        public NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
             return stateChanged(reply(participant, ConfirmStatus.DECLINE), ConfirmStatus.DECLINE);
         }
 
-        public NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
             if (onlyMyStateChanged()) {
                 // This needs to be a reply
                 if (participant.hasRole(ITipRole.ORGANIZER)) {
@@ -883,13 +901,13 @@ public class NotificationMailGenerator implements ITipMailGenerator {
                 return false;
             }
             if (diff.onlyTheseChanged("participants", "confirmations", "users") && diff.anyFieldChangedOf("users")) {
-                FieldUpdate update = diff.getUpdateFor("users");
-                Difference difference = (Difference) update.getExtraInfo();
-                List<Change> changed = difference.getChanged();
-                String identifier = String.valueOf(actor.getIdentifier());
-                for (Change change : changed) {
+                final FieldUpdate update = diff.getUpdateFor("users");
+                final Difference difference = (Difference) update.getExtraInfo();
+                final List<Change> changed = difference.getChanged();
+                final String identifier = Integer.toString(actor.getIdentifier());
+                for (final Change change : changed) {
                     if (change.getIdentifier().equals(identifier)) {
-                        ConfirmationChange confChange = (ConfirmationChange) change;
+                        final ConfirmationChange confChange = (ConfirmationChange) change;
                         confirmStatus = ConfirmStatus.byId(confChange.getNewStatus());
                         return stateChanged = true;
                     }
@@ -898,20 +916,23 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return false;
         }
 
-        public NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateCreateExceptionMailFor(final NotificationParticipant participant) throws OXException {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
                 return createException(counter(participant));
             }
             return createException(noITIP(participant, State.Type.MODIFIED));
         }
 
-		public NotificationMail generateDeclineCounterMailFor(
-				NotificationParticipant participant) throws OXException {
+		@Override
+        public NotificationMail generateDeclineCounterMailFor(
+				final NotificationParticipant participant) throws OXException {
 			return null;
 		}
 
-		public NotificationMail generateRefreshMailFor(
-				NotificationParticipant participant) throws OXException {
+		@Override
+        public NotificationMail generateRefreshMailFor(
+				final NotificationParticipant participant) throws OXException {
 			return askForUpdate(refresh(participant));
 		}
 
@@ -919,30 +940,30 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     protected class AttendeeWithInternalOrganizerState extends AttendeeWithExternalOrganizerState {
 
-        private OrganizerState ORGANIZER = new OrganizerState();
+        private final OrganizerState ORGANIZER = new OrganizerState();
 
-        private AttendeeWithExternalOrganizerState ATTENDEE = new AttendeeWithExternalOrganizerState();
+        private final AttendeeWithExternalOrganizerState ATTENDEE = new AttendeeWithExternalOrganizerState();
         
         @Override
-        public NotificationMail generateCreateMailFor(NotificationParticipant participant) throws OXException {
+        public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
             return null;
         }
         
         @Override
-        public NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws OXException {
+        public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
             if (participant.hasRole(ITipRole.ATTENDEE)) {
-                Appointment appointmentToReport = appointment.clone();
+                final Appointment appointmentToReport = appointment.clone();
                 removeParticipant(appointmentToReport, session.getUserId());
                 return update(request(participant, appointmentToReport, State.Type.DELETED));
             }
             return ATTENDEE.generateDeleteMailFor(participant);
         }
 
-        private void removeParticipant(Appointment appointment, int userId) {
-            List<Participant> purged = new ArrayList<Participant>(appointment.getParticipants().length);
-            for (Participant p : appointment.getParticipants()) {
+        private void removeParticipant(final Appointment appointment, final int userId) {
+            final List<Participant> purged = new ArrayList<Participant>(appointment.getParticipants().length);
+            for (final Participant p : appointment.getParticipants()) {
                 if (p instanceof UserParticipant) {
-                    UserParticipant up = (UserParticipant) p;
+                    final UserParticipant up = (UserParticipant) p;
                     if (up.getIdentifier() != userId) {
                         purged.add(up);
                     }
@@ -952,8 +973,8 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             appointment.setParticipants(purged);
 
-            List<UserParticipant> users = new ArrayList<UserParticipant>(appointment.getUsers().length);
-            for (UserParticipant up : appointment.getUsers()) {
+            final List<UserParticipant> users = new ArrayList<UserParticipant>(appointment.getUsers().length);
+            for (final UserParticipant up : appointment.getUsers()) {
                 if (up.getIdentifier() != userId) {
                     users.add(up);
                 }
@@ -962,7 +983,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         }
         
         @Override
-        public NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException {
+        public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
             if (participant.hasRole(ITipRole.ORGANIZER)) {
             	if (onlyMyStateChanged()) {
             		if (confirmStatus == null) {
@@ -997,7 +1018,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         }
         
         @Override
-        public NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws OXException {
+        public NotificationMail generateCreateExceptionMailFor(final NotificationParticipant participant) throws OXException {
         	if (participant.hasRole(ITipRole.ORGANIZER)) {
                 return createException(noITIP(participant, State.Type.MODIFIED));
         	} else if (participant.hasRole(ITipRole.ATTENDEE)) {
@@ -1010,29 +1031,35 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     
     protected class DoNothingState implements MailGeneratorState {
 
-        public NotificationMail generateCreateExceptionMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateCreateExceptionMailFor(final NotificationParticipant participant) throws OXException {
             return null;
         }
 
-        public NotificationMail generateCreateMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
             return null;
         }
 
-        public NotificationMail generateDeleteMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
             return null;
         }
 
-        public NotificationMail generateUpdateMailFor(NotificationParticipant participant) throws OXException {
+        @Override
+        public NotificationMail generateUpdateMailFor(final NotificationParticipant participant) throws OXException {
             return null;
         }
 
-		public NotificationMail generateDeclineCounterMailFor(
-				NotificationParticipant participant) throws OXException {
+		@Override
+        public NotificationMail generateDeclineCounterMailFor(
+				final NotificationParticipant participant) throws OXException {
 			return null;
 		}
 
-		public NotificationMail generateRefreshMailFor(
-				NotificationParticipant participant) throws OXException {
+		@Override
+        public NotificationMail generateRefreshMailFor(
+				final NotificationParticipant participant) throws OXException {
 			return null;
 		}
         

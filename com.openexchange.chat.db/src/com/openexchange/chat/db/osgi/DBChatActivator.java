@@ -217,7 +217,7 @@ public final class DBChatActivator extends HousekeepingActivator {
                         if (null != dbRoster) {
                             final PresenceImpl presence = new PresenceImpl();
                             final int userId = session.getUserId();
-                            presence.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, session.getContextId())));
+                            presence.setFrom(new ChatUserImpl(Integer.toString(userId), getUserName(userId, session.getContextId())));
                             dbRoster.notifyRosterListeners(presence);
                         }
                     } catch (final Exception e) {
@@ -242,7 +242,7 @@ public final class DBChatActivator extends HousekeepingActivator {
                         if (null != dbRoster) {
                             final PresenceImpl presence = new PresenceImpl(Presence.Type.UNAVAILABLE);
                             final int userId = session.getUserId();
-                            presence.setFrom(new ChatUserImpl(String.valueOf(userId), getUserName(userId, session.getContextId())));
+                            presence.setFrom(new ChatUserImpl(Integer.toString(userId), getUserName(userId, session.getContextId())));
                             dbRoster.notifyRosterListeners(presence);
                         }
                         // Drop chat access for associated user

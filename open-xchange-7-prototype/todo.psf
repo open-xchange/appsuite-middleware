@@ -2,7 +2,6 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.authentication.ldap"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.calendar.printing"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.db"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.json"/>

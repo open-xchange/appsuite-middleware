@@ -427,11 +427,11 @@ public class ContactWriter extends CommonWriter {
             final int id = links[a].getLinkID();
             String displayname = links[a].getLinkDisplayname();
             if (displayname == null) {
-                displayname = String.valueOf(id);
+                displayname = Integer.toString(id);
             }
 
             final Element e = new Element("link", XmlServlet.NS);
-            e.addContent(String.valueOf(id));
+            e.addContent(Integer.toString(id));
             e.setAttribute("displayname", displayname, XmlServlet.NS);
 
             e_links.addContent(e);
@@ -454,10 +454,10 @@ public class ContactWriter extends CommonWriter {
 
             final Element e = new Element("email", XmlServlet.NS);
             e.addContent(correctCharacterData(email));
-            e.setAttribute("id", String.valueOf(distributionlist[a].getEntryID()), XmlServlet.NS);
-            e.setAttribute(ContactFields.FOLDER_ID, String.valueOf(distributionlist[a].getFolderID()), XmlServlet.NS);
+            e.setAttribute("id", Integer.toString(distributionlist[a].getEntryID()), XmlServlet.NS);
+            e.setAttribute(ContactFields.FOLDER_ID, Integer.toString(distributionlist[a].getFolderID()), XmlServlet.NS);
             e.setAttribute("displayname", displayname.trim(), XmlServlet.NS);
-            e.setAttribute("emailfield", String.valueOf(distributionlist[a].getEmailfield()), XmlServlet.NS);
+            e.setAttribute("emailfield", Integer.toString(distributionlist[a].getEmailfield()), XmlServlet.NS);
 
             e_distributionlist.addContent(e);
         }
