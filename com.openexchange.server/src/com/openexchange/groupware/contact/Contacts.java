@@ -6698,7 +6698,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getObjectID());
+                return Integer.toString(co.getObjectID());
             }
 
             @Override
@@ -6739,7 +6739,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getNumberOfDistributionLists());
+                return Integer.toString(co.getNumberOfDistributionLists());
             }
 
             @Override
@@ -6780,7 +6780,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getNumberOfLinks());
+                return Integer.toString(co.getNumberOfLinks());
             }
 
             @Override
@@ -6911,7 +6911,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getParentFolderID());
+                return Integer.toString(co.getParentFolderID());
             }
 
             @Override
@@ -6952,7 +6952,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getContextId());
+                return Integer.toString(co.getContextId());
             }
 
             @Override
@@ -6994,7 +6994,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getCreatedBy());
+                return Integer.toString(co.getCreatedBy());
             }
 
             @Override
@@ -7035,7 +7035,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getModifiedBy());
+                return Integer.toString(co.getModifiedBy());
             }
 
             @Override
@@ -7608,7 +7608,7 @@ public final class Contacts {
 
             @Override
             public String getValueAsString(final Contact co) {
-                return String.valueOf(co.getDefaultAddress());
+                return Integer.toString(co.getDefaultAddress());
             }
 
             @Override

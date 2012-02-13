@@ -85,7 +85,8 @@ public final class SessionClearerOnContextDelete extends ContextDelete {
         if (null != cacheService) {
             try {
                 final Cache sessionCache = cacheService.getCache("SessionCache");
-                sessionCache.put(Integer.valueOf(contextId), InvalidatedMarker.newInstance(Integer.valueOf(contextId)));
+                final Integer key = Integer.valueOf(contextId);
+                sessionCache.put(key, InvalidatedMarker.newInstance(key));
             } catch (final OXException e) {
                 // Ignore
             }

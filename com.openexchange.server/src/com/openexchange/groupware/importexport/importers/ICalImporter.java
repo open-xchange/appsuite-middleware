@@ -302,10 +302,10 @@ public class ICalImporter extends AbstractImporter {
 				task.setParentFolderID(taskFolderId);
 				try {
 					taskInterface.insertTaskObject(task);
-					importResult.setObjectId(String.valueOf(task
+					importResult.setObjectId(Integer.toString(task
 							.getObjectID()));
 					importResult.setDate(task.getLastModified());
-					importResult.setFolder(String.valueOf(taskFolderId));
+					importResult.setFolder(Integer.toString(taskFolderId));
 				} catch (final OXException e) {
 					LOG.error(e.getMessage(), e);
 					importResult.setException(e);
@@ -407,10 +407,11 @@ public class ICalImporter extends AbstractImporter {
 					if(isChange){
 						appointmentObj.setRecurrenceID(masterID);
 						appointmentObj.removeUid();
-						if(appointmentObj.containsRecurrenceDatePosition())
-							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
-						else
-							appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+						if(appointmentObj.containsRecurrenceDatePosition()) {
+                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getRecurrenceDatePosition()));
+                        } else {
+                            appointmentObj.setRecurrenceDatePosition(calculateRecurrenceDatePosition(appointmentObj.getStartDate()));
+                        }
 					}
 					final Appointment[] conflicts;
 					if(isChange){
@@ -423,19 +424,17 @@ public class ICalImporter extends AbstractImporter {
                         master2id.put(index, appointmentObj.getObjectID());
                     }
 					if (conflicts == null || conflicts.length == 0) {
-						importResult.setObjectId(String
-								.valueOf(appointmentObj.getObjectID()));
+						importResult.setObjectId(Integer.toString(appointmentObj.getObjectID()));
 						importResult.setDate(appointmentObj
 								.getLastModified());
-						importResult.setFolder(String
-								.valueOf(appointmentFolderId));
+						importResult.setFolder(Integer.toString(appointmentFolderId));
 					} else {
 						importResult
 								.setException(ImportExportExceptionCodes.RESOURCE_HARD_CONFLICT
 										.create());
 					}
 				} catch (final OXException e) {
-					OXException ne = makeMoreInformative(e);
+					final OXException ne = makeMoreInformative(e);
 					//LOG.error(ne.getMessage(), ne); //removed logging, because this would be a user error spamming our log.
 					importResult.setException(ne);
 				}
@@ -467,13 +466,13 @@ public class ICalImporter extends AbstractImporter {
 		}
 	}
 
-	private OXException makeMoreInformative(OXException e) {
+	private OXException makeMoreInformative(final OXException e) {
 		if( e.getCategory() == Category.CATEGORY_TRUNCATED){
-			ProblematicAttribute[] problematics = e.getProblematics();
-			StringBuilder bob = new StringBuilder();
-			for(ProblematicAttribute att: problematics){
+			final ProblematicAttribute[] problematics = e.getProblematics();
+			final StringBuilder bob = new StringBuilder();
+			for(final ProblematicAttribute att: problematics){
 				if((att instanceof SimpleTruncatedAttribute) && ((SimpleTruncatedAttribute) att).getValue() != null){
-					SimpleTruncatedAttribute temp = (SimpleTruncatedAttribute) att;
+					final SimpleTruncatedAttribute temp = (SimpleTruncatedAttribute) att;
 					bob.append(temp.getValue());
 					bob.append(" (>");
 					bob.append(temp.getMaxSize());
@@ -637,7 +636,7 @@ public class ICalImporter extends AbstractImporter {
 				return field.getName();
 			}
 		}
-		return String.valueOf(id);
+		return Integer.toString(id);
 
 	}
 

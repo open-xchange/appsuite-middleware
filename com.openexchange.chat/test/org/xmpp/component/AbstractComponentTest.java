@@ -19,11 +19,10 @@ package org.xmpp.component;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
 import org.junit.Test;
 import org.xmpp.packet.IQ;
-import org.xmpp.packet.JID;
 import org.xmpp.packet.IQ.Type;
+import org.xmpp.packet.JID;
 
 /**
  * Basic tests for the {@link AbstractComponent} implementation. The initial
@@ -347,7 +346,7 @@ public class AbstractComponentTest {
 		final IQ result = (IQ) component.getSentPacket();
 		assertNotNull(result);
 		assertEquals(Type.result, result.getType());
-		assertEquals(String.valueOf(wait), result.getChildElement().attributeValue("seconds"));
+		assertEquals(Integer.toString(wait), result.getChildElement().attributeValue("seconds"));
 	}
 
 	/**

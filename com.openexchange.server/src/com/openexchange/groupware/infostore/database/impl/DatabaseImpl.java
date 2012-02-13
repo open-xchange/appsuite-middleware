@@ -256,7 +256,7 @@ public class DatabaseImpl extends DBService {
         if (version == InfostoreFacade.CURRENT_VERSION) {
             versionString = "infostore.version";
         } else {
-            versionString = String.valueOf(version);
+            versionString = Integer.toString(version);
         }
         try {
             final int[] columns = switchMetadata2DBColumns(Metadata.VALUES_ARRAY, false);

@@ -130,8 +130,8 @@ public abstract class LinkableState implements State {
             folder = obj.getParentFolderID();
         }
 
-        subst.put(new StringReplacement(TemplateToken.FOLDER_ID, String.valueOf(folder)));
-        subst.put(new StringReplacement(TemplateToken.OBJECT_ID, String.valueOf(obj.getObjectID())));
+        subst.put(new StringReplacement(TemplateToken.FOLDER_ID, Integer.toString(folder)));
+        subst.put(new StringReplacement(TemplateToken.OBJECT_ID, Integer.toString(obj.getObjectID())));
         subst.put(new StringReplacement(TemplateToken.UI_WEB_PATH, ServerConfig.getProperty(Property.UI_WEB_PATH)));
         final HostnameService hostnameService = ServerServiceRegistry.getInstance().getService(HostnameService.class);
         final String hostnameStr;
