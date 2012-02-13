@@ -49,16 +49,25 @@
 
 package com.openexchange.documentation.descriptions;
 
-import com.openexchange.documentation.annotations.Type;
+import com.openexchange.documentation.Type;
 
 /**
  * {@link AttributeDescription} - Description for attributes.
  *
+ * @see com.openexchange.documentation.annotations.Attribute
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface AttributeDescription extends Description {
 	
+	/**
+	 * Specifies whether the attribute is mandatory or not. Defaults to <code>false</code>.
+	 * @return <code>true</code>, if it is mandatory, <code>false</code>, otherwise
+	 */
 	boolean isMandatory();
 
+	/**
+	 * Specifies the type. Defaults to <code>Type.STRING</code>.
+	 * @return the type
+	 */
 	Type getType();
 }

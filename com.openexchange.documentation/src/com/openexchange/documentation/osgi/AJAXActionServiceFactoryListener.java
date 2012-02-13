@@ -47,27 +47,39 @@
  *
  */
 
-package com.openexchange.documentation.descriptions;
+package com.openexchange.documentation.osgi;
+
+import org.osgi.framework.ServiceReference;
+
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.internal.DocumentationProcessor;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link Description} - Common descriptions.
- *
+ * {@link AJAXActionServiceFactoryListener} - Recognizes services with documentation annotations.
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Description {
+public class AJAXActionServiceFactoryListener implements SimpleRegistryListener<AJAXActionServiceFactory> {
 	
-	/**
-	 * Specifies the name. Required.
-	 * 
-	 * @return The name
-	 */
-	String getName();
+	private final DocumentationProcessor processor;
 
-	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
-	 * @return the description
-	 */
-	String getDescription();
+    /**
+     * Initializes a new {@link AJAXActionServiceFactoryListener}.
+     */
+    public AJAXActionServiceFactoryListener(final DocumentationProcessor processor) {
+        super();
+        this.processor = processor;
+    }
+	
+	@Override
+	public void added(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
+		this.processor.add(service);
+	}
+
+	@Override
+	public void removed(final ServiceReference<AJAXActionServiceFactory> ref, final AJAXActionServiceFactory service) {
+		this.processor.remove(service);
+	}
 
 }

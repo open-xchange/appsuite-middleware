@@ -47,27 +47,18 @@
  *
  */
 
-package com.openexchange.documentation.descriptions;
+package com.openexchange.documentation;
+
+import com.openexchange.documentation.annotations.Action;
 
 /**
- * {@link Description} - Common descriptions.
+ * {@link RequestMethod} - Methods for {@link Action}s
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Description {
-	
-	/**
-	 * Specifies the name. Required.
-	 * 
-	 * @return The name
-	 */
-	String getName();
-
-	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
-	 * @return the description
-	 */
-	String getDescription();
-
+public enum RequestMethod {
+	GET, 
+	POST, 
+	PUT,
+	UPLOAD
 }

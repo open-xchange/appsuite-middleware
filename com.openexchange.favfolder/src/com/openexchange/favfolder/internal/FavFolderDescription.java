@@ -47,27 +47,36 @@
  *
  */
 
-package com.openexchange.documentation.descriptions;
+package com.openexchange.favfolder.internal;
+
+import org.osgi.framework.BundleContext;
+
+import com.openexchange.documentation.DescriptionFactory;
+import com.openexchange.documentation.ModuleDescriptionRegisterer;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
+import com.openexchange.documentation.descriptions.ModuleDescription;
 
 /**
- * {@link Description} - Common descriptions.
+ * {@link FavFolderDescription} - Provides the module description for the favorite folders bundle.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Description {
+public final class FavFolderDescription extends ModuleDescriptionRegisterer {
+
+	public FavFolderDescription(final BundleContext context) {
+		super(context);
+	}
+
+	@Override
+	protected ModuleDescription getDescription(final DescriptionFactory factory) {
+		return factory.module("favfolder", "Provides access to a user's favorite folder trees.", null, 
+				factory.action("delete", "Deletes a favorite folder tree", RequestMethod.GET, null, null, null, false,
+						factory.parameter("session", "A session ID previously obtained from the login module.", Type.STRING, false),
+						factory.parameter("id", "The identifier of the folder tree to delete.", Type.STRING, false)
+				)
+				//TODO: more actions
+		);
+	}
 	
-	/**
-	 * Specifies the name. Required.
-	 * 
-	 * @return The name
-	 */
-	String getName();
-
-	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
-	 * @return the description
-	 */
-	String getDescription();
-
 }

@@ -47,27 +47,45 @@
  *
  */
 
-package com.openexchange.documentation.descriptions;
+package com.openexchange.documentation;
+
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Attribute;
+import com.openexchange.documentation.annotations.Container;
+import com.openexchange.documentation.annotations.Parameter;
 
 /**
- * {@link Description} - Common descriptions.
+ * {@link Type} - Types for {@link Parameter}s used by {@link Action}s and {@link Attribute}s used by {@link Container}s.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Description {
-	
+public enum Type {
 	/**
-	 * Specifies the name. Required.
-	 * 
-	 * @return The name
+	 * Value   ::= "null" | Boolean | Number | String | Array | Object
 	 */
-	String getName();
-
+	VALUE,
 	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
-	 * @return the description
+	 * Boolean ::= "true" | "false"
 	 */
-	String getDescription();
-
+	BOOLEAN,
+	/**
+	 * Number  ::= see NumericLiteral in ECMA 262 3rd edition
+	 */
+	NUMBER,
+	/**
+	 * String  ::= \"([^"\n\\]|\\["\n\\])*\"
+	 */
+	STRING,
+	/**
+	 * Array   ::= "[]" | "[" Value ("," Value)* "]"
+	 */
+	ARRAY,
+	/**
+	 * Object  ::= "{}" | "{" Name ":" Value ("," Name ":" Value)* "}"
+	 */
+	OBJECT,
+	/**
+	 * Name    ::= [A-Fa-f][0-9A-Fa-f_]*
+	 */
+	NAME,
 }
