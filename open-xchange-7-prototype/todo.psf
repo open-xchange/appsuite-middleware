@@ -9,6 +9,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.conversion.engine"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.conversion.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.data.conversion.ical.ical4j"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.favfolder"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.config"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.generic"/>
