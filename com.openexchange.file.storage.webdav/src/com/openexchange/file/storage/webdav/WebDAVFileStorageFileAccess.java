@@ -893,7 +893,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              * Perform PropPatch
              */
             final DavPropertySet setProperties = new DavPropertySet();
-            setProperties.add(new DefaultDavProperty<String>(DavPropertyName.create("dummy", WebDAVConstants.OX_NAMESPACE), String.valueOf(System.currentTimeMillis())));
+            setProperties.add(new DefaultDavProperty<String>(DavPropertyName.create("dummy", WebDAVConstants.OX_NAMESPACE), Long.toString(System.currentTimeMillis())));
             final DavMethod davMethod = new PropPatchMethod(uri.toString(), setProperties, new DavPropertyNameSet());
             try {
                 initMethod(folderId, id, davMethod);

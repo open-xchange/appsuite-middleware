@@ -135,7 +135,7 @@ public class FolderTest extends AbstractAJAXTest {
      */
     @Deprecated
     public static final int getUserId(final WebConversation conversation, final String hostname, final String entityArg, final String password) throws IOException, SAXException, JSONException, OXException, OXException {
-        WebConversation conversation2 = new WebConversation(); // Can't reuse conversations for different sessions!
+        final WebConversation conversation2 = new WebConversation(); // Can't reuse conversations for different sessions!
         final String sessionId = LoginTest.getSessionId(conversation2, hostname, entityArg, password);
         return ConfigTools.getUserId(conversation2, hostname, sessionId);
     }
@@ -182,8 +182,8 @@ public class FolderTest extends AbstractAJAXTest {
         return getSubfolders(conversation, null, hostname, sessionId, parentIdentifier, ignoreMailfolder);
     }
 
-    public static List<FolderObject> getSubfolders(WebConversation conversation, String protocol, String hostname, String sessionId, String parentIdentifier, boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
-        AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, sessionId));
+    public static List<FolderObject> getSubfolders(final WebConversation conversation, final String protocol, final String hostname, final String sessionId, final String parentIdentifier, final boolean ignoreMailfolder) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
+        final AJAXClient client = new AJAXClient(new AJAXSession(conversation, hostname, sessionId));
         client.setProtocol(protocol);
         client.setHostname(hostname);
         return FolderTools.getSubFolders(client, parentIdentifier, ignoreMailfolder);
@@ -305,7 +305,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
+        urlParam.setParameter(FolderFields.FOLDER_ID, Integer.toString(parentFolderId));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
@@ -362,7 +362,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(FolderFields.FOLDER_ID, String.valueOf(parentFolderId));
+        urlParam.setParameter(FolderFields.FOLDER_ID, Integer.toString(parentFolderId));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         final WebRequest req = new PutMethodWebRequest(
@@ -390,7 +390,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
+        urlParam.setParameter(AJAXServlet.PARAMETER_ID, Integer.toString(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -441,7 +441,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_UPDATE);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(AJAXServlet.PARAMETER_ID, String.valueOf(folderId));
+        urlParam.setParameter(AJAXServlet.PARAMETER_ID, Integer.toString(folderId));
         urlParam.setParameter("timestamp", String.valueOf(timestamp));
         final byte[] bytes = jsonFolder.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
         final ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
@@ -523,7 +523,7 @@ public class FolderTest extends AbstractAJAXTest {
         final URLParameter urlParam = new URLParameter();
         urlParam.setParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_CLEAR);
         urlParam.setParameter(AJAXServlet.PARAMETER_SESSION, sessionId);
-        urlParam.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, String.valueOf(timestamp));
+        urlParam.setParameter(AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(timestamp));
 
         final WebRequest req = new PutMethodWebRequest(
             ((null == protocol) ? PROTOCOL : (protocol + "://")) + hostname + FOLDER_URL + urlParam.getURLParameters(),
@@ -639,9 +639,9 @@ public class FolderTest extends AbstractAJAXTest {
         return getStandardContactFolder(conversation, null, hostname, sessionId);
     }
 
-    public static FolderObject getStandardContactFolder(WebConversation conversation, String protocol, String hostname, String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
-        List<FolderObject> subfolders = getSubfolders(conversation, protocol, hostname, sessionId, FolderStorage.PRIVATE_ID, true);
-        for (FolderObject subfolder : subfolders) {
+    public static FolderObject getStandardContactFolder(final WebConversation conversation, final String protocol, final String hostname, final String sessionId) throws MalformedURLException, IOException, SAXException, JSONException, OXException, OXException {
+        final List<FolderObject> subfolders = getSubfolders(conversation, protocol, hostname, sessionId, FolderStorage.PRIVATE_ID, true);
+        for (final FolderObject subfolder : subfolders) {
             if (subfolder.getModule() == FolderObject.CONTACT && subfolder.isDefaultFolder()) {
                 return subfolder;
             }
@@ -688,7 +688,7 @@ public class FolderTest extends AbstractAJAXTest {
             throw new TestException("System infostore folder not found!");
         }
         FolderObject userStore = null;
-        l = getSubfolders(conversation, protocol, hostname, sessionId, String.valueOf(infostore.getObjectID()));
+        l = getSubfolders(conversation, protocol, hostname, sessionId, Integer.toString(infostore.getObjectID()));
         for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
             final FolderObject f = iter.next();
             if (f.getObjectID() == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
@@ -699,7 +699,7 @@ public class FolderTest extends AbstractAJAXTest {
         if (null == userStore) {
             throw new TestException("System user store folder not found!");
         }
-        l = getSubfolders(conversation, protocol, hostname, sessionId, String.valueOf(userStore.getObjectID()));
+        l = getSubfolders(conversation, protocol, hostname, sessionId, Integer.toString(userStore.getObjectID()));
         for (final Iterator<FolderObject> iter = l.iterator(); iter.hasNext();) {
             final FolderObject f = iter.next();
             if (f.containsDefaultFolder() && f.isDefaultFolder() && f.getCreator() == loginId) {

@@ -175,7 +175,7 @@ public class ServletResponseWrapper implements ServletResponse {
 
     @Override
     public void setContentLength(final int contentLength) {
-        headers.put(CONTENT_LENGTH, new String[] { String.valueOf(contentLength) });
+        headers.put(CONTENT_LENGTH, new String[] { Integer.toString(contentLength) });
     }
 
     public int getContentLength() {

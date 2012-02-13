@@ -224,7 +224,7 @@ public class CSVContactImporter extends AbstractImporter {
                 }
                 results.add(result);
             } else if (intention.contact != null && intention.contact.getObjectID() == 0) {
-            	ImportResult notCreated = new ImportResult();
+            	final ImportResult notCreated = new ImportResult();
             	notCreated.setException(ImportExportExceptionCodes.COULD_NOT_CREATE.create(intention.contact));
             	results.add(notCreated);
             } else if (intention.result != null) {
@@ -406,7 +406,7 @@ public class CSVContactImporter extends AbstractImporter {
     protected String getNameForFieldInTruncationError(final int id, final OXException unused) {
         final ContactField field = ContactField.getByValue(id);
         if (field == null) {
-            return String.valueOf(id);
+            return Integer.toString(id);
         }
         return field.getReadableName();
     }

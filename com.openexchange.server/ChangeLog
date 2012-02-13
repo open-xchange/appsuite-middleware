@@ -1,3 +1,13 @@
+* 2012-02-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21507: Checking for possible TNEF content by file name, too
+
+* 2012-02-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21525: Fixed possible NPE
+ - Fix for bug 21483: Interpret ASCII as ISO-8859-1 characters
+ - Fix for bug 21476: Prefer "imapflags" over "imap4flags" if both supported as indicated by SIEVE capabilities
+
 * 2012-02-10 - jan.bauerdick@open-xchange.com
 
  - DeferredActivator CLT 

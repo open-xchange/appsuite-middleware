@@ -79,7 +79,7 @@ public class RdbCredentials implements Credentials {
     public String getValue(final String valueName) {
         String retval = null;
         if (USER_ID.equals(valueName)) {
-            retval = String.valueOf(userID);
+            retval = Integer.toString(userID);
         }
         return retval;
     }

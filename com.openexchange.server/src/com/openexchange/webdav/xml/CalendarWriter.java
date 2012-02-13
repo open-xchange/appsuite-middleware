@@ -169,7 +169,7 @@ public abstract class CalendarWriter extends CommonWriter {
                 switch (type) {
                     case Participant.USER:
                         eParticipant = new Element("user", XmlServlet.NS);
-                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        eParticipant.addContent(Integer.toString(participant[a].getIdentifier()));
 
                         if (hasUserParticipants) {
                             final int userPos = Arrays.binarySearch(userparticipant, participant[a]);
@@ -194,15 +194,15 @@ public abstract class CalendarWriter extends CommonWriter {
                         break;
                     case Participant.GROUP:
                         eParticipant = new Element("group", XmlServlet.NS);
-                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        eParticipant.addContent(Integer.toString(participant[a].getIdentifier()));
                         break;
                     case Participant.RESOURCE:
                         eParticipant = new Element("resource", XmlServlet.NS);
-                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        eParticipant.addContent(Integer.toString(participant[a].getIdentifier()));
                         break;
                     case Participant.EXTERNAL_USER:
                         eParticipant = new Element("user", XmlServlet.NS);
-                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        eParticipant.addContent(Integer.toString(participant[a].getIdentifier()));
                         if (participant[a].getDisplayName() != null) {
                             eParticipant.setAttribute("displayname", participant[a].getDisplayName(), XmlServlet.NS);
                         } else {
@@ -218,7 +218,7 @@ public abstract class CalendarWriter extends CommonWriter {
                         break;
                     case Participant.EXTERNAL_GROUP:
                         eParticipant = new Element("group", XmlServlet.NS);
-                        eParticipant.addContent(String.valueOf(participant[a].getIdentifier()));
+                        eParticipant.addContent(Integer.toString(participant[a].getIdentifier()));
                         if (participant[a].getDisplayName() != null) {
                             eParticipant.setAttribute("displayname", participant[a].getDisplayName(), XmlServlet.NS);
                         } else {

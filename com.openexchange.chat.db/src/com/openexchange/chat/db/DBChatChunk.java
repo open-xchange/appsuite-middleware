@@ -87,9 +87,9 @@ public class DBChatChunk implements ChatChunk {
         this.chunkId = chunkId;
         this.chatId = chatId;
         this.contextId = contextId;
-        this.sChunkId = String.valueOf(chunkId);
-        this.sChatId = String.valueOf(chatId);
-        this.sContextId = String.valueOf(contextId);
+        this.sChunkId = Integer.toString(chunkId);
+        this.sChatId = Integer.toString(chatId);
+        this.sContextId = Integer.toString(contextId);
         this.createdAt = System.currentTimeMillis();
     }
 
@@ -124,7 +124,7 @@ public class DBChatChunk implements ChatChunk {
             rs = stmt.executeQuery();
             final List<String> ret = new LinkedList<String>();
             while (rs.next()) {
-                ret.add(String.valueOf(rs.getInt(1)));
+                ret.add(Integer.toString(rs.getInt(1)));
             }
             return ret;
         } catch (final SQLException e) {

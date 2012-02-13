@@ -100,7 +100,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
         return fieldMappers;
     }
 
-    public void setFieldMappers(List<ContactFieldMapper> fieldMappers) {
+    public void setFieldMappers(final List<ContactFieldMapper> fieldMappers) {
         this.fieldMappers = fieldMappers;
     }
 
@@ -108,11 +108,11 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
         return fieldMapper;
     }
 
-    public void setFieldMapper(ContactFieldMapper fieldMapper) {
+    public void setFieldMapper(final ContactFieldMapper fieldMapper) {
         this.fieldMapper = fieldMapper;
     }
 
-    public void addFieldMappers(ContactFieldMapper newMapper) {
+    public void addFieldMappers(final ContactFieldMapper newMapper) {
         if (fieldMappers == null) {
             fieldMappers = new LinkedList<ContactFieldMapper>();
         }
@@ -153,7 +153,7 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
     protected boolean checkFields(final List<String> fields) {
         int highestAmountOfMappedFields = 0;
 
-        for (ContactFieldMapper mapper : getFieldMappers()) {
+        for (final ContactFieldMapper mapper : getFieldMappers()) {
             int mappedFields = 0;
             for (final String name : fields) {
                 if (mapper.getFieldByName(name) != null) {
@@ -201,14 +201,14 @@ public class OutlookCSVContactImporter extends CSVContactImporter {
     protected String getNameForFieldInTruncationError(final int id, final OXException notused) {
         final ContactField field = ContactField.getByValue(id);
         if (field == null) {
-            return String.valueOf(id);
+            return Integer.toString(id);
         }
         return getFieldMapper().getNameOfField(field);
     }
 
     @Override
-    protected boolean passesSanityTestForDisplayName(List<String> headers) {
-        ContactFieldMapper mpr = getFieldMapper();
+    protected boolean passesSanityTestForDisplayName(final List<String> headers) {
+        final ContactFieldMapper mpr = getFieldMapper();
 
         return Collections.any(
             headers,

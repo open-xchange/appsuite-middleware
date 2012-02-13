@@ -3187,7 +3187,7 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
             }
             prep.setInt(1, contextId);
             prep.setInt(2, recurrenceId);
-            prep.setString(3, String.valueOf(exDate.getTime()));
+            prep.setString(3, Long.toString(exDate.getTime()));
             rs = calendarsqlimp.getResultSet(prep);
             /*
              * Use CalendarOperation to load the calendar object

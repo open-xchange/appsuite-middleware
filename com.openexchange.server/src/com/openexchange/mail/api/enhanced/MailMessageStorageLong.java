@@ -114,8 +114,8 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * Moreover the implementation should take care if a copy operation from or to default drafts folder is performed. If so, this method
      * should ensure that system flag <tt>DRAFT</tt> is enabled or disabled.
      *
-     * @param sourceFolder The source folder fullname
-     * @param destFolder The destination folder fullname
+     * @param sourceFolder The source folder full name
+     * @param destFolder The destination folder full name
      * @param mailIds The mail IDs in source folder
      * @param fast <code>true</code> to perform a fast copy operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of long is returned; otherwise <code>false</code>
@@ -134,7 +134,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * If no mail could be found for a given mail ID, it is treated as a no-op.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param hardDelete <code>true</code> to hard delete the messages, meaning not to create a backup copy of each message in default trash
      *            folder; otherwise <code>false</code>
@@ -169,7 +169,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailPart getAttachment(final String folder, final String mailId, final String sequenceId) throws OXException {
         try {
-            return getAttachmentLong(folder, Long.parseLong(mailId), sequenceId);
+            return getAttachmentLong(folder, parseUnsignedLong(mailId), sequenceId);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -203,7 +203,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailPart getImageAttachment(final String folder, final String mailId, final String contentId) throws OXException {
         try {
-            return getImageAttachmentLong(folder, Long.parseLong(mailId), contentId);
+            return getImageAttachmentLong(folder, parseUnsignedLong(mailId), contentId);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -264,7 +264,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public MailMessage getMessage(final String folder, final String mailId, final boolean markSeen) throws OXException {
         try {
-            return getMessageLong(folder, Long.parseLong(mailId), markSeen);
+            return getMessageLong(folder, parseUnsignedLong(mailId), markSeen);
         } catch (final NumberFormatException e) {
             LOG.error("UID cannot be parsed to a number: " + mailId, e);
             return null;
@@ -316,7 +316,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * If any mail ID is invalid, <code>null</code> is returned for that entry.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
      * @return Corresponding mails as an array
@@ -332,7 +332,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * If underlying mailing system is IMAP, this method requires the IMAPv4 SORT extension or in detail the IMAP <code>CAPABILITY</code>
      * command should contain "SORT THREAD=ORDEREDSUBJECT THREAD=REFERENCES".
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -354,7 +354,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * This is a convenience method that may be overridden if a faster way can be achieved.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param sortField The sort field
      * @param order The sort order
      * @param fields The fields to pre-fill in returned instances of {@link MailMessage}
@@ -382,8 +382,8 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <p>
      * This is a convenience method that may be overridden if a faster way can be achieved.
      *
-     * @param sourceFolder The source folder fullname
-     * @param destFolder The destination folder fullname
+     * @param sourceFolder The source folder full name
+     * @param destFolder The destination folder full name
      * @param mailIds The mail IDs in source folder
      * @param fast <code>true</code> to perform a fast move operation, meaning the corresponding mail IDs in destination folder are ignored
      *            and an empty array of String is returned; otherwise <code>false</code>
@@ -408,13 +408,13 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * A convenience method that saves given draft mail to default drafts folder and supports deletion of old draft's version (draft-edit
      * operation).
      *
-     * @param draftFullname The fullname of default drafts folder
+     * @param draftFullName name The full name of default drafts folder
      * @param draftMail The draft mail as a composed mail
      * @return The stored draft mail
      * @throws OXException If saving specified draft message fails
      */
     @Override
-    public MailMessage saveDraft(final String draftFullname, final ComposedMailMessage draftMail) throws OXException {
+    public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage draftMail) throws OXException {
         final String uid;
         try {
             final MailMessage filledMail = MIMEMessageConverter.fillComposedMailMessage(draftMail);
@@ -422,7 +422,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             /*
              * Append message to draft folder
              */
-            uid = appendMessages(draftFullname, new MailMessage[] { filledMail })[0];
+            uid = appendMessages(draftFullName, new MailMessage[] { filledMail })[0];
         } finally {
             draftMail.cleanUp();
         }
@@ -430,14 +430,14 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
          * Check for draft-edit operation: Delete old version
          */
         final MailPath msgref = draftMail.getMsgref();
-        if (msgref != null && draftFullname.equals(msgref.getFolder())) {
+        if (msgref != null && draftFullName.equals(msgref.getFolder())) {
             deleteMessages(msgref.getFolder(), new String[] { msgref.getMailID() }, true);
             draftMail.setMsgref(null);
         }
         /*
          * Return draft mail
          */
-        return getMessage(draftFullname, uid, true);
+        return getMessage(draftFullName, uid, true);
     }
 
     /**
@@ -449,7 +449,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * <b>Note</b> that sorting needs not to be supported by underlying mailing system. This can be done on application side, too.<br>
      * Same is for search, but in most cases it's faster to search on mailing system, but this heavily depends on how mails are accessed.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param indexRange The index range specifying the desired sub-list in sorted list; may be <code>null</code> to obtain complete list.
      *            Range begins at the specified start index and extends to the message at index <code>end - 1</code>. Thus the length of the
      *            range is <code>end - start</code>.
@@ -474,7 +474,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * The color labels are user flags with the common prefix <code>"cl_"</code> and its numeric color code appended (currently numbers 0 to
      * 10).
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param colorLabel The color label to apply
      * @throws OXException If color label cannot be updated
@@ -495,7 +495,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * The color labels are user flags with the common prefix <code>"cl_"</code> and its numeric color code appended (currently numbers 0 to
      * 10).
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param colorLabel The color label to apply
      * @throws OXException If color label cannot be updated
@@ -536,7 +536,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * the {@link SpamHandler#handleSpam(String, String[], boolean, MailAccess)}/
      * {@link SpamHandler#handleHam(String, String[], boolean, MailAccess)} methods needs to be executed.
      *
-     * @param folder The folder fullname
+     * @param folder The folder full name
      * @param mailIds The mail IDs
      * @param flags The bit pattern for the flags to alter
      * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
@@ -561,6 +561,8 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         return retval;
     }
 
+    private static final int RADIX = 10;
+
     /**
      * Converts specified UID numbers to an array of <code>String</code>.
      *
@@ -577,7 +579,7 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
             if (-1 == l) {
                 retval[i] = null;
             } else {
-                retval[i] = String.valueOf(longs[i]);
+                retval[i] = Long.toString(longs[i], RADIX);
             }
         }
         return retval;
@@ -585,18 +587,26 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
 
     private static final long DEFAULT = -1L;
 
-    private static final int RADIX = 10;
-
-    private static long parseUnsignedLong(final String s) {
+    /**
+     * Parses the string argument as a signed decimal <code>long</code>. The characters in the string must all be decimal digits.
+     * <p>
+     * Note that neither the character <code>L</code> (<code>'&#92;u004C'</code>) nor <code>l</code> (<code>'&#92;u006C'</code>) is
+     * permitted to appear at the end of the string as a type indicator, as would be permitted in Java programming language source code.
+     * 
+     * @param s A <code>String</code> containing the <code>long</code> representation to be parsed
+     * @return The <code>long</code> represented by the argument in decimal or <code>-1</code> if the string does not contain a parsable
+     *         <code>long</code>.
+     */
+    protected static long parseUnsignedLong(final String s) {
         if (s == null) {
             return DEFAULT;
         }
         final int max = s.length();
         if (max <= 0) {
-            return -1;
+            return DEFAULT;
         }
         if (s.charAt(0) == '-') {
-            return -1;
+            return DEFAULT;
         }
 
         long result = 0;

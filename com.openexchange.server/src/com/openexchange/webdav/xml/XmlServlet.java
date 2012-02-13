@@ -525,7 +525,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         e_response.addNamespaceDeclaration(NS);
 
         final Element e_href = new Element("href", dav);
-        e_href.addContent(String.valueOf(dataobject.getObjectID()));
+        e_href.addContent(Integer.toString(dataobject.getObjectID()));
 
         e_response.addContent(e_href);
 
@@ -533,19 +533,19 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         final Element e_prop = new Element(prop, dav);
 
         final Element e_object_id = new Element(DataFields.OBJECT_ID, NS);
-        e_object_id.addContent(String.valueOf(dataobject.getObjectID()));
+        e_object_id.addContent(Integer.toString(dataobject.getObjectID()));
         e_prop.addContent(e_object_id);
 
         final Date lastModified = dataobject.getLastModified();
         if (lastModified != null) {
             final Element eLastModified = new Element(DataFields.LAST_MODIFIED, NS);
-            eLastModified.addContent(String.valueOf(lastModified.getTime()));
+            eLastModified.addContent(Long.toString(lastModified.getTime()));
             e_prop.addContent(eLastModified);
         }
 
         if (dataobject instanceof CalendarObject) {
             final Element e_recurrence_id = new Element(CalendarFields.RECURRENCE_ID, NS);
-            e_recurrence_id.addContent(String.valueOf(((CalendarObject) dataobject).getRecurrenceID()));
+            e_recurrence_id.addContent(Integer.toString(((CalendarObject) dataobject).getRecurrenceID()));
             e_prop.addContent(e_recurrence_id);
         }
 
@@ -559,7 +559,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         e_propstat.addContent(e_prop);
 
         final Element e_status = new Element("status", "D", davUri);
-        e_status.addContent(String.valueOf(status));
+        e_status.addContent(Integer.toString(status));
 
         e_propstat.addContent(e_status);
 

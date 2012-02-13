@@ -67,7 +67,7 @@ public class InfostoreFile extends AbstractFile implements File {
 
     private final DocumentMetadata document;
 
-    public InfostoreFile(DocumentMetadata documentMetadata) {
+    public InfostoreFile(final DocumentMetadata documentMetadata) {
         this.document = documentMetadata;
     }
 
@@ -134,13 +134,13 @@ public class InfostoreFile extends AbstractFile implements File {
 
     @Override
     public String getFolderId() {
-        return String.valueOf(document.getFolderId());
+        return Long.toString(document.getFolderId());
     }
 
 
     @Override
     public String getId() {
-        return String.valueOf(document.getId());
+        return Integer.toString(document.getId());
     }
 
 
@@ -169,7 +169,7 @@ public class InfostoreFile extends AbstractFile implements File {
 
 
     @Override
-    public String getProperty(String key) {
+    public String getProperty(final String key) {
         return document.getProperty(key);
     }
 
@@ -217,61 +217,61 @@ public class InfostoreFile extends AbstractFile implements File {
 
 
     @Override
-    public void setCategories(String categories) {
+    public void setCategories(final String categories) {
         document.setCategories(categories);
     }
 
 
     @Override
-    public void setColorLabel(int color) {
+    public void setColorLabel(final int color) {
         document.setColorLabel(color);
     }
 
 
     @Override
-    public void setCreatedBy(int cretor) {
+    public void setCreatedBy(final int cretor) {
         document.setCreatedBy(cretor);
     }
 
 
     @Override
-    public void setCreated(Date creationDate) {
+    public void setCreated(final Date creationDate) {
         document.setCreationDate(creationDate);
     }
 
 
     @Override
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         document.setDescription(description);
     }
 
 
     @Override
-    public void setFileMD5Sum(String sum) {
+    public void setFileMD5Sum(final String sum) {
         document.setFileMD5Sum(sum);
     }
 
 
     @Override
-    public void setFileMIMEType(String type) {
+    public void setFileMIMEType(final String type) {
         document.setFileMIMEType(type);
     }
 
 
     @Override
-    public void setFileName(String fileName) {
+    public void setFileName(final String fileName) {
         document.setFileName(fileName);
     }
 
 
     @Override
-    public void setFileSize(long length) {
+    public void setFileSize(final long length) {
         document.setFileSize(length);
     }
 
 
     @Override
-    public void setFolderId(String folderId) {
+    public void setFolderId(final String folderId) {
         if(folderId != null) {
             document.setFolderId(Long.parseLong(folderId));
         }
@@ -279,7 +279,7 @@ public class InfostoreFile extends AbstractFile implements File {
 
 
     @Override
-    public void setId(String id) {
+    public void setId(final String id) {
         if(id == FileStorageFileAccess.NEW) {
             document.setId(InfostoreFacade.NEW);
         } else {
@@ -289,55 +289,55 @@ public class InfostoreFile extends AbstractFile implements File {
 
 
     @Override
-    public void setIsCurrentVersion(boolean bool) {
+    public void setIsCurrentVersion(final boolean bool) {
         document.setIsCurrentVersion(bool);
     }
 
 
     @Override
-    public void setLastModified(Date now) {
+    public void setLastModified(final Date now) {
         document.setLastModified(now);
     }
 
 
     @Override
-    public void setLockedUntil(Date lockedUntil) {
+    public void setLockedUntil(final Date lockedUntil) {
         document.setLockedUntil(lockedUntil);
     }
 
 
     @Override
-    public void setModifiedBy(int lastEditor) {
+    public void setModifiedBy(final int lastEditor) {
         document.setModifiedBy(lastEditor);
     }
 
 
     @Override
-    public void setNumberOfVersions(int numberOfVersions) {
+    public void setNumberOfVersions(final int numberOfVersions) {
         document.setNumberOfVersions(numberOfVersions);
     }
 
 
     @Override
-    public void setTitle(String title) {
+    public void setTitle(final String title) {
         document.setTitle(title);
     }
 
 
     @Override
-    public void setURL(String url) {
+    public void setURL(final String url) {
         document.setURL(url);
     }
 
 
     @Override
-    public void setVersion(int version) {
+    public void setVersion(final int version) {
         document.setVersion(version);
     }
 
 
     @Override
-    public void setVersionComment(String string) {
+    public void setVersionComment(final String string) {
         document.setVersionComment(string);
     }
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.calendar;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -61,6 +60,7 @@ import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.request.AppointmentRequest;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.databaseold.Database;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.search.AppointmentSearchObject;
@@ -129,7 +129,7 @@ public class SlowCalendarTests extends AbstractCalendarTest {
 
             iter = sqlInterface.getObjectsById(new int[][] { { cdao.getObjectID(), cdao.getParentFolderID() } }, COLS);
             assertContains(iter, cdao);
-            AppointmentSearchObject searchObj = new AppointmentSearchObject();
+            final AppointmentSearchObject searchObj = new AppointmentSearchObject();
             searchObj.setPattern("*");
             searchObj.addFolder(cdao.getParentFolderID());
 
@@ -169,9 +169,9 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             // Freebusy
             arr = req.actionFreeBusy(json(
                 AJAXServlet.PARAMETER_ID,
-                String.valueOf(userId),
+                Integer.toString(userId),
                 "type",
-                String.valueOf(Participant.USER),
+                Integer.toString(Participant.USER),
                 AJAXServlet.PARAMETER_START,
                 String.valueOf(SUPER_START.getTime()),
                 AJAXServlet.PARAMETER_END,
@@ -181,9 +181,9 @@ public class SlowCalendarTests extends AbstractCalendarTest {
             // Get
             final JSONObject loaded = req.actionGet(json(
                 AJAXServlet.PARAMETER_ID,
-                String.valueOf(cdao.getObjectID()),
+                Integer.toString(cdao.getObjectID()),
                 AJAXServlet.PARAMETER_FOLDERID,
-                String.valueOf(cdao.getParentFolderID())));
+                Integer.toString(cdao.getParentFolderID())));
             assertEquals(loaded.getInt("id"), cdao.getObjectID());
 
             // Has

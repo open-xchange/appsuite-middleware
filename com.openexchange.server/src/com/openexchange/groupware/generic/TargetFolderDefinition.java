@@ -97,7 +97,7 @@ public class TargetFolderDefinition {
     }
 
     public void setFolderId(final int folderId) {
-        setFolderId(String.valueOf(folderId));
+        setFolderId(Integer.toString(folderId));
     }
 
     public boolean containsFolderId() {

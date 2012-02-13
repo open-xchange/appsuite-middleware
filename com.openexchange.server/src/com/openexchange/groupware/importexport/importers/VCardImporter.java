@@ -208,7 +208,7 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
                     try {
                         final VersitObject versitObject = def.parse(versitReader);
 
-                        importResult.setFolder(String.valueOf(contactFolderId));
+                        importResult.setFolder(Integer.toString(contactFolderId));
 
                         final Contact contactObj = oxContainerConverter.convertContact(versitObject);
                         contactObj.setParentFolderID(contactFolderId);
@@ -234,7 +234,7 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
                                 LOG.debug("cannot import contact object", oxEx);
                             }
                         }
-                        importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
+                        importResult.setObjectId(Integer.toString(contactObj.getObjectID()));
                         importResult.setDate(contactObj.getLastModified());
                     } catch (final VersitException e) {
                         LOG.error("cannot parse contact object", e);
@@ -268,7 +268,7 @@ public class VCardImporter extends AbstractImporter implements OXExceptionConsta
     protected String getNameForFieldInTruncationError(final int id, final OXException unused) {
         final ContactField field = ContactField.getByValue(id);
         if (field == null) {
-            return String.valueOf(id);
+            return Integer.toString(id);
         }
         return field.getReadableName();
     }

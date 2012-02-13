@@ -95,7 +95,7 @@ public class BulkFolderField implements AdditionalFolderField {
     public Object getValue(final FolderObject f, final ServerSession session) {
         String fn = f.getFullName();
         if (fn == null) {
-            fn = String.valueOf(f.getObjectID());
+            fn = Integer.toString(f.getObjectID());
         }
         if (!values.containsKey(fn)) {
             getValues(Collections.singletonList(f), session);
@@ -109,7 +109,7 @@ public class BulkFolderField implements AdditionalFolderField {
         final List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
         for (final FolderObject f : folders) {
             final String fn = f.getFullName();
-            if (!values.containsKey(fn == null ? String.valueOf(f.getObjectID()) : fn)) {
+            if (!values.containsKey(fn == null ? Integer.toString(f.getObjectID()) : fn)) {
                 fl.add(f);
             }
         }
@@ -119,7 +119,7 @@ public class BulkFolderField implements AdditionalFolderField {
         final List<Object> vals = new ArrayList<Object>(folders.size());
         for (final FolderObject f : folders) {
             final String fn = f.getFullName();
-            final Object value = values.get(fn == null ? String.valueOf(f.getObjectID()) : fn);
+            final Object value = values.get(fn == null ? Integer.toString(f.getObjectID()) : fn);
             vals.add(NULL == value ? null : value);
         }
         return vals;
@@ -142,7 +142,7 @@ public class BulkFolderField implements AdditionalFolderField {
         for (final FolderObject f : folders) {
             final String fn = f.getFullName();
             final Object value = vals.get(i++);
-            values.put(fn == null ? String.valueOf(f.getObjectID()) : fn, null == value ? NULL : value);
+            values.put(fn == null ? Integer.toString(f.getObjectID()) : fn, null == value ? NULL : value);
         }
     }
 

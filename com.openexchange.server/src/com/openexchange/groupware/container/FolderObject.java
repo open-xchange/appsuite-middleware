@@ -950,7 +950,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
 
     public final List<Integer> getSubfolderIds() throws OXException {
         if (!b_subfolderIds) {
-            throw OXFolderExceptionCode.ATTRIBUTE_NOT_SET.create("subfolderIds", String.valueOf(getObjectID()), "");
+            throw OXFolderExceptionCode.ATTRIBUTE_NOT_SET.create("subfolderIds", Integer.toString(getObjectID()), "");
         }
         return subfolderIds;
     }
@@ -975,7 +975,7 @@ public class FolderObject extends FolderChildObject implements Cloneable, Serial
                 return new ArrayList<Integer>(0);
             }
             if (!enforce) {
-                throw OXFolderExceptionCode.ATTRIBUTE_NOT_SET.create("subfolderIds", String.valueOf(getObjectID()), "");
+                throw OXFolderExceptionCode.ATTRIBUTE_NOT_SET.create("subfolderIds", Integer.toString(getObjectID()), "");
             }
             subfolderIds = getSubfolderIds(objectId, ctx, readCon);
             b_subfolderIds = true;

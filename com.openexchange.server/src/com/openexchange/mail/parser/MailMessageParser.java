@@ -404,7 +404,7 @@ public final class MailMessageParser {
             return;
         }
         final String lcct = LocaleTools.toLowerCase(contentType.getBaseType());
-        final String filename = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
+        final String fileName = getFileName(mailPart.getFileName(), getSequenceId(prefix, partCount), lcct);
         /*
          * Parse part dependent on its MIME type
          */
@@ -449,7 +449,7 @@ public final class MailMessageParser {
                     "",
                     ContentType.DEFAULT_CONTENT_TYPE,
                     0,
-                    filename,
+                    fileName,
                     MailMessageParser.getSequenceId(prefix, partCount))) {
                     stop = true;
                     return;
@@ -467,7 +467,7 @@ public final class MailMessageParser {
                         uuencodedMP.getCleanText(),
                         contentType,
                         uuencodedMP.getCleanText().length(),
-                        filename,
+                        fileName,
                         getSequenceId(prefix, partCount))) {
                         stop = true;
                         return;
@@ -498,7 +498,7 @@ public final class MailMessageParser {
                         content,
                         contentType,
                         size,
-                        filename,
+                        fileName,
                         MailMessageParser.getSequenceId(prefix, partCount))) {
                         stop = true;
                         return;
@@ -511,7 +511,7 @@ public final class MailMessageParser {
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
-                if (!handler.handleAttachment(mailPart, false, lcct, filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -521,12 +521,12 @@ public final class MailMessageParser {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
             if (isInline) {
-                if (!handler.handleInlineHtml(readContent(mailPart, contentType), contentType, size, filename, mailPart.getSequenceId())) {
+                if (!handler.handleInlineHtml(readContent(mailPart, contentType), contentType, size, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
             } else {
-                if (!handler.handleAttachment(mailPart, false, lcct, filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -535,7 +535,7 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (!handler.handleImagePart(mailPart, mailPart.getContentId(), lcct, isInline, filename, mailPart.getSequenceId())) {
+            if (!handler.handleImagePart(mailPart, mailPart.getContentId(), lcct, isInline, fileName, mailPart.getSequenceId())) {
                 stop = true;
                 return;
             }
@@ -549,12 +549,12 @@ public final class MailMessageParser {
                     return;
                 }
             } else {
-                if (!handler.handleAttachment(mailPart, isInline, MIMETypes.MIME_MESSAGE_RFC822, filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, isInline, MIMETypes.MIME_MESSAGE_RFC822, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
             }
-        } else if (TNEFUtils.isTNEFMimeType(lcct)) {
+        } else if (TNEFUtils.isTNEFMimeType(lcct) || isWinmailDat(fileName)) {
             try {
                 /*
                  * Here go with TNEF encoded messages. Since TNEF library is based on JavaMail API we are forced to use JavaMail-specific
@@ -794,7 +794,7 @@ public final class MailMessageParser {
                         if (!mailPart.containsSequenceId()) {
                             mailPart.setSequenceId(getSequenceId(prefix, partCount));
                         }
-                        if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
+                        if (!handler.handleAttachment(mailPart, isInline, lcct, fileName, mailPart.getSequenceId())) {
                             stop = true;
                             return;
                         }
@@ -807,7 +807,7 @@ public final class MailMessageParser {
                         /*
                          * Translate TNEF attributes to MIME
                          */
-                        final String attachFilename = filename;
+                        final String attachFilename = fileName;
                         final DataSource ds = new RawDataSource(messageClass.getRawData(), MIMETypes.MIME_APPL_OCTET);
                         bodyPart.setDataHandler(new DataHandler(ds));
                         bodyPart.setHeader(
@@ -831,7 +831,7 @@ public final class MailMessageParser {
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
-                if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, isInline, lcct, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -842,7 +842,7 @@ public final class MailMessageParser {
                 if (!mailPart.containsSequenceId()) {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
-                if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
+                if (!handler.handleAttachment(mailPart, isInline, lcct, fileName, mailPart.getSequenceId())) {
                     stop = true;
                     return;
                 }
@@ -851,7 +851,7 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (!handler.handleSpecialPart(mailPart, lcct, filename, mailPart.getSequenceId())) {
+            if (!handler.handleSpecialPart(mailPart, lcct, fileName, mailPart.getSequenceId())) {
                 stop = true;
                 return;
             }
@@ -859,7 +859,7 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (!handler.handleAttachment(mailPart, isInline, lcct, filename, mailPart.getSequenceId())) {
+            if (!handler.handleAttachment(mailPart, isInline, lcct, fileName, mailPart.getSequenceId())) {
                 stop = true;
                 return;
             }
@@ -1006,7 +1006,7 @@ public final class MailMessageParser {
     }
 
     private static String readContent(final MailPart mailPart, final ContentType contentType) throws OXException, IOException {
-        if (is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
+        if (false && is7BitTransferEncoding(mailPart) && (mailPart instanceof MIMERawSource)) {
             try {
                 final byte[] bytes = MessageUtility.getBytesFrom(((MIMERawSource) mailPart).getRawInputStream());
                 if (!MessageUtility.isAscii(bytes)) {
@@ -1237,6 +1237,14 @@ public final class MailMessageParser {
             }
         }
         return false;
+    }
+
+    private static boolean isWinmailDat(final String fileName) {
+        if (isEmptyString(fileName)) {
+            return false;
+        }
+        final String toCheck = LocaleTools.toLowerCase(fileName);
+        return toCheck.startsWith("winmail", 0) && toCheck.endsWith(".dat");
     }
 
 }

@@ -55,7 +55,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,12 +67,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.reports.Syncstatus;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -222,7 +218,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         return resolveCollection(url);
     }
 
-    private WebdavPath sanitize(WebdavPath url) {
+    private WebdavPath sanitize(final WebdavPath url) {
         if (url.startsWith(new WebdavPath("caldav"))) {
             return url.subpath(1);
         }
@@ -405,7 +401,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         } catch (final NumberFormatException e) { 
             // IGNORE
             // preloading failed, we don't care, let's load this one normally.
-        } catch (WebdavProtocolException e) {
+        } catch (final WebdavProtocolException e) {
             // IGNORE
         }
     }
@@ -556,11 +552,11 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 	     */
         private String getDefaultFolderTrash() {
         	if (null == this.defaultFolderTrash) {
-    			FolderService folderService = this.factory.getFolderService();
+    			final FolderService folderService = this.factory.getFolderService();
     			try {
 					this.defaultFolderTrash = folderService.getDefaultFolder(this.factory.getUser(), OUTLOOK_TREE_ID, 
 							TrashContentType.getInstance(), this.factory.getSession(), null).getID();
-				} catch (OXException e) {
+				} catch (final OXException e) {
 					LOG.warn("unable to determine default trash folder", e);
 				}
         	}
@@ -577,13 +573,13 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
 	     * @throws FolderException 
 	     */
 	    private boolean isTrashFolder(final UserizedFolder folder) throws OXException {
-	    	String trashFolderId = this.getDefaultFolderTrash();
+	    	final String trashFolderId = this.getDefaultFolderTrash();
 	    	if (null != trashFolderId) {
-				FolderService folderService = this.factory.getFolderService();
-				FolderResponse<UserizedFolder[]> pathResponse = folderService.getPath(
+				final FolderService folderService = this.factory.getFolderService();
+				final FolderResponse<UserizedFolder[]> pathResponse = folderService.getPath(
 						OUTLOOK_TREE_ID, folder.getID(), this.factory.getSession(), null);
-	            UserizedFolder[] response = pathResponse.getResponse();
-	            for (UserizedFolder parentFolder : response) {
+	            final UserizedFolder[] response = pathResponse.getResponse();
+	            for (final UserizedFolder parentFolder : response) {
 	            	if (trashFolderId.equals(parentFolder.getID())) {
 	            		LOG.debug("Detected folder below trash: " + folder);
 	            		return true;
@@ -823,11 +819,11 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 	}
                 }
                 deletedAppointmentsInFolder.close();
-            } catch (WebdavProtocolException e) {
+            } catch (final WebdavProtocolException e) {
                 LOG.error(e.getMessage(),e);
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.error(e.getMessage(),e);
-            } catch (SQLException e) {
+            } catch (final SQLException e) {
                 LOG.error(e.getMessage(),e);
             }
             return lastModification;
@@ -882,7 +878,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
     
     private final int[] SYNC_STATUS_FIELDS = { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.LAST_MODIFIED, Appointment.CREATION_DATE };
 
-    public Syncstatus<WebdavResource> getSyncStatusSince(WebdavCollection webdavCollection, String token) throws WebdavProtocolException {
+    public Syncstatus<WebdavResource> getSyncStatusSince(final WebdavCollection webdavCollection, String token) throws WebdavProtocolException {
         if (token.length() == 0) {
             token = null;
         }
@@ -892,18 +888,18 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         final Date lastModified = token != null ? new Date(Long.parseLong(token)) : new Date(0);
 
         try {
-            CaldavCollection parent = (CaldavCollection)webdavCollection;
+            final CaldavCollection parent = (CaldavCollection)webdavCollection;
             final int folderId = parent.getId();
             
             final Syncstatus<WebdavResource> multistatus = new Syncstatus<WebdavResource>();
             
-            SearchIterator<Appointment> modifiedAppointmentsInFolder = getAppointmentInterface().getModifiedAppointmentsInFolder(folderId, start(), end(), SYNC_STATUS_FIELDS, lastModified);
+            final SearchIterator<Appointment> modifiedAppointmentsInFolder = getAppointmentInterface().getModifiedAppointmentsInFolder(folderId, start(), end(), SYNC_STATUS_FIELDS, lastModified);
             
             Date youngest = lastModified;
 
             
             while(modifiedAppointmentsInFolder.hasNext()) {
-                Appointment appointment = modifiedAppointmentsInFolder.next();
+                final Appointment appointment = modifiedAppointmentsInFolder.next();
                 
                 final long time1 = appointment.getLastModified().getTime();
                 final long time2 = lastModified.getTime();
@@ -924,15 +920,15 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
             }
             
-            SearchIterator<Appointment> deletedAppointmentsInFolder = getAppointmentInterface().getDeletedAppointmentsInFolder(folderId, SYNC_STATUS_FIELDS, lastModified);
+            final SearchIterator<Appointment> deletedAppointmentsInFolder = getAppointmentInterface().getDeletedAppointmentsInFolder(folderId, SYNC_STATUS_FIELDS, lastModified);
             while(deletedAppointmentsInFolder.hasNext()) {
-                Appointment appointment = deletedAppointmentsInFolder.next();
+                final Appointment appointment = deletedAppointmentsInFolder.next();
                 final CaldavResource resource = new CaldavResource(parent, appointment, this);
                 multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(404, resource.getUrl(), resource));
                 youngest = new Date();
             }
 
-            multistatus.setToken(String.valueOf(youngest.getTime()));
+            multistatus.setToken(Long.toString(youngest.getTime()));
 
             return multistatus;
         } catch (final Exception x) {

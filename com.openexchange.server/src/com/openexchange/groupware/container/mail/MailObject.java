@@ -494,7 +494,7 @@ public class MailObject {
              * X-Open-Xchange-Object
              */
             if (internalRecipient) {
-                msg.setHeader(HEADER_X_OX_OBJECT, String.valueOf(objectId));
+                msg.setHeader(HEADER_X_OX_OBJECT, Integer.toString(objectId));
             }
             msg.saveChanges();
             /*

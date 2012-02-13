@@ -406,7 +406,7 @@ public final class SieveTextFilter {
      */
     private ArrayList<Rule> addRightRequires(final ClientRulesAndRequire clientrulesandrequire, final Set<String> capabilities) {
         final ArrayList<Rule> newruleslist = new ArrayList<Rule>();
-        final HashSet<String> requiredlist = new HashSet<String>();
+        final Set<String> requireds = new HashSet<String>();
         for (final Rule rule : clientrulesandrequire.getRules()) {
             if (null == rule.getRequireCommand()) {
                 newruleslist.add(rule);
@@ -415,20 +415,28 @@ public final class SieveTextFilter {
                     for (final Command command : commands) {
                         final Set<String> required = command.getRequired();
                         required.retainAll(capabilities);
-                        requiredlist.addAll(required);
+                        requireds.addAll(required);
                     }
                 }
             }
         }
-        requiredlist.addAll(clientrulesandrequire.getRequire());
-        if (!requiredlist.isEmpty()) {
+        requireds.addAll(clientrulesandrequire.getRequire());
+        if (!requireds.isEmpty()) {
             final ArrayList<ArrayList<String>> arrayList = new ArrayList<ArrayList<String>>();
-            arrayList.add(new ArrayList<String>(requiredlist));
+            arrayList.add(new ArrayList<String>(requiredList(requireds)));
             final ArrayList<Command> commandlist = new ArrayList<Command>();
             commandlist.add(new RequireCommand(arrayList));
             newruleslist.add(0, new Rule(commandlist, FIRST_LINE_OFFSET + 1));
         }
         return newruleslist;
+    }
+
+    private static Set<String> requiredList(final Set<String> requireds) {
+        if (requireds.contains("imapflags") && requireds.contains("imap4flags")) {
+            // Prefer "imapflags" if both supported
+            requireds.remove("imap4flags");
+        }
+        return requireds;
     }
 
     /**

@@ -100,7 +100,7 @@ public class GetRequest extends AbstractFolderRequest<GetResponse> {
     }
 
     public GetRequest(final API api, final int folderId, final int[] columns) {
-        this(api, String.valueOf(folderId), columns, true);
+        this(api, Integer.toString(folderId), columns, true);
     }
 
     public GetRequest(final API api, final String folderId, final int[] columns) {
@@ -108,11 +108,11 @@ public class GetRequest extends AbstractFolderRequest<GetResponse> {
     }
 
     public GetRequest(final API api, final int folderId) {
-        this(api, String.valueOf(folderId), FolderObject.ALL_COLUMNS, true);
+        this(api, Integer.toString(folderId), FolderObject.ALL_COLUMNS, true);
     }
 
     public GetRequest(final API api, final int folderId, final boolean failOnError) {
-        this(api, String.valueOf(folderId), FolderObject.ALL_COLUMNS, failOnError);
+        this(api, Integer.toString(folderId), FolderObject.ALL_COLUMNS, failOnError);
     }
 
     @Override

@@ -137,13 +137,13 @@ public final class HTMLDetector {
      */
     private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex, final int[] computedFailures) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
-            throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
+            throw new IndexOutOfBoundsException(Integer.toString(beginIndex));
         }
         if ((endIndex < 0) || (endIndex > data.length)) {
-            throw new IndexOutOfBoundsException(String.valueOf(endIndex));
+            throw new IndexOutOfBoundsException(Integer.toString(endIndex));
         }
         if ((beginIndex > endIndex)) {
-            throw new IndexOutOfBoundsException(String.valueOf(endIndex - beginIndex));
+            throw new IndexOutOfBoundsException(Integer.toString(endIndex - beginIndex));
         }
 
         final int[] failure;

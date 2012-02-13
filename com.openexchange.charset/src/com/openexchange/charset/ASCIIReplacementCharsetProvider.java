@@ -47,28 +47,79 @@
  *
  */
 
-package com.openexchange.groupware.contact.sqlinjectors;
+package com.openexchange.charset;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.nio.charset.Charset;
+import java.nio.charset.UnsupportedCharsetException;
+import java.nio.charset.spi.CharsetProvider;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Set;
 
-public class IntSQLInjector implements SQLInjector {
-	private final int value;
+/**
+ * {@link ASCIIReplacementCharsetProvider} - A charset provider which returns the "WINDOWS-1252" charset when "ISO-8859-1" is requested.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public final class ASCIIReplacementCharsetProvider extends CharsetProvider {
 
-	public IntSQLInjector(final int value) {
-		super();
-		this.value = value;
-	}
+    private final Set<String> aliases;
 
-	@Override
-    public void inject(final PreparedStatement ps, final int parameterIndex)
-			throws SQLException {
-		ps.setInt(parameterIndex, value);
-	}
+    private final CharsetProvider standardProvider;
 
-	@Override
-	public String toString() {
-		return Integer.toString(value);
-	}
+    private final Charset windows1252;
+
+    private final Locale english;
+
+    /**
+     * Initializes a new {@link ASCIIReplacementCharsetProvider}.
+     *
+     * @throws UnsupportedCharsetException If "WINDOWS-1252" charset cannot be found
+     */
+    public ASCIIReplacementCharsetProvider(final CharsetProvider standardProvider) {
+        super();
+        this.standardProvider = standardProvider;
+        windows1252 = Charset.forName("WINDOWS-1252");
+
+        final Charset ascii = Charset.forName("US-ASCII");
+        english = Locale.ENGLISH;
+        aliases = new HashSet<String>(16);
+        aliases.add("US-ASCII");
+        for (final String alias : ascii.aliases()) {
+            aliases.add(alias.toUpperCase(english));
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return standardProvider.hashCode();
+    }
+
+    @Override
+    public Iterator<Charset> charsets() {
+        return standardProvider.charsets();
+    }
+
+    @Override
+    public Charset charsetForName(final String charsetName) {
+        if (aliases.contains(charsetName.toUpperCase(english))) {
+            return windows1252;
+        }
+        /*
+         * Delegate to standard provider
+         */
+        return standardProvider.charsetForName(charsetName);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return standardProvider.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return standardProvider.toString();
+    }
 
 }

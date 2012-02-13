@@ -237,7 +237,7 @@ public final class TwitterMessagingMessage implements MessagingMessage {
 
     @Override
     public String getId() {
-        return String.valueOf(status.getId());
+        return Long.toString(status.getId());
     }
 
     @Override

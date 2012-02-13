@@ -172,7 +172,7 @@ public final class TwitterStatusConverter {
              * Get a MailMessage object
              */
             final MailMessage mm = MIMEMessageConverter.convertMessage(asciiBytes);
-            mm.setMailId(String.valueOf(status.getId()));
+            mm.setMailId(Long.toString(status.getId()));
             mm.setFolder("INBOX");
             mm.setAccountId(accountId);
             mm.setAccountName(accountName);

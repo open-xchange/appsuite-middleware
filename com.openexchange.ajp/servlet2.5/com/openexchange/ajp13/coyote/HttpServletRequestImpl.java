@@ -220,7 +220,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         parameters = new HashKeyMap<List<String>>(max > 0 ? max : 64).setGenerator(hashKeyGenerator);
         headers = new HashMap<String, List<String>>(16);
         try {
-            setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
+            setHeaderInternal(CONTENT_LENGTH, Integer.toString(-1), false);
         } catch (final AJPv13Exception e) {
             // Cannot occur
         }
@@ -266,7 +266,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
         parameters.setGenerator(hashKeyGenerator);
         headers.clear();
         try {
-            setHeaderInternal(CONTENT_LENGTH, String.valueOf(-1), false);
+            setHeaderInternal(CONTENT_LENGTH, Integer.toString(-1), false);
         } catch (final AJPv13Exception e) {
             // Cannot occur
         }
@@ -310,7 +310,7 @@ public final class HttpServletRequestImpl implements HttpServletRequest {
      */
     public void setContentLength(final long contentLength) {
         try {
-            setHeaderInternal(CONTENT_LENGTH, String.valueOf(contentLength), false);
+            setHeaderInternal(CONTENT_LENGTH, Long.toString(contentLength), false);
         } catch (final AJPv13Exception e) {
             // Cannot occur
         }
