@@ -42,6 +42,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push.udp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessiond"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sql"/>
