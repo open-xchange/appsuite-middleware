@@ -2,14 +2,14 @@ Source: open-xchange-core
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-osgi
+Build-Depends: debhelper (>= 4.0.0), ant (>= 1.7.0), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-osgi (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 Build-Conflicts: ecj, libecj-java-gcj, ecj-gcj, libecj-java, gcj-4.3-base, libgcj-common, libgcj9-0, libgcj-bc, libgcj9-jar, java-gcj-compat-headless, gcj-4.3, java-gcj-compat, java-gcj-compat-dev
 
 Package: open-xchange-core
 Architecture: all
-Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime, open-xchange-osgi
+Depends: ${misc:Depends}, adduser, sun-java6-jre|java6-runtime, open-xchange-osgi (>= @OXVERSION@)
 Pre-Depends: dpkg (>= 1.15.7.2)
 Replaces: open-xchange (<< 7.0.0), open-xchange-ajp (<< 7.0.0), open-xchange-cache (<< 7.0.0), open-xchange-calendar, open-xchange-charset, open-xchange-common, open-xchange-config-cascade, open-xchange-config-cascade-context, open-xchange-config-cascade-user, open-xchange-configread, open-xchange-conversion, open-xchange-crypto, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-file-storage, open-xchange-file-storage-composition, open-xchange-global, open-xchange-html, open-xchange-jcharset, open-xchange-management, open-xchange-messaging (<< 7.0.0), open-xchange-monitoring, open-xchange-proxy, open-xchange-publish, open-xchange-push (<< 7.0.0), open-xchange-secret (<< 7.0.0), open-xchange-secret-recovery, open-xchange-server, open-xchange-sessiond, open-xchange-sql, open-xchange-templating-base, open-xchange-threadpool (<< 7.0.0), open-xchange-tx, open-xchange-xml
 Breaks: open-xchange (<< 7.0.0), open-xchange-ajp (<< 7.0.0), open-xchange-cache (<< 7.0.0), open-xchange-calendar, open-xchange-charset, open-xchange-common, open-xchange-config-cascade, open-xchange-config-cascade-context, open-xchange-config-cascade-user, open-xchange-configread, open-xchange-conversion, open-xchange-crypto, open-xchange-dataretention, open-xchange-genconf, open-xchange-genconf-mysql, open-xchange-file-storage, open-xchange-file-storage-composition, open-xchange-global, open-xchange-html, open-xchange-jcharset, open-xchange-management, open-xchange-messaging (<< 7.0.0), open-xchange-monitoring, open-xchange-proxy, open-xchange-publish, open-xchange-push (<< 7.0.0), open-xchange-secret (<< 7.0.0), open-xchange-secret-recovery, open-xchange-server, open-xchange-sessiond, open-xchange-sql, open-xchange-templating-base, open-xchange-threadpool (<< 7.0.0), open-xchange-tx, open-xchange-xml

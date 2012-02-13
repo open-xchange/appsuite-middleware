@@ -157,6 +157,9 @@
                 <include name="${packageName}/**"/>
             </fileset>
         </copy>
+        <replace dir="${packageDir}/${packageName}/debian" includes="control">
+            <replacefilter token="@OXVERSION@" value="${version}"/>
+        </replace>
         <move todir="${packageDir}">
             <fileset dir="${packageDir}/${packageName}">
                 <include name="**"/>
