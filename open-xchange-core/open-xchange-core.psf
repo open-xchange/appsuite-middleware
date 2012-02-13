@@ -21,6 +21,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.dataretention"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.datatypes.genericonf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.datatypes.genericonf.storage"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.composition"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.global"/>
@@ -47,6 +48,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.textxtraction"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.threadpool"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.tx"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,net.freeutils.jcharset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.apache.tika"/>

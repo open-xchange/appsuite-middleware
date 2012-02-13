@@ -6,7 +6,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.db"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.data.conversion.ical.ical4j"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.favfolder"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.file.storage.config"/>
@@ -62,7 +61,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.twitter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.unifiedinbox"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.url.mail.attachment"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xerces.sun"/>
 </provider>
 </psf>
