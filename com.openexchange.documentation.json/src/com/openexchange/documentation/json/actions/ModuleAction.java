@@ -53,9 +53,9 @@ import org.json.JSONException;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.DocumentationRegistry;
+import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.documentation.annotations.RequestMethod;
 import com.openexchange.documentation.json.DocumentationAJAXRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;

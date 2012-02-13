@@ -49,8 +49,6 @@
 
 package com.openexchange.documentation;
 
-import com.openexchange.documentation.annotations.RequestMethod;
-import com.openexchange.documentation.annotations.Type;
 import com.openexchange.documentation.descriptions.ActionDescription;
 import com.openexchange.documentation.descriptions.AttributeDescription;
 import com.openexchange.documentation.descriptions.ContainerDescription;
@@ -65,43 +63,61 @@ import com.openexchange.documentation.descriptions.ParameterDescription;
 public interface DescriptionFactory {
 	
 	/**
-	 * 
 	 * Creates a {@link ModuleDescription} from the supplied parameters.
 	 * 
-	 * @param name
-	 * @param description
-	 * @param containers
-	 * @param actions
-	 * @return
+	 * @param name the name
+	 * @param description the description
+	 * @param containers the containers
+	 * @param actions the actions
+	 * @return the module description
 	 */
 	ModuleDescription module(String name, String description, ContainerDescription[] containers, ActionDescription... actions);
 	
 	/**
 	 * Creates a {@link ContainerDescription} from the supplied parameters.
-	 * @param name
-	 * @param description
-	 * @param attributes
-	 * @return
+	 * 
+	 * @param name the name
+	 * @param description the description
+	 * @param attributes the attributes
+	 * @return the container description
 	 */
 	ContainerDescription container(String name, String description, AttributeDescription... attributes);
 	
 	/**
-	 * Creates a {@link ActionDescription} from the supplied parameters.
+	 * Creates an {@link ActionDescription} from the supplied parameters.
 	 * 
-	 * @param name
-	 * @param description
-	 * @param method
-	 * @param defaultFormat
-	 * @param requestBody
-	 * @param responseDescription
-	 * @param deprecated
-	 * @param parameters
-	 * @return
+	 * @param name the name
+	 * @param description the description
+	 * @param method the method
+	 * @param defaultFormat the default format
+	 * @param requestBody the request body
+	 * @param responseDescription the response description
+	 * @param deprecated the deprecated
+	 * @param parameters the parameters
+	 * @return the action description
 	 */
 	ActionDescription action(String name, String description, RequestMethod method, String defaultFormat, String requestBody, String responseDescription, boolean deprecated, ParameterDescription... parameters);
 
+	/**
+	 * Creates an {@link AttributeDescription} from the supplied parameters.
+	 * 
+	 * @param name the name
+	 * @param description the description
+	 * @param type the type
+	 * @param mandatory whether it is mandatory or not
+	 * @return the attribute description
+	 */
 	AttributeDescription attribute(String name, String description, Type type, boolean mandatory);
 	
+	/**
+	 * Creates a {@link ParameterDescription} from the supplied parameters.
+	 * 
+	 * @param name the name
+	 * @param description the description
+	 * @param type the type
+	 * @param optional whether it is optional or not
+	 * @return the parameter description
+	 */
 	ParameterDescription parameter(String name, String description, Type type, boolean optional);	
 	
 }

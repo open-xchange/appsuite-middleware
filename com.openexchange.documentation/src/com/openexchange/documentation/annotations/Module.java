@@ -55,6 +55,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * {@link Module} - Annotation for modules.
  *
+ * @see com.openexchange.documentation.descriptions.ModuleDescription
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Retention(RetentionPolicy.RUNTIME)

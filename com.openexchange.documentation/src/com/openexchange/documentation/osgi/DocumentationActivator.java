@@ -52,6 +52,7 @@ package com.openexchange.documentation.osgi;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.DescriptionFactory;
 import com.openexchange.documentation.DocumentationRegistry;
+import com.openexchange.documentation.descriptions.ModuleDescription;
 import com.openexchange.documentation.internal.DefaultDescriptionFactory;
 import com.openexchange.documentation.internal.DefaultDocumentationRegistry;
 import com.openexchange.documentation.internal.DocumentationProcessor;
@@ -80,8 +81,9 @@ public class DocumentationActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
     	final DefaultDocumentationRegistry registry = new DefaultDocumentationRegistry();
     	final DefaultDescriptionFactory factory = new DefaultDescriptionFactory();
-    	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);    	
-    	super.track(AJAXActionServiceFactory.class, new DocumentationListener(processor));
+    	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);
+    	super.track(AJAXActionServiceFactory.class, new AJAXActionServiceFactoryListener(processor));
+    	super.track(ModuleDescription.class, new ModuleDescriptionListener(processor));    	
     	super.openTrackers();
     	super.registerService(DocumentationRegistry.class, registry);
     	super.registerService(DescriptionFactory.class, factory);

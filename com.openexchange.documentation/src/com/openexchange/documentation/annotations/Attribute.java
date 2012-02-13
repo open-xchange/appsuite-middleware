@@ -52,9 +52,12 @@ package com.openexchange.documentation.annotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import com.openexchange.documentation.Type;
+
 /**
  * {@link Attribute} - Annotation for {@link Container} attributes.
  *
+ * @see com.openexchange.documentation.descriptions.AttributeDescription
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 @Retention(RetentionPolicy.RUNTIME)

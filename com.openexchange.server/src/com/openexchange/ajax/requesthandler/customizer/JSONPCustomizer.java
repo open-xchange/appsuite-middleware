@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,59 @@
  *
  */
 
-package com.openexchange.documentation.descriptions;
+package com.openexchange.ajax.requesthandler.customizer;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.requesthandler.AJAXActionCustomizer;
+import com.openexchange.ajax.requesthandler.AJAXActionCustomizerFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Description} - Common descriptions.
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link JSONPCustomizer}
+ * 
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface Description {
-	
-	/**
-	 * Specifies the name. Required.
-	 * 
-	 * @return The name
-	 */
-	String getName();
+public class JSONPCustomizer implements AJAXActionCustomizer, AJAXActionCustomizerFactory {
 
-	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
-	 * @return the description
-	 */
-	String getDescription();
+    private static final String JSONP = "jsonp";
+
+    @Override
+    public AJAXActionCustomizer createCustomizer(AJAXRequestData request, ServerSession session) {
+        return this;
+    }
+
+    @Override
+    public AJAXRequestData incoming(AJAXRequestData request, ServerSession session) throws OXException {
+        return request;
+    }
+
+    @Override
+    public AJAXRequestResult outgoing(AJAXRequestData request, AJAXRequestResult result, ServerSession session) throws OXException {
+        if (request.containsParameter(JSONP) && result.getResultObject() instanceof Response) {
+            Response response = (Response) result.getResultObject();
+            try {
+                JSONObject jsonValue = response.getJSON();
+                if (jsonValue == null) {
+                    return result;
+                }
+                String call = request.getParameter(JSONP);
+                StringBuilder sb = new StringBuilder(call);
+                sb.append("(");
+                sb.append(jsonValue.toString());
+                sb.append(");");
+                result.setResultObject(sb.toString());
+            } catch (JSONException e) {
+                e.printStackTrace(); //Do nothing
+            }
+        }
+
+        return result;
+    }
 
 }

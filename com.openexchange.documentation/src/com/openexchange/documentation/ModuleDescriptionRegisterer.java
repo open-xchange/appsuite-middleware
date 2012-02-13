@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2012 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2011 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,77 +47,69 @@
  *
  */
 
-package com.openexchange.documentation.annotations;
+package com.openexchange.documentation;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.Type;
+import com.openexchange.documentation.descriptions.ModuleDescription;
 
 /**
- * {@link Action} - Annotation for actions.
- *
- * @see com.openexchange.documentation.descriptions.ActionDescription
+ * {@link ModuleDescriptionRegisterer} - Abstract tracker customizer that registers a {@link ModuleDescription} service when the 
+ * {@link DescriptionFactory} service is available.
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Action {
+public abstract class ModuleDescriptionRegisterer implements ServiceTrackerCustomizer<DescriptionFactory, DescriptionFactory> {
+
+    private final BundleContext context;
+	private ServiceRegistration<ModuleDescription> serviceRegistration;
 
 	/**
-	 * Specifies the name. Required.
-	 * 
-	 * @return The name
-	 */
-	String name();
-
-	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
-	 * @return the description
-	 */
-	String description() default "";		
-
-	/**
-	 * Specifies the request method. Required.
-	 *  
-	 * @return the method
-	 */
-	RequestMethod method();
-
-	/**
-	 * Specifies the parameters. Required.
-	 * 
-	 * @return the parameters
-	 */
-	Parameter[] parameters();
-	
-    /**
-     * Specifies the default format. Defaults to <code>"apiResponse"</code>.
-     *
-     * @return the default format
+     * Initializes a new {@link ModuleDescriptionRegisterer}.
      */
-    String defaultFormat() default "apiResponse";
+    protected ModuleDescriptionRegisterer(final BundleContext context) {
+        super();
+		this.context = context;
+    }
     
     /**
-	 * Specifies the request body description for {@link Type}<code>.PUT</code> or {@link Type}<code>.POST</code> requests. 
-	 * Defaults to <code>""</code>.
+     * Creates a new {@link ServiceTracker} based on this customizer instance that tracks registered services under the name of the 
+     * {@link DescriptionFactory} class.
      * 
-     * @return the request body description
+     * @return the service tracker
      */
-    String requestBody() default "";
-
-    /**
-	 * Specifies the response description. Defaults to <code>""</code>.
-	 * 
-	 * @return the response description
-	 */
-    String responseDescription() default "";
+    public ServiceTracker<DescriptionFactory, DescriptionFactory> asTracker() {
+    	return new ServiceTracker<DescriptionFactory, DescriptionFactory>(this.context, DescriptionFactory.class, this);
+    }
     
     /**
-	 * Specifies whether the action is deprecated or not. Defaults to <code>false</code>.
+     * Gets the module description
      * 
-     * @return <code>true</code>, if it is deprecated, <code>false</code>, otherwise
+     * @param factory a description factory instance to aid with description construction 
+     * @return the module description
      */
-    boolean deprecated() default false;
+    protected abstract ModuleDescription getDescription(final DescriptionFactory factory);
+
+	@Override
+	public final DescriptionFactory addingService(final ServiceReference<DescriptionFactory> reference) {
+		final DescriptionFactory factory = context.getService(reference);
+		this.serviceRegistration = context.registerService(ModuleDescription.class, this.getDescription(factory), null);
+		return factory;
+	}
+
+	@Override
+	public final void modifiedService(final ServiceReference<DescriptionFactory> reference, final DescriptionFactory service) {
+		// nothing to do		
+	}
+
+	@Override
+	public final void removedService(final ServiceReference<DescriptionFactory> reference, final DescriptionFactory service) {
+		context.ungetService(reference);
+		this.serviceRegistration.unregister();
+	}
+
 }

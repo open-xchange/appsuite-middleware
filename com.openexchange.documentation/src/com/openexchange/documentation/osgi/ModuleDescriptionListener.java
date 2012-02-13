@@ -47,27 +47,39 @@
  *
  */
 
-package com.openexchange.documentation.descriptions;
+package com.openexchange.documentation.osgi;
+
+import org.osgi.framework.ServiceReference;
+
+import com.openexchange.documentation.descriptions.ModuleDescription;
+import com.openexchange.documentation.internal.DocumentationProcessor;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link Description} - Common descriptions.
- *
+ * {@link ModuleDescriptionListener} - Recognizes services providing a module description directly.
+ * 
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface Description {
+public class ModuleDescriptionListener implements SimpleRegistryListener<ModuleDescription> {
 	
-	/**
-	 * Specifies the name. Required.
-	 * 
-	 * @return The name
-	 */
-	String getName();
+	private final DocumentationProcessor processor;
 
-	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 * 
-	 * @return the description
-	 */
-	String getDescription();
+    /**
+     * Initializes a new {@link ModuleDescriptionListener}.
+     */
+    public ModuleDescriptionListener(final DocumentationProcessor processor) {
+        super();
+        this.processor = processor;
+    }
+	
+	@Override
+	public void added(final ServiceReference<ModuleDescription> ref, final ModuleDescription service) {
+		this.processor.add(service);
+	}
+
+	@Override
+	public void removed(final ServiceReference<ModuleDescription> ref, final ModuleDescription service) {
+		this.processor.remove(service);
+	}
 
 }

@@ -50,8 +50,8 @@
 package com.openexchange.documentation.internal;
 
 import com.openexchange.documentation.DescriptionFactory;
-import com.openexchange.documentation.annotations.RequestMethod;
-import com.openexchange.documentation.annotations.Type;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
 import com.openexchange.documentation.descriptions.ActionDescription;
 import com.openexchange.documentation.descriptions.AttributeDescription;
 import com.openexchange.documentation.descriptions.ContainerDescription;
@@ -76,7 +76,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public String getDescription() {
-				return description;
+				return null != description ? description : "";
 			}
 			
 			@Override
@@ -102,7 +102,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public String getDescription() {
-				return description;
+				return null != description ? description : "";
 			}
 			
 			@Override
@@ -125,7 +125,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public String getDescription() {
-				return description;
+				return null != description ? description : "";
 			}
 			
 			@Override
@@ -135,12 +135,12 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public String getResponseDescription() {
-				return responseDescription;
+				return null != responseDescription ? responseDescription : "";
 			}
 			
 			@Override
 			public String getRequestBody() {
-				return requestBody;
+				return null != requestBody ? requestBody : "";
 			}
 			
 			@Override
@@ -155,7 +155,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public String getDefaultFormat() {
-				return defaultFormat;
+				return null != defaultFormat ? defaultFormat : "apiResponse";
 			}
 		};
 	}
@@ -171,7 +171,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public String getDescription() {
-				return description;
+				return null != description ? description : "";
 			}
 			
 			@Override
@@ -181,7 +181,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public Type getType() {
-				return type;
+				return null != type ? type : Type.STRING;
 			}
 		};
 	}
@@ -197,7 +197,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public String getDescription() {
-				return description;
+				return null != description ? description : "";
 			}
 			
 			@Override
@@ -207,7 +207,7 @@ public class DefaultDescriptionFactory implements DescriptionFactory {
 			
 			@Override
 			public Type getType() {
-				return type;
+				return null != type ? type : Type.STRING;
 			}
 		};
 	}
