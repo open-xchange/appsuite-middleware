@@ -1106,11 +1106,11 @@ public final class HTMLServiceImpl implements HTMLService {
 
     private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\]>)(.*?)(<!\\[endif\\](?:--)?>)", Pattern.DOTALL);
 
-    private static final String CC_START_IF = "<!--[if";
+    private static final String CC_START_IF = "<!-- [if";
 
-    private static final String CC_END_IF = "-->";
+    private static final String CC_END_IF = " -->";
 
-    private static final String CC_ENDIF = "<!--<![endif]-->";
+    private static final String CC_ENDIF = "<!-- <![endif] -->";
 
     /**
      * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
