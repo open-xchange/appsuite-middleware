@@ -36,6 +36,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.proxy"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.proxy.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push.udp"/>
