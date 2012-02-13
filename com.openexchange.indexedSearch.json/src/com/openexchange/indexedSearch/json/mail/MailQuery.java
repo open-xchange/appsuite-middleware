@@ -147,6 +147,7 @@ public final class MailQuery {
         for (int i = 0; i < length; i++) {
             final SingleSearchTerm searchTerm = SingleOperation.EQUALS.newInstance();
             final JSONArray ja = new JSONArray();
+            ja.put(SingleOperation.EQUALS.toString());
             ja.put(pattern);
             ja.put(new JSONObject().put("field", fields[i].toLowerCase(DEFAULT_LOCALE)));
             SearchTermParser.parseSingleOperands(searchTerm, ja, 2);

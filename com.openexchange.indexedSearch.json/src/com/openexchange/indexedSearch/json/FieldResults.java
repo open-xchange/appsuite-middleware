@@ -108,7 +108,7 @@ public final class FieldResults {
      * 
      * @return The <i>has-more</i> flag
      */
-    public boolean isMore() {
+    public boolean hasMore() {
         return more;
     }
 

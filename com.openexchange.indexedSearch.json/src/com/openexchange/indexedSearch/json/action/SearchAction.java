@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -118,6 +119,8 @@ public final class SearchAction extends AbstractIndexAction {
         final AJAXRequestData requestData = req.getRequest();
         final ServerSession session = req.getSession();
         final JSONObject jsonResult = new JSONObject();
+        requestData.setAction(AJAXServlet.ACTION_ALL);
+        requestData.putParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
         for (final String module : modules) {
             final SearchHandler handler = handlers.get(module);
             if (null == handler) {
@@ -125,13 +128,15 @@ public final class SearchAction extends AbstractIndexAction {
             }
             final List<FieldResults> search = handler.search(jBody, range, columns, requestData, session);
             for (final FieldResults fieldResults : search) {
-                final ResultConverter converter = registry.getFor(fieldResults.getFormat());
+                final String format = fieldResults.getFormat();
+                final ResultConverter converter = registry.getFor(format);
                 if (null == converter) {
                     throw AjaxExceptionCodes.UNKNOWN_MODULE.create(module);
                 }
                 final AJAXRequestResult result = new AJAXRequestResult();
+                result.setResultObject(fieldResults.getResults(), format);
                 converter.convert(requestData, result, session, null);
-                jsonResult.put(fieldResults.getFieldName(), result.getResultObject());
+                jsonResult.put(fieldResults.getFieldName(), new JSONObject().put("results", result.getResultObject()).put("more", fieldResults.hasMore()));
             }
         }
         // Return

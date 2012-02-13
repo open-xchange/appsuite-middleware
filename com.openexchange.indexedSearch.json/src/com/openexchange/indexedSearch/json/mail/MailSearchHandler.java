@@ -214,7 +214,7 @@ public final class MailSearchHandler implements SearchHandler {
     private static Object[] getNameAndConstant(@SuppressWarnings("unchecked") final Operand[] operands) {
         if (Operand.Type.CONSTANT.equals((operands[0]).getType())) {
             return new Object[] { operands[1].getValue().toString(), operands[0].getValue() };
-        } else if (Operand.Type.CONSTANT.equals((operands[1]).getType())) {
+        } else if (operands.length > 1 && Operand.Type.CONSTANT.equals((operands[1]).getType())) {
             return new Object[] { operands[0].getValue().toString(), operands[1].getValue() };
         }
         return null;

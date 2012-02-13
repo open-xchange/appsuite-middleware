@@ -136,7 +136,7 @@ public final class SearchTerm2Query implements SolrConstants {
             queryBuilder.append('(');
             final List<String> names = getFieldNameFor(searchTerm);
             queryBuilder.append(names.get(0)).append(':').append('"').append(sPattern).append('"');
-            for (int i = 0; i < names.size(); i++) {
+            for (int i = 1; i < names.size(); i++) {
                 queryBuilder.append(" OR ");
                 queryBuilder.append(names.get(i)).append(':').append('"').append(sPattern).append('"');
             }

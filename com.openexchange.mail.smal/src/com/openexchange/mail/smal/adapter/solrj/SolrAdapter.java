@@ -640,8 +640,8 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
              * Page-wise retrieval
              */
             Integer rows = Integer.valueOf(QUERY_ROWS);
-            if (indexRange != null && indexRange.end < rows.intValue()) {
-                rows = Integer.valueOf(indexRange.end);
+            if (indexRange != null && (indexRange.end - indexRange.start) < rows.intValue()) {
+                rows = Integer.valueOf(indexRange.end - indexRange.start);
             }
             Integer start = Integer.valueOf(0);
             if (indexRange != null && indexRange.start > start.intValue()) {
@@ -695,7 +695,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 for (int i = 0; i < size; i++) {
                     mails.add(readDocument(results.get(i), mailFillers, checkContent));
                 }
-                off = size;
+                off = start.intValue() + size;
 
                 System.out.println("SolrjAdapter.search() requested " + off + " of " + numFound + " mails from index for:\n" + query);
 
