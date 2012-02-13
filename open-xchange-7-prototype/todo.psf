@@ -5,7 +5,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.db"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.chat.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.contactcollector"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
