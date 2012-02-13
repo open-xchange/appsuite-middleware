@@ -19,12 +19,10 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval.attachments"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval.mail"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.settings.extensions"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.appointments"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.linkedin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.index"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.langdetect"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/>
