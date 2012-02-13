@@ -69,7 +69,7 @@
                         <property name="deleteBuildXML" value="build.xml"/>
                     </else>
                 </if>
-                <ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/>
+                <!-- ant dir="${checkoutDir}/${projectName}" antfile="build.xml" target="clean"/ -->
                 <if>
                     <available file="${destDir}/${bundlesDir}" type="dir"/>
                     <then>
@@ -157,7 +157,7 @@
                 <include name="${packageName}/**"/>
             </fileset>
         </copy>
-        <replace dir="${packageDir}/${packageName}/debian" includes="control">
+        <replace file="${packageDir}/${packageName}/debian/control">
             <replacefilter token="@OXVERSION@" value="${version}"/>
         </replace>
         <move todir="${packageDir}">
