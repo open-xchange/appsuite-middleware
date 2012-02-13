@@ -25,7 +25,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.appointments"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.halo.linkedin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.i18n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.index"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.langdetect"/>
