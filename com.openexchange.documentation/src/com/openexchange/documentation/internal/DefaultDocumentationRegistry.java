@@ -52,10 +52,8 @@ package com.openexchange.documentation.internal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import com.openexchange.documentation.DocumentationRegistry;
 import com.openexchange.documentation.descriptions.ContainerDescription;
 import com.openexchange.documentation.descriptions.ModuleDescription;
@@ -117,14 +115,13 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
      * @param module the module description to add
      */
     public void addModule(final ModuleDescription module) {
-        if (null == module.getName()) {
-        	LOG.warn("Not adding module description without name.");
+        if (null == module || null == module.getName()) {
+        	LOG.warn("Not adding missing module or a module description without name.");
             return;
-        } else {
-	        this.modules.put(module.getName(), module);
-	        for (final ContainerDescription container : module.getContainers()) {
-	            containers.put(container.getName(), container);
-	        }
+        }
+        this.modules.put(module.getName(), module);
+        for (final ContainerDescription container : module.getContainers()) {
+            containers.put(container.getName(), container);
         }
     }
 

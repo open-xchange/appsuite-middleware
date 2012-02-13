@@ -61,6 +61,7 @@ import com.openexchange.ajax.Multiple;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
+import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -74,9 +75,9 @@ import com.openexchange.ajax.requesthandler.converters.preview.MailTextPreviewRe
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
+import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
-import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -192,6 +193,8 @@ public class DispatcherActivator extends HousekeepingActivator {
         });
 
         openTrackers();
+
+        registerService(Dispatcher.class, dispatcher);
     }
 
     @Override

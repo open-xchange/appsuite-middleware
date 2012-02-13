@@ -105,6 +105,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.transport.RemoteTransportException;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -493,11 +494,11 @@ public final class ElasticSearchAdapter implements IndexAdapter {
 
     @Override
     public List<MailMessage> all(final String optFullName, final int optAccountId, final Session session) throws OXException, InterruptedException {
-        return search(optFullName, null, null, null, FIELDS, optAccountId, session);
+        return search(optFullName, null, null, null, FIELDS, null, optAccountId, session, null);
     }
 
     @Override
-    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException {
+    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, IndexRange indexRange, final int optAccountId, final Session session, boolean[] more) throws OXException {
         try {
             ensureStarted();
             final int contextId = session.getContextId();

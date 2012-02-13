@@ -76,6 +76,7 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CommonsHttpSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -90,6 +91,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.index.ConfigIndexService;
 import com.openexchange.index.IndexUrl;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -601,7 +603,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
     }
 
     @Override
-    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int optAccountId, final Session session) throws OXException, InterruptedException {
+    public List<MailMessage> search(final String optFullName, final SearchTerm<?> searchTerm, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final IndexRange indexRange, final int optAccountId, final Session session, final boolean[] more) throws OXException, InterruptedException {
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);
             final MailFields mailFields = new MailFields(fields);
@@ -610,6 +612,9 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 if (null != sf) {
                     mailFields.add(sf);
                 }
+            }
+            if (null != more) {
+                more[0] = false;
             }
             final String query;
             {
@@ -634,16 +639,24 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             /*
              * Page-wise retrieval
              */
-            final Integer rows = Integer.valueOf(QUERY_ROWS);
+            Integer rows = Integer.valueOf(QUERY_ROWS);
+            if (indexRange != null && indexRange.end < rows.intValue()) {
+                rows = Integer.valueOf(indexRange.end);
+            }
+            Integer start = Integer.valueOf(0);
+            if (indexRange != null && indexRange.start > start.intValue()) {
+                start = Integer.valueOf(indexRange.start);
+            }
             int off;
             final String[] fieldArray;
-            final long numFound;
+            long numFound;
             final List<MailMessage> mails;
             final List<MailFiller> mailFillers;
             {
                 final SolrQuery solrQuery = new SolrQuery().setQuery(query);
-                solrQuery.setStart(Integer.valueOf(0));
+                solrQuery.setStart(start);
                 solrQuery.setRows(rows);
+                solrQuery.setSortField(sortField2Name.get(null == sortField ? MailSortField.RECEIVED_DATE : sortField), getORDER(order));
                 final Set<String> set = new HashSet<String>(mailFields.size());
                 for (final MailField field : mailFields.toArray()) {
                     final List<String> list = field2Name.get(field);
@@ -663,6 +676,12 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 numFound = results.getNumFound();
                 if (numFound <= 0) {
                     return Collections.emptyList();
+                }
+                if (null != indexRange && indexRange.end < numFound) {
+                    numFound = indexRange.end;
+                    if (null != more) {
+                        more[0] = true;
+                    }
                 }
                 mails = new ArrayList<MailMessage>((int) numFound);
                 mailFillers = fillersFor(mailFields);
@@ -705,15 +724,19 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 System.out.println("SolrjAdapter.search() requested " + off + " of " + numFound + " mails from index for " + optFullName);
 
             }
-            if (null != sortField) {
-                Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
-            }
+//            if (null != sortField) {
+//                Collections.sort(mails, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getUserLocaleLazy(session)));
+//            }
             return mails;
         } catch (final SolrServerException e) {
             throw SMALExceptionCodes.INDEX_FAULT.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw SMALExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static ORDER getORDER(final OrderDirection order) {
+        return OrderDirection.ASC.equals(order) ? ORDER.asc : ORDER.desc;
     }
 
     private static final List<MailFiller> FILLERS = fillersFor(MAIL_FIELDS);
@@ -837,7 +860,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
     @Override
     public List<MailMessage> getMessages(final String[] optMailIds, final String fullName, final MailSortField sortField, final OrderDirection order, final MailField[] fields, final int accountId, final Session session) throws OXException, InterruptedException {
         if (null == optMailIds || 0 == optMailIds.length) {
-            return search(fullName, null, sortField, order, fields, accountId, session);
+            return search(fullName, null, sortField, order, fields, null, accountId, session, null);
         }
         try {
             final CommonsHttpSolrServer solrServer = solrServerFor(session, false);

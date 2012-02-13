@@ -52,6 +52,7 @@ package com.openexchange.mail.smal.adapter;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailSortField;
@@ -125,13 +126,15 @@ public interface IndexAdapter {
      * @param sortField The sort field
      * @param order The order direction
      * @param fields The fields to pre-fill in returned {@link MailMessage} instances; if <code>null</code> all available fields are filled
+     * @param indexRange The index range
      * @param optAccountId The optional account identifier or <code>-1</code> to not restrict to a certain account
      * @param session The session
+     * @param more Optional <code>boolean</code> array if more results available than requested
      * @return The search result
      * @throws OXException If search fails
      * @throws InterruptedException If processing is interrupted
      */
-    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, MailField[] fields, int optAccountId, Session session) throws OXException, InterruptedException;
+    public List<MailMessage> search(String optFullName, SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, MailField[] fields, IndexRange indexRange, int optAccountId, Session session, boolean[] more) throws OXException, InterruptedException;
 
     /**
      * Performs specified search by provided query.

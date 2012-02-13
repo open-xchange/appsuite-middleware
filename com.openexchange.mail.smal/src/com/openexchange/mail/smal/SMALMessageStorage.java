@@ -339,8 +339,8 @@ public final class SMALMessageStorage extends AbstractSMALStorage implements IMa
                             sortField,
                             order,
                             fields,
-                            accountId,
-                            session));
+                            indexRange,
+                            accountId, session, null));
                     } catch (final InterruptedException e) {
                         LOG.debug("Index search request interrupted: " + e.getMessage());
 
