@@ -120,8 +120,11 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
             return;
         }
         this.modules.put(module.getName(), module);
-        for (final ContainerDescription container : module.getContainers()) {
-            containers.put(container.getName(), container);
+        final ContainerDescription[] containers = module.getContainers();
+        if (null != containers) {
+            for (final ContainerDescription container : containers) {
+                this.containers.put(container.getName(), container);
+            }
         }
     }
 
@@ -132,9 +135,12 @@ public class DefaultDocumentationRegistry implements DocumentationRegistry {
      */
     public void removeModule(final String name) {
     	if (null != name && this.modules.containsKey(name)) {
-	        final ModuleDescription remove = modules.remove(name);
-	        for (final ContainerDescription container : remove.getContainers()) {
-	            containers.remove(container.getName());
+	        final ModuleDescription removed = modules.remove(name);
+	        final ContainerDescription[] containers = removed.getContainers();
+	        if (null != containers) {
+	        	for (final ContainerDescription container : containers) {
+	        		this.containers.remove(container.getName());
+	        	}
 	        }
     	} else {
     		LOG.warn("Module '" + name + "' not registered.");

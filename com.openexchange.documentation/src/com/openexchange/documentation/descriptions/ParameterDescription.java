@@ -49,17 +49,28 @@
 
 package com.openexchange.documentation.descriptions;
 
-import com.openexchange.documentation.annotations.Type;
+import com.openexchange.documentation.Type;
 
 /**
  * {@link ParameterDescription} - Description for parameters.
  *
+ * @see com.openexchange.documentation.annotations.Parameter
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ParameterDescription extends Description {
 	
+	/**
+	 * Specifies whether the parameter is optional or not. Defaults to <code>false</code>.
+	 * 
+	 * @return <code>true</code>, if it is optional, <code>false</code>, otherwise
+	 */
 	boolean isOptional();
 
+	/**
+	 * Specifies the type. Defaults to <code>Type.STRING</code>.
+	 * 
+	 * @return the type
+	 */
 	Type getType();
 
 }

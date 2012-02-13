@@ -52,6 +52,7 @@ package com.openexchange.favfolder.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.favfolder.internal.FavFolderDescription;
 import com.openexchange.favfolder.json.FavFolderActionFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.id.IDGeneratorService;
@@ -85,6 +86,7 @@ public class FavFolderActivator extends AJAXModuleActivator {
         trackService(IDGeneratorService.class);
         trackService(UserService.class);
         trackService(ContextService.class);
+        rememberTracker(new FavFolderDescription(context).asTracker());
         openTrackers();
         // Register factory/module
         registerModule(new FavFolderActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "favfolder");
