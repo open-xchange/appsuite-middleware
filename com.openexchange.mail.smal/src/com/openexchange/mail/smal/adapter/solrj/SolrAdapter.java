@@ -1210,15 +1210,19 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
         if (null == mailSublist || mailSublist.isEmpty()) {
             return;
         }
-        final int size = mailSublist.size();
-        final Map<String, MailMessage> map = new HashMap<String, MailMessage>(size);
-        for (final MailMessage mail : mailSublist) {
-            map.put(mail.getMailId(), mail);
+        final Map<String, MailMessage> map;
+        {
+            final int size = mailSublist.size();
+            map = new HashMap<String, MailMessage>(size);
+            for (final MailMessage mail : mailSublist) {
+                map.put(mail.getMailId(), mail);
+            }
         }
         try {
             /*
              * Page-wise retrieval
              */
+            final List<MailMessage> mails = new ArrayList<MailMessage>(mailSublist);
             final Integer rows = Integer.valueOf(QUERY_ROWS);
             int off;
             final long numFound;
@@ -1239,7 +1243,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 final int rsize = results.size();
                 for (int i = 0; i < rsize; i++) {
                     final SolrDocument solrDocument = results.get(i);
-                    mailSublist.add(readDocument(solrDocument, mailFillers));
+                    mails.add(readDocument(solrDocument, mailFillers));
                 }
                 off = rsize;
             }
@@ -1259,7 +1263,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
                 }
                 for (int i = 0; i < rsize; i++) {
                     final SolrDocument solrDocument = results.get(i);
-                    mailSublist.add(readDocument(solrDocument, mailFillers));
+                    mails.add(readDocument(solrDocument, mailFillers));
                 }
                 off += rsize;
             }
