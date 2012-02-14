@@ -380,6 +380,9 @@ public class NotificationMail {
         if (getDiff() == null) {
             return false;
         }
+        if (isAttachmentUpdate()) {
+        	return false;
+        }
         
         // First, let's see if any fields besides the state tracking fields have changed
         HashSet<String> differing = new HashSet<String>(getDiff().getDifferingFieldNames());

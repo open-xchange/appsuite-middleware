@@ -301,6 +301,11 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 					}
 				}
 			}
+			
+			if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
+				// Explicitely ignore title update
+				update.setTitle(original.getTitle());
+			}
 		} else {
 			// The Reply may only override participant states
 			AppointmentDiff diff = AppointmentDiff.compare(update, original,
@@ -530,7 +535,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 		if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
 			skipList.add(Appointment.TITLE);
 		}
-		return null;
+		return skipList;
 	}
 
 	private void discardAllButFirst(Appointment update) {
