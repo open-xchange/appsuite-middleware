@@ -5,8 +5,9 @@
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.data.conversion.ical.ical4j"/> core
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.favfolder"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/> core
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig.json"/>
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.group.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.resource.servlet"/>
@@ -27,10 +28,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal"/>
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.langdetect"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.importexport"/> core
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig.json"/>
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.filter"/>
 
@@ -53,8 +50,6 @@
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.spellcheck.servlet"/>
-
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sso"/> thorben
 
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.subscribe.json"/>
 subscribe.*
