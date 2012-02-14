@@ -49,9 +49,10 @@
 
 package com.openexchange.unifiedinbox;
 
-import static com.openexchange.mail.utils.MailPasswordUtil.decrypt;
-import static com.openexchange.mail.utils.MailPasswordUtil.encrypt;
-import java.security.GeneralSecurityException;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.BitSet;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 
@@ -61,8 +62,6 @@ import com.openexchange.mail.MailPath;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedInboxUID {
-
-    private static final String KEY = "unifiedm";
 
     private int accountId;
 
@@ -115,14 +114,7 @@ public final class UnifiedInboxUID {
         this.fullname = fullname;
         this.id = id;
         final String mailPath = MailPath.getMailPath(accountId, fullname, id);
-        try {
-            uidl = encrypt(mailPath, KEY);
-            return this;
-        } catch (final GeneralSecurityException e) {
-            // Must not occur
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxUID.class)).warn("\n\tPBE (password-based-encryption) failed.\n", e);
-            uidl = mailPath;
-        }
+        uidl = encodeQP(mailPath);
         return this;
     }
 
@@ -134,12 +126,7 @@ public final class UnifiedInboxUID {
      * @return This {@link UnifiedInboxUID} with new UID applied.
      */
     public UnifiedInboxUID setUIDString(final String unifiedINBOXUID) throws OXException {
-        String decoded;
-        try {
-            decoded = decrypt(unifiedINBOXUID, KEY);
-        } catch (final GeneralSecurityException e) {
-            decoded = unifiedINBOXUID;
-        }
+        final String decoded = decodeQP(unifiedINBOXUID);
         final MailPath mailPath = new MailPath(decoded);
         accountId = mailPath.getAccountId();
         fullname = mailPath.getFolder();
@@ -179,4 +166,36 @@ public final class UnifiedInboxUID {
     public String toString() {
         return uidl;
     }
+
+    private static final BitSet PRINTABLE_CHARS = new BitSet(256);
+    // Static initializer for printable chars collection
+    static {
+        for (int i = '0'; i <= '9'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'G'; i <= 'Z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'g'; i <= 'z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+    }
+
+    private static String encodeQP(final String string) {
+        try {
+            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII).replaceAll("=", "%");
+        } catch (final UnsupportedCharsetException e) {
+            // Cannot occur
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static String decodeQP(final String string) {
+        try {
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.replaceAll("%", "=").getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
+        } catch (final DecoderException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
 }

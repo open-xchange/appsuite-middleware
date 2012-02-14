@@ -55,31 +55,31 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 
 /**
- * {@link UnifiedINBOXProperties}
+ * {@link UnifiedInboxProperties}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXProperties extends AbstractProtocolProperties implements IUnifiedINBOXProperties {
+public final class UnifiedInboxProperties extends AbstractProtocolProperties implements IUnifiedInboxProperties {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXProperties.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxProperties.class));
 
-    private static final UnifiedINBOXProperties instance = new UnifiedINBOXProperties();
+    private static final UnifiedInboxProperties instance = new UnifiedInboxProperties();
 
     /**
-     * Gets the singleton instance of {@link UnifiedINBOXProperties}
+     * Gets the singleton instance of {@link UnifiedInboxProperties}
      *
-     * @return The singleton instance of {@link UnifiedINBOXProperties}
+     * @return The singleton instance of {@link UnifiedInboxProperties}
      */
-    public static UnifiedINBOXProperties getInstance() {
+    public static UnifiedInboxProperties getInstance() {
         return instance;
     }
 
     private final IMailProperties mailProperties;
 
     /**
-     * Initializes a new {@link UnifiedINBOXProperties}
+     * Initializes a new {@link UnifiedInboxProperties}
      */
-    private UnifiedINBOXProperties() {
+    private UnifiedInboxProperties() {
         super();
         mailProperties = MailProperties.getInstance();
     }

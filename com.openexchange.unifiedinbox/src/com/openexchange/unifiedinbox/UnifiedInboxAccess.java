@@ -61,8 +61,8 @@ import com.openexchange.mail.api.MailLogicTools;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
-import com.openexchange.unifiedinbox.config.UnifiedINBOXConfig;
-import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.config.UnifiedInboxConfig;
+import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 
 /**
  * {@link UnifiedInboxAccess} - Access to Unified INBOX.
@@ -172,7 +172,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
     @Override
     protected MailConfig createNewMailConfig() {
-        return new UnifiedINBOXConfig();
+        return new UnifiedInboxConfig();
     }
 
     @Override
@@ -257,7 +257,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
     @Override
     protected IMailProperties createNewMailProperties() throws OXException {
         try {
-            final MailAccountStorageService storageService = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(
+            final MailAccountStorageService storageService = UnifiedInboxServiceRegistry.getServiceRegistry().getService(
                 MailAccountStorageService.class,
                 true);
             return new MailAccountUnifiedINBOXProperties(storageService.getMailAccount(

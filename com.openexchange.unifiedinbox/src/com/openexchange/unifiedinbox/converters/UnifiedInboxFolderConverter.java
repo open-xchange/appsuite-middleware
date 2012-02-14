@@ -71,23 +71,23 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
-import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 /**
- * {@link UnifiedINBOXFolderConverter} - Converts a Unified INBOX folder to an instance of {@link MailFolder}.
+ * {@link UnifiedInboxFolderConverter} - Converts a Unified INBOX folder to an instance of {@link MailFolder}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXFolderConverter {
+public final class UnifiedInboxFolderConverter {
 
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxFolderConverter.class));
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 
@@ -134,7 +134,7 @@ public final class UnifiedINBOXFolderConverter {
     /**
      * Prevent instantiation
      */
-    private UnifiedINBOXFolderConverter() {
+    private UnifiedInboxFolderConverter() {
         super();
     }
 
@@ -250,7 +250,7 @@ public final class UnifiedINBOXFolderConverter {
         final MailAccount[] accounts;
         {
             final MailAccountStorageService storageService =
-                UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
             for (final MailAccount mailAccount : arr) {
@@ -268,7 +268,7 @@ public final class UnifiedINBOXFolderConverter {
         } else {
             exec = executor;
         }
-        final TrackingCompletionService<int[]> completionService = new UnifiedINBOXCompletionService<int[]>(exec);
+        final TrackingCompletionService<int[]> completionService = new UnifiedInboxCompletionService<int[]>(exec);
         final AtomicBoolean retval = new AtomicBoolean();
         // Iterate
         {
@@ -282,7 +282,7 @@ public final class UnifiedINBOXFolderConverter {
                         try {
                             mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                             mailAccess.connect();
-                            final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
+                            final String accountFullname = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullname);
                             // Check if account fullname is not null
                             if (null == accountFullname) {
                                 return EMPTY_COUNTS;
@@ -372,7 +372,7 @@ public final class UnifiedINBOXFolderConverter {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             for (int i = 0; i < retval.length; i++) {
-                final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullnames[i]);
+                final String accountFullname = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullnames[i]);
                 if (null != accountFullname && mailAccess.getFolderStorage().exists(accountFullname)) {
                     final MailFolder mf = mailAccess.getFolderStorage().getFolder(accountFullname);
                     retval[i] =

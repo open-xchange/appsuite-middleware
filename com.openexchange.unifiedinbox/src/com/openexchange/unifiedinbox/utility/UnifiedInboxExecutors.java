@@ -49,7 +49,7 @@
 
 package com.openexchange.unifiedinbox.utility;
 
-import static com.openexchange.unifiedinbox.utility.UnifiedINBOXSynchronousQueueProvider.getInstance;
+import static com.openexchange.unifiedinbox.utility.UnifiedInboxSynchronousQueueProvider.getInstance;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -57,16 +57,16 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link UnifiedINBOXExecutors} - Factory and utility methods for {@link ExecutorService} for Unified INBOX bundle.
+ * {@link UnifiedInboxExecutors} - Factory and utility methods for {@link ExecutorService} for Unified INBOX bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXExecutors {
+public final class UnifiedInboxExecutors {
 
     /**
-     * Initializes a new {@link UnifiedINBOXExecutors}.
+     * Initializes a new {@link UnifiedInboxExecutors}.
      */
-    private UnifiedINBOXExecutors() {
+    private UnifiedInboxExecutors() {
         super();
     }
 
@@ -87,7 +87,7 @@ public final class UnifiedINBOXExecutors {
             0L,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<Runnable>(),
-            new UnifiedINBOXThreadFactory());
+            new UnifiedInboxThreadFactory());
         threadPool.prestartCoreThread();
         return threadPool;
     }
@@ -110,7 +110,7 @@ public final class UnifiedINBOXExecutors {
             1L,
             TimeUnit.SECONDS,
             queue,
-            new UnifiedINBOXThreadFactory(),
+            new UnifiedInboxThreadFactory(),
             new ThreadPoolExecutor.CallerRunsPolicy());
         threadPool.prestartAllCoreThreads();
         return threadPool;
@@ -131,7 +131,7 @@ public final class UnifiedINBOXExecutors {
             1L,
             TimeUnit.SECONDS,
             queue,
-            new UnifiedINBOXThreadFactory(namePrefix),
+            new UnifiedInboxThreadFactory(namePrefix),
             new ThreadPoolExecutor.CallerRunsPolicy());
         threadPool.prestartAllCoreThreads();
         return threadPool;
@@ -150,7 +150,7 @@ public final class UnifiedINBOXExecutors {
     private static int getCoreSize() {
         Integer tmp = CORE_SIZE;
         if (null == tmp) {
-            synchronized (UnifiedINBOXExecutors.class) {
+            synchronized (UnifiedInboxExecutors.class) {
                 tmp = CORE_SIZE;
                 if (null == tmp) {
                     tmp = CORE_SIZE = Integer.valueOf(Runtime.getRuntime().availableProcessors() + 1);
@@ -174,7 +174,7 @@ public final class UnifiedINBOXExecutors {
             1L,
             TimeUnit.SECONDS,
             queue,
-            new UnifiedINBOXThreadFactory());
+            new UnifiedInboxThreadFactory());
         threadPool.prestartAllCoreThreads();
         return threadPool;
     }
@@ -194,7 +194,7 @@ public final class UnifiedINBOXExecutors {
             1L,
             TimeUnit.SECONDS,
             queue,
-            new UnifiedINBOXThreadFactory(namePrefix));
+            new UnifiedInboxThreadFactory(namePrefix));
         threadPool.prestartAllCoreThreads();
         return threadPool;
     }

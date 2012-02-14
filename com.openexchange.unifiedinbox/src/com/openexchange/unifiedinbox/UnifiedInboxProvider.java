@@ -56,7 +56,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.unifiedinbox.config.UnifiedINBOXProperties;
+import com.openexchange.unifiedinbox.config.UnifiedInboxProperties;
 
 /**
  * {@link UnifiedInboxProvider} - The provider for Unified INBOX protocol.
@@ -105,7 +105,7 @@ public final class UnifiedInboxProvider extends MailProvider {
 
     @Override
     protected AbstractProtocolProperties getProtocolProperties() {
-        return UnifiedINBOXProperties.getInstance();
+        return UnifiedInboxProperties.getInstance();
     }
 
     @Override

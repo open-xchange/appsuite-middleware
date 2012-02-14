@@ -65,19 +65,19 @@ import com.openexchange.tools.stream.UnsynchronizedStringWriter;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.UnifiedInboxUID;
-import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 
 /**
- * {@link UnifiedINBOXUtility} - Utility methods for Unified INBOX.
+ * {@link UnifiedInboxUtility} - Utility methods for Unified INBOX.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXUtility {
+public final class UnifiedInboxUtility {
 
     /**
-     * Initializes a new {@link UnifiedINBOXUtility}.
+     * Initializes a new {@link UnifiedInboxUtility}.
      */
-    private UnifiedINBOXUtility() {
+    private UnifiedInboxUtility() {
         super();
     }
 
@@ -87,7 +87,7 @@ public final class UnifiedINBOXUtility {
      * @return The default max. running millis
      */
     public static long getMaxRunningMillis() {
-        final ConfigurationService service = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService service = UnifiedInboxServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service) {
             return 60000L;
         }

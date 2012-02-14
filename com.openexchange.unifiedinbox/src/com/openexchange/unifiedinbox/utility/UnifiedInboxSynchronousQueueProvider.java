@@ -47,80 +47,70 @@
  *
  */
 
-package com.openexchange.unifiedinbox.config;
+package com.openexchange.unifiedinbox.utility;
 
-import com.openexchange.mail.api.IMailProperties;
-import com.openexchange.mail.api.MailCapabilities;
-import com.openexchange.mail.api.MailConfig;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 /**
- * {@link UnifiedINBOXConfig}
+ * {@link UnifiedInboxSynchronousQueueProvider} - Provider for appropriate synchronous queue instance dependent on JRE version.
+ * <p>
+ * Java6 synchronous queue implementation is up to 3 times faster than Java5 one.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXConfig extends MailConfig {
-
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXConfig.class));
-
-    private IMailProperties mailProperties;
+public abstract class UnifiedInboxSynchronousQueueProvider {
 
     /**
-     * Default constructor
+     * Initializes a new {@link UnifiedInboxSynchronousQueueProvider}.
      */
-    public UnifiedINBOXConfig() {
+    protected UnifiedInboxSynchronousQueueProvider() {
         super();
     }
 
-    @Override
-    public MailCapabilities getCapabilities() {
-        return MailCapabilities.EMPTY_CAPS;
+    private static UnifiedInboxSynchronousQueueProvider instance;
+
+    /**
+     * Initializes appropriate instance of synchronous queue provider.
+     *
+     * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
+     *            {@link Java6SynchronousQueue}
+     */
+    public static void initInstance(final boolean useBuiltInQueue) {
+        if (useBuiltInQueue) {
+            instance = new UnifiedInboxSynchronousQueueProvider() {
+
+                @Override
+                public <V> BlockingQueue<V> newSynchronousQueue() {
+                    return new SynchronousQueue<V>();
+                }
+            };
+        } else {
+            instance = new UnifiedInboxSynchronousQueueProvider() {
+
+                @Override
+                public <V> BlockingQueue<V> newSynchronousQueue() {
+                    return new Java6SynchronousQueue<V>();
+                }
+            };
+        }
     }
 
-    @Override
-    public int getPort() {
-        return -1;
+    /**
+     * Releases instance of synchronous queue provider.
+     */
+    public static void releaseInstance() {
+        instance = null;
     }
 
-    @Override
-    public void setPort(final int pop3Port) {
-        // Nothing to set
+    /**
+     * Gets the {@link UnifiedInboxSynchronousQueueProvider} instance.
+     *
+     * @return The {@link UnifiedInboxSynchronousQueueProvider} instance
+     */
+    public static UnifiedInboxSynchronousQueueProvider getInstance() {
+        return instance;
     }
 
-    @Override
-    public String getServer() {
-        return "localhost";
-    }
-
-    @Override
-    public void setServer(final String pop3Server) {
-        // Nothing to set
-    }
-
-    @Override
-    public boolean isSecure() {
-        return false;
-    }
-
-    @Override
-    public void setSecure(final boolean secure) {
-        // Nothing to set
-    }
-
-    @Override
-    protected void parseServerURL(final String serverURL) {
-        // Nothing to parse
-        login = "dummy";
-        password = "secret";
-    }
-
-    @Override
-    public IMailProperties getMailProperties() {
-        return mailProperties;
-    }
-
-    @Override
-    public void setMailProperties(final IMailProperties mailProperties) {
-        this.mailProperties = mailProperties;
-    }
-
+    public abstract <V> BlockingQueue<V> newSynchronousQueue();
 }

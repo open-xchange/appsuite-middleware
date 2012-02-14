@@ -58,12 +58,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link UnifiedINBOXCompletionService} - A {@link TrackingCompletionService} that uses a supplied {@link Executor} to execute tasks. This
+ * {@link UnifiedInboxCompletionService} - A {@link TrackingCompletionService} that uses a supplied {@link Executor} to execute tasks. This
  * class arranges that submitted tasks are, upon completion, placed on a queue accessible using <tt>take</tt>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXCompletionService<V> implements TrackingCompletionService<V> {
+public final class UnifiedInboxCompletionService<V> implements TrackingCompletionService<V> {
 
     /**
      * FutureTask extension to enqueue upon completion
@@ -99,12 +99,12 @@ public final class UnifiedINBOXCompletionService<V> implements TrackingCompletio
     private int count;
 
     /**
-     * Initializes a new {@link UnifiedINBOXCompletionService}.
+     * Initializes a new {@link UnifiedInboxCompletionService}.
      *
      * @param executor The executor to use
      * @throws NullPointerException If executor is <tt>null</tt>
      */
-    public UnifiedINBOXCompletionService(final Executor executor) {
+    public UnifiedInboxCompletionService(final Executor executor) {
         super();
         if (executor == null) {
             throw new NullPointerException();
@@ -114,13 +114,13 @@ public final class UnifiedINBOXCompletionService<V> implements TrackingCompletio
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXCompletionService}.
+     * Initializes a new {@link UnifiedInboxCompletionService}.
      *
      * @param executor The executor to use
      * @param completionQueue The queue to use as the completion queue normally one dedicated for use by this service
      * @throws NullPointerException If executor or completionQueue are <tt>null</tt>
      */
-    public UnifiedINBOXCompletionService(final Executor executor, final BlockingQueue<Future<V>> completionQueue) {
+    public UnifiedInboxCompletionService(final Executor executor, final BlockingQueue<Future<V>> completionQueue) {
         super();
         if (executor == null || completionQueue == null) {
             throw new NullPointerException();

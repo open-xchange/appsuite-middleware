@@ -57,7 +57,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 final class KF2AFEqualCallable implements Task<Object> {
 
@@ -102,7 +102,7 @@ final class KF2AFEqualCallable implements Task<Object> {
         try {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
-            final String realSource = UnifiedINBOXUtility.determineAccountFullname(mailAccess, sourceFolder);
+            final String realSource = UnifiedInboxUtility.determineAccountFullname(mailAccess, sourceFolder);
             final String[] results;
             if (move) {
                 results =

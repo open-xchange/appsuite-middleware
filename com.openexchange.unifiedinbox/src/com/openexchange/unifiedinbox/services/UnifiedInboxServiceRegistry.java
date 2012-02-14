@@ -52,12 +52,12 @@ package com.openexchange.unifiedinbox.services;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link UnifiedINBOXServiceRegistry} - A registry for services needed by Unified INBOX bundle
+ * {@link UnifiedInboxServiceRegistry} - A registry for services needed by Unified INBOX bundle
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *
  */
-public final class UnifiedINBOXServiceRegistry {
+public final class UnifiedInboxServiceRegistry {
 
 	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
@@ -71,9 +71,9 @@ public final class UnifiedINBOXServiceRegistry {
 	}
 
 	/**
-	 * Initializes a new {@link UnifiedINBOXServiceRegistry}
+	 * Initializes a new {@link UnifiedInboxServiceRegistry}
 	 */
-	private UnifiedINBOXServiceRegistry() {
+	private UnifiedInboxServiceRegistry() {
 		super();
 	}
 
