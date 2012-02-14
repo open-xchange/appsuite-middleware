@@ -105,8 +105,9 @@ public abstract class AbstractITipAction implements AJAXActionService{
 
         ITipParser itipParser = services.getService(ITipParser.class);
         ITipAnalyzerService analyzer = services.getService(ITipAnalyzerService.class);
-
-        TimeZone tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
+        
+        String optTimezone = request.getParameter("timezone");
+		TimeZone tz = TimeZone.getTimeZone(optTimezone != null ? optTimezone : session.getUser().getTimeZone());
         Map<String, String> mailHeader = new HashMap<String, String>();
         List<ITipMessage> messages = itipParser.parseMessage(getInputStreamAndFillMailHeader(request, session, mailHeader), tz, session.getContext(), errors, warnings);
 
