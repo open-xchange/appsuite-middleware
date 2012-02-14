@@ -51,6 +51,7 @@ package com.openexchange.unifiedinbox;
 
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.BitSet;
+import java.util.regex.Pattern;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.exception.OXException;
@@ -181,18 +182,22 @@ public final class UnifiedInboxUID {
         }
     }
 
+    private static final Pattern ENCODE_PATTERN = Pattern.compile("=");
+
     private static String encodeQP(final String string) {
         try {
-            return new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII).replaceAll("=", "%");
+            return ENCODE_PATTERN.matcher(new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII)).replaceAll("%");
         } catch (final UnsupportedCharsetException e) {
             // Cannot occur
             throw new IllegalStateException(e);
         }
     }
 
+    private static final Pattern DECODE_PATTERN = Pattern.compile("%");
+
     private static String decodeQP(final String string) {
         try {
-            return new String(QuotedPrintableCodec.decodeQuotedPrintable(string.replaceAll("%", "=").getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(DECODE_PATTERN.matcher(string).replaceAll("=").getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
         } catch (final DecoderException e) {
             throw new IllegalStateException(e);
         }
