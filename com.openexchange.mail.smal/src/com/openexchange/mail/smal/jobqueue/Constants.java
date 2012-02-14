@@ -74,9 +74,9 @@ public final class Constants {
     public static final int DEFAULT_MILLIS = 5 * 60 * 1000;
 
     /**
-     * The size of a chunk for indexed messages for a bulk add.
+     * The size of a chunk for indexed messages for a bulk add; zero or less means unlimited.
      */
-    public static final int CHUNK_SIZE = 1000;
+    public static final int CHUNK_SIZE = 0;
 
     /**
      * The number of chunks allowed being added to index in a single job's run.

@@ -84,7 +84,10 @@ public class ContactRequest {
     }
 
     public int getId() throws OXException {
-        return request.getParameter("id", int.class);
+    	if (request.isSet("id")) {
+            return request.getParameter("id", int.class);
+    	}
+    	return session.getUser().getContactId();
     }
 
     public int getFolder() throws OXException {
