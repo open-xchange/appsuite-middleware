@@ -110,7 +110,6 @@ import com.openexchange.mail.smal.adapter.IndexAdapters;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.SolrTextFillerQueue;
 import com.openexchange.mail.smal.adapter.solrj.contentgrab.TextFiller;
 import com.openexchange.mail.smal.adapter.solrj.management.CommonsHttpSolrServerManagement;
-import com.openexchange.mail.smal.jobqueue.Constants;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -362,9 +361,11 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
      * ----------------------------------------------------------------------------------------------
      */
 
+    private static final int ADD_ROWS = 2000;
+
     private static final int QUERY_ROWS = 2000;
 
-    private static final int ALL_ROWS = 8000;
+    private static final int ALL_ROWS = 4000;
 
     private static final int DELETE_ROWS = 25;
 
@@ -1339,7 +1340,7 @@ public final class SolrAdapter implements IndexAdapter, SolrConstants {
             solrServer = solrServerFor(session, true);
             final List<TextFiller> fillers = new ArrayList<TextFiller>(mails.size());
             final long now = System.currentTimeMillis();
-            final int chunkSize = Constants.CHUNK_SIZE;
+            final int chunkSize = ADD_ROWS;
             final int size = mails.size();
             final Thread thread = Thread.currentThread();
             try {
