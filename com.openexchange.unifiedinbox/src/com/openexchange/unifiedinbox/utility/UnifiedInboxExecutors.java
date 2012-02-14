@@ -57,7 +57,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link UnifiedInboxExecutors} - Factory and utility methods for {@link ExecutorService} for Unified INBOX bundle.
+ * {@link UnifiedInboxExecutors} - Factory and utility methods for {@link ExecutorService} for Unified Mail bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

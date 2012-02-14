@@ -92,7 +92,7 @@ import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedInboxMessageStorage} - The Unified INBOX message storage implementation.
+ * {@link UnifiedInboxMessageStorage} - The Unified Mail message storage implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -129,7 +129,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage {
     /**
      * Initializes a new {@link UnifiedInboxMessageStorage}.
      *
-     * @param access The Unified INBOX access
+     * @param access The Unified Mail access
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
      */

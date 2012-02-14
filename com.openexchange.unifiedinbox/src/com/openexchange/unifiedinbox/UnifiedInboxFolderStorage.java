@@ -84,7 +84,7 @@ import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedInboxFolderStorage} - The Unified INBOX folder storage implementation.
+ * {@link UnifiedInboxFolderStorage} - The Unified Mail folder storage implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -105,7 +105,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
     /**
      * Initializes a new {@link UnifiedInboxFolderStorage}
      *
-     * @param access The Unified INBOX access
+     * @param access The Unified Mail access
      * @param session The session providing needed user data
      * @throws OXException If context loading fails
      */
@@ -204,7 +204,7 @@ public final class UnifiedInboxFolderStorage extends MailFolderStorage {
                 throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(parentFullname);
             }
             /*
-             * Return empty array since mapped default folders have no subfolders in Unified INBOX account
+             * Return empty array since mapped default folders have no subfolders in Unified Mail account
              */
             return EMPTY_PATH;
         }

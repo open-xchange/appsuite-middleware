@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 
 /**
- * {@link UnifiedInboxUID} - The Unified INBOX UID.
+ * {@link UnifiedInboxUID} - The Unified Mail UID.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -93,8 +93,8 @@ public final class UnifiedInboxUID {
     /**
      * Initializes a new {@link UnifiedInboxUID}.
      *
-     * @param unifiedINBOXUID The Unified INBOX UID as a string
-     * @throws OXException If parsing Unified INBOX UID fails
+     * @param unifiedINBOXUID The Unified Mail UID as a string
+     * @throws OXException If parsing Unified Mail UID fails
      */
     public UnifiedInboxUID(final String unifiedINBOXUID) throws OXException {
         super();
@@ -121,8 +121,8 @@ public final class UnifiedInboxUID {
     /**
      * Sets the UID of this {@link UnifiedInboxUID}.
      *
-     * @param unifiedINBOXUID The Unified INBOX UID as a string
-     * @throws MailException If parsing Unified INBOX UID fails
+     * @param unifiedINBOXUID The Unified Mail UID as a string
+     * @throws MailException If parsing Unified Mail UID fails
      * @return This {@link UnifiedInboxUID} with new UID applied.
      */
     public UnifiedInboxUID setUIDString(final String unifiedINBOXUID) throws OXException {

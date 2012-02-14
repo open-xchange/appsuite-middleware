@@ -52,7 +52,7 @@ package com.openexchange.unifiedinbox.utility;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link UnifiedInboxThreadFactory} - A thread factory for Unified INBOX threads taking a custom name prefix for created threads.
+ * {@link UnifiedInboxThreadFactory} - A thread factory for Unified Mail threads taking a custom name prefix for created threads.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

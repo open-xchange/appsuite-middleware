@@ -78,7 +78,7 @@ import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 /**
- * {@link UnifiedInboxFolderConverter} - Converts a Unified INBOX folder to an instance of {@link MailFolder}.
+ * {@link UnifiedInboxFolderConverter} - Converts a Unified Mail folder to an instance of {@link MailFolder}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -150,7 +150,7 @@ public final class UnifiedInboxFolderConverter {
     /**
      * Gets the appropriately filled instance of {@link MailFolder}.
      *
-     * @param unifiedInboxAccountId The account ID of the Unified INBOX account
+     * @param unifiedInboxAccountId The account ID of the Unified Mail account
      * @param session The session
      * @param fullName The folder's full name
      * @param localizedName The localized name of the folder
@@ -164,7 +164,7 @@ public final class UnifiedInboxFolderConverter {
     /**
      * Gets the appropriately filled instance of {@link MailFolder}.
      *
-     * @param unifiedInboxAccountId The account ID of the Unified INBOX account
+     * @param unifiedInboxAccountId The account ID of the Unified Mail account
      * @param session The session
      * @param fullname The folder's full name
      * @param localizedName The localized name of the folder
@@ -174,7 +174,7 @@ public final class UnifiedInboxFolderConverter {
      */
     public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final Executor executor) throws OXException {
         final MailFolder tmp = new MailFolder();
-        // Subscription not supported by Unified INBOX, so every folder is "subscribed"
+        // Subscription not supported by Unified Mail, so every folder is "subscribed"
         tmp.setSubscribed(true);
         tmp.setSupportsUserFlags(true);
         tmp.setRootFolder(false);
@@ -409,7 +409,7 @@ public final class UnifiedInboxFolderConverter {
         final int size = accountFolders.size();
         for (int i = 0; i < retval.length; i++) {
             final MailFolder tmp = retval[i] = new MailFolder();
-            // Subscription not supported by Unified INBOX, so every folder is "subscribed"
+            // Subscription not supported by Unified Mail, so every folder is "subscribed"
             final String fullname = fullnames[i];
             tmp.setSubscribed(true);
             tmp.setSupportsUserFlags(true);

@@ -119,7 +119,7 @@ public final class MailAccountWriter {
         json.put(MailAccountFields.SPAM_FULLNAME, prepareFullname(accountId, account.getSpamFullname()));
         json.put(MailAccountFields.CONFIRMED_SPAM_FULLNAME, prepareFullname(accountId, account.getConfirmedSpamFullname()));
         json.put(MailAccountFields.CONFIRMED_HAM_FULLNAME, prepareFullname(accountId, account.getConfirmedHamFullname()));
-        // Unified INBOX enabled
+        // Unified Mail enabled
         json.put(MailAccountFields.UNIFIED_INBOX_ENABLED, account.isUnifiedINBOXEnabled());
         // Properties
         final Map<String, String> props = account.getProperties();

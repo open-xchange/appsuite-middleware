@@ -68,7 +68,7 @@ import com.openexchange.unifiedinbox.UnifiedInboxUID;
 import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 
 /**
- * {@link UnifiedInboxUtility} - Utility methods for Unified INBOX.
+ * {@link UnifiedInboxUtility} - Utility methods for Unified Mail.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -95,9 +95,9 @@ public final class UnifiedInboxUtility {
     }
 
     /**
-     * Parses specified Unified INBOX mail IDs.
+     * Parses specified Unified Mail mail IDs.
      *
-     * @param mailIDs The Unified INBOX mail IDs to parse
+     * @param mailIDs The Unified Mail mail IDs to parse
      * @return A map grouping referenced accounts and referenced fullnames and IDs.
      * @throws OXException If parsing mail IDs fails
      */
@@ -128,8 +128,8 @@ public final class UnifiedInboxUtility {
     /**
      * Generates a nested folder's fullname.
      *
-     * @param uiAccountId The Unified INBOX's account ID
-     * @param uiFullname The Unified INBOX's fullname
+     * @param uiAccountId The Unified Mail's account ID
+     * @param uiFullname The Unified Mail's fullname
      * @param nestedAccountId The nested account's ID
      * @param nestedFullname The nested folder's fullname
      * @return The generated nested folder's fullname.

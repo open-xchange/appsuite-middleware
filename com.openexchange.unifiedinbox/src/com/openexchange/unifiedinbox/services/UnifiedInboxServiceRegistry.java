@@ -52,7 +52,7 @@ package com.openexchange.unifiedinbox.services;
 import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link UnifiedInboxServiceRegistry} - A registry for services needed by Unified INBOX bundle
+ * {@link UnifiedInboxServiceRegistry} - A registry for services needed by Unified Mail bundle
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  *

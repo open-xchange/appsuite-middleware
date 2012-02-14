@@ -71,7 +71,7 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedINBOXManagementImpl} - The Unified INBOX management implementation.
+ * {@link UnifiedINBOXManagementImpl} - The Unified Mail management implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -98,9 +98,9 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         try {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            // Check if Unified INBOX account already exists for given user
+            // Check if Unified Mail account already exists for given user
             if (exists(userId, contextId, con)) {
-                // User already has the Unified INBOX account set
+                // User already has the Unified Mail account set
                 throw MailAccountExceptionCodes.DUPLICATE_UNIFIED_INBOX_ACCOUNT.create(
                     Integer.valueOf(userId),
                     Integer.valueOf(contextId));
@@ -158,7 +158,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
         try {
             final MailAccountStorageService storageService =
                 ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            // Determine the ID of the Unified INBOX account for given user
+            // Determine the ID of the Unified Mail account for given user
             final MailAccount[] existingAccounts = storageService.getUserMailAccounts(userId, contextId);
             int id = -1;
             for (int i = 0; i < existingAccounts.length && id < 0; i++) {
@@ -167,7 +167,7 @@ public final class UnifiedINBOXManagementImpl implements UnifiedINBOXManagement 
                     id = mailAccount.getId();
                 }
             }
-            // Delete the Unified INBOX account
+            // Delete the Unified Mail account
             if (id >= 0) {
                 if (null == con) {
                     storageService.deleteMailAccount(id, Collections.<String, Object> emptyMap(), userId, contextId, false);

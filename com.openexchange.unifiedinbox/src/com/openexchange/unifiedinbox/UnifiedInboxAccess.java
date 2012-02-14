@@ -65,7 +65,7 @@ import com.openexchange.unifiedinbox.config.UnifiedInboxConfig;
 import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 
 /**
- * {@link UnifiedInboxAccess} - Access to Unified INBOX.
+ * {@link UnifiedInboxAccess} - Access to Unified Mail.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -101,7 +101,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
     public static final String DRAFTS = "Drafts";
 
     /**
-     * A set containing all known default folders for an Unified INBOX account.
+     * A set containing all known default folders for an Unified Mail account.
      */
     public static final Set<String> KNOWN_FOLDERS;
 
@@ -224,7 +224,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             try {
                 folderStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing Unified INBOX folder storage: ").append(e.getMessage()).toString(), e);
+                LOG.error(new StringBuilder("Error while closing Unified Mail folder storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 folderStorage = null;
             }
@@ -233,7 +233,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
             try {
                 messageStorage.releaseResources();
             } catch (final OXException e) {
-                LOG.error(new StringBuilder("Error while closing Unified INBOX message storage: ").append(e.getMessage()).toString(), e);
+                LOG.error(new StringBuilder("Error while closing Unified Mail message storage: ").append(e.getMessage()).toString(), e);
             } finally {
                 messageStorage = null;
 

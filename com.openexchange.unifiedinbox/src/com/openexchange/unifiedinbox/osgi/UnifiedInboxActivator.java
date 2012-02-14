@@ -67,7 +67,7 @@ import com.openexchange.unifiedinbox.utility.UnifiedInboxSynchronousQueueProvide
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedInboxActivator} - The {@link BundleActivator activator} for Unified INBOX bundle.
+ * {@link UnifiedInboxActivator} - The {@link BundleActivator activator} for Unified Mail bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

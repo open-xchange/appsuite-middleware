@@ -59,23 +59,23 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.unifiedinbox.config.UnifiedInboxProperties;
 
 /**
- * {@link UnifiedInboxProvider} - The provider for Unified INBOX protocol.
+ * {@link UnifiedInboxProvider} - The provider for Unified Mail protocol.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class UnifiedInboxProvider extends MailProvider {
 
     /**
-     * Unified INBOX protocol.
+     * Unified Mail protocol.
      */
     public static final Protocol PROTOCOL_UNIFIED_INBOX = new Protocol(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX);
 
     private static final UnifiedInboxProvider instance = new UnifiedInboxProvider();
 
     /**
-     * Gets the singleton instance of Unified INBOX provider.
+     * Gets the singleton instance of Unified Mail provider.
      *
-     * @return The singleton instance of Unified INBOX provider
+     * @return The singleton instance of Unified Mail provider
      */
     public static UnifiedInboxProvider getInstance() {
         return instance;
