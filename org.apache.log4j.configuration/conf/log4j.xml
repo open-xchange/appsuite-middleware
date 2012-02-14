@@ -5,7 +5,7 @@
         <param name="SyslogHost" value="localhost"/>
         <param name="Facility" value="local2"/>
         <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d open-xchange-groupware %-5p [%c][%t]: %C,%M %m%n"/>
+            <param name="ConversionPattern" value="%d open-xchange %-5p [%c][%t]: %C,%M %m%n"/>
         </layout>
     </appender>
     <logger name="org.apache.jcs">
