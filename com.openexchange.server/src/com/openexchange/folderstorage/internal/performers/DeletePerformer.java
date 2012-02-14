@@ -189,12 +189,7 @@ public final class DeletePerformer extends AbstractPerformer {
         final Folder folder = folderStorage.getFolder(treeId, folderId, storageParameters);
         storageParameters.putParameter(FolderType.GLOBAL, "global", Boolean.valueOf(folder.isGlobalID()));
         {
-            final Permission permission;
-            if (null == getSession()) {
-                permission = CalculatePermission.calculate(folder, getUser(), getContext(), ALL_ALLOWED);
-            } else {
-                permission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
-            }
+            final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
             if (!permission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     getFolderInfo4Error(folder),
