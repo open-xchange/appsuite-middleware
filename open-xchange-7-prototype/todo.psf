@@ -26,9 +26,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.filter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.smal"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mdns"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.model"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.modules.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pop3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview.thirdwing"/>
