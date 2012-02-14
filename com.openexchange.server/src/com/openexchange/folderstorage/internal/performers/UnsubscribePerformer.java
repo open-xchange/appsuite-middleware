@@ -141,15 +141,10 @@ public final class UnsubscribePerformer extends AbstractPerformer {
             final Folder folder = virtualStorage.getFolder(treeId, folderId, storageParameters);
             {
                 /*
-                 * Check folder permission for parent folder
+                 * Check folder permission
                  */
-                final Permission parentPermission;
-                if (null == getSession()) {
-                    parentPermission = CalculatePermission.calculate(folder, getUser(), getContext(), ALL_ALLOWED);
-                } else {
-                    parentPermission = CalculatePermission.calculate(folder, getSession(), ALL_ALLOWED);
-                }
-                if (!parentPermission.isVisible()) {
+                final Permission permission = CalculatePermission.calculate(folder, this, ALL_ALLOWED);
+                if (!permission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                         getFolderInfo4Error(folder),
                         getUserInfo4Error(),

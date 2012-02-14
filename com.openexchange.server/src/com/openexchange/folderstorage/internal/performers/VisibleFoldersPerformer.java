@@ -224,6 +224,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                 paramsProvider = null == session ? new SessionStorageParametersProvider(user, context) : new SessionStorageParametersProvider(session);
             }
             int taskCount = 0;
+            final AbstractPerformer performer = this;
             for (final Entry<FolderStorage, TIntList> entry : map.entrySet()) {
                 final FolderStorage tmp = entry.getKey();
                 final int[] indexes = entry.getValue().toArray();
@@ -285,13 +286,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                      * Check for subscribed status dependent on parameter "all"
                                      */
                                     if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                        final Permission userPermission;
-                                        if (null == getSession()) {
-                                            userPermission =
-                                                CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                        } else {
-                                            userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                                        }
+                                        final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                         if (userPermission.isVisible()) {
                                             subfolders[index] =
                                                 getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
@@ -311,13 +306,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                          * Check for subscribed status dependent on parameter "all"
                                          */
                                         if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                            final Permission userPermission;
-                                            if (null == getSession()) {
-                                                userPermission =
-                                                    CalculatePermission.calculate(subfolder, getUser(), getContext(), getAllowedContentTypes());
-                                            } else {
-                                                userPermission = CalculatePermission.calculate(subfolder, getSession(), getAllowedContentTypes());
-                                            }
+                                            final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
                                             if (userPermission.isVisible()) {
                                                 subfolders[index] =
                                                     getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);

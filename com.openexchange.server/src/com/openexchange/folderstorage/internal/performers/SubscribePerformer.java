@@ -143,23 +143,37 @@ public final class SubscribePerformer extends AbstractPerformer {
         }
         try {
             Folder sourceFolder = sourceStorage.getFolder(sourceTreeId, folderId, storageParameters);
-            {
-                /*
-                 * Check folder permission for parent folder
-                 */
-                final Permission parentPermission;
-                if (null == getSession()) {
-                    parentPermission = CalculatePermission.calculate(sourceFolder, getUser(), getContext(), ALL_ALLOWED);
-                } else {
-                    parentPermission = CalculatePermission.calculate(sourceFolder, getSession(), ALL_ALLOWED);
-                }
-                if (!parentPermission.isVisible()) {
+            /*
+             * Check folder permission
+             */
+            if (!CalculatePermission.calculate(sourceFolder, this, ALL_ALLOWED).isVisible()) {
+                throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
+                    getFolderInfo4Error(sourceFolder),
+                    getUserInfo4Error(),
+                    getContextInfo4Error());
+            }
+            final String trgtParentId = targetParentId;
+            while (null == trgtParentId) {
+                final String parentId = sourceFolder.getParentID();
+                final Folder sourceParent = sourceStorage.getFolder(parentId, folderId, storageParameters);
+                if (!CalculatePermission.calculate(sourceParent, this, ALL_ALLOWED).isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
-                        getFolderInfo4Error(sourceFolder),
+                        getFolderInfo4Error(sourceParent),
                         getUserInfo4Error(),
                         getContextInfo4Error());
                 }
+                final FolderStorage targetStorage = getOpenedStorage(parentId, targetTreeId, storageParameters, openedStorages);
+                if (!targetStorage.containsFolder(targetTreeId, parentId, storageParameters)) {
+                    // Recurisive invocation here
+                    
+                }
             }
+            
+            
+            /*-
+             * ---------------------------------------
+             */
+            
             final FolderStorage targetStorage = getOpenedStorage(targetParentId, targetTreeId, storageParameters, openedStorages);
             {
                 /*
@@ -197,12 +211,7 @@ public final class SubscribePerformer extends AbstractPerformer {
                     /*
                      * Check folder permission for parent folder
                      */
-                    final Permission parentPermission;
-                    if (null == getSession()) {
-                        parentPermission = CalculatePermission.calculate(sourceFolder, getUser(), getContext(), ALL_ALLOWED);
-                    } else {
-                        parentPermission = CalculatePermission.calculate(sourceFolder, getSession(), ALL_ALLOWED);
-                    }
+                    final Permission parentPermission = CalculatePermission.calculate(sourceFolder, this, ALL_ALLOWED);
                     if (parentPermission.isVisible()) {
                         virtualFolder = (Folder) sourceFolder.clone();
                         virtualFolder.setParentID(sourceFolder.getParentID());

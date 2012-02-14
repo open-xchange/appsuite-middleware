@@ -154,12 +154,7 @@ public final class CreatePerformer extends AbstractPerformer {
             /*
              * Check folder permission for parent folder
              */
-            final Permission parentPermission;
-            if (null == getSession()) {
-                parentPermission = CalculatePermission.calculate(parent, getUser(), getContext(), ALL_ALLOWED);
-            } else {
-                parentPermission = CalculatePermission.calculate(parent, getSession(), ALL_ALLOWED);
-            }
+            final Permission parentPermission = CalculatePermission.calculate(parent, this, ALL_ALLOWED);
             if (!parentPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(
                     getFolderInfo4Error(parent),
@@ -295,11 +290,7 @@ public final class CreatePerformer extends AbstractPerformer {
                     {
                         final Folder rootFolder = capStorage.getFolder(treeId, rootId, storageParameters);
                         final List<ContentType> contentTypes = Collections.<ContentType> emptyList();
-                        if (null == getSession()) {
-                            rootPermission = CalculatePermission.calculate(rootFolder, getUser(), getContext(), contentTypes);
-                        } else {
-                            rootPermission = CalculatePermission.calculate(rootFolder, getSession(), contentTypes);
-                        }
+                        rootPermission = CalculatePermission.calculate(rootFolder, this, contentTypes);
                     }
                     if (rootPermission.getFolderPermission() >= Permission.CREATE_SUB_FOLDERS) {
                         /*
