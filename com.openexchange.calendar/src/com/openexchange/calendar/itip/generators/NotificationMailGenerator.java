@@ -482,24 +482,24 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     	if (services == null) {
     		return;
     	}
-    	final AttachmentBase attachments = services.getService(AttachmentBase.class);
+    	if (!attachmentMemory.hasAttachmentChanged(appointment.getObjectID(), ctx.getContextId())) {
+    		return;
+    	}
+		mail.setAttachmentUpdate(true);
+		AttachmentBase attachments = services.getService(AttachmentBase.class);
     	SearchIterator<AttachmentMetadata> results = null;
     	try {
-    		final TimedResult<AttachmentMetadata> attachmentsResult = attachments.getAttachments(mail.getAppointment().getParentFolderID(), mail.getAppointment().getObjectID(), Types.APPOINTMENT, ctx, user, userConfig);
+    		TimedResult<AttachmentMetadata> attachmentsResult = attachments.getAttachments(mail.getAppointment().getParentFolderID(), mail.getAppointment().getObjectID(), Types.APPOINTMENT, ctx, user, userConfig);
     		results = attachmentsResult.results();
     		while(results.hasNext()) {
     			mail.addAttachment(results.next());
     		}
-    	} catch (final OXException x) {
-    		// Ignore. This is best effort only.
+    	} catch (OXException x) {
+    		// Best effort only
     	} finally {
     		if (results != null) {
         		results.close();
     		}
-    	}
-    	
-    	if (attachmentMemory.hasAttachmentChanged(appointment.getObjectID(), ctx.getContextId())) {
-    		mail.setAttachmentUpdate(true);
     	}
     }
 
