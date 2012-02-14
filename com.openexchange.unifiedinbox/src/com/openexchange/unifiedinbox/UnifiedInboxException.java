@@ -57,11 +57,11 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MIMEMailExceptionCode;
 
 /**
- * {@link UnifiedINBOXException} - Indicates a Unified INBOX error.
+ * {@link UnifiedInboxException} - Indicates a Unified Mail error.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXException extends OXException {
+public final class UnifiedInboxException extends OXException {
 
     /**
      * Serial Version UID
@@ -71,45 +71,45 @@ public final class UnifiedINBOXException extends OXException {
     public static enum Code implements OXExceptionCode {
 
         /**
-         * Unified INBOX does not support to create folders.
+         * Unified Mail does not support to create folders.
          */
-        CREATE_DENIED("Unified INBOX does not support to create folders.", Category.CATEGORY_ERROR, 2001),
+        CREATE_DENIED("Unified Mail does not support to create folders.", Category.CATEGORY_ERROR, 2001),
         /**
-         * Unified INBOX does not support to delete folders.
+         * Unified Mail does not support to delete folders.
          */
-        DELETE_DENIED("Unified INBOX does not support to delete folders.", Category.CATEGORY_ERROR, 2002),
+        DELETE_DENIED("Unified Mail does not support to delete folders.", Category.CATEGORY_ERROR, 2002),
         /**
-         * Unified INBOX does not support to update folders.
+         * Unified Mail does not support to update folders.
          */
-        UPDATE_DENIED("Unified INBOX does not support to update folders.", Category.CATEGORY_ERROR, 2003),
+        UPDATE_DENIED("Unified Mail does not support to update folders.", Category.CATEGORY_ERROR, 2003),
         /**
-         * Unified INBOX does not support to move messages.
+         * Unified Mail does not support to move messages.
          */
-        MOVE_MSGS_DENIED("Unified INBOX does not support to move messages.", Category.CATEGORY_ERROR, 2004),
+        MOVE_MSGS_DENIED("Unified Mail does not support to move messages.", Category.CATEGORY_ERROR, 2004),
         /**
-         * Unified INBOX does not support to copy messages.
+         * Unified Mail does not support to copy messages.
          */
-        COPY_MSGS_DENIED("Unified INBOX does not support to copy messages.", Category.CATEGORY_ERROR, 2005),
+        COPY_MSGS_DENIED("Unified Mail does not support to copy messages.", Category.CATEGORY_ERROR, 2005),
         /**
          * Append messages failed.
          */
         APPEND_MSGS_DENIED("Append messages failed.", Category.CATEGORY_ERROR, 2006),
         /**
-         * Unified INBOX does not support draft messages.
+         * Unified Mail does not support draft messages.
          */
-        DRAFTS_NOT_SUPPORTED("Unified INBOX does not support draft messages.", Category.CATEGORY_ERROR, 2007),
+        DRAFTS_NOT_SUPPORTED("Unified Mail does not support draft messages.", Category.CATEGORY_ERROR, 2007),
         /**
-         * Unified INBOX does not support to move folders.
+         * Unified Mail does not support to move folders.
          */
-        MOVE_DENIED("Unified INBOX does not support to move folders.", Category.CATEGORY_ERROR, 2008),
+        MOVE_DENIED("Unified Mail does not support to move folders.", Category.CATEGORY_ERROR, 2008),
         /**
-         * Unified INBOX does not support mail folder creation
+         * Unified Mail does not support mail folder creation
          */
-        FOLDER_CREATION_FAILED("Unified INBOX does not support mail folder creation", Category.CATEGORY_ERROR, 2009),
+        FOLDER_CREATION_FAILED("Unified Mail does not support mail folder creation", Category.CATEGORY_ERROR, 2009),
         /**
-         * Unified INBOX does not support to clear INBOX folder.
+         * Unified Mail does not support to clear INBOX folder.
          */
-        CLEAR_NOT_SUPPORTED("Unified INBOX does not support to clear INBOX folder.", Category.CATEGORY_ERROR, 2010),
+        CLEAR_NOT_SUPPORTED("Unified Mail does not support to clear INBOX folder.", Category.CATEGORY_ERROR, 2010),
         /**
          * No connection available to access mailbox
          */
@@ -152,7 +152,7 @@ public final class UnifiedINBOXException extends OXException {
             this.message = message;
             this.detailNumber = detailNumber;
             this.category = category;
-            prefix = UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX.getName();
+            prefix = UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.getName();
         }
 
         private Code(final MailExceptionCode code) {
@@ -232,9 +232,9 @@ public final class UnifiedINBOXException extends OXException {
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXException}
+     * Initializes a new {@link UnifiedInboxException}
      */
-    private UnifiedINBOXException() {
+    private UnifiedInboxException() {
         super();
     }
 

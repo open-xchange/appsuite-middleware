@@ -69,25 +69,25 @@ import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
-import com.openexchange.unifiedinbox.UnifiedINBOXException;
-import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.UnifiedInboxAccess;
+import com.openexchange.unifiedinbox.UnifiedInboxException;
+import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 import com.openexchange.unifiedinbox.utility.LoggingCallable;
 import com.openexchange.unifiedinbox.utility.TrackingCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXCompletionService;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxCompletionService;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 /**
- * {@link UnifiedINBOXFolderConverter} - Converts a Unified INBOX folder to an instance of {@link MailFolder}.
+ * {@link UnifiedInboxFolderConverter} - Converts a Unified Mail folder to an instance of {@link MailFolder}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXFolderConverter {
+public final class UnifiedInboxFolderConverter {
 
     static final int[] EMPTY_COUNTS = new int[] { 0, 0, 0, 0 };
 
     private static final org.apache.commons.logging.Log LOG =
-        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXFolderConverter.class));
+        com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxFolderConverter.class));
 
     private static final MailFolder ROOT_UNIFIED_INBOX_FOLDER;
 
@@ -134,7 +134,7 @@ public final class UnifiedINBOXFolderConverter {
     /**
      * Prevent instantiation
      */
-    private UnifiedINBOXFolderConverter() {
+    private UnifiedInboxFolderConverter() {
         super();
     }
 
@@ -150,7 +150,7 @@ public final class UnifiedINBOXFolderConverter {
     /**
      * Gets the appropriately filled instance of {@link MailFolder}.
      *
-     * @param unifiedInboxAccountId The account ID of the Unified INBOX account
+     * @param unifiedInboxAccountId The account ID of the Unified Mail account
      * @param session The session
      * @param fullName The folder's full name
      * @param localizedName The localized name of the folder
@@ -164,7 +164,7 @@ public final class UnifiedINBOXFolderConverter {
     /**
      * Gets the appropriately filled instance of {@link MailFolder}.
      *
-     * @param unifiedInboxAccountId The account ID of the Unified INBOX account
+     * @param unifiedInboxAccountId The account ID of the Unified Mail account
      * @param session The session
      * @param fullname The folder's full name
      * @param localizedName The localized name of the folder
@@ -174,7 +174,7 @@ public final class UnifiedINBOXFolderConverter {
      */
     public static MailFolder getUnifiedINBOXFolder(final int unifiedInboxAccountId, final Session session, final String fullname, final String localizedName, final Executor executor) throws OXException {
         final MailFolder tmp = new MailFolder();
-        // Subscription not supported by Unified INBOX, so every folder is "subscribed"
+        // Subscription not supported by Unified Mail, so every folder is "subscribed"
         tmp.setSubscribed(true);
         tmp.setSupportsUserFlags(true);
         tmp.setRootFolder(false);
@@ -203,15 +203,15 @@ public final class UnifiedINBOXFolderConverter {
         }
         // What else?!
         tmp.setDefaultFolder(true);
-        if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+        if (UnifiedInboxAccess.INBOX.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.INBOX);
-        } else if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+        } else if (UnifiedInboxAccess.TRASH.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.TRASH);
-        } else if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+        } else if (UnifiedInboxAccess.SENT.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.SENT);
-        } else if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+        } else if (UnifiedInboxAccess.SPAM.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.SPAM);
-        } else if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+        } else if (UnifiedInboxAccess.DRAFTS.equals(fullname)) {
             tmp.setDefaultFolderType(DefaultFolderType.DRAFTS);
         } else {
             tmp.setDefaultFolderType(DefaultFolderType.NONE);
@@ -246,11 +246,11 @@ public final class UnifiedINBOXFolderConverter {
         mailFolder.addPermission(permission);
     }
 
-    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedINBOXException, OXException {
+    private static boolean setMessageCounts(final String fullname, final int unifiedInboxAccountId, final Session session, final MailFolder tmp, final Executor executor) throws UnifiedInboxException, OXException {
         final MailAccount[] accounts;
         {
             final MailAccountStorageService storageService =
-                UnifiedINBOXServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
+                UnifiedInboxServiceRegistry.getServiceRegistry().getService(MailAccountStorageService.class, true);
             final MailAccount[] arr = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
             final List<MailAccount> l = new ArrayList<MailAccount>(arr.length);
             for (final MailAccount mailAccount : arr) {
@@ -268,7 +268,7 @@ public final class UnifiedINBOXFolderConverter {
         } else {
             exec = executor;
         }
-        final TrackingCompletionService<int[]> completionService = new UnifiedINBOXCompletionService<int[]>(exec);
+        final TrackingCompletionService<int[]> completionService = new UnifiedInboxCompletionService<int[]>(exec);
         final AtomicBoolean retval = new AtomicBoolean();
         // Iterate
         {
@@ -282,7 +282,7 @@ public final class UnifiedINBOXFolderConverter {
                         try {
                             mailAccess = MailAccess.getInstance(session, mailAccount.getId());
                             mailAccess.connect();
-                            final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullname);
+                            final String accountFullname = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullname);
                             // Check if account fullname is not null
                             if (null == accountFullname) {
                                 return EMPTY_COUNTS;
@@ -372,7 +372,7 @@ public final class UnifiedINBOXFolderConverter {
             mailAccess = MailAccess.getInstance(session, accountId);
             mailAccess.connect();
             for (int i = 0; i < retval.length; i++) {
-                final String accountFullname = UnifiedINBOXUtility.determineAccountFullname(mailAccess, fullnames[i]);
+                final String accountFullname = UnifiedInboxUtility.determineAccountFullname(mailAccess, fullnames[i]);
                 if (null != accountFullname && mailAccess.getFolderStorage().exists(accountFullname)) {
                     final MailFolder mf = mailAccess.getFolderStorage().getFolder(accountFullname);
                     retval[i] =
@@ -409,7 +409,7 @@ public final class UnifiedINBOXFolderConverter {
         final int size = accountFolders.size();
         for (int i = 0; i < retval.length; i++) {
             final MailFolder tmp = retval[i] = new MailFolder();
-            // Subscription not supported by Unified INBOX, so every folder is "subscribed"
+            // Subscription not supported by Unified Mail, so every folder is "subscribed"
             final String fullname = fullnames[i];
             tmp.setSubscribed(true);
             tmp.setSupportsUserFlags(true);
@@ -429,15 +429,15 @@ public final class UnifiedINBOXFolderConverter {
             }
             // What else?!
             tmp.setDefaultFolder(true);
-            if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
+            if (UnifiedInboxAccess.INBOX.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.INBOX);
-            } else if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+            } else if (UnifiedInboxAccess.TRASH.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.TRASH);
-            } else if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+            } else if (UnifiedInboxAccess.SENT.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.SENT);
-            } else if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+            } else if (UnifiedInboxAccess.SPAM.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.SPAM);
-            } else if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+            } else if (UnifiedInboxAccess.DRAFTS.equals(fullname)) {
                 tmp.setDefaultFolderType(DefaultFolderType.DRAFTS);
             } else {
                 tmp.setDefaultFolderType(DefaultFolderType.NONE);

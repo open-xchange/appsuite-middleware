@@ -56,46 +56,46 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.UnifiedINBOXManagement;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.unifiedinbox.config.UnifiedINBOXProperties;
+import com.openexchange.unifiedinbox.config.UnifiedInboxProperties;
 
 /**
- * {@link UnifiedINBOXProvider} - The provider for Unified INBOX protocol.
+ * {@link UnifiedInboxProvider} - The provider for Unified Mail protocol.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXProvider extends MailProvider {
+public final class UnifiedInboxProvider extends MailProvider {
 
     /**
-     * Unified INBOX protocol.
+     * Unified Mail protocol.
      */
     public static final Protocol PROTOCOL_UNIFIED_INBOX = new Protocol(UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX);
 
-    private static final UnifiedINBOXProvider instance = new UnifiedINBOXProvider();
+    private static final UnifiedInboxProvider instance = new UnifiedInboxProvider();
 
     /**
-     * Gets the singleton instance of Unified INBOX provider.
+     * Gets the singleton instance of Unified Mail provider.
      *
-     * @return The singleton instance of Unified INBOX provider
+     * @return The singleton instance of Unified Mail provider
      */
-    public static UnifiedINBOXProvider getInstance() {
+    public static UnifiedInboxProvider getInstance() {
         return instance;
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXProvider}.
+     * Initializes a new {@link UnifiedInboxProvider}.
      */
-    private UnifiedINBOXProvider() {
+    private UnifiedInboxProvider() {
         super();
     }
 
     @Override
     public MailAccess<?, ?> createNewMailAccess(final Session session) {
-        return new UnifiedINBOXAccess(session);
+        return new UnifiedInboxAccess(session);
     }
 
     @Override
     public MailAccess<?, ?> createNewMailAccess(final Session session, final int accountId) {
-        return new UnifiedINBOXAccess(session, accountId);
+        return new UnifiedInboxAccess(session, accountId);
     }
 
     @Override
@@ -105,7 +105,7 @@ public final class UnifiedINBOXProvider extends MailProvider {
 
     @Override
     protected AbstractProtocolProperties getProtocolProperties() {
-        return UnifiedINBOXProperties.getInstance();
+        return UnifiedInboxProperties.getInstance();
     }
 
     @Override

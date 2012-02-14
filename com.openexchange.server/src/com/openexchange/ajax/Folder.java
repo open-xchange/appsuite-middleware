@@ -695,7 +695,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                             if (!accounts.isEmpty() || !messagingAccounts.isEmpty()) {
                                 if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                                     /*
-                                     * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                                     * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                                      */
                                     final UnifiedINBOXManagement uim =
                                         ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
@@ -1568,7 +1568,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
                 if (!accounts.isEmpty() || !messagingAccounts.isEmpty()) {
                     if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                         /*
-                         * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                         * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                          */
                         final UnifiedINBOXManagement uim = ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class);
                         if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {

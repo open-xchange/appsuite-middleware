@@ -55,6 +55,7 @@ import static com.openexchange.mail.smal.adapter.solrj.SolrUtils.rollback;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -79,7 +80,6 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
-import org.elasticsearch.ElasticSearchException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.index.ConfigIndexService;
@@ -400,9 +400,22 @@ public final class SolrTextFillerQueue implements Runnable, SolrConstants {
                 }
             }
         } catch (final OXException e) {
-            LOG.error("Failed pushing text content to indexed mails.", e);
-        } catch (final ElasticSearchException e) {
-            LOG.error("Failed pushing text content to indexed mails.", e);
+            LOG.warn("Failed pushing batch text contents to indexed mails. Retry one-by-one.", e);
+            // Retry one-by-one
+            final Thread thread = Thread.currentThread();
+            for (final TextFiller textFiller : fillersChunk) {
+                if (thread.isInterrupted()) {
+                    throw new InterruptedException("Text filler thread interrupted");
+                }
+                try {
+                    pushMailTextBodies(Collections.singletonList(textFiller), threadDesc);
+                } catch (final OXException ignore) {
+                    // Ignore
+                    if (DEBUG) {
+                        LOG.debug("Ignoring failed text filler handling.", ignore);
+                    }
+                }
+            }
         } catch (final RuntimeException e) {
             LOG.error("Failed pushing text content to indexed mails.", e);
         } finally {

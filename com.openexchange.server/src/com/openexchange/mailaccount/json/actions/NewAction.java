@@ -108,9 +108,9 @@ public final class NewAction extends AbstractMailAccountAction {
 
             checkNeededFields(accountDescription);
 
-            // Check if account denotes a Unified INBOX account
+            // Check if account denotes a Unified Mail account
             if (isUnifiedINBOXAccount(accountDescription.getMailProtocol())) {
-                // Deny creation of Unified INBOX account
+                // Deny creation of Unified Mail account
                 throw MailAccountExceptionCodes.CREATION_FAILED.create();
             }
 

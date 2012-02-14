@@ -102,7 +102,7 @@ public enum MailAccountExceptionCodes implements OXExceptionCode {
      */
     PASSWORD_DECRYPTION_FAILED(MailAccountExceptionStrings.PASSWORD_DECRYPTION_FAILED_MSG, Category.CATEGORY_ERROR, 10),
     /**
-     * The Unified INBOX account already exists for user %1$s in context %2$s.
+     * The Unified Mail account already exists for user %1$s in context %2$s.
      */
     DUPLICATE_UNIFIED_INBOX_ACCOUNT(MailAccountExceptionStrings.DUPLICATE_UNIFIED_INBOX_ACCOUNT_MSG, Category.CATEGORY_ERROR, 11),
     /**
