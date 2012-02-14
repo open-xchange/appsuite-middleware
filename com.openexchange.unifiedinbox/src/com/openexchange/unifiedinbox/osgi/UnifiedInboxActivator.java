@@ -49,7 +49,7 @@
 
 package com.openexchange.unifiedinbox.osgi;
 
-import static com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry.getServiceRegistry;
+import static com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry.getServiceRegistry;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleActivator;
@@ -62,23 +62,23 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.unifiedinbox.UnifiedINBOXProvider;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXSynchronousQueueProvider;
+import com.openexchange.unifiedinbox.UnifiedInboxProvider;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxSynchronousQueueProvider;
 import com.openexchange.user.UserService;
 
 /**
- * {@link UnifiedINBOXActivator} - The {@link BundleActivator activator} for Unified INBOX bundle.
+ * {@link UnifiedInboxActivator} - The {@link BundleActivator activator} for Unified Mail bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXActivator extends HousekeepingActivator {
+public final class UnifiedInboxActivator extends HousekeepingActivator {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXActivator.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxActivator.class));
 
     /**
-     * Initializes a new {@link UnifiedINBOXActivator}
+     * Initializes a new {@link UnifiedInboxActivator}
      */
-    public UnifiedINBOXActivator() {
+    public UnifiedInboxActivator() {
         super();
     }
 
@@ -131,8 +131,8 @@ public final class UnifiedINBOXActivator extends HousekeepingActivator {
              * Register service(s)
              */
             final Dictionary<String, String> dictionary = new Hashtable<String, String>(1);
-            dictionary.put("protocol", UnifiedINBOXProvider.PROTOCOL_UNIFIED_INBOX.toString());
-            registerService(MailProvider.class, UnifiedINBOXProvider.getInstance(), dictionary);
+            dictionary.put("protocol", UnifiedInboxProvider.PROTOCOL_UNIFIED_INBOX.toString());
+            registerService(MailProvider.class, UnifiedInboxProvider.getInstance(), dictionary);
             /*
              * Detect what SynchronousQueue to use
              */
@@ -141,14 +141,14 @@ public final class UnifiedINBOXActivator extends HousekeepingActivator {
                 property = System.getProperty("java.runtime.version");
                 if (null == property) {
                     // JRE not detectable, use fallback
-                    UnifiedINBOXSynchronousQueueProvider.initInstance(false);
+                    UnifiedInboxSynchronousQueueProvider.initInstance(false);
                 } else {
                     // "java.runtime.version=1.6.0_0-b14" OR "java.runtime.version=1.5.0_18-b02"
-                    UnifiedINBOXSynchronousQueueProvider.initInstance(!property.startsWith("1.5"));
+                    UnifiedInboxSynchronousQueueProvider.initInstance(!property.startsWith("1.5"));
                 }
             } else {
                 // "java.specification.version=1.5" OR "java.specification.version=1.6"
-                UnifiedINBOXSynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
+                UnifiedInboxSynchronousQueueProvider.initInstance("1.5".compareTo(property) < 0);
             }
         } catch (final Exception e) {
             LOG.error(e.getMessage(), e);
@@ -159,7 +159,7 @@ public final class UnifiedINBOXActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
-            UnifiedINBOXSynchronousQueueProvider.releaseInstance();
+            UnifiedInboxSynchronousQueueProvider.releaseInstance();
             cleanUp();
             /*
              * Clear service registry

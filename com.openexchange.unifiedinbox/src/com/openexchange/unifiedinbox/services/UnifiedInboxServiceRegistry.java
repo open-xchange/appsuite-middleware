@@ -47,70 +47,34 @@
  *
  */
 
-package com.openexchange.unifiedinbox.utility;
+package com.openexchange.unifiedinbox.services;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.SynchronousQueue;
+import com.openexchange.osgi.ServiceRegistry;
 
 /**
- * {@link UnifiedINBOXSynchronousQueueProvider} - Provider for appropriate synchronous queue instance dependent on JRE version.
- * <p>
- * Java6 synchronous queue implementation is up to 3 times faster than Java5 one.
+ * {@link UnifiedInboxServiceRegistry} - A registry for services needed by Unified Mail bundle
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ *
  */
-public abstract class UnifiedINBOXSynchronousQueueProvider {
+public final class UnifiedInboxServiceRegistry {
 
-    /**
-     * Initializes a new {@link UnifiedINBOXSynchronousQueueProvider}.
-     */
-    protected UnifiedINBOXSynchronousQueueProvider() {
-        super();
-    }
+	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
 
-    private static UnifiedINBOXSynchronousQueueProvider instance;
+	/**
+	 * Gets the service registry
+	 *
+	 * @return The service registry
+	 */
+	public static ServiceRegistry getServiceRegistry() {
+		return REGISTRY;
+	}
 
-    /**
-     * Initializes appropriate instance of synchronous queue provider.
-     *
-     * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
-     *            {@link Java6SynchronousQueue}
-     */
-    public static void initInstance(final boolean useBuiltInQueue) {
-        if (useBuiltInQueue) {
-            instance = new UnifiedINBOXSynchronousQueueProvider() {
+	/**
+	 * Initializes a new {@link UnifiedInboxServiceRegistry}
+	 */
+	private UnifiedInboxServiceRegistry() {
+		super();
+	}
 
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue() {
-                    return new SynchronousQueue<V>();
-                }
-            };
-        } else {
-            instance = new UnifiedINBOXSynchronousQueueProvider() {
-
-                @Override
-                public <V> BlockingQueue<V> newSynchronousQueue() {
-                    return new Java6SynchronousQueue<V>();
-                }
-            };
-        }
-    }
-
-    /**
-     * Releases instance of synchronous queue provider.
-     */
-    public static void releaseInstance() {
-        instance = null;
-    }
-
-    /**
-     * Gets the {@link UnifiedINBOXSynchronousQueueProvider} instance.
-     *
-     * @return The {@link UnifiedINBOXSynchronousQueueProvider} instance
-     */
-    public static UnifiedINBOXSynchronousQueueProvider getInstance() {
-        return instance;
-    }
-
-    public abstract <V> BlockingQueue<V> newSynchronousQueue();
 }

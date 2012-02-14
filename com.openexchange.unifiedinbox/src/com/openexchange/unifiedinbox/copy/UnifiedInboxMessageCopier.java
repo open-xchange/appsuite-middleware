@@ -65,31 +65,31 @@ import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
-import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
-import com.openexchange.unifiedinbox.UnifiedINBOXException;
-import com.openexchange.unifiedinbox.UnifiedINBOXUID;
-import com.openexchange.unifiedinbox.utility.UnifiedINBOXUtility;
+import com.openexchange.unifiedinbox.UnifiedInboxAccess;
+import com.openexchange.unifiedinbox.UnifiedInboxException;
+import com.openexchange.unifiedinbox.UnifiedInboxUID;
+import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
 
 /**
- * {@link UnifiedINBOXMessageCopier} - Copies messages from/to Unified INBOX folders.
+ * {@link UnifiedInboxMessageCopier} - Copies messages from/to Unified Mail folders.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXMessageCopier {
+public final class UnifiedInboxMessageCopier {
 
     private static final MailField[] FIELDS_FULL = new MailField[] { MailField.FULL };
 
     private final Session session;
 
-    private final UnifiedINBOXAccess access;
+    private final UnifiedInboxAccess access;
 
     /**
-     * Initializes a new {@link UnifiedINBOXMessageCopier}.
+     * Initializes a new {@link UnifiedInboxMessageCopier}.
      *
      * @param session The session
-     * @param access The Unified INBOX access
+     * @param access The Unified Mail access
      */
-    public UnifiedINBOXMessageCopier(final Session session, final UnifiedINBOXAccess access) {
+    public UnifiedInboxMessageCopier(final Session session, final UnifiedInboxAccess access) {
         super();
         this.session = session;
         this.access = access;
@@ -107,13 +107,13 @@ public final class UnifiedINBOXMessageCopier {
      * @throws OXException If copy operation fails
      */
     public String[] doCopy(final String sourceFolder, final String destFolder, final String[] mailIds, final boolean fast, final boolean move) throws OXException {
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(sourceFolder)) {
-            if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(destFolder)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(sourceFolder)) {
+            if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(destFolder)) {
                 return knownFolder2KnownFolder(sourceFolder, destFolder, mailIds, fast, move);
             }
             return knownFolder2AccountFolder(sourceFolder, destFolder, mailIds, fast, move);
         }
-        if (UnifiedINBOXAccess.KNOWN_FOLDERS.contains(destFolder)) {
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(destFolder)) {
             return accountFolder2KnownFolder(sourceFolder, destFolder, mailIds, fast, move);
         }
         return accountFolder2AccountFolder(sourceFolder, destFolder, mailIds, fast, move);
@@ -125,10 +125,10 @@ public final class UnifiedINBOXMessageCopier {
          * folders is needed here.
          */
         if (move && sourceFolder.equals(destFolder)) {
-            throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
+            throw UnifiedInboxException.Code.NO_EQUAL_MOVE.create();
         }
         // Helper object
-        final UnifiedINBOXUID tmp = new UnifiedINBOXUID();
+        final UnifiedInboxUID tmp = new UnifiedInboxUID();
         // The array to fill
         final String[] retval = new String[mailIds.length];
         // A map remembering callables
@@ -160,8 +160,8 @@ public final class UnifiedINBOXMessageCopier {
          * A copy/move from an account's default folder to a specific folder
          */
         // Parse destination folder
-        final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFolder);
-        final UnifiedINBOXUID tmp = new UnifiedINBOXUID();
+        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullname(destFolder);
+        final UnifiedInboxUID tmp = new UnifiedInboxUID();
         // Check for possible conflict on move
         final String destFullname = destFullnameArgument.getFullname();
         final int destAccountId = destFullnameArgument.getAccountId();
@@ -170,7 +170,7 @@ public final class UnifiedINBOXMessageCopier {
                 tmp.setUIDString(mailId);
                 // Check if accounts and fullnames are equal
                 if (tmp.getAccountId() == destAccountId && tmp.getFullName().equals(destFullname)) {
-                    throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
+                    throw UnifiedInboxException.Code.NO_EQUAL_MOVE.create();
                 }
             }
         }
@@ -214,15 +214,15 @@ public final class UnifiedINBOXMessageCopier {
          */
         final String[] retval;
         // Parse source folder
-        final FullnameArgument sourceFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(sourceFolder);
+        final FullnameArgument sourceFullnameArgument = UnifiedInboxUtility.parseNestedFullname(sourceFolder);
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session, sourceFullnameArgument.getAccountId());
             mailAccess.connect();
-            final String realDest = UnifiedINBOXUtility.determineAccountFullname(mailAccess, destFolder);
+            final String realDest = UnifiedInboxUtility.determineAccountFullname(mailAccess, destFolder);
             final String sourceFullname = sourceFullnameArgument.getFullname();
             if (move && sourceFullname.equals(realDest)) {
-                throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
+                throw UnifiedInboxException.Code.NO_EQUAL_MOVE.create();
             }
             if (move) {
                 retval = mailAccess.getMessageStorage().moveMessages(sourceFullname, realDest, mailIds, fast);
@@ -243,15 +243,15 @@ public final class UnifiedINBOXMessageCopier {
          * A copy/move from a specific folder to an account's specific folder
          */
         // Parse source folder
-        final FullnameArgument sourceFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(sourceFolder);
+        final FullnameArgument sourceFullnameArgument = UnifiedInboxUtility.parseNestedFullname(sourceFolder);
         // Parse destination folder
-        final FullnameArgument destFullnameArgument = UnifiedINBOXUtility.parseNestedFullname(destFolder);
+        final FullnameArgument destFullnameArgument = UnifiedInboxUtility.parseNestedFullname(destFolder);
         // Check for equal mail account
         final String sourceFullname = sourceFullnameArgument.getFullname();
         final String destFullname = destFullnameArgument.getFullname();
         if (sourceFullnameArgument.getAccountId() == destFullnameArgument.getAccountId()) {
             if (move && sourceFullname.equals(destFullname)) {
-                throw UnifiedINBOXException.Code.NO_EQUAL_MOVE.create();
+                throw UnifiedInboxException.Code.NO_EQUAL_MOVE.create();
             }
             MailAccess<?, ?> mailAccess = null;
             try {

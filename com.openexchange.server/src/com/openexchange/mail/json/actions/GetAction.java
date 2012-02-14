@@ -51,9 +51,12 @@ package com.openexchange.mail.json.actions;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import javax.mail.internet.MimeMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,12 +66,15 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.log.Log;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MIMEDefaultSession;
+import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.utils.CharsetDetector;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
@@ -129,6 +135,8 @@ public final class GetAction extends AbstractMailAction {
         }
     }
 
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
     private AJAXRequestResult performGet(final MailRequest req) throws OXException {
         try {
             final ServerSession session = req.getSession();
@@ -145,6 +153,24 @@ public final class GetAction extends AbstractMailAction {
             final boolean saveToDisk = (tmp != null && tmp.length() > 0 && Integer.parseInt(tmp) > 0);
             tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
             final boolean unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+            tmp = req.getParameter("ignorable");
+            final List<String> ignorableContentTypes;
+            if (isEmpty(tmp)) {
+                ignorableContentTypes = Collections.<String> emptyList();
+            } else {
+                final String[] strings = SPLIT.split(tmp, 0);
+                final int length = strings.length;
+                ignorableContentTypes = new ArrayList<String>(length);
+                for (int i = 0; i < length; i++) {
+                    final String cts = strings[i];
+                    if ("ics".equalsIgnoreCase(cts)) {
+                        ignorableContentTypes.add("text/calendar");
+                        ignorableContentTypes.add("application/ics");
+                    } else {
+                        ignorableContentTypes.add(cts);
+                    }
+                }
+            }
             tmp = null;
             /*
              * Warnings container
@@ -189,6 +215,14 @@ public final class GetAction extends AbstractMailAction {
                     LOG.debug(e.getMessage(), e);
                     baos.reset();
                 }
+                // Filter
+                if (!ignorableContentTypes.isEmpty()) {
+                    MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
+                    mimeMessage = new MimeFilter(ignorableContentTypes).filter(mimeMessage);                        
+                    baos.reset();
+                    mimeMessage.writeTo(baos);
+                }
+                // Proceed
                 final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
                 final boolean doUnseen = (unseen && wasUnseen);
                 if (doUnseen) {

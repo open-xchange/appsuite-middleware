@@ -54,20 +54,20 @@ import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.MailConfig;
 
 /**
- * {@link UnifiedINBOXConfig}
+ * {@link UnifiedInboxConfig}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXConfig extends MailConfig {
+public final class UnifiedInboxConfig extends MailConfig {
 
-    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXConfig.class));
+    private static final org.apache.commons.logging.Log LOG = com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedInboxConfig.class));
 
     private IMailProperties mailProperties;
 
     /**
      * Default constructor
      */
-    public UnifiedINBOXConfig() {
+    public UnifiedInboxConfig() {
         super();
     }
 

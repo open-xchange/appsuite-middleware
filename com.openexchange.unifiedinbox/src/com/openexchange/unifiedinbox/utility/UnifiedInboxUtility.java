@@ -62,22 +62,22 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.tools.stream.UnsynchronizedStringWriter;
-import com.openexchange.unifiedinbox.UnifiedINBOXAccess;
-import com.openexchange.unifiedinbox.UnifiedINBOXException;
-import com.openexchange.unifiedinbox.UnifiedINBOXUID;
-import com.openexchange.unifiedinbox.services.UnifiedINBOXServiceRegistry;
+import com.openexchange.unifiedinbox.UnifiedInboxAccess;
+import com.openexchange.unifiedinbox.UnifiedInboxException;
+import com.openexchange.unifiedinbox.UnifiedInboxUID;
+import com.openexchange.unifiedinbox.services.UnifiedInboxServiceRegistry;
 
 /**
- * {@link UnifiedINBOXUtility} - Utility methods for Unified INBOX.
+ * {@link UnifiedInboxUtility} - Utility methods for Unified Mail.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXUtility {
+public final class UnifiedInboxUtility {
 
     /**
-     * Initializes a new {@link UnifiedINBOXUtility}.
+     * Initializes a new {@link UnifiedInboxUtility}.
      */
-    private UnifiedINBOXUtility() {
+    private UnifiedInboxUtility() {
         super();
     }
 
@@ -87,7 +87,7 @@ public final class UnifiedINBOXUtility {
      * @return The default max. running millis
      */
     public static long getMaxRunningMillis() {
-        final ConfigurationService service = UnifiedINBOXServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService service = UnifiedInboxServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
         if (null == service) {
             return 60000L;
         }
@@ -95,16 +95,16 @@ public final class UnifiedINBOXUtility {
     }
 
     /**
-     * Parses specified Unified INBOX mail IDs.
+     * Parses specified Unified Mail mail IDs.
      *
-     * @param mailIDs The Unified INBOX mail IDs to parse
+     * @param mailIDs The Unified Mail mail IDs to parse
      * @return A map grouping referenced accounts and referenced fullnames and IDs.
      * @throws OXException If parsing mail IDs fails
      */
     public static Map<Integer, Map<String, List<String>>> parseMailIDs(final String[] mailIDs) throws OXException {
         final Map<Integer, Map<String, List<String>>> map = new HashMap<Integer, Map<String, List<String>>>(mailIDs.length);
         // Start parsing
-        final UnifiedINBOXUID uidl = new UnifiedINBOXUID();
+        final UnifiedInboxUID uidl = new UnifiedInboxUID();
         for (final String mailID : mailIDs) {
             uidl.setUIDString(mailID);
 
@@ -128,8 +128,8 @@ public final class UnifiedINBOXUtility {
     /**
      * Generates a nested folder's fullname.
      *
-     * @param uiAccountId The Unified INBOX's account ID
-     * @param uiFullname The Unified INBOX's fullname
+     * @param uiAccountId The Unified Mail's account ID
+     * @param uiFullname The Unified Mail's fullname
      * @param nestedAccountId The nested account's ID
      * @param nestedFullname The nested folder's fullname
      * @return The generated nested folder's fullname.
@@ -151,7 +151,7 @@ public final class UnifiedINBOXUtility {
     public static FullnameArgument parseNestedFullname(final String nestedFullname) throws OXException {
         // INBOX/default0/INBOX
         if (!startsWithKnownFullname(nestedFullname)) {
-            throw UnifiedINBOXException.Code.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullname).getFullname());
+            throw UnifiedInboxException.Code.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullname).getFullname());
         }
         // Cut off starting known fullname and its separator character
         final String fn = nestedFullname.substring(nestedFullname.indexOf(SEPERATOR) + 1);
@@ -159,7 +159,7 @@ public final class UnifiedINBOXUtility {
     }
 
     private static boolean startsWithKnownFullname(final String fullname) {
-        for (final String knownFullname : UnifiedINBOXAccess.KNOWN_FOLDERS) {
+        for (final String knownFullname : UnifiedInboxAccess.KNOWN_FOLDERS) {
             if (fullname.startsWith(knownFullname)) {
                 return true;
             }
@@ -176,22 +176,22 @@ public final class UnifiedINBOXUtility {
      * @throws OXException If fullname look-up fails
      */
     public static String determineAccountFullname(final MailAccess<?, ?> mailAccess, final String fullname) throws OXException {
-        if (UnifiedINBOXAccess.INBOX.equals(fullname)) {
-            return UnifiedINBOXAccess.INBOX;
+        if (UnifiedInboxAccess.INBOX.equals(fullname)) {
+            return UnifiedInboxAccess.INBOX;
         }
-        if (UnifiedINBOXAccess.DRAFTS.equals(fullname)) {
+        if (UnifiedInboxAccess.DRAFTS.equals(fullname)) {
             return mailAccess.getFolderStorage().getDraftsFolder();
         }
-        if (UnifiedINBOXAccess.SENT.equals(fullname)) {
+        if (UnifiedInboxAccess.SENT.equals(fullname)) {
             return mailAccess.getFolderStorage().getSentFolder();
         }
-        if (UnifiedINBOXAccess.SPAM.equals(fullname)) {
+        if (UnifiedInboxAccess.SPAM.equals(fullname)) {
             return mailAccess.getFolderStorage().getSpamFolder();
         }
-        if (UnifiedINBOXAccess.TRASH.equals(fullname)) {
+        if (UnifiedInboxAccess.TRASH.equals(fullname)) {
             return mailAccess.getFolderStorage().getTrashFolder();
         }
-        throw UnifiedINBOXException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX.create(fullname);
+        throw UnifiedInboxException.Code.UNKNOWN_DEFAULT_FOLDER_INDEX.create(fullname);
     }
 
     /**

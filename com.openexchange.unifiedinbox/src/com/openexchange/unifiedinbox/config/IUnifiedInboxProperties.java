@@ -53,10 +53,10 @@ import com.openexchange.mail.api.IMailProperties;
 
 
 /**
- * {@link IUnifiedINBOXProperties} - Properties for Unified INBOX.
+ * {@link IUnifiedInboxProperties} - Properties for Unified Mail.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface IUnifiedINBOXProperties extends IMailProperties {
+public interface IUnifiedInboxProperties extends IMailProperties {
 
 }

@@ -1,5 +1,9 @@
 * 2012-02-13 - thorben.betten@open-xchange.com
 
+ - Fix for bug 21537: Fixed generation of virtual Unified Mail identifiers
+
+* 2012-02-13 - thorben.betten@open-xchange.com
+
  - Fix for bug 21532: Converting MS conditional commands to proper HTML comments
 
 * 2012-02-12 - thorben.betten@open-xchange.com

@@ -129,6 +129,7 @@ import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
 import com.openexchange.html.HTMLService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -158,6 +159,7 @@ import com.openexchange.mail.mime.MIMEMailExceptionCode;
 import com.openexchange.mail.mime.MIMETypes;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MIMEMessageConverter;
 import com.openexchange.mail.mime.filler.MIMEMessageFiller;
@@ -1254,17 +1256,24 @@ public class Mail extends PermissionServlet implements UploadListener {
                     if (mail == null) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(uid, folderPath);
                     }
-                    final UnsynchronizedByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
+                    final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream();
                     try {
                         mail.writeTo(baos);
                     } catch (final OXException e) {
-                        if (MailExceptionCode.NO_CONTENT.equals(e)) {
-                            LOG.debug(e.getMessage(), e);
-                            baos.reset();
-                        } else {
+                        if (!MailExceptionCode.NO_CONTENT.equals(e)) {
                             throw e;
                         }
+                        LOG.debug(e.getMessage(), e);
+                        baos.reset();
                     }
+                    // Filter
+                    if (!ignorableContentTypes.isEmpty()) {
+                        MimeMessage mimeMessage = new MimeMessage(MIMEDefaultSession.getDefaultSession(), Streams.newByteArrayInputStream(baos.toByteArray()));
+                        mimeMessage = new MimeFilter(ignorableContentTypes).filter(mimeMessage);                        
+                        baos.reset();
+                        mimeMessage.writeTo(baos);
+                    }
+                    // Proceed
                     final boolean wasUnseen = (mail.containsPrevSeen() && !mail.isPrevSeen());
                     final boolean doUnseen = (unseen && wasUnseen);
                     if (doUnseen) {

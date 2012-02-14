@@ -47,34 +47,64 @@
  *
  */
 
-package com.openexchange.unifiedinbox.services;
+package com.openexchange.unifiedinbox.utility;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * {@link UnifiedINBOXServiceRegistry} - A registry for services needed by Unified INBOX bundle
+ * {@link UnifiedInboxThreadFactory} - A thread factory for Unified Mail threads taking a custom name prefix for created threads.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
  */
-public final class UnifiedINBOXServiceRegistry {
+public final class UnifiedInboxThreadFactory implements java.util.concurrent.ThreadFactory {
 
-	private static final ServiceRegistry REGISTRY = new ServiceRegistry();
+    // private final ThreadGroup group;
 
-	/**
-	 * Gets the service registry
-	 *
-	 * @return The service registry
-	 */
-	public static ServiceRegistry getServiceRegistry() {
-		return REGISTRY;
-	}
+    private final AtomicInteger threadNumber = new AtomicInteger(1);
 
-	/**
-	 * Initializes a new {@link UnifiedINBOXServiceRegistry}
-	 */
-	private UnifiedINBOXServiceRegistry() {
-		super();
-	}
+    private final String namePrefix;
+
+    private final int len;
+
+    /**
+     * Initializes a new {@link UnifiedInboxThreadFactory} with default prefix <code>"UnifiedINBOX-"</code> applied to each created thread.
+     */
+    public UnifiedInboxThreadFactory() {
+        this("UnifiedINBOX-");
+    }
+
+    /**
+     * Initializes a new {@link UnifiedInboxThreadFactory} with specified prefix applied to each created thread.
+     *
+     * @param namePrefix The name prefix
+     */
+    public UnifiedInboxThreadFactory(final String namePrefix) {
+        super();
+        // final java.lang.SecurityManager s = System.getSecurityManager();
+        // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
+        this.namePrefix = namePrefix;
+        len = namePrefix.length() + 4;
+    }
+
+    public Thread newThread(final Runnable r) {
+        // final Thread t = new Thread(group, r, getThreadName(
+        // threadNumber.getAndIncrement(),
+        // new StringBuilder(NAME_LENGTH).append(namePrefix)), 0);
+        // if (t.isDaemon()) {
+        // t.setDaemon(false);
+        // }
+        // if (t.getPriority() != Thread.NORM_PRIORITY) {
+        // t.setPriority(Thread.NORM_PRIORITY);
+        // }
+
+        return new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(len).append(namePrefix)));
+    }
+
+    private static String getThreadName(final int threadNumber, final StringBuilder sb) {
+        for (int i = threadNumber; i < 1000; i *= 10) {
+            sb.append('0');
+        }
+        return sb.append(threadNumber).toString();
+    }
 
 }

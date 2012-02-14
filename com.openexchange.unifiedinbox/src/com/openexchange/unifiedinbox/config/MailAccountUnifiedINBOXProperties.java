@@ -57,7 +57,7 @@ import com.openexchange.mailaccount.MailAccount;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class MailAccountUnifiedINBOXProperties extends MailAccountProperties implements IUnifiedINBOXProperties {
+public final class MailAccountUnifiedINBOXProperties extends MailAccountProperties implements IUnifiedInboxProperties {
 
     /**
      * Initializes a new {@link MailAccountUnifiedINBOXProperties}.

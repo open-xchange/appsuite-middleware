@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2010 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,33 @@
  *
  */
 
-package com.openexchange.unifiedinbox.utility;
+package com.openexchange.mail.mime;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
 
 /**
- * {@link UnifiedINBOXThreadFactory} - A thread factory for Unified INBOX threads taking a custom name prefix for created threads.
- *
+ * {@link IcsMimeFilter}
+ * 
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXThreadFactory implements java.util.concurrent.ThreadFactory {
+public final class IcsMimeFilter extends MimeFilter {
 
-    // private final ThreadGroup group;
-
-    private final AtomicInteger threadNumber = new AtomicInteger(1);
-
-    private final String namePrefix;
-
-    private final int len;
+    private static final IcsMimeFilter INSTANCE = new IcsMimeFilter();
 
     /**
-     * Initializes a new {@link UnifiedINBOXThreadFactory} with default prefix <code>"UnifiedINBOX-"</code> applied to each created thread.
+     * Gets the instance
+     * 
+     * @return The instance
      */
-    public UnifiedINBOXThreadFactory() {
-        this("UnifiedINBOX-");
+    public static IcsMimeFilter getInstance() {
+        return INSTANCE;
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXThreadFactory} with specified prefix applied to each created thread.
-     *
-     * @param namePrefix The name prefix
+     * Initializes a new {@link IcsMimeFilter}.
      */
-    public UnifiedINBOXThreadFactory(final String namePrefix) {
-        super();
-        // final java.lang.SecurityManager s = System.getSecurityManager();
-        // group = (s == null) ? Thread.currentThread().getThreadGroup() : s.getThreadGroup();
-        this.namePrefix = namePrefix;
-        len = namePrefix.length() + 4;
-    }
-
-    public Thread newThread(final Runnable r) {
-        // final Thread t = new Thread(group, r, getThreadName(
-        // threadNumber.getAndIncrement(),
-        // new StringBuilder(NAME_LENGTH).append(namePrefix)), 0);
-        // if (t.isDaemon()) {
-        // t.setDaemon(false);
-        // }
-        // if (t.getPriority() != Thread.NORM_PRIORITY) {
-        // t.setPriority(Thread.NORM_PRIORITY);
-        // }
-
-        return new Thread(r, getThreadName(threadNumber.getAndIncrement(), new StringBuilder(len).append(namePrefix)));
-    }
-
-    private static String getThreadName(final int threadNumber, final StringBuilder sb) {
-        for (int i = threadNumber; i < 1000; i *= 10) {
-            sb.append('0');
-        }
-        return sb.append(threadNumber).toString();
+    private IcsMimeFilter() {
+        super(Arrays.asList("text/calendar", "application/ics"));
     }
 
 }

@@ -654,9 +654,9 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     /**
-     * Sets if this mail account is enabled for Unified INBOX.
+     * Sets if this mail account is enabled for Unified Mail.
      *
-     * @param unifiedINBOXEnabled <code>true</code> if this mail account is enabled for Unified INBOX; otherwise <code>false</code>
+     * @param unifiedINBOXEnabled <code>true</code> if this mail account is enabled for Unified Mail; otherwise <code>false</code>
      */
     public void setUnifiedINBOXEnabled(final boolean unifiedINBOXEnabled) {
         this.unifiedINBOXEnabled = unifiedINBOXEnabled;

@@ -49,20 +49,20 @@
 
 package com.openexchange.unifiedinbox;
 
-import static com.openexchange.mail.utils.MailPasswordUtil.decrypt;
-import static com.openexchange.mail.utils.MailPasswordUtil.encrypt;
-import java.security.GeneralSecurityException;
+import java.nio.charset.UnsupportedCharsetException;
+import java.util.BitSet;
+import java.util.regex.Pattern;
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
 
 /**
- * {@link UnifiedINBOXUID} - The Unified INBOX UID.
+ * {@link UnifiedInboxUID} - The Unified Mail UID.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXUID {
-
-    private static final String KEY = "unifiedm";
+public final class UnifiedInboxUID {
 
     private int accountId;
 
@@ -73,73 +73,61 @@ public final class UnifiedINBOXUID {
     private String uidl;
 
     /**
-     * Initializes an empty {@link UnifiedINBOXUID}.
+     * Initializes an empty {@link UnifiedInboxUID}.
      */
-    public UnifiedINBOXUID() {
+    public UnifiedInboxUID() {
         super();
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXUID}.
+     * Initializes a new {@link UnifiedInboxUID}.
      *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
      */
-    public UnifiedINBOXUID(final int accountId, final String fullname, final String id) {
+    public UnifiedInboxUID(final int accountId, final String fullname, final String id) {
         super();
         setUID(accountId, fullname, id);
     }
 
     /**
-     * Initializes a new {@link UnifiedINBOXUID}.
+     * Initializes a new {@link UnifiedInboxUID}.
      *
-     * @param unifiedINBOXUID The Unified INBOX UID as a string
-     * @throws OXException If parsing Unified INBOX UID fails
+     * @param unifiedINBOXUID The Unified Mail UID as a string
+     * @throws OXException If parsing Unified Mail UID fails
      */
-    public UnifiedINBOXUID(final String unifiedINBOXUID) throws OXException {
+    public UnifiedInboxUID(final String unifiedINBOXUID) throws OXException {
         super();
         setUIDString(unifiedINBOXUID);
     }
 
     /**
-     * Sets the UID of this {@link UnifiedINBOXUID}.
+     * Sets the UID of this {@link UnifiedInboxUID}.
      *
      * @param accountId The account ID
      * @param fullname The folder fullname
      * @param id The mail ID
-     * @return This {@link UnifiedINBOXUID} with new UID applied.
+     * @return This {@link UnifiedInboxUID} with new UID applied.
      */
-    public UnifiedINBOXUID setUID(final int accountId, final String fullname, final String id) {
+    public UnifiedInboxUID setUID(final int accountId, final String fullname, final String id) {
         this.accountId = accountId;
         this.fullname = fullname;
         this.id = id;
         final String mailPath = MailPath.getMailPath(accountId, fullname, id);
-        try {
-            uidl = encrypt(mailPath, KEY);
-            return this;
-        } catch (final GeneralSecurityException e) {
-            // Must not occur
-            com.openexchange.log.Log.valueOf(org.apache.commons.logging.LogFactory.getLog(UnifiedINBOXUID.class)).warn("\n\tPBE (password-based-encryption) failed.\n", e);
-            uidl = mailPath;
-        }
+        uidl = encodeQP(mailPath);
         return this;
     }
 
     /**
-     * Sets the UID of this {@link UnifiedINBOXUID}.
+     * Sets the UID of this {@link UnifiedInboxUID}.
      *
-     * @param unifiedINBOXUID The Unified INBOX UID as a string
-     * @throws MailException If parsing Unified INBOX UID fails
-     * @return This {@link UnifiedINBOXUID} with new UID applied.
+     * @param unifiedINBOXUID The Unified Mail UID as a string
+     * @throws MailException If parsing Unified Mail UID fails
+     * @return This {@link UnifiedInboxUID} with new UID applied.
      */
-    public UnifiedINBOXUID setUIDString(final String unifiedINBOXUID) throws OXException {
-        String decoded;
-        try {
-            decoded = decrypt(unifiedINBOXUID, KEY);
-        } catch (final GeneralSecurityException e) {
-            decoded = unifiedINBOXUID;
-        }
+    public UnifiedInboxUID setUIDString(final String unifiedINBOXUID) throws OXException {
+        final String decoded = decodeQP(unifiedINBOXUID);
         final MailPath mailPath = new MailPath(decoded);
         accountId = mailPath.getAccountId();
         fullname = mailPath.getFolder();
@@ -179,4 +167,40 @@ public final class UnifiedINBOXUID {
     public String toString() {
         return uidl;
     }
+
+    private static final BitSet PRINTABLE_CHARS = new BitSet(256);
+    // Static initializer for printable chars collection
+    static {
+        for (int i = '0'; i <= '9'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'G'; i <= 'Z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+        for (int i = 'g'; i <= 'z'; i++) {
+            PRINTABLE_CHARS.set(i);
+        }
+    }
+
+    private static final Pattern ENCODE_PATTERN = Pattern.compile("=");
+
+    private static String encodeQP(final String string) {
+        try {
+            return ENCODE_PATTERN.matcher(new String(QuotedPrintableCodec.encodeQuotedPrintable(PRINTABLE_CHARS, string.getBytes(com.openexchange.java.Charsets.UTF_8)),com.openexchange.java.Charsets.US_ASCII)).replaceAll("%");
+        } catch (final UnsupportedCharsetException e) {
+            // Cannot occur
+            throw new IllegalStateException(e);
+        }
+    }
+
+    private static final Pattern DECODE_PATTERN = Pattern.compile("%");
+
+    private static String decodeQP(final String string) {
+        try {
+            return new String(QuotedPrintableCodec.decodeQuotedPrintable(DECODE_PATTERN.matcher(string).replaceAll("=").getBytes(com.openexchange.java.Charsets.US_ASCII)), com.openexchange.java.Charsets.UTF_8);
+        } catch (final DecoderException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
 }

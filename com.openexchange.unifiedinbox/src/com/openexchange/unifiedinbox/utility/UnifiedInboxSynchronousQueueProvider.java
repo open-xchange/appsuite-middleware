@@ -47,64 +47,70 @@
  *
  */
 
-package com.openexchange.groupware.update.tasks;
+package com.openexchange.unifiedinbox.utility;
 
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 
 /**
- * {@link UnifiedINBOXRenamerTask} - Renames "Unified Mail" to "Unified Mail".
+ * {@link UnifiedInboxSynchronousQueueProvider} - Provider for appropriate synchronous queue instance dependent on JRE version.
+ * <p>
+ * Java6 synchronous queue implementation is up to 3 times faster than Java5 one.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
+public abstract class UnifiedInboxSynchronousQueueProvider {
 
-    public UnifiedINBOXRenamerTask() {
+    /**
+     * Initializes a new {@link UnifiedInboxSynchronousQueueProvider}.
+     */
+    protected UnifiedInboxSynchronousQueueProvider() {
         super();
     }
 
-    @Override
-    public String[] getDependencies() {
-        return new String[] { MailAccountMigrationTask.class.getName() };
-    }
+    private static UnifiedInboxSynchronousQueueProvider instance;
 
-    @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND);
-    }
+    /**
+     * Initializes appropriate instance of synchronous queue provider.
+     *
+     * @param useBuiltInQueue <code>true</code> to use built-in {@link SynchronousQueue}; otherwise <code>false</code> to use custom
+     *            {@link Java6SynchronousQueue}
+     */
+    public static void initInstance(final boolean useBuiltInQueue) {
+        if (useBuiltInQueue) {
+            instance = new UnifiedInboxSynchronousQueueProvider() {
 
-    @Override
-    public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        /*
-         * Obtain connection
-         */
-        final Connection con;
-        try {
-            con = Database.getNoTimeout(contextId, true);
-        } catch (final OXException e) {
-            throw new OXException(e);
-        }
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE user_mail_account SET name = ? WHERE user_mail_account.url LIKE 'unifiedinbox%'");
-            stmt.setString(1, "Unified Mail");
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(stmt);
-            Database.backNoTimeout(contextId, true, con);
+                @Override
+                public <V> BlockingQueue<V> newSynchronousQueue() {
+                    return new SynchronousQueue<V>();
+                }
+            };
+        } else {
+            instance = new UnifiedInboxSynchronousQueueProvider() {
+
+                @Override
+                public <V> BlockingQueue<V> newSynchronousQueue() {
+                    return new Java6SynchronousQueue<V>();
+                }
+            };
         }
     }
+
+    /**
+     * Releases instance of synchronous queue provider.
+     */
+    public static void releaseInstance() {
+        instance = null;
+    }
+
+    /**
+     * Gets the {@link UnifiedInboxSynchronousQueueProvider} instance.
+     *
+     * @return The {@link UnifiedInboxSynchronousQueueProvider} instance
+     */
+    public static UnifiedInboxSynchronousQueueProvider getInstance() {
+        return instance;
+    }
+
+    public abstract <V> BlockingQueue<V> newSynchronousQueue();
 }

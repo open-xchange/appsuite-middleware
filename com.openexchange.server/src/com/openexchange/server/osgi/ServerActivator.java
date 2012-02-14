@@ -512,7 +512,7 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new CreateIDSequenceTable());
         // TODO: Register server's mail account storage here until its encapsulated in an own bundle
         registerService(MailAccountStorageService.class, ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class));
-        // TODO: Register server's Unified INBOX management here until its encapsulated in an own bundle
+        // TODO: Register server's Unified Mail management here until its encapsulated in an own bundle
         registerService(UnifiedINBOXManagement.class, ServerServiceRegistry.getInstance().getService(UnifiedINBOXManagement.class));
         // Register ID generator
         registerService(IDGeneratorService.class, ServerServiceRegistry.getInstance().getService(IDGeneratorService.class));
