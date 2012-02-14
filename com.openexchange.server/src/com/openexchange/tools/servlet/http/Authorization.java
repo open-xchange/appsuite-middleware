@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
 
@@ -88,7 +88,7 @@ public final class Authorization {
     public static class Credentials {
         private final String login;
         private final String password;
-        Credentials(String login, String password) {
+        Credentials(final String login, final String password) {
             super();
             this.login = login;
             this.password = password;
@@ -103,9 +103,17 @@ public final class Authorization {
         }
     }
 
-    public static Credentials decode(String auth) throws UnsupportedEncodingException {
+    /**
+     * The unknown character: <code>'&#65533;'</code>
+     */
+    private static final char UNKNOWN = '\ufffd';
+
+    public static Credentials decode(final String auth) throws UnsupportedCharsetException {
         final byte[] decoded = Base64.decode(auth.substring(6));
-        final String userpass = new String(decoded, com.openexchange.java.Charsets.UTF_8).trim();
+        String userpass = new String(decoded, com.openexchange.java.Charsets.UTF_8).trim();
+        if (userpass.indexOf(UNKNOWN) >= 0) {
+            userpass = new String(decoded, com.openexchange.java.Charsets.ISO_8859_1).trim();
+        }
         final int delimiter = userpass.indexOf(':');
         String login = "";
         String pass = "";

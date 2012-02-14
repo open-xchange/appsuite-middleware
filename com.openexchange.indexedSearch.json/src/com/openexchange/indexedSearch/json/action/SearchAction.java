@@ -52,9 +52,9 @@ package com.openexchange.indexedSearch.json.action;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ResultConverter;
@@ -92,42 +92,37 @@ public final class SearchAction extends AbstractIndexAction {
 
     @Override
     protected AJAXRequestResult perform(final IndexAJAXRequest req) throws OXException, JSONException {
-        // Get parameters
-        final int[] columns = req.checkIntArray("columns");
-        final String[] modules = req.checkStringArray("modules");
-        // Parse range
-        final int[] range;
-        {
-            String sRange = req.getParameter("range");
-            if (null == sRange) {
-                range = RANGE_DEFAULT;
-            } else {
-                int[] tmp;
-                try {
-                    sRange = sRange.trim();
-                    final int pos = sRange.indexOf(',');
-                    tmp = new int[] { Integer.parseInt(sRange.substring(0, pos)), Integer.parseInt(sRange.substring(pos+1))};
-                } catch (final NumberFormatException e) {
-                    tmp = RANGE_DEFAULT;
-                }
-                range = tmp;
-            }
-        }
         // Get JSON body
-        final JSONObject jBody = req.getData();
+        final JSONArray jBody = req.getData();
+        if (null == jBody) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("body");
+        }
         // Check modules
         final AJAXRequestData requestData = req.getRequest();
         final ServerSession session = req.getSession();
-        final JSONObject jsonResult = new JSONObject();
-        requestData.setAction(AJAXServlet.ACTION_ALL);
-        requestData.putParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
-        for (final String module : modules) {
+        final JSONArray resultArray = new JSONArray();
+        final int length = jBody.length();
+        for (int i = 0; i < length; i++) {
+            final JSONObject jQuery = jBody.getJSONObject(i);
+            /*
+             * Look-up appropriate handler for specified module
+             */
+            final String module = jQuery.getString("module");
             final SearchHandler handler = handlers.get(module);
             if (null == handler) {
                 throw AjaxExceptionCodes.UNKNOWN_MODULE.create(module);
             }
-            final List<FieldResults> search = handler.search(jBody, range, columns, requestData, session);
-            for (final FieldResults fieldResults : search) {
+            /*
+             * Perform search
+             */
+            final List<FieldResults> resultsList;
+            {
+                final int[] columns = toIntArray(jQuery.getJSONArray("columns"));
+                final int[] range = jQuery.hasAndNotNull("range") ? toIntArray(jQuery.getJSONArray("range")) : RANGE_DEFAULT;
+                resultsList = handler.search(jQuery, range, columns, requestData, session);
+            }
+            final JSONObject jsonResult = new JSONObject();
+            for (final FieldResults fieldResults : resultsList) {
                 final String format = fieldResults.getFormat();
                 final ResultConverter converter = registry.getFor(format);
                 if (null == converter) {
@@ -138,9 +133,38 @@ public final class SearchAction extends AbstractIndexAction {
                 converter.convert(requestData, result, session, null);
                 jsonResult.put(fieldResults.getFieldName(), new JSONObject().put("results", result.getResultObject()).put("more", fieldResults.hasMore()));
             }
+            resultArray.put(jsonResult);
         }
         // Return
-        return new AJAXRequestResult(jsonResult, "json");
+        return new AJAXRequestResult(resultArray, "json");
+    }
+
+    private static int[] toIntArray(final JSONArray jIntArray) throws JSONException {
+        if (null == jIntArray) {
+            return null;
+        }
+        final int len = jIntArray.length();
+        final int[] retval = new int[len];
+        for (int i = 0; i < len; i++) {
+            retval[i] = jIntArray.getInt(i);
+        }
+        return retval;
+    }
+
+    private static String toCSV(final int[] arr) {
+        if (null == arr) {
+            return "";
+        }
+        final int len = arr.length;
+        if (0 == len) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(len << 2);
+        sb.append(arr[0]);
+        for (int i = 1; i < len; i++) {
+            sb.append(',').append(arr[i]);
+        }
+        return sb.toString();
     }
 
     @Override

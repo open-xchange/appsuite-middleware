@@ -1847,7 +1847,7 @@ public final class OutlookFolderStorage implements FolderStorage {
                         if (!mailAccount.isDefaultAccount()) {
                             if (UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
                                 /*
-                                 * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                                 * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                                  */
                                 final UnifiedINBOXManagement uim =
                                     OutlookServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);

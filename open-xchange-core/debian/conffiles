@@ -7,6 +7,7 @@ opt/open-xchange/etc/contact.properties
 opt/open-xchange/etc/event.properties
 opt/open-xchange/etc/excludedupdatetasks.properties
 opt/open-xchange/etc/file-logging.properties
+opt/open-xchange/etc/filestorage.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
 opt/open-xchange/etc/HTMLEntities.properties
@@ -29,6 +30,7 @@ opt/open-xchange/etc/notification.properties
 opt/open-xchange/etc/ox-scriptconf.sh
 opt/open-xchange/etc/participant.properties
 opt/open-xchange/etc/passwordchange.properties
+opt/open-xchange/etc/publications.properties
 opt/open-xchange/etc/push-udp.properties
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessioncache.ccf

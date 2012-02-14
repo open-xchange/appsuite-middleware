@@ -120,7 +120,7 @@ public final class MessageWriter {
      */
     public static JSONObject writeStructure(final int accountId, final MailMessage mail, final long maxSize) throws OXException {
         final MIMEStructureHandler handler = new MIMEStructureHandler(maxSize);
-        new StructureMailMessageParser().parseMailMessage(mail, handler);
+        new StructureMailMessageParser().setParseTNEFParts(true).parseMailMessage(mail, handler);
         return handler.getJSONMailObject();
     }
 

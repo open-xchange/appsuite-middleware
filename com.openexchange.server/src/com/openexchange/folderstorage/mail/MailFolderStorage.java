@@ -252,7 +252,7 @@ public final class MailFolderStorage implements FolderStorage {
                     Collections.sort(accountList, new MailAccountComparator(session.getUser().getLocale()));
                     if (!accountList.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accountList.get(0).getMailProtocol())) {
                         /*
-                         * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                         * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                          */
                         final UnifiedINBOXManagement uim = MailServiceRegistry.getServiceRegistry().getService(UnifiedINBOXManagement.class);
                         if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {
@@ -919,7 +919,7 @@ public final class MailFolderStorage implements FolderStorage {
                 }
                 if (!accounts.isEmpty() && UnifiedINBOXManagement.PROTOCOL_UNIFIED_INBOX.equals(accounts.get(0).getMailProtocol())) {
                     /*
-                     * Ensure Unified INBOX is enabled; meaning at least one account is subscribed to Unified INBOX
+                     * Ensure Unified Mail is enabled; meaning at least one account is subscribed to Unified Mail
                      */
                     final UnifiedINBOXManagement uim = serviceRegistry.getService(UnifiedINBOXManagement.class);
                     if (null == uim || !uim.isEnabled(session.getUserId(), session.getContextId())) {

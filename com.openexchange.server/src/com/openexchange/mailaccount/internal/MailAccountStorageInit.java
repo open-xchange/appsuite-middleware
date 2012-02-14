@@ -111,9 +111,9 @@ public final class MailAccountStorageInit implements Initialization {
     }
 
     /**
-     * Creates a new Unified INBOX management instance.
+     * Creates a new Unified Mail management instance.
      *
-     * @return A new Unified INBOX management instance
+     * @return A new Unified Mail management instance
      */
     public static UnifiedINBOXManagement newUnifiedINBOXManagement() {
         return new UnifiedINBOXManagementImpl();

@@ -126,11 +126,11 @@ public enum FolderExceptionErrorMessage implements OXExceptionCode {
      */
     NO_REAL_SUBSCRIBE(FolderExceptionMessages.NO_REAL_SUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1015),
     /**
-     * Un-Subscribe operation not permitted on tree "%1$s".
+     * Unsubscribe operation not permitted on tree "%1$s".
      */
     NO_REAL_UNSUBSCRIBE(FolderExceptionMessages.NO_REAL_UNSUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1016),
     /**
-     * Un-Subscribe operation not permitted on folder "%1$s" in tree "%2$s".
+     * Unsubscribe operation not permitted on folder "%1$s" in tree "%2$s". Unsubscribe subfolders first.
      */
     NO_UNSUBSCRIBE(FolderExceptionMessages.NO_UNSUBSCRIBE_MSG, Category.CATEGORY_PERMISSION_DENIED, 1017),
     /**
