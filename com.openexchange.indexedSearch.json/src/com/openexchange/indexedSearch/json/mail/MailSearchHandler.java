@@ -54,7 +54,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.indexedSearch.json.FieldResults;
@@ -78,6 +81,7 @@ import com.openexchange.search.Operand;
 import com.openexchange.search.Operation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -98,42 +102,50 @@ public final class MailSearchHandler implements SearchHandler {
     }
 
     @Override
-    public List<FieldResults> search(final JSONObject jsonQuery, final int[] range, final int[] fields, final AJAXRequestData request, final ServerSession session) throws OXException {
-        final IndexService indexService = services.getService(IndexService.class);
-        if (null == indexService) {
-            return Collections.emptyList();
-        }
-        final IndexAdapter adapter = indexService.getAdapter();
-        // Parse query
-        final MailQuery query = MailQuery.queryFor(jsonQuery);
-        final MailField[] mailFields = MailField.getFields(fields);
-        final boolean[] more = new boolean[1];
-        final List<String> names = query.getNames();
-        final List<FieldResults> retval = new LinkedList<FieldResults>();
-        int i = 0;
-        for (final com.openexchange.search.SearchTerm<?> searchTerm : query.getTerms()) {
-            try {
-                more[0] = false;
-                final String name = null == names ? null : names.get(i++);
-                final List<MailMessage> results =
-                    adapter.search(
-                        query.getFullName(),
-                        map(searchTerm),
-                        MailSortField.RECEIVED_DATE,
-                        OrderDirection.DESC,
-                        mailFields,
-                        new IndexRange(range[0], range[1]),
-                        query.getAccountId(),
-                        session,
-                        more);
-                retval.add(new FieldResults(name, "mail", results, more[0]));
-            } catch (final InterruptedException e) {
-                // Thread interrupted
-                Thread.currentThread().interrupt();
+    public List<FieldResults> search(final JSONObject jsonQuery, final int[] range, final int[] fields, final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        try {
+            final IndexService indexService = services.getService(IndexService.class);
+            if (null == indexService) {
                 return Collections.emptyList();
             }
+            final IndexAdapter adapter = indexService.getAdapter();
+            // Parse query
+            final MailQuery query = MailQuery.queryFor(jsonQuery);
+            final MailField[] mailFields = MailField.getFields(fields);
+            final boolean[] more = new boolean[1];
+            final List<String> names = query.getNames();
+            final List<FieldResults> retval = new LinkedList<FieldResults>();
+            int i = 0;
+            for (final com.openexchange.search.SearchTerm<?> searchTerm : query.getTerms()) {
+                try {
+                    more[0] = false;
+                    final String name = null == names ? null : names.get(i++);
+                    final List<MailMessage> results =
+                        adapter.search(
+                            query.getFullName(),
+                            map(searchTerm),
+                            MailSortField.RECEIVED_DATE,
+                            OrderDirection.DESC,
+                            mailFields,
+                            new IndexRange(range[0], range[1]),
+                            query.getAccountId(),
+                            session,
+                            more);
+                    retval.add(new FieldResults(name, "mail", results, more[0]));
+                } catch (final InterruptedException e) {
+                    // Thread interrupted
+                    Thread.currentThread().interrupt();
+                    return Collections.emptyList();
+                }
+            }
+            // Prepare AJAX request data for mail ResultConverter
+            requestData.setAction(AJAXServlet.ACTION_ALL);
+            requestData.putParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL);
+            requestData.putParameter(AJAXServlet.PARAMETER_COLUMNS, toCSV(jsonQuery.getJSONArray(AJAXServlet.PARAMETER_COLUMNS)));
+            return retval;
+        } catch (final JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        return retval;
     }
 
     /**
@@ -218,6 +230,22 @@ public final class MailSearchHandler implements SearchHandler {
             return new Object[] { operands[0].getValue().toString(), operands[1].getValue() };
         }
         return null;
+    }
+
+    private static String toCSV(final JSONArray jArray) throws JSONException {
+        if (null == jArray) {
+            return "";
+        }
+        final int len = jArray.length();
+        if (0 == len) {
+            return "";
+        }
+        final StringBuilder sb = new StringBuilder(len << 2);
+        sb.append(jArray.get(0));
+        for (int i = 1; i < len; i++) {
+            sb.append(',').append(jArray.get(i));
+        }
+        return sb.toString();
     }
 
 }
