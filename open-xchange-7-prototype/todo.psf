@@ -8,8 +8,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.data.conversion.ical.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.documentation.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.favfolder"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.frontend.uwa"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.frontend.uwa.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.group.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.groupware.dataRetrieval.attachments"/>
