@@ -27,10 +27,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.oauth.linkedin.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.pop3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.preview.thirdwing"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.resource.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.scripting.rhino"/>
