@@ -132,6 +132,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     
     public static final int[] DEFAULT_SKIP = new int[]{
         Appointment.OBJECT_ID,
+        Appointment.FOLDER_ID,
         Appointment.CREATED_BY,
         Appointment.MODIFIED_BY,
         Appointment.CREATION_DATE,
